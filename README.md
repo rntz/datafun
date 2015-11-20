@@ -23,7 +23,7 @@ Semantics of types, in brief:
   are lattice types.
 
 - The lattice type `FS A` represents *finite sets of `A`s*, with union as
-  lattice join and ∅ as least element. This is how we represent datalog
+  lattice join and ∅ as least element. This is how we represent Datalog
   predicates; a predicate is a finite set of tuples.
 
 - The lattice type `A → L` represents functions mapping `A` into `L`. The
