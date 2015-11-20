@@ -65,6 +65,7 @@ There is an implicit restriction: Γ may only be nonempty if `A` is a lattice
 type `L`. (This is effectively the same as having two judgments: `Δ ⊢ e : A` and
 `Δ;Γ ⊢ e : L`, where `Δ ⊢ e : L` is implicitly equivalent to `Δ;· ⊢ e : L`.)
 
+### Structural rules
 Both contexts obey the usual intuitionistic structural rules (weakening,
 exchange). There is one additional (albeit rather useless) structural rule:
 
@@ -77,16 +78,36 @@ this fact and treat it as if it is unrestricted in `x`. Read backward, this says
 we may freely choose to bind ourselves to using an unrestricted variable only
 monotonically within a subterm.
 
-Non-structural rules (some omitted):
+### Function rules
 
      Δ,x:A; Γ ⊢ e : B      Δ; Γ,x:L ⊢ e : M
     ------------------    -------------------
     Δ;Γ ⊢ λx.e : A → B    Δ;Γ ⊢ λ^x.e : L ↝ M
-    
+
+    Δ;Γ ⊢ e₁ : A → B   Δ;· ⊢ e₂ : A
+    -------------------------------- app
+           Δ;Γ ⊢ e₁ e₂ : B
+
+    Δ;Γ ⊢ e₁ : L ↝ M   Δ;Γ ⊢ e₂ : L
+    ------------------------------- app^
+           Δ;Γ ⊢ e₁ e₂ : M
+
+NB. The monotone context of `e₂` in the application rule for ordinary functions
+must be empty! Since `A → B` represents an *arbitrary* function, we cannot rely
+on its output being monotone in its argument. Thus its argument must be, not
+*monotone* relative to our current Γ, but *constant*.
+
+### Lattice rules
+
                      Δ;Γ ⊢ eᵢ : L
     -----------    -----------------
     Δ;Γ ⊢ ∅ : L    Δ;Γ ⊢ e₁ ∨ e₂ : L
-    
+
+### Set rules
+
+      Δ;Γ ⊢ e : A       Δ;Γ ⊢ e₁ : FS A   Δ,x:A; Γ ⊢ e₂ : L
+    ----------------    -----------------------------------
+    Δ;Γ ⊢ {e} : FS A        Δ;Γ ⊢ let x ∈ e₁ in e₂ : L
 
 # Two-layer formulation
 Alternative, two-layer formulation:
