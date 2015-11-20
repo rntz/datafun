@@ -16,7 +16,8 @@ Alternative, two-layer formulation:
     expressions     e   ::= x | λx.e | e₁ e₂
                           | (e₁, e₂) | πᵢ e
                           | U u
-    lattice exprs   u   ::= x | λx.u | λ^x.u | u₁ u₂
+    lattice exprs   u   ::= x | λ^x.u | u₁ u₂
+                          | λx.u | u e
                           | (u₁, u₂) | πᵢ u
                           | ∅ | u₁ ∨ u₂
                           | {e} | let x ∈ u₁ in u₂
