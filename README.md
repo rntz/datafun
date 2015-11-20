@@ -7,8 +7,88 @@
                           | ∅ | e₁ ∨ e₂
                           | {e} | let x ∈ e₁ in e₂
 
-NB. Lattice types are a syntactic restriction of types.
+    contexts        Δ   ::= · | Δ,x:A
+    monotone ctxts  Γ   ::= · | Δ,x:L
 
+## Semantic intuition
+
+Semantics of types, in brief:
+
+- `ℕ`, `A × B`, and `A → B` all mean what you'd expect.
+
+- So called "lattice types" `L` represent *unital semilattices* ─ that is,
+  semilattices with a least element. Lattice types are simply a syntactic
+  restriction of ordinary types: any lattice type is a type, but not all types
+  are lattice types.
+
+- The lattice type `FS A` represents *finite sets of `A`s*, with union as
+  lattice join and ∅ as least element. This is how we represent datalog
+  predicates; a predicate is a finite set of tuples.
+
+- The lattice type `A → L` represents functions mapping `A` into `L`. The
+  lattice join operation is pointwise; the least element is `λx.∅`, where `∅` is
+  the least element of `L`.
+
+- The lattice type `L ↝ M` represents *monotone functions* from `L` to `M`.
+  These form a unital semilattice in the same way as ordinary functions.
+
+Semantics of expressions, in brief:
+
+- `x`, `λx.e`, `(e₁, e₂)`, and `πᵢ e` all do what you'd expect.
+
+- `λ^x.e` is a *monotone lambda*, with type `L ↝ M` for appropriate `L`, `M`.
+  That is, its body `e` must be *monotone* in `x`; this is enforced by the type
+  system.
+
+- `e₁ e₂` is function application ─ ordinary *or* monotone. In a language
+  without quantified types, inferring which application is intended is easy.
+  (With quantifiers, maybe it isn't. Future work!)
+
+- `∅` represents the least element of a lattice type.
+
+- `e₁ ∨ e₂` represents lattice join.
+
+- `{e}` represents the singleton set containing `e`.
+
+- `let x ∈ e₁ in e₂` is set-comprehension. `e₁` must have a finite set type;
+  `e₂` must have a lattice type. For each `x` in `e₁`, we compute `e₂`; then we
+  lattice-join together all values of `e₂` computed this way, and that is our
+  result. This generalizes the "bind" operation of the finite-set monad.
+
+## Typing judgment: `Δ;Γ ⊢ e : A`
+
+Our typing judgment is `Δ;Γ ⊢ e : A`
+
+We call `Δ` our *unrestricted* context and `Γ` our *monotone* context.
+
+There is an implicit restriction: Γ may only be nonempty if `A` is a lattice
+type `L`. (This is effectively the same as having two judgments: `Δ ⊢ e : A` and
+`Δ;Γ ⊢ e : L`, where `Δ ⊢ e : L` is implicitly equivalent to `Δ;· ⊢ e : L`.)
+
+Both contexts obey the usual intuitionistic structural rules (weakening,
+exchange). There is one additional (albeit rather useless) structural rule:
+
+    Δ; Γ,x:L ⊢ e : M
+    ---------------- forget
+    Δ,x:L; Γ ⊢ e : M
+
+Read forward, this says that if `e` *is* monotonic in `x`, then we may forget
+this fact and treat it as if it is unrestricted in `x`. Read backward, this says
+we may freely choose to bind ourselves to using an unrestricted variable only
+monotonically within a subterm.
+
+Non-structural rules (some omitted):
+
+     Δ,x:A; Γ ⊢ e : B      Δ; Γ,x:L ⊢ e : M
+    ------------------    -------------------
+    Δ;Γ ⊢ λx.e : A → B    Δ;Γ ⊢ λ^x.e : L ↝ M
+    
+                     Δ;Γ ⊢ eᵢ : L
+    -----------    -----------------
+    Δ;Γ ⊢ ∅ : L    Δ;Γ ⊢ e₁ ∨ e₂ : L
+    
+
+# Two-layer formulation
 Alternative, two-layer formulation:
 
     types           A,B ::= U L | A × B | A → B
