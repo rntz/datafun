@@ -25,3 +25,8 @@ Alternative, two-layer formulation:
     Δ;· ⊢ u : L               Δ ⊢ e : U L
     -------------           ---------------
     Δ ⊢ U u : U L           Δ;Γ ⊢ U⁻¹ e : L
+
+NB. In this presentation, `FS` comes apart into `F` and `U`. `U` is the
+*underlying* functor; given a semilattice, it gives the type of its underlying
+values. `F` is the *free* functor: given a type `A` it produces the free unital
+semilattice on `A`, which is to say, finite sets of `A`s under union.
