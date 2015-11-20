@@ -6,6 +6,7 @@
                           | (e₁, e₂) | πᵢ e
                           | ∅ | e₁ ∨ e₂
                           | {e} | let x ∈ e₁ in e₂
+                          | fix x. e
 
     contexts        Δ   ::= · | Δ,x:A
     monotone ctxts  Γ   ::= · | Δ,x:L
@@ -55,6 +56,12 @@ Semantics of expressions, in brief:
   lattice-join together all values of `e₂` computed this way, and that is our
   result. This generalizes the "bind" operation of the finite-set monad.
 
+- `fix x.e` finds the least-fixed-point of the monotone expression `e`. We can
+  only find fixed-points at certain types; which types exactly is an open
+  question. We know how to do it at least for `ℕ` and for `FS A` where A is an
+  equality type. Finding least-fixed-points of finite-set-typed expressions is
+  precisely Datalog-style recursion.
+
 ## Typing judgment: `Δ;Γ ⊢ e : A`
 
 Our typing judgment is `Δ;Γ ⊢ e : A`
@@ -65,7 +72,6 @@ There is an implicit restriction: Γ may only be nonempty if `A` is a lattice
 type `L`. (This is effectively the same as having two judgments: `Δ ⊢ e : A` and
 `Δ;Γ ⊢ e : L`, where `Δ ⊢ e : L` is implicitly equivalent to `Δ;· ⊢ e : L`.)
 
-### Structural rules
 Both contexts obey the usual intuitionistic structural rules (weakening,
 exchange). There is one additional (albeit rather useless) structural rule:
 
@@ -78,7 +84,7 @@ this fact and treat it as if it is unrestricted in `x`. Read backward, this says
 we may freely choose to bind ourselves to using an unrestricted variable only
 monotonically within a subterm.
 
-### Function rules
+### Typing rules
 
      Δ,x:A; Γ ⊢ e : B      Δ; Γ,x:L ⊢ e : M
     ------------------    -------------------
@@ -92,22 +98,25 @@ monotonically within a subterm.
     ------------------------------- app^
            Δ;Γ ⊢ e₁ e₂ : M
 
-NB. The monotone context of `e₂` in the application rule for ordinary functions
-must be empty! Since `A → B` represents an *arbitrary* function, we cannot rely
-on its output being monotone in its argument. Thus its argument must be, not
-*monotone* relative to our current Γ, but *constant*.
-
-### Lattice rules
+NB. The monotone context of `e₂` in the rule `app` for applying ordinary
+functions must be empty! Since `A → B` represents an *arbitrary* function, we
+cannot rely on its output being monotone in its argument. Thus its argument must
+be, not *monotone* relative to our current Γ, but *constant*.
 
                      Δ;Γ ⊢ eᵢ : L
     -----------    -----------------
     Δ;Γ ⊢ ∅ : L    Δ;Γ ⊢ e₁ ∨ e₂ : L
 
-### Set rules
-
       Δ;Γ ⊢ e : A       Δ;Γ ⊢ e₁ : FS A   Δ,x:A; Γ ⊢ e₂ : L
     ----------------    -----------------------------------
     Δ;Γ ⊢ {e} : FS A        Δ;Γ ⊢ let x ∈ e₁ in e₂ : L
+
+    Δ; Γ,x:L ⊢ e : L
+    ----------------- fix
+    Δ;Γ ⊢ fix x.e : L
+
+The last rule, for `fix`, is overly permissive as stated; it needs to be
+restricted to some computationally tractable class of lattice types.
 
 # Two-layer formulation
 Alternative, two-layer formulation:
