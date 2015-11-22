@@ -1,6 +1,6 @@
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\x}{\times}
-\newcommand{\ms}{\mathsf}
+\newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
 \newcommand{\mono}{\rightsquigarrow}
 \newcommand{\ent}{\vdash}
 \newcommand{\fn}{\lambda}
@@ -12,6 +12,7 @@
 \newcommand{\GD}{\Delta}
 \newcommand{\GG}{\Gamma}
 \newcommand{\of}{\!:\!}
+\newcommand{\fix}[1]{\ms{fix}\,{\bind{#1}}}
 
 \newcommand{\case}[5]{%
 \ms{case}~{#1}~\ms{of}~\ms{in}_1\,{#2}\to{#3};\,\ms{in}_2\,{#4}\to{#5}}

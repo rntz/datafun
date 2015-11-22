@@ -18,15 +18,19 @@ $$\begin{array}{lrrl}
 &&|\,& \ms{in}_i\; e \pipe \case{e}{x}{e_1}{y}{e_2}\\
 &&|\,& \emptyset \pipe e_1 \vee e_2\\
 &&|\,& \{e\} \pipe \letin{x}{e_1}{e_2}\\
+&&|\,& \fix{x}e\\
 \text{contexts} & \GD &::=& \cdot \pipe \GD, x \of A \\
 \text{monotone ctxts} & \GG &::=& \cdot \pipe \GG, x \of M\\
-\text{typing} & J &::=& \J{\GD}{\cdot}{e}{A}\\
-\text{judgment} &&|\,& \J{\GD}{\GG}{e}{M}
+\text{typing judgment} & J &::=& \J{\GD}{\cdot}{e}{A}\\
+&&|\,& \J{\GD}{\GG}{e}{M}
 \end{array}$$
 
 # Typing rules
 
 ## Structural rules
+
+These rules are technically unnecessary, as they are (ought to be, no proof yet)
+admissible.
 
 $$
 \infer[\ms{exchange}]{
@@ -40,7 +44,7 @@ $$
 ## Other rules
 
 $$
-\infer{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD \cup \GG} \qquad
+\infer[\ms{hyp}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD \cup \GG} \qquad
 \infer[\fn]{\J{\GD}{\GG}{\fn\bind{x}{e}}{A \to B}}{
   \J{\GD,x\of A}{\GG}{e}{B}} \qquad
 \infer[\ms{app}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
@@ -53,22 +57,29 @@ $$\ $$
   \J{\GD}{\GG}{e_1}{M \mono N} &
   \J{\GD}{\GG}{e_2}{M}}
 $$\ $$
-\infer{\J{\GD}{\GG}{(e_1, e_2)}{A_1 \x A_2}}{\J{\GD}{\GG}{e_i}{A_i}}
+\infer[(,\!)]{\J{\GD}{\GG}{(e_1, e_2)}{A_1 \x A_2}}{\J{\GD}{\GG}{e_i}{A_i}}
 \qquad
-\infer{\J{\GD}{\GG}{\pi_i\; e}{A_i}}{\J{\GD}{\GG}{e}{A_1 \x A_2}}
+\infer[\pi_i]{\J{\GD}{\GG}{\pi_i\; e}{A_i}}{\J{\GD}{\GG}{e}{A_1 \x A_2}}
 $$\ $$
-\infer{\J{\GD}{\cdot}{\ms{in}_i\;e}{A_1 + A_2}}{
+\infer[\ms{in}_i]{\J{\GD}{\cdot}{\ms{in}_i\;e}{A_1 + A_2}}{
   \J{\GD}{\cdot}{e}{A_i}} \qquad
-\infer{\J{\GD}{\GG}{\case{e}{x}{e_1}{y}{e_2}}{C}}{
+\infer[\ms{case}]{\J{\GD}{\GG}{\case{e}{x}{e_1}{y}{e_2}}{C}}{
   \J{\GD}{\cdot}{e}{A + B} &
   \J{\GD,x\of A}{\GG}{e_1}{C} &
   \J{\GD,y\of B}{\GG}{e_2}{C}}
 $$\ $$
-\infer{\J{\GD}{\GG}{\emptyset}{M}}{} \qquad
-\infer{\J{\GD}{\GG}{e_1 \vee e_2}{M}}{\J{\GD}{\GG}{e_i}{M}}
+\infer[\emptyset]{\J{\GD}{\GG}{\emptyset}{M}}{} \qquad
+\infer[\vee]{\J{\GD}{\GG}{e_1 \vee e_2}{M}}{\J{\GD}{\GG}{e_i}{M}}
 $$\ $$
-\infer{\J{\GD}{\GG}{\{e\}}{\FS\;A}}{\J{\GD}{\cdot}{e}{A}} \qquad
-\infer{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{M}}{
+\infer[\{\}]{\J{\GD}{\GG}{\{e\}}{\FS\;A}}{\J{\GD}{\cdot}{e}{A}} \qquad
+\infer[\ms{let}_{\in}]{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{M}}{
   \J{\GD}{\GG}{e_1}{\FS\;A} &
   \J{\GD,x\of A}{\GG}{e_2}{M}}
+$$\ $$
+\infer[\ms{fix}]{\J{\GD}{\GG}{\fix{x}e}{M}}{
+  \J{\GD}{\GG,x\of M}{e}{M}}
 $$
+
+The \ms{fix} rule is overly permissive in allowing fix-points to be taken at any
+lattice type; it needs to be be restricted to some computationally tractable
+class of lattice types.
