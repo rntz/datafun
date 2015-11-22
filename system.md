@@ -13,8 +13,38 @@ $$\begin{array}{lrrl}
 &&|\,& \{e\} \pipe \letin{x}{e_1}{e_2}\\
 \text{contexts} & \GD &::=& \cdot \pipe \GD, x \of A \\
 \text{monotone ctxts} & \GG &::=& \cdot \pipe \GG, x \of M\\
-\text{typing} & J &::=& \GD;\cdot \ent e : A\\
-\text{judgment} &&|\,& \GD;\GG \ent e : M
+\text{typing} & J &::=& \J{\GD}{\cdot}{e}{A}\\
+\text{judgment} &&|\,& \J{\GD}{\GG}{e}{M}
 \end{array}$$
 
 # Typing rules
+
+## Structural rules
+
+$$
+\infer[\ms{exchange}]{
+  \J{\GD_1,\GD_2}{\GG_1,\GG_2}{e}{A}}{\J{\GD_2,\GD_1}{\GG_2,\GG_1}{e}{A}}
+\qquad
+\infer[\ms{weaken}]{\J{\GD,\GD'}{\GG,\GG'}{e}{A}}{\J{\GD}{\GG}{e}{A}}
+$$\ $$
+\infer[\ms{forget}]{\J{\GD,x\of M}{\GG}{e}{N}}{\J{\GD}{\GG,x\of M}{e}{N}}
+$$
+
+## Other rules
+
+$$
+\infer{\J{\GD,x\of A}{\GG}{x}{A}}{} \qquad
+\infer{\J{\GD}{\GG,x\of M}{x}{M}}{}
+$$\ $$
+\infer{\J{\GD}{\GG}{\fn\bind{x}{e}}{A \to B}}{
+  \J{\GD,x\of A}{\GG}{e}{B}} \qquad
+\infer{\J{\GD}{\GG}{e_1\;e_2}{B}}{
+  \J{\GD}{\GG}{e_1}{A \to B} &
+  \J{\GD}{\cdot}{e_2}{B}}
+$$\ $$
+\infer{\J{\GD}{\GG}{\monofn\bind{x}{e}}{M \mono N}}{
+  \J{\GD}{\GG,x \of M}{e}{N}} \qquad
+\infer{\J{\GD}{\GG}{e_1\;e_2}{N}}{
+  \J{\GD}{\GG}{e_1}{M \mono N} &
+  \J{\GD}{\GG}{e_2}{M}}
+$$
