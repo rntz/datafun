@@ -41,10 +41,9 @@ Semantics of expressions, in brief:
   That is, its body `e` must be *monotone* in `x`; this is enforced by the type
   system.
 
-- `e₁ e₂` is function application ─ ordinary *or* monotone. In a language
-  without quantified types, inferring which application is intended is easy.
-  (With quantifiers, maybe it isn't. Future work!)
-
+- `e₁ e₂` is function application ─ ordinary *or* monotone. If you want type
+  inference, this *might* break Hindley-Milner, but won't break bidirectional
+  type checking.
 - `∅` represents the least element of a lattice type.
 
 - `e₁ ∨ e₂` represents lattice join.
