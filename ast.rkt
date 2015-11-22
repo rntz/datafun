@@ -1,5 +1,7 @@
 #lang racket
 
+(require (except-in syntax/parse expr) (for-syntax syntax/parse))
+
 (require "util.rkt")
 (provide (all-defined-out))
 
@@ -8,14 +10,40 @@
   (t-tuple types)
   ;; branches is a hash from branch names to types
   (t-sum branches)
-  (t-fun args result)
-  (t-mono args result)
+  (t-fun arg result)
+  (t-mono arg result)
   (t-fs type))
+
+(define type=? equal?)
+
+;; convenience macros for types
+(define-syntax-parser Bool [_:id #'(t-bool)])
+(define-syntax-parser Nat [_:id #'(t-nat)])
+(define-syntax-parser Str [_:id #'(t-str)])
+(define-match-expander FS
+  (syntax-parser [(_ a) #'(t-fs a)])
+  (syntax-parser [(_ a) #'(t-fs a)]))
+(define-for-syntax expand->
+  (syntax-parser
+    [(_ a) #'a]
+    [(_ a b ...) #'(t-fun a (-> b ...))]))
+(define-match-expander -> expand-> expand->)
+(define-for-syntax expand~>
+  (syntax-parser
+    [(_ a) #'a]
+    [(_ a b ...) #'(t-mono a (~> b ...))]))
+(define-match-expander ~> expand~> expand~>)
+(define-match-expander ×
+  (syntax-parser [(× a ...) #'(t-tuple (list a ...))])
+  (syntax-parser [(× a ...) #'(t-tuple (list a ...))]))
+(define-syntax-parser Σ
+  [(Σ (tag:id type) ...)
+    #'(t-sum (make-immutable-hash `((tag . ,type) ...)))])
 
 (define (type-wf? x)
   (match x
-    [(t-mono as b) (andmap (andf type-wf? lattice-type?) (cons b as))]
-    [(t-fun as b) (andmap type-wf? (cons b as))]
+    [(t-mono a b) (andmap (andf type-wf? lattice-type?) (list a b))]
+    [(t-fun a b) (andmap type-wf? (list a b))]
     [(t-fs a) (type-wf? a)]
     [(t-tuple ts) (andmap type-wf? ts)]
     [(t-sum bs) ((hash/c symbol? type-wf? #:immutable #t) bs)]
@@ -38,11 +66,11 @@
 
 (enum expr
   (e-ann expr type)
+  ;; DeBruijn indexing w/ name for readability
   (e-var name index)
   ;; used for literals & primitive functions.
   (e-lit value)
   (e-prim prim)
-  ;; DeBruijn indexing w/ name for readability
   (e-fun var type body)
   (e-mono var type body)
   (e-app func arg)
@@ -69,23 +97,24 @@
     [(string? l) (t-str)]
     [#t #f]))
 
-(define (prim? x) (member x '(= <= + - * subset? print ++)))
+(define (prim? x) (member x '(= <= + - * subset? print puts ++)))
 
-(define (prim-infer-type p)
+(define (prim-type-synth p)
   (match p
-    ['<= (t-fun (list (t-nat) (t-nat)) (t-bool))]
-    [(or '+ '*) (t-mono (list (t-nat) (t-nat)) (t-nat))]
-    ['- (t-fun (list (t-nat) (t-nat)) (t-nat))]
+    ['<= (-> Nat (~> Nat Bool))]
+    [(or '+ '*) (~> Nat Nat Nat)]
+    ['- (~> Nat (-> Nat Nat))]
+    ['++ (-> Str Str Str)]
+    ['puts (~> Str (×))]
     [_ #f]))
 
-(define (prim-has-type? p t)
-  (define pt (prim-infer-type t))
-  (if pt (equal? t pt)
+(define (prim-type-check p t)
+  (define pt (prim-type-synth t))
+  (if pt (type=? t pt)
     (match* (p t)
-      [(('= (t-fun (list a b) (t-bool))))
-        (and (equal? a b) (eqtype? a))]
-      [('subset? (t-fun (list (t-fs a) (t-fs b)) (t-bool))
-         (and (equal? a b) (eqtype? a)))]
-      [('print (t-mono (list a) (t-tuple '()))) #t]
-      [('++ (t-fun (list (t-str) ...) (t-str))) #t]
-      [_ #f])))
+      [('= (-> a b (t-bool)))
+        (and (type=? a b) (eqtype? a))]
+      [('subset? (-> (FS a) (~> (FS b) (t-bool))))
+        (and (type=? a b) (eqtype? a))]
+      [('print (~> _ (×))) #t]
+      [(_ _) #f])))
