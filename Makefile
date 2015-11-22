@@ -1,7 +1,7 @@
 # TODO: bibliography file
 # pandoc --filter pandoc-citeproc $< --biblio BIBLIOFILE
-#PANDOC:=pandoc --latex-engine=xelatex
 PANDOC:=pandoc --standalone
+PANDOC_TEX=--include-in-header header.sty
 
 SOURCES:=system.md
 OUTPUTS=$(SOURCES:.md=.pdf) $(SOURCES:.md=.tex)
@@ -10,10 +10,10 @@ OUTPUTS=$(SOURCES:.md=.pdf) $(SOURCES:.md=.tex)
 all: system.pdf
 
 %.pdf: %.md
-	$(PANDOC) $< -o $@
+	$(PANDOC) $(PANDOC_TEX) $< -o $@
 
 %.tex: %.md
-	$(PANDOC) $< -o $@
+	$(PANDOC) $(PANDOC_TEX) $< -o $@
 
 %.html: %.md
 	$(PANDOC) $< -o $@

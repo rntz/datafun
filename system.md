@@ -1,22 +1,3 @@
-\newcommand{\N}{\mathbb{N}}
-\newcommand{\x}{\times}
-\newcommand{\ms}{\mathsf}
-\newcommand{\mono}{\rightsquigarrow}
-\newcommand{\ent}{\vdash}
-\newcommand{\fn}{\lambda}
-\newcommand{\monofn}{\hat{\lambda}}
-\newcommand{\binder}{.\,}
-\newcommand{\bind}[1]{#1\binder}
-\newcommand{\pipe}{\hspace{0.5em}|\hspace{0.5em}}
-\newcommand{\FS}{\ms{FS}}
-\newcommand{\GD}{\Delta}
-\newcommand{\GG}{\Gamma}
-\newcommand{\of}{:\!}
-
-\newcommand{\case}[5]{%
-\ms{case}~{#1}~\ms{of}~\ms{in}_1\,{#2}\to{#3};\,\ms{in}_2\,{#4}\to{#5}}
-\newcommand{\letin}[3]{\ms{let}~{#1}\in{#2}~\ms{in}~{#3}}
-
 # Syntax
 
 $$\begin{array}{lrrl}
