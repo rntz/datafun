@@ -14,9 +14,33 @@
   (t-mono arg result)
   (t-fs type))
 
-(define type=? equal?)
+(enum expr
+  (e-ann type expr)
+  ;; DeBruijn indexing w/ name for readability
+  (e-var name index)
+  ;; used for literals & primitive functions.
+  (e-lit value)
+  (e-prim prim)
+  (e-fun var body)
+  (e-mono var body)
+  (e-app func arg)
+  (e-tuple exprs) (e-proj index expr)
+  (e-tag tag expr)
+  ;; branches is a list of (pat . expr) pairs. TODO: use a struct!
+  (e-case subject branches)
+  (e-empty) (e-join left right)
+  (e-singleton expr) (e-letin var arg body)
+  (e-fix var body))
 
-;; convenience macros for types
+(enum pat
+  (p-wild)
+  (p-var name)
+  (p-tuple pats)
+  (p-tag tag pat)
+  (p-lit lit))
+
+
+;; Convenience macros
 (define-syntax-parser Bool [_:id #'(t-bool)])
 (define-syntax-parser Nat [_:id #'(t-nat)])
 (define-syntax-parser Str [_:id #'(t-str)])
@@ -33,12 +57,17 @@
     [(_ a) #'a]
     [(_ a b ...) #'(t-mono a (~> b ...))]))
 (define-match-expander ~> expand~> expand~>)
+;; TODO: remove ×, Σ if not sufficiently useful
 (define-match-expander ×
   (syntax-parser [(× a ...) #'(t-tuple (list a ...))])
   (syntax-parser [(× a ...) #'(t-tuple (list a ...))]))
 (define-syntax-parser Σ
-  [(Σ (tag:id type) ...)
-    #'(t-sum (make-immutable-hash `((tag . ,type) ...)))])
+  [(Σ (tag type) ...)
+    #'(t-sum (make-immutable-hash `((,tag . ,type) ...)))])
+
+
+;;; Type stuff
+(define type=? equal?)
 
 (define (type-wf? x)
   (match x
@@ -64,31 +93,8 @@
     [(or (t-fun _ _) (t-mono _ _)) #f]
     [(t-fs a) (eqtype? a)]))
 
-(enum expr
-  (e-ann expr type)
-  ;; DeBruijn indexing w/ name for readability
-  (e-var name index)
-  ;; used for literals & primitive functions.
-  (e-lit value)
-  (e-prim prim)
-  (e-fun var type body)
-  (e-mono var type body)
-  (e-app func arg)
-  (e-tuple exprs) (e-proj index expr)
-  (e-tag tag expr)
-  ;; branches is a list of (pat . expr) pairs. TODO: use a struct!
-  (e-case subject branches)
-  (e-empty) (e-join left right)
-  (e-singleton expr) (e-letin var arg body)
-  (e-fix var body))
-
-(enum pat
-  (p-wild)
-  (p-var name)
-  (p-tuple pats)
-  (p-tag tag pat)
-  (p-lit lit))
-
+
+;;; Literals & primitives
 (define (lit? x) (if (lit-type x) #t #f))
 (define (lit-type l)
   (cond
