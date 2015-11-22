@@ -40,9 +40,7 @@ $$
 ## Other rules
 
 $$
-\infer{\J{\GD,x\of A}{\GG}{x}{A}}{} \qquad
-\infer{\J{\GD}{\GG,x\of M}{x}{M}}{}
-$$\ $$
+\infer{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD \cup \GG} \qquad
 \infer[\fn]{\J{\GD}{\GG}{\fn\bind{x}{e}}{A \to B}}{
   \J{\GD,x\of A}{\GG}{e}{B}} \qquad
 \infer[\ms{app}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
@@ -65,4 +63,12 @@ $$\ $$
   \J{\GD}{\cdot}{e}{A + B} &
   \J{\GD,x\of A}{\GG}{e_1}{C} &
   \J{\GD,y\of B}{\GG}{e_2}{C}}
+$$\ $$
+\infer{\J{\GD}{\GG}{\emptyset}{M}}{} \qquad
+\infer{\J{\GD}{\GG}{e_1 \vee e_2}{M}}{\J{\GD}{\GG}{e_i}{M}}
+$$\ $$
+\infer{\J{\GD}{\GG}{\{e\}}{\FS\;A}}{\J{\GD}{\cdot}{e}{A}} \qquad
+\infer{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{M}}{
+  \J{\GD}{\GG}{e_1}{\FS\;A} &
+  \J{\GD,x\of A}{\GG}{e_2}{M}}
 $$
