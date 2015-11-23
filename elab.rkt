@@ -183,7 +183,10 @@
         [_ (type-error "not a sum type: ~v" t)])]
 
     [(e-case subj branches)
-      ;; TODO: case completeness checking
+      ;; TODO: case completeness checking.
+      ;;
+      ;; TODO: think about when it might be ok not to hide the monotone
+      ;; environment when typechecking the case-subject.
       (define-values (subj-t subj-e) (elab-infer (env-hide-mono Γ) subj))
       (define sum-types
         (match subj-t
