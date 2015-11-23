@@ -69,35 +69,40 @@
 (struct e-app-mono e-app () #:transparent)
 
 
-;;; Synthesis & checking.
+;;; Inference & checking.
 ;; returns two values: type & elaborated expression.
-(define (elab-synth Γ e)
+(define (elab-infer Γ e)
   (define (ok t) (values t e))
   (match e
     [(e-ann t e) (values t (e-ann t (elab-check Γ t e)))]
+    [(e-lit v) (ok (lit-type v))]
+
     [(e-var n i)
       (match (env-ref Γ i)
         [(or (h-any t) (h-mono t)) (ok t)]
         [_ (type-error "hidden variable: ~a" n)])]
-    [(e-lit v) (ok (lit-type v))]
+
     [(e-prim p)
-      (define t (prim-type-synth p))
+      (define t (prim-type-infer p))
       (if t (ok t)
         (type-error "can't infer type of primitive: ~a" p))]
+
     [(e-app f a)
-      (define-values (ft f) (elab-synth Γ f))
+      (define-values (ft fe) (elab-infer Γ f))
       (match ft
-        [(-> i o) (values o (e-app-mono f (elab-check (env-hide-mono Γ) i a)))]
-        [(~> i o) (values o (e-app-fun f (elab-check Γ i a)))]
+        [(-> i o) (values o (e-app-mono fe (elab-check (env-hide-mono Γ) i a)))]
+        [(~> i o) (values o (e-app-fun fe (elab-check Γ i a)))]
         [_ (type-error "applying non-function ~a, of type ~a" f ft)])]
+
     [(e-proj i subj)
-      (define-values (subjt subj) (elab-synth Γ subj))
-      (match subjt
+      (define-values (subj-t subj-e) (elab-infer Γ subj))
+      (match subj-t
         [(t-tuple ts) #:when (< i (length ts))
-          (values (list-ref ts i) (e-proj i subj))]
+          (values (list-ref ts i) (e-proj i subj-e))]
         [(t-tuple _) (type-error "projection index out of bounds")]
         [_ (type-error "projecting from non-tuple ~a, which has type ~a"
-             subj subjt)])]
+             subj-e subj-t)])]
+
     ;; TODO: synthesize case, let-in, and join expressions when possible, even
     ;; though it's non-standard.
     ;;
@@ -105,14 +110,17 @@
     ;; singleton sets, since they're introduction forms. but w/e.
     [(e-tuple as)
       (define-values (ts es)
-        (for/lists (ts es) ([a as]) (elab-synth Γ a)))
+        (for/lists (ts es) ([a as]) (elab-infer Γ a)))
       (values (t-tuple ts) (e-tuple es))]
+
     [(e-tag name subj)
-      (define-values (subjt subj) (elab-synth Γ subj))
-      (values (Σ (name subjt)) (e-tag name subj))]
+      (define-values (subj-t subj-e) (elab-infer Γ subj))
+      (values (Σ (name subj-t)) (e-tag name subj-e))]
+
     [(e-singleton subj)
-      (define-values (subjt subj) (elab-synth Γ subj))
-      (values (FS subjt) (e-singleton subj))]
+      (define-values (subj-t subj-e) (elab-infer Γ subj))
+      (values (FS subj-t) (e-singleton subj-e))]
+
     [(or (e-fun _ _) (e-mono _ _) (e-fix _ _) (e-empty) (e-join _ _)
        (e-case _ _) (e-letin _ _ _))
       (type-error "can't infer type of: ~a" e)]))
@@ -120,7 +128,100 @@
 ;; returns elaborated expression.
 (define (elab-check Γ t e)
   (match e
-    [(e-ann st s)
-      (unless (subtype? st t) (type-error "incompatible types: ~a and ~a" t st))
-      (e-ann st (elab-check Γ st s))]
-    ))
+    ;; things that must be inferrable
+    [(or (e-ann _ _) (e-var _ _) (e-lit _) (e-app _ _) (e-proj _ _))
+      (define-values (et ee) (elab-infer Γ e))
+      (unless (subtype? et t)
+        (type-error "expression e has type: ~a\nbut we expect type: ~a" et t))
+      ee]
+
+    [(e-prim p)
+      (if (prim-has-type? p t) e
+        (type-error "primitive ~a cannot have type ~a" p t))]
+
+    [(e-fun var body)
+      (match t
+        [(t-fun a b) (e-fun var (elab-check (env-cons (h-any a) Γ) b body))]
+        [_ (type-error "not a function type: ~a" t)])]
+    [(e-mono var body)
+      (match t
+        [(or (t-fun a b) (t-mono a b))
+          (e-mono var (elab-check (env-cons (h-mono a) Γ) b body))]
+        [_ (type-error "not a monotone function type: ~a" t)])]
+
+    [(e-tuple es)
+      (match t
+        [(t-tuple ts)
+          (e-tuple (map (curry elab-check Γ) es ts))]
+        [_ (type-error "not a tuple type: ~a" t)])]
+
+    [(e-tag name subj)
+      (match t
+        [(t-sum branches)
+          (define (fail)
+            (type-error "sum type ~a does not have branch ~a"
+              branches name))
+          (e-tag name (elab-check Γ (hash-ref branches name fail) subj))]
+        [_ (type-error "not a sum type: ~a" t)])]
+
+    [(e-case subj branches)
+      (define-values (subj-t subj-e) (elab-infer Γ subj))
+      (define sum-types
+        (match subj-t
+          [(t-sum h) h]
+          [_ (type-error "can't case on expr of type ~a" subj-t)]))
+      (e-case subj-e
+        (for/list ([b branches])
+          (match-define (case-branch p body) b)
+          (define pat-env (check-pat Γ subj-t p))
+          ;; is append right? use env-extend instead?
+          (case-branch p
+            (elab-check (append (map h-any pat-env) Γ) t body))))]
+
+    [(e-empty)
+      (unless (lattice-type? t) (error "not a lattice type: ~a" t))
+      e]
+    [(e-join l r)
+      (unless (lattice-type? t) (error "not a lattice type: ~a" t))
+      (e-join (elab-check Γ t l) (elab-check Γ t r))]
+
+    [(e-singleton elem)
+      (match t
+        [(t-fs a) (e-singleton (elab-check (env-hide-mono Γ) a elem))]
+        [_ (type-error "not a set type: ~a" t)])]
+
+    [(e-letin var arg body)
+      (define-values (arg-t arg-e) (elab-infer Γ arg))
+      (define elem-t (match arg-t
+                       [(t-fs a) a]
+                       [_ (type-error "(letin) not a set type: ~a" arg-t)]))
+      (e-letin var arg-e
+        (elab-check (env-cons (h-any elem-t) Γ) body))]
+
+    [(e-fix var body)
+      (unless (fixpoint-type? t)
+        (type-error "cannot take fixpoint at type: ~a" t))
+      (e-fix var
+        (elab-check (env-cons (h-mono t) Γ) body))]))
+
+;; checks a pattern against a type and returns the env that the pattern binds.
+(define (check-pat Γ t p)
+  (match p
+    [(p-wild) '()]
+    [(p-var _) (list t)]
+    [(p-lit l)
+      (if (subtype? t (or (lit-type l) (type-error "unknown literal type")))
+        '()
+        (type-error "wrong type when matched against literal"))]
+    [(p-tuple pats)
+      (match t
+        [(t-tuple types)
+          (if (= (length types) (length pats))
+            ;; why (append* (reverse ...))?
+            (append* (reverse (map (curry check-pat Γ) types pats)))
+            (type-error "wrong length tuple pattern"))]
+        [_ (type-error "not a tuple")])]
+    [(p-tag tag pat)
+      (match t
+        [(t-sum bs) TODO]
+        [_ (type-error "not a sum")])]))

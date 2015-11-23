@@ -21,16 +21,21 @@
   ;; used for literals & primitive functions.
   (e-lit value)
   (e-prim prim)
+  ;; NOTE/TODO: since we're type-checking bidirectionally, I think we can
+  ;; actually coalesce e-fun and e-mono into one branch & have elaboration
+  ;; figure it out, just like we do with e-app!
   (e-fun var body)
   (e-mono var body)
   (e-app func arg)
   (e-tuple exprs) (e-proj index expr)
   (e-tag tag expr)
-  ;; branches is a list of (pat . expr) pairs. TODO: use a struct!
+  ;; branches is a list of case-branch structs.
   (e-case subject branches)
   (e-empty) (e-join left right)
   (e-singleton expr) (e-letin var arg body)
   (e-fix var body))
+
+(struct case-branch (pat body) #:transparent)
 
 (enum pat
   (p-wild)
@@ -93,6 +98,21 @@
     [(or (t-fun _ _) (t-mono _ _)) #f]
     [(t-fs a) (eqtype? a)]))
 
+(define (finite-type? t)
+  (match t
+    [(t-bool) #t]
+    [(t-fs a) (finite-type? a)]
+    [(or (t-tuple as) (t-sum (app hash-keys as))) (andmap finite-type? as)]
+    [(or (t-fun a b) (t-mono a b)) (andmap finite-type? (list a b))]
+    [_ #f]))
+
+(define (fixpoint-type? t)
+  (match t
+    [(or (t-bool) (t-nat)) #t]
+    [(t-tuple as) (andmap fixpoint-type? as)]
+    [(t-fs a) (eqtype? a)]
+    [_ ((andf finite-type? lattice-type?) t)]))
+
 
 ;;; Literals & primitives
 (define (lit? x) (if (lit-type x) #t #f))
@@ -105,7 +125,7 @@
 
 (define (prim? x) (member x '(= <= + - * subset? print puts ++)))
 
-(define (prim-type-synth p)
+(define (prim-type-infer p)
   (match p
     ['<= (-> Nat (~> Nat Bool))]
     [(or '+ '*) (~> Nat Nat Nat)]
@@ -114,8 +134,8 @@
     ['puts (~> Str (×))]
     [_ #f]))
 
-(define (prim-type-check p t)
-  (define pt (prim-type-synth t))
+(define (prim-has-type? p t)
+  (define pt (prim-type-infer t))
   (if pt (type=? t pt)
     (match* (p t)
       [('= (-> a b (t-bool)))
