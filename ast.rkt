@@ -115,6 +115,15 @@
     [_ ((andf finite-type? lattice-type?) t)]))
 
 
+;;; expression & pattern stuff
+(define (pat-vars p)
+  (match p
+    [(or (p-wild) (p-lit _)) '()]
+    [(p-var n) (list n)]
+    [(p-tuple ps) (append* (map pat-vars ps))]
+    [(p-tag _ p) (pat-vars p)]))
+
+
 ;;; Literals & primitives
 (define (lit? x) (if (lit-type x) #t #f))
 (define (lit-type l)

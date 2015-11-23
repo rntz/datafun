@@ -48,7 +48,7 @@
 
 
 ;;; Miscellaneous utilities
-(provide assert! warn! flip andf orf print-error index-of eqmap)
+(provide assert! warn! flip andf orf print-error index-of eqmap foldl1 foldr1)
 
 (define (assert! t) (unless t (error "ASSERTION FAILURE")))
 (define (warn! msg) (displayln (format "WARNING: ~a" msg)) )
@@ -71,6 +71,12 @@
   (define len (length l))
   (and (andmap (lambda (l) (= len (length l))) lsts)
        (apply andmap eq l lsts)))
+
+(define (foldl1 f l)
+  (foldl f (car l) (cdr l)))
+
+(define (foldr1 f l)
+  (foldl1 f (reverse l)))
 
 
 ;;; stream utilities
