@@ -103,8 +103,8 @@
         [_ (type-error "projecting from non-tuple ~a, which has type ~a"
              subj-e subj-t)])]
 
-    ;; TODO: synthesize case, let-in, and join expressions when possible, even
-    ;; though it's non-standard.
+    ;; TODO: synthesize let-in and join expressions when possible, even though
+    ;; it's non-standard.
     ;;
     ;; NB. technically I shouldn't be synthesizing tuples, tagged values, or
     ;; singleton sets, since they're introduction forms. but w/e.
@@ -121,8 +121,23 @@
       (define-values (subj-t subj-e) (elab-infer Γ subj))
       (values (FS subj-t) (e-singleton subj-e))]
 
+    [(e-case subj branches)
+      (when (null? branches)
+        (type-error "can't infer type of case with no branches"))
+      (define-values (subj-t subj-e) (elab-infer (env-hide-mono Γ) subj))
+      (define-values (branch-ts branch-es)
+        (for/lists (_ts _es) ([b branches])
+          (match-define (case-branch pat body) b)
+          ;; it's okay to use h-any here ONLY because we hid the monotone
+          ;; environment when checking subj.
+          (define pat-Γ (map h-any (check-pat Γ subj-t pat)))
+          (define-values (branch-t branch-e) (elab-infer (append pat-Γ Γ) body))
+          (values branch-t (case-branch (case-branch-pat b) branch-e))))
+      ;; find the lub of all the branch types
+      (values (foldl1 type-lub branch-ts) (e-case subj-e branch-es))]
+
     [(or (e-fun _ _) (e-mono _ _) (e-fix _ _) (e-empty) (e-join _ _)
-       (e-case _ _) (e-letin _ _ _))
+       (e-letin _ _ _))
       (type-error "can't infer type of: ~a" e)]))
 
 ;; returns elaborated expression.
@@ -165,7 +180,8 @@
         [_ (type-error "not a sum type: ~a" t)])]
 
     [(e-case subj branches)
-      (define-values (subj-t subj-e) (elab-infer Γ subj))
+      ;; TODO: case completeness checking
+      (define-values (subj-t subj-e) (elab-infer (env-hide-mono Γ) subj))
       (define sum-types
         (match subj-t
           [(t-sum h) h]
@@ -176,6 +192,8 @@
           (define pat-env (check-pat Γ subj-t p))
           ;; is append right? use env-extend instead?
           (case-branch p
+            ;; it's okay to use h-any here ONLY because we hid the monotone
+            ;; environment when checking subj.
             (elab-check (append (map h-any pat-env) Γ) t body))))]
 
     [(e-empty)
