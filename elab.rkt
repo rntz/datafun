@@ -90,8 +90,8 @@
     [(e-app f a)
       (define-values (ft fe) (elab-infer Γ f))
       (match ft
-        [(-> i o) (values o (e-app-mono fe (elab-check (env-hide-mono Γ) i a)))]
-        [(~> i o) (values o (e-app-fun fe (elab-check Γ i a)))]
+        [(~> i o) (values o (e-app-mono fe (elab-check (env-hide-mono Γ) i a)))]
+        [(-> i o) (values o (e-app-fun fe (elab-check Γ i a)))]
         [_ (type-error "applying non-function ~a, of type ~a" f ft)])]
 
     [(e-proj i subj)
@@ -223,5 +223,9 @@
         [_ (type-error "not a tuple")])]
     [(p-tag tag pat)
       (match t
-        [(t-sum bs) TODO]
+        [(t-sum bs) (if (dict-has-key? bs tag)
+                      (check-pat Γ (hash-ref bs tag) pat)
+                      ;; FIXME: this is actually ok, it's just dead code; should
+                      ;; warn, not error
+                      (type-error "no such branch in tagged sum"))]
         [_ (type-error "not a sum")])]))
