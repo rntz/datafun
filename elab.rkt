@@ -72,6 +72,7 @@
 ;;; Inference & checking.
 ;; returns two values: type & elaborated expression.
 (define (elab-infer Γ e)
+  ;; (printf "(elab-infer ~v ~v)\n" Γ e)
   (define (ok t) (values t e))
   (match e
     [(e-ann t e) (values t (e-ann t (elab-check Γ t e)))]
@@ -89,9 +90,10 @@
 
     [(e-app f a)
       (define-values (ft fe) (elab-infer Γ f))
+      ;; (printf "function ~v has type ~v\n" f ft)
       (match ft
-        [(~> i o) (values o (e-app-mono fe (elab-check (env-hide-mono Γ) i a)))]
-        [(-> i o) (values o (e-app-fun fe (elab-check Γ i a)))]
+        [(~> i o) (values o (e-app-mono fe (elab-check Γ i a)))]
+        [(-> i o) (values o (e-app-fun fe (elab-check (env-hide-mono Γ) i a)))]
         [_ (type-error "applying non-function ~v, of type ~v" f ft)])]
 
     [(e-proj i subj)
@@ -142,6 +144,7 @@
 
 ;; returns elaborated expression.
 (define (elab-check Γ t e)
+  ;; (printf "(elab-check ~v ~v ~v)\n" Γ t e)
   (match e
     ;; things that must be inferrable
     [(or (e-ann _ _) (e-var _ _) (e-lit _) (e-app _ _) (e-proj _ _))

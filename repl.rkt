@@ -10,6 +10,6 @@
       (define expr-in (parse-expr line '()))
       (printf "parsed: ~v\n" expr-in)
       (define-values (expr-type expr-elab) (elab-infer '() expr-in))
-      (printf "type: ~v\n" expr-type)
-      (printf "elab: ~v\n" expr-elab))
+      (printf "elab: ~v\n" expr-elab)
+      (printf "type: ~v\n" expr-type))
     (repl)))
