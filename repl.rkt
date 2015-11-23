@@ -3,7 +3,7 @@
 (require "util.rkt" "ast.rkt" "parse.rkt" "elab.rkt")
 
 (define (repl)
-  (printf "DF> ")
+  (printf "DF- ")
   (define line (read))
   (unless (eof-object? line)
     (with-handlers ([exn:fail? (lambda (e) (printf "** ~a\n" (exn-message e)))])
