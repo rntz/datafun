@@ -28,7 +28,7 @@
     (t-fun (type-glb a b) (type-lub x y))]
   [((t-fs a) (t-fs b)) (t-fs (type-lub a b))]
   [(x y) #:when (type=? x y) x]
-  [(x y) (type-error "no lub: ~a and ~a" x y)])
+  [(x y) (type-error "no lub: ~v and ~v" x y)])
 
 (define/match (type-glb a b)
   [((t-tuple as) (t-tuple bs)) (t-tuple (type-glbs as bs))]
@@ -39,7 +39,7 @@
     (t-mono (type-lub a b) (type-glb x y))]
   [((t-fs a) (t-fs b)) (t-fs (type-glb a b))]
   [(x y) #:when (type=? x y) x]
-  [(x y) (type-error "no glb: ~a and ~a" x y)])
+  [(x y) (type-error "no glb: ~v and ~v" x y)])
 
 (define (type-lubs as bs)
   (unless (= (length as) (length bs)) (type-error "lists of unequal length"))
@@ -92,7 +92,7 @@
       (match ft
         [(~> i o) (values o (e-app-mono fe (elab-check (env-hide-mono Γ) i a)))]
         [(-> i o) (values o (e-app-fun fe (elab-check Γ i a)))]
-        [_ (type-error "applying non-function ~a, of type ~a" f ft)])]
+        [_ (type-error "applying non-function ~v, of type ~v" f ft)])]
 
     [(e-proj i subj)
       (define-values (subj-t subj-e) (elab-infer Γ subj))
@@ -100,7 +100,7 @@
         [(t-tuple ts) #:when (< i (length ts))
           (values (list-ref ts i) (e-proj i subj-e))]
         [(t-tuple _) (type-error "projection index out of bounds")]
-        [_ (type-error "projecting from non-tuple ~a, which has type ~a"
+        [_ (type-error "projecting from non-tuple ~v, which has type ~v"
              subj-e subj-t)])]
 
     ;; TODO: synthesize let-in and join expressions when possible, even though
@@ -138,7 +138,7 @@
 
     [(or (e-fun _ _) (e-mono _ _) (e-fix _ _) (e-empty) (e-join _ _)
        (e-letin _ _ _))
-      (type-error "can't infer type of: ~a" e)]))
+      (type-error "can't infer type of: ~v" e)]))
 
 ;; returns elaborated expression.
 (define (elab-check Γ t e)
@@ -147,37 +147,37 @@
     [(or (e-ann _ _) (e-var _ _) (e-lit _) (e-app _ _) (e-proj _ _))
       (define-values (et ee) (elab-infer Γ e))
       (unless (subtype? et t)
-        (type-error "expression e has type: ~a\nbut we expect type: ~a" et t))
+        (type-error "expression e has type: ~v\nbut we expect type: ~v" et t))
       ee]
 
     [(e-prim p)
       (if (prim-has-type? p t) e
-        (type-error "primitive ~a cannot have type ~a" p t))]
+        (type-error "primitive ~a cannot have type ~v" p t))]
 
     [(e-fun var body)
       (match t
         [(t-fun a b) (e-fun var (elab-check (env-cons (h-any a) Γ) b body))]
-        [_ (type-error "not a function type: ~a" t)])]
+        [_ (type-error "not a function type: ~v" t)])]
     [(e-mono var body)
       (match t
         [(or (t-fun a b) (t-mono a b))
           (e-mono var (elab-check (env-cons (h-mono a) Γ) b body))]
-        [_ (type-error "not a monotone function type: ~a" t)])]
+        [_ (type-error "not a monotone function type: ~v" t)])]
 
     [(e-tuple es)
       (match t
         [(t-tuple ts)
           (e-tuple (map (curry elab-check Γ) es ts))]
-        [_ (type-error "not a tuple type: ~a" t)])]
+        [_ (type-error "not a tuple type: ~v" t)])]
 
     [(e-tag name subj)
       (match t
         [(t-sum branches)
           (define (fail)
-            (type-error "sum type ~a does not have branch ~a"
+            (type-error "sum type ~v does not have branch ~a"
               branches name))
           (e-tag name (elab-check Γ (hash-ref branches name fail) subj))]
-        [_ (type-error "not a sum type: ~a" t)])]
+        [_ (type-error "not a sum type: ~v" t)])]
 
     [(e-case subj branches)
       ;; TODO: case completeness checking
@@ -185,7 +185,7 @@
       (define sum-types
         (match subj-t
           [(t-sum h) h]
-          [_ (type-error "can't case on expr of type ~a" subj-t)]))
+          [_ (type-error "can't case on expr of type ~v" subj-t)]))
       (e-case subj-e
         (for/list ([b branches])
           (match-define (case-branch p body) b)
@@ -197,28 +197,28 @@
             (elab-check (append (map h-any pat-env) Γ) t body))))]
 
     [(e-empty)
-      (unless (lattice-type? t) (error "not a lattice type: ~a" t))
+      (unless (lattice-type? t) (error "not a lattice type: ~v" t))
       e]
     [(e-join l r)
-      (unless (lattice-type? t) (error "not a lattice type: ~a" t))
+      (unless (lattice-type? t) (error "not a lattice type: ~v" t))
       (e-join (elab-check Γ t l) (elab-check Γ t r))]
 
     [(e-singleton elem)
       (match t
         [(t-fs a) (e-singleton (elab-check (env-hide-mono Γ) a elem))]
-        [_ (type-error "not a set type: ~a" t)])]
+        [_ (type-error "not a set type: ~v" t)])]
 
     [(e-letin var arg body)
       (define-values (arg-t arg-e) (elab-infer Γ arg))
       (define elem-t (match arg-t
                        [(t-fs a) a]
-                       [_ (type-error "(letin) not a set type: ~a" arg-t)]))
+                       [_ (type-error "(letin) not a set type: ~v" arg-t)]))
       (e-letin var arg-e
         (elab-check (env-cons (h-any elem-t) Γ) body))]
 
     [(e-fix var body)
       (unless (fixpoint-type? t)
-        (type-error "cannot take fixpoint at type: ~a" t))
+        (type-error "cannot take fixpoint at type: ~v" t))
       (e-fix var
         (elab-check (env-cons (h-mono t) Γ) body))]))
 
