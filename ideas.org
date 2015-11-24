@@ -1,0 +1,13 @@
+* Future work: on-line computation
+
+Matthew Maurer is working on a datalog-like logic language for binary analysis
+which has the property that external predicates (representing individual
+analyses) can have new facts added at any time! This requires monotonicity in
+aggregation operators.
+
+We have monotonicity! Can we efficiently implement *on-line* computation? That
+is to say, for a function (f : A ~> B) in our language, is there an efficient
+way to evaluate it over *monotonically increasing* inputs?
+
+Could use SAC (self-adjusting computation), but that's more general (works for
+*arbitrarily-changing* inputs).
