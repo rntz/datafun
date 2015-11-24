@@ -1,0 +1,12 @@
+#!/bin/bash
+# counts lines of code, ignoring whitespace & comments
+
+filter() {
+    egrep -v '^ *(;.*)?$|^#lang ' "$@"
+}
+
+for name in *.rkt; do
+    printf "%5d %s\n" $(filter "$name" | wc -l) "$name"
+done | sort -n
+
+printf "%5d total\n" $(filter *.rkt | wc -l)
