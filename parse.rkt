@@ -14,12 +14,10 @@
     ['empty (e-empty)]
     [(? symbol?) (e-var e (or (index-of e Γ) (error "unbound variable:" e)))]
     [`(: ,t ,e) (e-ann (parse-type t) (r e))]
-    [`(fn ,x ,e) (e-fun x (parse-expr e (cons x Γ)))]
-    [`(mono ,x ,e) (e-mono x (parse-expr e (cons x Γ)))]
-    [`(,(and f (or 'λ 'λ^)) ,xs ... ,e)
+    [`(fn ,x ,e) (e-lam x (parse-expr e (cons x Γ)))]
+    [`(λ ,xs ... ,e)
       (set! e (parse-expr e (append (reverse xs) Γ)))
-      (set! f (if (equal? f 'λ) e-fun e-mono))
-      (for/fold ([e e]) ([x (reverse xs)]) (f x e))]
+      (foldr e-lam e xs)]
     [`(cons . ,es) (e-tuple (map r es))]
     [(list (or 'π 'proj) i e) (e-proj i (r e))]
     [(or `(tag ,name ,e) `(',name ,e)) (e-tag name (r e))]

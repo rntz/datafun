@@ -22,12 +22,9 @@
   ;; used for literals & primitive functions.
   (e-lit value)
   (e-prim prim)
-  ;; NOTE/TODO: since we're type-checking bidirectionally, I think we can
-  ;; actually coalesce e-fun and e-mono into one branch & have elaboration
-  ;; figure it out, just like we do with e-app!
-  (e-fun var body)
-  (e-mono var body)
-  (e-app func arg)
+  ;; bidirectional type inference / elaboration figures out which kind (ordinary
+  ;; or monotonic) of lambda / application we meant
+  (e-lam var body) (e-app func arg)
   (e-tuple exprs) (e-proj index expr)
   (e-tag tag expr)
   ;; branches is a list of case-branch structs.

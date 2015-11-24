@@ -63,8 +63,11 @@
 (define (env-hide-mono Γ)
   (map (match-lambda [(h-mono _) (h-hidden)] [x x]) Γ))
 
-;; Elaborated expression forms:
-;; e-app-{fun,mono} distinguish applying functions from monotone functions
+;; Elaborated expression forms to distinguish ordinary from monotone functions
+;; and applications.
+(struct e-lam-fun e-lam () #:transparent)
+(struct e-lam-mono e-lam () #:transparent)
+
 (struct e-app-fun e-app () #:transparent)
 (struct e-app-mono e-app () #:transparent)
 
@@ -81,7 +84,7 @@
     [(e-var n i)
       (match (env-ref Γ i)
         [(or (h-any t) (h-mono t)) (ok t)]
-        [_ (type-error "hidden variable: ~a" n)])]
+        [_ (type-error "hidden monotone variable: ~a" n)])]
 
     [(e-prim p)
       (define t (prim-type-infer p))
@@ -138,8 +141,7 @@
       ;; find the lub of all the branch types
       (values (foldl1 type-lub branch-ts) (e-case subj-e branch-es))]
 
-    [(or (e-fun _ _) (e-mono _ _) (e-fix _ _) (e-empty) (e-join _ _)
-       (e-letin _ _ _))
+    [(or (e-lam _ _) (e-fix _ _) (e-empty) (e-join _ _) (e-letin _ _ _))
       (type-error "can't infer type of: ~v" e)]))
 
 ;; returns elaborated expression.
@@ -157,15 +159,13 @@
       (if (prim-has-type? p t) e
         (type-error "primitive ~a cannot have type ~v" p t))]
 
-    [(e-fun var body)
+    [(e-lam var body)
       (match t
-        [(t-fun a b) (e-fun var (elab-check (env-cons (h-any a) Γ) b body))]
+        [(t-mono a b)
+          (e-lam-mono var (elab-check (env-cons (h-mono a) Γ) b body))]
+        [(t-fun a b)
+          (e-lam-fun var (elab-check (env-cons (h-any a) Γ) b body))]
         [_ (type-error "not a function type: ~v" t)])]
-    [(e-mono var body)
-      (match t
-        [(or (t-fun a b) (t-mono a b))
-          (e-mono var (elab-check (env-cons (h-mono a) Γ) b body))]
-        [_ (type-error "not a monotone function type: ~v" t)])]
 
     [(e-tuple es)
       (match t
