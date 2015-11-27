@@ -35,6 +35,10 @@
       (e-letin x (r e) (parse-expr body (cons x Γ)))]
     [`(fix ,x ,body)
       (e-fix x (parse-expr body (cons x Γ)))]
+    [`(let ,x = ,e in ,body)
+      (e-let-any x (r e) (parse-expr body (cons x Γ)))]
+    [`(let ,x ^= ,e in ,body)
+      (e-let-mono x (r e) (parse-expr body (cons x Γ)))]
     [`(,f ,as ...)
       (foldl (flip e-app) (r f) (map r as))]
     [_ (error "unfamiliar expression:" e)]))
@@ -65,7 +69,16 @@
 
 
 ;;; Declaration/definition parsing
+;;; TODO: support monotone declarations, which bind a monotone variable.
 (struct defn (name type expr) #:transparent)
+
+;; given some defns and an unparsed expr, parses the expr in the appropriate
+;; environment and produces an expr which let-binds all the defns in the expr.
+(define (let-defns defns e Γ)
+  (set! e (parse-expr e (append (reverse (map defn-name defns)) Γ)))
+  (for/fold ([e e]) ([d defns])
+    (match-define (defn n t body) d)
+    (e-let-any n (e-ann t body) e)))
 
 ;; decls are used internally to produce defns, so we can separate type
 ;; annotations from declarations. we don't parse the expressions or types until

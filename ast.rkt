@@ -31,7 +31,10 @@
   (e-case subject branches)
   (e-empty) (e-join left right)
   (e-singleton expr) (e-letin var arg body)
-  (e-fix var body))
+  (e-fix var body)
+  ;; let binding. TODO: support pats here?
+  (e-let-any var expr body)
+  (e-let-mono var expr body))
 
 (struct case-branch (pat body) #:transparent)
 
