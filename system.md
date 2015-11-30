@@ -5,7 +5,9 @@ consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
 dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident,
 sunt in culpa qui officia deserunt mollit anim id est laborum. -->
 
-# Syntax
+# Language
+
+## Syntax
 
 $$\begin{array}{lrrl}
 \text{types} & A,B
@@ -25,9 +27,9 @@ $$\begin{array}{lrrl}
 &&|\,& \J{\GD}{\GG}{e}{M}
 \end{array}$$
 
-# Typing rules
+## Typing rules
 
-## Structural rules
+### Structural rules
 
 These rules are technically unnecessary, as they are (ought to be, no proof yet)
 admissible.
@@ -41,7 +43,7 @@ $$
 \infer[\ms{forget}]{\J{\GD,x\of M}{\GG}{e}{N}}{\J{\GD}{\GG,x\of M}{e}{N}}
 $$
 
-## Other rules
+### Other rules
 
 $$
 \infer[\ms{hyp}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD \cup \GG} \qquad
@@ -83,3 +85,87 @@ $$
 The \ms{fix} rule is overly permissive in allowing fix-points to be taken at any
 lattice type; it needs to be be restricted to some computationally tractable
 class of lattice types.
+
+# Proofs
+
+## Syntactic substitution
+
+Note that whenever two variables are given distinct names $x, y$ it is assumed
+$x \ne y$ unless mentioned otherwise.
+
+We define substitution $\sub{e_1/x} e_2$, by induction on $e_2$:
+
+$$
+\begin{array}{rcl}
+  \sub{e/x} x &=& e\\
+  \sub{e/x} y &=& y\\
+  \sub{e/x}(\fn\bind{y} e') &=& \fn\bind{y} \sub{e/x} e'\\
+  \sub{e/x}(\monofn\bind{y} e') &=& \monofn\bind{y} \sub{e/x} e'\\
+  \sub{e/x}(e_1\;e_2) &=& (\sub{e/x} e_1)\;(\sub{e/x}e_2)\\
+  \sub{e/x}(e_1, e_2) &=& (\sub{e/x}e_1, \sub{e/x}e_2)\\
+  \sub{e/x}(\pi_i\; e') &=& \pi_i\;(\sub{e/x} e')\\
+  \sub{e/x}(\ms{in}_i\;e') &=& \ms{in}_i\;(\sub{e/x}e')\\
+  \sub{e/x}(\case{e'}{y}{e_1}{z}{e_2})
+  &=& \case{\sub{e/x} e'}{y}{\sub{e/x}e_1}{z}{\sub{e/x}e_2}\\
+  \sub{e/x} \emptyset &=& \emptyset\\
+  \sub{e/x}(e_1 \vee e_2) &=& (\sub{e/x}e_1) \vee (\sub{e/x} e_2)\\
+  \sub{e/x}\{e'\} &=& \{\sub{e/x}e'\}\\
+  \sub{e/x}(\letin{y}{e_1}{e_2}) &=& \letin{y}{\sub{e/x}e_1}{\sub{e/x}e_2}\\
+  \sub{e/x}(\fix{y} e') &=& \fix{y} \sub{e/x} e'
+\end{array}
+$$
+
+<!-- TODO: theorem numbering. what package provides \begin{theorem} again? -->
+
+\textbf{Theorem 1.1, substitution for unrestricted variables:} If
+$\J{\GD}{\GG}{e}{A}$ and $\J{\GD,x\of A}{\GG}{e'}{B}$ then
+$\J{\GD}{\GG}{\sub{e/x}{e'}}{B}$.
+
+\textbf{Proof:} Proceed by induction on $\J{\GD,x\of A}{\GG}{e'}{B}$, assuming
+in each case that $\J{\GD}{\GG}{e}{A}$:
+
+\begin{quote}
+  \begin{description}
+  %% \item[Case \(\infer{\J{\GD,x\of A}{\GG}{x}{A}}{x\of A \in \GD\cup\GG}\):]
+  %%   By assumption, $\J{\GD}{\GG}{e}{A}$
+  \item[Case \ms{hyp}, $x \ne y$:] Given \[
+    \infer[\ms{hyp}]{\J{\GD,x\of A}{\GG}{y}{B}}{
+      y\of B \in (\GD,x\of A)\cup\GG}
+    \]
+
+    Since $x \ne y$, evidently $y \of B \in \GD \cup \GG$, thus:
+    \[\infer[\ms{hyp}]{\J{\GD}{\GG}{y}{B}}{y\of B \in \GD\cup\GG}\]
+
+  \item[Case \ms{hyp}, $x = y$:] Given \[
+    \infer[\ms{hyp}]{\J{\GD,x\of A}{\GG}{x}{A}}{
+      x\of A \in (\GD,x\of A)\cup\GG}\]
+
+    By assumption we have $\J{\GD,x\of A}{\GG}{e}{A}$, which suffices.
+
+  \item[Case $\fn$]: Given \[
+    \infer[\fn]{\J{\GD,x\of A}{\GG}{\fn\bind{y} e'}{B \to C}}{
+      \J{\GD,x\of A,y\of B}{\GG}{e'}{C}}
+    \]
+
+    By our IH (and exchange), we have $\J{\GD,y : B}{\GG}{\sub{e/x}e'}{C}$.
+    Thus: \[
+    \infer{\J{\GD}{\GG}{\fn\bind{y} \sub{e/x} e'}{B \to C}}{
+      \J{\GD,y : B}{\GG}{\sub{e/x}e'}{C}}
+    \]
+
+  \item[Case $\monofn$]: Given \[
+    \infer[\monofn]{\J{\GD,x\of A}{\GG}{\monofn\bind{y} e'}{M \mono N}}{
+      \J{\GD,x\of A}{\GG,y \of M}{e'}{N}}
+    \]
+
+    By our IH, we have $\J{\GD}{\GG,y \of M}{\sub{e/x}e'}{N}$. Thus: \[
+    \infer[\monofn]{\J{\GD}{\GG}{\monofn\bind{y} \sub{e/x}e'}{M \mono N}}{
+      \J{\GD}{\GG,y\of M}{\sub{e/x} e'}{N}
+      }
+    \]
+  \end{description}
+\end{quote}
+
+\textbf{Theorem 1.2, substitution for monotone variables:} If
+$\J{\GD}{\GG}{e}{M}$ and $\J{\GD}{\GG,x \of M}{e'}{N}$ then
+$\J{\GD}{\GG}{\sub{e/x}{e'}}{N}$.
