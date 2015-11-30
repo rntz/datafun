@@ -1,4 +1,11 @@
-* Future work: on-line computation
+* implementation: maybe use PLT redex?
+* Future work: generalize to {some,many,all} Eilenberg-Moore categories?
+* Future work: exploring lists, bags, and sets
+counting things, for example, is naturally a commutative-monoid-style
+computation.
+
+* Future work: a type system for LVars?
+* Future work: on-line monotone computation
 
 Matthew Maurer is working on a datalog-like logic language for binary analysis
 (https://github.com/maurer/holmes/blob/master/formal/holmes.tex) which has the
@@ -11,4 +18,6 @@ computation? That is to say, for a function (f : A ~> B) in our language, is
 there an efficient way to evaluate it over *monotonically increasing* inputs?
 
 Could use SAC (self-adjusting computation), but that's more general (works for
-*arbitrarily-changing* inputs).
+*arbitrarily-changing* inputs). (A monotonic function can of course involve
+computing things in the non-monotonic fragment, but I *think* we're guaranteed
+those won't change when we change the monotone input?)
