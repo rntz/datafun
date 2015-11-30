@@ -88,6 +88,10 @@ class of lattice types.
 
 # Proofs
 
+## Admissibility of {\ms{exchange},\ms{weaken},\ms{forget}}
+
+TODO
+
 ## Syntactic substitution
 
 Note that whenever two variables are given distinct names $x, y$ it is assumed
@@ -163,6 +167,76 @@ in each case that $\J{\GD}{\GG}{e}{A}$:
       \J{\GD}{\GG,y\of M}{\sub{e/x} e'}{N}
       }
     \]
+
+  \item[Case $\ms{app}$:] Given: \[
+    \infer[\ms{app}]{\J{\GD,x\of A}{\GG}{e_1\;e_2}{C}}{
+      \J{\GD,x\of A}{\GG}{e_1}{B \to C} &
+      \J{\GD,x\of A}{\cdot}{e_2}{B}}
+    \]
+
+    By our IHs, we have $\J{\GD}{\GG}{\sub{e/x} e_1}{B\to C}$ and
+    $\J{\GD}{\cdot}{\sub{e/x}e_2}{B}$. Thus: \[
+    \infer[\ms{app}]{\J{\GD}{\GG}{(\sub{e/x} e_1)\;(\sub{e/x} e_2)}{C}}{
+        \J{\GD}{\GG}{\sub{e/x} e_1}{B \to C} &
+        \J{\GD}{\cdot}{\sub{e/x} e_2}{B}}
+    \]
+
+  \item[Case $\widehat{\ms{app}}$:] Given \[
+    \infer[\widehat{\ms{app}}]{\J{\GD,x\of A}{\GG}{e_1\;e_2}{N}}{
+      \J{\GD,x\of A}{\GG}{e_1}{M \mono N} &
+      \J{\GD,x\of A}{\GG}{e_2}{N}}
+    \]
+
+    By our IHs, we have $\J{\GD}{\GG}{\sub{e/x} e_1}{M\to N}$ and
+    $\J{\GD}{\GG}{\sub{e/x}e_2}{M}$. Thus: \[
+    \infer[\widehat{\ms{app}}]{
+      \J{\GD}{\GG}{(\sub{e/x} e_1)\;(\sub{e/x} e_2)}{N}
+    }{
+        \J{\GD}{\GG}{\sub{e/x} e_1}{M \mono N} &
+        \J{\GD}{\GG}{\sub{e/x} e_2}{M}}
+    \]
+
+  \item[Case $(,\!)$:] boring, TODO
+  \item[Case $\pi_i$:] boring, TODO
+  \item[Case $\ms{in}_i$:] boring, TODO
+  \item[Case \ms{case}:] TODO
+  \item[Case $\emptyset$:] boring, TODO
+  \item[Case ${\vee}$:] boring, TODO
+  \item[Case $\{\}$:] Given \[
+    \infer[\{\}]{\J{\GD,x\of A}{\GG}{\{e'\}}{\FS\;B}}{
+      \J{\GD,x\of A}{\cdot}{e'}{B}}
+    \]
+
+    By IH we have $\J{\GD}{\cdot}{\sub{e/x} e'}{B}$, thus:\[
+    \infer[\{\}]{\J{\GD}{\GG}{\{\sub{e/x} e'\}}{\FS\;B}}{
+      \J{\GD}{\cdot}{\sub{e/x} e'}{B}}
+    \]
+
+  \item[Case $\ms{let}_{\in}$:] Given \[
+    \infer[\ms{let}_{\in}]{\J{\GD,x\of A}{\GG}{\letin{y}{e_1}{e_2}}{M}}{
+      \J{\GD,x\of A}{\GG}{e_1}{\FS\;B} &
+      \J{\GD,x\of A,y\of B}{\GG}{e_2}{M}}\]
+
+    By our IHs (and exchange), we have $\J{\GD}{\GG}{\sub{e/x}e_1}{\FS\;B}$
+    and $\J{\GD,y\of B}{\GG}{\sub{e/x} e_2}{M}$. Thus: \[
+    \infer[\ms{let}_{\in}]{
+      \J{\GD}{\GG}{\letin{y}{\sub{e/x}e_1}{\sub{e/x}e_2}}{M}
+    }{
+      \J{\GD}{\GG}{\sub{e/x} e_1}{\FS\;B} &
+      \J{\GD,y\of B}{\GG}{\sub{e/x} e_2}{M}
+    }
+    \]
+
+  \item[Case $\ms{fix}$:] Given \[
+    \infer[\ms{fix}]{\J{\GD,x\of A}{\GG}{\fix{y} e'}{M}}{
+      \J{\GD,x\of A}{\GG,y \of M}{e'}{M}}
+    \]
+
+    By our IH we have $\J{\GD}{\GG,y\of M}{\sub{e/x} e'}{M}$. Thus: \[
+    \infer[\ms{fix}]{\J{\GD}{\GG}{\fix{y} \sub{e/x} e'}{M}}{
+      \J{\GD}{\GG,y\of M}{\sub{e/x} e'}{M}
+    }\]
+
   \end{description}
 \end{quote}
 
