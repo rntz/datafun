@@ -90,7 +90,7 @@ class of lattice types.
 
 ## Admissibility of {\ms{exchange},\ms{weaken},\ms{forget}}
 
-TODO
+\textcolor{red}{TODO}
 
 ## Syntactic substitution
 
@@ -123,6 +123,9 @@ $$
   \sub{e/x}(\fix{y} e') &=& \fix{y} \sub{e/x} e'
 \end{array}
 $$
+
+\textbf{Lemma, useless substitution:} If $\J{\GD}{\GG}{e}{A}$ and $x \not\in
+\GD\cup\GG$, then $\sub{e'/x}e = e$. \textbf{Proof:} \textcolor{red}{Omitted}.
 
 <!-- TODO: theorem numbering. what package provides \begin{theorem} again? -->
 
@@ -242,8 +245,8 @@ case that $\J{\GD}{\cdot}{e}{A}$:
       \J{\GD}{\GG,y\of M}{\sub{e/x} e'}{M}
     }\]
 
-  \item[Omitted cases:] $(,\!)$, $\pi_i$, $\ms{in}_i$, $\emptyset$, and
-    ${\vee}$ are trivial.
+  \item[{\color{red} Omitted cases:}] $(,\!)$, $\pi_i$, $\ms{in}_i$,
+    $\emptyset$, and ${\vee}$ are trivial.
 
   \end{description}
 \end{quote}
@@ -280,14 +283,84 @@ $\J{\GD}{\GG}{e}{M}$ in each case:
       \J{\GD,y\of A}{\GG}{\sub{e/x} e'}{N}}
     \]
 
-  \item[Case $\monofn$]: Given
-  \item[Case $\ms{app}$:] Given
-  \item[Case $\widehat{\ms{app}}$:] Given
+  \item[Case $\monofn$]: Given \[
+    \infer{\J{\GD}{\GG,x \of M}{\monofn\bind{y} e'}{N \mono O}}{
+      \J{\GD}{\GG,x \of M, y \of N}{e'}{O}}
+    \]
+
+    By our IH, exchange, and weakening, we have $\J{\GD}{\GG,y\of N}{\sub{e/x}
+      e'}{O}$. Thus:
+    \[
+    \infer{\J{\GD}{\GG}{\monofn\bind{y} \sub{e/x} e'}{N \mono O}}{
+      \J{\GD}{\GG,y\of N}{\sub{e/x} e'}{O}}
+    \]
+
+  \item[Case $\ms{app}$:] Given \[
+    \infer{\J{\GD}{\GG,x \of M}{e_1\;e_2}{N}}{
+      \J{\GD}{\GG,x\of M}{e_1}{A \to N} &
+      \J{\GD}{\cdot}{e_2}{A}}
+    \]
+
+    By our IH we have $\J{\GD}{\GG}{\sub{e/x} e_1}{A \to N}$. Since $x$ does not
+    occur free in $e_2$, $\sub{e/x} e_2 = e_2$. Thus, this suffices:
+    \[
+    \infer{\J{\GD}{\GG}{(\sub{e/x} e_1)\;e_2}{N}}{
+      \J{\GD}{\GG}{\sub{e/x} e_1}{A \to N} &
+      \J{\GD}{\cdot}{e_2}{A}}
+    \]
+
+  \item[Case $\widehat{\ms{app}}$:] Given \[
+    \infer{\J{\GD}{\GG,x \of M}{e_1\;e_2}{O}}{
+      \J{\GD}{\GG,x \of M}{e_1}{N \mono O} &
+      \J{\GD}{\GG,x \of M}{e_2}{N}}
+    \]
+
+    By our IHs, we have $\J{\GD}{\GG}{\sub{e/x}e_1}{N \mono O}$ and
+    $\J{\GD}{\GG}{\sub{e/x}e_2}{N}$. Thus:
+    \[
+    \infer{\J{\GD}{\GG}{(\sub{e/x} e_1)\;(\sub{e/x} e_2)}{O}}{
+      \J{\GD}{\GG}{\sub{e/x} e_1}{N \mono O} &
+      \J{\GD}{\GG}{\sub{e/x} e_2}{N}}
+    \]
+
   \item[Case \ms{case}:] {\color{red} TODO}
-  \item[Case $\{\}$:] Given 
-  \item[Case $\ms{let}_{\in}$:] Given 
-  \item[Case $\ms{fix}$:] Given 
-  \item[Omitted cases:] $(,\!)$, $\pi_i$, $\ms{in}_i$, $\emptyset$, and ${\vee}$
-    are trivial.
+  \item[Case $\{\}$:] Given \[
+    \infer{\J{\GD}{\GG,x\of M}{\{e'\}}{\FS\;A}}{
+      \J{\GD}{\cdot}{e'}{A}}
+    \]
+
+    Since $x$ does not occur free in $e'$, $\sub{e/x} e' = e'$. Thus, this
+    suffices:
+    \[
+    \infer{\J{\GD}{\GG}{\{e'\}}{\FS\;A}}{\J{\GD}{\cdot}{e'}{A}}
+    \]
+
+  \item[Case $\ms{let}_{\in}$:] Given \[
+    \infer{\J{\GD}{\GG,x\of M}{\letin{y}{e_1}{e_2}}{N}}{
+      \J{\GD}{\GG,x\of M}{e_1}{\FS\;A} &
+      \J{\GD,y\of A}{\GG,x\of M}{e_2}{N}}
+    \]
+
+    By our IHs and weakening, we have $\J{\GD}{\GG}{\sub{e/x} e_1}{\FS\;A}$
+    and $\J{\GD,y\of A}{\GG}{\sub{e/x} e_2}{N}$. Thus:
+    \[
+    \infer{\J{\GD}{\GG}{\letin{y}{\sub{e/x}e_1}{\sub{e/x}e_2}}{N}}{
+      \J{\GD}{\GG}{\sub{e/x} e_1}{\FS\;A} &
+      \J{\GD,y\of A}{\GG}{\sub{e/x} e_2}{N}}
+    \]
+
+  \item[Case $\ms{fix}$:] Given \[
+    \infer{\J{\GD}{\GG,x\of M}{\fix{y} e'}{N}}{
+      \J{\GD}{\GG,x\of M,y\of N}{e'}{N}}
+    \]
+
+    By our IH and weakening, we have $\J{\GD}{\GG,y \of N}{\sub{e/x} e'}{N}$.
+    Thus: \[
+    \infer{\J{\GD}{\GG}{\fix{y} \sub{e/x} e'}{N}}{
+      \J{\GD}{\GG,y\of N}{\sub{e/x} e'}{N}}
+    \]
+
+  \item[{\color{red} Omitted cases:}] $(,\!)$, $\pi_i$, $\ms{in}_i$,
+    $\emptyset$, and ${\vee}$ are trivial.
   \end{description}
 \end{quote}
