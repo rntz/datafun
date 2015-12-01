@@ -206,7 +206,32 @@ case that $\J{\GD}{\cdot}{e}{A}$:
         \J{\GD}{\GG}{\sub{e/x} e_2}{M}}
     \]
 
-  \item[Case \ms{case}:] {\color{red} TODO}
+  \item[Case \ms{case}:] Given \[
+    \infer{
+      \J{\GD,x\of A}{\GG}{\case{e'}{y}{e_1}{z}{e_2}}{D}
+    }{
+      \J{\GD,x\of A}{\cdot}{e'}{B + C} &
+      \J{\GD,x\of A,y\of B}{\GG}{e_1}{D} &
+      \J{\GD,x\of A,z\of C}{\GG}{e_2}{D}
+    }
+    \]
+
+    By our IHs, exchange, and weakening, we have:
+    \begin{itemize}
+    \item $\J{\GD}{\cdot}{\sub{e/x} e'}{B + C}$,
+    \item $\J{\GD,y\of B}{\GG}{\sub{e/x}e_1}{D}$, and
+    \item $\J{\GD,z \of C}{\GG}{\sub{e/x} e_2}{D}$.
+    \end{itemize}
+    Thus:
+    \[
+    \infer{
+      \J{\GD}{\GG}{\case{\sub{e/x}e'}{y}{\sub{e/x}e_1}{z}{\sub{e/x}e_2}}{D}
+    }{
+      \J{\GD}{\cdot}{\sub{e/x}e'}{B + C} &
+      \J{\GD,y\of B}{\GG}{\sub{e/x}e_1}{D} &
+      \J{\GD,z\of C}{\GG}{\sub{e/x}e_2}{D}
+    }
+    \]
 
   \item[Case $\{\}$:] Given \[
     \infer[\{\}]{\J{\GD,x\of A}{\GG}{\{e'\}}{\FS\;B}}{
@@ -323,7 +348,23 @@ $\J{\GD}{\GG}{e}{M}$ in each case:
       \J{\GD}{\GG}{\sub{e/x} e_2}{N}}
     \]
 
-  \item[Case \ms{case}:] {\color{red} TODO}
+  \item[Case \ms{case}:] Given \[
+    \infer{\J{\GD}{\GG,x\of M}{\case{e'}{y}{e_1}{z}{e_2}}{N}}{
+      \J{\GD}{\cdot}{e'}{A + B} &
+      \J{\GD,y \of A}{\GG,x\of M}{e_1}{N} &
+      \J{\GD,z \of B}{\GG,x\of M}{e_2}{N}}
+    \]
+
+    Since $x$ does not occur free in $e'$, $\sub{e/x}e' = e'$. By our IHs and
+    weakening, we have $\J{\GD,y\of A}{\GG}{\sub{e/x} e_1}{N}$ and $\J{\GD,z\of
+      B}{\GG}{\sub{e/x}e_2}{N}$. Thus, this suffices:
+    \[
+    \infer{\J{\GD}{\GG}{\case{e'}{y}{\sub{e/x}e_1}{z}{\sub{e/x}e_2}}{N}}{
+      \J{\GD}{\cdot}{e'}{A+B} &
+      \J{\GD,y\of A}{\GG}{\sub{e/x} e_1}{N} &
+      \J{\GD,z\of B}{\GG}{\sub{e/x} e_2}{N}}
+    \]
+
   \item[Case $\{\}$:] Given \[
     \infer{\J{\GD}{\GG,x\of M}{\{e'\}}{\FS\;A}}{
       \J{\GD}{\cdot}{e'}{A}}
