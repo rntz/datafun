@@ -97,6 +97,11 @@ TODO
 Note that whenever two variables are given distinct names $x, y$ it is assumed
 $x \ne y$ unless mentioned otherwise.
 
+We could choose to define two substitution operators, one for unrestricted
+substitution and the other for monotone substitution, but they coincide on
+properly-typed arguments (see substitution theorems below for what I mean by
+properly-typed arguments), so we don't bother.
+
 We define substitution $\sub{e_1/x} e_2$, by induction on $e_2$:
 
 $$
@@ -122,11 +127,11 @@ $$
 <!-- TODO: theorem numbering. what package provides \begin{theorem} again? -->
 
 \textbf{Theorem 1.1, substitution for unrestricted variables:} If
-$\J{\GD}{\GG}{e}{A}$ and $\J{\GD,x\of A}{\GG}{e'}{B}$ then
+$\J{\GD}{\cdot}{e}{A}$ and $\J{\GD,x\of A}{\GG}{e'}{B}$ then
 $\J{\GD}{\GG}{\sub{e/x}{e'}}{B}$.
 
-\textbf{Proof:} Proceed by induction on $\J{\GD,x\of A}{\GG}{e'}{B}$, assuming
-in each case that $\J{\GD}{\GG}{e}{A}$:
+\textbf{Proof:} By induction on $\J{\GD,x\of A}{\GG}{e'}{B}$, assuming in each
+case that $\J{\GD}{\cdot}{e}{A}$:
 
 \begin{quote}
   \begin{description}
@@ -144,15 +149,16 @@ in each case that $\J{\GD}{\GG}{e}{A}$:
     \infer[\ms{hyp}]{\J{\GD,x\of A}{\GG}{x}{A}}{
       x\of A \in (\GD,x\of A)\cup\GG}\]
 
-    By assumption we have $\J{\GD,x\of A}{\GG}{e}{A}$, which suffices.
+    By weakening our assumption we have $\J{\GD}{\GG}{e}{A}$, which suffices.
 
   \item[Case $\fn$]: Given \[
     \infer[\fn]{\J{\GD,x\of A}{\GG}{\fn\bind{y} e'}{B \to C}}{
       \J{\GD,x\of A,y\of B}{\GG}{e'}{C}}
     \]
 
-    By our IH (and exchange), we have $\J{\GD,y : B}{\GG}{\sub{e/x}e'}{C}$.
-    Thus: \[
+    By our IH, exchange, and weakening, we have $\J{\GD,y :
+      B}{\GG}{\sub{e/x}e'}{C}$. Thus:
+    \[
     \infer{\J{\GD}{\GG}{\fn\bind{y} \sub{e/x} e'}{B \to C}}{
       \J{\GD,y : B}{\GG}{\sub{e/x}e'}{C}}
     \]
@@ -162,13 +168,14 @@ in each case that $\J{\GD}{\GG}{e}{A}$:
       \J{\GD,x\of A}{\GG,y \of M}{e'}{N}}
     \]
 
-    By our IH, we have $\J{\GD}{\GG,y \of M}{\sub{e/x}e'}{N}$. Thus: \[
+    By our IH, we have $\J{\GD}{\GG,y \of M}{\sub{e/x}e'}{N}$. Thus:
+    \[
     \infer[\monofn]{\J{\GD}{\GG}{\monofn\bind{y} \sub{e/x}e'}{M \mono N}}{
       \J{\GD}{\GG,y\of M}{\sub{e/x} e'}{N}
       }
     \]
 
-  \item[Case $\ms{app}$:] Given: \[
+  \item[Case $\ms{app}$:] Given \[
     \infer[\ms{app}]{\J{\GD,x\of A}{\GG}{e_1\;e_2}{C}}{
       \J{\GD,x\of A}{\GG}{e_1}{B \to C} &
       \J{\GD,x\of A}{\cdot}{e_2}{B}}
@@ -196,12 +203,8 @@ in each case that $\J{\GD}{\GG}{e}{A}$:
         \J{\GD}{\GG}{\sub{e/x} e_2}{M}}
     \]
 
-  \item[Case $(,\!)$:] boring, TODO
-  \item[Case $\pi_i$:] boring, TODO
-  \item[Case $\ms{in}_i$:] boring, TODO
-  \item[Case \ms{case}:] TODO
-  \item[Case $\emptyset$:] boring, TODO
-  \item[Case ${\vee}$:] boring, TODO
+  \item[Case \ms{case}:] {\color{red} TODO}
+
   \item[Case $\{\}$:] Given \[
     \infer[\{\}]{\J{\GD,x\of A}{\GG}{\{e'\}}{\FS\;B}}{
       \J{\GD,x\of A}{\cdot}{e'}{B}}
@@ -217,8 +220,10 @@ in each case that $\J{\GD}{\GG}{e}{A}$:
       \J{\GD,x\of A}{\GG}{e_1}{\FS\;B} &
       \J{\GD,x\of A,y\of B}{\GG}{e_2}{M}}\]
 
-    By our IHs (and exchange), we have $\J{\GD}{\GG}{\sub{e/x}e_1}{\FS\;B}$
-    and $\J{\GD,y\of B}{\GG}{\sub{e/x} e_2}{M}$. Thus: \[
+    By our IHs, exchange, and weakening, we have
+    $\J{\GD}{\GG}{\sub{e/x}e_1}{\FS\;B}$ and $\J{\GD,y\of B}{\GG}{\sub{e/x}
+      e_2}{M}$. Thus:
+    \[
     \infer[\ms{let}_{\in}]{
       \J{\GD}{\GG}{\letin{y}{\sub{e/x}e_1}{\sub{e/x}e_2}}{M}
     }{
@@ -237,9 +242,52 @@ in each case that $\J{\GD}{\GG}{e}{A}$:
       \J{\GD}{\GG,y\of M}{\sub{e/x} e'}{M}
     }\]
 
+  \item[Omitted cases:] $(,\!)$, $\pi_i$, $\ms{in}_i$, $\emptyset$, and
+    ${\vee}$ are trivial.
+
   \end{description}
 \end{quote}
 
 \textbf{Theorem 1.2, substitution for monotone variables:} If
 $\J{\GD}{\GG}{e}{M}$ and $\J{\GD}{\GG,x \of M}{e'}{N}$ then
 $\J{\GD}{\GG}{\sub{e/x}{e'}}{N}$.
+
+\textbf{Proof:} By induction on $\J{\GD}{\GG,x \of M}{e'}{N}$, assuming
+$\J{\GD}{\GG}{e}{M}$ in each case:
+
+\begin{quote}
+  \begin{description}
+  \item[Case \ms{hyp}, $x \ne y$:] Given \[
+    \infer{\J{\GD}{\GG,x\of M}{y}{N}}{y\of N \in \GD\cup(\GG,x\of M)}
+    \]
+
+    Since $x \ne y$, evidently $y\of N \in \GD \cup \GG$. Thus:\[
+    \infer{\J{\GD}{\GG}{y}{N}}{y\of N \in \GD\cup\GG}
+    \]
+
+  \item[Case \ms{hyp}, $x = y$:] Given \[
+    \infer{\J{\GD}{\GG,x\of M}{x}{M}}{x\of M \in \GD\cup\GG}
+    \]
+
+    By assumption, $\J{\GD}{\GG}{e}{M}$, which suffices.
+
+  \item[Case $\fn$]: Given \[
+    \infer{\J{\GD}{\GG,x\of M}{\fn\bind{y}{e'}}{A \to N}}{
+      \J{\GD,y\of A}{\GG,x\of M}{e'}{N}}\]
+
+    By our IH and weakening, $\J{\GD,y:A}{\GG}{\sub{e/x} e'}{N}$. Thus: \[
+    \infer{\J{\GD}{\GG}{\fn\bind{y} \sub{e/x} e'}{A \to N}}{
+      \J{\GD,y\of A}{\GG}{\sub{e/x} e'}{N}}
+    \]
+
+  \item[Case $\monofn$]: Given
+  \item[Case $\ms{app}$:] Given
+  \item[Case $\widehat{\ms{app}}$:] Given
+  \item[Case \ms{case}:] {\color{red} TODO}
+  \item[Case $\{\}$:] Given 
+  \item[Case $\ms{let}_{\in}$:] Given 
+  \item[Case $\ms{fix}$:] Given 
+  \item[Omitted cases:] $(,\!)$, $\pi_i$, $\ms{in}_i$, $\emptyset$, and ${\vee}$
+    are trivial.
+  \end{description}
+\end{quote}
