@@ -87,6 +87,7 @@ lattice type; it needs to be be restricted to some computationally tractable
 class of lattice types.
 
 # Proofs
+
 
 ## Admissibility of {\ms{exchange},\ms{weaken},\ms{forget}}
 
@@ -129,6 +130,7 @@ $$
 
 <!-- TODO: theorem numbering. what package provides \begin{theorem} again? -->
 
+
 \textbf{Theorem 1.1, substitution for unrestricted variables:} If
 $\J{\GD}{\cdot}{e}{A}$ and $\J{\GD,x\of A}{\GG}{e'}{B}$ then
 $\J{\GD}{\GG}{\sub{e/x}{e'}}{B}$.
@@ -276,6 +278,7 @@ case that $\J{\GD}{\cdot}{e}{A}$:
   \end{description}
 \end{quote}
 
+
 \textbf{Theorem 1.2, substitution for monotone variables:} If
 $\J{\GD}{\GG}{e}{M}$ and $\J{\GD}{\GG,x \of M}{e'}{N}$ then
 $\J{\GD}{\GG}{\sub{e/x}{e'}}{N}$.
