@@ -116,7 +116,7 @@ We write $\varepsilon$, $\vee$, and $\le$ for the unit, join, and partial-order
 of an unspecified usl, or subscript them to specify a particular usl.
 
 We consider only usls in which $\varepsilon$ and $\vee$ are computable. However,
-equality $=$ and ordering $\le$ may not always be decidable.
+equality $=$ and thus ordering $\le$ may not always be decidable.
 
 Let \ms{Set} be the category of sets and functions and \ms{USL} be the category
 of usls and monotone functions.
@@ -183,13 +183,31 @@ $$\begin{array}{lcl}
 We define a semantics on type derivations $J$ with the following signature:
 $$\begin{array}{lcl}
   \den{\J{\GD}{\GG}{e}{M}} &\in& \den{\GD} \to \den{\GG}_L \mono \den{M}_L\\
-  \den{\J{\GD}{\cdot}{e}{A}} &\in& \den{\GD} \to 1 \to \den{A}\\
+  \den{\J{\GD}{\cdot}{e}{A}} &\in& \den{\GD} \to \one \to \den{A}\\
 \end{array}$$
 
 The above signatures overlap in the case of type derivations of the form
 $\J{\GD}{\cdot}{e}{M}$. However, this is not a problem, since $(\den{\cdot}_L
 \mono \den{M}_L) = (\one_L \mono \den{M}_L) = (\one \to \den{M})$ as all
 functions out of \one{} are monotone.
+
+\newcommand{\fux}[2]{\Den{\vcenter{\infer{#1}{#2}}}}
+\newcommand{\dg}{\;\delta\;\gamma}
+
+$$
+\begin{array}{ccll}
+  \textbf{Derivation} && \textbf{Denotes} & \textbf{Monotone in $\gamma$?}
+  \vspace{.4em}\\
+  \fux{\J{x_1\of A_1, ..., x_n\of A_N}{\GG}{x_i}{A_i}}{\phantom{.}}\dg
+  &=& \pi_i\;\delta & \checkmark\ \text{constant in $\gamma$}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{x_1\of M_1, ..., x_n\of M_n}{x_i}{M_i}}{\phantom{.}}\dg
+  &=& \pi_i\;\gamma & \checkmark\ \pi_i\text{ is monotone}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\emptyset}{M}}{\phantom{.}}\dg
+  &=& \varepsilon_{\den{M}_L} & \checkmark\ \text{constant in $\gamma$}
+\end{array}
+$$
 
 
 
