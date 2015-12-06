@@ -21,7 +21,7 @@
 
 (define/match (type-lub a b)
   [((t-tuple as) (t-tuple bs)) (t-tuple (type-lubs as bs))]
-  [((t-sum as) (t-sum bs)) (t-sum (hash-intersection-with as bs type-lub))]
+  [((t-sum as) (t-sum bs)) (t-sum (hash-union-with as bs type-lub))]
   [((t-mono a x) (t-mono b y))
     (t-mono (type-glb a b) (type-lub x y))]
   [((or (t-mono a x) (t-fun a x)) (or (t-mono b y) (t-fun b y)))
@@ -32,7 +32,7 @@
 
 (define/match (type-glb a b)
   [((t-tuple as) (t-tuple bs)) (t-tuple (type-glbs as bs))]
-  [((t-sum as) (t-sum bs)) (t-sum (hash-union-with as bs type-glb))]
+  [((t-sum as) (t-sum bs)) (t-sum (hash-intersection-with as bs type-glb))]
   [((t-fun a x) (t-fun b y))
     (t-fun (type-lub a b) (type-glb x y))]
   [((or (t-mono a x) (t-fun a x)) (or (t-mono b y) (t-fun b y)))
