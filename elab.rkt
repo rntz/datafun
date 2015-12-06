@@ -123,7 +123,7 @@
       (values (Σ (name subj-t)) (e-tag name subj-e))]
 
     [(e-singleton subj)
-      (define-values (subj-t subj-e) (elab-infer Γ subj))
+      (define-values (subj-t subj-e) (elab-infer (env-hide-mono Γ) subj))
       (values (FS subj-t) (e-singleton subj-e))]
 
     [(e-case subj branches)
