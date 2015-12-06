@@ -106,7 +106,7 @@ be, not *monotone* relative to our current Γ, but *constant*.
     -----------    -----------------
     Δ;Γ ⊢ ∅ : L    Δ;Γ ⊢ e₁ ∨ e₂ : L
 
-      Δ;Γ ⊢ e : A       Δ;Γ ⊢ e₁ : FS A   Δ,x:A; Γ ⊢ e₂ : L
+      Δ;· ⊢ e : A       Δ;Γ ⊢ e₁ : FS A   Δ,x:A; Γ ⊢ e₂ : L
     ----------------    -----------------------------------
     Δ;Γ ⊢ {e} : FS A        Δ;Γ ⊢ let x ∈ e₁ in e₂ : L
 
