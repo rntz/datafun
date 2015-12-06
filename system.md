@@ -195,17 +195,33 @@ functions out of \one{} are monotone.
 \newcommand{\dg}{\;\delta\;\gamma}
 
 $$
-\begin{array}{ccll}
-  \textbf{Derivation} && \textbf{Denotes} & \textbf{Monotone in $\gamma$?}
+\begin{array}{rcll}
+  \textbf{Derivation} && \textbf{Denotes}
+  & \textbf{Monotone in }\gamma
   \vspace{.4em}\\
   \fux{\J{x_1\of A_1, ..., x_n\of A_N}{\GG}{x_i}{A_i}}{\phantom{.}}\dg
-  &=& \pi_i\;\delta & \checkmark\ \text{constant in $\gamma$}
+  &=& \pi_i\;\delta & \text{constant in }\gamma
   \vspace{.8em}\\
   \fux{\J{\GD}{x_1\of M_1, ..., x_n\of M_n}{x_i}{M_i}}{\phantom{.}}\dg
-  &=& \pi_i\;\gamma & \checkmark\ \pi_i\text{ is monotone}
+  &=& \pi_i\;\gamma & \pi_i\text{ is monotone}
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{\emptyset}{M}}{\phantom{.}}\dg
-  &=& \varepsilon_{\den{M}_L} & \checkmark\ \text{constant in $\gamma$}
+  &=& \varepsilon_{\den{M}_L} & \text{constant in }\gamma
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{e_1 \vee e_2}{M}}{
+    \J{\GD}{\GG}{e_1}{M} &
+    \J{\GD}{\GG}{e_2}{M}}\dg
+  &=& \den{e_1} \vee_{\den{M}_L} \den{e_2}
+  & \text{$\vee$ monotone, IHs}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\{e\}}{\FS\;A}}{\J{\GD}{\cdot}{e}{A}}\dg
+  &=& \{\den{e}\;\delta\;\tuple{}\} & \text{constant in }\gamma
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{M}}{
+    \J{\GD}{\GG}{e_1}{\FS\;A} &
+    \J{\GD,x\of A}{\GG}{e_2}{M}}\dg
+  &=& \bigvee_{x \in \den{e_1}\dg}\ \den{e_2}\;\tuple{\delta,x}\;\gamma
+  & \text{(see below)}
 \end{array}
 $$
 
