@@ -39,8 +39,22 @@ $$
   \J{\GD_1,\GD_2}{\GG_1,\GG_2}{e}{A}}{\J{\GD_2,\GD_1}{\GG_2,\GG_1}{e}{A}}
 \quad
 \infer[\ms{weaken}]{\J{\GD,\GD'}{\GG,\GG'}{e}{A}}{\J{\GD}{\GG}{e}{A}}
-\quad
+$$
+
+As originally formulated, there was an additional structural rule, \ms{forget}:
+$$
 \infer[\ms{forget}]{\J{\GD,x\of M}{\GG}{e}{N}}{\J{\GD}{\GG,x\of M}{e}{N}}
+$$
+
+However, \ms{forget} is not used in any proofs, and is moreover derivable from
+weakening and the rules for monotone functions (with a bit of term elaboration):
+$$
+\infer[\widehat{\ms{app}}]{\J{\GD,x\of M}{\GG}{(\monofn\bind{x} e)\; x}{N}}{
+  \infer[\ms{weaken}]{\J{\GD,x\of M}{\GG}{\monofn\bind{x}e}{M \mono N}}{
+    \infer[\monofn]{\J{\GD}{\GG}{\monofn\bind{x}e}{M \mono N}}{
+      \J{\GD}{\GG,x\of M}{e}{N}}} &
+  \infer[\ms{hyp}]{\J{\GD,x\of M}{\GG}{x}{M}}{}
+  }
 $$
 
 ### Other rules
