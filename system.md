@@ -90,28 +90,34 @@ class of lattice types.
 
 # Denotational semantics
 
-A unital semilattice (usl) is a triple $\tuple{A, \varepsilon, \vee}$ of a set
-$A$, a unit $\varepsilon \in A$, and a join operator ${\vee} \in A \x A \to A$
-obeying the usual laws. We write $\varepsilon$ and $\vee$ for the unit and join
-operator of an unspecified usl, or subscript them to specify a particular usl.
-Likewise, we write $\le$ for the ordering on an unspecified usl, or subscript it
-to specify a particular usl.
+A unital semilattice (usl) is a triple $\triple{A}{\varepsilon}{\vee}$ of a set
+$A$, a unit (least element) $\varepsilon : A$, and a join (least upper bound)
+operator ${\vee} : A \x A \to A$ obeying associativity, commutativity,
+idempotence, and identity. Every usl has an associated poset, defined by $(a \le
+b) \iff (a \vee b = b)$. Usls may be seen as posets in which every finite set of
+elements has a least upper bound; conversely, finite sets (ordered by inclusion)
+are the free usl.
+
+We write $\varepsilon$, $\vee$, and $\le$ for the unit, join, and partial-order
+of an unspecified usl, or subscript them to specify a particular usl.
+
+We consider only usls in which $\varepsilon$ and $\vee$ are computable. However,
+equality $=$ and ordering $\le$ may not always be decidable.
 
 Let \ms{Set} be the category of sets and functions and \ms{USL} be the category
 of usls and monotone functions.
 
-For sets $A,B$ and unital semilattices $M$, $N$ we use the following notation:
+Given sets $A,B$ and usls $M$, $N$ we use the following notation:
 \begin{center}\begin{tabular}{cl}
     \one & one-element set, $\{\tuple{}\}$\\
     $M \mono N$ & set of monotone functions from $M$ to $N$\\
     $\FS\;A$ & set of finite subsets of $A$\\
     $|M|$ & underlying set of $M$\\
-    $\one_L$ & one-element unital semilattice\\
-    $M \x_L N$ & pointwise unital semilattice on pairs of $M$s and $N$s\\
-    $A \to_L M$ & pointwise unital semilattice of functions from $A$ to $M$\\
-    $M \mono_L N$ & pointwise unital semilattice of monotone functions from
-    $M$ to $N$\\
-    $\FS_L\;A$ & unital semilattice of finite subsets of $A$ under union\\
+    $\one_L$ & trivial one-element usl\\
+    $M \x_L N$ & pointwise usl on pairs of $M$s and $N$s\\
+    $A \to_L M$ & pointwise usl of functions from $A$ to $M$\\
+    $M \mono_L N$ & pointwise usl of monotone functions from $M$ to $N$\\
+    $\FS_L\;A$ & usl of finite subsets of $A$ under inclusion\\
 \end{tabular}\end{center}
 
 ## Semantics of types and contexts
@@ -168,8 +174,8 @@ $$\begin{array}{lcl}
 
 The above signatures overlap in the case of type derivations of the form
 $\J{\GD}{\cdot}{e}{M}$. However, this is not a problem, since $(\den{\cdot}_L
-\mono \den{M}_L) = (\one \to \den{M})$ as all functions out of \one{} are
-monotone.
+\mono \den{M}_L) = (\one_L \mono \den{M}_L) = (\one \to \den{M})$ as all
+functions out of \one{} are monotone.
 
 
 
