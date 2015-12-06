@@ -13,7 +13,15 @@
 \newcommand{\GG}{\Gamma}
 \newcommand{\of}{\,{:}\,}
 \newcommand{\fix}[1]{\ms{fix}\,{\bind{#1}}}
-\newcommand{\sub}[1]{[#1]\,}    %substitution
+\newcommand{\sub}[1]{[#1]\,}                   % substitution
+\newcommand{\den}[1]{\ensuremath{\llbracket{#1}\rrbracket}} % denotation
+% denotation for vertically large things
+\newcommand{\Den}[1]{\left\llbracket{#1}\right\rrbracket}
+\newcommand{\tuple}[1]{\langle{#1}\rangle}
+\newcommand{\pair}[2]{\tuple{#1,\,#2}}
+\newcommand{\triple}[3]{\tuple{#1,\,#2,\,#3}}
+\newcommand{\omitted}[1]{{\color{red}#1}}
+\newcommand{\one}{\ensuremath{\mathbf{1}}}
 
 \newcommand{\case}[5]{%
 \ms{case}~{#1}~\ms{of}~\ms{in}_1\,{#2}\to{#3};\,\ms{in}_2\,{#4}\to{#5}}

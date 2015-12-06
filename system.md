@@ -86,8 +86,94 @@ The \ms{fix} rule is overly permissive in allowing fix-points to be taken at any
 lattice type; it needs to be be restricted to some computationally tractable
 class of lattice types.
 
-# Proofs
 
+
+# Denotational semantics
+
+A unital semilattice (usl) is a triple $\tuple{A, \varepsilon, \vee}$ of a set
+$A$, a unit $\varepsilon \in A$, and a join operator ${\vee} \in A \x A \to A$
+obeying the usual laws. We write $\varepsilon$ and $\vee$ for the unit and join
+operator of an unspecified usl, or subscript them to specify a particular usl.
+Likewise, we write $\le$ for the ordering on an unspecified usl, or subscript it
+to specify a particular usl.
+
+Let \ms{Set} be the category of sets and functions and \ms{USL} be the category
+of usls and monotone functions.
+
+For sets $A,B$ and unital semilattices $M$, $N$ we use the following notation:
+\begin{center}\begin{tabular}{cl}
+    \one & one-element set, $\{\tuple{}\}$\\
+    $M \mono N$ & set of monotone functions from $M$ to $N$\\
+    $\FS\;A$ & set of finite subsets of $A$\\
+    $|M|$ & underlying set of $M$\\
+    $\one_L$ & one-element unital semilattice\\
+    $M \x_L N$ & pointwise unital semilattice on pairs of $M$s and $N$s\\
+    $A \to_L M$ & pointwise unital semilattice of functions from $A$ to $M$\\
+    $M \mono_L N$ & pointwise unital semilattice of monotone functions from
+    $M$ to $N$\\
+    $\FS_L\;A$ & unital semilattice of finite subsets of $A$ under union\\
+\end{tabular}\end{center}
+
+## Semantics of types and contexts
+
+We define a semantics of types and contexts with the following signaturee:
+$$\begin{array}{ccc}
+  \den{A}, \den{\GD} &\in& \ms{Set}_0\\
+  \den{M}_L, \den{\GG}_L &\in& \ms{USL}_0\\
+  |\den{M}_L| &=& \den{M}
+\end{array}$$
+
+We define $\den{A}$ as follows:
+$$\begin{array}{lcl}
+  \den{\N} &=& \N\\
+  \den{A \to B} &=& \den{A} \to \den{B}\\
+  \den{A \x B} &=& \den{A} \x \den{B}\\
+  \den{A + B} &=& \den{A} \uplus \den{B}\\
+  %% \den{\FS\;A} &=& \{x ~|~ x \subseteq \den{A} \wedge x\text{ is finite}\}\\
+  \den{\FS\;A} &=& \FS\;\den{A}\\
+  \den{M \mono N} &=& \den{M}_L \mono \den{N}_L
+\end{array}$$
+
+We define $\den{M}_L$ as follows:
+$$\begin{array}{lcl}
+  \den{\N}_L &=& \triple{\N}{0}{\ms{max}}\\
+  \den{A \to M}_L &=& \den{A} \to_L \den{M}_L\\
+  %% &=& \triple{\den{A \to M}}{\fn\bind{x}\varepsilon}{%
+  %%   \fn\bind{\tuple{f,g}} \fn\bind{x} f(x) \vee g(x)}\\
+  \den{M \x N}_L &=& \den{A}_L \x_L \den{B}_L\\
+  %% \den{M \x N}_L &=& \triple{\den{A \x B}}{\tuple{\varepsilon,\varepsilon}}{%
+  %%   \fn\bind{\tuple{\tuple{a,x},\tuple{b,y}}} \pair{a \vee b}{x \vee y}}\\
+  %% \den{\FS\;A}_L &=& \triple{\den{\FS\;A}}{\emptyset}{\cup}\\
+  \den{\FS\;A}_L &=& \FS_L\;\den{A}\\
+  \den{M \mono N}_L &=& \den{M}_L \mono_L \den{N}_L\\
+  %% &=& \triple{\den{M}_L \mono \den{N}_L}{\fn\bind{x}\varepsilon}{%
+  %%   \fn\bind{\tuple{f,g}}\fn\bind{x} f(x) \vee g(x)}
+\end{array}$$
+
+We extend these to contexts $\den{\GD}$, $\den{\GG}_L$ as follows:
+$$\begin{array}{lcl}
+  \den{\cdot} &=& \one\\
+  \den{\GD,A} &=& \den{\GD} \x \den{A}\\
+  \den{\cdot}_L &=& \one_L\\
+  \den{\GG,M}_L &=& \den{\GG}_L \x_L \den{M}_L
+\end{array}$$
+
+## Semantics of type derivations
+
+We define a semantics on type derivations $J$ with the following signature:
+$$\begin{array}{lcl}
+  \den{\J{\GD}{\GG}{e}{M}} &\in& \den{\GD} \to \den{\GG}_L \mono \den{M}_L\\
+  \den{\J{\GD}{\cdot}{e}{A}} &\in& \den{\GD} \to 1 \to \den{A}\\
+\end{array}$$
+
+The above signatures overlap in the case of type derivations of the form
+$\J{\GD}{\cdot}{e}{M}$. However, this is not a problem, since $(\den{\cdot}_L
+\mono \den{M}_L) = (\one \to \den{M})$ as all functions out of \one{} are
+monotone.
+
+
+
+# Proofs
 
 ## Admissibility of {\ms{exchange},\ms{weaken},\ms{forget}}
 
@@ -126,7 +212,7 @@ $$
 $$
 
 \textbf{Lemma, useless substitution:} If $\J{\GD}{\GG}{e}{A}$ and $x \not\in
-\GD\cup\GG$, then $\sub{e'/x}e = e$. \textbf{Proof:} \textcolor{red}{Omitted}.
+\GD\cup\GG$, then $\sub{e'/x}e = e$. \textbf{Proof:} \omitted{Omitted}.
 
 <!-- TODO: theorem numbering. what package provides \begin{theorem} again? -->
 
@@ -272,7 +358,7 @@ case that $\J{\GD}{\cdot}{e}{A}$:
       \J{\GD}{\GG,y\of M}{\sub{e/x} e'}{M}
     }\]
 
-  \item[{\color{red} Omitted cases:}] $(,\!)$, $\pi_i$, $\ms{in}_i$,
+  \item[\omitted{Omitted cases:}] $(,\!)$, $\pi_i$, $\ms{in}_i$,
     $\emptyset$, and ${\vee}$ are trivial.
 
   \end{description}
@@ -404,7 +490,7 @@ $\J{\GD}{\GG}{e}{M}$ in each case:
       \J{\GD}{\GG,y\of N}{\sub{e/x} e'}{N}}
     \]
 
-  \item[{\color{red} Omitted cases:}] $(,\!)$, $\pi_i$, $\ms{in}_i$,
+  \item[\omitted{Omitted cases:}] $(,\!)$, $\pi_i$, $\ms{in}_i$,
     $\emptyset$, and ${\vee}$ are trivial.
   \end{description}
 \end{quote}
