@@ -123,7 +123,7 @@ of usls and monotone functions.
 
 Given sets $A,B$ and usls $M$, $N$ we use the following notation:
 \begin{center}\begin{tabular}{cl}
-    \one & one-element set, $\{\tuple{}\}$\\
+    \one & one-element set, $\{\triv\}$\\
     $M \mono N$ & set of monotone functions from $M$ to $N$\\
     $\FS\;A$ & set of finite subsets of $A$\\
     $|M|$ & underlying set of $M$\\
@@ -203,7 +203,7 @@ $$
   &=& \pi_i\;\delta & \text{constant in }\gamma
   \vspace{.8em}\\
   \fux{\J{\GD}{x_1\of M_1, ..., x_n\of M_n}{x_i}{M_i}}{\phantom{.}}\dg
-  &=& \pi_i\;\gamma & \pi_i\text{ is monotone}
+  &=& \pi_i\;\gamma & \pi_i\text{ monotone}
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{\emptyset}{M}}{\phantom{.}}\dg
   &=& \varepsilon_{\den{M}_L} & \text{constant in }\gamma
@@ -215,13 +215,36 @@ $$
   & \text{$\vee$ monotone, IHs}
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{\{e\}}{\FS\;A}}{\J{\GD}{\cdot}{e}{A}}\dg
-  &=& \{\den{e}\;\delta\;\tuple{}\} & \text{constant in }\gamma
+  &=& \{\den{e}\;\delta\;\triv\} & \text{constant in }\gamma
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{M}}{
     \J{\GD}{\GG}{e_1}{\FS\;A} &
     \J{\GD,x\of A}{\GG}{e_2}{M}}\dg
-  &=& \bigvee_{x \in \den{e_1}\dg}\ \den{e_2}\;\tuple{\delta,x}\;\gamma
+  &=& \displaystyle\bigvee_{x \,\in\, \den{e_1}\,\delta\,\gamma}
+  \den{e_2}\;\tuple{\delta,x}\;\gamma
   & \text{(see below)}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\fn\bind{x} e}{A \to B}}{
+    \J{\GD,x\of A}{\GG}{e}{B}}\dg
+  &=& x \mapsto \den{e}\;\tuple{\delta,x}\;\gamma
+  & \den{e}\text{ monotone}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{e_1\;e_2}{B}}{
+    \J{\GD}{\GG}{e_1}{A \to B} &
+    \J{\GD}{\cdot}{e_2}{A}} \dg
+  &=& \den{e_1}\dg\;(\den{e_2}\;\delta\;\triv)
+  & \text{(see below)}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\monofn\bind{x} e}{M \mono N}}{
+    \J{\GD}{\GG,x\of M}{e}{N}}\dg
+  &=& x \mapsto \den{e} \;\delta \;\tuple{\gamma,x}
+  & \den{e}\text{ monotone}\\
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{e_1\;e_2}{N}}{
+    \J{\GD}{\GG}{e_1}{M \mono N} &
+    \J{\GD}{\GG}{e_2}{N}} \dg
+  &=& \den{e_1}\dg\;(\den{e_2}\dg)
+  & \den{e_i}\text{ monotone}
 \end{array}
 $$
 
