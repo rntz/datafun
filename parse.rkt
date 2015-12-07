@@ -6,6 +6,11 @@
 ;; a simple s-expression syntax for the language.
 ;; contexts Γ are simple lists of identifiers.
 
+(define (reserved-form? x) (set-member? x reserved-forms))
+(define reserved-forms
+  (list->set '(: empty fn λ cons π proj record record-merge extend-record tag
+               quote case join single let fix)))
+
 ;; TODO: record expressions!
 (define (parse-expr e Γ)
   ;; (printf "(parse-expr ~v ~v)\n" e Γ)
@@ -46,7 +51,9 @@
     [`(let ,x ^= ,e in ,body)
       (e-let 'mono x (r e) (parse-expr body (cons x Γ)))]
     [`(,f ,as ...)
-      (foldl (flip e-app) (r f) (map r as))]
+     (if (reserved-form? f)
+         (error "invalid use of form:" e)
+         (foldl (flip e-app) (r f) (map r as)))]
     [_ (error "unfamiliar expression:" e)]))
 
 (define (parse-type t)
@@ -55,6 +62,9 @@
     ['nat (t-nat)]
     ['str (t-str)]
     [`(* ,as ...) (t-tuple (map parse-type as))]
+    [`(record (,ns ,ts) ...)
+     (t-record (for/hash ([n ns] [t ts])
+                 (values n (parse-type t))))]
     [`(+ (,tags ,types) ...)
       (t-sum (for/hash ([tag tags] [type types])
                (values tag (parse-type type))))]

@@ -109,7 +109,7 @@
      (define-values (subj-t subj-e) (elab-infer Γ subj))
      (values
       (match* (i subj-t)
-        [((? number?) (t-tuples a)) #:when (< i (length a)) (list-ref a i)]
+        [((? number?) (t-tuple a))  #:when (< i (length a)) (list-ref a i)]
         [((? symbol?) (t-record a)) #:when (hash-has-key? a i) (hash-ref a i)]
         [(_ _) (type-error "invalid projection: ~v" subj-e)])
       (e-proj i subj-e))]
@@ -128,7 +128,7 @@
      (define (f e) (call-with-values (lambda () (elab-infer Γ e)) cons))
      (define h (hash-map-values f fields))
      (values (t-record (hash-map-values car h))
-             (e-record base-expr (hash-map-values cdr h)))]
+             (e-record (hash-map-values cdr h)))]
 
     [(e-record-merge l r)
      (define-values (l-fields l-expr) (elab-infer-record Γ l))
@@ -206,9 +206,8 @@
                 [_ (type-error "not a record type: ~v" t)]))
      (e-record
       (for/hash ([(n e) fields])
-        ;; TODO: technically we should allow fields that aren't in the type
-        ;; we're checking against. this seems unlikely to come up in practice.
-        (define (err) (type-error "field of unspecified type: ~a" n))
+        ;; TODO: technically this should be a warning.
+        (define (err) (type-error "unnecessary field: ~a" n))
         (values n (elab-check Γ (hash-ref field-types n err) e))))]
 
     [(e-tag name subj)
@@ -274,7 +273,7 @@
 
 ;; returns (values fields expr-or-#f)
 (define (elab-infer-record Γ e)
-  (define-values (tt ee) (elab-infer Γ base))
+  (define-values (tt ee) (elab-infer Γ e))
   (values (match tt [(t-record h) h] [_ (type-error "not a record: ~v" ee)])
           ee))
 
