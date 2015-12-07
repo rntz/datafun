@@ -6,7 +6,7 @@
 ;; a simple s-expression syntax for the language.
 ;; contexts Γ are simple lists of identifiers.
 
-(define (reserved-form? x) (set-member? x reserved-forms))
+(define (reserved-form? x) (set-member? reserved-forms x))
 (define reserved-forms
   (list->set '(: empty fn λ cons π proj record record-merge extend-record tag
                quote case join single let fix)))
