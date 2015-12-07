@@ -6,6 +6,7 @@
 ;; a simple s-expression syntax for the language.
 ;; contexts Γ are simple lists of identifiers.
 
+;; TODO: record expressions!
 (define (parse-expr e Γ)
   ;; (printf "(parse-expr ~v ~v)\n" e Γ)
   (define (r e) (parse-expr e Γ))

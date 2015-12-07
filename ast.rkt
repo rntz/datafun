@@ -9,6 +9,8 @@
 (enum type
   (t-bool) (t-nat) (t-str)
   (t-tuple types)
+  ;; fields is a hash from field names to types
+  (t-record fields)
   ;; branches is a hash from branch names to types
   (t-sum branches)
   (t-fun arg result)
@@ -26,6 +28,9 @@
   ;; or monotonic) of lambda / application we meant
   (e-lam var body) (e-app func arg)
   (e-tuple exprs) (e-proj index expr)
+  ;; fields is a hash from names to exprs
+  ;; base is either #f or an expression for the record we're extending/updating
+  (e-record base fields)
   (e-tag tag expr)
   ;; branches is a list of case-branch structs.
   (e-case subject branches)
@@ -38,6 +43,7 @@
 
 (struct case-branch (pat body) #:transparent)
 
+;; TODO: pats for records.
 (enum pat
   (p-wild)
   (p-var name)
@@ -82,6 +88,7 @@
     [(t-fs a) (type-wf? a)]
     [(t-tuple ts) (andmap type-wf? ts)]
     [(t-sum bs) ((hash/c symbol? type-wf? #:immutable #t) bs)]
+    [(t-record as) ((hash/c symbol? type-wf? #:immutable #t) as)]
     [_ #t]))
 
 (define (lattice-type? x)
@@ -89,13 +96,15 @@
     [(or (t-bool) (t-nat) (t-mono _ _) (t-fs _)) #t]
     [(or (t-str) (t-sum _)) #f]
     [(t-tuple ts) (andmap lattice-type? ts)]
+    [(t-record as) (andmap lattice-type? (hash-values as))]
     [(t-fun _ r) (lattice-type? r)]))
 
 (define (eqtype? x)
   (match x
     [(or (t-bool) (t-nat) (t-str)) #t]
-    [(or (t-tuple as) (t-sum (app hash-values as)))
-      (andmap eqtype? as)]
+    [(or (t-record (app hash-values as)) (t-sum (app hash-values as))
+         (t-tuple as))
+     (andmap eqtype? as)]
     [(or (t-fun _ _) (t-mono _ _)) #f]
     [(t-fs a) (eqtype? a)]))
 
@@ -103,14 +112,17 @@
   (match t
     [(t-bool) #t]
     [(t-fs a) (finite-type? a)]
-    [(or (t-tuple as) (t-sum (app hash-keys as))) (andmap finite-type? as)]
+    [(or (t-tuple as)
+         (t-record (app hash-values as)) (t-sum (app hash-values as)))
+     (andmap finite-type? as)]
     [(or (t-fun a b) (t-mono a b)) (andmap finite-type? (list a b))]
     [_ #f]))
 
 (define (fixpoint-type? t)
   (match t
     [(or (t-bool) (t-nat)) #t]
-    [(t-tuple as) (andmap fixpoint-type? as)]
+    [(or (t-tuple as) (t-record (app hash-values as)))
+     (andmap fixpoint-type? as)]
     [(t-fs a) (eqtype? a)]
     [_ ((andf finite-type? lattice-type?) t)]))
 

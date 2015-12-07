@@ -10,6 +10,9 @@
 ;; Type utilities.
 (define/match (subtype? a b)
   [((t-tuple as) (t-tuple bs)) (eqmap subtype? as bs)]
+  [((t-record as) (t-record bs))
+    (for/and ([(k v) bs])
+      (and (hash-has-key? as k) (subtype? (hash-ref as k) v)))]
   [((t-sum as) (t-sum bs))
     (for/and ([(k v) as])
       (and (hash-has-key? bs k) (subtype? v (hash-ref bs k))))]
@@ -21,6 +24,8 @@
 
 (define/match (type-lub a b)
   [((t-tuple as) (t-tuple bs)) (t-tuple (type-lubs as bs))]
+  [((t-record as) (t-record bs))
+    (t-record (hash-intersection-with as bs type-lub))]
   [((t-sum as) (t-sum bs)) (t-sum (hash-union-with as bs type-lub))]
   [((t-mono a x) (t-mono b y))
     (t-mono (type-glb a b) (type-lub x y))]
@@ -32,6 +37,7 @@
 
 (define/match (type-glb a b)
   [((t-tuple as) (t-tuple bs)) (t-tuple (type-glbs as bs))]
+  [((t-record as) (t-record bs)) (t-record (hash-union-with as bs type-glb))]
   [((t-sum as) (t-sum bs)) (t-sum (hash-intersection-with as bs type-glb))]
   [((t-fun a x) (t-fun b y))
     (t-fun (type-lub a b) (type-glb x y))]
@@ -118,6 +124,14 @@
         (for/lists (ts es) ([a as]) (elab-infer Γ a)))
       (values (t-tuple ts) (e-tuple es))]
 
+    [(e-record base fields)
+     (define-values (base-fields base-expr) (infer-record-base Γ base))
+     (define (f e) (call-with-values (lambda () (elab-infer Γ e)) cons))
+     (define h (hash-map-values f fields))
+     (values (t-record (hash-union-with base-fields (hash-map-values car h)
+                                        (lambda (x y) y)))
+             (e-record base-expr (hash-map-values cdr h)))]
+
     [(e-tag name subj)
       (define-values (subj-t subj-e) (elab-infer Γ subj))
       (values (Σ (name subj-t)) (e-tag name subj-e))]
@@ -184,6 +198,20 @@
           (e-tuple (map (curry elab-check Γ) es ts))]
         [_ (type-error "not a tuple type: ~v" t)])]
 
+    [(e-record base fields)
+     (define field-types (match t
+                           [(t-record fs) fs]
+                           [_ (type-error "not a record type: ~v" t)]))
+     (define-values (base-fields base-expr) (infer-record-base Γ base))
+     (for ([n (hash-keys field-types)])
+       (unless (hash-has-key? fields n)
+         (type-error "record lacks field ~a" n)))
+     (e-record base-expr
+               (for/hash ([(n e) fields])
+                 (if (hash-has-key? field-types n)
+                     (elab-check Γ (hash-ref field-types n) e)
+                     (let-values ([(ee _) (elab-infer Γ e)]) ee))))]
+
     [(e-tag name subj)
       (match t
         [(t-sum branches)
@@ -245,6 +273,17 @@
         (type-error "cannot take fixpoint at type: ~v" t))
       (e-fix var
         (elab-check (env-cons (h-mono t) Γ) body))]))
+
+;; returns (values fields expr-or-#f)
+(define (infer-record-base Γ base)
+  (if (not base)
+      (values (hash) #f)
+      (let-values ([(tt ee) (elab-infer Γ base)])
+        (values (match tt
+                     [(t-record h) h]
+                     [_ (type-error "extending non-record of type ~v"
+                                    tt)])
+                ee))))
 
 ;; checks a pattern against a type and returns the env that the pattern binds.
 (define (check-pat Γ t p)
