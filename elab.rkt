@@ -106,13 +106,13 @@
         [_ (type-error "applying non-function ~v, of type ~v" f ft)])]
 
     [(e-proj i subj)
-      (define-values (subj-t subj-e) (elab-infer Γ subj))
-      (match subj-t
-        [(t-tuple ts) #:when (< i (length ts))
-          (values (list-ref ts i) (e-proj i subj-e))]
-        [(t-tuple _) (type-error "projection index out of bounds")]
-        [_ (type-error "projecting from non-tuple ~v, which has type ~v"
-             subj-e subj-t)])]
+     (define-values (subj-t subj-e) (elab-infer Γ subj))
+     (values
+      (match* (i subj-t)
+        [((? number?) (t-tuples a)) #:when (< i (length a)) (list-ref a i)]
+        [((? symbol?) (t-record a)) #:when (hash-has-key? a i) (hash-ref a i)]
+        [(_ _) (type-error "invalid projection: ~v" subj-e)])
+      (e-proj i subj-e))]
 
     ;; TODO: synthesize let-in and join expressions when possible, even though
     ;; it's non-standard.

@@ -32,6 +32,7 @@
     ['(join) (e-empty)]
     [`(join . ,es) (foldr1 e-join (map r es))]
     [`(single ,e) (e-singleton (r e))]
+    ;; TODO: use declaration parsing here
     [`(let ,x <- ,e in ,body)
       (e-letin x (r e) (parse-expr body (cons x Γ)))]
     [`(fix ,x ,body)
