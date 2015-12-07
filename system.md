@@ -247,8 +247,36 @@ $$
     \J{\GD}{\GG}{e_2}{N}} \dg
   &=& \den{e_1}\dg\;(\den{e_2}\dg)
   & \den{e_i}\text{ monotone}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\cdot}{\ms{in}_i\;e}{A_1 + A_2}}{
+    \J{\GD}{\cdot}{e}{A_i}}\;\delta\;\triv
+  &=& \ms{in}_i\;(\den{e} \;\delta\;\triv)
+  & \text{(meaningless)}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\case{e}{x}{e_1}{x}{e_2}}{B}}{
+    \J{\GD}{\cdot}{e}{A_1 + A_2} &
+    \J{\GD,x\of A_i}{\GG}{e_i}{B}}
+  \dg
+  &=&
+  \begin{cases}
+    \den{e_1}\;\pair{\delta}{x}\;\gamma
+    &\text{if }\den{e_2}\;\delta\;\triv = \ms{in}_1\;x\\
+    \den{e_2}\;\pair{\delta}{x}\;\gamma
+    &\text{if }\den{e_2}\;\delta\;\triv = \ms{in}_2\;x\\
+  \end{cases}
+  & \den{e_i}\text{ monotone}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{(e_1, e_2)}{A_1 \x A_2}}{
+    \J{\GD}{\GG}{e_i}{A_i}}\dg
+  &=& \pair{e_1\dg}{e_2\dg} & \den{e_i}\text{ monotone}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\pi_i\;e}{A_i}}{
+    \J{\GD}{\GG}{e}{A_1 + A_2}}\dg
+  &=& \pi_i\;(\den{e}\dg) & \pi_i,\,\den{e}\text{ monotone}
 \end{array}
 $$
+
+\omitted{TODO: show denotation of $\ms{let}_\in$ is monotone in $\gamma$}
 
 
 
