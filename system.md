@@ -104,18 +104,18 @@ class of lattice types.
 
 # Denotational semantics
 
-A unital semilattice (usl) is a triple $\triple{A}{\varepsilon}{\vee}$ of a set
-$A$, a unit (least element) $\varepsilon : A$, and a join (least upper bound)
-operator ${\vee} : A \x A \to A$ obeying associativity, commutativity,
-idempotence, and identity. Every usl has an associated poset, defined by $(a \le
-b) \iff (a \vee b = b)$. Usls may be seen as posets in which every finite set of
-elements has a least upper bound; conversely, finite sets (ordered by inclusion)
-are the free usl.
+A unital semilattice (usl) is a triple $\triple{A}{\unit}{\vee}$ of a set $A$, a
+unit (least element) $\unit : A$, and a join (least upper bound) operator
+${\vee} : A \x A \to A$ obeying associativity, commutativity, idempotence, and
+identity. Every usl has an associated poset, defined by $(a \le b) \iff (a \vee
+b = b)$. Usls may be seen as posets in which every finite set of elements has a
+least upper bound; conversely, finite sets (ordered by inclusion) are the free
+usl.
 
-We write $\varepsilon$, $\vee$, and $\le$ for the unit, join, and partial-order
+We write $\unit$, $\vee$, and $\le$ for the unit, join, and partial-order
 of an unspecified usl, or subscript them to specify a particular usl.
 
-We consider only usls in which $\varepsilon$ and $\vee$ are computable. However,
+We consider only usls in which $\unit$ and $\vee$ are computable. However,
 equality $=$ and thus ordering $\le$ may not always be decidable.
 
 Let \ms{Set} be the category of sets and functions and \ms{USL} be the category
@@ -158,15 +158,15 @@ We define $\den{M}_L$ as follows:
 $$\begin{array}{lcl}
   \den{\N}_L &=& \triple{\N}{0}{\ms{max}}\\
   \den{A \to M}_L &=& \den{A} \to_L \den{M}_L\\
-  %% &=& \triple{\den{A \to M}}{\fn\bind{x}\varepsilon}{%
+  %% &=& \triple{\den{A \to M}}{\fn\bind{x}\unit}{%
   %%   \fn\bind{\tuple{f,g}} \fn\bind{x} f(x) \vee g(x)}\\
   \den{M \x N}_L &=& \den{A}_L \x_L \den{B}_L\\
-  %% \den{M \x N}_L &=& \triple{\den{A \x B}}{\tuple{\varepsilon,\varepsilon}}{%
+  %% \den{M \x N}_L &=& \triple{\den{A \x B}}{\tuple{\unit,\unit}}{%
   %%   \fn\bind{\tuple{\tuple{a,x},\tuple{b,y}}} \pair{a \vee b}{x \vee y}}\\
   %% \den{\FS\;A}_L &=& \triple{\den{\FS\;A}}{\emptyset}{\cup}\\
   \den{\FS\;A}_L &=& \FS_L\;\den{A}\\
   \den{M \mono N}_L &=& \den{M}_L \mono_L \den{N}_L\\
-  %% &=& \triple{\den{M}_L \mono \den{N}_L}{\fn\bind{x}\varepsilon}{%
+  %% &=& \triple{\den{M}_L \mono \den{N}_L}{\fn\bind{x}\unit}{%
   %%   \fn\bind{\tuple{f,g}}\fn\bind{x} f(x) \vee g(x)}
 \end{array}$$
 
@@ -206,12 +206,14 @@ $$
   &=& \pi_i\;\gamma & \pi_i\text{ monotone}
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{\emptyset}{M}}{\phantom{.}}\dg
-  &=& \varepsilon_{\den{M}_L} & \text{constant in }\gamma
+  %% \den{\emptyset : M}\dg
+  &=& \unit_{\den{M}_L} & \text{constant in }\gamma
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{e_1 \vee e_2}{M}}{
     \J{\GD}{\GG}{e_1}{M} &
     \J{\GD}{\GG}{e_2}{M}}\dg
-  &=& \den{e_1} \vee_{\den{M}_L} \den{e_2}
+  %% \den{e_1 \vee e_2 : M}\dg
+  &=& \den{e_1}\dg \vee_{\den{M}_L} \den{e_2}\dg
   & \text{$\vee$ monotone, IHs}
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{\{e\}}{\FS\;A}}{\J{\GD}{\cdot}{e}{A}}\dg
