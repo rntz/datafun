@@ -282,7 +282,7 @@ $$
 
 # Proofs
 
-## Admissibility of {\ms{exchange},\ms{weaken},\ms{forget}}
+## Admissibility of {\ms{exchange},\ms{weaken}}
 
 \textcolor{red}{TODO}
 
