@@ -155,16 +155,12 @@
       ;; find the lub of all the branch types
       (values (foldl1 type-lub branch-ts) (e-case subj-e branch-es))]
 
-    [(e-let 'any v subj body)
-      (define-values (subj-t subj-e) (elab-infer (env-hide-mono Γ) subj))
-      (define-values (body-t body-e)
-        (elab-infer (env-cons (h-any subj-t) Γ) body))
-      (values body-t (e-let 'any v subj-e body-e))]
-    [(e-let 'mono v subj body)
-      (define-values (subj-t subj-e) (elab-infer Γ subj))
-      (define-values (body-t body-e)
-        (elab-infer (env-cons (h-mono subj-t) Γ) body))
-      (values body-t (e-let 'mono v subj-e body-e))]
+    [(e-let kind v subj body)
+     (define hyp    (match kind ['mono h-mono] ['any h-any]))
+     (define subj-Γ (match kind ['mono Γ]      ['any (env-hide-mono Γ)]))
+     (define-values (subj-t subj-e) (elab-infer subj-Γ subj))
+     (define-values (body-t body-e) (elab-infer (env-cons (hyp subj-t) Γ) body))
+     (values body-t (e-let kind v subj-e body-e))]
 
     [(or (e-lam _ _) (e-fix _ _) (e-empty) (e-join _ _) (e-letin _ _ _))
       (type-error "can't infer type of: ~v" e)]))
@@ -261,12 +257,11 @@
       (e-letin var arg-e
         (elab-check (env-cons (h-any elem-t) Γ) body))]
 
-    [(e-let 'any v subj body)
-      (define-values (subj-t subj-e) (elab-infer (env-hide-mono Γ) subj))
-      (e-let 'any v subj-e (elab-check (env-cons (h-any subj-t) Γ) t body))]
-    [(e-let 'mono v subj body)
-      (define-values (subj-t subj-e) (elab-infer Γ subj))
-      (e-let 'mono v subj-e (elab-check (env-cons (h-mono subj-t) Γ) t body))]
+    [(e-let kind v subj body)
+     (define subj-Γ (match kind ['any (env-hide-mono Γ)] ['mono Γ]))
+     (define hyp    (match kind ['any h-any] ['mono h-mono]))
+     (define-values (subj-t subj-e) (elab-infer subj-Γ subj))
+     (e-let kind v subj-e (elab-check (env-cons (hyp subj-t) Γ) t body))]
 
     [(e-fix var body)
       (unless (fixpoint-type? t)
