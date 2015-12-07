@@ -21,7 +21,11 @@
       (set! e (parse-expr e (append (reverse xs) Γ)))
       (foldr e-lam e xs)]
     [`(cons . ,es) (e-tuple (map r es))]
-    [(list (or 'π 'proj) i e) (e-proj i (r e))]
+    [`(,(or 'π 'proj) ,i ,e) (e-proj i (r e))]
+    [`(record (,ns ,es) ...) (e-record (for/hash ([n ns] [e es])
+                                         (values n (r e))))]
+    [`(record-merge ,a ,b) (e-record-merge (r a) (r b))]
+    [`(extend-record ,base . ,as) (e-record-merge (r base) (r `(record . ,as)))]
     [(or `(tag ,name ,e) `(',name ,e)) (e-tag name (r e))]
     [`(case ,subj (,ps ,es) ...)
       (e-case (r subj)
@@ -38,9 +42,9 @@
     [`(fix ,x ,body)
       (e-fix x (parse-expr body (cons x Γ)))]
     [`(let ,x = ,e in ,body)
-      (e-let-any x (r e) (parse-expr body (cons x Γ)))]
+      (e-let 'any x (r e) (parse-expr body (cons x Γ)))]
     [`(let ,x ^= ,e in ,body)
-      (e-let-mono x (r e) (parse-expr body (cons x Γ)))]
+      (e-let 'mono x (r e) (parse-expr body (cons x Γ)))]
     [`(,f ,as ...)
       (foldl (flip e-app) (r f) (map r as))]
     [_ (error "unfamiliar expression:" e)]))
@@ -80,7 +84,7 @@
   (set! e (parse-expr e (append (reverse (map defn-name defns)) Γ)))
   (for/fold ([e e]) ([d defns])
     (match-define (defn n t body) d)
-    (e-let-any n (e-ann t body) e)))
+    (e-let 'any n (e-ann t body) e)))
 
 ;; decls are used internally to produce defns, so we can separate type
 ;; annotations from declarations. we don't parse the expressions or types until
