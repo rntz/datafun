@@ -29,8 +29,8 @@
   (e-lam var body) (e-app func arg)
   (e-tuple exprs) (e-proj index expr)
   ;; fields is a hash from names to exprs
-  ;; base is either #f or an expression for the record we're extending/updating
-  (e-record base fields)
+  (e-record fields)
+  (e-record-merge left right) ;; merges two records. right-biased.
   (e-tag tag expr)
   ;; branches is a list of case-branch structs.
   (e-case subject branches)

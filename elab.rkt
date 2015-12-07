@@ -124,13 +124,17 @@
         (for/lists (ts es) ([a as]) (elab-infer Γ a)))
       (values (t-tuple ts) (e-tuple es))]
 
-    [(e-record base fields)
-     (define-values (base-fields base-expr) (infer-record-base Γ base))
+    [(e-record fields)
      (define (f e) (call-with-values (lambda () (elab-infer Γ e)) cons))
      (define h (hash-map-values f fields))
-     (values (t-record (hash-union-with base-fields (hash-map-values car h)
-                                        (lambda (x y) y)))
+     (values (t-record (hash-map-values car h))
              (e-record base-expr (hash-map-values cdr h)))]
+
+    [(e-record-merge l r)
+     (define-values (l-fields l-expr) (elab-infer-record Γ l))
+     (define-values (r-fields r-expr) (elab-infer-record Γ r))
+     (values (t-record (hash-union-right l-fields r-fields))
+             (e-record-merge l-expr r-expr))]
 
     [(e-tag name subj)
       (define-values (subj-t subj-e) (elab-infer Γ subj))
@@ -170,7 +174,9 @@
   ;; (printf "(elab-check ~v ~v ~v)\n" Γ t e)
   (match e
     ;; things that must be inferrable
-    [(or (e-ann _ _) (e-var _ _) (e-lit _) (e-app _ _) (e-proj _ _))
+    ;; TODO: maybe allow checking e-record-merge?
+    [(or (e-ann _ _) (e-var _ _) (e-lit _) (e-app _ _) (e-proj _ _)
+         (e-record-merge _ _))
       (define-values (et ee) (elab-infer Γ e))
       (unless (subtype? et t)
         (type-error "expression e has type: ~v\nbut we expect type: ~v" et t))
@@ -194,19 +200,16 @@
           (e-tuple (map (curry elab-check Γ) es ts))]
         [_ (type-error "not a tuple type: ~v" t)])]
 
-    [(e-record base fields)
-     (define field-types (match t
-                           [(t-record fs) fs]
-                           [_ (type-error "not a record type: ~v" t)]))
-     (define-values (base-fields base-expr) (infer-record-base Γ base))
-     (for ([n (hash-keys field-types)])
-       (unless (hash-has-key? fields n)
-         (type-error "record lacks field ~a" n)))
-     (e-record base-expr
-               (for/hash ([(n e) fields])
-                 (if (hash-has-key? field-types n)
-                     (elab-check Γ (hash-ref field-types n) e)
-                     (let-values ([(ee _) (elab-infer Γ e)]) ee))))]
+    [(e-record fields)
+     (define field-types
+       (match t [(t-record fs) fs]
+                [_ (type-error "not a record type: ~v" t)]))
+     (e-record
+      (for/hash ([(n e) fields])
+        ;; TODO: technically we should allow fields that aren't in the type
+        ;; we're checking against. this seems unlikely to come up in practice.
+        (define (err) (type-error "field of unspecified type: ~a" n))
+        (values n (elab-check Γ (hash-ref field-types n err) e))))]
 
     [(e-tag name subj)
       (match t
@@ -270,15 +273,10 @@
         (elab-check (env-cons (h-mono t) Γ) body))]))
 
 ;; returns (values fields expr-or-#f)
-(define (infer-record-base Γ base)
-  (if (not base)
-      (values (hash) #f)
-      (let-values ([(tt ee) (elab-infer Γ base)])
-        (values (match tt
-                     [(t-record h) h]
-                     [_ (type-error "extending non-record of type ~v"
-                                    tt)])
-                ee))))
+(define (elab-infer-record Γ e)
+  (define-values (tt ee) (elab-infer Γ base))
+  (values (match tt [(t-record h) h] [_ (type-error "not a record: ~v" ee)])
+          ee))
 
 ;; checks a pattern against a type and returns the env that the pattern binds.
 (define (check-pat Γ t p)
