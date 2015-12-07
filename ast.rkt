@@ -145,7 +145,8 @@
     [(string? l) (t-str)]
     [#t #f]))
 
-(define (prim? x) (member x '(= <= + - * subset? print puts ++)))
+(define prims (list->set '(= <= + - * subset? print puts ++)))
+(define (prim? x) (set-member? prims x))
 
 (define (prim-type-infer p)
   (match p
