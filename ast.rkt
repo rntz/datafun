@@ -35,7 +35,7 @@
   ;; branches is a list of case-branch structs.
   (e-case subject branches)
   (e-join exprs)
-  (e-singleton expr) (e-letin var arg body)
+  (e-set exprs) (e-letin var arg body)
   (e-fix var body)
   ;; let binding. TODO: support pats here?
   ;; kind is either 'any or 'mono.
@@ -44,6 +44,7 @@
 (struct case-branch (pat body) #:transparent)
 
 ;; TODO: pats for records.
+;; TODO?: pats for sets?
 (enum pat
   (p-wild)
   (p-var name)

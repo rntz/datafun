@@ -42,7 +42,7 @@
     [(e-tag t e) #`(list '#,t #,(r e))]
     [(e-case subj branches) TODO]
     [(e-join es) #`(#,(joiner-for (info)) #,@(map r es))]
-    [(e-singleton e) #`(set #,(r e))]
+    [(e-set es) #`(set #,@(map r es))]
     [(e-letin v arg body) TODO]
     [(e-fix var body) TODO]
     [(e-let _ v expr body)

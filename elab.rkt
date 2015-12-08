@@ -151,7 +151,10 @@
 
     [(e-tag name subj) (t-sum (hash name (elab-infer subj Γ)))]
 
-    [(e-singleton subj) (FS (elab-infer subj (env-hide-mono Γ)))]
+    [(e-set '()) (type-error "can't infer type of empty set")]
+    [(e-set elems)
+     (define new-Γ (env-hide-mono Γ))
+     (FS (foldl1 type-lub (for/list ([a elems]) (elab-infer a new-Γ))))]
 
     [(e-case subj branches)
      (when (null? branches)
@@ -246,10 +249,11 @@
      (for ([a as]) (elab-check a t Γ))
      (remember-type)]
 
-    [(e-singleton elem)
-      (match t
-        [(t-fs a) (elab-check elem a (env-hide-mono Γ))]
-        [_ (type-error "not a set type: ~v" t)])]
+    [(e-set elems)
+     (define new-Γ (env-hide-mono Γ))
+     (match t
+       [(t-fs a) (for ([elem elems]) (elab-check elem a new-Γ))]
+       [_ (type-error "not a set type: ~v" t)])]
 
     [(e-letin var arg body)
      (define arg-t (elab-infer arg Γ))

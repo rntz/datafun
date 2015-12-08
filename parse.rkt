@@ -9,7 +9,7 @@
 (define (reserved-form? x) (set-member? reserved-forms x))
 (define reserved-forms
   (list->set '(: empty fn λ cons π proj record record-merge extend-record tag
-               quote case join single let fix)))
+               quote case join set let fix)))
 
 ;; TODO: record expressions!
 (define (parse-expr e Γ)
@@ -39,7 +39,7 @@
           (set! e (parse-expr e (append (reverse (pat-vars p)) Γ)))
           (case-branch p e)))]
     [`(join . ,es) (e-join (map r es))]
-    [`(single ,e) (e-singleton (r e))]
+    [`(set . ,es) (e-set (map r es))]
     ;; TODO: use declaration parsing here
     [`(let ,x <- ,e in ,body)
       (e-letin x (r e) (parse-expr body (cons x Γ)))]
