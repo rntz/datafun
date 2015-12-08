@@ -90,6 +90,8 @@
 ;; - e-lam, e-app: 'fun or 'mono, for ordinary or monotone {lambdas,application}
 ;; - e-join, e-prim, e-fix: its type
 (define *elab-info*  (make-weak-hasheq))
+(define (elab-info e [orelse (lambda () (error "no elab info for:" e))])
+  (hash-ref *elab-info* e orelse))
 
 ;; returns type & updates expr-elab-info.
 (define (elab-infer e Γ)

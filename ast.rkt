@@ -147,6 +147,7 @@
 
 (define (prim-type-infer p)
   (match p
+    ;; TODO?: extend <= to all equality types?
     ['<= (-> Nat (~> Nat Bool))]
     [(or '+ '*) (~> Nat Nat Nat)]
     ['- (~> Nat (-> Nat Nat))]
