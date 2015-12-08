@@ -79,136 +79,127 @@
 
 
 ;;; Inference & checking.
-;; returns two values: type & elaborated expression.
+
+;; maps some exprs to info about them that is used for compilation:
+;; - e-lam, e-app: 'fun or 'mono, for ordinary or monotone {lambdas,application}
+;; - e-empty, e-join, e-prim, e-fix: its type
+(define *elab-info*  (make-weak-hasheq))
+
+;; returns type & updates expr-elab-info.
 (define (elab-infer e Γ)
   ;; (printf "(elab-infer ~v ~v)\n" Γ e)
-  (define (ok t) (values t e))
+  (define (set-info i) (hash-set! *elab-info* e i))
+  (define (remember-type t) (set-info t) t)
   (match e
-    [(e-ann t e) (values t (e-ann t (elab-check e t Γ)))]
-    [(e-lit v) (ok (lit-type v))]
+    [(e-ann t e) (elab-check e t Γ) t]
+    [(e-lit v) (lit-type v)]
 
     [(e-var n i)
       (match (env-ref Γ i)
-        [(or (h-any t) (h-mono t)) (ok t)]
+        [(or (h-any t) (h-mono t)) t]
         [_ (type-error "hidden monotone variable: ~a" n)])]
 
     [(e-prim p)
-      (define t (prim-type-infer p))
-      (if t (ok t)
-        (type-error "can't infer type of primitive: ~a" p))]
+     (define t (prim-type-infer p))
+     (unless t (type-error "can't infer type of primitive: ~a" p))
+     (remember-type t)]
 
     [(e-app f a)
-      (define-values (ft fe) (elab-infer f Γ))
-      ;; (printf "function ~v has type ~v\n" f ft)
-      (match ft
-        [(~> i o) (values o (e-app-mono fe (elab-check a i Γ)))]
-        [(-> i o) (values o (e-app-fun fe (elab-check a i (env-hide-mono Γ))))]
-        [_ (type-error "applying non-function ~v, of type ~v" f ft)])]
+     (define ft (elab-infer f Γ))
+     (match ft
+       [(~> i o) (set-info 'mono) (elab-check a i Γ) o]
+       [(-> i o) (set-info 'fun) (elab-check a i (env-hide-mono Γ)) o]
+       [_ (type-error "applying non-function ~v, of type ~v" f ft)])]
 
     [(e-proj i subj)
-     (define-values (subj-t subj-e) (elab-infer subj Γ))
-     (values
-      (match* (i subj-t)
-        [((? number?) (t-tuple a))  #:when (< i (length a)) (list-ref a i)]
-        [((? symbol?) (t-record a)) #:when (hash-has-key? a i) (hash-ref a i)]
-        [(_ _) (type-error "invalid projection: ~v" subj-e)])
-      (e-proj i subj-e))]
+     (define subj-t (elab-infer subj Γ))
+     (match* (i subj-t)
+       [((? number?) (t-tuple a))  #:when (< i (length a))    (list-ref a i)]
+       [((? symbol?) (t-record a)) #:when (hash-has-key? a i) (hash-ref a i)]
+       [(_ _) (type-error "invalid projection: ~v" e)])]
 
     ;; TODO: synthesize let-in and join expressions when possible, even though
     ;; it's non-standard.
     ;;
     ;; NB. technically I shouldn't be synthesizing tuples, tagged values, or
     ;; singleton sets, since they're introduction forms. but w/e.
-    [(e-tuple as)
-      (define-values (ts es)
-        (for/lists (ts es) ([a as]) (elab-infer a Γ)))
-      (values (t-tuple ts) (e-tuple es))]
+    [(e-tuple as) (t-tuple (for/list ([a as]) (elab-infer a Γ)))]
 
     [(e-record fields)
-     (define (f e) (call-with-values (lambda () (elab-infer e Γ)) cons))
-     (define h (hash-map-values f fields))
-     (values (t-record (hash-map-values car h))
-             (e-record (hash-map-values cdr h)))]
+     (t-record (hash-map-values (lambda (x) (elab-infer x Γ)) fields))]
 
     [(e-record-merge l r)
-     (define-values (l-fields l-expr) (elab-infer-record l Γ))
-     (define-values (r-fields r-expr) (elab-infer-record r Γ))
-     (values (t-record (hash-union-right l-fields r-fields))
-             (e-record-merge l-expr r-expr))]
+     (t-record (hash-union-right (elab-infer-record l Γ)
+                                 (elab-infer-record r Γ)))]
 
-    [(e-tag name subj)
-      (define-values (subj-t subj-e) (elab-infer subj Γ))
-      (values (Σ (name subj-t)) (e-tag name subj-e))]
+    [(e-tag name subj) (t-sum (hash name (elab-infer subj Γ)))]
 
-    [(e-singleton subj)
-      (define-values (subj-t subj-e) (elab-infer subj (env-hide-mono Γ)))
-      (values (FS subj-t) (e-singleton subj-e))]
+    [(e-singleton subj) (FS (elab-infer subj (env-hide-mono Γ)))]
 
     [(e-case subj branches)
-      (when (null? branches)
-        (type-error "can't infer type of case with no branches"))
-      (define-values (subj-t subj-e) (elab-infer subj (env-hide-mono Γ)))
-      (define-values (branch-ts branch-es)
-        (for/lists (_ts _es) ([b branches])
-          (match-define (case-branch pat body) b)
-          ;; it's okay to use h-any here ONLY because we hid the monotone
-          ;; environment when checking subj.
-          (define pat-Γ (map h-any (check-pat Γ subj-t pat)))
-          (define-values (branch-t branch-e) (elab-infer body (append pat-Γ Γ)))
-          (values branch-t (case-branch (case-branch-pat b) branch-e))))
-      ;; find the lub of all the branch types
-      (values (foldl1 type-lub branch-ts) (e-case subj-e branch-es))]
+     (when (null? branches)
+       (type-error "can't infer type of case with no branches"))
+     (define subj-t (elab-infer subj (env-hide-mono Γ)))
+     ;; find the lub of all the branch types
+     (define (branch-type b)
+       (match-define (case-branch pat body) b)
+       ;; it's okay to use h-any here ONLY because we hid the monotone
+       ;; environment when checking subj.
+       (define pat-Γ (map h-any (check-pat Γ subj-t pat)))
+       (elab-infer body (append pat-Γ Γ)))
+     (foldl1 type-lub (map branch-type branches))]
 
     [(e-let kind v subj body)
      (define hyp    (match kind ['mono h-mono] ['any h-any]))
      (define subj-Γ (match kind ['mono Γ]      ['any (env-hide-mono Γ)]))
-     (define-values (subj-t subj-e) (elab-infer subj subj-Γ))
-     (define-values (body-t body-e) (elab-infer body (env-cons (hyp subj-t) Γ)))
-     (values body-t (e-let kind v subj-e body-e))]
+     (define subj-t (elab-infer subj subj-Γ))
+     (elab-infer body (env-cons (hyp subj-t) Γ))]
 
     [(or (e-lam _ _) (e-fix _ _) (e-empty) (e-join _ _) (e-letin _ _ _))
       (type-error "can't infer type of: ~v" e)]))
 
-;; returns elaborated expression.
+;; returns nothing.
 (define (elab-check e t Γ)
+  (define (set-info i) (hash-set! *elab-info* e i))
+  (define (remember-type) (set-info t))
   ;; (printf "(elab-check ~v ~v ~v)\n" Γ t e)
   (match e
     ;; things that must be inferrable
     ;; TODO: maybe allow checking e-record-merge?
     [(or (e-ann _ _) (e-var _ _) (e-lit _) (e-app _ _) (e-proj _ _)
          (e-record-merge _ _))
-      (define-values (et ee) (elab-infer e Γ))
-      (unless (subtype? et t)
-        (type-error "expression e has type: ~v\nbut we expect type: ~v" et t))
-      ee]
+     (define et (elab-infer e Γ))
+     (unless (subtype? et t)
+       (type-error "expression e has type: ~v\nbut we expect type: ~v" et t))]
 
-    [(e-prim p)
-      (if (prim-has-type? p t) e
-        (type-error "primitive ~a cannot have type ~v" p t))]
+    [(e-prim p) (if (prim-has-type? p t) (remember-type)
+                    (type-error "primitive ~a cannot have type ~v" p t))]
 
     [(e-lam var body)
-      (match t
-        [(t-mono a b)
-          (e-lam-mono var (elab-check body b (env-cons (h-mono a) Γ)))]
-        [(t-fun a b)
-          (e-lam-fun var (elab-check body b (env-cons (h-any a) Γ)))]
-        [_ (type-error "not a function type: ~v" t)])]
+     (define-values (k h b)
+       (match t
+         [(t-mono a b) (values 'mono (h-mono a) b)]
+         [(t-fun a b) (values 'fun (h-any a) b)]
+         [_ (type-error "not a function type: ~v" t)]))
+     (set-info k)
+     (elab-check body b (env-cons h Γ))]
 
     [(e-tuple es)
       (match t
-        [(t-tuple ts) (e-tuple (for/list ([e es] [t ts])
-                                 (elab-check e t Γ)))]
+        [(t-tuple ts)
+         (if (= (length es) (length ts))
+          (for ([e es] [t ts]) (elab-check e t Γ))
+          (type-error "wrong-length tuple: ~v" e))]
         [_ (type-error "not a tuple type: ~v" t)])]
 
     [(e-record fields)
      (define field-types
        (match t [(t-record fs) fs]
                 [_ (type-error "not a record type: ~v" t)]))
-     (e-record
-      (for/hash ([(n e) fields])
-        ;; TODO: technically this should be a warning.
-        (define (err) (type-error "unnecessary field: ~a" n))
-        (values n (elab-check e (hash-ref field-types n err) Γ))))]
+     (for ([(n e) fields])
+       ;; TODO: technically this should be a warning.
+       (define (err) (type-error "unnecessary field: ~a" n))
+       (elab-check e (hash-ref field-types n err) Γ))]
 
     [(e-tag name subj)
       (match t
@@ -216,66 +207,60 @@
           (define (fail)
             (type-error "sum type ~v does not have branch ~a"
               branches name))
-          (e-tag name (elab-check subj (hash-ref branches name fail) Γ))]
+         (elab-check subj (hash-ref branches name fail) Γ)]
         [_ (type-error "not a sum type: ~v" t)])]
 
     [(e-case subj branches)
       ;; TODO: case completeness checking.
       ;;
       ;; TODO: think about when it might be ok not to hide the monotone
-      ;; environment when typechecking the case-subject.
-      (define-values (subj-t subj-e) (elab-infer subj (env-hide-mono Γ)))
-      (define sum-types
-        (match subj-t
-          [(t-sum h) h]
-          [_ (type-error "can't case on expr of type ~v" subj-t)]))
-      (e-case subj-e
-        (for/list ([b branches])
-          (match-define (case-branch p body) b)
-          (define pat-env (check-pat Γ subj-t p))
-          ;; is append right? use env-extend instead?
-          (case-branch p
-            ;; it's okay to use h-any here ONLY because we hid the monotone
-            ;; environment when checking subj.
-            (elab-check body t (append (map h-any pat-env) Γ)))))]
+      ;; environment when typechecking the case-subject. I think only for
+      ;; irrefutable patterns, a la (let p = e in e)?
+     (define subj-t (elab-infer subj (env-hide-mono Γ)))
+     (for ([b branches])
+       (match-define (case-branch p body) b)
+       (define pat-env (check-pat Γ subj-t p))
+       ;; it's okay to use h-any here ONLY because we hid the monotone
+       ;; environment when checking subj.
+       (elab-check body t (append (map h-any pat-env) Γ)))]
 
     [(e-empty)
-      (unless (lattice-type? t) (error "not a lattice type: ~v" t))
-      e]
+     (unless (lattice-type? t) (error "not a lattice type: ~v" t))
+     (remember-type)]
     [(e-join l r)
-      (unless (lattice-type? t) (error "not a lattice type: ~v" t))
-      (e-join (elab-check l t Γ) (elab-check r t Γ))]
+     (unless (lattice-type? t) (error "not a lattice type: ~v" t))
+     (elab-check l t Γ) (elab-check r t Γ)
+     (remember-type)]
 
     [(e-singleton elem)
       (match t
-        [(t-fs a) (e-singleton (elab-check elem a (env-hide-mono Γ)))]
+        [(t-fs a) (elab-check elem a (env-hide-mono Γ))]
         [_ (type-error "not a set type: ~v" t)])]
 
     [(e-letin var arg body)
-      (define-values (arg-t arg-e) (elab-infer arg Γ))
-      (define elem-t (match arg-t
-                       [(t-fs a) a]
-                       [_ (type-error "(letin) not a set type: ~v" arg-t)]))
-      (e-letin var arg-e
-        (elab-check body t (env-cons (h-any elem-t) Γ)))]
+     (define arg-t (elab-infer arg Γ))
+     (define elem-t (match arg-t
+                      [(t-fs a) a]
+                      [_ (type-error "(letin) not a set type: ~v" arg-t)]))
+     (elab-check body t (env-cons (h-any elem-t) Γ))
+     (remember-type)]
 
     [(e-let kind v subj body)
-     (define subj-Γ (match kind ['any (env-hide-mono Γ)] ['mono Γ]))
      (define hyp    (match kind ['any h-any] ['mono h-mono]))
-     (define-values (subj-t subj-e) (elab-infer subj subj-Γ))
-     (e-let kind v subj-e (elab-check body t (env-cons (hyp subj-t) Γ)))]
+     (define subj-Γ (match kind ['any (env-hide-mono Γ)] ['mono Γ]))
+     (define subj-t (elab-infer subj subj-Γ))
+     (elab-check body t (env-cons (hyp subj-t) Γ))]
 
     [(e-fix var body)
-      (unless (fixpoint-type? t)
-        (type-error "cannot take fixpoint at type: ~v" t))
-      (e-fix var
-        (elab-check body t (env-cons (h-mono t) Γ)))]))
+     (unless (fixpoint-type? t)
+       (type-error "cannot take fixpoint at type: ~v" t))
+     (elab-check body t (env-cons (h-mono t) Γ))
+     (remember-type)]))
 
-;; returns (values fields expr-or-#f)
 (define (elab-infer-record e Γ)
-  (define-values (tt ee) (elab-infer e Γ))
-  (values (match tt [(t-record h) h] [_ (type-error "not a record: ~v" ee)])
-          ee))
+  (match (elab-infer e Γ)
+    [(t-record h) h]
+    [_ (type-error "not a record: ~v" e)]))
 
 ;; checks a pattern against a type and returns the env that the pattern binds.
 (define (check-pat Γ t p)
