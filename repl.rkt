@@ -7,6 +7,8 @@
 (define (repl)
   (let/ec quit
     (printf "- DF> ")
+    ;; we do this to prune *elab-info* of unnecessary entries
+    (collect-garbage)
     (match (read)
       [(? eof-object?) (quit)]
       [line
@@ -15,6 +17,5 @@
          (printf "expr: ~v\n" expr-in)
          (define expr-type (elab-infer expr-in '()))
          (printf "type: ~v\n" expr-type)
-         (printf "info: ~v\n"
-                 (for/hasheq ([(k v) *elab-info*]) (values k v))))])
+         (display "info: ") (pretty-print *elab-info*))])
     (repl)))
