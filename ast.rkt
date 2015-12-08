@@ -34,6 +34,7 @@
   (e-tag tag expr)
   ;; branches is a list of case-branch structs.
   (e-case subject branches)
+  ;; TODO: unify e-empty, e-join into one node type
   (e-empty) (e-join left right)
   (e-singleton expr) (e-letin var arg body)
   (e-fix var body)
@@ -69,13 +70,10 @@
     [(_ a) #'a]
     [(_ a b ...) #'(t-mono a (~> b ...))]))
 (define-match-expander ~> expand~> expand~>)
-;; TODO: remove ×, Σ if not sufficiently useful
+;; TODO: remove × if not sufficiently useful
 (define-match-expander ×
   (syntax-parser [(× a ...) #'(t-tuple (list a ...))])
   (syntax-parser [(× a ...) #'(t-tuple (list a ...))]))
-(define-syntax-parser Σ
-  [(Σ (tag type) ...)
-    #'(t-sum (make-immutable-hash `((,tag . ,type) ...)))])
 
 
 ;;; Type stuff
