@@ -218,7 +218,7 @@
                 [_ (type-error "not a record type: ~v" t)]))
      (for ([(n e) fields])
        ;; TODO: technically this should be a warning.
-       (define (err) (type-error "unnecessary field: ~a" n))
+       (define (err) (type-error "(WARNING) unnecessary field: ~a" n))
        (elab-check e (hash-ref field-types n err) Γ))]
 
     [(e-tag name subj)
@@ -303,5 +303,5 @@
                       (check-pat Γ (hash-ref bs tag) pat)
                       ;; FIXME: this is actually ok, it's just dead code; should
                       ;; warn, not error
-                      (type-error "no such branch in tagged sum"))]
+                      (type-error "(WARNING) no such branch in tagged sum"))]
         [_ (type-error "not a sum")])]))

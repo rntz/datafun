@@ -17,7 +17,7 @@
          (printf "expr: ~v\n" expr)
          (define expr-type (elab-infer expr '()))
          (printf "type: ~v\n" expr-type)
-         (display "info: ") (pretty-print *elab-info*)
+         ;; (display "info: ") (pretty-print *elab-info*)
          (define code (compile-expr expr))
          (display "code: ") (pretty-print (syntax->datum code))
          (printf " val: ~v\n" (eval code)))])
