@@ -18,7 +18,7 @@
   (match e
     [(? prim?) (e-prim e)]
     [(? lit?) (e-lit e)]
-    ['empty (e-empty)]
+    ['empty (e-join '())]
     [(? symbol?) (e-var e (or (index-of e Γ) (error "unbound variable:" e)))]
     [`(: ,t ,e) (e-ann (parse-type t) (r e))]
     [`(fn ,x ,e) (e-lam x (parse-expr e (cons x Γ)))]
@@ -38,8 +38,7 @@
           (set! p (parse-pat p))
           (set! e (parse-expr e (append (reverse (pat-vars p)) Γ)))
           (case-branch p e)))]
-    ['(join) (e-empty)]
-    [`(join . ,es) (foldr1 e-join (map r es))]
+    [`(join . ,es) (e-join (map r es))]
     [`(single ,e) (e-singleton (r e))]
     ;; TODO: use declaration parsing here
     [`(let ,x <- ,e in ,body)

@@ -34,8 +34,7 @@
   (e-tag tag expr)
   ;; branches is a list of case-branch structs.
   (e-case subject branches)
-  ;; TODO: unify e-empty, e-join into one node type
-  (e-empty) (e-join left right)
+  (e-join exprs)
   (e-singleton expr) (e-letin var arg body)
   (e-fix var body)
   ;; let binding. TODO: support pats here?

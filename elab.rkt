@@ -88,7 +88,7 @@
 
 ;; maps some exprs to info about them that is used for compilation:
 ;; - e-lam, e-app: 'fun or 'mono, for ordinary or monotone {lambdas,application}
-;; - e-empty, e-join, e-prim, e-fix: its type
+;; - e-join, e-prim, e-fix: its type
 (define *elab-info*  (make-weak-hasheq))
 
 ;; returns type & updates expr-elab-info.
@@ -124,8 +124,21 @@
        [((? symbol?) (t-record a)) #:when (hash-has-key? a i) (hash-ref a i)]
        [(_ _) (type-error "invalid projection: ~v" e)])]
 
-    ;; TODO: synthesize let-in and join expressions when possible, even though
-    ;; it's non-standard.
+    [(e-record-merge l r)
+     (t-record (hash-union-right (elab-infer-record l Γ)
+                                 (elab-infer-record r Γ)))]
+
+    ;; TODO: synthesize let-in  join expressions when possible, even though
+    ;; it's non-standard?
+    ;;
+    ;; PROBLEM: synthesizing joins is tricksy! for exmaple, ({a:2, b:"foo"} join
+    ;; {a:10}) has meaning, namely {a:10}. but then ({a:2, b:"foo"} join
+    ;; {a:10,b:"fux"}) must have a meaning as well, or we violate liskov's
+    ;; substitution principle! so now we need a function
+    ;; least-lattice-supertype, that given a type A finds the least lattice type
+    ;; M such that A <: M. this seems excessively magical.
+    ;;
+    ;; are there similar problems with let-in? indeed!
     ;;
     ;; NB. technically I shouldn't be synthesizing tuples, tagged values, or
     ;; singleton sets, since they're introduction forms. but w/e.
@@ -133,10 +146,6 @@
 
     [(e-record fields)
      (t-record (hash-map-values (lambda (x) (elab-infer x Γ)) fields))]
-
-    [(e-record-merge l r)
-     (t-record (hash-union-right (elab-infer-record l Γ)
-                                 (elab-infer-record r Γ)))]
 
     [(e-tag name subj) (t-sum (hash name (elab-infer subj Γ)))]
 
@@ -161,7 +170,7 @@
      (define subj-t (elab-infer subj subj-Γ))
      (elab-infer body (env-cons (hyp subj-t) Γ))]
 
-    [(or (e-lam _ _) (e-fix _ _) (e-empty) (e-join _ _) (e-letin _ _ _))
+    [(or (e-lam _ _) (e-fix _ _) (e-join _) (e-letin _ _ _))
       (type-error "can't infer type of: ~v" e)]))
 
 ;; returns nothing.
@@ -230,12 +239,9 @@
        ;; environment when checking subj.
        (elab-check body t (append (map h-any pat-env) Γ)))]
 
-    [(e-empty)
+    [(e-join as)
      (unless (lattice-type? t) (error "not a lattice type: ~v" t))
-     (remember-type)]
-    [(e-join l r)
-     (unless (lattice-type? t) (error "not a lattice type: ~v" t))
-     (elab-check l t Γ) (elab-check r t Γ)
+     (for ([a as]) (elab-check a t Γ))
      (remember-type)]
 
     [(e-singleton elem)

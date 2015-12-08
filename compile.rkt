@@ -23,10 +23,7 @@
     ;; TODO?: "better" representation for tagged things?
     [(e-tag t e) #`(list '#,t #,(r e))]
     [(e-case subj branches) TODO]
-    ;; FIXME: need to elaborate e-empty, e-join, e-letin so they have type
-    ;; annotations, since their compilation is type-directed!
-    [(e-empty) TODO]
-    [(e-join _ _) TODO]
+    [(e-join es) TODO]
     [(e-singleton e) #`(set #,(r e))]
     [(e-letin v arg body) TODO]
     [(e-fix var body) TODO]
