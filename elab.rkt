@@ -6,6 +6,12 @@
 (define (type-error fmt . args)
   (error (apply format (string-append "type error: " fmt) args)))
 
+;;; FIXME: the typechecker doesn't actually check the condition that, if there
+;;; are monotone variables in the context, the expression we're checking must
+;;; have a lattice type!
+;;;
+;;; I think this is OK, but it's *not* the type system outlined in the paper!
+
 
 ;; Type utilities.
 (define/match (subtype? a b)
