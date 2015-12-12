@@ -5,29 +5,127 @@ consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
 dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident,
 sunt in culpa qui officia deserunt mollit anim id est laborum. -->
 
+\newcommand{\op}[1]{#1^{\ms{op}}}
+\newcommand{\D}[1]{\ms{D}\,#1}
+
+# Notation
+
+Give sets $A,B$, posets $P,Q$, and usls (unital semilattices) $M,N$, we use the
+following notation:
+\begin{center}
+  \begin{tabular}{cl}
+    $|P|$ & the underlying set of the poset $P$\\
+    $P \x_\le Q$ & the poset of pairs of $P$s and $Q$s, ordered pointwise\\
+    $P +_\le Q$ & the poset on the disjoint sum of $P$ and $Q$, ordered disjointly\\
+    $P \lhd Q$ & the poset on the disjoint sum of $P$ and $Q$ where
+    $\ms{in}_1\; x \le \ms{in}_2\; y\ (\forall x \of P,y \of Q)$\\
+    $P \mono Q$ & the poset of monotone maps from $P$ to $Q$\\
+    $\ms{D}\,A$ & the discrete poset on $A$ (where $x \le y \iff x = y$)\\
+    $\FS\;A$ & the usl of finite sets of $A$s, ordered by inclusion
+  \end{tabular}
+\end{center}
+
+Note that $\ms{D}$ and $|\_|$ are adjoint, and that $|\ms{D}\,A| = A$.
+
 # Language
 
 ## Syntax
 
 $$\begin{array}{lrrl}
 \text{types} & A,B
-&::=& \N \pipe A \x B \pipe A \to B \pipe M \mono N \pipe \FS\;A \pipe A + B\\
+&::=& |P| \pipe A \x B \pipe A + B \pipe A \to B\\
+\text{poset types} & P,Q
+&::=& \ms{D}\;A \pipe P^{\ms{op}}
+\pipe P \x Q \pipe P + Q \pipe P \lhd Q \pipe P \to Q\\
+&&|\,& \N \pipe \FS\;A\\
 \text{lattice types} & M,N
-&::=& \N \pipe M \x N \pipe A \to M \pipe M \mono N \pipe \FS\;A\\
-\text{finite lattices} & F,G
-&::=& F \x G \pipe F \to G \pipe F \mono G \pipe \FS\;F\\
+&::=& \N \pipe M \x N \pipe P \to M \pipe \FS\;A\\
 \text{expressions} & e
-&::=& x \pipe \fn\bind{x} e \pipe \monofn\bind{x} e \pipe e_1\;e_2\\
-&&|\,& (e_1, e_2) \pipe \pi_i\;e\\
+&::=& x \pipe \fn\bind{x} \pipe e_1\;e_2
+\pipe (e_1,e_2) \pipe \pi_i\;e\\
 &&|\,& \ms{in}_i\; e \pipe \case{e}{x}{e_1}{y}{e_2}\\
-&&|\,& \emptyset \pipe e_1 \vee e_2\\
-&&|\,& \{e\} \pipe \letin{x}{e_1}{e_2}\\
-&&|\,& \fix{x}e\\
+&&|\,& |u|\\
+\text{monotone exprs} & u
+&::=& x \pipe \fn\bind{x} u \pipe u_1\;u_2 \pipe (u_1, u_2) \pipe \pi_i\;u\\
+%% &&|\,& e \pipe \ms{let}~|x : P| = u_1 ~\ms{in}~ u_2 \\
+&&|\,& \ms{in}_i\; u \pipe \case{u}{x}{u_1}{y}{u_2}\\
+&&|\,& \emptyset \pipe u_1 \vee u_2\\
+&&|\,& \{u\} \pipe \letin{x}{u_1}{u_2}\\
+&&|\,& \fix{x}u\\
+&&|\,& u ~\ms{as}~ P
+\pipe \ms{disc}\;e ~|~ \ms{let}~\ms{disc}\;x = u_1 ~\ms{in}~ u_2\\
 \text{contexts} & \GD &::=& \cdot \pipe \GD, x \of A \\
-\text{monotone ctxts} & \GG &::=& \cdot \pipe \GG, x \of M\\
-\text{typing judgment} & J &::=& \J{\GD}{\cdot}{e}{A}\\
-&&|\,& \J{\GD}{\GG}{e}{M}
+\text{monotone ctxts} & \GG &::=& \cdot \pipe \GG, x \of P\\
+\text{typing judgments} & J &::=& \GD\ent e : A\\
+&&|\,& \J{\GD}{\GG}{u}{P}
 \end{array}$$
+
+Note that:\vspace{-0.8em}
+\begin{itemize}
+  \setlength{\itemsep}{0em}
+\item Type and poset types are separate, although sharing the overloaded
+  notation $\x$, $+$ and $\to$.
+\item Lattice types are a syntactic restriction of poset types.
+\end{itemize}
+
+## Semantics of types
+
+Types $A$ are interpreted as sets $\den{A}$. Poset types $P$ are interpreted as
+posets $\den{P}$. Lattice types are interpreted as usls $\den{M}_L$.
+
+Denotation of types $\den{A}$:
+$$\begin{array}{rcl}
+  \den{|P|} &=& |\den{P}|\\
+  \den{A \x B} &=& \den{A} \x \den{B}\\
+  \den{A + B} &=& \den{A} \uplus \den{B}\\
+  \den{A \to B} &=& \den{A} \to \den{B}
+\end{array}$$
+
+Denotation of posets $\den{P}$:
+$$\begin{array}{rcl}
+  \den{\ms{D}\,A} &=& \ms{D}\,\den{A}\\
+  \den{\N} &=& \pair{\N}{\le}\\
+  \den{P \x Q} &=& \den{P} \x_\le \den{Q}\\
+  \den{P + Q} &=& \den{P} +_\le \den{Q}\\
+  \den{P \lhd Q} &=& \den{P} \lhd \den{Q}\\
+  \den{P \to Q} &=& \den{P} \mono \den{Q}\\
+  \den{\FS\;A} &=& \FS\;\den{A}
+\end{array}$$
+
+## Equality and subtyping
+
+\omitted{I'm not sure I've gotten everything here.}
+
+Nontrivial laws for equality of types $A = B$:
+$$
+\begin{array}{rcl}
+  |P \x Q| &=& |P| \x |Q|\\
+  |P + Q| &=& |P| + |Q|\\
+  |P \lhd Q| &=& |P| + |Q|\\
+  |\ms{D}\,A| &=& A\\
+  |\D{A} \to P| &=& A \to |P|\\
+\end{array}$$
+
+Nontrivial laws for equality of posets $P = Q$:
+$$\begin{array}{rclcl}
+  \D{(A \x B)} &=& \D{A} \x \D{B}\\
+  \D{(A + B)} &=& \D{A} + \D{B}\\
+  \D{(A \to B)} &=& \D{A} \to \D{B}\\
+  \op{(\op{P})} &=& P\\
+  \op{(P \x Q)} &=& \op{P} \x \op{Q}\\
+  \op{(P + Q)} &=& \op{P} + \op{Q}\\
+  \op{(P \to Q)} &=& \op{P} \to \op{Q}\\
+  \op{P} \to Q &=& P \to \op{Q}
+\end{array}$$
+
+Nontrivial laws for subtyping of posets $P \le Q$:
+$$\begin{array}{rcl}
+  \D{|P|} &\le& P\\
+  P + Q &\le& P \lhd Q
+\end{array}$$
+
+\textbf{Theorem:} Type equality and subtyping are decidable. \textbf{Proof:}
+\omitted{TODO}.
 
 ## Typing rules
 
@@ -98,14 +196,9 @@ $$\ $$
   \J{\GD}{\GG,x\of F}{e}{F}}
 $$
 
-The restriction of the \ms{fix} rule to finite lattices is necessary to avoid
-nontermination.
-
-<!--
 The \ms{fix} rule is overly permissive in allowing fix-points to be taken at any
 lattice type; it needs to be be restricted to some computationally tractable
 class of lattice types.
--->
 
 
 
