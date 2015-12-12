@@ -14,6 +14,8 @@ $$\begin{array}{lrrl}
 &::=& \N \pipe A \x B \pipe A \to B \pipe M \mono N \pipe \FS\;A \pipe A + B\\
 \text{lattice types} & M,N
 &::=& \N \pipe M \x N \pipe A \to M \pipe M \mono N \pipe \FS\;A\\
+\text{finite lattices} & F,G
+&::=& F \x G \pipe F \to G \pipe F \mono G \pipe \FS\;F\\
 \text{expressions} & e
 &::=& x \pipe \fn\bind{x} e \pipe \monofn\bind{x} e \pipe e_1\;e_2\\
 &&|\,& (e_1, e_2) \pipe \pi_i\;e\\
@@ -92,13 +94,18 @@ $$\ $$
   \J{\GD}{\GG}{e_1}{\FS\;A} &
   \J{\GD,x\of A}{\GG}{e_2}{M}}
 $$\ $$
-\infer[\ms{fix}]{\J{\GD}{\GG}{\fix{x}e}{M}}{
-  \J{\GD}{\GG,x\of M}{e}{M}}
+\infer[\ms{fix}]{\J{\GD}{\GG}{\fix{x}e}{F}}{
+  \J{\GD}{\GG,x\of F}{e}{F}}
 $$
 
+The restriction of the \ms{fix} rule to finite lattices is necessary to avoid
+nontermination.
+
+<!--
 The \ms{fix} rule is overly permissive in allowing fix-points to be taken at any
 lattice type; it needs to be be restricted to some computationally tractable
 class of lattice types.
+-->
 
 
 
@@ -235,7 +242,7 @@ $$
     \J{\GD}{\GG}{e_1}{A \to B} &
     \J{\GD}{\cdot}{e_2}{A}} \dg
   &=& \den{e_1}\dg\;(\den{e_2}\;\delta\;\triv)
-  & \text{(see below)}
+  & \text{\omitted{TODO}}
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{\monofn\bind{x} e}{M \mono N}}{
     \J{\GD}{\GG,x\of M}{e}{N}}\dg
@@ -273,10 +280,27 @@ $$
   \fux{\J{\GD}{\GG}{\pi_i\;e}{A_i}}{
     \J{\GD}{\GG}{e}{A_1 + A_2}}\dg
   &=& \pi_i\;(\den{e}\dg) & \pi_i,\,\den{e}\text{ monotone}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\fix{x}e}{F}}{
+    \J{\GD}{\GG,x\of F}{e}{F}}\dg
+  &=& \ms{fix}_{\den{F}_L}\;(\fn\bind{x} \den{e}\;\pair{\delta}{x}\;\gamma)
+  & \text{\omitted{TODO}}
 \end{array}
 $$
 
 \omitted{TODO: show denotation of $\ms{let}_\in$ is monotone in $\gamma$}
+
+\omitted{TODO: show denotation of $\fix{x} e$ is monotone in $\gamma$}
+
+Note that the denotation of $\fix{x} e$ being well-defined relies on the
+following lemma:
+
+\textbf{Lemma:} The denotation $\den{F}_L$ of a finite lattice type $F$ is a
+finite usl. \textbf{Proof:} \omitted{Omitted}.
+
+From this it follows immediately (\omitted{TODO: reference some proof of this
+  well-known fact}) that it is a complete join-semilattice, and therefore a
+complete lattice, and therefore has a least fix-point (by Knaster-Tarski).
 
 
 
