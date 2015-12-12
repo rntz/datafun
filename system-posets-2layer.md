@@ -10,7 +10,7 @@ sunt in culpa qui officia deserunt mollit anim id est laborum. -->
 
 # Notation
 
-Give sets $A,B$, posets $P,Q$, and usls (unital semilattices) $M,N$, we use the
+Given sets $A,B$, posets $P,Q$, and usls (unital semilattices) $M,N$, we use the
 following notation:
 \begin{center}
   \begin{tabular}{cl}
