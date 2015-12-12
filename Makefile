@@ -3,12 +3,12 @@
 PANDOC:=pandoc --standalone
 PANDOC_TEX:=--include-in-header header.sty --variable=geometry:margin=1in
 
-SOURCES:=README.md system.md
+SOURCES:=README.md system.md system-posets.md
 AUXIL:=$(wildcard *.sty) Makefile
 OUTPUTS=$(SOURCES:.md=.pdf) $(SOURCES:.md=.tex)
 
 .PHONY: all watch
-all: system.pdf
+all: system.pdf system-posets.pdf
 watch: all
 	@while inotifywait -e modify $(SOURCES) $(AUXIL); do make all; done
 
