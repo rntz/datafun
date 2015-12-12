@@ -3,7 +3,7 @@
 PANDOC:=pandoc --standalone
 PANDOC_TEX:=--include-in-header header.sty --variable=geometry:margin=1in
 
-SOURCES:=README.md system.md system-posets.md
+SOURCES:=README.md system.md system-posets-2layer.md
 AUXIL:=$(wildcard *.sty) Makefile
 OUTPUTS=$(SOURCES:.md=.pdf) $(SOURCES:.md=.tex)
 
