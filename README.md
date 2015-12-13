@@ -1,3 +1,15 @@
+# FILES
+
+`system.md`: Current description of Datafun's type theory.
+
+`system-posets.md`: Alternate version of Datafun based on posets as a
+generalization of semilattices.
+
+`system-posets-2layer.md`: More explicitly adjoint version of the above.
+
+`*.rkt`: Implementation of datafun, with bells and whistles. `repl.rkt` is most
+useful.
+
 # Datafun
 
     types           A,B ::= ℕ | A × B | A → B | L ↝ M | FS A
