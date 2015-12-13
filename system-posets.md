@@ -76,15 +76,21 @@ $$\begin{array}{rcl}
 
 ## Equality and subtyping
 
-\omitted{I'm not sure I've gotten everything here.}
+\omitted{I'm not sure I've gotten everything here. In particular, until I added
+  the equation $|A \to P| = A \to |P|$, I couldn't show that $||\N| \to \N| =
+  |\N| \to |\N|$.}
+
+\omitted{How would I formulate a theorem to show that I've caught everything?}
 
 Nontrivial laws for equality of types $P = Q$:
-$$\begin{array}{rclcl}
+$$\begin{array}{rcl}
   |A| &=& A\\
   |\op{P}| &=& |P|\\
   |P \x Q| &=& |P| \x |Q|\\
   |P + Q| &=& |P| + |Q|\\
   |P \lhd Q| &=& |P| + |Q|\\
+  |A \to P| &=& A \to |P|\\
+  |P \to A| &=& P \to A\\
   \op{A} &=& A\\
   \op{(\op{P})} &=& P\\
   \op{(P \x Q)} &=& \op{P} \x \op{Q}\\
