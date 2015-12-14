@@ -189,4 +189,5 @@ We need no elim rule for $|\_|$; \ms{cast} suffices, since $|P| \le P$.
 
 Likewise, we need no elim rule for $\ms{op}$, since $\op{(\op{P})} = P$.
 
-\omitted{I don't know what the elim rule for $A \lhd B$ should look like.}
+\omitted{I don't know what the elim rule for $A \lhd B$ should look like. It
+  doesn't seem to have a natural one in \ms{Poset}.}
