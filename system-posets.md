@@ -163,24 +163,28 @@ $$\ $$
   \J{\GG}{e}{P_1 + P_2} &
   \J{\GG,x_i\of P_i}{e_i}{Q}}
 $$\ $$
-\infer[\emptyset]{\J{\GG}{\emptyset}{M}}{} \qquad
-\infer[\vee]{\J{\GG}{e_1 \vee e_2}{M}}{\J{\GG}{e_i}{M}}
-$$\ $$
 \infer[\{\}]{\J{\GG}{\{e\}}{\FS\;A}}{\J{\dsc{\GG}}{e}{A}} \qquad
 \infer[\ms{let}_{\in}]{\J{\GG}{\letin{x}{e_1}{e_2}}{M}}{
   \J{\GG}{e_1}{\FS\;A} &
   \J{\GG,x\of A}{e_2}{M}}
 $$\ $$
+\infer[\emptyset]{\J{\GG}{\emptyset}{M}}{} \qquad
+\infer[\vee]{\J{\GG}{e_1 \vee e_2}{M}}{\J{\GG}{e_i}{M}}
+$$\ $$
 \infer[\ms{fix}]{\J{\GG}{\fix{x}e}{M}}{
   \J{\GG,x\of M}{e}{M}}
-$$\ $$
-\infer[|{\cdot}|]{\J{\GG}{|e|}{|P|}}{\J{\dsc{\GG}}{e}{P}} \qquad
-\infer[\ms{as}]{\J{\GG}{e~\ms{as}~P}{P}}{\J{\GG}{e}{|P|}}
+\qquad
+\infer[\ms{op}]{\J{\GG}{\op{e}}{\op{P}}}{\J{\op{\GG}}{e}{P}}
+\qquad
+\infer[|{\cdot}|]{\J{\GG}{|e|}{|P|}}{\J{\dsc{\GG}}{e}{P}}
+\qquad
+\infer[\ms{cast}]{\J{\GG}{e}{Q}}{\J{\GG}{e}{P} & P \le Q}
 $$
 
 The \ms{fix} rule is overly permissive in allowing fix-points to be taken at any
 lattice type; it needs to be be restricted to some computationally tractable
 class of lattice types.
 
-The \ms{as} rule is ``unnecessary'' in the presence of the subtyping rule that
-$|P| \le P$. (Type annotations might be needed for inference, though.)
+We need no elim rule for $|\_|$; \ms{cast} suffices, since $|P| \le P$.
+
+Likewise, we need no elim rule for $\ms{op}$, since $\op{(\op{P})} = P$.
