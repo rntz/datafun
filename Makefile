@@ -8,7 +8,7 @@ AUXIL:=$(wildcard *.sty) Makefile
 OUTPUTS=$(SOURCES:.md=.pdf) $(SOURCES:.md=.tex)
 
 .PHONY: all watch
-all: system.pdf system-posets.pdf
+all: system.pdf system-posets.pdf system-posets-2layer.pdf
 watch: all
 	@while inotifywait -e modify $(SOURCES) $(AUXIL); do make all; done
 

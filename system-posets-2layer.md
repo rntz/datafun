@@ -14,14 +14,14 @@ Given sets $A,B$, posets $P,Q$, and usls (unital semilattices) $M,N$, we use the
 following notation:
 \begin{center}
   \begin{tabular}{cl}
-    $|P|$ & the underlying set of the poset $P$\\
-    $P \x_\le Q$ & the poset of pairs of $P$s and $Q$s, ordered pointwise\\
-    $P +_\le Q$ & the poset on the disjoint sum of $P$ and $Q$, ordered disjointly\\
-    $P \lhd Q$ & the poset on the disjoint sum of $P$ and $Q$ where
+    $|P|$ & underlying set of the poset $P$\\
+    $P \x_\le Q$ & poset of pairs of $P$s and $Q$s, ordered pointwise\\
+    $P +_\le Q$ & poset on the disjoint sum of $P$ and $Q$, ordered disjointly\\
+    $P \lhd Q$ & poset on the disjoint sum of $P$ and $Q$ where
     $\ms{in}_1\; x \le \ms{in}_2\; y\ (\forall x \of P,y \of Q)$\\
-    $P \mono Q$ & the poset of monotone maps from $P$ to $Q$\\
-    $\ms{D}\,A$ & the discrete poset on $A$ (where $x \le y \iff x = y$)\\
-    $\FS\;A$ & the usl of finite sets of $A$s, ordered by inclusion
+    $P \mono Q$ & poset of monotone maps from $P$ to $Q$\\
+    $\D{A}$ & discrete poset on $A$ (where $x \le y \iff x = y$)\\
+    $\FS\;A$ & usl of finite sets of $A$s, ordered by inclusion
   \end{tabular}
 \end{center}
 
@@ -41,7 +41,7 @@ $$\begin{array}{lrrl}
 \text{lattice types} & M,N
 &::=& \N \pipe M \x N \pipe P \to M \pipe \FS\;A\\
 \text{expressions} & e
-&::=& x \pipe \fn\bind{x} \pipe e_1\;e_2
+&::=& x \pipe \fn\bind{x} e \pipe e_1\;e_2
 \pipe (e_1,e_2) \pipe \pi_i\;e\\
 &&|\,& \ms{in}_i\; e \pipe \case{e}{x}{e_1}{y}{e_2}\\
 &&|\,& |u|\\
@@ -70,26 +70,32 @@ Note that:\vspace{-0.8em}
 
 ## Semantics of types
 
-Types $A$ are interpreted as sets $\den{A}$. Poset types $P$ are interpreted as
-posets $\den{P}$. Lattice types are interpreted as usls $\den{M}_L$.
+\newcommand{\setden}[1]{\den{#1}_{\ms{set}}}
+\newcommand{\posden}[1]{\den{#1}_{\ms{pos}}}
+\newcommand{\latden}[1]{\den{#1}_{\ms{usl}}}
 
-Denotation of types $\den{A}$:
+Types $A$ are interpreted as sets $\setden{A}$. Poset types $P$ are interpreted
+as posets $\posden{P}$. As a lemma (\omitted{TODO: prove}), the denotation
+$\posden{M}$ of a lattice type $M$ is always an usl with computable unit and
+join.
+
+Denotation of types $\setden{A}$:
 $$\begin{array}{rcl}
-  \den{|P|} &=& |\den{P}|\\
-  \den{A \x B} &=& \den{A} \x \den{B}\\
-  \den{A + B} &=& \den{A} \uplus \den{B}\\
-  \den{A \to B} &=& \den{A} \to \den{B}
+  \setden{|P|} &=& |\posden{P}|\\
+  \setden{A \x B} &=& \setden{A} \x \setden{B}\\
+  \setden{A + B} &=& \setden{A} \uplus \setden{B}\\
+  \setden{A \to B} &=& \setden{A} \to \setden{B}
 \end{array}$$
 
-Denotation of posets $\den{P}$:
+Denotation of posets $\posden{P}$:
 $$\begin{array}{rcl}
-  \den{\ms{D}\,A} &=& \ms{D}\,\den{A}\\
-  \den{\N} &=& \pair{\N}{\le}\\
-  \den{P \x Q} &=& \den{P} \x_\le \den{Q}\\
-  \den{P + Q} &=& \den{P} +_\le \den{Q}\\
-  \den{P \lhd Q} &=& \den{P} \lhd \den{Q}\\
-  \den{P \to Q} &=& \den{P} \mono \den{Q}\\
-  \den{\FS\;A} &=& \FS\;\den{A}
+  \posden{\D{A}} &=& \D{\setden{A}}\\
+  \posden{\N} &=& \pair{\N}{\le}\\
+  \posden{P \x Q} &=& \posden{P} \x_\le \posden{Q}\\
+  \posden{P + Q} &=& \posden{P} +_\le \posden{Q}\\
+  \posden{P \lhd Q} &=& \posden{P} \lhd \posden{Q}\\
+  \posden{P \to Q} &=& \posden{P} \mono \posden{Q}\\
+  \posden{\FS\;A} &=& \FS\;\setden{A}
 \end{array}$$
 
 ## Equality and subtyping
@@ -123,6 +129,13 @@ $$\begin{array}{rcl}
   \D{|P|} &\le& P\\
   P + Q &\le& P \lhd Q
 \end{array}$$
+Moreover:\vspace{-0.8em}
+\begin{itemize}\setlength{\itemsep}{0pt}
+\item ${\x}$, ${+}$, $\lhd$, and $\op{\_}$ are covariant
+\item $P \to Q$ is covariant in $Q$ and contravariant in $P$
+\item \FS{} and \ms{D} are covariant (although I'm not sure there are any
+  non-reflexive subtyping relations $A \le B$)
+\end{itemize}
 
 \textbf{Theorem:} Type equality and subtyping are decidable. \textbf{Proof:}
 \omitted{TODO}.
@@ -139,22 +152,6 @@ $$
   \J{\GD_1,\GD_2}{\GG_1,\GG_2}{e}{A}}{\J{\GD_2,\GD_1}{\GG_2,\GG_1}{e}{A}}
 \quad
 \infer[\ms{weaken}]{\J{\GD,\GD'}{\GG,\GG'}{e}{A}}{\J{\GD}{\GG}{e}{A}}
-$$
-
-As originally formulated, there was an additional structural rule, \ms{forget}:
-$$
-\infer[\ms{forget}]{\J{\GD,x\of M}{\GG}{e}{N}}{\J{\GD}{\GG,x\of M}{e}{N}}
-$$
-
-However, \ms{forget} is not used in any proofs, and is moreover derivable from
-weakening and the rules for monotone functions (with a bit of term elaboration):
-$$
-\infer[\widehat{\ms{app}}]{\J{\GD,x\of M}{\GG}{(\monofn\bind{x} e)\; x}{N}}{
-  \infer[\ms{weaken}]{\J{\GD,x\of M}{\GG}{\monofn\bind{x}e}{M \mono N}}{
-    \infer[\monofn]{\J{\GD}{\GG}{\monofn\bind{x}e}{M \mono N}}{
-      \J{\GD}{\GG,x\of M}{e}{N}}} &
-  \infer[\ms{hyp}]{\J{\GD,x\of M}{\GG}{x}{M}}{}
-  }
 $$
 
 ### Other rules
