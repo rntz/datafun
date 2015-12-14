@@ -118,6 +118,8 @@ $$\begin{array}{rclcl}
   \D{(A \x B)} &=& \D{A} \x \D{B}\\
   \D{(A + B)} &=& \D{A} + \D{B}\\
   \D{(A \to B)} &=& \D{A} \to \D{B}\\
+  \D{|P \to \D{A}|} &=& P \to \D{A}
+  & \text{\omitted{is this true? necessary?}}\\
   \op{(\op{P})} &=& P\\
   \op{(P \x Q)} &=& \op{P} \x \op{Q}\\
   \op{(P + Q)} &=& \op{P} + \op{Q}\\
