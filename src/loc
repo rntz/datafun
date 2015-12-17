@@ -1,6 +1,8 @@
 #!/bin/bash
 # counts lines of code, ignoring whitespace & comments
 
+cd "$(dirname "$0")"
+
 filter() {
     egrep -v '^ *(;.*)?$|^#lang ' "$@"
 }

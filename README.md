@@ -7,8 +7,7 @@ generalization of semilattices.
 
 `system-posets-2layer.md`: More explicitly adjoint version of the above.
 
-`*.rkt`: Implementation of datafun, with bells and whistles. `repl.rkt` is most
-useful.
+`src/`: Implementation of datafun in Racket. `src/repl.rkt` is most useful.
 
 # Datafun
 
@@ -29,7 +28,7 @@ Semantics of types, in brief:
 
 - `ℕ`, `A × B`, and `A → B` all mean what you'd expect.
 
-- So called "lattice types" `L` represent *unital semilattices* ─ that is,
+- So-called "lattice types" `L` represent *unital semilattices* ─ that is,
   semilattices with a least element. Lattice types are simply a syntactic
   restriction of ordinary types: any lattice type is a type, but not all types
   are lattice types.
