@@ -5,7 +5,7 @@ PANDOC_TEX:=--include-in-header header.sty --variable=geometry:margin=1in
 
 SOURCES:=README.md system.md system-posets.md system-posets-2layer.md
 AUXIL:=$(wildcard *.sty) Makefile
-OUTPUTS=$(SOURCES:.md=.pdf) $(SOURCES:.md=.tex)
+OUTPUTS=$(addsuffix .pdf,$(basename $(SOURCES)))
 
 .PHONY: all watch
 all: system.pdf system-posets.pdf system-posets-2layer.pdf
@@ -20,3 +20,8 @@ watch: all
 
 clean:
 	rm -f $(OUTPUTS)
+
+# debugging: `make print-FOO` will print the value of $(FOO)
+.PHONY: print-%
+print-%:
+	@echo $*=$($*)
