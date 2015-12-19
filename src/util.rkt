@@ -111,7 +111,7 @@
 
 ;;; hash utilities
 (provide freeze-hash hash-union-with hash-union-right hash-intersection-with
-  hash-filter-keys hash-select-keys hash-map-values)
+  hash-filter-keys hash-select-keys hash-map-values hash-key-set)
 
 (define (freeze-hash h) (for/hash ([(k v) h]) (values k v)))
 
@@ -120,6 +120,8 @@
 
 (define (hash-select-keys h k)
   (hash-filter-keys (curry set-member? (for/set ([x k]) x)) h))
+
+(define (hash-key-set h) (list->set (hash-keys h)))
 
 (define (hash-map-values f h)
   (for/hash ([(k v) h])

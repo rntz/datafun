@@ -180,8 +180,7 @@
        (match t [(t-record fs) fs]
                 [_ (type-error "not a record type: ~v" t)]))
      (for ([(n e) fields])
-       ;; TODO: technically this should be a warning.
-       (define (err) (type-error "(WARNING) unnecessary field: ~a" n))
+       (define (err) (type-error "extra field in record literal: ~a" n))
        (elab-check e (hash-ref field-types n err) Γ))]
 
     [(e-tag name subj)

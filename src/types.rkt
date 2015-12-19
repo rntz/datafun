@@ -58,8 +58,13 @@
 (define/match (subtype? a b)
   [((t-tuple as) (t-tuple bs)) (eqmap subtype? as bs)]
   [((t-record as) (t-record bs))
-    (for/and ([(k v) bs])
-      (and (hash-has-key? as k) (subtype? (hash-ref as k) v)))]
+   ;; records are invariant in their field-sets - adding fields does not
+   ;; preserve type. this is because equality of records depends on what fields
+   ;; the *actual* value has, so it's not parametric in the field-set. the
+   ;; alternative is to make the meaning of equality type-indexed, and screw
+   ;; that.
+   (and (set=? (hash-key-set as) (hash-key-set bs))
+        (for/and ([(field a) as]) (subtype? a (hash-ref bs field))))]
   [((t-sum as) (t-sum bs))
     (for/and ([(k v) as])
       (and (hash-has-key? bs k) (subtype? v (hash-ref bs k))))]
@@ -72,7 +77,8 @@
 (define/match (type-lub a b)
   [((t-tuple as) (t-tuple bs)) (t-tuple (type-lubs as bs))]
   [((t-record as) (t-record bs))
-    (t-record (hash-intersection-with as bs type-lub))]
+   #:when (set=? (hash-key-set as) (hash-key-set bs))
+   (t-record (hash-intersection-with as bs type-lub))]
   [((t-sum as) (t-sum bs)) (t-sum (hash-union-with as bs type-lub))]
   [((t-mono a x) (t-mono b y))
     (t-mono (type-glb a b) (type-lub x y))]
@@ -84,7 +90,9 @@
 
 (define/match (type-glb a b)
   [((t-tuple as) (t-tuple bs)) (t-tuple (type-glbs as bs))]
-  [((t-record as) (t-record bs)) (t-record (hash-union-with as bs type-glb))]
+  [((t-record as) (t-record bs))
+   #:when (set=? (hash-key-set as) (hash-key-set bs))
+   (t-record (hash-union-with as bs type-glb))]
   [((t-sum as) (t-sum bs)) (t-sum (hash-intersection-with as bs type-glb))]
   [((t-fun a x) (t-fun b y))
     (t-fun (type-lub a b) (type-glb x y))]
