@@ -30,9 +30,8 @@
   (e-tuple exprs) (e-proj index expr)
   ;; fields is a hash from names to exprs
   (e-record fields)
-  ;; TODO: e-record-project
-  ;; TODO: rename e-record-extend
-  (e-record-merge left right) ;; merges two records. right-biased.
+  ;; TODO?: e-record-project (project a set of fields, like in rel.alg.)
+  (e-record-merge left right) ;; merges two records, right-biased.
   (e-tag tag expr)
   ;; branches is a list of case-branch structs.
   (e-case subject branches)
