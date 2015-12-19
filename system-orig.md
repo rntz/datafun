@@ -1,23 +1,32 @@
+<!-- Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
+dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident,
+sunt in culpa qui officia deserunt mollit anim id est laborum. -->
+
 # Language
 
 ## Syntax
 
 $$\begin{array}{lrrl}
 \text{types} & A,B
-&::=& \N \pipe A \x B \pipe A + B \pipe A \to B \pipe A \mono B \pipe \FS\;A\\
+&::=& \N \pipe A \x B \pipe A \to B \pipe M \mono N \pipe \FS\;A \pipe A + B\\
 \text{lattice types} & M,N
-&::=& \N \pipe M \x N \pipe A \to M \pipe A \mono M \pipe \FS\;A\\
-\text{finite types} & F,G
-&::=& F \x G \pipe F + G \pipe F \to G \pipe F \mono G \pipe \FS\;F\\
+&::=& \N \pipe M \x N \pipe A \to M \pipe M \mono N \pipe \FS\;A\\
+\text{finite lattices} & F,G
+&::=& F \x G \pipe F \to G \pipe F \mono G \pipe \FS\;F\\
 \text{expressions} & e
-&::=& x \pipe \fn\bind{x} e \pipe e_1\;e_2
-\pipe (e_1, e_2) \pipe \pi_i\;e \pipe \ms{in}_i\;e\\
-&&|\,& \case{e}{x}{e_1}{y}{e_2}\\
-&&|\,& \monocase{e}{x}{e_1}{y}{e_2}\\
+&::=& x \pipe \fn\bind{x} e \pipe \monofn\bind{x} e \pipe e_1\;e_2\\
+&&|\,& (e_1, e_2) \pipe \pi_i\;e\\
+&&|\,& \ms{in}_i\; e \pipe \case{e}{x}{e_1}{y}{e_2}\\
+&&|\,& \emptyset \pipe e_1 \vee e_2\\
 &&|\,& \{e\} \pipe \letin{x}{e_1}{e_2}\\
-&&|\,& \emptyset \pipe e_1 \vee e_2 \pipe \fix{x}e\\
-\text{contexts} & \GD,\GG &::=& \cdot \pipe \GD, x \of A \\
-\text{typing judgment} & J &::=& \J{\GD}{\GG}{e}{A}
+&&|\,& \fix{x}e\\
+\text{contexts} & \GD &::=& \cdot \pipe \GD, x \of A \\
+\text{monotone ctxts} & \GG &::=& \cdot \pipe \GG, x \of M\\
+\text{typing judgment} & J &::=& \J{\GD}{\cdot}{e}{A}\\
+&&|\,& \J{\GD}{\GG}{e}{M}
 \end{array}$$
 
 ## Typing rules
@@ -36,18 +45,17 @@ $$
 
 As originally formulated, there was an additional structural rule, \ms{forget}:
 $$
-\infer[\ms{forget}]{\J{\GD,x\of A}{\GG}{e}{B}}{\J{\GD}{\GG,x\of A}{e}{B}}
+\infer[\ms{forget}]{\J{\GD,x\of M}{\GG}{e}{N}}{\J{\GD}{\GG,x\of M}{e}{N}}
 $$
 
-However, \ms{forget} is not used in any proofs, and is moreover derivable, as a
-form of $\beta$-expansion, from weakening and the rules for monotone functions
-(with a bit of term elaboration):
+However, \ms{forget} is not used in any proofs, and is moreover derivable from
+weakening and the rules for monotone functions (with a bit of term elaboration):
 $$
-\infer[\widehat{\ms{app}}]{\J{\GD,x\of A}{\GG}{(\fn\bind{x} e)\; x}{B}}{
-  \infer[\ms{weaken}]{\J{\GD,x\of A}{\GG}{\fn\bind{x}e}{A \mono B}}{
-    \infer[\monofn]{\J{\GD}{\GG}{\fn\bind{x}e}{A \mono B}}{
-      \J{\GD}{\GG,x\of A}{e}{B}}} &
-  \infer[\ms{hyp}]{\J{\GD,x\of A}{\GG}{x}{A}}{}
+\infer[\widehat{\ms{app}}]{\J{\GD,x\of M}{\GG}{(\monofn\bind{x} e)\; x}{N}}{
+  \infer[\ms{weaken}]{\J{\GD,x\of M}{\GG}{\monofn\bind{x}e}{M \mono N}}{
+    \infer[\monofn]{\J{\GD}{\GG}{\monofn\bind{x}e}{M \mono N}}{
+      \J{\GD}{\GG,x\of M}{e}{N}}} &
+  \infer[\ms{hyp}]{\J{\GD,x\of M}{\GG}{x}{M}}{}
   }
 $$
 
@@ -57,43 +65,37 @@ $$
 \infer[\ms{hyp}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD \cup \GG} \qquad
 \infer[\fn]{\J{\GD}{\GG}{\fn\bind{x}{e}}{A \to B}}{
   \J{\GD,x\of A}{\GG}{e}{B}} \qquad
-\infer[\monofn]{\J{\GD}{\GG}{\fn\bind{x}{e}}{A \mono B}}{
-  \J{\GD}{\GG,x \of A}{e}{B}}
-$$\ $$
 \infer[\ms{app}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
   \J{\GD}{\GG}{e_1}{A \to B} &
-  \J{\GD}{\cdot}{e_2}{B}} \qquad
-\infer[\widehat{\ms{app}}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
-  \J{\GD}{\GG}{e_1}{A \mono B} &
-  \J{\GD}{\GG}{e_2}{A}}
+  \J{\GD}{\cdot}{e_2}{B}}
+$$\ $$
+\infer[\monofn]{\J{\GD}{\GG}{\monofn\bind{x}{e}}{M \mono N}}{
+  \J{\GD}{\GG,x \of M}{e}{N}} \qquad
+\infer[\widehat{\ms{app}}]{\J{\GD}{\GG}{e_1\;e_2}{N}}{
+  \J{\GD}{\GG}{e_1}{M \mono N} &
+  \J{\GD}{\GG}{e_2}{M}}
 $$\ $$
 \infer[(,\!)]{\J{\GD}{\GG}{(e_1, e_2)}{A_1 \x A_2}}{\J{\GD}{\GG}{e_i}{A_i}}
 \qquad
 \infer[\pi_i]{\J{\GD}{\GG}{\pi_i\; e}{A_i}}{\J{\GD}{\GG}{e}{A_1 \x A_2}}
-\qquad
-\infer[\ms{in}_i]{\J{\GD}{\GG}{\ms{in}_i\;e}{A_1 + A_2}}{
-  \J{\GD}{\GG}{e}{A_i}}
 $$\ $$
-\infer[\ms{case}]{\J{\GD}{\GG}{\case{e}{x_1}{e_1}{x_2}{e_2}}{C}}{
-  \J{\GD}{\cdot}{e}{A_1 + A_2} &
-  \J{\GD,x_i\of A_i}{\GG}{e_i}{C}
-}
-$$\ $$
-\infer[\widehat{\ms{case}}]{\J{\GD}{\GG}{\monocase{e}{x_1}{e_1}{x_2}{e_2}}{C}}{
-  \J{\GD}{\GG}{e}{A_1 + A_2} &
-  \J{\GD}{\GG, x_i \of A_i}{e_i}{C}
-}
-$$\ $$
-\infer[\{\}]{\J{\GD}{\GG}{\{e\}}{\FS\;A}}{\J{\GD}{\cdot}{e}{A}} \qquad
-\infer[\bigvee_\in]{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{M}}{
-  \J{\GD}{\GG}{e_1}{\FS\;A} &
-  \J{\GD,x\of A}{\GG}{e_2}{M}}
+\infer[\ms{in}_i]{\J{\GD}{\cdot}{\ms{in}_i\;e}{A_1 + A_2}}{
+  \J{\GD}{\cdot}{e}{A_i}} \qquad
+\infer[\ms{case}]{\J{\GD}{\GG}{\case{e}{x}{e_1}{y}{e_2}}{C}}{
+  \J{\GD}{\cdot}{e}{A + B} &
+  \J{\GD,x\of A}{\GG}{e_1}{C} &
+  \J{\GD,y\of B}{\GG}{e_2}{C}}
 $$\ $$
 \infer[\emptyset]{\J{\GD}{\GG}{\emptyset}{M}}{} \qquad
 \infer[\vee]{\J{\GD}{\GG}{e_1 \vee e_2}{M}}{\J{\GD}{\GG}{e_i}{M}}
-\qquad
-\infer[\ms{fix}]{\J{\GD}{\GG}{\fix{x}e}{M}}{
-  \J{\GD}{\GG,x\of M}{e}{M} & M~\ms{finite}}
+$$\ $$
+\infer[\{\}]{\J{\GD}{\GG}{\{e\}}{\FS\;A}}{\J{\GD}{\cdot}{e}{A}} \qquad
+\infer[\ms{let}_{\in}]{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{M}}{
+  \J{\GD}{\GG}{e_1}{\FS\;A} &
+  \J{\GD,x\of A}{\GG}{e_2}{M}}
+$$\ $$
+\infer[\ms{fix}]{\J{\GD}{\GG}{\fix{x}e}{F}}{
+  \J{\GD}{\GG,x\of F}{e}{F}}
 $$
 
 The restriction of the \ms{fix} rule to finite lattices is necessary to avoid
@@ -109,69 +111,95 @@ class of lattice types.
 
 # Denotational semantics
 
-A unital semilattice (usl) is a poset $\pair{A}{\le}$ in which every finite
-subset $X \subseteq_{\ms{fin}} A$ has a least upper bound, written $\bigvee X$.
-We define $\unit$ and $\vee$ with respect to an arbitrary usl as follows:
-$$\begin{array}{rcl}
-  \unit &=& \bigvee \emptyset\\
-  a \vee b &=& \bigvee \{a,b\}
-\end{array}$$
+A unital semilattice (usl) is a triple $\triple{A}{\unit}{\vee}$ of a set $A$, a
+unit (least element) $\unit : A$, and a join (least upper bound) operator
+${\vee} : A \x A \to A$ obeying associativity, commutativity, idempotence, and
+identity. Every usl has an associated poset, defined by $(a \le b) \iff (a \vee
+b = b)$. Usls may be seen as posets in which every finite set of elements has a
+least upper bound; conversely, finite sets (ordered by inclusion) are the free
+usl.
 
-We consider only usls in which $\bigvee$, and thus $\unit$ and $\vee$, are
-computable. However, equality $=$ and thus ordering $\le$ may not always be
-decidable. (Equality and ordering are interdefinable given $\vee$, since $(a
-\le b) \iff (a \vee b = b)$.)
+We write $\unit$, $\vee$, and $\le$ for the unit, join, and partial-order
+of an unspecified usl, or subscript them to specify a particular usl.
 
-<!-- Let \ms{Set} be the category of sets and functions and \ms{Poset} be the
-category of posets and monotone functions. -->
+We consider only usls in which $\unit$ and $\vee$ are computable. However,
+equality $=$ and thus ordering $\le$ may not always be decidable.
 
-Given posets $A,B$ we use the following notation:
+Let \ms{Set} be the category of sets and functions and \ms{USL} be the category
+of usls and monotone functions.
+
+Given sets $A,B$ and usls $M$, $N$ we use the following notation:
 \begin{center}\begin{tabular}{cl}
-    \one & one-element poset, $\{\triv\}$, $\triv \le \triv$\\
-    $A + B$ & disjointly-ordered poset on disjoint union of $A$ and $B$\\
-    $A \x B$ & pointwise poset on pairs of $A$s and $B$s\\
-    $A \to B$ & poset of functions from $A$ to $B$, ordered pointwise\\
-    $A \mono B$
-    & poset of monotone functions from $A$ to $B$, ordered pointwise\\
-    $\FS\;A$ & usl of finite subsets of $A$ ordered by inclusion\\
+    \one & one-element set, $\{\triv\}$\\
+    $M \mono N$ & set of monotone functions from $M$ to $N$\\
+    $\FS\;A$ & set of finite subsets of $A$\\
+    $|M|$ & underlying set of $M$\\
+    $\one_L$ & trivial one-element usl\\
+    $M \x_L N$ & pointwise usl on pairs of $M$s and $N$s\\
+    $A \to_L M$ & pointwise usl of functions from $A$ to $M$\\
+    $M \mono_L N$ & pointwise usl of monotone functions from $M$ to $N$\\
+    $\FS_L\;A$ & usl of finite subsets of $A$ under inclusion\\
 \end{tabular}\end{center}
-
-Note that $A \x B$ is an usl if $A$ and $B$ are, that $A \to B$ and $A \mono B$
-are usls if $B$ is, and $\FS\;A$ is always an usl (indeed, is the free usl on
-the underlying set of $A$). $A + B$ is an usl when exactly one of $A$ or $B$ is
-empty and the other is an usl, as otherwise it has no least element.
 
 ## Semantics of types and contexts
 
-Types are interpreted as posets:
-$$\begin{array}{lcl}
-  \den{\N} &=& \pair{\N}{\le}\\
-  \den{A + B} &=& \den{A} + \den{B}\\
-  \den{A \x B} &=& \den{A} \x \den{B}\\
-  \den{A \to B} &=& \den{A} \to \den{B}\\
-  \den{A \mono B} &=& \den{A} \mono \den{B}\\
-  \den{\FS\;A} &=& \FS\;\den{A}\\
+We define a semantics of types and contexts with the following signaturee:
+$$\begin{array}{ccc}
+  \den{A}, \den{\GD} &\in& \ms{Set}_0\\
+  \den{M}_L, \den{\GG}_L &\in& \ms{USL}_0\\
+  |\den{M}_L| &=& \den{M}
 \end{array}$$
 
-We extend this to contexts:
+We define $\den{A}$ as follows:
+$$\begin{array}{lcl}
+  \den{\N} &=& \N\\
+  \den{A \to B} &=& \den{A} \to \den{B}\\
+  \den{A \x B} &=& \den{A} \x \den{B}\\
+  \den{A + B} &=& \den{A} \uplus \den{B}\\
+  %% \den{\FS\;A} &=& \{x ~|~ x \subseteq \den{A} \wedge x\text{ is finite}\}\\
+  \den{\FS\;A} &=& \FS\;\den{A}\\
+  \den{M \mono N} &=& \den{M}_L \mono \den{N}_L
+\end{array}$$
+
+We define $\den{M}_L$ as follows:
+$$\begin{array}{lcl}
+  \den{\N}_L &=& \triple{\N}{0}{\ms{max}}\\
+  \den{A \to M}_L &=& \den{A} \to_L \den{M}_L\\
+  %% &=& \triple{\den{A \to M}}{\fn\bind{x}\unit}{%
+  %%   \fn\bind{\tuple{f,g}} \fn\bind{x} f(x) \vee g(x)}\\
+  \den{M \x N}_L &=& \den{A}_L \x_L \den{B}_L\\
+  %% \den{M \x N}_L &=& \triple{\den{A \x B}}{\tuple{\unit,\unit}}{%
+  %%   \fn\bind{\tuple{\tuple{a,x},\tuple{b,y}}} \pair{a \vee b}{x \vee y}}\\
+  %% \den{\FS\;A}_L &=& \triple{\den{\FS\;A}}{\emptyset}{\cup}\\
+  \den{\FS\;A}_L &=& \FS_L\;\den{A}\\
+  \den{M \mono N}_L &=& \den{M}_L \mono_L \den{N}_L\\
+  %% &=& \triple{\den{M}_L \mono \den{N}_L}{\fn\bind{x}\unit}{%
+  %%   \fn\bind{\tuple{f,g}}\fn\bind{x} f(x) \vee g(x)}
+\end{array}$$
+
+We extend these to contexts $\den{\GD}$, $\den{\GG}_L$ as follows:
 $$\begin{array}{lcl}
   \den{\cdot} &=& \one\\
-  \den{\GD,x\of A} &=& \den{\GD} \x \den{A}\\
+  \den{\GD,A} &=& \den{\GD} \x \den{A}\\
+  \den{\cdot}_L &=& \one_L\\
+  \den{\GG,M}_L &=& \den{\GG}_L \x_L \den{M}_L
 \end{array}$$
-
-As a lemma, we show that for ``lattice types'' $M$, $\den{M}$ is an usl with a
-computable $\bigvee$ (and thus computable $\unit$ and $\vee$). \omitted{TODO:
-  prove lemma}
 
 ## Semantics of type derivations
 
-\newcommand{\fux}[2]{\Den{\vcenter{\infer{#1}{#2}}}}
-\newcommand{\dg}{\;\delta\;\gamma}
-
 We define a semantics on type derivations $J$ with the following signature:
 $$\begin{array}{lcl}
-  \den{\J{\GD}{\GG}{e}{A}} &\in& \den{\GD} \to \den{\GG} \mono \den{A}
+  \den{\J{\GD}{\GG}{e}{M}} &\in& \den{\GD} \to \den{\GG}_L \mono \den{M}_L\\
+  \den{\J{\GD}{\cdot}{e}{A}} &\in& \den{\GD} \to \one \to \den{A}\\
 \end{array}$$
+
+The above signatures overlap in the case of type derivations of the form
+$\J{\GD}{\cdot}{e}{M}$. However, this is not a problem, since $(\den{\cdot}_L
+\mono \den{M}_L) = (\one_L \mono \den{M}_L) = (\one \to \den{M})$ as all
+functions out of \one{} are monotone.
+
+\newcommand{\fux}[2]{\Den{\vcenter{\infer{#1}{#2}}}}
+\newcommand{\dg}{\;\delta\;\gamma}
 
 $$
 \begin{array}{rcll}
@@ -186,13 +214,13 @@ $$
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{\emptyset}{M}}{\phantom{.}}\dg
   %% \den{\emptyset : M}\dg
-  &=& \unit & \text{constant in }\gamma
+  &=& \unit_{\den{M}_L} & \text{constant in }\gamma
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{e_1 \vee e_2}{M}}{
     \J{\GD}{\GG}{e_1}{M} &
     \J{\GD}{\GG}{e_2}{M}}\dg
   %% \den{e_1 \vee e_2 : M}\dg
-  &=& \den{e_1}\dg \vee \den{e_2}\dg
+  &=& \den{e_1}\dg \vee_{\den{M}_L} \den{e_2}\dg
   & \text{$\vee$ monotone, IHs}
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{\{e\}}{\FS\;A}}{\J{\GD}{\cdot}{e}{A}}\dg
@@ -203,16 +231,11 @@ $$
     \J{\GD,x\of A}{\GG}{e_2}{M}}\dg
   &=& \displaystyle\bigvee_{x \,\in\, \den{e_1}\,\delta\,\gamma}
   \den{e_2}\;\tuple{\delta,x}\;\gamma
-  & \text{\omitted{TODO}}
+  & \text{(see below)}
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{\fn\bind{x} e}{A \to B}}{
     \J{\GD,x\of A}{\GG}{e}{B}}\dg
   &=& x \mapsto \den{e}\;\tuple{\delta,x}\;\gamma
-  & \den{e}\text{ monotone}
-  \vspace{.8em}\\
-  \fux{\J{\GD}{\GG}{\fn\bind{x} e}{A \mono B}}{
-    \J{\GD}{\GG,x\of A}{e}{B}}\dg
-  &=& x \mapsto \den{e} \;\delta \;\tuple{\gamma,x}
   & \den{e}\text{ monotone}
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{e_1\;e_2}{B}}{
@@ -221,20 +244,25 @@ $$
   &=& \den{e_1}\dg\;(\den{e_2}\;\delta\;\triv)
   & \text{\omitted{TODO}}
   \vspace{.8em}\\
-  \fux{\J{\GD}{\GG}{e_1\;e_2}{B}}{
-    \J{\GD}{\GG}{e_1}{A \mono B} &
-    \J{\GD}{\GG}{e_2}{B}} \dg
+  \fux{\J{\GD}{\GG}{\monofn\bind{x} e}{M \mono N}}{
+    \J{\GD}{\GG,x\of M}{e}{N}}\dg
+  &=& x \mapsto \den{e} \;\delta \;\tuple{\gamma,x}
+  & \den{e}\text{ monotone}\\
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{e_1\;e_2}{N}}{
+    \J{\GD}{\GG}{e_1}{M \mono N} &
+    \J{\GD}{\GG}{e_2}{N}} \dg
   &=& \den{e_1}\dg\;(\den{e_2}\dg)
   & \den{e_i}\text{ monotone}
   \vspace{.8em}\\
-  \fux{\J{\GD}{\GG}{\ms{in}_i\;e}{A_1 + A_2}}{
-    \J{\GD}{\GG}{e}{A_i}}\dg
-  &=& \ms{in}_i\;(\den{e}\dg)
-  & \ms{in}_i, \den{e}\text{ monotone}
+  \fux{\J{\GD}{\cdot}{\ms{in}_i\;e}{A_1 + A_2}}{
+    \J{\GD}{\cdot}{e}{A_i}}\;\delta\;\triv
+  &=& \ms{in}_i\;(\den{e} \;\delta\;\triv)
+  & \text{(meaningless)}
   \vspace{.8em}\\
-  \fux{\J{\GD}{\GG}{\case{e}{x_1}{e_1}{x_2}{e_2}}{B}}{
+  \fux{\J{\GD}{\GG}{\case{e}{x}{e_1}{x}{e_2}}{B}}{
     \J{\GD}{\cdot}{e}{A_1 + A_2} &
-    \J{\GD,x_i\of A_i}{\GG}{e_i}{B}}
+    \J{\GD,x\of A_i}{\GG}{e_i}{B}}
   \dg
   &=&
   \begin{cases}
@@ -245,35 +273,30 @@ $$
   \end{cases}
   & \den{e_i}\text{ monotone}
   \vspace{.8em}\\
-  %% TODO: denotation of \monocase
-  \fux{\J{\GD}{\GG}{\monocase{e}{x_1}{e_1}{x_2}{e_2}}{B}}{
-    \J{\GD}{\GG}{e}{A_1 + A_2} &
-    \J{\GD}{\GG,x_i\of A_i}{e_i}{B}
-  }\dg
-  &=& \text{\omitted{TODO}}
-  \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{(e_1, e_2)}{A_1 \x A_2}}{
     \J{\GD}{\GG}{e_i}{A_i}}\dg
-  &=& \pair{\den{e_1}\dg}{\den{e_2}\dg} & \den{e_i}\text{ monotone}
+  &=& \pair{e_1\dg}{e_2\dg} & \den{e_i}\text{ monotone}
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{\pi_i\;e}{A_i}}{
     \J{\GD}{\GG}{e}{A_1 + A_2}}\dg
   &=& \pi_i\;(\den{e}\dg) & \pi_i,\,\den{e}\text{ monotone}
   \vspace{.8em}\\
-  \fux{\J{\GD}{\GG}{\fix{x}e}{M}}{
-    \J{\GD}{\GG,x\of M}{e}{M} &
-    M~\ms{finite}
-  }\dg
-  &=& \ms{fix}_{\den{M}}\;(\fn\bind{x} \den{e}\;\pair{\delta}{x}\;\gamma)
+  \fux{\J{\GD}{\GG}{\fix{x}e}{F}}{
+    \J{\GD}{\GG,x\of F}{e}{F}}\dg
+  &=& \ms{fix}_{\den{F}_L}\;(\fn\bind{x} \den{e}\;\pair{\delta}{x}\;\gamma)
   & \text{\omitted{TODO}}
 \end{array}
 $$
 
+\omitted{TODO: show denotation of $\ms{let}_\in$ is monotone in $\gamma$}
+
+\omitted{TODO: show denotation of $\fix{x} e$ is monotone in $\gamma$}
+
 Note that the denotation of $\fix{x} e$ being well-defined relies on the
 following lemma:
 
-\textbf{Lemma:} The denotation $\den{M}$ of a \emph{finite} lattice type $M$ is
-a finite usl. \textbf{Proof:} \omitted{Omitted}.
+\textbf{Lemma:} The denotation $\den{F}_L$ of a finite lattice type $F$ is a
+finite usl. \textbf{Proof:} \omitted{Omitted}.
 
 From this it follows immediately (\omitted{TODO: reference some proof of this
   well-known fact}) that it is a complete join-semilattice, and therefore a
@@ -304,14 +327,13 @@ $$
   \sub{e/x} x &=& e\\
   \sub{e/x} y &=& y\\
   \sub{e/x}(\fn\bind{y} e') &=& \fn\bind{y} \sub{e/x} e'\\
+  \sub{e/x}(\monofn\bind{y} e') &=& \monofn\bind{y} \sub{e/x} e'\\
   \sub{e/x}(e_1\;e_2) &=& (\sub{e/x} e_1)\;(\sub{e/x}e_2)\\
   \sub{e/x}(e_1, e_2) &=& (\sub{e/x}e_1, \sub{e/x}e_2)\\
   \sub{e/x}(\pi_i\; e') &=& \pi_i\;(\sub{e/x} e')\\
   \sub{e/x}(\ms{in}_i\;e') &=& \ms{in}_i\;(\sub{e/x}e')\\
   \sub{e/x}(\case{e'}{y}{e_1}{z}{e_2})
   &=& \case{\sub{e/x} e'}{y}{\sub{e/x}e_1}{z}{\sub{e/x}e_2}\\
-  \sub{e/x}(\monocase{e'}{y}{e_1}{z}{e_2})
-  &=& \monocase{\sub{e/x} e'}{y}{\sub{e/x}e_1}{z}{\sub{e/x}e_2}\\
   \sub{e/x} \emptyset &=& \emptyset\\
   \sub{e/x}(e_1 \vee e_2) &=& (\sub{e/x}e_1) \vee (\sub{e/x} e_2)\\
   \sub{e/x}\{e'\} &=& \{\sub{e/x}e'\}\\
@@ -429,8 +451,6 @@ case that $\J{\GD}{\cdot}{e}{A}$:
       \J{\GD,z\of C}{\GG}{\sub{e/x}e_2}{D}
     }
     \]
-
-  \item[Case $\widehat{\ms{case}}$:] \omitted{TODO}
 
   \item[Case $\{\}$:] Given \[
     \infer[\{\}]{\J{\GD,x\of A}{\GG}{\{e'\}}{\FS\;B}}{
@@ -564,8 +584,6 @@ $\J{\GD}{\GG}{e}{M}$ in each case:
       \J{\GD,y\of A}{\GG}{\sub{e/x} e_1}{N} &
       \J{\GD,z\of B}{\GG}{\sub{e/x} e_2}{N}}
     \]
-
-  \item[Case $\widehat{\ms{case}}$:] \omitted{TODO}
 
   \item[Case $\{\}$:] Given \[
     \infer{\J{\GD}{\GG,x\of M}{\{e'\}}{\FS\;A}}{
