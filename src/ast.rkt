@@ -30,11 +30,15 @@
   (e-tuple exprs) (e-proj index expr)
   ;; fields is a hash from names to exprs
   (e-record fields)
+  ;; TODO: e-record-project
+  ;; TODO: rename e-record-extend
   (e-record-merge left right) ;; merges two records. right-biased.
   (e-tag tag expr)
   ;; branches is a list of case-branch structs.
   (e-case subject branches)
+  ;; TODO: (e-case-mono subject branches)
   (e-join exprs)
+  ;; TODO: rename e-letin to e-join-in, or something
   (e-set exprs) (e-letin var arg body)
   (e-fix var body)
   ;; let binding. TODO: support pats here?
@@ -76,56 +80,7 @@
   (syntax-parser [(× a ...) #'(t-tuple (list a ...))]))
 
 
-;;; Type stuff
-(define type=? equal?)
-
-(define (type-wf? x)
-  (match x
-    [(t-mono a b) (andmap (andf type-wf? lattice-type?) (list a b))]
-    [(t-fun a b) (andmap type-wf? (list a b))]
-    [(t-fs a) (type-wf? a)]
-    [(t-tuple ts) (andmap type-wf? ts)]
-    [(t-sum bs) ((hash/c symbol? type-wf? #:immutable #t) bs)]
-    [(t-record as) ((hash/c symbol? type-wf? #:immutable #t) as)]
-    [_ #t]))
-
-(define (lattice-type? x)
-  (match x
-    [(or (t-bool) (t-nat) (t-mono _ _) (t-fs _)) #t]
-    [(or (t-str) (t-sum _)) #f]
-    [(t-tuple ts) (andmap lattice-type? ts)]
-    [(t-record as) (andmap lattice-type? (hash-values as))]
-    [(t-fun _ r) (lattice-type? r)]))
-
-(define (eqtype? x)
-  (match x
-    [(or (t-bool) (t-nat) (t-str)) #t]
-    [(or (t-record (app hash-values as)) (t-sum (app hash-values as))
-         (t-tuple as))
-     (andmap eqtype? as)]
-    [(or (t-fun _ _) (t-mono _ _)) #f]
-    [(t-fs a) (eqtype? a)]))
-
-(define (finite-type? t)
-  (match t
-    [(t-bool) #t]
-    [(t-fs a) (finite-type? a)]
-    [(or (t-tuple as)
-         (t-record (app hash-values as)) (t-sum (app hash-values as)))
-     (andmap finite-type? as)]
-    [(or (t-fun a b) (t-mono a b)) (andmap finite-type? (list a b))]
-    [_ #f]))
-
-(define (fixpoint-type? t)
-  (match t
-    [(or (t-bool) (t-nat)) #t]
-    [(or (t-tuple as) (t-record (app hash-values as)))
-     (andmap fixpoint-type? as)]
-    [(t-fs a) (eqtype? a)]
-    [_ ((andf finite-type? lattice-type?) t)]))
-
-
-;;; expression & pattern stuff
+;;; Expression & pattern stuff
 (define (pat-vars p)
   (match p
     [(or (p-wild) (p-lit _)) '()]
@@ -133,7 +88,6 @@
     [(p-tuple ps) (append* (map pat-vars ps))]
     [(p-tag _ p) (pat-vars p)]))
 
-
 ;;; Literals & primitives
 (define (lit? x) (if (lit-type x) #t #f))
 (define (lit-type l)
@@ -145,24 +99,3 @@
 
 (define prims (list->set '(= <= + - * subset? print puts ++)))
 (define (prim? x) (set-member? prims x))
-
-(define (prim-type-infer p)
-  (match p
-    ;; TODO?: extend <= to all equality types?
-    ['<= (-> Nat (~> Nat Bool))]
-    [(or '+ '*) (~> Nat Nat Nat)]
-    ['- (~> Nat (-> Nat Nat))]
-    ['++ (-> Str Str Str)]
-    ['puts (~> Str (×))]
-    [_ #f]))
-
-(define (prim-has-type? p t)
-  (define pt (prim-type-infer t))
-  (if pt (type=? t pt)
-    (match* (p t)
-      [('= (-> a b (t-bool)))
-        (and (type=? a b) (eqtype? a))]
-      [('subset? (-> (FS a) (~> (FS b) (t-bool))))
-        (and (type=? a b) (eqtype? a))]
-      [('print (~> _ (×))) #t]
-      [(_ _) #f])))

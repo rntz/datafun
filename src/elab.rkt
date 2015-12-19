@@ -1,65 +1,28 @@
 #lang racket
 
-(require "util.rkt" "ast.rkt")
+(require "util.rkt" "ast.rkt" "types.rkt")
 (provide (all-defined-out))
 
-(define (type-error fmt . args)
-  (error (apply format (string-append "type error: " fmt) args)))
+(define (prim-type-infer p)
+  (match p
+    ;; TODO?: extend <= to all equality types?
+    ['<= (-> Nat (~> Nat Bool))]
+    [(or '+ '*) (~> Nat Nat Nat)]
+    ['- (~> Nat (-> Nat Nat))]
+    ['++ (-> Str Str Str)]
+    ['puts (~> Str (×))]
+    [_ #f]))
 
-;;; FIXME: the typechecker doesn't actually check the condition that, if there
-;;; are monotone variables in the context, the expression we're checking must
-;;; have a lattice type!
-;;;
-;;; I think this is OK, but it's *not* the type system outlined in the paper!
-
-
-;; Type utilities.
-(define/match (subtype? a b)
-  [((t-tuple as) (t-tuple bs)) (eqmap subtype? as bs)]
-  [((t-record as) (t-record bs))
-    (for/and ([(k v) bs])
-      (and (hash-has-key? as k) (subtype? (hash-ref as k) v)))]
-  [((t-sum as) (t-sum bs))
-    (for/and ([(k v) as])
-      (and (hash-has-key? bs k) (subtype? v (hash-ref bs k))))]
-  [((t-mono a x) (or (t-fun b y) (t-mono b y)))
-    (and (subtype? b a) (subtype? x y))]
-  [((t-mono a x) (t-mono b y))
-    (and (subtype? b a) (subtype? x y))]
-  [(x y) (type=? x y)])
-
-(define/match (type-lub a b)
-  [((t-tuple as) (t-tuple bs)) (t-tuple (type-lubs as bs))]
-  [((t-record as) (t-record bs))
-    (t-record (hash-intersection-with as bs type-lub))]
-  [((t-sum as) (t-sum bs)) (t-sum (hash-union-with as bs type-lub))]
-  [((t-mono a x) (t-mono b y))
-    (t-mono (type-glb a b) (type-lub x y))]
-  [((or (t-mono a x) (t-fun a x)) (or (t-mono b y) (t-fun b y)))
-    (t-fun (type-glb a b) (type-lub x y))]
-  [((t-fs a) (t-fs b)) (t-fs (type-lub a b))]
-  [(x y) #:when (type=? x y) x]
-  [(x y) (type-error "no lub: ~v and ~v" x y)])
-
-(define/match (type-glb a b)
-  [((t-tuple as) (t-tuple bs)) (t-tuple (type-glbs as bs))]
-  [((t-record as) (t-record bs)) (t-record (hash-union-with as bs type-glb))]
-  [((t-sum as) (t-sum bs)) (t-sum (hash-intersection-with as bs type-glb))]
-  [((t-fun a x) (t-fun b y))
-    (t-fun (type-lub a b) (type-glb x y))]
-  [((or (t-mono a x) (t-fun a x)) (or (t-mono b y) (t-fun b y)))
-    (t-mono (type-lub a b) (type-glb x y))]
-  [((t-fs a) (t-fs b)) (t-fs (type-glb a b))]
-  [(x y) #:when (type=? x y) x]
-  [(x y) (type-error "no glb: ~v and ~v" x y)])
-
-(define (type-lubs as bs)
-  (unless (= (length as) (length bs)) (type-error "lists of unequal length"))
-  (map type-lub as bs))
-
-(define (type-glbs as bs)
-  (unless (= (length as) (length bs)) (type-error "lists of unequal length"))
-  (map type-glb as bs))
+(define (prim-has-type? p t)
+  (define pt (prim-type-infer t))
+  (if pt (type=? t pt)
+    (match* (p t)
+      [('= (-> a b (t-bool)))
+        (and (type=? a b) (eqtype? a))]
+      [('subset? (-> (FS a) (~> (FS b) (t-bool))))
+        (and (type=? a b) (eqtype? a))]
+      [('print (~> _ (×))) #t]
+      [(_ _) #f])))
 
 
 ;; an env is a list of hyp(othese)s. h-any is an unrestricted hyp; h-mono is a
