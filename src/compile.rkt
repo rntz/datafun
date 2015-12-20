@@ -47,7 +47,7 @@
          #,@(for/list ([b branches])
               (match-define (case-branch pat body) b)
               (define-values (ids rkt-pat) (compile-pat pat))
-              #`[#,rkt-pat #,(compile-expr body (env-extend ids Γ))]))]
+              #`[#,rkt-pat #,(compile-expr body (append (reverse ids) Γ))]))]
     [(e-join es) #`(#,(joiner-for (info)) #,@(map r es))]
     [(e-set es) #`(set #,@(map r es))]
     [(e-letin v arg body) TODO]

@@ -21,6 +21,7 @@
   (e-ann type expr)
   ;; DeBruijn indexing w/ name for readability
   (e-var name index)
+  (e-free-var name)
   ;; used for literals & primitive functions.
   (e-lit value)
   (e-prim prim)

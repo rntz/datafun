@@ -1,6 +1,6 @@
 #lang racket
 
-(require "util.rkt" "ast.rkt" "parse.rkt" "elab.rkt" "compile.rkt")
+(require "util.rkt" "ast.rkt" "parse.rkt" "env.rkt" "elab.rkt" "compile.rkt")
 
 (define (show-err e) (printf "** ~a\n" (exn-message e)))
 
@@ -15,7 +15,7 @@
        (with-handlers ([exn:fail? show-err])
          (define expr (parse-expr line '()))
          (printf "expr: ~v\n" expr)
-         (define expr-type (elab-infer expr '()))
+         (define expr-type (elab-infer expr empty-env))
          (printf "type: ~v\n" expr-type)
          ;; (display "info: ") (pretty-print *elab-info*)
          (define code (compile-expr expr))

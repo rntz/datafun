@@ -1,6 +1,6 @@
 #lang racket
 
-(require "util.rkt" "ast.rkt" "types.rkt")
+(require "util.rkt" "ast.rkt" "types.rkt" "env.rkt")
 (provide (all-defined-out))
 
 (define (prim-type-infer p)
@@ -25,48 +25,40 @@
       [(_ _) #f])))
 
 
-;; an env is a list of hyp(othese)s. h-any is an unrestricted hyp; h-mono is a
-;; monotone hyp; h-hidden is a monotone hyp hidden by entry into a constant
-;; expression (e.g. argument to a non-monotone function).
+;; Elaboration uses envs mapping bound variables to hyp(othese)s. h-any is an
+;; unrestricted hyp; h-mono is a monotone hyp; h-hidden is a monotone hyp hidden
+;; by entry into a constant expression (e.g. argument to a non-monotone
+;; function).
+;;
+;; "Free" variables are always unrestricted, and are just mapped to their types.
 (enum hyp (h-any type) (h-mono type) (h-hidden))
-(define env? (listof h-any?))
-
-(define env-cons cons)
-(define env-ref list-ref)
-(define (env-extend extension env) (append (reverse extension) env))
 
 (define (env-hide-mono Γ)
-  (map (match-lambda [(h-mono _) (h-hidden)] [x x]) Γ))
-
-;; Elaborated expression forms to distinguish ordinary from monotone functions
-;; and applications.
-(struct e-lam-fun e-lam () #:transparent)
-(struct e-lam-mono e-lam () #:transparent)
-
-(struct e-app-fun e-app () #:transparent)
-(struct e-app-mono e-app () #:transparent)
+  (env-map-bound (match-lambda [(h-mono _) (h-hidden)] [x x]) Γ))
 
 
-;;; Inference & checking.
-
-;; maps some exprs to info about them that is used for compilation:
+;; Maps some exprs to info about them that is used for compilation:
 ;; - e-lam, e-app: 'fun or 'mono, for ordinary or monotone {lambdas,application}
 ;; - e-join, e-prim, e-fix: its type
 (define *elab-info*  (make-weak-hasheq))
 (define (elab-info e [orelse (lambda () (error "no elab info for:" e))])
   (hash-ref *elab-info* e orelse))
 
-;; returns type & updates expr-elab-info.
+;; Returns type & updates expr-elab-info. Γ is an env mapping variables to types
+;; (see above.
 (define (elab-infer e Γ)
-  ;; (printf "(elab-infer ~v ~v)\n" Γ e)
+  ;; (printf "(elab-infer ~v ~v)\n" e Γ)
   (define (set-info i) (hash-set! *elab-info* e i))
   (define (remember-type t) (set-info t) t)
   (match e
     [(e-ann t e) (elab-check e t Γ) t]
     [(e-lit v) (lit-type v)]
 
+    [(e-free-var n)
+     (env-free-ref e n (lambda () (type-error "undefined variable: ~a" n)))]
+
     [(e-var n i)
-      (match (env-ref Γ i)
+      (match (env-ref Γ i (lambda () (type-error "unbound variable: ~a" n)))
         [(or (h-any t) (h-mono t)) t]
         [_ (type-error "hidden monotone variable: ~a" n)])]
 
@@ -193,18 +185,18 @@
         [_ (type-error "not a sum type: ~v" t)])]
 
     [(e-case subj branches)
-      ;; TODO: case completeness checking.
-      ;;
-      ;; TODO: think about when it might be ok not to hide the monotone
-      ;; environment when typechecking the case-subject. I think only for
-      ;; irrefutable patterns, a la (let p = e in e)?
+     ;; TODO: case completeness checking.
+     ;;
+     ;; TODO: think about when it might be ok not to hide the monotone
+     ;; environment when typechecking the case-subject. I think only for
+     ;; irrefutable patterns, a la (let p = e in e)?
      (define subj-t (elab-infer subj (env-hide-mono Γ)))
      (for ([b branches])
        (match-define (case-branch p body) b)
-       (define pat-env (check-pat Γ subj-t p))
        ;; it's okay to use h-any here ONLY because we hid the monotone
        ;; environment when checking subj.
-       (elab-check body t (append (map h-any pat-env) Γ)))]
+       (define pat-hyps (map h-any (check-pat Γ subj-t p)))
+       (elab-check body t (env-extend Γ pat-hyps)))]
 
     [(e-join as)
      (unless (lattice-type? t) (error "not a lattice type: ~v" t))
@@ -243,27 +235,28 @@
     [_ (type-error "not a record: ~v" e)]))
 
 ;; checks a pattern against a type and returns the env that the pattern binds.
+;; returns list of types of variables the pattern binds.
+;; e.g. (p-tuple (p-var X) (p-var Y)) --> (list X's-type Y's-type)
 (define (check-pat Γ t p)
   (match p
     [(p-wild) '()]
     [(p-var _) (list t)]
     [(p-lit l)
-      (if (subtype? t (or (lit-type l) (type-error "unknown literal type")))
-        '()
-        (type-error "wrong type when matched against literal"))]
+     (if (subtype? t (or (lit-type l) (type-error "unknown literal type")))
+         '()
+         (type-error "wrong type when matched against literal"))]
     [(p-tuple pats)
-      (match t
-        [(t-tuple types)
-          (if (= (length types) (length pats))
-            ;; why (append* (reverse ...))?
-            (append* (reverse (map (curry check-pat Γ) types pats)))
+     (match t
+       [(t-tuple types)
+        (if (= (length types) (length pats))
+            (append* (map (curry check-pat Γ) types pats))
             (type-error "wrong length tuple pattern"))]
-        [_ (type-error "not a tuple")])]
+       [_ (type-error "not a tuple")])]
     [(p-tag tag pat)
-      (match t
-        [(t-sum bs) (if (dict-has-key? bs tag)
-                      (check-pat Γ (hash-ref bs tag) pat)
-                      ;; FIXME: this is actually ok, it's just dead code; should
-                      ;; warn, not error
-                      (type-error "(WARNING) no such branch in tagged sum"))]
-        [_ (type-error "not a sum")])]))
+     (match t
+       [(t-sum bs) (if (dict-has-key? bs tag)
+                       (check-pat Γ (hash-ref bs tag) pat)
+                       ;; TODO: this is actually ok, it's just dead code; should
+                       ;; warn, not error
+                       (type-error "(WARNING) no such branch in tagged sum"))]
+       [_ (type-error "not a sum")])]))
