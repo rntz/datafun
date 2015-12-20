@@ -51,7 +51,12 @@
     [_ #f]))
 
 (define (fixpoint-type? t)
-  (and (eqtype? t) (finite-type? t) (lattice-type? t)))
+  ;; for now this is all it takes. if we ever introduce lattice types which have
+  ;; infinite descending chains, this'll get more complicated.
+  ;;
+  ;; also, functions of finite type should perhaps be allowed, but that's really
+  ;; because they're secretly equality types. (TODO?)
+  (and (lattice-type? t) (eqtype? t)))
 
 
 ;; Subtyping & the type lattice.
