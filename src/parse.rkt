@@ -3,15 +3,15 @@
 (require "util.rkt" "ast.rkt")
 (provide (all-defined-out))
 
-;; a simple s-expression syntax for the language.
-;; contexts Γ are simple lists of identifiers.
+;; a simple s-expression syntax for datafun.
 
 (define (reserved-form? x) (set-member? reserved-forms x))
 (define reserved-forms
   (list->set '(: empty fn λ cons π proj record record-merge extend-record tag
                quote case join set let fix)))
 
-;; TODO: record expressions!
+;; contexts Γ are simple lists of identifiers - used to map variable names to
+;; debruijn indices.
 (define (parse-expr e Γ)
   ;; (printf "(parse-expr ~v ~v)\n" e Γ)
   (define (r e) (parse-expr e Γ))
