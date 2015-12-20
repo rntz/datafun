@@ -1,0 +1,4 @@
+- support declarations properly
+
+  + change 'compile-expr & co to take an env rather than a list, so we can
+    support "free variables"
