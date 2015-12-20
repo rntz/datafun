@@ -16,6 +16,7 @@
 (define ((df++ x) y) (string-append x y))
 (define ((df-subset? x) y) (subset? x y))
 (define (df-max . xs) (if (null? xs) 0 (apply max xs)))
+(define (df-or . xs) (ormap identity xs))
 
 ;; contexts Γ are lists of racket identifiers.
 (define (compile-expr e [Γ '()])
@@ -84,7 +85,7 @@
 ;; TODO: this needs optimized.
 (define (joiner-for t)
   (match t
-    [(t-bool) #'(curry ormap identity)]
+    [(t-bool) #'df-or]
     [(t-nat) #'df-max]
     [(t-fs _) #'df-union]
     [(or (t-fun i o) (t-mono i o))
