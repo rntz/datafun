@@ -3,12 +3,12 @@
 PANDOC:=pandoc --standalone
 PANDOC_TEX:=--include-in-header header.sty --variable=geometry:margin=1in
 
-SOURCES:=$(wildcard *.md)
+SOURCES:=$(wildcard system*.md)
 AUXIL:=$(wildcard *.sty) Makefile
-OUTPUTS=$(addsuffix .pdf,$(basename $(SOURCES)))
+PDFS:=$(addsuffix .pdf,$(basename $(SOURCES)))
 
 .PHONY: all watch
-all: system.pdf system-posets.pdf system-posets-2layer.pdf
+all: $(PDFS)
 watch: all
 	@while inotifywait -e modify $(SOURCES) $(AUXIL); do make all; done
 
@@ -19,7 +19,7 @@ watch: all
 	$(PANDOC) $(PANDOC_TEX) $< -o $@
 
 clean:
-	rm -f $(OUTPUTS)
+	rm -f *.pdf
 
 # debugging: `make print-FOO` will print the value of $(FOO)
 .PHONY: print-%
