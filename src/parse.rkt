@@ -71,7 +71,7 @@
     ;; meaning (foo bar -> (baz quux ~> bar))
     [`(,as ... -> ,r) (foldr t-fun (parse-type r) (map parse-type as))]
     [`(,as ... ~> ,r) (foldr t-mono (parse-type r) (map parse-type as))]
-    [`(fs ,a) (t-fs (parse-type a))]
+    [`(set ,a) (t-fs (parse-type a))]
     [_ (error "unfamiliar type:" t)]))
 
 (define (parse-pat p)
