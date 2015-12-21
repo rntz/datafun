@@ -3,18 +3,20 @@
 (require "util.rkt" "ast.rkt" "env.rkt" "elab.rkt" "runtime.rkt")
 (provide compile-expr)
 
-;; contexts Γ are lists of racket identifiers.
-(define (compile-expr e [Γ '()])
+;; contexts Γ are envs mapping variables to what they should compile to (an
+;; identifier, generally).
+(define (compile-expr e [Γ empty-env])
   (define (info) (elab-info e))
   (define (r e) (compile-expr e Γ))
   (match e
     [(e-ann _ e) (r e)]
-    [(e-var _ i) (list-ref Γ i)]
+    [(e-free-var n) (env-free-ref Γ n)]
+    [(e-var _ i) (env-ref Γ i)]
     [(e-lit l) #`'#,l]
     [(e-prim p) (compile-prim p (info))]
     [(e-lam v body)
      (define var (gensym v))
-     #`(lambda (#,var) #,(compile-expr body (cons var Γ)))]
+     #`(lambda (#,var) #,(compile-expr body (env-cons var Γ)))]
     [(e-app f a) #`(#,(r f) #,(r a))]
     [(e-tuple es) #`(list #,(map r es))]
     [(e-proj i e)
@@ -32,7 +34,7 @@
          #,@(for/list ([b branches])
               (match-define (case-branch pat body) b)
               (define-values (ids rkt-pat) (compile-pat pat))
-              #`[#,rkt-pat #,(compile-expr body (append (reverse ids) Γ))]))]
+              #`[#,rkt-pat #,(compile-expr body (env-extend Γ ids))]))]
     [(e-join es) #`(#,(joiner-for (info)) #,@(map r es))]
     [(e-set es) #`(set #,@(map r es))]
     [(e-letin v arg body) TODO]
@@ -40,7 +42,7 @@
     [(e-let _ v expr body)
      (define var (gensym v))
      #`(let ((#,var ,(r expr)))
-         #,(compile-expr body (cons var Γ)))]))
+         #,(compile-expr body (env-cons var Γ)))]))
 
 ;; returns (values list-of-idents racket-pattern)
 (define (compile-pat p)
