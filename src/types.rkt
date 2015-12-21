@@ -12,8 +12,7 @@
 ;; type well-formedness
 (define (type-wf? x)
   (match x
-    [(t-mono a b) (andmap (andf type-wf? lattice-type?) (list a b))]
-    [(t-fun a b) (andmap type-wf? (list a b))]
+    [(or (t-mono a b) (t-fun a b)) (and (type-wf? a) (type-wf? b))]
     [(t-fs a) (type-wf? a)]
     [(t-tuple ts) (andmap type-wf? ts)]
     [(t-sum bs) ((hash/c symbol? type-wf? #:immutable #t) bs)]
@@ -24,11 +23,11 @@
 ;; Type "classes" or predicates
 (define (lattice-type? x)
   (match x
-    [(or (t-bool) (t-nat) (t-mono _ _) (t-fs _)) #t]
+    [(or (t-bool) (t-nat) (t-fs _)) #t]
     [(or (t-str) (t-sum _)) #f]
     [(t-tuple ts) (andmap lattice-type? ts)]
     [(t-record as) (andmap lattice-type? (hash-values as))]
-    [(t-fun _ r) (lattice-type? r)]))
+    [(or (t-fun _ r) (t-mono _ r)) (lattice-type? r)]))
 
 (define (eqtype? x)
   (match x
