@@ -67,6 +67,8 @@
     [`(+ (,tags ,types) ...)
       (t-sum (for/hash ([tag tags] [type types])
                (values tag (parse-type type))))]
+    ;; TODO: allow type expressions like (foo bar -> baz quux ~> blah),
+    ;; meaning (foo bar -> (baz quux ~> bar))
     [`(,as ... -> ,r) (foldr t-fun (parse-type r) (map parse-type as))]
     [`(,as ... ~> ,r) (foldr t-mono (parse-type r) (map parse-type as))]
     [`(fs ,a) (t-fs (parse-type a))]
