@@ -37,7 +37,11 @@
               #`[#,rkt-pat #,(compile-expr body (env-extend Γ ids))]))]
     [(e-join es) #`(#,(joiner-for (info)) #,@(map r es))]
     [(e-set es) #`(set #,@(map r es))]
-    [(e-letin v arg body) TODO]
+    [(e-letin v arg body)
+     (define var (gensym v))
+     #`(apply #,(joiner-for (info))
+              (for/list ([#,var #,(r arg)])
+                #,(compile-expr body (env-cons var Γ))))]
     [(e-fix var body) TODO]
     [(e-let _ v expr body)
      (define var (gensym v))
