@@ -86,7 +86,10 @@
 
 
 ;;; Declaration/definition parsing
-;;; TODO: support monotone declarations, which bind a monotone variable.
+;;; TODO?: support monotone declarations, which bind a monotone variable.
+;;; TODO: support definitions w/o type signatures.
+
+;; A definition. type is #f if no type signature provided.
 (struct defn (name type expr) #:transparent)
 
 ;; given some defns and an unparsed expr, parses the expr in the appropriate
