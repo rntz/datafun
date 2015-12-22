@@ -3,5 +3,6 @@
   + change 'compile-expr & co to take an env rather than a list, so we can
     support "free variables"
 
-  + change parse-expr & co to take env rather than list, so we can parse w/ free
-    vars, too.
+  + change parse to support decls in let bodies
+
+  + change repl to keep around an environment

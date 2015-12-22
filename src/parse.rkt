@@ -19,7 +19,10 @@
     [(? prim?) (e-prim e)]
     [(? lit?) (e-lit e)]
     ['empty (e-join '())]
-    [(? symbol?) (e-var e (or (index-of e Γ) (error "unbound variable:" e)))]
+    [(? symbol?)
+     (match (index-of e Γ)
+       [#f (e-free-var e)]
+       [i (e-var e i)])]
     [`(: ,t ,e) (e-ann (parse-type t) (r e))]
     [`(fn ,x ,e) (e-lam x (parse-expr e (cons x Γ)))]
     [`(λ ,xs ... ,e)

@@ -55,12 +55,13 @@
     [(e-lit v) (lit-type v)]
 
     [(e-free-var n)
-     (env-free-ref e n (lambda () (type-error "undefined variable: ~a" n)))]
+     (env-free-ref Γ n (lambda () (type-error "free variable: ~a" n)))]
 
     [(e-var n i)
-      (match (env-ref Γ i (lambda () (type-error "unbound variable: ~a" n)))
-        [(or (h-any t) (h-mono t)) t]
-        [_ (type-error "hidden monotone variable: ~a" n)])]
+     (define (unbound) (type-error "(BAD PARSE) unbound variable: ~a" n))
+     (match (env-ref Γ i unbound)
+       [(or (h-any t) (h-mono t)) t]
+       [_ (type-error "hidden monotone variable: ~a" n)])]
 
     [(e-prim p)
      (define t (prim-type-infer p))
