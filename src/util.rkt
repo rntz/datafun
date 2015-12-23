@@ -79,8 +79,11 @@
   (foldl1 f (reverse l)))
 
 
-;;; stream utilities
-(provide stream-take stream-append-lazy)
+;;; stream and generator utilities
+(require racket/generator)
+(provide stream-take stream-append-lazy
+  (all-from-out racket/generator)
+  for/generator for/stream generate/list for/generate/list)
 
 (define (stream-take n s)
   (for/list ([x (in-stream s)]
@@ -91,6 +94,15 @@
   (if (stream-empty? stream) (stream-thunk)
     (stream-cons (stream-first stream)
       (stream-append-lazy (stream-rest stream stream-thunk)))))
+
+(define-syntax-rule (for/generator clauses body ...)
+  (in-generator (for clauses (yield (begin body ...)))))
+(define-syntax-rule (for/stream clauses body ...)
+  (sequence->stream (for/generator clauses body ...)))
+(define-syntax-rule (generate/list body ...)
+  (for/list ([i (in-generator body ...)]) i))
+(define-syntax-rule (for/generate/list clauses body ...)
+  (generate/list (for clauses body ...)))
 
 
 ;;; set utilities
