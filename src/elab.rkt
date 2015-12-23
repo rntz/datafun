@@ -47,7 +47,6 @@
 ;; Returns type & updates expr-elab-info. Γ is an env mapping variables to types
 ;; (see above.
 (define (elab-infer e Γ)
-  ;; (printf "(elab-infer ~v ~v)\n" e Γ)
   (define (set-info i) (hash-set! *elab-info* e i))
   (define (remember-type t) (set-info t) t)
   (match e
@@ -138,7 +137,6 @@
 (define (elab-check e t Γ)
   (define (set-info i) (hash-set! *elab-info* e i))
   (define (remember-type) (set-info t))
-  ;; (printf "(elab-check ~v ~v ~v)\n" Γ t e)
   (match e
     ;; things that must be inferrable
     ;; TODO: maybe allow checking e-record-merge?

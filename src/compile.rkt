@@ -45,7 +45,7 @@
     [(e-fix var body) TODO]
     [(e-let _ v expr body)
      (define var (gensym v))
-     #`(let ((#,var ,(r expr)))
+     #`(let ((#,var #,(r expr)))
          #,(compile-expr body (env-cons var Γ)))]))
 
 ;; returns (values list-of-idents racket-pattern)

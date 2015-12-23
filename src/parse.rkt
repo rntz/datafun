@@ -13,7 +13,6 @@
 ;; contexts Γ are simple lists of identifiers - used to map variable names to
 ;; debruijn indices.
 (define (parse-expr e Γ)
-  ;; (printf "(parse-expr ~v ~v)\n" e Γ)
   (define (r e) (parse-expr e Γ))
   (match e
     [(? prim?) (e-prim e)]
