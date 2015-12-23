@@ -92,6 +92,10 @@
 
 
 ;;; Declaration/definition parsing
+;;;
+;;; TODO: this code (and other code involving decls) is kind of complex. is
+;;; there a simpler way?
+;;;
 ;;; TODO?: support monotone declarations, which bind a monotone variable.
 
 ;; A definition.
