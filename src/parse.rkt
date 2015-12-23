@@ -43,14 +43,18 @@
     [`(join . ,es) (e-join (map r es))]
     [`(set . ,es) (e-set (map r es))]
     ;; TODO: use declaration parsing here
+    [`(let ,decls ,body)
+     (parse-expr-letting (parse-decls decls Γ) body Γ)]
+    [`(,expr where . ,decls)
+     (parse-expr-letting (parse-decls decls Γ) expr Γ)]
     [`(let ,x <- ,e in ,body)
       (e-letin x (r e) (parse-expr body (cons x Γ)))]
     [`(fix ,x ,body)
       (e-fix x (parse-expr body (cons x Γ)))]
-    [`(let ,x = ,e in ,body)
-      (e-let 'any x (r e) (parse-expr body (cons x Γ)))]
-    [`(let ,x ^= ,e in ,body)
-      (e-let 'mono x (r e) (parse-expr body (cons x Γ)))]
+    ;; [`(let ,x = ,e in ,body)
+    ;;   (e-let 'any x (r e) (parse-expr body (cons x Γ)))]
+    ;; [`(let ,x ^= ,e in ,body)
+    ;;   (e-let 'mono x (r e) (parse-expr body (cons x Γ)))]
     [`(,f ,as ...)
      (if (reserved-form? f)
          (error "invalid use of form:" e)
@@ -89,25 +93,50 @@
 
 ;;; Declaration/definition parsing
 ;;; TODO?: support monotone declarations, which bind a monotone variable.
-;;; TODO: support definitions w/o type signatures.
 
-;; A definition. type is #f if no type signature provided.
-(struct defn (name type expr) #:transparent)
-
-;; given some defns and an unparsed expr, parses the expr in the appropriate
-;; environment and produces an expr which let-binds all the defns in the expr.
-(define (let-defns defns e Γ)
-  (set! e (parse-expr e (append (reverse (map defn-name defns)) Γ)))
-  (for/fold ([e e]) ([d defns])
-    (match-define (defn n t body) d)
-    (e-let 'any n (e-ann t body) e)))
+;; A definition.
+;; kind is either 'any or 'mono
+;; type is #f if no type signature provided.
+(struct defn (name kind type expr) #:transparent)
 
 ;; decls are used internally to produce defns, so we can separate type
 ;; annotations from declarations. we don't parse the expressions or types until
 ;; we turn them into defns.
-(enum decl
-  (d-ann name type)
-  (d-def name expr))
+;;
+;; name is the variable being declared.
+;; what is either 'kind, 'type, or 'expr.
+;; if what is 'kind, value is either 'any or 'mono.
+;; if what is 'type, value is a type (unparsed).
+;; if what is 'expr, value is an expr (unparsed).
+(struct decl (name what value) #:transparent)
+
+;; produces a list of decls.
+(define (parse-decl d)
+  (define mono
+    (match (car d)
+      ['mono (set! d (cdr d)) #t]
+      [_ #f]))
+  (generate/list
+   (define (yield-mono n) (yield (decl n 'kind 'mono)))
+   (match d
+     ;; just a monotone declaration
+     [`(,(? symbol? names) ...) #:when mono
+      (for ([n names]) (yield-mono n))]
+     ;; type declaration
+     [`(,(? symbol? names) ... : ,t)
+      (for ([n names])
+        (when mono (yield-mono n))
+        (yield (decl n 'type t)))]
+     ;; value declaration
+     [`(,(? symbol? name) ,(? symbol? args) ... = . ,body)
+      (set! body `(λ ,@args ,(parse-decl-body body)))
+      (when mono (yield-mono name))
+      (yield (decl name 'expr body))])))
+
+(define (parse-decl-body body)
+  (match body
+    [`(,expr) expr]
+    [`(,expr where . ,decls) `(let ,decls ,expr)]))
 
 ;; produces a list of defns. for now, we don't support referring to a variable
 ;; before its definition, not even if you give it a type-signature. also, all
@@ -115,35 +144,34 @@
 (define (parse-decls ds Γ)
   (decls->defns (append* (map parse-decl ds)) Γ))
 
-;; produces a list of decls.
-(define (parse-decl d)
-  ;; (printf "(parse-decl ~v ~v)\n" d Γ)
-  (match d
-    [`(: ,(? symbol? name) ,t) (list (d-ann name t))]
-    [`(def ,(? symbol? name) ,e) (list (d-def name e))]
-    [`(def ,(? symbol? name) ,t ,e)
-      (list (d-ann name t) (d-def name e))]
-    [`(def (,(? symbol? name) ,(? symbol? args) ...) ,body)
-      ;; this is a crude hack
-      (list (d-def name `(λ ,@args ,body)))]
-    [`(def (,(? symbol? name) ,(? symbol? args) ...) ,t ,body)
-      (list
-        (d-ann name t)
-        ;; same hack here
-        (d-def name `(λ ,@args ,body)))]))
-
 ;; list of decls -> list of defns
 (define (decls->defns ds Γ)
-  (define acc '())
   (define type-sigs (make-hash))
-  (for ([d ds])
-    (match d
-      [(d-ann n t) (hash-set! type-sigs n (parse-type t))]
-      [(d-def n e)
-        (define t (hash-ref type-sigs n #f))
-        (unless t (error "no type signature for:" n))
-        (set! e (parse-expr e Γ))
-        (set! Γ (cons n Γ))
-        (set! acc (cons (defn n t e) acc))
-        (hash-remove! type-sigs n)]))
-  (reverse acc))
+  (define kind-sigs (make-hash))
+  (begin0
+    (for/generate/list ([d ds])
+      (match d
+        [(decl name 'kind k)
+          (hash-set! kind-sigs name k)]
+        [(decl name 'type t)
+          (hash-set! type-sigs name (parse-type t))]
+        [(decl name 'expr e)
+          (define t (hash-ref type-sigs name #f))
+          (define k (hash-ref kind-sigs name 'any))
+          (yield (defn name k t (parse-expr e Γ)))
+          (set! Γ (cons name Γ))
+          (hash-remove! type-sigs name)
+          (hash-remove! kind-sigs name)]))
+    ;; if kind-sigs or type-sigs is non-empty, error.
+    (for ([(k _) type-sigs])
+      (error "type annotation for undefined variable:" k))
+    (for ([(k _) kind-sigs])
+      (error "kind annotation for undefined variable:" k))))
+
+;; given some defns and an unparsed expr, parses the expr in the appropriate
+;; environment and produces an expr which let-binds all the defns in the expr.
+(define (parse-expr-letting defns e Γ)
+  (set! e (parse-expr e (append (reverse (map defn-name defns)) Γ)))
+  (for/fold ([e e]) ([d (reverse defns)])
+    (match-define (defn n k t body) d)
+    (e-let k n (if t (e-ann t body) body) e)))
