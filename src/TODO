@@ -1,3 +1,7 @@
 - support declarations properly
 
   + change repl to parse decls & keep around an environment
+
+- allow loading from files in repl
+
+- pretty-print expressions and types at repl
