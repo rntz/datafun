@@ -124,9 +124,9 @@
        (elab-infer body (append pat-Γ Γ)))
      (foldl1 type-lub (map branch-type branches))]
 
-    [(e-let kind v subj body)
-     (define hyp    (match kind ['mono h-mono] ['any h-any]))
-     (define subj-Γ (match kind ['mono Γ]      ['any (env-hide-mono Γ)]))
+    [(e-let tone v subj body)
+     (define hyp    (match tone ['mono h-mono] ['any h-any]))
+     (define subj-Γ (match tone ['mono Γ]      ['any (env-hide-mono Γ)]))
      (define subj-t (elab-infer subj subj-Γ))
      (elab-infer body (env-cons (hyp subj-t) Γ))]
 
@@ -216,9 +216,9 @@
      (elab-check body t (env-cons (h-any elem-t) Γ))
      (remember-type)]
 
-    [(e-let kind v subj body)
-     (define hyp    (match kind ['any h-any] ['mono h-mono]))
-     (define subj-Γ (match kind ['any (env-hide-mono Γ)] ['mono Γ]))
+    [(e-let tone v subj body)
+     (define hyp    (match tone ['any h-any] ['mono h-mono]))
+     (define subj-Γ (match tone ['any (env-hide-mono Γ)] ['mono Γ]))
      (define subj-t (elab-infer subj subj-Γ))
      (elab-check body t (env-cons (hyp subj-t) Γ))]
 

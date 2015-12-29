@@ -42,8 +42,8 @@
   (e-set exprs) (e-letin var arg body)
   (e-fix var body)
   ;; let binding. TODO: support pats here?
-  ;; kind is either 'any or 'mono.
-  (e-let kind var expr body))
+  ;; tone is either 'any or 'mono.
+  (e-let tone var expr body))
 
 (struct case-branch (pat body) #:transparent)
 

@@ -42,7 +42,6 @@
           (case-branch p e)))]
     [`(join . ,es) (e-join (map r es))]
     [`(set . ,es) (e-set (map r es))]
-    ;; TODO: use declaration parsing here
     [`(let ,decls ,body)
      (parse-expr-letting (parse-decls decls Γ) body Γ)]
     [`(,expr where . ,decls)
@@ -51,10 +50,6 @@
       (e-letin x (r e) (parse-expr body (cons x Γ)))]
     [`(fix ,x ,body)
       (e-fix x (parse-expr body (cons x Γ)))]
-    ;; [`(let ,x = ,e in ,body)
-    ;;   (e-let 'any x (r e) (parse-expr body (cons x Γ)))]
-    ;; [`(let ,x ^= ,e in ,body)
-    ;;   (e-let 'mono x (r e) (parse-expr body (cons x Γ)))]
     [`(,f ,as ...)
      (if (reserved-form? f)
          (error "invalid use of form:" e)
@@ -73,12 +68,22 @@
     [`(+ (,tags ,types) ...)
       (t-sum (for/hash ([tag tags] [type types])
                (values tag (parse-type type))))]
-    ;; TODO: allow type expressions like (foo bar -> baz quux ~> blah),
-    ;; meaning (foo bar -> (baz quux ~> bar))
-    [`(,as ... -> ,r) (foldr t-fun (parse-type r) (map parse-type as))]
-    [`(,as ... ~> ,r) (foldr t-mono (parse-type r) (map parse-type as))]
+    [`(,as ... -> ,r) (parse-arrow-type t-fun as (parse-type r))]
+    [`(,as ... ~> ,r) (parse-arrow-type t-mono as (parse-type r))]
     [`(set ,a) (t-fs (parse-type a))]
     [_ (error "unfamiliar type:" t)]))
+
+;; handles parsing types like
+;; (foo bar -> baz quux ~> xyzzy)
+;; which is the same as
+;; (foo -> (bar -> (baz ~> (quux ~> xyzzy))))
+(define (parse-arrow-type t-arr args result-type)
+  (match args
+    [`(,as ... ~> ,(and (not '~> '->) bs) ...)
+     (parse-arrow-type t-mono as (foldr t-arr result-type bs))]
+    [`(,as ... -> ,(and (not '~> '->) bs) ...)
+     (parse-arrow-type t-fun as (foldr t-arr result-type bs))]
+    [`(,(not '~> '->) ...) (foldr t-arr result-type args)]))
 
 (define (parse-pat p)
   (match p
@@ -95,21 +100,19 @@
 ;;;
 ;;; TODO: this code (and other code involving decls) is kind of complex. is
 ;;; there a simpler way?
-;;;
-;;; TODO?: support monotone declarations, which bind a monotone variable.
 
 ;; A definition.
-;; kind is either 'any or 'mono
+;; how is either 'any or 'mono
 ;; type is #f if no type signature provided.
-(struct defn (name kind type expr) #:transparent)
+(struct defn (name how type expr) #:transparent)
 
 ;; decls are used internally to produce defns, so we can separate type
 ;; annotations from declarations. we don't parse the expressions or types until
 ;; we turn them into defns.
 ;;
 ;; name is the variable being declared.
-;; what is either 'kind, 'type, or 'expr.
-;; if what is 'kind, value is either 'any or 'mono.
+;; what is either 'tone, 'type, or 'expr.
+;; if what is 'tone, value is either 'any or 'mono.
 ;; if what is 'type, value is a type (unparsed).
 ;; if what is 'expr, value is an expr (unparsed).
 (struct decl (name what value) #:transparent)
@@ -121,7 +124,7 @@
       ['mono (set! d (cdr d)) #t]
       [_ #f]))
   (generate/list
-   (define (yield-mono n) (yield (decl n 'kind 'mono)))
+   (define (yield-mono n) (yield (decl n 'tone 'mono)))
    (match d
      ;; just a monotone declaration
      [`(,(? symbol? names) ...) #:when mono
@@ -135,7 +138,8 @@
      [`(,(? symbol? name) ,(? symbol? args) ... = . ,body)
       (set! body `(λ ,@args ,(parse-decl-body body)))
       (when mono (yield-mono name))
-      (yield (decl name 'expr body))])))
+      (yield (decl name 'expr body))]
+     [_ (error "could not parse decl:" d)])))
 
 (define (parse-decl-body body)
   (match body
@@ -151,26 +155,26 @@
 ;; list of decls -> list of defns
 (define (decls->defns ds Γ)
   (define type-sigs (make-hash))
-  (define kind-sigs (make-hash))
+  (define tone-sigs (make-hash))
   (begin0
     (for/generate/list ([d ds])
       (match d
-        [(decl name 'kind k)
-          (hash-set! kind-sigs name k)]
+        [(decl name 'tone k)
+          (hash-set! tone-sigs name k)]
         [(decl name 'type t)
           (hash-set! type-sigs name (parse-type t))]
         [(decl name 'expr e)
           (define t (hash-ref type-sigs name #f))
-          (define k (hash-ref kind-sigs name 'any))
+          (define k (hash-ref tone-sigs name 'any))
           (yield (defn name k t (parse-expr e Γ)))
           (set! Γ (cons name Γ))
           (hash-remove! type-sigs name)
-          (hash-remove! kind-sigs name)]))
-    ;; if kind-sigs or type-sigs is non-empty, error.
+          (hash-remove! tone-sigs name)]))
+    ;; if tone-sigs or type-sigs is non-empty, error.
     (for ([(k _) type-sigs])
       (error "type annotation for undefined variable:" k))
-    (for ([(k _) kind-sigs])
-      (error "kind annotation for undefined variable:" k))))
+    (for ([(k _) tone-sigs])
+      (error "tone annotation for undefined variable:" k))))
 
 ;; given some defns and an unparsed expr, parses the expr in the appropriate
 ;; environment and produces an expr which let-binds all the defns in the expr.
