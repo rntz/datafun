@@ -5,10 +5,13 @@
 
 ;; a simple s-expression syntax for datafun.
 
-(define (reserved-form? x) (set-member? reserved-forms x))
-(define reserved-forms
-  (list->set '(: empty fn λ cons π proj record record-merge extend-record tag
-               quote case join set let fix)))
+(define (reserved? x) (set-member? reserved x))
+(define reserved
+  (list->set '(: = mono <- -> ~>
+               empty fn λ cons π proj record record-merge extend-record tag
+               quote case if join set let where fix)))
+
+(define (ident? x) (and (symbol? x) (not (reserved? x))))
 
 ;; contexts Γ are simple lists of identifiers - used to map variable names to
 ;; debruijn indices.
@@ -18,13 +21,12 @@
     [(? prim?) (e-prim e)]
     [(? lit?) (e-lit e)]
     ['empty (e-join '())]
-    [(? symbol?)
+    [(? ident?)
      (match (index-of e Γ)
        [#f (e-free-var e)]
        [i (e-var e i)])]
     [`(: ,t ,e) (e-ann (parse-type t) (r e))]
-    [`(fn ,x ,e) (e-lam x (parse-expr e (cons x Γ)))]
-    [`(λ ,xs ... ,e)
+    [`(,(or 'fn 'λ) ,xs ... ,e)
       (set! e (parse-expr e (append (reverse xs) Γ)))
       (foldr e-lam e xs)]
     [`(cons . ,es) (e-tuple (map r es))]
@@ -51,7 +53,7 @@
     [`(fix ,x ,body)
       (e-fix x (parse-expr body (cons x Γ)))]
     [`(,f ,as ...)
-     (if (reserved-form? f)
+     (if (reserved? f)
          (error "invalid use of form:" e)
          (foldl (flip e-app) (r f) (map r as)))]
     [_ (error "unfamiliar expression:" e)]))
@@ -80,15 +82,15 @@
 (define (parse-arrow-type t-arr args result-type)
   (match args
     [`(,as ... ~> ,(and (not '~> '->) bs) ...)
-     (parse-arrow-type t-mono as (foldr t-arr result-type bs))]
+     (parse-arrow-type t-mono as (foldr t-arr result-type (map parse-type bs)))]
     [`(,as ... -> ,(and (not '~> '->) bs) ...)
-     (parse-arrow-type t-fun as (foldr t-arr result-type bs))]
-    [`(,(not '~> '->) ...) (foldr t-arr result-type args)]))
+     (parse-arrow-type t-fun as (foldr t-arr result-type (map parse-type bs)))]
+    [`(,(not '~> '->) ...) (foldr t-arr result-type (map parse-type args))]))
 
 (define (parse-pat p)
   (match p
     ['_ (p-wild)]
-    [(? symbol?) (p-var p)]
+    [(? ident?) (p-var p)]
     [(? lit?) (p-lit p)]
     [`(cons ,ps ...) (p-tuple (map parse-pat ps))]
     [(or `(tag ,name ,pat) `(',name ,pat))
@@ -127,15 +129,15 @@
    (define (yield-mono n) (yield (decl n 'tone 'mono)))
    (match d
      ;; just a monotone declaration
-     [`(,(? symbol? names) ...) #:when mono
+     [`(,(? ident? names) ...) #:when mono
       (for ([n names]) (yield-mono n))]
      ;; type declaration
-     [`(,(? symbol? names) ... : ,t)
+     [`(,(? ident? names) ... : ,t)
       (for ([n names])
         (when mono (yield-mono n))
         (yield (decl n 'type t)))]
      ;; value declaration
-     [`(,(? symbol? name) ,(? symbol? args) ... = . ,body)
+     [`(,(? ident? name) ,(? ident? args) ... = . ,body)
       (set! body `(λ ,@args ,(parse-decl-body body)))
       (when mono (yield-mono name))
       (yield (decl name 'expr body))]
