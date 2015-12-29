@@ -1,5 +1,3 @@
 - support declarations properly
 
-  + change parse to support decls in let bodies
-
-  + change repl to keep around an environment
+  + change repl to parse decls & keep around an environment
