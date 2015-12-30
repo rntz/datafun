@@ -23,7 +23,7 @@
 (define (env-cons info e)
   (make-env (env-free e) (cons info (env-bound e))))
 (define (env-extend e infos)
-  (make-env (env-free e) (append (reverse infos) (env-bound e))))
+  (make-env (env-free e) (rev-append infos (env-bound e))))
 (define (env-map-bound f e)
   (make-env (env-free e) (map f (env-bound e))))
 

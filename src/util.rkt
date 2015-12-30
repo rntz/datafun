@@ -48,7 +48,8 @@
 
 
 ;;; Miscellaneous utilities
-(provide assert! warn! flip andf orf print-error index-of eqmap foldl1 foldr1)
+(provide assert! warn! flip andf orf print-error
+         index-of eqmap foldl1 foldr1 rev-append)
 
 (define (assert! t) (unless t (error "ASSERTION FAILURE")))
 (define (warn! msg) (displayln (format "WARNING: ~a" msg)) )
@@ -77,6 +78,9 @@
 
 (define (foldr1 f l)
   (foldl1 f (reverse l)))
+
+(define (rev-append x y)
+  (append (reverse x) y))
 
 
 ;;; stream and generator utilities

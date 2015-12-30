@@ -4,6 +4,7 @@
 (provide (all-defined-out))
 
 ;; a simple s-expression syntax for datafun.
+;; TODO: an exception class for parse failures.
 
 (define (reserved? x) (set-member? reserved x))
 (define reserved
@@ -27,8 +28,8 @@
        [i (e-var e i)])]
     [`(: ,t ,e) (e-ann (parse-type t) (r e))]
     [`(,(or 'fn 'λ) ,xs ... ,e)
-      (set! e (parse-expr e (append (reverse xs) Γ)))
-      (foldr e-lam e xs)]
+     (set! e (parse-expr e (rev-append xs Γ)))
+     (foldr e-lam e xs)]
     [`(cons . ,es) (e-tuple (map r es))]
     [`(,(or 'π 'proj) ,i ,e) (e-proj i (r e))]
     [`(record (,ns ,es) ...) (e-record (for/hash ([n ns] [e es])
@@ -40,14 +41,14 @@
       (e-case (r subj)
         (for/list ([p ps] [e es])
           (set! p (parse-pat p))
-          (set! e (parse-expr e (append (reverse (pat-vars p)) Γ)))
+          (set! e (parse-expr e (rev-append (pat-vars p) Γ)))
           (case-branch p e)))]
     [`(join . ,es) (e-join (map r es))]
     [`(set . ,es) (e-set (map r es))]
     [`(let ,decls ,body)
-     (parse-expr-letting (parse-decls decls Γ) body Γ)]
+     (parse-expr-letting (parse-all-decls decls Γ) body Γ)]
     [`(,expr where . ,decls)
-     (parse-expr-letting (parse-decls decls Γ) expr Γ)]
+     (parse-expr-letting (parse-all-decls decls Γ) expr Γ)]
     [`(let ,x <- ,e in ,body)
       (e-letin x (r e) (parse-expr body (cons x Γ)))]
     [`(fix ,x ,body)
@@ -99,89 +100,89 @@
 
 
 ;;; Declaration/definition parsing
-;;;
-;;; TODO: this code (and other code involving decls) is kind of complex. is
-;;; there a simpler way?
 
 ;; A definition.
-;; how is either 'any or 'mono
+;; tone is either 'any or 'mono
 ;; type is #f if no type signature provided.
-(struct defn (name how type expr) #:transparent)
+(struct defn (name tone type expr) #:transparent)
 
-;; decls are used internally to produce defns, so we can separate type
-;; annotations from declarations. we don't parse the expressions or types until
-;; we turn them into defns.
+(struct decl-state (tone-sigs type-sigs) #:transparent)
+
+(define empty-decl-state (decl-state (hash) (hash)))
+(define (decl-state-empty? d)
+  (match-define (decl-state tone-sigs type-sigs) d)
+  (and (hash-empty? tone-sigs) (hash-empty? type-sigs)))
+
+(define (parse-all-decls ds Γ)
+  (define-values (new-state defns) (parse-decls empty-decl-state ds Γ))
+  (match-define (decl-state tone-sigs type-sigs) new-state)
+  (for ([(n _) type-sigs])
+    (error "type ascription for undefined variable:" n))
+  (for ([(n _) tone-sigs])
+    (error "monotonicity declaration for undefined variable:" n))
+  defns)
+
+;; returns (values new-state list-of-defns), or errors
 ;;
-;; name is the variable being declared.
-;; what is either 'tone, 'type, or 'expr.
-;; if what is 'tone, value is either 'any or 'mono.
-;; if what is 'type, value is a type (unparsed).
-;; if what is 'expr, value is an expr (unparsed).
-(struct decl (name what value) #:transparent)
+;; for now, we don't support referring to a variable before its definition, not
+;; even if you give it a type-signature. also, all recursion must be explicit
+;; via `fix'.
+(define (parse-decls state ds Γ)
+  ;; (printf "parse-decls ~a\n" ds)
+  (define defns '())
+  (for ([d ds])
+    ;; (printf "parsing ~a\n" d)
+    (define-values (new-state new-defns) (parse-decl state d Γ))
+    (set! state new-state)
+    (set! Γ (rev-append (map defn-name new-defns) Γ))
+    (set! defns (rev-append new-defns defns)))
+  (values state (reverse defns)))
 
-;; produces a list of decls.
-(define (parse-decl d)
-  (define mono
-    (match (car d)
-      ['mono (set! d (cdr d)) #t]
-      [_ #f]))
-  (generate/list
-   (define (yield-mono n) (yield (decl n 'tone 'mono)))
-   (match d
-     ;; just a monotone declaration
-     [`(,(? ident? names) ...) #:when mono
-      (for ([n names]) (yield-mono n))]
-     ;; type declaration
-     [`(,(? ident? names) ... : ,t)
-      (for ([n names])
-        (when mono (yield-mono n))
-        (yield (decl n 'type t)))]
-     ;; value declaration
-     [`(,(? ident? name) ,(? ident? args) ... = . ,body)
-      (set! body `(λ ,@args ,(parse-decl-body body)))
-      (when mono (yield-mono name))
-      (yield (decl name 'expr body))]
-     [_ (error "could not parse decl:" d)])))
-
-(define (parse-decl-body body)
-  (match body
-    [`(,expr) expr]
-    [`(,expr where . ,decls) `(let ,decls ,expr)]))
-
-;; produces a list of defns. for now, we don't support referring to a variable
-;; before its definition, not even if you give it a type-signature. also, all
-;; recursion must be explicit via `fix'.
-(define (parse-decls ds Γ)
-  (decls->defns (append* (map parse-decl ds)) Γ))
-
-;; list of decls -> list of defns
-(define (decls->defns ds Γ)
-  (define type-sigs (make-hash))
-  (define tone-sigs (make-hash))
-  (begin0
-    (for/generate/list ([d ds])
-      (match d
-        [(decl name 'tone k)
-          (hash-set! tone-sigs name k)]
-        [(decl name 'type t)
-          (hash-set! type-sigs name (parse-type t))]
-        [(decl name 'expr e)
-          (define t (hash-ref type-sigs name #f))
-          (define k (hash-ref tone-sigs name 'any))
-          (yield (defn name k t (parse-expr e Γ)))
-          (set! Γ (cons name Γ))
-          (hash-remove! type-sigs name)
-          (hash-remove! tone-sigs name)]))
-    ;; if tone-sigs or type-sigs is non-empty, error.
-    (for ([(k _) type-sigs])
-      (error "type annotation for undefined variable:" k))
-    (for ([(k _) tone-sigs])
-      (error "tone annotation for undefined variable:" k))))
+;; returns (values new-state list-of-defns), or errors
+(define (parse-decl state d Γ)
+  ;; (printf "parse-decl ~a\n" d)
+  (match-define (decl-state tone-sigs type-sigs) state)
+  (define (ret x) (values (decl-state tone-sigs type-sigs) x))
+  (define mono (match (car d)
+                 ['mono (set! d (cdr d)) #t]
+                 [_ #f]))
+  (define (set-mono! n)
+    (set! tone-sigs (hash-set tone-sigs n 'mono)))
+  (define (set-type! n t)
+    (set! type-sigs (hash-set type-sigs n t)))
+  (match d
+    ;; just a monotonicity declaration
+    [`(,(? ident? names) ...) #:when mono
+     (for ([n names]) (set-mono! n))
+     (ret '())]
+    ;; type declaration
+    [`(,(? ident? names) ... : ,t)
+     (define type (parse-type t))
+     (for ([n names])
+       (when mono (set-mono! n))
+       (set-type! n type))
+     (ret '())]
+    ;; a value declaration
+    [`(,(? ident? name) ,(? ident? args) ... = . ,body)
+     (when mono (set-mono! name))
+     (define expr
+       `(λ ,@args
+          ,(match body
+             [`(,expr) expr]
+             [`(,expr where . ,decls) body])))
+     ;; grab tone & type
+     (define tone (hash-ref tone-sigs name 'any))
+     (define type (hash-ref type-sigs name #f))
+     (set! tone-sigs (hash-remove tone-sigs name))
+     (set! type-sigs (hash-remove type-sigs name))
+     ;; parse the decl & give it up.
+     (ret (list (defn name tone type (parse-expr expr Γ))))]
+    [_ (error "could not parse declaration:" d)]))
 
 ;; given some defns and an unparsed expr, parses the expr in the appropriate
 ;; environment and produces an expr which let-binds all the defns in the expr.
 (define (parse-expr-letting defns e Γ)
-  (set! e (parse-expr e (append (reverse (map defn-name defns)) Γ)))
+  (set! e (parse-expr e (rev-append (map defn-name defns) Γ)))
   (for/fold ([e e]) ([d (reverse defns)])
     (match-define (defn n k t body) d)
     (e-let k n (if t (e-ann t body) body) e)))

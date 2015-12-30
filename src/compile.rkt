@@ -5,7 +5,7 @@
 
 ;; contexts Γ are envs mapping variables to what they should compile to (an
 ;; identifier, generally).
-(define (compile-expr e [Γ empty-env])
+(define (compile-expr e Γ)
   (define (info) (elab-info e))
   (define (r e) (compile-expr e Γ))
   (match e
