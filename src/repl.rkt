@@ -4,7 +4,7 @@
 
 (define (show-err e) (printf "** ~a\n" (exn-message e)))
 
-(define df-debug (make-parameter #t))
+(define df-debug (make-parameter #f))
 (define-syntax-rule (debug body ...) (when (df-debug) body ...))
 
 ;; global environments
@@ -67,7 +67,7 @@
       (debug (printf "type: ~v\n" expr-type))
       (define code (compile-expr expr (compile-env env)))
       (debug (display "code: ") (pretty-print (syntax->datum code)))
-      (printf "~v\n" (eval code)))
+      (printf "~v : ~v\n" (eval code) expr-type))
 
     (define (handle-defns defns)
       (set! env (eval-defns defns env)))
@@ -91,6 +91,16 @@ could not parse expression: ~a" (exn-message e1) (exn-message e2))))
       (printf "- DF> ")
       (with-handlers ([exn:fail? show-err])
         (match (read)
-          [(? eof-object?) (quit)]
+          [(or (? eof-object?) ',quit) (quit)]
+          [',debug (df-debug (not (df-debug)))]
+          [',load
+           (define filename (read))
+           (unless (string? filename) (error "filename must be a string"))
+           (set! env (eval-file filename env))]
+          [',env (for ([(name g) env])
+                   (match-define (global type value) g)
+                   (printf "~a : ~v = ~v\n" name type value))]
+          [(and line (cons 'unquote _))
+           (error "unrecognized command:" line)]
           [line (handle-line line)]))
      (loop))))
