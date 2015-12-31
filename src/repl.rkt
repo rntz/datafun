@@ -4,52 +4,73 @@
 
 (define (show-err e) (printf "** ~a\n" (exn-message e)))
 
-(struct global (type value) #:transparent)
+(define df-debug (make-parameter #t))
+(define-syntax-rule (debug body ...) (when (df-debug) body ...))
 
+;; global environments
+(struct global (type value) #:transparent)
+(define global-env? (hash/c ident? global? #:immutable #t))
+
+(define (elab-env env)
+  (make-free-env (hash-map-values global-type env)))
+
+(define (compile-env env)
+  (make-free-env
+   ;; this is a terrible hack that only works because racket is amazing
+   (hash-map-values (lambda (x) #`'#,(global-value x)) env)))
+
+
+;; Utilities for evaluating things inside a given global-env
+(define (eval-file filename env)
+  (eval-decls (read-file filename) env))
+
+(define (eval-decls lines env)
+  (eval-defns (parse-all-decls lines '()) env))
+
+(define (eval-defns defns env)
+  (for ([d defns] #:when (equal? 'mono (defn-tone d)))
+    (error "monotone definitions not allowed at top-level: " d))
+  ;; run the defns in order.
+  (for ([d defns])
+    (set! env (eval-defn d env)))
+  env)
+
+;; evaluates a definition & updates the global environment.
+(define (eval-defn d env)
+  (match-define (defn name tone type expr) d)
+  (assert! (not (equal? 'mono tone)))
+  (debug (printf "defn: ~a = ~a\n" name expr))
+  ;; elaborate the expression.
+  (match type
+    ;; if not type-annotated, try to infer.
+    [#f (set! type (elab-infer expr (elab-env env)))]
+    [_ (elab-check expr type (elab-env env))])
+  (debug (printf "type: ~v\n" type))
+  ;; compile it.
+  (define code (compile-expr expr (compile-env env)))
+  (debug (display "code: ") (pretty-print (syntax->datum code)))
+  (define val (eval code))
+  (debug (printf "val:  ~v\n" val))
+  ;; bind name to val in env and return it.
+  (hash-set env name (global type val)))
+
+
+;; the repl
 (define (repl [env (hash)])
   (let/ec quit
-    ;; env maps names to globals.
-    (define env (hash))
+    ;; env is a global-env?; it maps names to globals.
     (define decl-parser empty-decl-state)
 
-    (define (elab-env)
-      (env-free-extend empty-env
-       (for/hash ([(name g) env])
-         (values name (global-type g)))))
-    (define (compile-env)
-      (env-free-extend empty-env
-       (for/hash ([(name g) env])
-         ;; this is a terrible hack that only works because racket is amazing
-         (values name #`'#,(global-value g)))))
-
     (define (handle-expr expr)
-      (printf "expr: ~v\n" expr)
-      (define expr-type (elab-infer expr (elab-env)))
-      (printf "type: ~v\n" expr-type)
-      (define code (compile-expr expr (compile-env)))
-      (display "code: ") (pretty-print (syntax->datum code))
-      (printf " val: ~v\n" (eval code)))
+      (debug (printf "expr: ~v\n" expr))
+      (define expr-type (elab-infer expr (elab-env env)))
+      (debug (printf "type: ~v\n" expr-type))
+      (define code (compile-expr expr (compile-env env)))
+      (debug (display "code: ") (pretty-print (syntax->datum code)))
+      (printf "~v\n" (eval code)))
 
     (define (handle-defns defns)
-      (for ([d defns] #:when (equal? 'mono (defn-tone d)))
-        (error "monotone definitions not allowed at top-level: " d))
-      ;; run the defns in order.
-      (for ([d defns])
-        (match-define (defn name _ type expr) d)
-        (printf "defn: ~a = ~a\n" name expr)
-        ;; elaborate the expression.
-        (match type
-          ;; if not type-annotated, try to infer.
-          [#f (set! type (elab-infer expr (elab-env)))]
-          [_ (elab-check expr type (elab-env))])
-        (printf "type: ~v\n" type)
-        ;; compile it.
-        (define code (compile-expr expr (compile-env)))
-        (display "code: ") (pretty-print (syntax->datum code))
-        (define val (eval code))
-        (printf "val: ~v\n" val)
-        ;; bind name to val in env and compile-env
-        (set! env (hash-set env name (global type val)))))
+      (set! env (eval-defns defns env)))
 
     (define (handle-line line)
       (define (on-err e1 e2)

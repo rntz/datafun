@@ -109,9 +109,6 @@
 (struct decl-state (tone-sigs type-sigs) #:transparent)
 
 (define empty-decl-state (decl-state (hash) (hash)))
-(define (decl-state-empty? d)
-  (match-define (decl-state tone-sigs type-sigs) d)
-  (and (hash-empty? tone-sigs) (hash-empty? type-sigs)))
 
 (define (parse-all-decls ds Γ)
   (define-values (new-state defns) (parse-decls empty-decl-state ds Γ))

@@ -49,7 +49,8 @@
 
 ;;; Miscellaneous utilities
 (provide assert! warn! flip andf orf print-error
-         index-of eqmap foldl1 foldr1 rev-append)
+         index-of eqmap foldl1 foldr1 rev-append
+         read-file)
 
 (define (assert! t) (unless t (error "ASSERTION FAILURE")))
 (define (warn! msg) (displayln (format "WARNING: ~a" msg)) )
@@ -82,12 +83,20 @@
 (define (rev-append x y)
   (append (reverse x) y))
 
+(define (read-file filename)
+  (with-input-from-file filename
+    (lambda ()
+      (let loop ([line (read)] [acc '()])
+        (if (eof-object? line)
+            (reverse acc)
+            (loop (read) (cons line acc)))))))
+
 
 ;;; stream and generator utilities
 (require racket/generator)
 (provide stream-take stream-append-lazy
   (all-from-out racket/generator)
-  for/generator for/stream generate/list for/generate/list)
+  for/generator for/stream generate/stream generate/list for/generate/list)
 
 (define (stream-take n s)
   (for/list ([x (in-stream s)]
@@ -103,6 +112,8 @@
   (in-generator (for clauses (yield (begin body ...)))))
 (define-syntax-rule (for/stream clauses body ...)
   (sequence->stream (for/generator clauses body ...)))
+(define-syntax-rule (generate/stream body ...)
+  (sequence->stream (in-generator body ...)))
 (define-syntax-rule (generate/list body ...)
   (for/list ([i (in-generator body ...)]) i))
 (define-syntax-rule (for/generate/list clauses body ...)

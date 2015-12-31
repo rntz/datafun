@@ -28,6 +28,8 @@
   (make-env (env-free e) (map f (env-bound e))))
 
 ;; manipulating free variables
+(define (make-free-env h)
+  (make-env h '()))
 (define (env-free-ref e n [orelse (lambda () (error "no such free variable"))])
   (hash-ref (env-free e) n orelse))
 (define (env-free-extend e h)
