@@ -145,8 +145,8 @@
   (match e
     ;; things that must be inferrable
     ;; TODO: maybe allow checking e-record-merge?
-    [(or (e-ann _ _) (e-var _ _) (e-lit _) (e-app _ _) (e-proj _ _)
-         (e-record-merge _ _))
+    [(or (e-ann _ _) (e-var _ _) (e-free-var _) (e-lit _) (e-app _ _)
+         (e-proj _ _) (e-record-merge _ _))
      (define et (elab-infer e Γ))
      (unless (subtype? et t)
        (type-error "expression e has type: ~v\nbut we expect type: ~v" et t))]
