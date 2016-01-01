@@ -11,10 +11,10 @@
     ['- (~> Nat (-> Nat Nat))]
     ['++ (-> Str Str Str)]
     ['puts (~> Str (×))]
-    [_ #f]))
+    [_ #:when (prim? p) #f]))
 
 (define (prim-has-type? p t)
-  (define pt (prim-type-infer t))
+  (define pt (prim-type-infer p))
   (if pt (type=? t pt)
     (match* (p t)
       [('= (-> a b (t-bool)))
