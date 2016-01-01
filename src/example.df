@@ -18,14 +18,22 @@
 ;; (and : (bool bool ~> bool))
 ;; (and x y = )
 
+;; XXX: how do we write this function?
+;; note that (record) is 1.
+(bool->set : (bool ~> (set (record))))
+(bool->set x = (trustme (case x [#t (set (record))]
+                                [#f (set)])))
+
+(set->bool : ((set (record)) ~> bool))
+(set->bool x = (let _ <- x in #t))
+
 ;; XXX: how can we write this?
 (< : (nat -> nat ~> bool))
 ;; this works but is a hack, not extensible to other types:
-(< x y = (<= x (+ y 1)))
+(< x y = (<= (+ x 1) y))
 
 ;; this does not work, 'not is not monotone, can't see 'y:
 ;; (< x y = (and (<= x y) (not (<= y x))))
-
 ;; this *could* work, perhaps, if we accounted for antitonicity and made
 ;; negation antitone - but then I don't know how we'd write 'not!
 ;;
@@ -37,9 +45,5 @@
 ;; conj x y = {1 | a in x, b in y}
 ;;          = let a <- x in let b <- y in {1}
 (conj : ((set (record)) (set (record)) ~> (set (record))))
-(conj x y = (let a <- x in (let b <- y in (set (record)))))
-
-;; XXX: how do we write this function?
-;; note that 1 is (record).
-;; (as-set : (bool ~> (set (record))))
-;; (as-set x = )
+(conj x y = (let a <- x in
+             (let b <- y in (set (record)))))
