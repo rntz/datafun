@@ -138,22 +138,22 @@
     [`(+ (,tags ,types) ...)
       (t-sum (for/hash ([tag tags] [type types])
                (values tag (parse-type type))))]
-    [`(,as ... -> ,r) (parse-arrow-type t-fun as (parse-type r))]
-    [`(,as ... ~> ,r) (parse-arrow-type t-mono as (parse-type r))]
+    [`(,_ ... ,(or '-> '~>) ,_) (parse-arrow-type t)]
     [`(set ,a) (t-fs (parse-type a))]
     [_ (error "unfamiliar type:" t)]))
 
-;; handles parsing types like
-;; (foo bar -> baz quux ~> xyzzy)
-;; which is the same as
-;; (foo -> (bar -> (baz ~> (quux ~> xyzzy))))
-(define (parse-arrow-type t-arr args result-type)
-  (match args
-    [`(,as ... ~> ,(and (not '~> '->) bs) ...)
-     (parse-arrow-type t-mono as (foldr t-arr result-type (map parse-type bs)))]
-    [`(,as ... -> ,(and (not '~> '->) bs) ...)
-     (parse-arrow-type t-fun as (foldr t-arr result-type (map parse-type bs)))]
-    [`(,(not '~> '->) ...) (foldr t-arr result-type (map parse-type args))]))
+(define (arrow-type->sexp t)
+  (match t
+    [(or (t-fun _ _) (t-mono _ _)) (type->sexp t)]
+    [_ `(,(type->sexp t))]))
+
+(define (parse-arrow-type t)
+  (define (parse t-arr as bs)
+    (foldr t-arr (parse-arrow-type bs) (map parse-type as)))
+  (match t
+    [`(,(and as (not '-> '~>)) ... -> ,bs ..1) (parse t-fun as bs)]
+    [`(,(and as (not '-> '~>)) ... ~> ,bs ..1) (parse t-mono as bs)]
+    [`(,t) (parse-type t)]))
 
 
 ;; Pattern parsing/pretty-printing
@@ -177,6 +177,7 @@
 
 
 ;;; Declaration/definition parsing
+;; TODO?: defn->sexp
 
 ;; A definition.
 ;; tone is either 'any or 'mono
@@ -230,8 +231,8 @@
      (for ([n names]) (set-mono! n))
      (ret '())]
     ;; type declaration
-    [`(,(? ident? names) ... : ,t)
-     (define type (parse-type t))
+    [`(,(? ident? names) ... : ,t ..1)
+     (define type (parse-arrow-type t))
      (for ([n names])
        (when mono (set-mono! n))
        (set-type! n type))
