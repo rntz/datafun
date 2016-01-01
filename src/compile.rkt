@@ -18,7 +18,7 @@
      (define var (gensym v))
      #`(lambda (#,var) #,(compile-expr body (env-cons var Γ)))]
     [(e-app f a) #`(#,(r f) #,(r a))]
-    [(e-tuple es) #`(list #,(map r es))]
+    [(e-tuple es) #`(list #,@(map r es))]
     [(e-proj i e)
      (match i [(? number?) #`(list-ref #,(r e) #,i)]
               [(? symbol?) #`(hash-ref #,(r e) '#,i)])]
