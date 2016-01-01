@@ -98,16 +98,13 @@ could not parse expression: ~a" (exn-message e1) (exn-message e2))))
       (display "- DF> ")
       (with-handlers ([exn:fail? show-err])
         (match (read)
-          [(or (? eof-object?) ',quit) (quit)]
-          [',debug (df-debug (not (df-debug)))]
-          [',load
-           (define filename (read))
+          [(or #:quit (? eof-object?)) (quit)]
+          [#:debug (df-debug (not (df-debug)))]
+          [`(#:load ,filename)
            (unless (string? filename) (error "filename must be a string"))
            (set-env! (eval-file filename (env)))]
-          [',env (for ([(name g) (env)])
+          [#:env (for ([(name g) (env)])
                    (match-define (global type value) g)
                    (printf "~a : ~s = ~v\n" name (type->sexp type) value))]
-          [(and line (cons 'unquote _))
-           (error "unrecognized command:" line)]
           [line (handle-line line)]))
       (loop))))
