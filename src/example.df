@@ -1,0 +1,45 @@
+(x : nat)
+(x = 2)
+
+(john : (record [name str]))
+(john = (record [name "hello"]))
+
+;; negation
+(not : (bool -> bool))
+(not x = (case x [#t #f] [#f #t]))
+
+;; disjunction, eagerly
+;; this is easy because disjunction *is* the join operator on bools.
+(or : (bool bool ~> bool))
+(or x y = (join x y))
+
+;; conjunction, eagerly
+;; XXX: how can we write this?
+;; (and : (bool bool ~> bool))
+;; (and x y = )
+
+;; XXX: how can we write this?
+(< : (nat -> nat ~> bool))
+;; this works but is a hack, not extensible to other types:
+(< x y = (<= x (+ y 1)))
+
+;; this does not work, 'not is not monotone, can't see 'y:
+;; (< x y = (and (<= x y) (not (<= y x))))
+
+;; this *could* work, perhaps, if we accounted for antitonicity and made
+;; negation antitone - but then I don't know how we'd write 'not!
+;;
+;; the trouble is the lack of a good eliminator for bool, I think.
+;; bool is an *ordered* sum, (1 <| 1)
+;; but can also be thought of as (FS 1). does that help us?
+
+;; conj : FS 1 ~> FS 1 ~> FS 1
+;; conj x y = {1 | a in x, b in y}
+;;          = let a <- x in let b <- y in {1}
+(conj : ((set (record)) (set (record)) ~> (set (record))))
+(conj x y = (let a <- x in (let b <- y in (set (record)))))
+
+;; XXX: how do we write this function?
+;; note that 1 is (record).
+;; (as-set : (bool ~> (set (record))))
+;; (as-set x = )
