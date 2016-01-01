@@ -135,7 +135,7 @@
 
     [(e-trustme e) (elab-infer e (env-trustme Γ))]
 
-    [(or (e-lam _ _) (e-fix _ _) (e-join _) (e-letin _ _ _))
+    [(or (e-lam _ _) (e-fix _ _) (e-join _) (e-join-in _ _ _))
       (type-error "can't infer type of: ~v" e)]))
 
 ;; returns nothing.
@@ -213,7 +213,7 @@
        [(t-fs a) (for ([elem elems]) (elab-check elem a new-Γ))]
        [_ (type-error "not a set type: ~v" t)])]
 
-    [(e-letin var arg body)
+    [(e-join-in var arg body)
      (define arg-t (elab-infer arg Γ))
      (define elem-t (match arg-t
                       [(t-fs a) a]

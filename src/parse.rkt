@@ -43,7 +43,7 @@
     [(e-join '()) 'empty]
     [(e-join l) `(join ,@(map expr->sexp l))]
     [(e-set es) `(set ,@(map expr->sexp es))]
-    [(e-letin var arg body)
+    [(e-join-in var arg body)
      `(let ,var <- ,(expr->sexp arg) ,(expr->sexp body))]
     [(e-fix var body) `(fix ,var ,(expr->sexp body))]
     [(e-let tone var expr body)
@@ -88,7 +88,7 @@
     [`(,expr where . ,decls)
      (parse-expr-letting (parse-all-decls decls Γ) expr Γ)]
     [`(let ,x <- ,e in ,body)
-      (e-letin x (r e) (parse-expr body (cons x Γ)))]
+      (e-join-in x (r e) (parse-expr body (cons x Γ)))]
     [`(fix ,x ,body)
       (e-fix x (parse-expr body (cons x Γ)))]
     [`(trustme ,e) (e-trustme (r e))]

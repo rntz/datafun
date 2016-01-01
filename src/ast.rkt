@@ -38,8 +38,7 @@
   (e-case subject branches)
   ;; TODO: (e-case-mono subject branches)
   (e-join exprs)
-  ;; TODO: rename e-letin to e-join-in, or something
-  (e-set exprs) (e-letin var arg body)
+  (e-set exprs) (e-join-in var arg body)
   (e-fix var body)
   ;; let binding. TODO: support pats here?
   ;; tone is either 'any or 'mono.
