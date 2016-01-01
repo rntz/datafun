@@ -36,6 +36,9 @@
 (define (env-hide-mono Γ)
   (env-map-bound (match-lambda [(h-mono _) (h-hidden)] [x x]) Γ))
 
+(define (env-trustme Γ)
+  (env-map-bound (match-lambda [(h-mono t) (h-any t)] [x x]) Γ))
+
 
 ;; Maps some exprs to info about them that is used for compilation:
 ;; - e-lam, e-app: 'fun or 'mono, for ordinary or monotone {lambdas,application}
@@ -129,6 +132,8 @@
      (define subj-Γ (match tone ['mono Γ]      ['any (env-hide-mono Γ)]))
      (define subj-t (elab-infer subj subj-Γ))
      (elab-infer body (env-cons (hyp subj-t) Γ))]
+
+    [(e-trustme e) (elab-infer e (env-trustme Γ))]
 
     [(or (e-lam _ _) (e-fix _ _) (e-join _) (e-letin _ _ _))
       (type-error "can't infer type of: ~v" e)]))
@@ -226,7 +231,9 @@
      (unless (fixpoint-type? t)
        (type-error "cannot take fixpoint at type: ~v" t))
      (elab-check body t (env-cons (h-mono t) Γ))
-     (remember-type)]))
+     (remember-type)]
+
+    [(e-trustme e) (elab-check e t (env-trustme Γ))]))
 
 (define (elab-infer-record e Γ)
   (match (elab-infer e Γ)

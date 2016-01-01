@@ -43,7 +43,9 @@
   (e-fix var body)
   ;; let binding. TODO: support pats here?
   ;; tone is either 'any or 'mono.
-  (e-let tone var expr body))
+  (e-let tone var expr body)
+  ;; this moves all our "monotone" variables into the unrestricted context.
+  (e-trustme expr))
 
 (struct case-branch (pat body) #:transparent)
 

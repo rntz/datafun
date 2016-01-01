@@ -46,7 +46,8 @@
     [(e-let _ v expr body)
      (define var (gensym v))
      #`(let ((#,var #,(r expr)))
-         #,(compile-expr body (env-cons var Γ)))]))
+         #,(compile-expr body (env-cons var Γ)))]
+    [(e-trustme e) (r e)]))
 
 ;; returns (values list-of-idents racket-pattern)
 (define (compile-pat p)

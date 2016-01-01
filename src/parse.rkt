@@ -11,7 +11,7 @@
 (define reserved
   (list->set '(: = mono <- -> ~>
                empty fn λ cons π proj record record-merge extend-record tag
-               quote case if join set let where fix)))
+               quote case if join set let where fix trustme)))
 
 (define (ident? x) (and (symbol? x) (not (reserved? x))))
 
@@ -49,7 +49,8 @@
     [(e-let tone var expr body)
      `(let ([,@(match tone ['mono '(mono)] ['any '()])
              ,var = ,(expr->sexp expr)])
-        ,(expr->sexp body))]))
+        ,(expr->sexp body))]
+    [(e-trustme e) `(trustme ,(expr->sexp e))]))
 
 ;; contexts Γ are simple lists of identifiers - used to map variable names to
 ;; debruijn indices.
@@ -90,6 +91,7 @@
       (e-letin x (r e) (parse-expr body (cons x Γ)))]
     [`(fix ,x ,body)
       (e-fix x (parse-expr body (cons x Γ)))]
+    [`(trustme ,e) (e-trustme (r e))]
     [`(,f ,as ...)
      (if (reserved? f)
          (error "invalid use of form:" e)
