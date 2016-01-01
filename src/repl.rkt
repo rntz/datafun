@@ -1,6 +1,7 @@
 #lang racket
 
-(require "util.rkt" "ast.rkt" "parse.rkt" "env.rkt" "elab.rkt" "compile.rkt")
+(require "util.rkt" "ast.rkt" "types.rkt" "parse.rkt" "env.rkt" "elab.rkt"
+         "compile.rkt")
 
 (define (show-err e) (printf "** ~a\n" (exn-message e)))
 
@@ -11,10 +12,10 @@
 (struct global (type value) #:transparent)
 (define global-env? (hash/c ident? global? #:immutable #t))
 
-(define (elab-env env)
+(define (global-elab-env env)
   (make-free-env (hash-map-values global-type env)))
 
-(define (compile-env env)
+(define (global-compile-env env)
   (make-free-env
    ;; this is a terrible hack that only works because racket is amazing
    (hash-map-values (lambda (x) #`'#,(global-value x)) env)))
@@ -35,60 +36,66 @@
     (set! env (eval-defn d env)))
   env)
 
-;; evaluates a definition & updates the global environment.
+;; evaluates a definition in a global-env. returns updated env.
 (define (eval-defn d env)
   (match-define (defn name tone type expr) d)
   (assert! (not (equal? 'mono tone)))
-  (debug (printf "defn: ~a = ~a\n" name expr))
+  (debug (printf "defn: ~a = ~s\n" name (expr->sexp expr)))
   ;; elaborate the expression.
   (match type
     ;; if not type-annotated, try to infer.
-    [#f (set! type (elab-infer expr (elab-env env)))]
-    [_ (elab-check expr type (elab-env env))])
-  (debug (printf "type: ~v\n" type))
+    [#f (set! type (elab-infer expr (global-elab-env env)))]
+    [_ (elab-check expr type (global-elab-env env))])
+  (debug (printf "type: ~s\n" (type->sexp type)))
   ;; compile it.
-  (define code (compile-expr expr (compile-env env)))
+  (define code (compile-expr expr (global-compile-env env)))
   (debug (display "code: ") (pretty-print (syntax->datum code)))
   (define val (eval code))
-  (debug (printf "val:  ~v\n" val))
+  (debug (printf "val:  ~s\n" val))
   ;; bind name to val in env and return it.
   (hash-set env name (global type val)))
 
 
 ;; the repl
-(define (repl [env (hash)])
-  (let/ec quit
-    ;; env is a global-env?; it maps names to globals.
-    (define decl-parser empty-decl-state)
+(define *repl-env* (box (hash)))
 
-    (define (handle-expr expr)
-      (debug (printf "expr: ~v\n" expr))
-      (define expr-type (elab-infer expr (elab-env env)))
-      (debug (printf "type: ~v\n" expr-type))
-      (define code (compile-expr expr (compile-env env)))
-      (debug (display "code: ") (pretty-print (syntax->datum code)))
-      (printf "~v : ~v\n" (eval code) expr-type))
+(define (repl [env-box *repl-env*])
+  ;; env-box is a box containing a global-env mapping names to globals.
+  (define (env) (unbox env-box))
+  (define (set-env! e) (set-box! env-box e))
 
-    (define (handle-defns defns)
-      (set! env (eval-defns defns env)))
+  ;; what we use to parse decls. gets set! repeatedly in the main loop.
+  (define decl-parser empty-decl-state)
 
-    (define (handle-line line)
-      (define (on-err e1 e2)
-        (error (format "could not parse declaration: ~a
+  (define (handle-expr expr)
+    (debug (printf "expr: ~s\n" (expr->sexp expr)))
+    (define expr-type (elab-infer expr (global-elab-env (env))))
+    (debug (printf "type: ~s\n" (type->sexp expr-type)))
+    (define code (compile-expr expr (global-compile-env (env))))
+    (debug (display "code: ") (pretty-print (syntax->datum code)))
+    (printf "~v : ~s\n" (eval code) (type->sexp expr-type)))
+
+  (define (handle-defns defns)
+    (set-env! (eval-defns defns (env))))
+
+  (define (handle-line line)
+    (define (on-err e1 e2)
+      (error (format "could not parse declaration: ~a
 could not parse expression: ~a" (exn-message e1) (exn-message e2))))
-      ((with-handlers ([exn:fail?
-                        (lambda (e1)
-                          (define expr
-                            (with-handlers ([exn:fail? (curry on-err e1)])
-                              (parse-expr line '())))
-                          (lambda () (handle-expr expr)))])
-         (define-values (new-state defns) (parse-decl decl-parser line '()))
-         (set! decl-parser new-state)
-         (lambda () (handle-defns defns)))))
+    ((with-handlers ([exn:fail?
+                      (lambda (e1)
+                        (define expr
+                          (with-handlers ([exn:fail? (curry on-err e1)])
+                            (parse-expr line '())))
+                        (lambda () (handle-expr expr)))])
+       (define-values (new-state defns) (parse-decl decl-parser line '()))
+       (set! decl-parser new-state)
+       (lambda () (handle-defns defns)))))
 
-    ;; main loop
+  ;; main loop
+  (let/ec quit
     (let loop ()
-      (printf "- DF> ")
+      (display "- DF> ")
       (with-handlers ([exn:fail? show-err])
         (match (read)
           [(or (? eof-object?) ',quit) (quit)]
@@ -96,11 +103,11 @@ could not parse expression: ~a" (exn-message e1) (exn-message e2))))
           [',load
            (define filename (read))
            (unless (string? filename) (error "filename must be a string"))
-           (set! env (eval-file filename env))]
-          [',env (for ([(name g) env])
+           (set-env! (eval-file filename (env)))]
+          [',env (for ([(name g) (env)])
                    (match-define (global type value) g)
-                   (printf "~a : ~v = ~v\n" name type value))]
+                   (printf "~a : ~s = ~v\n" name (type->sexp type) value))]
           [(and line (cons 'unquote _))
            (error "unrecognized command:" line)]
           [line (handle-line line)]))
-     (loop))))
+      (loop))))

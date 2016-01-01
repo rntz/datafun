@@ -4,6 +4,7 @@
 (provide (all-defined-out))
 
 ;; a simple s-expression syntax for datafun.
+;; also, "pretty printers", i.e. convert parsed things back to canonical sexps.
 ;; TODO: an exception class for parse failures.
 
 (define (reserved? x) (set-member? reserved x))
@@ -13,6 +14,42 @@
                quote case if join set let where fix)))
 
 (define (ident? x) (and (symbol? x) (not (reserved? x))))
+
+
+;;; Expression parsing/pretty-printing
+(define (expr->sexp e)
+  (match e
+    [(or (e-var n _) (e-free-var n)) n]
+    [(e-lit v) v]
+    [(e-prim p) p]
+    [(e-ann t e) `(: ,(type->sexp t) ,(expr->sexp e))]
+    [(e-lam v b) `(fn ,v ,(expr->sexp b))]
+    [(e-app f a)
+     (let loop ([func f] [args (list a)])
+       (match func
+         [(e-app f a) (loop f (cons a args))]
+         [_ (map expr->sexp (cons func args))]))]
+    [(e-tuple es) `(cons ,@(map expr->sexp es))]
+    [(e-proj i e) `(π ,i ,(expr->sexp e))]
+    [(e-record fs) `(record ,@(for/list ([(n e) fs])
+                                `(,n ,(expr->sexp e))))]
+    [(e-record-merge l r) `(record-merge ,(expr->sexp l) ,(expr->sexp r))]
+    [(e-tag t e) `(',t ,(expr->sexp e))]
+    [(e-case subj branches)
+     `(case ,(expr->sexp subj)
+        ,@(for/list ([b branches])
+            (match-define (case-branch pat body) b)
+            `(,(pat->sexp pat) ,(expr->sexp body))))]
+    [(e-join '()) 'empty]
+    [(e-join l) `(join ,@(map expr->sexp l))]
+    [(e-set es) `(set ,@(map expr->sexp es))]
+    [(e-letin var arg body)
+     `(let ,var <- ,(expr->sexp arg) ,(expr->sexp body))]
+    [(e-fix var body) `(fix ,var ,(expr->sexp body))]
+    [(e-let tone var expr body)
+     `(let ([,@(match tone ['mono '(mono)] ['any '()])
+             ,var = ,(expr->sexp expr)])
+        ,(expr->sexp body))]))
 
 ;; contexts Γ are simple lists of identifiers - used to map variable names to
 ;; debruijn indices.
@@ -59,6 +96,31 @@
          (foldl (flip e-app) (r f) (map r as)))]
     [_ (error "unfamiliar expression:" e)]))
 
+
+;;; Type parsing/pretty-printing
+(define (type->sexp t)
+  (define (hash->sexps h)
+    (for/list ([(name type) h])
+      `(,name ,(type->sexp type))))
+  (match t
+    [(t-bool) 'bool]
+    [(t-nat) 'nat]
+    [(t-str) 'str]
+    [(t-tuple ts) `(* ,@(map type->sexp ts))]
+    [(t-record fields) `(record ,@(hash->sexps fields))]
+    [(t-sum branches) `(+ ,@(hash->sexps branches))]
+    [(t-fs a) `(set ,(type->sexp a))]
+    [(t-fun a b)
+     (let loop ([args (list a)] [result b])
+       (match result
+         [(t-fun a b) (loop (cons a args) b)]
+         [_ `(,@(map type->sexp (reverse args)) -> ,(type->sexp result))]))]
+    [(t-mono a b)
+     (let loop ([args (list a)] [result b])
+       (match result
+         [(t-mono a b) (loop (cons a args) b)]
+         [_ `(,@(map type->sexp (reverse args)) ~> ,(type->sexp result))]))]))
+
 (define (parse-type t)
   (match t
     ['bool (t-bool)]
@@ -87,6 +149,16 @@
     [`(,as ... -> ,(and (not '~> '->) bs) ...)
      (parse-arrow-type t-fun as (foldr t-arr result-type (map parse-type bs)))]
     [`(,(not '~> '->) ...) (foldr t-arr result-type (map parse-type args))]))
+
+
+;; Pattern parsing/pretty-printing
+(define (pat->sexp p)
+  (match p
+    [(p-wild) '_]
+    [(p-var x) x]
+    [(p-lit x) x]
+    [(p-tuple ps) `(cons ,(map pat->sexp ps))]
+    [(p-tag name p) `(',name ,(pat->sexp p))]))
 
 (define (parse-pat p)
   (match p
