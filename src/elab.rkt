@@ -1,6 +1,6 @@
 #lang racket
 
-(require "util.rkt" "ast.rkt" "types.rkt" "env.rkt")
+(require "util.rkt" "ast.rkt" "parse.rkt" "types.rkt" "env.rkt")
 (provide (all-defined-out))
 
 (define (prim-type-infer p)
@@ -43,202 +43,232 @@
 ;; Maps some exprs to info about them that is used for compilation:
 ;; - e-lam, e-app: 'fun or 'mono, for ordinary or monotone {lambdas,application}
 ;; - e-join, e-prim, e-fix: its type
-(define *elab-info*  (make-weak-hasheq))
+(define *elab-info* (make-weak-hasheq))
 (define (elab-info e [orelse (lambda () (error "no elab info for:" e))])
   (hash-ref *elab-info* e orelse))
+
+(define (should-remember-type expr)
+  (match expr
+    [(or (e-prim _) (e-join _) (e-join-in _ _ _) (e-fix _ _)) #t]
+    [_ #f]))
+
+;;; if `type' is #f, we infer the type of `expr'.
+;;; otherwise, we check that `expr' has type `type'.
+;;; returns (values info-table type-of-expr)
+;;; info-table is a hash from exprs to their elab info.
+(define (elab root-expr [root-Γ empty-env] #:type [root-type #f])
+  (define info-table (make-hasheq))
+  (define (set-info! e i)
+    (assert! (not (hash-has-key? info-table e)))
+    (hash-set! info-table e i))
+
+  ;; if `type' is #f, we're inferring.
+  ;; if not, we're checking.
+  ;; returns the type of `expr', which is always be a subtype of `type'.
+  (define (visit expr type Γ)
+    (define expr-type (find-type expr type Γ))
+    (when (should-remember-type expr)
+      (set-info! expr expr-type))
+    ;; TODO?: optimization: use eq? to avoid call to subtype? here
+    (when (and type (not (subtype? expr-type type)))
+      (type-error
+"        expression: ~s
+          has type: ~s
+but we expect type: ~s"
+                  (expr->sexp expr)
+                  (type->sexp expr-type)
+                  (type->sexp type)))
+    expr-type)
+
+  ;; if `type' is #f, we're inferring. if not, we're checking.
+  (define (find-type expr type Γ)
+    (define (fail [why #f] . format-args)
+      (define message
+       (if type
+           (format "expression: ~s
+cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
+           (format "cannot infer type of expression: ~s" (expr->sexp expr))))
+      (when why
+        (define why-msg (apply format (string-append why) format-args))
+        (set! message (string-append message "\nreason: " why-msg)))
+      (type-error message))
+
+    ;; ---------- COMMENCE BIG GIANT CASE ANALYSIS ----------
+    (match expr
+      ;; ===== TRANSPARENT / BOTH SYNTHESIS AND ANALYSIS EXPRESSIONS =====
+      [(e-trustme e) (visit e type (env-trustme Γ))]
+
+      [(e-let tone v subj body)
+       (define hyp    (match tone ['mono h-mono] ['any h-any]))
+       (define subj-Γ (match tone ['mono Γ]      ['any (env-hide-mono Γ)]))
+       (define subj-t (visit subj #f subj-Γ))
+       (visit body type (env-cons (hyp subj-t) Γ))]
+
+      ;; ===== SYNTHESIS-ONLY EXPRESSIONS =====
+      ;; we infer these, and our caller checks the inferred type if necessary
+      [(e-ann t e) (visit e t Γ) t]
+      [(e-lit v) (lit-type v)]
+
+      [(e-free-var n)
+       (env-free-ref Γ n (lambda () (fail "it is a free variable")))]
+
+      [(e-var n i)
+       (define (unbound) (fail "it is an unbound variable (BAD PARSE)"))
+       (match (env-ref Γ i unbound)
+         [(or (h-any t) (h-mono t)) t]
+         [_ (fail "it is a hidden monotone variable")])]
+
+      [(e-app f a)
+       (define ft (visit f #f Γ))
+       (match ft
+         [(~> i o) (set-info! expr 'mono) (visit a i Γ) o]
+         [(-> i o) (set-info! expr 'fun) (visit a i (env-hide-mono Γ)) o]
+         [_ (fail "applying non-function ~s : ~s"
+                  (expr->sexp f) (type->sexp ft))])]
+
+      [(e-proj i subj)
+       (define subj-t (visit subj #f Γ))
+       (match* (i subj-t)
+         [((? number?) (t-tuple a))  #:when (< i (length a))    (list-ref a i)]
+         [((? symbol?) (t-record a)) #:when (hash-has-key? a i) (hash-ref a i)]
+         [(_ _) (fail "bad projection")])]
+
+      [(e-record-merge l r)
+       (define (infer-record e)
+         (match (visit e #f Γ)
+           [(t-record h) h]
+           ;; TODO: better error message
+           [t (fail "merge argument is not a record: ~s : ~s"
+                    (expr->sexp e) (type->sexp t))]))
+       (t-record (hash-union-right (infer-record l) (infer-record r)))]
+
+      ;; ===== ANALYSIS-ONLY TERMS ====
+      ;; we need `type' to be non-#f to check these
+      [(e-lam _ _) #:when (not type) (fail "lambdas not inferrable")]
+      [(e-lam var body) #:when type
+       (define-values (tone hyp body-type)
+         (match type
+           [(t-mono a b) (values 'mono (h-mono a) b)]
+           [(t-fun a b)  (values 'fun  (h-any a)  b)]
+           [_ (fail "lambdas must have function type")]))
+       (set-info! expr tone)
+       (visit body body-type (env-cons hyp Γ))
+       type]
+
+      [(e-fix _ _) #:when (not type) (fail "fix expressions not inferrable")]
+      [(e-fix var body) #:when type
+       (unless (fixpoint-type? type)
+         (fail "cannot calculate fixpoints of type ~s" (type->sexp type)))
+       (visit body type (env-cons (h-mono type) Γ))]
+
+      [(e-join as) #:when (not type) (fail "join expressions not inferrable")]
+      [(e-join as) #:when type
+       (unless (lattice-type? type)
+         (error "cannot join at non-lattice type ~s" (type->sexp type)))
+       (for ([a as]) (visit a type Γ))
+       type]
+
+      [(e-join-in _ _ _) #:when (not type)
+       (fail "join expressions not inferrable")]
+      [(e-join-in var arg body) #:when type
+       (define elem-type
+         (match (visit arg #f Γ)
+           [(t-fs a) a]
+           ;; TODO: better error message
+           [t (fail "iteratee has non-set type ~s" (type->sexp t))]))
+       (visit body type (env-cons (h-any elem-type) Γ))]
+
+      ;; ===== ANALYSIS (BUT SOMETIMES SYNTHESIZABLE) EXPRESSIONS =====
+      ;;
+      ;; we can synthesize these (assuming their subterms synthesize), so we do,
+      ;; even though it's non-standard.
+      ;;
+      ;; TODO: synthesize join and join-in expressions when possible
+      [(e-prim p) #:when type (if (prim-has-type? p type) type (fail))]
+      [(e-prim p) (let ([t (prim-type-infer p)])
+                    (if t t (fail)))]
+
+      [(e-tuple as)
+       (match type
+         [#f (t-tuple (for/list ([a as]) (visit a #f Γ)))]
+         [(t-tuple ts) (if (= (length as) (length ts))
+                           (begin0 type (for ([a as] [t ts]) (visit a t Γ)))
+                           (fail "tuple length mismatch"))]
+         [_ (fail "tuple expression must have tuple type")])]
+
+      [(e-record fields)
+       (match type
+         [#f (t-record (hash-map-values (lambda (x) (visit x #f Γ)) fields))]
+         [(t-record field-types)
+          ;; we return the inferred type, and the subtype check will ensure it
+          ;; has all the necessary fields.
+          (t-record (for/hash ([(n e) fields])
+                      (define (err) (fail "extra field: ~a" n))
+                      (values n (visit e (hash-ref field-types e err)))))]
+         [_ (fail "record expression must have record type")])]
+
+      [(e-tag name subj)
+       (match type
+         [#f (t-sum (hash name (elab-infer subj Γ)))]
+         [(t-sum branches)
+          (define (err) (fail "no such branch in sum type: ~a" name))
+          (visit subj (hash-ref branches name err) Γ)
+          type]
+         [_ (fail "tagged expression must have sum type")])]
+
+      [(e-set '()) (or type (fail "can't infer type of empty set"))]
+      [(e-set elems)
+       (define new-Γ (env-hide-mono Γ))
+       (match type
+         [#f (FS (foldl1 type-lub (for/list ([a elems]) (visit a #f new-Γ))))]
+         [(t-fs a) (for ([elem elems]) (visit elem a new-Γ)) type]
+         [_ (fail "set expression must have set type")])]
+
+      [(e-case _ '()) #:when (not type)
+       (fail "can't infer type of case with no branches")]
+      [(e-case subj branches)
+       ;; TODO: case completeness checking.
+       ;;
+       ;; TODO: think about when it might be ok not to hide the monotone
+       ;; environment when typechecking the case-subject. I think only for
+       ;; irrefutable patterns, a la (let p = e in e)?
+       (define subj-t (visit subj #f (env-hide-mono Γ)))
+       ;; find the lub of all the branch types
+       (define (check-branch b)
+         (match-define (case-branch pat body) b)
+         ;; it's okay to use h-any here ONLY because we hid the monotone
+         ;; environment when checking subj.
+         (define pat-hyps (map h-any (check-pat Γ subj-t pat)))
+         (visit body type (env-extend Γ pat-hyps)))
+       (if type
+           (begin0 type (for ([b branches]) (check-branch b)))
+           (foldl1 type-lub (map check-branch branches)))])
+    ;; ---------- END BIG GIANT CASE ANALYSIS ----------
+    )
+
+  ;; we annotate errors with the whole expression for context
+  (define (on-err e)
+    (error (format "~a
+when typechecking expression: ~s" (exn-message e) (expr->sexp root-expr))))
+
+  (with-handlers ([exn:type-error? on-err])
+   (values info-table (visit root-expr root-type root-Γ))))
 
 ;; Returns type & updates expr-elab-info. Γ is an env mapping variables to types
 ;; (see above.
 (define (elab-infer e Γ)
-  (define (set-info i) (hash-set! *elab-info* e i))
-  (define (remember-type t) (set-info t) t)
-  (match e
-    [(e-ann t e) (elab-check e t Γ) t]
-    [(e-lit v) (lit-type v)]
-
-    [(e-free-var n)
-     (env-free-ref Γ n (lambda () (type-error "free variable: ~a" n)))]
-
-    [(e-var n i)
-     (define (unbound) (type-error "(BAD PARSE) unbound variable: ~a" n))
-     (match (env-ref Γ i unbound)
-       [(or (h-any t) (h-mono t)) t]
-       [_ (type-error "hidden monotone variable: ~a" n)])]
-
-    [(e-prim p)
-     (define t (prim-type-infer p))
-     (unless t (type-error "can't infer type of primitive: ~a" p))
-     (remember-type t)]
-
-    [(e-app f a)
-     (define ft (elab-infer f Γ))
-     (match ft
-       [(~> i o) (set-info 'mono) (elab-check a i Γ) o]
-       [(-> i o) (set-info 'fun) (elab-check a i (env-hide-mono Γ)) o]
-       [_ (type-error "applying non-function ~v, of type ~v" f ft)])]
-
-    [(e-proj i subj)
-     (define subj-t (elab-infer subj Γ))
-     (match* (i subj-t)
-       [((? number?) (t-tuple a))  #:when (< i (length a))    (list-ref a i)]
-       [((? symbol?) (t-record a)) #:when (hash-has-key? a i) (hash-ref a i)]
-       [(_ _) (type-error "invalid projection: ~v" e)])]
-
-    [(e-record-merge l r)
-     (t-record (hash-union-right (elab-infer-record l Γ)
-                                 (elab-infer-record r Γ)))]
-
-    ;; TODO: synthesize let-in  join expressions when possible, even though
-    ;; it's non-standard?
-    ;;
-    ;; PROBLEM: synthesizing joins is tricksy! for exmaple, ({a:2, b:"foo"} join
-    ;; {a:10}) has meaning, namely {a:10}. but then ({a:2, b:"foo"} join
-    ;; {a:10,b:"fux"}) must have a meaning as well, or we violate liskov's
-    ;; substitution principle! so now we need a function
-    ;; least-lattice-supertype, that given a type A finds the least lattice type
-    ;; M such that A <: M. this seems excessively magical.
-    ;;
-    ;; are there similar problems with let-in? indeed!
-    ;;
-    ;; NB. technically I shouldn't be synthesizing tuples, tagged values, or
-    ;; singleton sets, since they're introduction forms. but w/e.
-    [(e-tuple as) (t-tuple (for/list ([a as]) (elab-infer a Γ)))]
-
-    [(e-record fields)
-     (t-record (hash-map-values (lambda (x) (elab-infer x Γ)) fields))]
-
-    [(e-tag name subj) (t-sum (hash name (elab-infer subj Γ)))]
-
-    [(e-set '()) (type-error "can't infer type of empty set")]
-    [(e-set elems)
-     (define new-Γ (env-hide-mono Γ))
-     (FS (foldl1 type-lub (for/list ([a elems]) (elab-infer a new-Γ))))]
-
-    [(e-case subj branches)
-     (when (null? branches)
-       (type-error "can't infer type of case with no branches"))
-     (define subj-t (elab-infer subj (env-hide-mono Γ)))
-     ;; find the lub of all the branch types
-     (define (branch-type b)
-       (match-define (case-branch pat body) b)
-       ;; it's okay to use h-any here ONLY because we hid the monotone
-       ;; environment when checking subj.
-       (define pat-Γ (map h-any (check-pat Γ subj-t pat)))
-       (elab-infer body (append pat-Γ Γ)))
-     (foldl1 type-lub (map branch-type branches))]
-
-    [(e-let tone v subj body)
-     (define hyp    (match tone ['mono h-mono] ['any h-any]))
-     (define subj-Γ (match tone ['mono Γ]      ['any (env-hide-mono Γ)]))
-     (define subj-t (elab-infer subj subj-Γ))
-     (elab-infer body (env-cons (hyp subj-t) Γ))]
-
-    [(e-trustme e) (elab-infer e (env-trustme Γ))]
-
-    [(or (e-lam _ _) (e-fix _ _) (e-join _) (e-join-in _ _ _))
-      (type-error "can't infer type of: ~v" e)]))
+  (define-values (info type) (elab e Γ))
+  ;; XXX hack
+  (for ([(k v) info])
+    (hash-set! *elab-info* k v))
+  type)
 
 ;; returns nothing.
 (define (elab-check e t Γ)
-  (define (set-info i) (hash-set! *elab-info* e i))
-  (define (remember-type) (set-info t))
-  (match e
-    ;; things that must be inferrable
-    ;; TODO: maybe allow checking e-record-merge?
-    [(or (e-ann _ _) (e-var _ _) (e-free-var _) (e-lit _) (e-app _ _)
-         (e-proj _ _) (e-record-merge _ _))
-     (define et (elab-infer e Γ))
-     (unless (subtype? et t)
-       (type-error "expression e has type: ~v\nbut we expect type: ~v" et t))]
-
-    [(e-prim p) (if (prim-has-type? p t) (remember-type)
-                    (type-error "primitive ~a cannot have type ~v" p t))]
-
-    [(e-lam var body)
-     (define-values (k h b)
-       (match t
-         [(t-mono a b) (values 'mono (h-mono a) b)]
-         [(t-fun a b) (values 'fun (h-any a) b)]
-         [_ (type-error "not a function type: ~v" t)]))
-     (set-info k)
-     (elab-check body b (env-cons h Γ))]
-
-    [(e-tuple es)
-      (match t
-        [(t-tuple ts)
-         (if (= (length es) (length ts))
-          (for ([e es] [t ts]) (elab-check e t Γ))
-          (type-error "wrong-length tuple: ~v" e))]
-        [_ (type-error "not a tuple type: ~v" t)])]
-
-    [(e-record fields)
-     (define field-types
-       (match t [(t-record fs) fs]
-                [_ (type-error "not a record type: ~v" t)]))
-     (for ([(n e) fields])
-       (define (err) (type-error "extra field in record literal: ~a" n))
-       (elab-check e (hash-ref field-types n err) Γ))]
-
-    [(e-tag name subj)
-      (match t
-        [(t-sum branches)
-          (define (fail)
-            (type-error "sum type ~v does not have branch ~a"
-              branches name))
-         (elab-check subj (hash-ref branches name fail) Γ)]
-        [_ (type-error "not a sum type: ~v" t)])]
-
-    [(e-case subj branches)
-     ;; TODO: case completeness checking.
-     ;;
-     ;; TODO: think about when it might be ok not to hide the monotone
-     ;; environment when typechecking the case-subject. I think only for
-     ;; irrefutable patterns, a la (let p = e in e)?
-     (define subj-t (elab-infer subj (env-hide-mono Γ)))
-     (for ([b branches])
-       (match-define (case-branch p body) b)
-       ;; it's okay to use h-any here ONLY because we hid the monotone
-       ;; environment when checking subj.
-       (define pat-hyps (map h-any (check-pat Γ subj-t p)))
-       (elab-check body t (env-extend Γ pat-hyps)))]
-
-    [(e-join as)
-     (unless (lattice-type? t) (error "not a lattice type: ~v" t))
-     (for ([a as]) (elab-check a t Γ))
-     (remember-type)]
-
-    [(e-set elems)
-     (define new-Γ (env-hide-mono Γ))
-     (match t
-       [(t-fs a) (for ([elem elems]) (elab-check elem a new-Γ))]
-       [_ (type-error "not a set type: ~v" t)])]
-
-    [(e-join-in var arg body)
-     (define arg-t (elab-infer arg Γ))
-     (define elem-t (match arg-t
-                      [(t-fs a) a]
-                      [_ (type-error "(letin) not a set type: ~v" arg-t)]))
-     (elab-check body t (env-cons (h-any elem-t) Γ))
-     (remember-type)]
-
-    [(e-let tone v subj body)
-     (define hyp    (match tone ['any h-any] ['mono h-mono]))
-     (define subj-Γ (match tone ['any (env-hide-mono Γ)] ['mono Γ]))
-     (define subj-t (elab-infer subj subj-Γ))
-     (elab-check body t (env-cons (hyp subj-t) Γ))]
-
-    [(e-fix var body)
-     (unless (fixpoint-type? t)
-       (type-error "cannot take fixpoint at type: ~v" t))
-     (elab-check body t (env-cons (h-mono t) Γ))
-     (remember-type)]
-
-    [(e-trustme e) (elab-check e t (env-trustme Γ))]))
-
-(define (elab-infer-record e Γ)
-  (match (elab-infer e Γ)
-    [(t-record h) h]
-    [_ (type-error "not a record: ~v" e)]))
+  (define-values (info type) (elab e Γ #:type t))
+  ;; XXX hack
+  (for ([(k v) info])
+    (hash-set! *elab-info* k v)))
 
 ;; checks a pattern against a type and returns the env that the pattern binds.
 ;; returns list of types of variables the pattern binds.
