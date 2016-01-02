@@ -19,7 +19,7 @@
 ;;; Expression parsing/pretty-printing
 (define (expr->sexp e)
   (match e
-    [(or (e-var n _) (e-free-var n)) n]
+    [(e-var n) n]
     [(e-lit v) v]
     [(e-prim p) p]
     [(e-ann t e) `(isa ,(type->sexp t) ,(expr->sexp e))]
@@ -52,53 +52,45 @@
         ,(expr->sexp body))]
     [(e-trustme e) `(trustme ,(expr->sexp e))]))
 
-;; contexts Γ are simple lists of identifiers - used to map variable names to
-;; debruijn indices.
-(define (parse-expr e [Γ '()])
-  (define (r e) (parse-expr e Γ))
+(define (parse-expr e)
   (match e
     [(? prim?) (e-prim e)]
     [(? lit?) (e-lit e)]
     ['empty (e-join '())]
-    [(? ident?)
-     (match (index-of e Γ)
-       [#f (e-free-var e)]
-       [i (e-var e i)])]
-    [`(isa ,t ,e) (e-ann (parse-type t) (r e))]
+    [(? ident?) (e-var e)]
+    [`(isa ,t ,e) (e-ann (parse-type t) (parse-expr e))]
     [`(,(or 'fn 'λ) ,xs ... ,e)
-     (set! e (parse-expr e (rev-append xs Γ)))
+     (set! e (parse-expr e))
      (foldr e-lam e xs)]
-    [`(cons . ,es) (e-tuple (map r es))]
-    [`(,(or 'π 'proj) ,i ,e) (e-proj i (r e))]
+    [`(cons . ,es) (e-tuple (map parse-expr es))]
+    [`(,(or 'π 'proj) ,i ,e) (e-proj i (parse-expr e))]
     [`(record (,ns ,es) ...) (e-record (for/hash ([n ns] [e es])
-                                         (values n (r e))))]
-    [`(record-merge ,a ,b) (e-record-merge (r a) (r b))]
-    [`(extend-record ,base . ,as) (e-record-merge (r base) (r `(record . ,as)))]
-    [(or `(tag ,name ,e) `(',name ,e)) (e-tag name (r e))]
+                                         (values n (parse-expr e))))]
+    [`(record-merge ,a ,b) (e-record-merge (parse-expr a) (parse-expr b))]
+    [`(extend-record ,base . ,as)
+     (e-record-merge (parse-expr base) (parse-expr `(record . ,as)))]
+    [(or `(tag ,name ,e) `(',name ,e)) (e-tag name (parse-expr e))]
     [`(case ,subj (,ps ,es) ...)
-      (e-case (r subj)
+      (e-case (parse-expr subj)
         (for/list ([p ps] [e es])
-          (set! p (parse-pat p))
-          (set! e (parse-expr e (rev-append (pat-vars p) Γ)))
-          (case-branch p e)))]
-    [`(join . ,es) (e-join (map r es))]
-    [`(set . ,es) (e-set (map r es))]
+          (case-branch (parse-pat p) (parse-expr e))))]
+    [`(join . ,es) (e-join (map parse-expr es))]
+    [`(set . ,es) (e-set (map parse-expr es))]
     [`(let ,decls ,body)
-     (parse-expr-letting (parse-all-decls decls Γ) body Γ)]
+     (parse-expr-letting (parse-all-decls decls) body)]
     [`(,expr where . ,decls)
-     (parse-expr-letting (parse-all-decls decls Γ) expr Γ)]
-    [`(for () ,body) (r body)]
+     (parse-expr-letting (parse-all-decls decls) expr)]
+    [`(for () ,body) (parse-expr body)]
     [`(for ([,name ,expr]) ,body)
-     (e-join-in name (r expr) (parse-expr body (cons name Γ)))]
+     (e-join-in name (parse-expr expr) (parse-expr body))]
     [`(for ([,name ,expr] ,clauses ..1) ,body)
-     (r `(for ([,name ,expr]) (for ,clauses ,body)))]
-    [`(fix ,x ,body)
-      (e-fix x (parse-expr body (cons x Γ)))]
-    [`(trustme ,e) (e-trustme (r e))]
+     (parse-expr `(for ([,name ,expr]) (for ,clauses ,body)))]
+    [`(fix ,x ,body) (e-fix x (parse-expr body))]
+    [`(trustme ,e) (e-trustme (parse-expr e))]
     [`(,f ,as ...)
      (if (reserved? f)
          (error "invalid use of reserved form:" e)
-         (foldl (flip e-app) (r f) (map r as)))]
+         (foldl (flip e-app) (parse-expr f) (map parse-expr as)))]
     [_ (error "unfamiliar expression:" e)]))
 
 
@@ -188,8 +180,8 @@
 
 (define empty-decl-state (decl-state (hash) (hash)))
 
-(define (parse-all-decls ds Γ)
-  (define-values (new-state defns) (parse-decls empty-decl-state ds Γ))
+(define (parse-all-decls ds)
+  (define-values (new-state defns) (parse-decls empty-decl-state ds))
   (match-define (decl-state tone-sigs type-sigs) new-state)
   (for ([(n _) type-sigs])
     (error "type ascription for undefined variable:" n))
@@ -200,22 +192,17 @@
 ;; returns (values new-state list-of-defns), or errors
 ;;
 ;; for now, we don't support referring to a variable before its definition, not
-;; even if you give it a type-signature. also, all recursion must be explicit
-;; via `fix'.
-(define (parse-decls state ds Γ)
-  ;; (printf "parse-decls ~a\n" ds)
+;; even if you give it a type-signature. also, all recursion must be explicit.
+(define (parse-decls state ds)
   (define defns '())
   (for ([d ds])
-    ;; (printf "parsing ~a\n" d)
-    (define-values (new-state new-defns) (parse-decl state d Γ))
+    (define-values (new-state new-defns) (parse-decl state d))
     (set! state new-state)
-    (set! Γ (rev-append (map defn-name new-defns) Γ))
     (set! defns (rev-append new-defns defns)))
   (values state (reverse defns)))
 
 ;; returns (values new-state list-of-defns), or errors
-(define (parse-decl state d Γ)
-  ;; (printf "parse-decl ~a\n" d)
+(define (parse-decl state d)
   (match-define (decl-state tone-sigs type-sigs) state)
   (define (ret x) (values (decl-state tone-sigs type-sigs) x))
   (define mono (match (car d)
@@ -251,13 +238,13 @@
      (set! tone-sigs (hash-remove tone-sigs name))
      (set! type-sigs (hash-remove type-sigs name))
      ;; parse the decl & give it up.
-     (ret (list (defn name tone type (parse-expr expr Γ))))]
+     (ret (list (defn name tone type (parse-expr expr))))]
     [_ (error "could not parse declaration:" d)]))
 
 ;; given some defns and an unparsed expr, parses the expr in the appropriate
 ;; environment and produces an expr which let-binds all the defns in the expr.
-(define (parse-expr-letting defns e Γ)
-  (set! e (parse-expr e (rev-append (map defn-name defns) Γ)))
+(define (parse-expr-letting defns e)
+  (set! e (parse-expr e))
   (for/fold ([e e]) ([d (reverse defns)])
     (match-define (defn n k t body) d)
     (e-let k n (if t (e-ann t body) body) e)))

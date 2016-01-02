@@ -13,12 +13,11 @@
 (define global-env? (hash/c ident? global? #:immutable #t))
 
 (define (global-elab-env env)
-  (make-free-env (hash-map-values global-type env)))
+  (hash->env (hash-map-values (compose h-any global-type) env)))
 
 (define (global-compile-env env)
-  (make-free-env
    ;; this is a terrible hack that only works because racket is amazing
-   (hash-map-values (lambda (x) #`'#,(global-value x)) env)))
+  (hash->env (hash-map-values (lambda (x) #`'#,(global-value x)) env)))
 
 
 ;; Utilities for evaluating things inside a given global-env
@@ -28,7 +27,7 @@
 ;; FIXME: WRONG WRONG WRONG
 ;; parse-all-decls does debruijn binding rather than "free" binding
 (define (eval-decls lines env)
-  (eval-defns (parse-all-decls lines '()) env))
+  (eval-defns (parse-all-decls lines) env))
 
 ;; FIXME?: WRONG?
 (define (eval-defns defns env)
@@ -88,9 +87,9 @@ could not parse expression: ~a" (exn-message e1) (exn-message e2))))
                       (lambda (e1)
                         (define expr
                           (with-handlers ([exn:fail? (curry on-err e1)])
-                            (parse-expr line '())))
+                            (parse-expr line)))
                         (lambda () (handle-expr expr)))])
-       (define-values (new-state defns) (parse-decl decl-parser line '()))
+       (define-values (new-state defns) (parse-decl decl-parser line))
        (set! decl-parser new-state)
        (lambda () (handle-defns defns)))))
 

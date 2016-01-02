@@ -34,10 +34,10 @@
 (enum hyp (h-any type) (h-mono type) (h-hidden))
 
 (define (env-hide-mono Γ)
-  (env-map-bound (match-lambda [(h-mono _) (h-hidden)] [x x]) Γ))
+  (env-map (match-lambda [(h-mono _) (h-hidden)] [x x]) Γ))
 
 (define (env-trustme Γ)
-  (env-map-bound (match-lambda [(h-mono t) (h-any t)] [x x]) Γ))
+  (env-map (match-lambda [(h-mono t) (h-any t)] [x x]) Γ))
 
 
 ;; The elaborator generates an info hashtable that maps some exprs to info about
@@ -100,25 +100,21 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
       ;; ===== TRANSPARENT / BOTH SYNTHESIS AND ANALYSIS EXPRESSIONS =====
       [(e-trustme e) (visit e type (env-trustme Γ))]
 
-      [(e-let tone v subj body)
+      [(e-let tone var subj body)
        (define hyp    (match tone ['mono h-mono] ['any h-any]))
        (define subj-Γ (match tone ['mono Γ]      ['any (env-hide-mono Γ)]))
        (define subj-t (visit subj #f subj-Γ))
-       (visit body type (env-cons (hyp subj-t) Γ))]
+       (visit body type (env-bind var (hyp subj-t) Γ))]
 
       ;; ===== SYNTHESIS-ONLY EXPRESSIONS =====
       ;; we infer these, and our caller checks the inferred type if necessary
       [(e-ann t e) (visit e t Γ) t]
       [(e-lit v) (lit-type v)]
 
-      [(e-free-var n)
-       (env-free-ref Γ n (lambda () (fail "it is a free variable")))]
-
-      [(e-var n i)
-       (define (unbound) (fail "it is an unbound variable (BAD PARSE)"))
-       (match (env-ref Γ i unbound)
+      [(e-var n)
+       (match (env-ref Γ n (lambda () (fail "~a is not bound" n)))
          [(or (h-any t) (h-mono t)) t]
-         [_ (fail "it is a hidden monotone variable")])]
+         [_ (fail "~a is a hidden monotone variable" n)])]
 
       [(e-app f a)
        (define ft (visit f #f Γ))
@@ -154,14 +150,14 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
            [(t-fun a b)  (values 'fun  (h-any a)  b)]
            [_ (fail "lambdas must have function type")]))
        (set-info! expr tone)
-       (visit body body-type (env-cons hyp Γ))
+       (visit body body-type (env-bind var hyp Γ))
        type]
 
       [(e-fix _ _) #:when (not type) (fail "fix expressions not inferrable")]
       [(e-fix var body) #:when type
        (unless (fixpoint-type? type)
          (fail "cannot calculate fixpoints of type ~s" (type->sexp type)))
-       (visit body type (env-cons (h-mono type) Γ))]
+       (visit body type (env-bind var (h-mono type) Γ))]
 
       [(e-join as) #:when (not type) (fail "join expressions not inferrable")]
       [(e-join as) #:when type
@@ -178,7 +174,7 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
            [(t-fs a) a]
            ;; TODO: better error message
            [t (fail "iteratee has non-set type ~s" (type->sexp t))]))
-       (visit body type (env-cons (h-any elem-type) Γ))]
+       (visit body type (env-bind var (h-any elem-type) Γ))]
 
       ;; ===== ANALYSIS (BUT SOMETIMES SYNTHESIZABLE) EXPRESSIONS =====
       ;;
@@ -241,7 +237,7 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
          ;; it's okay to use h-any here ONLY because we hid the monotone
          ;; environment when checking subj.
          (define pat-hyps (map h-any (check-pat Γ subj-t pat)))
-         (visit body type (env-extend Γ pat-hyps)))
+         (visit body type (env-extend Γ (pat-vars pat) pat-hyps)))
        (if type
            (begin0 type (for ([b branches]) (check-branch b)))
            (foldl1 type-lub (map check-branch branches)))])

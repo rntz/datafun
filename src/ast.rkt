@@ -19,9 +19,7 @@
 
 (enum expr
   (e-ann type expr)
-  ;; DeBruijn indexing w/ name for readability
-  (e-var name index)
-  (e-free-var name)
+  (e-var name)
   (e-lit value) ;; literals
   (e-prim prim) ;; primitive functions
   ;; bidirectional type inference / elaboration figures out which kind (ordinary

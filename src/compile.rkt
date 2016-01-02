@@ -11,13 +11,12 @@
   (define (r e) (compile-expr e Γ info))
   (match e
     [(e-ann _ e) (r e)]
-    [(e-free-var n) (env-free-ref Γ n)]
-    [(e-var _ i) (env-ref Γ i)]
+    [(e-var n) (env-ref Γ n)]
     [(e-lit l) #`'#,l]
     [(e-prim p) (compile-prim p (expr-info))]
     [(e-lam v body)
      (define var (gensym v))
-     #`(lambda (#,var) #,(compile-expr body (env-cons var Γ) info))]
+     #`(lambda (#,var) #,(compile-expr body (env-bind v var Γ) info))]
     [(e-app f a) #`(#,(r f) #,(r a))]
     [(e-tuple es) #`(list #,@(map r es))]
     [(e-proj i e)
@@ -34,23 +33,24 @@
      #`(match #,(r subj)
          #,@(for/list ([b branches])
               (match-define (case-branch pat body) b)
-              (define-values (ids rkt-pat) (compile-pat pat))
-              #`[#,rkt-pat #,(compile-expr body (env-extend Γ ids) info)]))]
+              (define-values (pat-ids rkt-pat) (compile-pat pat))
+              (define body-Γ (env-extend Γ (pat-vars pat) pat-ids))
+              #`[#,rkt-pat #,(compile-expr body body-Γ info)]))]
     [(e-join es) #`(#,(joiner-for (expr-info)) #,@(map r es))]
     [(e-set es) #`(set #,@(map r es))]
     [(e-join-in v arg body)
      (define var (gensym v))
      #`(apply #,(joiner-for (expr-info))
               (for/list ([#,var #,(r arg)])
-                #,(compile-expr body (env-cons var Γ) info)))]
+                #,(compile-expr body (env-bind v var Γ) info)))]
     [(e-fix v body)
      (define var (gensym v))
      #`(df-fix (#,(joiner-for (expr-info)))
-               (lambda (#,var) #,(compile-expr body (env-cons var Γ) info)))]
+               (lambda (#,var) #,(compile-expr body (env-bind v var Γ) info)))]
     [(e-let _ v expr body)
      (define var (gensym v))
      #`(let ((#,var #,(r expr)))
-         #,(compile-expr body (env-cons var Γ) info))]
+         #,(compile-expr body (env-bind v var Γ) info))]
     [(e-trustme e) (r e)]))
 
 ;; returns (values list-of-idents racket-pattern)
