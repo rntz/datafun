@@ -22,7 +22,7 @@
     [(or (e-var n _) (e-free-var n)) n]
     [(e-lit v) v]
     [(e-prim p) p]
-    [(e-ann t e) `(: ,(type->sexp t) ,(expr->sexp e))]
+    [(e-ann t e) `(isa ,(type->sexp t) ,(expr->sexp e))]
     [(e-lam v b) `(fn ,v ,(expr->sexp b))]
     [(e-app f a)
      (let loop ([func f] [args (list a)])
@@ -64,7 +64,7 @@
      (match (index-of e Γ)
        [#f (e-free-var e)]
        [i (e-var e i)])]
-    [`(: ,t ,e) (e-ann (parse-type t) (r e))]
+    [`(isa ,t ,e) (e-ann (parse-type t) (r e))]
     [`(,(or 'fn 'λ) ,xs ... ,e)
      (set! e (parse-expr e (rev-append xs Γ)))
      (foldr e-lam e xs)]
