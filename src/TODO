@@ -1,7 +1,8 @@
-- support declarations properly
+- better support for polymorphic primitives. currently, when applying
+  polymorphic primitives, have to type-annotate the primitive itself. solutions:
 
-  + change repl to parse decls & keep around an environment
+  - replace e-prim with e-prim-apply, representing "fully apply a primitive to
+    arguments". change parsing to cope, and make type inference work on these.
 
-- allow loading from files in repl
-
-- pretty-print expressions and types at repl
+  - upgrade type system to handle polymorphism, including lattice-polymorphism.
+    we'll want this in the long run anyway. how hard would it be?
