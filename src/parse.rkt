@@ -7,10 +7,10 @@
 ;; also, "pretty printers", i.e. convert parsed things back to canonical sexps.
 ;; TODO: an exception class for parse failures.
 
+;; only prefix syntax forms are relevant here. thus =, ->, etc. not included.
 (define (reserved? x) (set-member? reserved x))
 (define reserved
-  (list->set '(: = mono <- -> ~>
-               empty fn λ cons π proj record record-merge extend-record tag
+  (list->set '(mono empty fn λ cons π proj record record-merge extend-record tag
                quote case if join set let where fix trustme)))
 
 (define (ident? x) (and (symbol? x) (not (reserved? x))))
