@@ -54,7 +54,7 @@
 
 ;; contexts Γ are simple lists of identifiers - used to map variable names to
 ;; debruijn indices.
-(define (parse-expr e Γ)
+(define (parse-expr e [Γ '()])
   (define (r e) (parse-expr e Γ))
   (match e
     [(? prim?) (e-prim e)]
@@ -97,7 +97,7 @@
     [`(trustme ,e) (e-trustme (r e))]
     [`(,f ,as ...)
      (if (reserved? f)
-         (error "invalid use of form:" e)
+         (error "invalid use of reserved form:" e)
          (foldl (flip e-app) (r f) (map r as)))]
     [_ (error "unfamiliar expression:" e)]))
 
