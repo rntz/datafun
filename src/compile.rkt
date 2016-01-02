@@ -67,8 +67,8 @@
 
 (define (compile-prim p t)
   (match p
-    ['= #'equal?]
-    ['subset? #'subset?]
+    ['= #'(curry equal?)]
+    ['subset? #'(curry subset?)]
     ['+ #'df+] ['* #'df*] ['- #'df-] ['<= #'df<=]
     ['++ #'df++]
     ['puts #'df-puts]
