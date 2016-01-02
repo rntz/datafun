@@ -6,3 +6,5 @@
 
   - upgrade type system to handle polymorphism, including lattice-polymorphism.
     we'll want this in the long run anyway. how hard would it be?
+
+    after some thought: quite hard. let's do the e-prim-apply thing.
