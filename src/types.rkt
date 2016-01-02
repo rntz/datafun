@@ -3,8 +3,11 @@
 (require "util.rkt" "ast.rkt")
 (provide (all-defined-out))
 
+(struct exn:type-error exn:fail () #:transparent)
+
 (define (type-error fmt . args)
-  (error (apply format (string-append "type error: " fmt) args)))
+  (define msg (string-append "TYPE ERROR\n" (apply format fmt args)))
+  (raise (exn:type-error msg (current-continuation-marks))))
 
 ;; for now, type equality is simple
 (define type=? equal?)
