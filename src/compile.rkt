@@ -42,7 +42,10 @@
      #`(apply #,(joiner-for (info))
               (for/list ([#,var #,(r arg)])
                 #,(compile-expr body (env-cons var Γ))))]
-    [(e-fix var body) TODO]
+    [(e-fix v body)
+     (define var (gensym v))
+     #`(df-fix (#,(joiner-for (info)))
+               (lambda (#,var) #,(compile-expr body (env-cons var Γ))))]
     [(e-let _ v expr body)
      (define var (gensym v))
      #`(let ((#,var #,(r expr)))

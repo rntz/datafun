@@ -17,6 +17,10 @@
 (define ((df-subset? x) y) (subset? x y))
 (define (df-max . xs) (if (null? xs) 0 (apply max xs)))
 (define (df-or . xs) (ormap identity xs))
+(define (df-fix init iter)
+  (define next (iter init))
+  (if (equal? init next) init
+      (df-fix next iter)))
 
 ;; produces syntax object which evals to an n-ary joiner function for the given
 ;; type.
