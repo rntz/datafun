@@ -1,22 +1,23 @@
 #lang racket
 
-(require "util.rkt" "ast.rkt" "env.rkt" "elab.rkt" "runtime.rkt")
+(require "util.rkt" "ast.rkt" "parse.rkt" "env.rkt" "elab.rkt" "runtime.rkt")
 (provide compile-expr)
 
 ;; contexts Γ are envs mapping variables to what they should compile to (an
-;; identifier, generally).
-(define (compile-expr e Γ)
-  (define (info) (elab-info e))
-  (define (r e) (compile-expr e Γ))
+;; identifier, generally). info maps exprs to elaboration info; see elab.rkt.
+(define (compile-expr e Γ info)
+  (define (expr-info)
+    (hash-ref info e (lambda () (error "no elab info for: ~s" (expr->sexp e)))))
+  (define (r e) (compile-expr e Γ info))
   (match e
     [(e-ann _ e) (r e)]
     [(e-free-var n) (env-free-ref Γ n)]
     [(e-var _ i) (env-ref Γ i)]
     [(e-lit l) #`'#,l]
-    [(e-prim p) (compile-prim p (info))]
+    [(e-prim p) (compile-prim p (expr-info))]
     [(e-lam v body)
      (define var (gensym v))
-     #`(lambda (#,var) #,(compile-expr body (env-cons var Γ)))]
+     #`(lambda (#,var) #,(compile-expr body (env-cons var Γ) info))]
     [(e-app f a) #`(#,(r f) #,(r a))]
     [(e-tuple es) #`(list #,@(map r es))]
     [(e-proj i e)
@@ -34,22 +35,22 @@
          #,@(for/list ([b branches])
               (match-define (case-branch pat body) b)
               (define-values (ids rkt-pat) (compile-pat pat))
-              #`[#,rkt-pat #,(compile-expr body (env-extend Γ ids))]))]
-    [(e-join es) #`(#,(joiner-for (info)) #,@(map r es))]
+              #`[#,rkt-pat #,(compile-expr body (env-extend Γ ids) info)]))]
+    [(e-join es) #`(#,(joiner-for (expr-info)) #,@(map r es))]
     [(e-set es) #`(set #,@(map r es))]
     [(e-join-in v arg body)
      (define var (gensym v))
-     #`(apply #,(joiner-for (info))
+     #`(apply #,(joiner-for (expr-info))
               (for/list ([#,var #,(r arg)])
-                #,(compile-expr body (env-cons var Γ))))]
+                #,(compile-expr body (env-cons var Γ) info)))]
     [(e-fix v body)
      (define var (gensym v))
-     #`(df-fix (#,(joiner-for (info)))
-               (lambda (#,var) #,(compile-expr body (env-cons var Γ))))]
+     #`(df-fix (#,(joiner-for (expr-info)))
+               (lambda (#,var) #,(compile-expr body (env-cons var Γ) info)))]
     [(e-let _ v expr body)
      (define var (gensym v))
      #`(let ((#,var #,(r expr)))
-         #,(compile-expr body (env-cons var Γ)))]
+         #,(compile-expr body (env-cons var Γ) info))]
     [(e-trustme e) (r e)]))
 
 ;; returns (values list-of-idents racket-pattern)

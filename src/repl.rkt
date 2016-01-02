@@ -41,17 +41,15 @@
 
 ;; evaluates a definition in a global-env. returns updated env.
 (define (eval-defn d env)
-  (match-define (defn name tone type expr) d)
+  (match-define (defn name tone decl-type expr) d)
   (assert! (not (equal? 'mono tone)))
   (debug (printf "defn: ~a = ~s\n" name (expr->sexp expr)))
   ;; elaborate the expression.
-  (match type
-    ;; if not type-annotated, try to infer.
-    [#f (set! type (elab-infer expr (global-elab-env env)))]
-    [_ (elab-check expr type (global-elab-env env))])
+  (define-values (elab-info type)
+    (elab expr #:type decl-type #:env (global-elab-env env)))
   (debug (printf "type: ~s\n" (type->sexp type)))
   ;; compile it.
-  (define code (compile-expr expr (global-compile-env env)))
+  (define code (compile-expr expr (global-compile-env env) elab-info))
   (debug (display "code: ") (pretty-print (syntax->datum code)))
   (define val (eval code))
   (debug (printf "val:  ~s\n" val))
@@ -72,9 +70,10 @@
 
   (define (handle-expr expr)
     (debug (printf "expr: ~s\n" (expr->sexp expr)))
-    (define expr-type (elab-infer expr (global-elab-env (env))))
+    (define-values (elab-info expr-type)
+      (elab expr #:env (global-elab-env (env))))
     (debug (printf "type: ~s\n" (type->sexp expr-type)))
-    (define code (compile-expr expr (global-compile-env (env))))
+    (define code (compile-expr expr (global-compile-env (env)) elab-info))
     (debug (display "code: ") (pretty-print (syntax->datum code)))
     (printf "~v : ~s\n" (eval code) (type->sexp expr-type)))
 

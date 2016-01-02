@@ -40,23 +40,25 @@
   (env-map-bound (match-lambda [(h-mono t) (h-any t)] [x x]) Γ))
 
 
-;; Maps some exprs to info about them that is used for compilation:
+;; The elaborator generates an info hashtable that maps some exprs to info about
+;; them that is used for compilation:
+;;
 ;; - e-lam, e-app: 'fun or 'mono, for ordinary or monotone {lambdas,application}
-;; - e-join, e-prim, e-fix: its type
-(define *elab-info* (make-weak-hasheq))
-(define (elab-info e [orelse (lambda () (error "no elab info for:" e))])
-  (hash-ref *elab-info* e orelse))
+;; - e-join, e-join-in, e-prim, e-fix: its type
+;;
+;; TODO: currently the 'fun/'mono information is completely unused (see
+;; compile.rkt)! should we remove it?
 
+;; whether we need to remember the type of an expression
 (define (should-remember-type expr)
   (match expr
     [(or (e-prim _) (e-join _) (e-join-in _ _ _) (e-fix _ _)) #t]
     [_ #f]))
 
+;;; returns (values info-table type-of-expr)
 ;;; if `type' is #f, we infer the type of `expr'.
 ;;; otherwise, we check that `expr' has type `type'.
-;;; returns (values info-table type-of-expr)
-;;; info-table is a hash from exprs to their elab info.
-(define (elab root-expr [root-Γ empty-env] #:type [root-type #f])
+(define (elab root-expr #:type [root-type #f] #:env [root-Γ empty-env])
   (define info-table (make-hasheq))
   (define (set-info! e i)
     (assert! (not (hash-has-key? info-table e)))
@@ -209,7 +211,7 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
 
       [(e-tag name subj)
        (match type
-         [#f (t-sum (hash name (elab-infer subj Γ)))]
+         [#f (t-sum (hash name (visit subj #f Γ)))]
          [(t-sum branches)
           (define (err) (fail "no such branch in sum type: ~a" name))
           (visit subj (hash-ref branches name err) Γ)
@@ -253,22 +255,6 @@ when typechecking expression: ~s" (exn-message e) (expr->sexp root-expr))))
 
   (with-handlers ([exn:type-error? on-err])
    (values info-table (visit root-expr root-type root-Γ))))
-
-;; Returns type & updates expr-elab-info. Γ is an env mapping variables to types
-;; (see above.
-(define (elab-infer e Γ)
-  (define-values (info type) (elab e Γ))
-  ;; XXX hack
-  (for ([(k v) info])
-    (hash-set! *elab-info* k v))
-  type)
-
-;; returns nothing.
-(define (elab-check e t Γ)
-  (define-values (info type) (elab e Γ #:type t))
-  ;; XXX hack
-  (for ([(k v) info])
-    (hash-set! *elab-info* k v)))
 
 ;; checks a pattern against a type and returns the env that the pattern binds.
 ;; returns list of types of variables the pattern binds.
