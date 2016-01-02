@@ -22,9 +22,8 @@
   ;; DeBruijn indexing w/ name for readability
   (e-var name index)
   (e-free-var name)
-  ;; used for literals & primitive functions.
-  (e-lit value)
-  (e-prim prim)
+  (e-lit value) ;; literals
+  (e-prim prim) ;; primitive functions
   ;; bidirectional type inference / elaboration figures out which kind (ordinary
   ;; or monotonic) of lambda / application we meant
   (e-lam var body) (e-app func arg)
