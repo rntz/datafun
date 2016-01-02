@@ -38,8 +38,7 @@
 (triv = (record))
 
 (tt ff : (set (record)))
-;; (tt = (set triv)) ;; PROBLEMS
-(tt = (set (record)))
+(tt = (set triv))
 (ff = (set))
 
 (conj : (set (record)) (set (record)) ~> (set (record)))
@@ -52,8 +51,7 @@
 ;; XXX: how do we write this function?
 ;; note that (record) is 1.
 (bool->set : (bool ~> (set (record))))
-;;(bool->set x = (trustme (case x [#t tt] [#f ff])))
-(bool->set x = (trustme (case x [#t (set (record))] [#f (set)])))
+(bool->set x = (trustme (case x [#t tt] [#f ff])))
 
 (set->bool : (set (record)) ~> bool)
 (set->bool x = (for ([_ x]) #t))
@@ -72,9 +70,9 @@
 ;; (ancestor : (set (* str str)))
 ;; (ancestor = (fix ancestor
 ;;                  (join
-;;                   (for ([p person]) (cons p p))
+;;                   (for ([p person]) (set (cons p p)))
 ;;                   (for ([p person]
 ;;                         [a ancestor])
-;;                     (case (equal? (proj 1 p) (proj 0 a))
+;;                     (case (= (proj 1 p) (proj 0 a))
 ;;                       [#t (set (cons (proj 0 p) (proj 1 a)))]
 ;;                       [#f (set)])))))
