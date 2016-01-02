@@ -137,8 +137,9 @@
 
 
 ;;; hash utilities
-(provide freeze-hash hash-union-with hash-union-right hash-intersection-with
-  hash-filter-keys hash-select-keys hash-map-values hash-key-set)
+(provide freeze-hash hash-union-with hash-union-right hash-unions-right
+         hash-intersection-with hash-filter-keys hash-select-keys
+         hash-map-values hash-key-set)
 
 (define (freeze-hash h) (for/hash ([(k v) h]) (values k v)))
 
@@ -165,6 +166,7 @@
           (f (dict-ref a k) (dict-ref b k)))))))
 
 (define (hash-union-right a b) (hash-union-with a b (lambda (x y) y)))
+(define (hash-unions-right hs) (foldl hash-union-right (hash) hs))
 
 (define (hash-intersection-with a b f)
   (for/hash ([k (in-dict-keys a)]
