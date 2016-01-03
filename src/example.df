@@ -2,22 +2,22 @@
 (x = 2)
 
 ;; negation
-(not : (bool -> bool))
+(not : bool -> bool)
 (not x = (case x [#t #f] [#f #t]))
 
 ;; disjunction, eagerly
 ;; this is easy because disjunction *is* the join operator on bools.
-(or : (bool bool ~> bool))
+(or : bool bool ~> bool)
 (or x y = (join x y))
 
 ;; conjunction, eagerly
 ;; XXX: how can we write this?
-(and : (bool bool ~> bool))
+(and : bool bool ~> bool)
 (and x y = (trustme (case x [#t y] [#f #f])))
 
 
 ;; XXX: how can we write this?
-(< : (nat -> nat ~> bool))
+(< : nat -> nat ~> bool)
 ;; this works but is a hack, not extensible to other types:
 (< x y = (<= (+ x 1) y))
 
@@ -50,7 +50,7 @@
 
 ;; XXX: how do we write this function?
 ;; note that (record) is 1.
-(bool->set : (bool ~> (set (record))))
+(bool->set : bool ~> (set (record)))
 (bool->set x = (trustme (case x [#t tt] [#f ff])))
 
 (set->bool : (set (record)) ~> bool)
@@ -67,12 +67,13 @@
                (cons "aldrich" "neel")
                (cons "neel" "rntz")))
 
-;; (ancestor : (set (* str str)))
-;; (ancestor = (fix ancestor
-;;                  (join
-;;                   (for ([p person]) (set (cons p p)))
-;;                   (for ([p person]
-;;                         [a ancestor])
-;;                     (case (= (proj 1 p) (proj 0 a))
-;;                       [#t (set (cons (proj 0 p) (proj 1 a)))]
-;;                       [#f (set)])))))
+(ancestor : (set (* str str)))
+(ancestor = (fix ancestor
+                 (join
+                  ;; (for ([x person]) (set (cons x x)))
+                  parent
+                  (for ([p parent]
+                        [a ancestor])
+                    (case ((isa (str str -> bool) =) (proj 1 p) (proj 0 a))
+                      [#t (set (cons (proj 0 p) (proj 1 a)))]
+                      [#f (set)])))))
