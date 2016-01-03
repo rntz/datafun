@@ -17,6 +17,11 @@
   (t-mono arg result)
   (t-fs type))
 
+;;; Literals & primitives
+(define (lit? x) (if (lit-type x) #t #f))
+(define (prim? x) (set-member? prims x))
+(define prims (list->set '(= <= + - * subset? print puts ++)))
+
 (enum expr
   (e-ann type expr)
   (e-var name)
@@ -86,14 +91,9 @@
     [(p-tuple ps) (append* (map pat-vars ps))]
     [(p-tag _ p) (pat-vars p)]))
 
-;;; Literals & primitives
-(define (lit? x) (if (lit-type x) #t #f))
 (define (lit-type l)
   (cond
     [(boolean? l) (t-bool)]
     [(number? l) (t-nat)]
     [(string? l) (t-str)]
     [#t #f]))
-
-(define prims (list->set '(= <= + - * subset? print puts ++)))
-(define (prim? x) (set-member? prims x))
