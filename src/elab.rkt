@@ -19,7 +19,8 @@
     (match* (p t)
       [('= (-> a b (t-bool)))
         (and (type=? a b) (eqtype? a))]
-      [('subset? (-> (FS a) (~> (FS b) (t-bool))))
+      [('subset? (-> (FS a) (or (~> (FS b) (t-bool))
+                                (-> (FS b) (t-bool)))))
         (and (type=? a b) (eqtype? a))]
       [('print (~> _ (×))) #t]
       [(_ _) #f])))
@@ -93,10 +94,22 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
       (when why
         (define why-msg (apply format (string-append why) format-args))
         (set! message (string-append message "\nreason: " why-msg)))
-      (type-error message))
+      (type-error "~a" message))
 
     ;; ---------- COMMENCE BIG GIANT CASE ANALYSIS ----------
     (match expr
+      ;; ===== SPECIAL CASES FOR INFERRING PRIMITIVES =====
+      ;; it would be nice if somehow we didn't need this *and* prim-has-type
+      [(e-app (and prim-expr (e-prim (and p (or '= 'subset? 'print)))) arg)
+       (define mono (match p ['print #t] [(or '= 'subset?) #f]))
+       (define arg-type (visit arg #f (if mono Γ (env-hide-mono Γ))))
+       (define result-type (match p
+                             ['print (×)]
+                             ['= (-> arg-type Bool)]
+                             ['subset? (~> arg-type Bool)]))
+       (visit prim-expr ((if mono t-mono t-fun) arg-type result-type) Γ)
+       result-type]
+
       ;; ===== TRANSPARENT / BOTH SYNTHESIS AND ANALYSIS EXPRESSIONS =====
       [(e-trustme e) (visit e type (env-trustme Γ))]
 

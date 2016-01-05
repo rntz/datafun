@@ -74,6 +74,6 @@
                   parent
                   (for ([p parent]
                         [a ancestor])
-                    (case ((isa (str str -> bool) =) (proj 1 p) (proj 0 a))
+                    (case (= (proj 1 p) (proj 0 a))
                       [#t (set (cons (proj 0 p) (proj 1 a)))]
                       [#f (set)])))))
