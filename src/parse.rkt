@@ -24,7 +24,7 @@
      [(e-lit v) v]
      [(e-prim p) p]
      [(e-ann t e) `(isa ,(type->sexp t) ,(expr->sexp e))]
-     [(e-lam v b) `(fn ,v ,(expr->sexp b))]
+     [(e-lam v b) `(λ ,v ,(expr->sexp b))]
      [(e-app f a)
       (let loop ([func f] [args (list a)])
         (match func
@@ -115,6 +115,7 @@
    `(for ,(append clauses-1 clauses-2) ,body)]
   [(`(let ,decls-1 (let ,decls-2 ,body)))
    `(let ,(append decls-1 decls-2) ,body)]
+  [(`(λ ,x (λ . ,rest))) `(λ ,x . ,rest)]
   [(e) e])
 
 
