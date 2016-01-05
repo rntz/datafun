@@ -34,7 +34,7 @@
     [(t-bool) #'df-or]
     [(t-nat) #'df-max]
     [(t-set _) #'df-union]
-    [(or (t-fun i o) (t-mono i o))
+    [(t-fun _ i o)
      #`(lambda fs (lambda (x) (#,(joiner-for o)
                      (for/list ([f fs]) (f x)))))]
     [(t-tuple ts)

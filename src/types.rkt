@@ -15,7 +15,7 @@
 ;; type well-formedness
 (define (type-wf? x)
   (match x
-    [(or (t-mono a b) (t-fun a b)) (and (type-wf? a) (type-wf? b))]
+    [(t-fun _ a b) (and (type-wf? a) (type-wf? b))]
     [(t-set a) (type-wf? a)]
     [(t-tuple ts) (andmap type-wf? ts)]
     [(t-sum bs) ((hash/c symbol? type-wf? #:immutable #t) bs)]
@@ -30,7 +30,7 @@
     [(or (t-str) (t-sum _)) #f]
     [(t-tuple ts) (andmap lattice-type? ts)]
     [(t-record as) (andmap lattice-type? (hash-values as))]
-    [(or (t-fun _ r) (t-mono _ r)) (lattice-type? r)]))
+    [(t-fun _ _ r) (lattice-type? r)]))
 
 (define (eqtype? x)
   (match x
@@ -38,7 +38,7 @@
     [(or (t-record (app hash-values as)) (t-sum (app hash-values as))
          (t-tuple as))
      (andmap eqtype? as)]
-    [(or (t-fun _ _) (t-mono _ _)) #f]
+    [(t-fun _ _ _) #f]
     [(t-set a) (eqtype? a)]))
 
 (define (finite-type? t)
@@ -49,7 +49,7 @@
          (t-record (app hash-values as))
          (t-sum (app hash-values as)))
      (andmap finite-type? as)]
-    [(or (t-fun a b) (t-mono a b)) (andmap finite-type? (list a b))]
+    [(t-fun _ a b) (andmap finite-type? (list a b))]
     [_ #f]))
 
 (define (fixpoint-type? t)
@@ -75,11 +75,11 @@
   [((t-sum as) (t-sum bs))
     (for/and ([(k v) as])
       (and (hash-has-key? bs k) (subtype? v (hash-ref bs k))))]
-  [((t-mono a x) (or (t-fun b y) (t-mono b y)))
-    (and (subtype? b a) (subtype? x y))]
-  [((t-mono a x) (t-mono b y))
-    (and (subtype? b a) (subtype? x y))]
+  [((t-fun o a x) (t-fun p b y))
+   (and (subtone? o p) (subtype? b a) (subtype? x y))]
   [(x y) (type=? x y)])
+
+(define/match (subtone? o p) [('any 'mono) #f] [(_ _) #t])
 
 (define/match (type-lub a b)
   [((t-tuple as) (t-tuple bs)) (t-tuple (type-lubs as bs))]
@@ -87,10 +87,8 @@
    #:when (set=? (hash-key-set as) (hash-key-set bs))
    (t-record (hash-intersection-with as bs type-lub))]
   [((t-sum as) (t-sum bs)) (t-sum (hash-union-with as bs type-lub))]
-  [((t-mono a x) (t-mono b y))
-    (t-mono (type-glb a b) (type-lub x y))]
-  [((or (t-mono a x) (t-fun a x)) (or (t-mono b y) (t-fun b y)))
-    (t-fun (type-glb a b) (type-lub x y))]
+  [((t-fun o a x) (t-fun p b y))
+   (t-fun (tone-lub o p) (type-glb a b) (type-lub x y))]
   [((t-set a) (t-set b)) (t-set (type-lub a b))]
   [(x y) #:when (type=? x y) x]
   [(x y) (type-error "no lub: ~v and ~v" x y)])
@@ -101,13 +99,14 @@
    #:when (set=? (hash-key-set as) (hash-key-set bs))
    (t-record (hash-union-with as bs type-glb))]
   [((t-sum as) (t-sum bs)) (t-sum (hash-intersection-with as bs type-glb))]
-  [((t-fun a x) (t-fun b y))
-    (t-fun (type-lub a b) (type-glb x y))]
-  [((or (t-mono a x) (t-fun a x)) (or (t-mono b y) (t-fun b y)))
-    (t-mono (type-lub a b) (type-glb x y))]
+  [((t-fun o a x) (t-fun p b y))
+   (t-fun (tone-glb o p) (type-lub a b) (type-glb x y))]
   [((t-set a) (t-set b)) (t-set (type-glb a b))]
   [(x y) #:when (type=? x y) x]
   [(x y) (type-error "no glb: ~v and ~v" x y)])
+
+(define/match (tone-lub o p) [('mono 'mono) 'mono] [(_ _) 'any])
+(define/match (tone-glb o p) [('any 'any)   'any]  [(_ _) 'mono])
 
 (define (type-lubs as bs)
   (unless (= (length as) (length bs)) (type-error "lists of unequal length"))

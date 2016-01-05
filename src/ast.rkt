@@ -13,8 +13,8 @@
   (t-record fields)
   ;; branches is a hash from branch names to types
   (t-sum branches)
-  (t-fun arg result)
-  (t-mono arg result)
+  ;; tone is 'any, for ordinary functions, or 'mono, for monotone fns
+  (t-fun tone arg result)
   (t-set type))
 
 ;;; Literals & primitives

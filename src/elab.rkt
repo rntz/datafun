@@ -18,13 +18,12 @@
   (define pt (prim-type-infer p))
   (if pt (type=? t pt)
       (match* (p t)
-        [('= (t-fun a (t-fun b (t-bool))))
+        [('= (t-fun 'any a (t-fun 'any b (t-bool))))
          (and (type=? a b) (eqtype? a))]
-        [('subset? (t-fun (t-set a)
-                          (or (t-mono (t-set b) (t-bool))
-                              (t-fun (t-set b) (t-bool)))))
+        [('subset? (t-fun 'any (t-set a)
+                          (t-fun _ (t-set b) (t-bool))))
          (and (type=? a b) (eqtype? a))]
-        [('print (t-mono _ (t-tuple '()))) #t]
+        [('print (t-fun _ _ (t-tuple '()))) #t]
         [(_ _) #f])))
 
 
@@ -46,10 +45,10 @@
 ;; The elaborator generates an info hashtable that maps some exprs to info about
 ;; them that is used for compilation:
 ;;
-;; - e-lam, e-app: 'fun or 'mono, for ordinary or monotone {lambdas,application}
+;; - e-lam, e-app: 'any or 'mono, for ordinary or monotone {lambdas,application}
 ;; - e-join, e-join-in, e-prim, e-fix: its type
 ;;
-;; TODO: currently the 'fun/'mono information is completely unused (see
+;; TODO: currently the 'any/'mono information is completely unused (see
 ;; compile.rkt)! should we remove it?
 
 ;; whether we need to remember the type of an expression
@@ -107,9 +106,9 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
        (define arg-type (visit arg #f (if mono Γ (env-hide-mono Γ))))
        (define result-type (match p
                              ['print (t-tuple '())]
-                             ['= (t-fun arg-type (t-bool))]
-                             ['subset? (t-mono arg-type (t-bool))]))
-       (visit prim-expr ((if mono t-mono t-fun) arg-type result-type) Γ)
+                             ['= (t-fun 'any arg-type (t-bool))]
+                             ['subset? (t-fun 'mono arg-type (t-bool))]))
+       (visit prim-expr (t-fun (if mono 'mono 'any) arg-type result-type) Γ)
        result-type]
 
       ;; ===== TRANSPARENT / BOTH SYNTHESIS AND ANALYSIS EXPRESSIONS =====
@@ -131,13 +130,14 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
          [(or (h-any t) (h-mono t)) t]
          [_ (fail "~a is a hidden monotone variable" n)])]
 
-      [(e-app f a)
-       (define ft (visit f #f Γ))
-       (match ft
-         [(t-mono i o) (set-info! expr 'mono) (visit a i Γ) o]
-         [(t-fun i o) (set-info! expr 'fun) (visit a i (env-hide-mono Γ)) o]
-         [_ (fail "applying non-function ~s : ~s"
-                  (expr->sexp f) (type->sexp ft))])]
+      [(e-app func arg)
+       (match (visit func #f Γ)
+         [(t-fun o a b)
+          (set-info! expr o)
+          (visit arg a (match o ['mono Γ] ['any (env-hide-mono Γ)]))
+          b]
+         [func-type (fail "applying non-function ~s : ~s"
+                          (expr->sexp func) (type->sexp func-type))])]
 
       [(e-proj i subj)
        (define subj-t (visit subj #f Γ))
@@ -159,11 +159,8 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
       ;; we need `type' to be non-#f to check these
       [(e-lam _ _) #:when (not type) (fail "lambdas not inferrable")]
       [(e-lam var body) #:when type
-       (define-values (tone hyp body-type)
-         (match type
-           [(t-mono a b) (values 'mono (h-mono a) b)]
-           [(t-fun a b)  (values 'fun  (h-any a)  b)]
-           [_ (fail "lambdas must have function type")]))
+       (match-define (t-fun tone a body-type) type)
+       (define hyp (match tone ['any (h-any a)] ['mono (h-mono a)]))
        (set-info! expr tone)
        (visit body body-type (env-bind var hyp Γ))
        type]

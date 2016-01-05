@@ -126,16 +126,14 @@
     [(t-record fields) `(record ,@(hash->sexps fields))]
     [(t-sum branches) `(+ ,@(hash->sexps branches))]
     [(t-set a) `(set ,(type->sexp a))]
-    [(t-fun a b)
+    [(t-fun tone a b)
      (let loop ([args (list a)] [result b])
        (match result
-         [(t-fun a b) (loop (cons a args) b)]
-         [_ `(,@(map type->sexp (reverse args)) -> ,(type->sexp result))]))]
-    [(t-mono a b)
-     (let loop ([args (list a)] [result b])
-       (match result
-         [(t-mono a b) (loop (cons a args) b)]
-         [_ `(,@(map type->sexp (reverse args)) ~> ,(type->sexp result))]))]))
+         [(t-fun tone2 a b) #:when (equal? tone tone2)
+          (loop (cons a args) b)]
+         [_ `(,@(map type->sexp (reverse args))
+              ,(match tone ['any '->] ['mono '~>])
+              ,(type->sexp result))]))]))
 
 (define (parse-type t)
   (match t
@@ -155,15 +153,15 @@
 
 (define (arrow-type->sexp t)
   (match t
-    [(or (t-fun _ _) (t-mono _ _)) (type->sexp t)]
+    [(t-fun _ _ _) (type->sexp t)]
     [_ `(,(type->sexp t))]))
 
 (define (parse-arrow-type t)
-  (define (parse t-arr as bs)
-    (foldr t-arr (parse-arrow-type bs) (map parse-type as)))
+  (define (parse tone as bs)
+    (foldr (curry t-fun tone) (parse-arrow-type bs) (map parse-type as)))
   (match t
-    [`(,(and as (not '-> '~>)) ... -> ,bs ..1) (parse t-fun as bs)]
-    [`(,(and as (not '-> '~>)) ... ~> ,bs ..1) (parse t-mono as bs)]
+    [`(,(and as (not '-> '~>)) ... -> ,bs ..1) (parse 'any as bs)]
+    [`(,(and as (not '-> '~>)) ... ~> ,bs ..1) (parse 'mono as bs)]
     [`(,t) (parse-type t)]))
 
 
