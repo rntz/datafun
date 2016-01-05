@@ -33,7 +33,7 @@
   (match t
     [(t-bool) #'df-or]
     [(t-nat) #'df-max]
-    [(t-fs _) #'df-union]
+    [(t-set _) #'df-union]
     [(or (t-fun i o) (t-mono i o))
      #`(lambda fs (lambda (x) (#,(joiner-for o)
                      (for/list ([f fs]) (f x)))))]

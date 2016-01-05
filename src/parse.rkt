@@ -125,7 +125,7 @@
     [(t-tuple ts) `(* ,@(map type->sexp ts))]
     [(t-record fields) `(record ,@(hash->sexps fields))]
     [(t-sum branches) `(+ ,@(hash->sexps branches))]
-    [(t-fs a) `(set ,(type->sexp a))]
+    [(t-set a) `(set ,(type->sexp a))]
     [(t-fun a b)
      (let loop ([args (list a)] [result b])
        (match result
@@ -150,7 +150,7 @@
       (t-sum (for/hash ([tag tags] [type types])
                (values tag (parse-type type))))]
     [`(,_ ... ,(or '-> '~>) ,_) (parse-arrow-type t)]
-    [`(set ,a) (t-fs (parse-type a))]
+    [`(set ,a) (t-set (parse-type a))]
     [_ (error "unfamiliar type:" t)]))
 
 (define (arrow-type->sexp t)

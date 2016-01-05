@@ -15,7 +15,7 @@
   (t-sum branches)
   (t-fun arg result)
   (t-mono arg result)
-  (t-fs type))
+  (t-set type))
 
 ;;; Literals & primitives
 (define (lit? x) (if (lit-type x) #t #f))

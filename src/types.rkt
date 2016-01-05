@@ -16,7 +16,7 @@
 (define (type-wf? x)
   (match x
     [(or (t-mono a b) (t-fun a b)) (and (type-wf? a) (type-wf? b))]
-    [(t-fs a) (type-wf? a)]
+    [(t-set a) (type-wf? a)]
     [(t-tuple ts) (andmap type-wf? ts)]
     [(t-sum bs) ((hash/c symbol? type-wf? #:immutable #t) bs)]
     [(t-record as) ((hash/c symbol? type-wf? #:immutable #t) as)]
@@ -26,7 +26,7 @@
 ;; Type "classes" or predicates
 (define (lattice-type? x)
   (match x
-    [(or (t-bool) (t-nat) (t-fs _)) #t]
+    [(or (t-bool) (t-nat) (t-set _)) #t]
     [(or (t-str) (t-sum _)) #f]
     [(t-tuple ts) (andmap lattice-type? ts)]
     [(t-record as) (andmap lattice-type? (hash-values as))]
@@ -39,12 +39,12 @@
          (t-tuple as))
      (andmap eqtype? as)]
     [(or (t-fun _ _) (t-mono _ _)) #f]
-    [(t-fs a) (eqtype? a)]))
+    [(t-set a) (eqtype? a)]))
 
 (define (finite-type? t)
   (match t
     [(t-bool) #t]
-    [(t-fs a) (finite-type? a)]
+    [(t-set a) (finite-type? a)]
     [(or (t-tuple as)
          (t-record (app hash-values as))
          (t-sum (app hash-values as)))
@@ -91,7 +91,7 @@
     (t-mono (type-glb a b) (type-lub x y))]
   [((or (t-mono a x) (t-fun a x)) (or (t-mono b y) (t-fun b y)))
     (t-fun (type-glb a b) (type-lub x y))]
-  [((t-fs a) (t-fs b)) (t-fs (type-lub a b))]
+  [((t-set a) (t-set b)) (t-set (type-lub a b))]
   [(x y) #:when (type=? x y) x]
   [(x y) (type-error "no lub: ~v and ~v" x y)])
 
@@ -105,7 +105,7 @@
     (t-fun (type-lub a b) (type-glb x y))]
   [((or (t-mono a x) (t-fun a x)) (or (t-mono b y) (t-fun b y)))
     (t-mono (type-lub a b) (type-glb x y))]
-  [((t-fs a) (t-fs b)) (t-fs (type-glb a b))]
+  [((t-set a) (t-set b)) (t-set (type-glb a b))]
   [(x y) #:when (type=? x y) x]
   [(x y) (type-error "no glb: ~v and ~v" x y)])
 

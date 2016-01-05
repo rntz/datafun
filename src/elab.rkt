@@ -20,9 +20,9 @@
       (match* (p t)
         [('= (t-fun a (t-fun b (t-bool))))
          (and (type=? a b) (eqtype? a))]
-        [('subset? (t-fun (t-fs a)
-                          (or (t-mono (t-fs b) (t-bool))
-                              (t-fun (t-fs b) (t-bool)))))
+        [('subset? (t-fun (t-set a)
+                          (or (t-mono (t-set b) (t-bool))
+                              (t-fun (t-set b) (t-bool)))))
          (and (type=? a b) (eqtype? a))]
         [('print (t-mono _ (t-tuple '()))) #t]
         [(_ _) #f])))
@@ -186,7 +186,7 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
       [(e-join-in var arg body) #:when type
        (define elem-type
          (match (visit arg #f Γ)
-           [(t-fs a) a]
+           [(t-set a) a]
            ;; TODO: better error message
            [t (fail "iteratee has non-set type ~s" (type->sexp t))]))
        (visit body type (env-bind var (h-any elem-type) Γ))]
@@ -233,8 +233,9 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
       [(e-set elems)
        (define new-Γ (env-hide-mono Γ))
        (match type
-         [#f (t-fs (foldl1 type-lub (for/list ([a elems]) (visit a #f new-Γ))))]
-         [(t-fs a) (for ([elem elems]) (visit elem a new-Γ)) type]
+         [#f (t-set (foldl1 type-lub (for/list ([a elems])
+                                       (visit a #f new-Γ))))]
+         [(t-set a) (for ([elem elems]) (visit elem a new-Γ)) type]
          [_ (fail "set expression must have set type")])]
 
       [(e-case _ '()) #:when (not type)
