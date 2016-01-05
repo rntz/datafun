@@ -27,7 +27,6 @@
                             [x (list #`'#,n (r e))])
                   x))]
     [(e-record-merge a b) #`(hash-union-right #,(r a) #,(r b))]
-    ;; TODO?: "better" representation for tagged things?
     [(e-tag t e) #`(list '#,t #,(r e))]
     [(e-case subj branches)
      #`(match #,(r subj)

@@ -43,8 +43,8 @@
   (e-set exprs) (e-join-in var arg body)
   (e-when subject body) ;; usl eliminator for booleans.
   (e-fix var body)
-  ;; let binding. TODO: support pats here?
-  ;; tone is either 'any or 'mono.
+  ;; let binding. tone is either 'any or 'mono. (in theory, this is just unary
+  ;; case. but case doesn't account for tone yet.)
   (e-let tone var expr body)
   ;; this moves all our "monotone" variables into the unrestricted context.
   (e-trustme expr))

@@ -25,16 +25,12 @@
 (define (eval-file filename env)
   (eval-decls (read-file filename) env))
 
-;; FIXME: WRONG WRONG WRONG
-;; parse-all-decls does debruijn binding rather than "free" binding
 (define (eval-decls lines env)
   (eval-defns (parse-all-decls lines) env))
 
-;; FIXME?: WRONG?
 (define (eval-defns defns env)
   (for ([d defns] #:when (equal? 'mono (defn-tone d)))
     (error "monotone definitions not allowed at top-level: " d))
-  ;; run the defns in order.
   (for ([d defns])
     (set! env (eval-defn d env)))
   env)
