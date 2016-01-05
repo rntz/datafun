@@ -105,9 +105,14 @@
   [(`(if ,cnd ,thn ,els)) `(case ,cnd [#t ,thn] [#f ,els])]
   ;; for loop / join comprehension syntax
   [(`(for () ,body)) body]
-  [(`(for ([,(? ident? name) ,expr] ,clauses ...) ,body))
+  [(`(for ([,(? ident? name) ,expr] . ,clauses) ,body))
    `(join-in ,name ,expr (for ,clauses ,body))]
-  [(`(for (#:when ,cnd ,clauses ...) ,body))
+  [(`(for ([,pat ,expr] . ,clauses) ,body))
+   ;; TODO: I hate having to use gensym here. find a better way?
+   (define v (gensym))
+   `(for ([,v ,expr])
+      (case ,v [,pat (for ,clauses ,body)] [_ empty]))]
+  [(`(for (#:when ,cnd . ,clauses) ,body))
    `(when ,cnd (for ,clauses ,body))]
   ;; end for loop syntax
   [(`(for/set ,clauses ,body))
