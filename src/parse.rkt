@@ -10,53 +10,53 @@
 ;; only prefix syntax forms are relevant here. thus =, ->, etc. not included.
 (define (reserved? x) (set-member? reserved x))
 (define reserved
-  (list->set '(mono empty fn λ cons π proj record record-merge extend-record tag
-               quote case if join set let where fix trustme)))
+  (list->set '(case cons empty extend-record fix fn if isa join let mono
+               proj quote record record-merge set tag trustme when where λ π)))
 
 (define (ident? x) (and (symbol? x) (not (reserved? x))))
 
 
 ;;; Expression parsing/pretty-printing
 (define (expr->sexp e)
-  (match e
-    [(e-var n) n]
-    [(e-lit v) v]
-    [(e-prim p) p]
-    [(e-ann t e) `(isa ,(type->sexp t) ,(expr->sexp e))]
-    [(e-lam v b) `(fn ,v ,(expr->sexp b))]
-    [(e-app f a)
-     (let loop ([func f] [args (list a)])
-       (match func
-         [(e-app f a) (loop f (cons a args))]
-         [_ (map expr->sexp (cons func args))]))]
-    [(e-tuple es) `(cons ,@(map expr->sexp es))]
-    [(e-proj i e) `(π ,i ,(expr->sexp e))]
-    [(e-record fs) `(record ,@(for/list ([(n e) fs])
-                                `(,n ,(expr->sexp e))))]
-    [(e-record-merge l r) `(record-merge ,(expr->sexp l) ,(expr->sexp r))]
-    [(e-tag t e) `(',t ,(expr->sexp e))]
-    [(e-case subj branches)
-     `(case ,(expr->sexp subj)
-        ,@(for/list ([b branches])
-            (match-define (case-branch pat body) b)
-            `(,(pat->sexp pat) ,(expr->sexp body))))]
-    [(e-join '()) 'empty]
-    [(e-join l) `(join ,@(map expr->sexp l))]
-    [(e-set es) `(set ,@(map expr->sexp es))]
-    [(e-join-in var arg body)
-     `(for ([,var ,(expr->sexp arg)]) ,(expr->sexp body))]
-    [(e-fix var body) `(fix ,var ,(expr->sexp body))]
-    [(e-let tone var expr body)
-     `(let ([,@(match tone ['mono '(mono)] ['any '()])
-             ,var = ,(expr->sexp expr)])
-        ,(expr->sexp body))]
-    [(e-trustme e) `(trustme ,(expr->sexp e))]))
+  (compact-expr
+   (match e
+     [(e-var n) n]
+     [(e-lit v) v]
+     [(e-prim p) p]
+     [(e-ann t e) `(isa ,(type->sexp t) ,(expr->sexp e))]
+     [(e-lam v b) `(fn ,v ,(expr->sexp b))]
+     [(e-app f a)
+      (let loop ([func f] [args (list a)])
+        (match func
+          [(e-app f a) (loop f (cons a args))]
+          [_ (map expr->sexp (cons func args))]))]
+     [(e-tuple es) `(cons ,@(map expr->sexp es))]
+     [(e-proj i e) `(π ,i ,(expr->sexp e))]
+     [(e-record fs) `(record ,@(for/list ([(n e) fs])
+                                 `(,n ,(expr->sexp e))))]
+     [(e-record-merge l r) `(record-merge ,(expr->sexp l) ,(expr->sexp r))]
+     [(e-tag t e) `(',t ,(expr->sexp e))]
+     [(e-case subj branches)
+      `(case ,(expr->sexp subj)
+         ,@(for/list ([b branches])
+             (match-define (case-branch pat body) b)
+             `(,(pat->sexp pat) ,(expr->sexp body))))]
+     [(e-join '()) 'empty]
+     [(e-join l) `(join ,@(map expr->sexp l))]
+     [(e-set es) `(set ,@(map expr->sexp es))]
+     [(e-join-in var arg body)
+      `(for ([,var ,(expr->sexp arg)]) ,(expr->sexp body))]
+     [(e-fix var body) `(fix ,var ,(expr->sexp body))]
+     [(e-let tone var expr body)
+      `(let ([,@(match tone ['mono '(mono)] ['any '()])
+              ,var = ,(expr->sexp expr)])
+         ,(expr->sexp body))]
+     [(e-trustme e) `(trustme ,(expr->sexp e))])))
 
 (define (parse-expr e)
-  (match e
+  (match (expand-expr e)
     [(? prim?) (e-prim e)]
     [(? lit?) (e-lit e)]
-    ['empty (e-join '())]
     [(? ident?) (e-var e)]
     [`(isa ,t ,e) (e-ann (parse-type t) (parse-expr e))]
     [`(,(or 'fn 'λ) ,xs ... ,e)
@@ -78,8 +78,6 @@
     [`(set . ,es) (e-set (map parse-expr es))]
     [`(let ,decls ,body)
      (parse-expr-letting (parse-all-decls decls) body)]
-    [`(,expr where . ,decls)
-     (parse-expr-letting (parse-all-decls decls) expr)]
     [`(for () ,body) (parse-expr body)]
     [`(for ([,name ,expr]) ,body)
      (e-join-in name (parse-expr expr) (parse-expr body))]
@@ -92,6 +90,27 @@
          (error "invalid use of reserved form:" e)
          (foldl (flip e-app) (parse-expr f) (map parse-expr as)))]
     [_ (error "unfamiliar expression:" e)]))
+
+
+;; expands out syntax sugar. not all syntax sugar goes here, though; for
+;; example, in some sense 'let is syntax sugar.
+(define (expand-expr expr)
+  (match expr
+    ['empty '(join)]
+    [`(,expr where . ,decls) `(let ,decls ,expr)]
+    [`(if ,cnd ,thn ,els) `(case ,cnd [#t ,thn] [#f ,els])]
+    [e e]))
+
+;; applies syntax sugar to make expressions prettier
+(define (compact-expr expr)
+  (match expr
+    ['(join) 'empty]
+    [`(case ,cnd [#t ,thn] [#f ,els]) `(if ,cnd ,thn ,els)]
+    [`(for ,clauses-1 (for ,clauses-2 ,body))
+     `(for ,(append clauses-1 clauses-2) ,body)]
+    [`(let ,decls-1 (let ,decls-2 ,body))
+     `(let ,(append decls-1 decls-2) ,body)]
+    [e e]))
 
 
 ;;; Type parsing/pretty-printing
