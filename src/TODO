@@ -11,6 +11,9 @@
   - make booleans *literally* sets of units, add syntax sugar to taste.
   - add eliminator which imitates set-of-units encoding.
     this is conceptually more complicated, but is probably less work!
+  - make e-join-in understand booleans?
+  - augment "for" to natively understand iterating over booleans!
+    the elim form is then (for ([#:when foo]) WHATEVER)
 
 - implement e-case-mono?
 - implement antitonicity? (e-case-anti?)

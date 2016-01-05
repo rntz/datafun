@@ -70,10 +70,9 @@
 (ancestor : (set (* str str)))
 (ancestor = (fix ancestor
                  (join
-                  ;; (for ([x person]) (set (cons x x)))
                   parent
                   (for ([p parent]
                         [a ancestor])
-                    (case (= (proj 1 p) (proj 0 a))
-                      [#t (set (cons (proj 0 p) (proj 1 a)))]
-                      [#f (set)])))))
+                    (if (= (π 1 p) (π 0 a))
+                      (set (cons (π 0 p) (π 1 a)))
+                      (set))))))
