@@ -1,10 +1,19 @@
-- better support for polymorphic primitives. currently, when applying
-  polymorphic primitives, have to type-annotate the primitive itself. solutions:
+- put patterns in more places!
+  - make pattern-match failure in a for loop exclude the item?
 
-  - replace e-prim with e-prim-apply, representing "fully apply a primitive to
-    arguments". change parsing to cope, and make type inference work on these.
+- implement irrefutable-pattern? & use it appropriately
+  - needed for using patterns to destructure monotone values in case-expressions
 
-  - upgrade type system to handle polymorphism, including lattice-polymorphism.
-    we'll want this in the long run anyway. how hard would it be?
+- implement set-comprehensions
+  - to implement where-clauses, we'll probably want that boolean eliminator
 
-    after some thought: quite hard. let's do the e-prim-apply thing.
+- implement some sort of monotone eliminator for booleans. options:
+  - make booleans *literally* sets of units, add syntax sugar to taste.
+  - add eliminator which imitates set-of-units encoding.
+    this is conceptually more complicated, but is probably less work!
+
+- implement e-case-mono?
+- implement antitonicity? (e-case-anti?)
+
+EVENTUALLY
+- implement polymorphism
