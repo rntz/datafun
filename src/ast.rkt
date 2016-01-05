@@ -60,29 +60,6 @@
   (p-lit lit))
 
 
-;; Convenience macros
-(define-syntax-parser Bool [_:id #'(t-bool)])
-(define-syntax-parser Nat [_:id #'(t-nat)])
-(define-syntax-parser Str [_:id #'(t-str)])
-(define-match-expander FS
-  (syntax-parser [(_ a) #'(t-fs a)])
-  (syntax-parser [(_ a) #'(t-fs a)]))
-(define-for-syntax expand->
-  (syntax-parser
-    [(_ a) #'a]
-    [(_ a b ...) #'(t-fun a (-> b ...))]))
-(define-match-expander -> expand-> expand->)
-(define-for-syntax expand~>
-  (syntax-parser
-    [(_ a) #'a]
-    [(_ a b ...) #'(t-mono a (~> b ...))]))
-(define-match-expander ~> expand~> expand~>)
-;; TODO: remove × if not sufficiently useful
-(define-match-expander ×
-  (syntax-parser [(× a ...) #'(t-tuple (list a ...))])
-  (syntax-parser [(× a ...) #'(t-tuple (list a ...))]))
-
-
 ;;; Expression & pattern stuff
 (define (pat-vars p)
   (match p

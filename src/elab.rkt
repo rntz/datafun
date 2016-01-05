@@ -4,26 +4,28 @@
 (provide (all-defined-out))
 
 (define (prim-type-infer p)
-  (match p
-    ;; TODO?: extend <= to all equality types?
-    ['<= (-> Nat (~> Nat Bool))]
-    [(or '+ '*) (~> Nat Nat Nat)]
-    ['- (~> Nat (-> Nat Nat))]
-    ['++ (-> Str Str Str)]
-    ['puts (~> Str (×))]
-    [_ #:when (prim? p) #f]))
+  ((lambda (x) (and x (parse-type x)))
+   (match p
+     ;; TODO?: extend <= to more types?
+     ['<= '(nat -> nat ~> bool)]
+     [(or '+ '*) '(nat nat ~> nat)]
+     ['- '(nat ~> nat -> nat)]
+     ['++ '(str str -> str)]
+     ['puts '(str -> (*))]
+     [_ #:when (prim? p) #f])))
 
 (define (prim-has-type? p t)
   (define pt (prim-type-infer p))
   (if pt (type=? t pt)
-    (match* (p t)
-      [('= (-> a b (t-bool)))
-        (and (type=? a b) (eqtype? a))]
-      [('subset? (-> (FS a) (or (~> (FS b) (t-bool))
-                                (-> (FS b) (t-bool)))))
-        (and (type=? a b) (eqtype? a))]
-      [('print (~> _ (×))) #t]
-      [(_ _) #f])))
+      (match* (p t)
+        [('= (t-fun a (t-fun b (t-bool))))
+         (and (type=? a b) (eqtype? a))]
+        [('subset? (t-fun (t-fs a)
+                          (or (t-mono (t-fs b) (t-bool))
+                              (t-fun (t-fs b) (t-bool)))))
+         (and (type=? a b) (eqtype? a))]
+        [('print (t-mono _ (t-tuple '()))) #t]
+        [(_ _) #f])))
 
 
 ;; Elaboration uses envs mapping bound variables to hyp(othese)s. h-any is an
@@ -104,9 +106,9 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
        (define mono (match p ['print #t] [(or '= 'subset?) #f]))
        (define arg-type (visit arg #f (if mono Γ (env-hide-mono Γ))))
        (define result-type (match p
-                             ['print (×)]
-                             ['= (-> arg-type Bool)]
-                             ['subset? (~> arg-type Bool)]))
+                             ['print (t-tuple '())]
+                             ['= (t-fun arg-type (t-bool))]
+                             ['subset? (t-mono arg-type (t-bool))]))
        (visit prim-expr ((if mono t-mono t-fun) arg-type result-type) Γ)
        result-type]
 
@@ -132,8 +134,8 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
       [(e-app f a)
        (define ft (visit f #f Γ))
        (match ft
-         [(~> i o) (set-info! expr 'mono) (visit a i Γ) o]
-         [(-> i o) (set-info! expr 'fun) (visit a i (env-hide-mono Γ)) o]
+         [(t-mono i o) (set-info! expr 'mono) (visit a i Γ) o]
+         [(t-fun i o) (set-info! expr 'fun) (visit a i (env-hide-mono Γ)) o]
          [_ (fail "applying non-function ~s : ~s"
                   (expr->sexp f) (type->sexp ft))])]
 
@@ -231,7 +233,7 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
       [(e-set elems)
        (define new-Γ (env-hide-mono Γ))
        (match type
-         [#f (FS (foldl1 type-lub (for/list ([a elems]) (visit a #f new-Γ))))]
+         [#f (t-fs (foldl1 type-lub (for/list ([a elems]) (visit a #f new-Γ))))]
          [(t-fs a) (for ([elem elems]) (visit elem a new-Γ)) type]
          [_ (fail "set expression must have set type")])]
 
