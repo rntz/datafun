@@ -1,15 +1,10 @@
 - put patterns in more places!
-  - make pattern-match failure in a for loop exclude the item?
-
-- implement irrefutable-pattern? & use it appropriately
-  - needed for using patterns to destructure monotone values in case-expressions
-
-- implement set-comprehensions? for/set?
-
-- augment for to understand when-clauses AND/OR iteration over booleans
+  - allow pattern let-binding (for irrefutable patterns)
+  - in for-loops, where match failure excludes the item
 
 - implement e-case-mono?
-- implement antitonicity? (e-case-anti?)
+
+- implement antitonicity? (and e-case-anti?)
 
 EVENTUALLY
 - implement polymorphism
