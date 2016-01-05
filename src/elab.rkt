@@ -256,8 +256,9 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
          (match-define (case-branch pat body) b)
          ;; it's okay to use (hyp 'any) here ONLY because we hid the monotone
          ;; environment when checking subj.
-         (define pat-hyps (map (curry hyp 'any) (check-pat Γ subj-t pat)))
-         (visit body type (env-extend Γ (pat-vars pat) pat-hyps)))
+         (define pat-hyps (hash-map-values (curry hyp 'any)
+                                           (check-pat Γ pat subj-t)))
+         (visit body type (env-extend Γ pat-hyps)))
        (if type
            (begin0 type (for ([b branches]) (check-branch b)))
            (foldl1 type-lub (map check-branch branches)))])
@@ -273,28 +274,24 @@ when typechecking expression: ~s" (exn-message e) (expr->sexp root-expr))))
    (values info-table (visit root-expr root-type root-Γ))))
 
 ;; checks a pattern against a type and returns the env that the pattern binds.
-;; returns list of types of variables the pattern binds.
-;; e.g. (p-tuple (p-var X) (p-var Y)) --> (list X's-type Y's-type)
-(define (check-pat Γ t p)
-  (match p
-    [(p-wild) '()]
-    [(p-var _) (list t)]
-    [(p-lit l)
-     (if (subtype? t (or (lit-type l) (type-error "unknown literal type")))
-         '()
-         (type-error "wrong type when matched against literal"))]
-    [(p-tuple pats)
-     (match t
-       [(t-tuple types)
-        (if (= (length types) (length pats))
-            (append* (map (curry check-pat Γ) types pats))
-            (type-error "wrong length tuple pattern"))]
-       [_ (type-error "not a tuple")])]
-    [(p-tag tag pat)
-     (match t
-       [(t-sum bs) (if (dict-has-key? bs tag)
-                       (check-pat Γ (hash-ref bs tag) pat)
-                       ;; TODO: this is actually ok, it's just dead code; should
-                       ;; warn, not error
-                       (type-error "(WARNING) no such branch in tagged sum"))]
-       [_ (type-error "not a sum")])]))
+;; returns hash mapping pattern variables to their types.
+(define (check-pat Γ p t)
+  (match* (p t)
+   [((p-wild) _) (hash)]
+   [((p-var name) t) (hash name t)]
+   [((p-lit l) t)
+    (if (subtype? t (or (lit-type l) (type-error "unknown literal type")))
+        (hash)
+        (type-error "wrong type when matched against literal"))]
+   [((p-tuple pats) (t-tuple types))
+    (if (= (length pats) (length types))
+        (hash-unions-right (map (curry check-pat Γ) pats types))
+        (type-error "wrong length tuple pattern"))]
+   [((p-tuple _) _) (type-error "not a tuple")]
+   [((p-tag tag pat) (t-sum bs))
+    (if (dict-has-key? bs tag)
+        (check-pat Γ pat (hash-ref bs tag))
+        ;; TODO: this is actually ok, it's just dead code; should warn, not
+        ;; error
+        (type-error "(WARNING) no such branch in tagged sum"))]
+   [((p-tag _ _) _) (type-error "not a sum")]))

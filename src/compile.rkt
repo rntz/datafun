@@ -32,8 +32,8 @@
      #`(match #,(r subj)
          #,@(for/list ([b branches])
               (match-define (case-branch pat body) b)
-              (define-values (pat-ids rkt-pat) (compile-pat pat))
-              (define body-Γ (env-extend Γ (pat-vars pat) pat-ids))
+              (define-values (rkt-pat pat-var-ids) (compile-pat pat))
+              (define body-Γ (env-extend Γ pat-var-ids))
               #`[#,rkt-pat #,(compile-expr body body-Γ info)]))]
     [(e-join es) #`(#,(joiner-for (expr-info)) #,@(map r es))]
     [(e-set es) #`(set #,@(map r es))]
@@ -54,20 +54,21 @@
          #,(compile-expr body (env-bind v var Γ) info))]
     [(e-trustme e) (r e)]))
 
-;; returns (values list-of-idents racket-pattern)
+;; returns (values racket-pattern hash-from-vars-to-idents)
 (define (compile-pat p)
-  (match p
-    [(p-wild) (values '() #'_)]
-    [(p-var x) (let ([name (gensym x)])
-                 (values (list name) #`#,name))]
-    [(p-tuple ps)
-     (define-values (ids rkt-ps)
-       (for/lists (_is _ps) ([p ps]) (compile-pat p)))
-     (values (append* ids) #`(list #,@rkt-ps))]
-    [(p-tag tag pat)
-     (define-values (ids rkt-pat) (compile-pat pat))
-     (values ids #`(list '#,tag #,rkt-pat))]
-    [(p-lit l) (values '() #`'#,l)]))
+  (define ids (make-hash))
+  (define (gen-id! name)
+    (define v (gensym name))
+    (hash-set! ids name v)
+    v)
+  (define/match (visit p)
+    [((p-wild)) #'_]
+    [((p-var x)) #`#,(gen-id! x)]
+    [((p-tuple ps)) #`(list #,@(map visit ps))]
+    [((p-tag tag pat)) #`(list '#,tag #,(visit pat))]
+    [((p-lit l)) #`'#,l])
+  (define rkt-pat (visit p))
+  (values rkt-pat (freeze-hash ids)))
 
 (define (compile-prim p t)
   (match p
