@@ -54,11 +54,11 @@
          ,(expr->sexp body))]
      [(e-trustme e) `(trustme ,(expr->sexp e))])))
 
-(define (parse-expr e)
-  (match (expand-expr e)
-    [(? prim?) (e-prim e)]
-    [(? lit?) (e-lit e)]
-    [(? ident?) (e-var e)]
+(define (parse-expr expr)
+  (match (expand-expr expr)
+    [(? prim? p) (e-prim p)]
+    [(? lit? l) (e-lit l)]
+    [(? ident? v) (e-var v)]
     [`(let ,decls ,body)
      (parse-expr-letting (parse-all-decls decls) body)]
     [`(isa ,t ,e) (e-ann (parse-type t) (parse-expr e))]
@@ -80,31 +80,38 @@
           (case-branch (parse-pat p) (parse-expr e))))]
     [`(join . ,es) (e-join (map parse-expr es))]
     [`(set . ,es) (e-set (map parse-expr es))]
-    ;; "for loop" (i.e. join-comprehension) syntax
-    [`(for () ,body) (parse-expr body)]
-    [`(for ([,(? ident? name) ,expr]) ,body)
-     (e-join-in name (parse-expr expr) (parse-expr body))]
-    [`(for (#:when ,cnd ,clauses ...) ,body)
-     (parse-expr `(when ,cnd (for ,clauses ,body)))]
-    [`(for ([,(? ident? name) ,expr] ,clauses ..1) ,body)
-     (parse-expr `(for ([,name ,expr]) (for ,clauses ,body)))]
+    [`(join-in ,(? ident? var) ,arg ,body)
+     (e-join-in var (parse-expr arg) (parse-expr body))]
     [`(when ,subj ,body) (e-when (parse-expr subj) (parse-expr body))]
     [`(fix ,x ,body) (e-fix x (parse-expr body))]
     [`(trustme ,e) (e-trustme (parse-expr e))]
-    [`(,f ,as ...)
+    [(and e `(,f ,as ...))
      (if (reserved? f)
          (error "invalid use of reserved form:" e)
          (foldl (flip e-app) (parse-expr f) (map parse-expr as)))]
-    [_ (error "unfamiliar expression:" e)]))
+    [e (error "unfamiliar expression:" e)]))
 
 
 ;; expands out syntax sugar. not all syntax sugar goes here, though; for
 ;; example, in some sense 'let is syntax sugar.
-(define/match (expand-expr expr)
+(define (expand-expr e)
+  (let loop ([e e])
+    (define expanded (expand-expr-once e))
+    (if (eq? e expanded) e (loop expanded))))
+
+(define/match (expand-expr-once expr)
   [('empty) '(join)]
   [(`(,expr where . ,decls)) `(let ,decls ,expr)]
   [(`(if ,cnd ,thn ,els)) `(case ,cnd [#t ,thn] [#f ,els])]
-  [(`(for/set ,clauses ,body)) `(for ,clauses (set ,body))]
+  ;; for loop / join comprehension syntax
+  [(`(for () ,body)) body]
+  [(`(for ([,(? ident? name) ,expr] ,clauses ...) ,body))
+   `(join-in ,name ,expr (for ,clauses ,body))]
+  [(`(for (#:when ,cnd ,clauses ...) ,body))
+   `(when ,cnd (for ,clauses ,body))]
+  ;; end for loop syntax
+  [(`(for/set ,clauses ,body))
+   `(for ,clauses (set ,body))]
   [(e) e])
 
 ;; applies syntax sugar to make expressions prettier
