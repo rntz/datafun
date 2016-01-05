@@ -75,3 +75,11 @@
     [(number? l) (t-nat)]
     [(string? l) (t-str)]
     [#t #f]))
+
+(define/match (pat-irrefutable? pat type)
+  [((or (p-wild) (p-var _)) _) #t]
+  [((p-tuple ps) (t-tuple ts))
+   (andmap pat-irrefutable? ps ts)]
+  [((p-tag tag1 p) (t-sum (hash-table tag2 t))) #:when (equal? tag1 tag2)
+   (pat-irrefutable? p t)]
+  [(_ _) #f])
