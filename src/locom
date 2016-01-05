@@ -1,0 +1,13 @@
+#!/bin/bash
+# counts ratio of (lines of code) / (lines of comment)
+# neither includes blank lines
+#
+# the above line would not count, for example, since it's a blank comment line
+# and neither would the below line, b/c it's a blank code line
+
+cd "$(dirname "$0")"
+
+code=$(egrep -v '^ *(;.*)?$|^#lang ' *.rkt | wc -l)
+comments=$(egrep --no-filename '^ *;' *.rkt | egrep -v '^[; ]*$' | wc -l)
+
+python -c "print float($code) / $comments"
