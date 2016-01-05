@@ -97,6 +97,12 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
         (set! message (string-append message "\nreason: " why-msg)))
       (type-error "~a" message))
 
+    (define (visit-branch tone pat-type body-type branch)
+      (match-define (case-branch pat body) branch)
+      (define pat-Γ (hash-map-values (curry hyp tone)
+                                     (check-pat Γ pat pat-type)))
+      (visit body body-type (env-extend Γ pat-Γ)))
+
     ;; ---------- COMMENCE BIG GIANT CASE ANALYSIS ----------
     (match expr
       ;; ===== SPECIAL CASES FOR INFERRING PRIMITIVES =====
@@ -126,14 +132,14 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
          (fail "cannot join at non-lattice type ~s" (type->sexp body-type)))
        body-type]
 
-      [(e-join-in var arg body)
+      [(e-join-in pat arg body)
        (define elem-type
          (match (visit arg #f Γ)
            [(t-set a) a]
            ;; TODO: better error message
            [t (fail "iteratee has non-set type ~s" (type->sexp t))]))
        (define body-type
-         (visit body type (env-bind var (hyp 'any elem-type) Γ)))
+         (visit-branch 'any elem-type type (case-branch pat body)))
        (unless (lattice-type? body-type)
          (error "cannot join at non-lattice type ~s" (type->sexp type)))
        body-type]
@@ -251,16 +257,13 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
        ;; environment when typechecking the case-subject. I think only for
        ;; irrefutable patterns, a la (let p = e in e)?
        (define subj-t (visit subj #f (env-hide-mono Γ)))
-       ;; find the lub of all the branch types
-       (define (check-branch b)
-         (match-define (case-branch pat body) b)
-         ;; it's okay to use (hyp 'any) here ONLY because we hid the monotone
-         ;; environment when checking subj.
-         (define pat-hyps (hash-map-values (curry hyp 'any)
-                                           (check-pat Γ pat subj-t)))
-         (visit body type (env-extend Γ pat-hyps)))
+       ;; it's okay to use check-pat-any here ONLY because we hid the monotone
+       ;; environment when checking subj.
+       (define check-branch (curry visit-branch 'any subj-t type))
        (if type
+           ;; checking
            (begin0 type (for ([b branches]) (check-branch b)))
+           ;; inferring: find the lub of all the branch types
            (foldl1 type-lub (map check-branch branches)))])
     ;; ---------- END BIG GIANT CASE ANALYSIS ----------
     )

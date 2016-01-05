@@ -44,8 +44,8 @@
      [(e-join '()) 'empty]
      [(e-join l) `(join ,@(map expr->sexp l))]
      [(e-set es) `(set ,@(map expr->sexp es))]
-     [(e-join-in var arg body)
-      `(for ([,var ,(expr->sexp arg)]) ,(expr->sexp body))]
+     [(e-join-in pat arg body)
+      `(for ([,pat ,(expr->sexp arg)]) ,(expr->sexp body))]
      [(e-when subj body) `(when ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-fix var body) `(fix ,var ,(expr->sexp body))]
      [(e-let tone var expr body)
@@ -80,8 +80,8 @@
           (case-branch (parse-pat p) (parse-expr e))))]
     [`(join . ,es) (e-join (map parse-expr es))]
     [`(set . ,es) (e-set (map parse-expr es))]
-    [`(join-in ,(? ident? var) ,arg ,body)
-     (e-join-in var (parse-expr arg) (parse-expr body))]
+    [`(join-in ,pat ,arg ,body)
+     (e-join-in (parse-pat pat) (parse-expr arg) (parse-expr body))]
     [`(when ,subj ,body) (e-when (parse-expr subj) (parse-expr body))]
     [`(fix ,x ,body) (e-fix x (parse-expr body))]
     [`(trustme ,e) (e-trustme (parse-expr e))]
@@ -105,13 +105,8 @@
   [(`(if ,cnd ,thn ,els)) `(case ,cnd [#t ,thn] [#f ,els])]
   ;; for loop / join comprehension syntax
   [(`(for () ,body)) body]
-  [(`(for ([,(? ident? name) ,expr] . ,clauses) ,body))
-   `(join-in ,name ,expr (for ,clauses ,body))]
   [(`(for ([,pat ,expr] . ,clauses) ,body))
-   ;; TODO: I hate having to use gensym here. find a better way?
-   (define v (gensym))
-   `(for ([,v ,expr])
-      (case ,v [,pat (for ,clauses ,body)] [_ empty]))]
+   `(join-in ,pat ,expr (for ,clauses ,body))]
   [(`(for (#:when ,cnd . ,clauses) ,body))
    `(when ,cnd (for ,clauses ,body))]
   ;; end for loop syntax

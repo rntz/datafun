@@ -40,8 +40,9 @@
   (e-case subject branches)
   ;; TODO: (e-case-mono subject branches)
   (e-join exprs)
-  (e-set exprs) (e-join-in var arg body)
-  (e-when subject body) ;; usl eliminator for booleans.
+  (e-set exprs)
+  (e-join-in pat arg body)
+  (e-when arg body) ;; usl eliminator for booleans.
   (e-fix var body)
   ;; let binding. tone is either 'any or 'mono. (in theory, this is just unary
   ;; case. but case doesn't account for tone yet.)

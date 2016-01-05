@@ -1,6 +1,5 @@
 - put patterns in more places!
   - allow pattern let-binding (for irrefutable patterns)
-  - in for-loops, where match failure excludes the item
 
 - implement e-case-mono?
 

@@ -4,7 +4,9 @@
          "compile.rkt")
 (provide (all-defined-out))
 
-(define (show-err e) (printf "** ~a\n" (exn-message e)))
+(define (show-err e)
+  (displayln "* ERROR")
+  ((error-display-handler) (exn-message e) e))
 
 (define df-debug (make-parameter #f))
 (define-syntax-rule (debug body ...) (when (df-debug) body ...))
