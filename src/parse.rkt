@@ -10,8 +10,8 @@
 ;; only prefix syntax forms are relevant here. thus =, ->, etc. not included.
 (define (reserved? x) (set-member? reserved x))
 (define reserved
-  (list->set '(case cons empty extend-record fix fn if isa join let mono
-               proj quote record record-merge set tag trustme when where λ π)))
+  (list->set '(case cons empty extend-record fix fn for for/set if isa join let
+               mono proj quote record record-merge set tag trustme when λ π)))
 
 (define (ident? x) (and (symbol? x) (not (reserved? x))))
 
@@ -67,22 +67,26 @@
      (foldr e-lam e xs)]
     [`(cons . ,es) (e-tuple (map parse-expr es))]
     [`(,(or 'π 'proj) ,i ,e) (e-proj i (parse-expr e))]
-    [`(record (,ns ,es) ...) (e-record (for/hash ([n ns] [e es])
-                                         (values n (parse-expr e))))]
+    [`(record (,(? symbol? ns) ,es) ...)
+     (e-record (for/hash ([n ns] [e es]) (values n (parse-expr e))))]
     [`(record-merge ,a ,b) (e-record-merge (parse-expr a) (parse-expr b))]
     [`(extend-record ,base . ,as)
      (e-record-merge (parse-expr base) (parse-expr `(record . ,as)))]
-    [(or `(tag ,name ,e) `(',name ,e)) (e-tag name (parse-expr e))]
+    [(or `(tag ,name ,e) `(',name ,e)) #:when (symbol? name)
+     (e-tag name (parse-expr e))]
     [`(case ,subj (,ps ,es) ...)
       (e-case (parse-expr subj)
         (for/list ([p ps] [e es])
           (case-branch (parse-pat p) (parse-expr e))))]
     [`(join . ,es) (e-join (map parse-expr es))]
     [`(set . ,es) (e-set (map parse-expr es))]
+    ;; "for loop" (i.e. join-comprehension) syntax
     [`(for () ,body) (parse-expr body)]
-    [`(for ([,name ,expr]) ,body)
+    [`(for ([,(? ident? name) ,expr]) ,body)
      (e-join-in name (parse-expr expr) (parse-expr body))]
-    [`(for ([,name ,expr] ,clauses ..1) ,body)
+    [`(for (#:when ,cnd ,clauses ...) ,body)
+     (parse-expr `(when ,cnd (for ,clauses ,body)))]
+    [`(for ([,(? ident? name) ,expr] ,clauses ..1) ,body)
      (parse-expr `(for ([,name ,expr]) (for ,clauses ,body)))]
     [`(when ,subj ,body) (e-when (parse-expr subj) (parse-expr body))]
     [`(fix ,x ,body) (e-fix x (parse-expr body))]
@@ -100,6 +104,7 @@
   [('empty) '(join)]
   [(`(,expr where . ,decls)) `(let ,decls ,expr)]
   [(`(if ,cnd ,thn ,els)) `(case ,cnd [#t ,thn] [#f ,els])]
+  [(`(for/set ,clauses ,body)) `(for ,clauses (set ,body))]
   [(e) e])
 
 ;; applies syntax sugar to make expressions prettier

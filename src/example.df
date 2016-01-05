@@ -72,7 +72,7 @@
                  (join
                   ;; (for ([p person]) (set (cons p p)))
                   advisor
-                  (for ([a advisor]
-                        [b ancestor])
-                    (when (= (π 1 a) (π 0 b))
-                      (set (cons (π 0 a) (π 1 b))))))))
+                  (for/set ([a advisor]
+                            [b ancestor]
+                            #:when (= (π 1 a) (π 0 b)))
+                    (cons (π 0 a) (π 1 b))))))
