@@ -54,7 +54,7 @@
 ;; whether we need to remember the type of an expression
 (define (should-remember-type expr)
   (match expr
-    [(or (e-prim _) (e-join _) (e-join-in _ _ _) (e-fix _ _)) #t]
+    [(or (e-prim _) (e-join _) (e-join-in _ _ _) (e-when _ _) (e-fix _ _)) #t]
     [_ #f]))
 
 ;;; returns (values info-table type-of-expr)
@@ -119,6 +119,13 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
        (define subj-t (visit subj #f subj-Γ))
        (visit body type (env-bind var (hyp tone subj-t) Γ))]
 
+      [(e-when subj body)
+       (visit subj (t-bool) Γ)
+       (define body-type (visit body type Γ))
+       (unless (lattice-type? body-type)
+         (fail "cannot join at non-lattice type ~s" (type->sexp body-type)))
+       body-type]
+
       ;; ===== SYNTHESIS-ONLY EXPRESSIONS =====
       ;; we infer these, and our caller checks the inferred type if necessary
       [(e-ann t e) (visit e t Γ) t]
@@ -179,6 +186,8 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
       [(e-join-in _ _ _) #:when (not type)
        (fail "join expressions not inferrable")]
       [(e-join-in var arg body) #:when type
+       (unless (lattice-type? type)
+         (error "cannot join at non-lattice type ~s" (type->sexp type)))
        (define elem-type
          (match (visit arg #f Γ)
            [(t-set a) a]

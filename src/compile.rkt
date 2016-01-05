@@ -43,6 +43,8 @@
      #`(apply #,(joiner-for (expr-info))
               (for/list ([#,var #,(r arg)])
                 #,(compile-expr body (env-bind v var Γ) info)))]
+    [(e-when subj body)
+     #`(if #,(r subj) #,(r body) (#,(joiner-for (expr-info))))]
     [(e-fix v body)
      (define var (gensym v))
      #`(df-fix (#,(joiner-for (expr-info)))

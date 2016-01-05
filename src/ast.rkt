@@ -41,6 +41,7 @@
   ;; TODO: (e-case-mono subject branches)
   (e-join exprs)
   (e-set exprs) (e-join-in var arg body)
+  (e-when subject body) ;; usl eliminator for booleans.
   (e-fix var body)
   ;; let binding. TODO: support pats here?
   ;; tone is either 'any or 'mono.

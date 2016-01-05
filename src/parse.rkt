@@ -46,6 +46,7 @@
      [(e-set es) `(set ,@(map expr->sexp es))]
      [(e-join-in var arg body)
       `(for ([,var ,(expr->sexp arg)]) ,(expr->sexp body))]
+     [(e-when subj body) `(when ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-fix var body) `(fix ,var ,(expr->sexp body))]
      [(e-let tone var expr body)
       `(let ([,@(match tone ['mono '(mono)] ['any '()])
@@ -58,6 +59,8 @@
     [(? prim?) (e-prim e)]
     [(? lit?) (e-lit e)]
     [(? ident?) (e-var e)]
+    [`(let ,decls ,body)
+     (parse-expr-letting (parse-all-decls decls) body)]
     [`(isa ,t ,e) (e-ann (parse-type t) (parse-expr e))]
     [`(,(or 'fn 'λ) ,xs ... ,e)
      (set! e (parse-expr e))
@@ -76,13 +79,12 @@
           (case-branch (parse-pat p) (parse-expr e))))]
     [`(join . ,es) (e-join (map parse-expr es))]
     [`(set . ,es) (e-set (map parse-expr es))]
-    [`(let ,decls ,body)
-     (parse-expr-letting (parse-all-decls decls) body)]
     [`(for () ,body) (parse-expr body)]
     [`(for ([,name ,expr]) ,body)
      (e-join-in name (parse-expr expr) (parse-expr body))]
     [`(for ([,name ,expr] ,clauses ..1) ,body)
      (parse-expr `(for ([,name ,expr]) (for ,clauses ,body)))]
+    [`(when ,subj ,body) (e-when (parse-expr subj) (parse-expr body))]
     [`(fix ,x ,body) (e-fix x (parse-expr body))]
     [`(trustme ,e) (e-trustme (parse-expr e))]
     [`(,f ,as ...)
