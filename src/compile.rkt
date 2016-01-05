@@ -60,7 +60,10 @@
     [(p-wild) (values '() #'_)]
     [(p-var x) (let ([name (gensym x)])
                  (values (list name) #`#,name))]
-    [(p-tuple ps) (for/lists (_is _ps) ([p ps]) (compile-pat p))]
+    [(p-tuple ps)
+     (define-values (ids rkt-ps)
+       (for/lists (_is _ps) ([p ps]) (compile-pat p)))
+     (values (append* ids) #`(list #,@rkt-ps))]
     [(p-tag tag pat)
      (define-values (ids rkt-pat) (compile-pat pat))
      (values ids #`(list '#,tag #,rkt-pat))]
