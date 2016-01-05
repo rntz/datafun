@@ -11,9 +11,8 @@
 (or x y = (join x y))
 
 ;; conjunction, eagerly
-;; XXX: how can we write this?
 (and : bool bool ~> bool)
-(and x y = (trustme (case x [#t y] [#f #f])))
+(and x y = (when x y))
 
 
 ;; XXX: how can we write this?
@@ -27,33 +26,23 @@
 ;; negation and <= appropriately antitone - but then I don't know how we'd
 ;; write 'not!
 
-;; one problem is the lack of a good eliminator for bool.
-;; bool is an *ordered* sum, (1 <| 1)
-;; but can also be thought of as (FS 1). does that help us?
-;; yes! it lets us write conjunction (see conj, below)
-
 
 ;; representing booleans as sets of units
-(triv : (record))
-(triv = (record))
+(triv : (*))
+(triv = (cons))
 
-(tt ff : (set (record)))
+(tt ff : (set (*)))
 (tt = (set triv))
 (ff = (set))
 
-(conj : (set (record)) (set (record)) ~> (set (record)))
-(conj X Y = (for ([a X] [b Y]) (set (record))))
+(conj : (set (*)) (set (*)) ~> (set (*)))
+(conj X Y = (for ([_ X] [_ Y]) tt))
 
-;; however, I *still* don't see how to write <:
-;; (< : (nat -> nat ~> (set (record))))
-;; (< m n = ???)
+;; Neel calls this "guard"
+(bool->set : bool ~> (set (*)))
+(bool->set x = (when x tt))
 
-;; XXX: how do we write this function?
-;; note that (record) is 1.
-(bool->set : bool ~> (set (record)))
-(bool->set x = (trustme (case x [#t tt] [#f ff])))
-
-(set->bool : (set (record)) ~> bool)
+(set->bool : (set (*)) ~> bool)
 (set->bool x = (for ([_ x]) #t))
 
 
