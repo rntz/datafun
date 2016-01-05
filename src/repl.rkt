@@ -14,7 +14,7 @@
 (define global-env? (hash/c ident? global? #:immutable #t))
 
 (define (global-elab-env env)
-  (hash->env (hash-map-values (compose h-any global-type) env)))
+  (hash->env (hash-map-values (lambda (g) (hyp 'any (global-type g))) env)))
 
 (define (global-compile-env env)
    ;; this is a terrible hack that only works because racket is amazing

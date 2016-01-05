@@ -27,19 +27,19 @@
         [(_ _) #f])))
 
 
-;; Elaboration uses envs mapping bound variables to hyp(othese)s. h-any is an
-;; unrestricted hyp; h-mono is a monotone hyp; h-hidden is a monotone hyp hidden
-;; by entry into a constant expression (e.g. argument to a non-monotone
-;; function).
-;;
-;; "Free" variables are always unrestricted, and are just mapped to their types.
-(enum hyp (h-any type) (h-mono type) (h-hidden))
+;; Elaboration uses envs mapping bound variables to hyp(othese)s. Hypotheses are
+;; annotated with their tones & their types. tones can be:
+;; - 'any, for ordinary unrestricted variables
+;; - 'mono, for monotone variables
+;; - #f, for previously-monotone variables hidden by entry into a constant
+;;   expression
+(struct hyp (tone type) #:transparent)
 
 (define (env-hide-mono Γ)
-  (env-map (match-lambda [(h-mono _) (h-hidden)] [x x]) Γ))
+  (env-map (match-lambda [(hyp (not 'any) t) (hyp #f t)] [x x]) Γ))
 
 (define (env-trustme Γ)
-  (env-map (match-lambda [(h-mono t) (h-any t)] [x x]) Γ))
+  (env-map (match-lambda [(hyp 'mono t) (hyp 'any t)] [x x]) Γ))
 
 
 ;; The elaborator generates an info hashtable that maps some exprs to info about
@@ -115,10 +115,9 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
       [(e-trustme e) (visit e type (env-trustme Γ))]
 
       [(e-let tone var subj body)
-       (define hyp    (match tone ['mono h-mono] ['any h-any]))
        (define subj-Γ (match tone ['mono Γ]      ['any (env-hide-mono Γ)]))
        (define subj-t (visit subj #f subj-Γ))
-       (visit body type (env-bind var (hyp subj-t) Γ))]
+       (visit body type (env-bind var (hyp tone subj-t) Γ))]
 
       ;; ===== SYNTHESIS-ONLY EXPRESSIONS =====
       ;; we infer these, and our caller checks the inferred type if necessary
@@ -127,8 +126,8 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
 
       [(e-var n)
        (match (env-ref Γ n (lambda () (fail "~a is not bound" n)))
-         [(or (h-any t) (h-mono t)) t]
-         [_ (fail "~a is a hidden monotone variable" n)])]
+         [(hyp (or 'any 'mono) t) t]
+         [(hyp #f _) (fail "~a is a hidden monotone variable" n)])]
 
       [(e-app func arg)
        (match (visit func #f Γ)
@@ -160,16 +159,15 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
       [(e-lam _ _) #:when (not type) (fail "lambdas not inferrable")]
       [(e-lam var body) #:when type
        (match-define (t-fun tone a body-type) type)
-       (define hyp (match tone ['any (h-any a)] ['mono (h-mono a)]))
        (set-info! expr tone)
-       (visit body body-type (env-bind var hyp Γ))
+       (visit body body-type (env-bind var (hyp tone a) Γ))
        type]
 
       [(e-fix _ _) #:when (not type) (fail "fix expressions not inferrable")]
       [(e-fix var body) #:when type
        (unless (fixpoint-type? type)
          (fail "cannot calculate fixpoints of type ~s" (type->sexp type)))
-       (visit body type (env-bind var (h-mono type) Γ))]
+       (visit body type (env-bind var (hyp 'mono type) Γ))]
 
       [(e-join as) #:when (not type) (fail "join expressions not inferrable")]
       [(e-join as) #:when type
@@ -186,7 +184,7 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
            [(t-set a) a]
            ;; TODO: better error message
            [t (fail "iteratee has non-set type ~s" (type->sexp t))]))
-       (visit body type (env-bind var (h-any elem-type) Γ))]
+       (visit body type (env-bind var (hyp 'any elem-type) Γ))]
 
       ;; ===== ANALYSIS (BUT SOMETIMES SYNTHESIZABLE) EXPRESSIONS =====
       ;;
@@ -247,9 +245,9 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
        ;; find the lub of all the branch types
        (define (check-branch b)
          (match-define (case-branch pat body) b)
-         ;; it's okay to use h-any here ONLY because we hid the monotone
+         ;; it's okay to use (hyp 'any) here ONLY because we hid the monotone
          ;; environment when checking subj.
-         (define pat-hyps (map h-any (check-pat Γ subj-t pat)))
+         (define pat-hyps (map (curry hyp 'any) (check-pat Γ subj-t pat)))
          (visit body type (env-extend Γ (pat-vars pat) pat-hyps)))
        (if type
            (begin0 type (for ([b branches]) (check-branch b)))
