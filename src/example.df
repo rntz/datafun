@@ -61,18 +61,18 @@
 (person = (set "constable" "harper" "arbob"
                "aldrich" "reynolds" "neel" "rntz"))
 
-(parent = (set (cons "constable" "harper")
-               (cons "harper" "arbob")
-               (cons "reynolds" "neel")
-               (cons "aldrich" "neel")
-               (cons "neel" "rntz")))
+(advisor = (set (cons "constable" "harper")
+                (cons "harper" "arbob")
+                (cons "reynolds" "neel")
+                (cons "aldrich" "neel")
+                (cons "neel" "rntz")))
 
 (ancestor : (set (* str str)))
 (ancestor = (fix ancestor
                  (join
-                  parent
-                  (for ([p parent]
-                        [a ancestor])
-                    (if (= (π 1 p) (π 0 a))
-                      (set (cons (π 0 p) (π 1 a)))
-                      (set))))))
+                  ;; (for ([p person]) (set (cons p p)))
+                  advisor
+                  (for ([a advisor]
+                        [b ancestor])
+                    (when (= (π 1 a) (π 0 b))
+                      (set (cons (π 0 a) (π 1 b))))))))
