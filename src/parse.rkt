@@ -96,23 +96,21 @@
 
 ;; expands out syntax sugar. not all syntax sugar goes here, though; for
 ;; example, in some sense 'let is syntax sugar.
-(define (expand-expr expr)
-  (match expr
-    ['empty '(join)]
-    [`(,expr where . ,decls) `(let ,decls ,expr)]
-    [`(if ,cnd ,thn ,els) `(case ,cnd [#t ,thn] [#f ,els])]
-    [e e]))
+(define/match (expand-expr expr)
+  [('empty) '(join)]
+  [(`(,expr where . ,decls)) `(let ,decls ,expr)]
+  [(`(if ,cnd ,thn ,els)) `(case ,cnd [#t ,thn] [#f ,els])]
+  [(e) e])
 
 ;; applies syntax sugar to make expressions prettier
-(define (compact-expr expr)
-  (match expr
-    ['(join) 'empty]
-    [`(case ,cnd [#t ,thn] [#f ,els]) `(if ,cnd ,thn ,els)]
-    [`(for ,clauses-1 (for ,clauses-2 ,body))
-     `(for ,(append clauses-1 clauses-2) ,body)]
-    [`(let ,decls-1 (let ,decls-2 ,body))
-     `(let ,(append decls-1 decls-2) ,body)]
-    [e e]))
+(define/match (compact-expr expr)
+  [('(join)) 'empty]
+  [(`(case ,cnd [#t ,thn] [#f ,els])) `(if ,cnd ,thn ,els)]
+  [(`(for ,clauses-1 (for ,clauses-2 ,body)))
+   `(for ,(append clauses-1 clauses-2) ,body)]
+  [(`(let ,decls-1 (let ,decls-2 ,body)))
+   `(let ,(append decls-1 decls-2) ,body)]
+  [(e) e])
 
 
 ;;; Type parsing/pretty-printing
