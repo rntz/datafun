@@ -172,3 +172,16 @@
   (for/hash ([k (in-dict-keys a)]
               #:when (dict-has-key? b k))
     (f (dict-ref a k) (dict-ref b k))))
+
+
+;;; racket 6.2 compatibility shims.
+(define-syntax-parser static-when
+  [(_ condition body ...)
+   (if (eval #'condition)
+       #'(begin body ...)
+       #'(begin))])
+
+(static-when (equal? "6.2" (version))
+  (provide string-contains?)
+  (define (string-contains? str substr)
+    (regexp-match? (regexp-quote substr) str)))
