@@ -2,6 +2,7 @@
 
 (require "util.rkt" "ast.rkt" "types.rkt" "parse.rkt" "env.rkt" "elab.rkt"
          "compile.rkt")
+(provide (all-defined-out))
 
 (define (show-err e) (printf "** ~a\n" (exn-message e)))
 
@@ -74,7 +75,10 @@
     (debug (printf "type: ~s\n" (type->sexp expr-type)))
     (define code (compile-expr expr (global-compile-env (env)) elab-info))
     (debug (display "code: ") (pretty-print (syntax->datum code)))
-    (printf "~v : ~s\n" (eval code) (type->sexp expr-type)))
+    (define value-string (pretty-format (eval code)))
+    ;; print type annotation on next line if value takes multiple lines
+    (printf (if (string-contains? value-string "\n") "~a\n: ~s\n" "~a : ~s\n")
+            value-string (type->sexp expr-type)))
 
   (define (handle-defns defns)
     (set-env! (eval-defns defns (env))))
