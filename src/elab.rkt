@@ -126,6 +126,18 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
          (fail "cannot join at non-lattice type ~s" (type->sexp body-type)))
        body-type]
 
+      [(e-join-in var arg body)
+       (define elem-type
+         (match (visit arg #f Γ)
+           [(t-set a) a]
+           ;; TODO: better error message
+           [t (fail "iteratee has non-set type ~s" (type->sexp t))]))
+       (define body-type
+         (visit body type (env-bind var (hyp 'any elem-type) Γ)))
+       (unless (lattice-type? body-type)
+         (error "cannot join at non-lattice type ~s" (type->sexp type)))
+       body-type]
+
       ;; ===== SYNTHESIS-ONLY EXPRESSIONS =====
       ;; we infer these, and our caller checks the inferred type if necessary
       [(e-ann t e) (visit e t Γ) t]
@@ -182,18 +194,6 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
          (error "cannot join at non-lattice type ~s" (type->sexp type)))
        (for ([a as]) (visit a type Γ))
        type]
-
-      [(e-join-in _ _ _) #:when (not type)
-       (fail "join expressions not inferrable")]
-      [(e-join-in var arg body) #:when type
-       (unless (lattice-type? type)
-         (error "cannot join at non-lattice type ~s" (type->sexp type)))
-       (define elem-type
-         (match (visit arg #f Γ)
-           [(t-set a) a]
-           ;; TODO: better error message
-           [t (fail "iteratee has non-set type ~s" (type->sexp t))]))
-       (visit body type (env-bind var (hyp 'any elem-type) Γ))]
 
       ;; ===== ANALYSIS (BUT SOMETIMES SYNTHESIZABLE) EXPRESSIONS =====
       ;;
