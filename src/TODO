@@ -1,5 +1,25 @@
+- allow equality patterns to be used within same pattern
+  so e.g. (cons x (= x)) will match (cons 2 2)
+
+  I think this requires completely rewriting our pattern compiler, since
+  racket's match-patterns do not permit this kind of shenanigans.
+
+  *actually*, racket's pattern matcher *does*, but it cares whether the variable
+   is defined in the same pattern or elsewhere!
+
+   (match foo [(cons x x) whatever]) works!
+   (let ([x 0]) (match foo [x whatever])) just shadows.
+   (let ([x 0]) (match foo [(== x) whatever]) works!
+
+   so really the problem is my language & racket have different "binding
+   paradigms" for patterns. I think of them as matching left-to-right, whereas
+   racket thinks of them as binding simultaneously and non-linearly.
+
+   (incidentally, THIS MEANS THE CURRENT PATTERN COMPILER HAS A BUG.)
+
 - put patterns in more places!
   - allow pattern let-binding (for irrefutable patterns)
+    - move pat-irrefutable? into elab.rkt
 
 - implement e-case-mono?
 
