@@ -61,7 +61,6 @@
                  (join
                   ;; (for ([p person]) (set (cons p p)))
                   advisor
-                  (for/set ([(cons a b1) advisor]
-                            [(cons b2 c) ancestor]
-                            #:when (= b1 b2))
+                  (for/set ([(cons a b) advisor]
+                            [(cons (= b) c) ancestor])
                     (cons a c)))))
