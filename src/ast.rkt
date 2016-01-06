@@ -62,8 +62,9 @@
   (p-lit lit)
   (p-and pats)
   (p-or pats)
-  ;; applies expr to thing being matched, and matches pat against the result.
-  (p-app expr pat))
+  ;; binds `var' to thing being matched in `body'. the result of `body' is then
+  ;; matched against `pat'.
+  (p-let var body pat))
 
 
 ;;; Expression & pattern stuff
@@ -72,7 +73,7 @@
   (match p
     [(p-var n) (set n)]
     [(or (p-wild) (p-lit _)) (set)]
-    [(or (p-tag _ p) (p-app _ p)) (pat-vars p)]
+    [(or (p-tag _ p) (p-let _ _ p)) (pat-vars p)]
     [(or (p-tuple ps) (p-and ps)) (set-unions (map pat-vars ps))]
     [(p-or ps) (set-intersects (map pat-vars ps))]))
 
@@ -83,7 +84,7 @@
    (andmap pat-irrefutable? ps ts)]
   [((p-tag tag1 p) (t-sum (hash-table tag2 t))) #:when (equal? tag1 tag2)
    (pat-irrefutable? p t)]
-  [((p-app _ p) t)
+  [((p-let _ _ p) t)
    ;; PROBLEM: type inference. ugh.
    (pat-irrefutable? p TODO)]
   [(_ _) #f])

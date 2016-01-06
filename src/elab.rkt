@@ -327,11 +327,6 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
      (type-error "all branches of or-pattern must bind same variables: ~s"
                  (type->sexp pat)))
    (foldl1 (lambda (x y) (hash-union-with x y type-lub)) hashes)]
-  [((and pat (p-app e p)) t)
+  [((p-let v body result-p) t)
    ;; FIXME: assumes we're matching with tonicity 'any
-   (match (expr-check e)
-     [(t-fun _ a b) #:when (subtype? t a) (check-pat p b)]
-     [(t-fun _ a b)
-      ;; TODO: better error message
-      (type-error "function has wrong argument type in: ~s" (pat->sexp pat))]
-     [_ (type-error "applying non-function: ~s" (pat->sexp pat))])])
+   (check-pat result-p (with-var v (hyp 'any t) (expr-check body)))])

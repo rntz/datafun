@@ -47,10 +47,10 @@
     (elab expr #:type decl-type #:env (global-elab-env env)))
   (debug (printf "type: ~s\n" (type->sexp type)))
   ;; compile it.
-  (define code (compile-expr expr (global-compile-env env) elab-info))
+  (define code (compile-expr expr elab-info (global-compile-env env)))
   (debug (display "code: ") (pretty-print (syntax->datum code)))
   (define val (eval code))
-  (debug (printf "val:  ~s\n" val))
+  (debug (printf "val:  ~v\n" val))
   ;; bind name to val in env and return it.
   (hash-set env name (global type val)))
 
@@ -71,7 +71,7 @@
     (define-values (elab-info expr-type)
       (elab expr #:env (global-elab-env (env))))
     (debug (printf "type: ~s\n" (type->sexp expr-type)))
-    (define code (compile-expr expr (global-compile-env (env)) elab-info))
+    (define code (compile-expr expr elab-info (global-compile-env (env))))
     (debug (display "code: ") (pretty-print (syntax->datum code)))
     (define value-string (pretty-format (eval code)))
     ;; print type annotation on next line if value takes multiple lines

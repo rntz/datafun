@@ -190,8 +190,8 @@
     [(p-or pats) `(or ,@(map pat->sexp pats))]
     [(p-and `(,p)) (pat->sexp p)]
     [(p-and pats) `(and ,@(map pat->sexp pats))]
-    [(p-app e (p-and ps)) `(app ,(expr->sexp e) ,@(map pat->sexp ps))]
-    [(p-app e p) `(app ,(expr->sexp e) ,(pat->sexp p))]))
+    [(p-let x e (p-and ps)) `(let ,x ,(expr->sexp e) ,@(map pat->sexp ps))]
+    [(p-let x e p) `(let ,x ,(expr->sexp e) ,(pat->sexp p))]))
 
 (define (parse-pat p)
   (match p
@@ -203,8 +203,9 @@
       (p-tag name (parse-pat pat))]
     [`(or ,ps ...) (p-or (map parse-pat ps))]
     [`(and ,ps ...) (p-and (map parse-pat ps))]
-    [`(app ,e ,ps ..1) (p-app (parse-expr e) (p-and (map parse-expr ps)))]
-    [`(? ,e . ,ps) (parse-pat `(and (app ,e #t) . ,ps))]
+    [`(let ,x ,e ,p) (p-let x (parse-expr e) (parse-pat p))]
+    [`(let ,x ,e ,ps ..1) (parse-pat `(let ,x ,e (p-and ,@ps)))]
+    ;; TODO: equality patterns
     [_ (error "unfamiliar pattern:" p)]))
 
 

@@ -5,60 +5,76 @@
 
 ;; contexts Γ are envs mapping variables to what they should compile to (an
 ;; identifier, generally). info maps exprs to elaboration info; see elab.rkt.
-(define (compile-expr e Γ info)
-  (define (joiner) (joiner-for (hash-ref info e no-info)))
-  (define (no-info) (error "no elab info for: ~s" (expr->sexp e)))
+(define (compile-expr e info Γ)
+  (parameterize ([elab-info info]
+                 [compile-env Γ])
+    (do-expr e)))
 
-  (define (r e) (compile-expr e Γ info))
-  (define (compile-case-branches branches)
-    (for/list ([b branches])
-      (match-define (case-branch pat body) b)
-      (define-values (rkt-pat pat-var-ids) (compile-pat pat))
-      (define body-Γ (env-extend Γ pat-var-ids))
-      #`[#,rkt-pat #,(compile-expr body body-Γ info)]))
+
+;;; ---------- PARAMETERS ----------
+(define elab-info (make-parameter #f))
+(define (no-info e) (error "no elab info for: ~s" (expr->sexp e)))
+(define (info e [orelse (lambda () (no-info e))])
+  (hash-ref (elab-info) e orelse))
 
+(define compile-env (make-parameter #f))
+(define-syntax-rule (with-var var id body ...)
+  (parameterize ([compile-env (env-bind var id (compile-env))]) body ...))
+(define-syntax-rule (with-env more-env body ...)
+  (parameterize ([compile-env (env-extend (compile-env) more-env)]) body ...))
+
+
+;;; ---------- INTERNAL FUNCTIONS ----------
+(define (do-expr e)
+  (define (joiner) (joiner-for (info e)))
   (match e
-    [(e-ann _ e) (r e)]
-    [(e-var n) (env-ref Γ n)]
+    [(e-ann _ e) (do-expr e)]
+    [(e-var n) (env-ref (compile-env) n)]
     [(e-lit l) #`'#,l]
-    [(e-prim p) (compile-prim p)]
+    [(e-prim p) (do-prim p)]
     [(e-lam v body)
      (define var (gensym v))
-     #`(lambda (#,var) #,(compile-expr body (env-bind v var Γ) info))]
-    [(e-app f a) #`(#,(r f) #,(r a))]
-    [(e-tuple es) #`(list #,@(map r es))]
-    [(e-proj (? number? i) e) #`(list-ref #,(r e) #,i)]
-    [(e-proj (? symbol? i) e) #`(hash-ref #,(r e) '#,i)]
+     #`(lambda (#,var) #,(with-var v var (do-expr body)))]
+    [(e-app f a) #`(#,(do-expr f) #,(do-expr a))]
+    [(e-tuple es) #`(list #,@(map do-expr es))]
+    [(e-proj (? number? i) e) #`(list-ref #,(do-expr e) #,i)]
+    [(e-proj (? symbol? i) e) #`(hash-ref #,(do-expr e) '#,i)]
     [(e-record fs)
      #`(hash #,@(for*/list ([(n e) fs]
-                            [x (list #`'#,n (r e))])
+                            [x (list #`'#,n (do-expr e))])
                   x))]
-    [(e-record-merge a b) #`(hash-union-right #,(r a) #,(r b))]
-    [(e-tag t e) #`(list '#,t #,(r e))]
+    [(e-record-merge a b) #`(hash-union-right #,(do-expr a) #,(do-expr b))]
+    [(e-tag t e) #`(list '#,t #,(do-expr e))]
     [(e-case subj branches)
-     #`(match #,(r subj) #,@(compile-case-branches branches))]
-    [(e-join es) #`(#,(joiner) #,@(map r es))]
-    [(e-set es) #`(set #,@(map r es))]
+     #`(match #,(do-expr subj) #,@(do-case-branches branches))]
+    [(e-join es) #`(#,(joiner) #,@(map do-expr es))]
+    [(e-set es) #`(set #,@(map do-expr es))]
     [(e-join-in pat arg body)
      #`(for/fold ([acc (#,(joiner))])
-                 ([elt #,(r arg)])
+                 ([elt #,(do-expr arg)])
          (#,(joiner) acc
            (match elt
-             #,@(compile-case-branches (list (case-branch pat body)))
+             #,@(do-case-branches (list (case-branch pat body)))
              [_ (#,(joiner))])))]
-    [(e-when subj body) #`(if #,(r subj) #,(r body) (#,(joiner)))]
+    [(e-when subj body) #`(if #,(do-expr subj) #,(do-expr body) (#,(joiner)))]
     [(e-fix v body)
      (define var (gensym v))
      #`(df-fix (#,(joiner))
-               (lambda (#,var) #,(compile-expr body (env-bind v var Γ) info)))]
+               (lambda (#,var) #,(with-var v var (do-expr body))))]
     [(e-let _ v expr body)
      (define var (gensym v))
-     #`(let ((#,var #,(r expr)))
-         #,(compile-expr body (env-bind v var Γ) info))]
-    [(e-trustme e) (r e)]))
+     #`(let ((#,var #,(do-expr expr)))
+         #,(with-var v var (do-expr body)))]
+    [(e-trustme e) (do-expr e)]))
+
+(define (do-case-branches branches)
+  (for/list ([b branches])
+    (match-define (case-branch pat body) b)
+    (define-values (rkt-pat pat-var-ids) (do-pat pat))
+    #`[#,rkt-pat #,(with-env pat-var-ids (do-expr body))]))
 
 ;; returns (values racket-pattern hash-from-vars-to-idents)
-(define (compile-pat p)
+(define (do-pat p)
   (define ids (make-hash))
   (define (gen-id! name)
     (define v (gensym name))
@@ -72,13 +88,14 @@
     [((p-lit l)) #`'#,l]
     [((p-and ps)) #`(and #,@(map visit ps))]
     [((p-or ps)) #`(or #,@(map visit ps))]
-    [((p-app e p))
-     ;; NEED TO BE ABLE TO COMPILE EXPRESSIONS
-     TODO])
+    [((p-let v body result-pat))
+     (define var (gensym v))
+     #`(app (lambda (#,var) #,(with-var v var (do-expr body)))
+            #,(visit result-pat))])
   (define rkt-pat (visit p))
   (values rkt-pat (freeze-hash ids)))
 
-(define (compile-prim p)
+(define (do-prim p)
   (match p
     ['= #'(curry equal?)]
     ['subset? #'(curry subset?)]
