@@ -72,7 +72,9 @@
     [((p-lit l)) #`'#,l]
     [((p-and ps)) #`(and #,@(map visit ps))]
     [((p-or ps)) #`(or #,@(map visit ps))]
-    [((p-if p e)) TODO])
+    [((p-app e p))
+     ;; NEED TO BE ABLE TO COMPILE EXPRESSIONS
+     TODO])
   (define rkt-pat (visit p))
   (values rkt-pat (freeze-hash ids)))
 

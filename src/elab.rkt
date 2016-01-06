@@ -291,6 +291,7 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
 ;; variables to their types.
 ;;
 ;; FIXME: needs to be given the tonicity we're binding variables in.
+;; TODO: rename to pat-check
 (define/match (check-pat p t)
   [((p-wild) _) (hash)]
   [((p-var name) t) (hash name t)]
@@ -326,8 +327,11 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
      (type-error "all branches of or-pattern must bind same variables: ~s"
                  (type->sexp pat)))
    (foldl1 (lambda (x y) (hash-union-with x y type-lub)) hashes)]
-  [((p-if p e) t)
-   ;; FIXME: wait, shit, I need to be updating elab-env!
-   TODO
-   (begin0 (check-pat p t)
-     (expr-check e (t-bool)))])
+  [((and pat (p-app e p)) t)
+   ;; FIXME: assumes we're matching with tonicity 'any
+   (match (expr-check e)
+     [(t-fun _ a b) #:when (subtype? t a) (check-pat p b)]
+     [(t-fun _ a b)
+      ;; TODO: better error message
+      (type-error "function has wrong argument type in: ~s" (pat->sexp pat))]
+     [_ (type-error "applying non-function: ~s" (pat->sexp pat))])])

@@ -186,9 +186,12 @@
     [(p-lit x) x]
     [(p-tuple ps) `(cons ,(map pat->sexp ps))]
     [(p-tag name p) `(',name ,(pat->sexp p))]
+    [(p-or `(,p)) (pat->sexp p)]
     [(p-or pats) `(or ,@(map pat->sexp pats))]
+    [(p-and `(,p)) (pat->sexp p)]
     [(p-and pats) `(and ,@(map pat->sexp pats))]
-    [(p-if p expr) `(,(pat->sexp p) if ,(expr->sexp expr))]))
+    [(p-app e (p-and ps)) `(app ,(expr->sexp e) ,@(map pat->sexp ps))]
+    [(p-app e p) `(app ,(expr->sexp e) ,(pat->sexp p))]))
 
 (define (parse-pat p)
   (match p
@@ -200,7 +203,8 @@
       (p-tag name (parse-pat pat))]
     [`(or ,ps ...) (p-or (map parse-pat ps))]
     [`(and ,ps ...) (p-and (map parse-pat ps))]
-    [`(,p if ,e) (p-if (parse-pat p) (parse-expr e))]
+    [`(app ,e ,ps ..1) (p-app (parse-expr e) (p-and (map parse-expr ps)))]
+    [`(? ,e . ,ps) (parse-pat `(and (app ,e #t) . ,ps))]
     [_ (error "unfamiliar pattern:" p)]))
 
 

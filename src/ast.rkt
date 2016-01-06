@@ -62,17 +62,17 @@
   (p-lit lit)
   (p-and pats)
   (p-or pats)
-  ;; matches `pat', then runs `expr'. matches iff `expr' evaluates to true.
-  (p-if pat expr))
+  ;; applies expr to thing being matched, and matches pat against the result.
+  (p-app expr pat))
 
 
 ;;; Expression & pattern stuff
 ;;; NOTE: pat-vars is currently unused
 (define (pat-vars p)
   (match p
-    [(or (p-wild) (p-lit _) (p-if _ _)) (set)]
     [(p-var n) (set n)]
-    [(p-tag _ p) (pat-vars p)]
+    [(or (p-wild) (p-lit _)) (set)]
+    [(or (p-tag _ p) (p-app _ p)) (pat-vars p)]
     [(or (p-tuple ps) (p-and ps)) (set-unions (map pat-vars ps))]
     [(p-or ps) (set-intersects (map pat-vars ps))]))
 
@@ -83,6 +83,9 @@
    (andmap pat-irrefutable? ps ts)]
   [((p-tag tag1 p) (t-sum (hash-table tag2 t))) #:when (equal? tag1 tag2)
    (pat-irrefutable? p t)]
+  [((p-app _ p) t)
+   ;; PROBLEM: type inference. ugh.
+   (pat-irrefutable? p TODO)]
   [(_ _) #f])
 
 (define (lit-type l)
