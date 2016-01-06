@@ -229,7 +229,7 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
     ;; we can synthesize these (assuming their subterms synthesize), so we do,
     ;; even though it's non-standard.
     ;;
-    ;; TODO: synthesize join and join-in expressions when possible
+    ;; TODO: synthesize join expressions when possible
     [(e-prim p) #:when type (if (prim-has-type? p type) type (fail))]
     [(e-prim p) (let ([t (prim-type-infer p)])
                   (if t t (fail)))]
