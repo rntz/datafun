@@ -59,24 +59,24 @@
   (p-var name)
   (p-tuple pats)
   (p-tag tag pat)
-  (p-lit lit))
+  (p-lit lit)
+  (p-and pats)
+  (p-or pats)
+  ;; matches `pat', then runs `expr'. matches iff `expr' evaluates to true.
+  (p-if pat expr))
 
 
 ;;; Expression & pattern stuff
+;;; NOTE: pat-vars is currently unused
 (define (pat-vars p)
   (match p
-    [(or (p-wild) (p-lit _)) '()]
-    [(p-var n) (list n)]
-    [(p-tuple ps) (append* (map pat-vars ps))]
-    [(p-tag _ p) (pat-vars p)]))
+    [(or (p-wild) (p-lit _) (p-if _ _)) (set)]
+    [(p-var n) (set n)]
+    [(p-tag _ p) (pat-vars p)]
+    [(or (p-tuple ps) (p-and ps)) (set-unions (map pat-vars ps))]
+    [(p-or ps) (set-intersects (map pat-vars ps))]))
 
-(define (lit-type l)
-  (cond
-    [(boolean? l) (t-bool)]
-    [(number? l) (t-nat)]
-    [(string? l) (t-str)]
-    [#t #f]))
-
+;;; NOTE: pat-irrefutable? is currently unused
 (define/match (pat-irrefutable? pat type)
   [((or (p-wild) (p-var _)) _) #t]
   [((p-tuple ps) (t-tuple ts))
@@ -84,3 +84,10 @@
   [((p-tag tag1 p) (t-sum (hash-table tag2 t))) #:when (equal? tag1 tag2)
    (pat-irrefutable? p t)]
   [(_ _) #f])
+
+(define (lit-type l)
+  (cond
+    [(boolean? l) (t-bool)]
+    [(number? l) (t-nat)]
+    [(string? l) (t-str)]
+    [#t #f]))
