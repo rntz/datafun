@@ -198,7 +198,7 @@
     [`(cons ,ps ...) (p-tuple (map parse-pat ps))]
     [(or `(tag ,name ,pat) `(',name ,pat))
       (p-tag name (parse-pat pat))]
-    [`(or ,ps ...) [(p-or (map parse-pat ps))]]
+    [`(or ,ps ...) (p-or (map parse-pat ps))]
     [`(and ,ps ...) (p-and (map parse-pat ps))]
     [`(,p if ,e) (p-if (parse-pat p) (parse-expr e))]
     [_ (error "unfamiliar pattern:" p)]))

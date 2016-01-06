@@ -69,7 +69,10 @@
     [((p-var x)) #`#,(gen-id! x)]
     [((p-tuple ps)) #`(list #,@(map visit ps))]
     [((p-tag tag pat)) #`(list '#,tag #,(visit pat))]
-    [((p-lit l)) #`'#,l])
+    [((p-lit l)) #`'#,l]
+    [((p-and ps)) #`(and #,@(map visit ps))]
+    [((p-or ps)) #`(or #,@(map visit ps))]
+    [((p-if p e)) TODO])
   (define rkt-pat (visit p))
   (values rkt-pat (freeze-hash ids)))
 
