@@ -109,9 +109,9 @@
 (define/match (tone-glb o p) [('any 'any)   'any]  [(_ _) 'mono])
 
 (define (type-lubs as bs)
-  (unless (= (length as) (length bs)) (type-error "lists of unequal length"))
+  (unless (length=? as bs) (type-error "lists of unequal length"))
   (map type-lub as bs))
 
 (define (type-glbs as bs)
-  (unless (= (length as) (length bs)) (type-error "lists of unequal length"))
+  (unless (length=? as bs) (type-error "lists of unequal length"))
   (map type-glb as bs))

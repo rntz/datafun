@@ -237,9 +237,10 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
     [(e-tuple as)
      (match type
        [#f (t-tuple (map expr-check as))]
-       [(t-tuple ts) (if (= (length as) (length ts))
-                         (begin0 type (map expr-check as ts))
-                         (fail "tuple length mismatch"))]
+       [(t-tuple ts) #:when (length=? as ts)
+        (map expr-check as ts)
+        type]
+       [(t-tuple _) (fail "tuple length mismatch")]
        [_ (fail "tuple expression must have tuple type")])]
 
     [(e-record fields)
