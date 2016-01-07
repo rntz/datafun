@@ -123,7 +123,7 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
 
   (define (visit-branch tone pat-type body-type branch)
     (match-define (case-branch pat body) branch)
-    (with-env (hash-map-values (curry hyp tone) (check-pat pat pat-type))
+    (with-env (hash-map-values (curry hyp tone) (pat-check pat pat-type))
       (expr-check body body-type)))
 
   ;; ---------- COMMENCE BIG GIANT CASE ANALYSIS ----------
@@ -280,8 +280,8 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
      ;; environment when typechecking the case-subject. I think only for
      ;; irrefutable patterns, a la (let p = e in e)?
      (define subj-t (with-tone 'any (expr-check subj #f)))
-     ;; it's okay to use check-pat-any here ONLY because we hid the monotone
-     ;; environment when checking subj.
+     ;; it's okay to use 'any here ONLY because we hid the monotone environment
+     ;; when checking subj.
      (define check-branch (curry visit-branch 'any subj-t type))
      (define branch-types (map check-branch branches))
      (or type (foldl1 type-lub branch-types))])
@@ -291,38 +291,32 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
 ;; checks a pattern against a type and returns a hash mapping pattern
 ;; variables to their types.
 ;;
+;; TODO: better error messages
 ;; FIXME: needs to be given the tonicity we're binding variables in.
-;; TODO: rename to pat-check
-(define/match (check-pat p t)
+(define/match (pat-check p t)
   [((p-wild) _) (hash)]
   [((p-var name) t) (hash name t)]
   [((p-lit l) t)
    (if (subtype? t (or (lit-type l) (type-error "unknown literal type")))
        (hash)
        (type-error "wrong type when matched against literal"))]
-  [((p-tuple pats) (t-tuple types))
-   (if (= (length pats) (length types))
-       (hash-unions-right (map check-pat pats types))
-       (type-error "wrong length tuple pattern"))]
-  [((p-tuple _) _) (type-error "not a tuple")]
+  [((and pat (p-tuple pats)) (t-tuple types)) #:when (length=? pats types)
+   (union-pat-envs pat (map pat-check pats types))]
+  [((p-tuple _) (t-tuple _)) (type-error "wrong length tuple pattern")]
+  [((p-tuple _) t) (type-error "not a tuple type: ~s" (type->sexp t))]
   [((p-tag tag pat) (t-sum bs))
    (if (dict-has-key? bs tag)
-       (check-pat pat (hash-ref bs tag))
+       (pat-check pat (hash-ref bs tag))
        ;; TODO: this is actually ok, it's just dead code; should warn, not
        ;; error
        (type-error "(WARNING) no such branch in tagged sum"))]
   [((p-tag _ _) _) (type-error "not a sum")]
   [((and pat (p-and ps)) t)
-   (define (err _a _b)
-     (type-error "branches of and-pattern must match disjoint variables: ~s"
-                 (pat->sexp pat)))
-   (for/fold ([var-types (hash)])
-             ([p ps])
-     (hash-union-with var-types (check-pat p t) err))]
+   (union-pat-envs pat (map (lambda (p) (pat-check p t)) ps))]
   [((and pat (p-or ps)) t)
    (when (empty? ps)
      (type-error "or-pattern cannot be empty: s" (pat->sexp pat)))
-   (define hashes (for/list ([p ps]) (check-pat p t)))
+   (define hashes (for/list ([p ps]) (pat-check p t)))
    (define vars (hash-key-set (first hashes)))
    (unless (andmap (lambda (x) (equal? vars (hash-key-set x))) hashes)
      (type-error "all branches of or-pattern must bind same variables: ~s"
@@ -330,4 +324,10 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
    (foldl1 (lambda (x y) (hash-union-with x y type-lub)) hashes)]
   [((p-let v body result-p) t)
    ;; FIXME: assumes we're matching with tonicity 'any
-   (check-pat result-p (with-var v (hyp 'any t) (expr-check body)))])
+   (pat-check result-p (with-var v (hyp 'any t) (expr-check body)))])
+
+(define (union-pat-envs pat hashes)
+  (define (err _a _b)
+    (type-error "patterns may use each variable only once: ~s" (pat->sexp pat)))
+  (for/fold ([var-types (hash)]) ([h hashes])
+    (hash-union-with var-types h err)))

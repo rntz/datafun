@@ -1,6 +1,8 @@
-- fix bug with pattern matching nonlinearity
-  options:
-  - enforce linearity: can't use a variable multiple times in same pattern
+- figure out how to deal with nonlinear patterns
+  currently we enforce linearity: can't use a variable multiple times in same pattern
+  (except for or-patterns, each branch of which must use exactly same variables)
+
+  other options:
   - nonlinearity results in equality tests (what racket does)
   - nonlinearity shadows, left-to-right, and we handle this in translation to
     racket.
