@@ -7,28 +7,27 @@
   - nonlinearity shadows, left-to-right, and we handle this in translation to
     racket.
 
-- allow equality patterns to be used within same pattern
-  so e.g. (cons x (= x)) will match (cons 2 2)
+- think about how equality patterns, nonlinearity, and variable binding
+  interact.
 
-  I think this requires completely rewriting our pattern compiler, since
-  racket's match-patterns do not permit this kind of shenanigans.
+  we'd like it to be possible *both* to depend on equality of variables bound in
+  *same* pattern, AND to allow to check for equality with arbitrary expressions,
+  incl. variables bound elsewhere.
 
-  *actually*, racket's pattern matcher *does*, but it cares whether the variable
-   is defined in the same pattern or elsewhere!
+  questions:
+  - what does pattern (cons x x) do?
+  - what does pattern (cons x (= x)) do?
+  - what will pattern (cons (= x) x) do?
+  - what if x is already bound in the environment?
 
-   (match foo [(cons x x) whatever]) works!
-   (let ([x 0]) (match foo [x whatever])) just shadows.
-   (let ([x 0]) (match foo [(== x) whatever]) works!
+  for reference, Racket's design choice:
+  - patterns are nonlinear. multiple use = equality testing.
+  - (== expr) pattern tests equality w/ arbitrary expressions.
+  - pattern variables are not bound in expressions inside the pattern.
+    so you can *only* test pattern vars for equality, not (eg) inequality.
 
-   so really the problem is my language & racket have different "binding
-   paradigms" for patterns. I think of them as matching left-to-right, whereas
-   racket thinks of them as binding simultaneously and non-linearly.
-
-   (incidentally, THIS MEANS THE CURRENT PATTERN COMPILER HAS A BUG.)
-
-- put patterns in more places!
-  - allow pattern let-binding (for irrefutable patterns)
-    - move pat-irrefutable? into elab.rkt
+- allow pattern let-binding (for irrefutable patterns)
+  - move pat-irrefutable? into elab.rkt, since it requires type-checking.
 
 - implement e-case-mono?
 
