@@ -1,30 +1,17 @@
-- figure out how to deal with nonlinear patterns
-  currently we enforce linearity: can't use a variable multiple times in same pattern
-  (except for or-patterns, each branch of which must use exactly same variables)
+- document how nonlinear patterns work. document how equality patterns work.
 
-  other options:
-  - nonlinearity results in equality tests (what racket does)
-  - nonlinearity shadows, left-to-right, and we handle this in translation to
-    racket.
+  nonlinear patterns: multiple uses of same variable check for equality.
 
-- think about how equality patterns, nonlinearity, and variable binding
-  interact.
+  equality patterns: use when you want to check equality with something that is
+  *not* a variable bound in the same pattern.
 
-  we'd like it to be possible *both* to depend on equality of variables bound in
-  *same* pattern, AND to allow to check for equality with arbitrary expressions,
-  incl. variables bound elsewhere.
+  note that variables bound in a pattern are *not* in the scope of expressions
+  within that pattern. for example:
 
-  questions:
-  - what does pattern (cons x x) do?
-  - what does pattern (cons x (= x)) do?
-  - what will pattern (cons (= x) x) do?
-  - what if x is already bound in the environment?
+      (let [(x = 0)] (case foo [(cons x (= x)) x]))
 
-  for reference, Racket's design choice:
-  - patterns are nonlinear. multiple use = equality testing.
-  - (== expr) pattern tests equality w/ arbitrary expressions.
-  - pattern variables are not bound in expressions inside the pattern.
-    so you can *only* test pattern vars for equality, not (eg) inequality.
+  the (cons x (= x)) will match only if foo is of the form (cons _ 0), and will
+  bind x to the first argument of the cons.
 
 - allow pattern let-binding (for irrefutable patterns)
   - move pat-irrefutable? into elab.rkt, since it requires type-checking.

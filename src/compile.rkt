@@ -76,13 +76,9 @@
 ;; returns (values racket-pattern hash-from-vars-to-idents)
 (define (do-pat p)
   (define ids (make-hash))
-  (define (gen-id! name)
-    (define v (gensym name))
-    (hash-set! ids name v)
-    v)
   (define/match (visit p)
     [((p-wild)) #'_]
-    [((p-var x)) #`#,(gen-id! x)]
+    [((p-var x)) #`#,(hash-ref! ids x (lambda () (gensym x)))]
     [((p-tuple ps)) #`(list #,@(map visit ps))]
     [((p-tag tag pat)) #`(list '#,tag #,(visit pat))]
     [((p-lit l)) #`'#,l]

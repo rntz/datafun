@@ -291,6 +291,10 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
 ;; checks a pattern against a type and returns a hash mapping pattern
 ;; variables to their types.
 ;;
+;; note that patterns are nonlinear - the same variable may be used multiple
+;; times. if it is, this indicates an equality check. for example, (cons x x)
+;; matches only pairs of two of the same value.
+;;
 ;; TODO: better error messages
 ;; FIXME: needs to be given the tonicity we're binding variables in.
 (define/match (pat-check p t)
@@ -327,7 +331,23 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
    (pat-check result-p (with-var v (hyp 'any t) (expr-check body)))])
 
 (define (union-pat-envs pat hashes)
-  (define (err _a _b)
-    (type-error "patterns may use each variable only once: ~s" (pat->sexp pat)))
   (for/fold ([var-types (hash)]) ([h hashes])
-    (hash-union-with var-types h err)))
+    ;; we use type-glb because, when the same variable is used multiple times,
+    ;; it must have a value which satisfies *all* of the types it is assigned.
+    (hash-union-with var-types h eqtype-glb)))
+
+;; finds glb of two types, checking that they are eqtypes. this is used for
+;; combining types of pattern variables which are used multiple times. these
+;; need to be eqtypes so that we can test equality; they are combined with
+;; type-glb the variable must have a value which satisfies *all* the types it
+;; was assigned.
+;;
+;; for this to be a reasonable approach requires that no equality type have a
+;; non-equality supertype. luckily, this is true for Datafun.
+(define (eqtype-glb a b)
+  (define type (type-glb a b))
+  (unless (eqtype? type)
+    ;; TODO: as usual, better error message
+    (type-error "pattern variable used multiple times has non-equality type ~s"
+                (type->sexp type)))
+  type)
