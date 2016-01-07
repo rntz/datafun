@@ -5,7 +5,7 @@
 (require "util.rkt")
 (provide (all-defined-out))
 
-;; TODO: make these types print better under ~a. or maybe use ~v everywhere?
+;; TODO?: make these types print better under ~a?
 (enum type
   (t-bool) (t-nat) (t-str)
   (t-tuple types)
