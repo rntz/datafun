@@ -1,3 +1,10 @@
+- fix bug with pattern matching nonlinearity
+  options:
+  - enforce linearity: can't use a variable multiple times in same pattern
+  - nonlinearity results in equality tests (what racket does)
+  - nonlinearity shadows, left-to-right, and we handle this in translation to
+    racket.
+
 - allow equality patterns to be used within same pattern
   so e.g. (cons x (= x)) will match (cons 2 2)
 
