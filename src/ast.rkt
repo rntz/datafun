@@ -21,6 +21,13 @@
 
 ;; Literals & primitives
 (define (lit? x) (if (lit-type x) #t #f))
+(define/match (lit-type l)
+  [((? boolean?)) (t-bool)]
+  [((? exact-nonnegative-integer?)) (t-nat)]
+  [((? string?)) (t-str)]
+  [((? null?)) (t-tuple '())]
+  [(_) #f])
+
 (define (prim? x) (set-member? prims x))
 (define prims (list->set '(= <= + - * subset? print puts ++)))
 
@@ -31,9 +38,13 @@
   (e-prim prim) ;; primitive functions
   ;; bidirectional type inference / elaboration figures out which kind (ordinary
   ;; or monotonic) of lambda / application we meant
-  (e-lam var body) (e-app func arg)
-  (e-tuple exprs) (e-proj index expr)
-  ;; fields is a hash from names to exprs
+  (e-lam var body)
+  (e-app func arg)
+  (e-tuple exprs)
+  ;; projection index is a nat when projecting from a tuple; a symbol when
+  ;; projecting from a record.
+  (e-proj index expr)
+  ;; fields is a hash from field names (as symbols) to exprs
   (e-record fields)
   ;; TODO?: e-record-project (project a set of fields, like in rel.alg.)
   (e-record-merge left right) ;; merges two records, right-biased.
@@ -91,10 +102,3 @@
 ;;    ;; PROBLEM: type inference. ugh.
 ;;    (pat-irrefutable? p TODO)]
 ;;   [(_ _) #f])
-
-(define (lit-type l)
-  (cond
-    [(boolean? l) (t-bool)]
-    [(number? l) (t-nat)]
-    [(string? l) (t-str)]
-    [#t #f]))
