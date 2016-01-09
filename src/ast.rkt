@@ -5,6 +5,9 @@
 (require "util.rkt")
 (provide (all-defined-out))
 
+;; Whether a variable/hypothesis, function, etc. is unrestricted or monotone.
+(define tone? (or/c 'any 'mono))
+
 ;; TODO?: make these types print better under ~a?
 (enum type
   (t-bool) (t-nat) (t-str)
@@ -13,11 +16,10 @@
   (t-record fields)
   ;; branches is a hash from branch names to types
   (t-sum branches)
-  ;; tone is 'any, for ordinary functions, or 'mono, for monotone fns
   (t-fun tone arg result)
   (t-set type))
 
-;;; Literals & primitives
+;; Literals & primitives
 (define (lit? x) (if (lit-type x) #t #f))
 (define (prim? x) (set-member? prims x))
 (define prims (list->set '(= <= + - * subset? print puts ++)))
