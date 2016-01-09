@@ -13,6 +13,9 @@
   the (cons x (= x)) will match only if foo is of the form (cons _ 0), and will
   bind x to the first argument of the cons.
 
+- add some type constructors & intro & elim forms for them
+  - flat lattices, (Flat A) = bottom <= .... A ... <= top
+
 - allow pattern let-binding (for irrefutable patterns)
   - move pat-irrefutable? into elab.rkt, since it requires type-checking.
 
