@@ -12,7 +12,6 @@
 (define ((df+ x) y) (+ x y))
 (define ((df- x) y) (- x y))
 (define ((df* x) y) (* x y))
-(define ((df<= x) y) (<= x y))
 (define ((df++ x) y) (string-append x y))
 (define ((df-subset? x) y) (subset? x y))
 (define (df-max . xs) (if (null? xs) 0 (apply max xs)))
@@ -21,6 +20,23 @@
   (define next (iter init))
   (if (equal? init next) init
       (df-fix next iter)))
+
+;; dynamic diiiiiiiispaaaaaaaaatch b/c why not
+(define/match (df<= a)
+  [(#f) (const #t)]
+  [(#t) (curry equal? #t)]
+  [((? number? a)) (curry <= a)]
+  [((? string? a)) (curry string<=? a)]
+  [((? set? a)) (curry subset? a)]
+  ;; sum types needs to come before tuples b/c their representations overlap
+  ;; somewhat. NB. would need to change if we had a type whose values were
+  ;; symbols.
+  [((list (? symbol? tag1) value1))
+   (match-lambda [(list (? symbol? tag2) value2)
+             (and (equal? tag1 tag2) (df<= value1 value2))])]
+  [((? list? as)) (curry andmap (lambda (a b) ((df<= a) b)) as)]
+  ;; NB: would need to change if we had record subtyping.
+  [((? hash? a)) (lambda (b) (for/and ([(k v) a]) ((df<= v) (hash-ref b k))))])
 
 ;; this needs us to give it the type, in case `args' is empty.
 (define (df-join type args)
