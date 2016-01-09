@@ -97,4 +97,5 @@
     ['+ #'df+] ['* #'df*] ['- #'df-] ['<= #'df<=]
     ['++ #'df++]
     ['puts #'df-puts]
-    ['print #'df-print]))
+    ['print #'df-print]
+    ['size #'set-count]))
