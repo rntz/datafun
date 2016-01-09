@@ -3,13 +3,8 @@
 (require "util.rkt" "ast.rkt" "parse.rkt" "types.rkt" "env.rkt")
 (provide elab (struct-out hyp))
 
-;; The elaborator generates an info hashtable that maps some exprs to info about
-;; them that is used for compilation:
-;;
-;; - e-lam, e-app: 'any or 'mono, for ordinary or monotone {lambdas,application}
-;; - e-join, e-join-in, e-prim, e-fix: its type
-;;
-;; TODO: the 'any/'mono information is unused (see compile.rkt). remove it.
+;; The elaborator generates an info hashtable that maps some exprs to their
+;; types. see should-remember-type?, below.
 
 ;;; returns (values info-table type-of-expr)
 ;;; if `type' is #f, we infer the type of `expr'.
@@ -69,10 +64,9 @@ when typechecking expression: ~s" (exn-message e) (expr->sexp root-expr))))
         [(_ _) #f])))
 
 ;; whether we need to remember the type of an expression
-(define (should-remember-type expr)
-  (match expr
-    [(or (e-prim _) (e-join _) (e-join-in _ _ _) (e-when _ _) (e-fix _ _)) #t]
-    [_ #f]))
+(define/match (should-remember-type? expr)
+  [((or (e-prim _) (e-join _) (e-join-in _ _ _) (e-when _ _) (e-fix _ _))) #t]
+  [(_) #f])
 
 
 ;;; ---------- PARAMETERS ----------
@@ -95,9 +89,9 @@ when typechecking expression: ~s" (exn-message e) (expr->sexp root-expr))))
 ;; returns the type of `expr', which is always be a subtype of `type'.
 (define (expr-check expr [type #f])
   (define expr-type (expr-infer expr type))
-  (when (should-remember-type expr)
+  (when (should-remember-type? expr)
     (set-info! expr expr-type))
-  ;; TODO?: optimization: use eq? to avoid call to subtype? here
+  ;; NB: optimization: could use eq? to avoid call to subtype? here
   (when (and type (not (subtype? expr-type type)))
     ;; TODO: better formatting here
     (type-error
@@ -178,7 +172,6 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
     [(e-app func arg)
      (match (expr-check func)
        [(t-fun o a b)
-        (set-info! expr o)
         (with-tone o (expr-check arg a))
         b]
        [func-type (fail "applying non-function ~s : ~s"
@@ -204,7 +197,6 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
     [(e-lam _ _) #:when (not type) (fail "lambdas not inferrable")]
     [(e-lam var body) #:when type
      (match-define (t-fun tone a body-type) type)
-     (set-info! expr tone)
      (with-var var (hyp tone a)
        (expr-check body body-type))
      type]
