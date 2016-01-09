@@ -65,7 +65,9 @@ when typechecking expression: ~s" (exn-message e) (expr->sexp root-expr))))
 
 ;; whether we need to remember the type of an expression
 (define/match (should-remember-type? expr)
-  [((or (e-prim _) (e-join _) (e-join-in _ _ _) (e-when _ _) (e-fix _ _))) #t]
+  [((or (e-join _) (e-join-in _ _ _) (e-when _ _) (e-fix _ _))) #t]
+  ;; we actually don't need to remember primitives; see do-prim in compile.rkt
+  ;; [((e-prim _)) #t]
   [(_) #f])
 
 
