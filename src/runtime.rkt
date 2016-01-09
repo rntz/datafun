@@ -22,30 +22,17 @@
   (if (equal? init next) init
       (df-fix next iter)))
 
-;; produces syntax object which evals to an n-ary joiner function for the given
-;; type.
-;;
-;; TODO: this needs optimized.
-;;
-;; TODO?: use a hashtable mapping types to joiners so that we can generate a
-;; joiner for each type *at most once*?
-(define (joiner-for t)
-  (match t
-    [(t-bool) #'df-or]
-    [(t-nat) #'df-max]
-    [(t-set _) #'df-union]
-    [(t-fun _ i o)
-     #`(lambda fs (lambda (x) (#,(joiner-for o)
-                     (for/list ([f fs]) (f x)))))]
+;; this needs us to give it the type, in case `args' is empty.
+(define (df-join type args)
+  (match type
+    [(t-bool) (ormap identity args)]
+    [(t-nat) (apply df-max args)]
+    [(t-set _) (apply df-union args)]
+    [(t-fun _ a b) (lambda (x) (df-join b (for/list ([f args]) (f x))))]
     [(t-tuple ts)
-     #`(lambda tuples
-         (list #,@(for/list ([i (length ts)] [t ts])
-                    #`(apply #,(joiner-for t)
-                             (for/list ([x tuples]) (list-ref x #,i))))))]
-    [(t-record fs)
-     (define (field-expr n t)
-       #`(apply #,(joiner-for t) (for/list ([r records]) (hash-ref r '#,n))))
-     #`(λ records
-         (hash #,@(for*/list ([(n t) fs]
-                              [x (list #`'#,n (field-expr n t))])
-                    x)))]))
+     (for/list ([i (length ts)] [t ts])
+       (df-join t (map (lambda (x) (list-ref x i)) args)))]
+    [(t-record fields)
+     (for/hash ([(name type) fields])
+       (define (get-field x) (hash-ref x name))
+       (values name (df-join type (map get-field args))))]))

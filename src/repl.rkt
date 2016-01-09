@@ -1,7 +1,7 @@
 #lang racket
 
 (require "util.rkt" "ast.rkt" "types.rkt" "parse.rkt" "env.rkt" "elab.rkt"
-         "compile.rkt")
+         "runtime.rkt" "compile.rkt")
 (provide (all-defined-out))
 
 (define (show-err e)

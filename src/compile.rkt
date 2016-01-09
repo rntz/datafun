@@ -26,7 +26,8 @@
 
 ;;; ---------- INTERNAL FUNCTIONS ----------
 (define (do-expr e)
-  (define (joiner) (joiner-for (info e)))
+  ;; TODO: define-syntax join instead
+  (define (join . args) #`(df-join '#,(info e) (list #,@args)))
   (match e
     [(e-ann _ e) (do-expr e)]
     [(e-var n) (env-ref (compile-env) n)]
@@ -47,20 +48,19 @@
     [(e-tag t e) #`(list '#,t #,(do-expr e))]
     [(e-case subj branches)
      #`(match #,(do-expr subj) #,@(do-case-branches branches))]
-    [(e-join es) #`(#,(joiner) #,@(map do-expr es))]
+    [(e-join es) (apply join (map do-expr es))]
     [(e-set es) #`(set #,@(map do-expr es))]
     [(e-join-in pat arg body)
-     #`(for/fold ([acc (#,(joiner))])
+     #`(for/fold ([acc #,(join)])
                  ([elt #,(do-expr arg)])
-         (#,(joiner) acc
-           (match elt
-             #,@(do-case-branches (list (case-branch pat body)))
-             [_ (#,(joiner))])))]
-    [(e-when subj body) #`(if #,(do-expr subj) #,(do-expr body) (#,(joiner)))]
+         #,(join #'acc
+                 #`(match elt
+                     #,@(do-case-branches (list (case-branch pat body)))
+                     [_ #,(join)])))]
+    [(e-when subj body) #`(if #,(do-expr subj) #,(do-expr body) #,(join))]
     [(e-fix v body)
      (define var (gensym v))
-     #`(df-fix (#,(joiner))
-               (lambda (#,var) #,(with-var v var (do-expr body))))]
+     #`(df-fix #,(join) (lambda (#,var) #,(with-var v var (do-expr body))))]
     [(e-let _ v expr body)
      (define var (gensym v))
      #`(let ((#,var #,(do-expr expr)))
