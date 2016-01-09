@@ -1,11 +1,11 @@
 #lang racket
 
 (require "util.rkt" "ast.rkt" "parse.rkt" "env.rkt" "elab.rkt" "runtime.rkt")
-(provide compile-expr)
+(provide compile)
 
 ;; contexts Γ are envs mapping variables to what they should compile to (an
 ;; identifier, generally). info maps exprs to elaboration info; see elab.rkt.
-(define (compile-expr e info Γ)
+(define (compile e #:env Γ #:info info)
   (parameterize ([elab-info info]
                  [compile-env Γ])
     (do-expr e)))
