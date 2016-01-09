@@ -1,3 +1,18 @@
+* thoughts on polymorphism and type inference
+
+currently the implementation has subtyping, but the only non-trivial subtyping
+is (a ~> b) <: (a -> b).
+
+however, we have two forms of type quantification:
+- quantification over all types
+- qunatification over lattice types
+
+using Hindley-Milner unmodified probably won't work, because how can we
+determine whether a function is intended to be ordinary or monotone?
+
+also, have to incorporate typeclass-like constraint for quantification over
+lattice types.
+
 * implementation: maybe use PLT redex?
 * Future work: generalize to {some,many,all} Eilenberg-Moore categories?
 * Future work: exploring lists, bags, and sets
