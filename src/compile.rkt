@@ -26,7 +26,6 @@
 
 ;;; ---------- INTERNAL FUNCTIONS ----------
 (define (do-expr e)
-  ;; TODO: define-syntax join instead
   (define (join . args) #`(df-join '#,(info e) (list #,@args)))
   (match e
     [(e-ann _ e) (do-expr e)]
