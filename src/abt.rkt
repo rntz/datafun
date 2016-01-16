@@ -17,12 +17,6 @@
 
 (define id-subst (Shift 0))
 
-;; used for substituting under a bind(er). see view-bind, further down.
-(define (subst-bind vars s)
-  (define n (length vars))
-  (foldr Cons (Compose s (Shift n))
-         (map Var (sequence->list n) vars)))
-
 (define (subst-whnf? s)
   (matches? s (or (Shift _) (Cons _ _))))
 
@@ -73,6 +67,10 @@
   ;; applies a substitution to a term.
   (Subst term subst))
 
+;; TODO: maybe, instead of an explicit Bind datastructure, use cons-lists
+;; terminated by terms? can still define Bind-vars, Bind-term, and make a
+;; pattern-matcher for it.
+
 ;; Bind variable names: A, B, C
 ;; vars is a list of names/annotations for variables. as far as binding
 ;; structure goes, only its length matters.
@@ -80,10 +78,15 @@
 
 
 ;;; ---------- SUBSTITUTION OPERATIONS PROPER ----------
-;; substitutes for all variables in a Bind, yielding a term
-(define (substitute terms A)
+;; binds/substitutes-for all variables in a Bind, yielding a term
+(define (bind A terms)
   (assert! (length=? terms (Bind-vars A)))
-  (Subst (Bind-term A) (foldr Cons id-subst terms)))
+  (bind-in-term (Bind-term A) terms))
+
+;; using this directly forgoes check that we're substituting the right # of
+;; variables.
+(define (bind-in-term a terms)
+  (Subst a (foldr Cons id-subst terms)))
 
 ;; Shallowly views a term or Bind in a subst, returning a Var, App, or Bind (but
 ;; never a Subst).
@@ -95,7 +98,7 @@
     [a #:when (eq? s id-subst) a]
     [(Var index name) (view (subst-ref s index name) id-subst)]
     [(App form args) (App form (map (lambda (A) (view A s)) args))]
-    [(Bind vars term) (Bind vars (Subst term (subst-bind vars s)))]))
+    [(Bind vars term) (Bind vars (Subst term (subst-under-bind vars s)))]))
 
 ;; eliminates all instances of Subst from a term or Bind.
 (define (deep-view a [s id-subst])
@@ -104,4 +107,10 @@
     [(Var _ _) #:when (eq? s id-subst) a]
     [(Var index name) (deep-view (subst-ref s index name) id-subst)]
     [(App form args) (App form (map (lambda (A) (deep-view A s)) args))]
-    [(Bind vars term) (Bind vars (deep-view term (subst-bind vars s)))]))
+    [(Bind vars term) (Bind vars (deep-view term (subst-under-bind vars s)))]))
+
+;; used for substituting under a binder.
+(define (subst-under-bind vars s)
+  (define n (length vars))
+  (foldr Cons (Compose s (Shift n))
+         (map Var (sequence->list n) vars)))
