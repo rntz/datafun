@@ -2,33 +2,31 @@
   - 1-level syntax (ie, one grammar of types)
 
   - Look at examples of using flow analyses to optimize
-    to study forgetting the order – eg:
+    to study forgetting the order - eg:
 
-    case U(〚p〛) of 
-      ⊤   → p 
-      ⌊x⌋ → x
-      ⊥   → skip
+    case U([[p]]) of
+      top   -> p
+      mid x -> x
+      bot   -> skip
 
-   where 〚_〛 : program → Flat(bool)
+   where [[_]] : program → Flat(bool)
 
 * Semantics
 
-  - two level 
+  - two level
     - Set/Poset adjunction
-    - use this to explain the D(A ⊕ B) ≃ D(A) + D(B) iso gives
+    - use this to explain the D(A <+> B) ~= D(A) + D(B) iso gives
       rise to 2 case rules
-    - explain P ↝ Q as D(U(P)) → Q 
-    - fixed points – we need finite equality lattices to ensure 
-      termination 
+    - explain "ordinary" P => Q via "monotone" D(U(P)) -> Q
+    - fixed points - we need finite equality lattices to ensure
+      termination
 
 * Examples
   o Graph reachability/ancestry
   o SQL-style examples:
-    -?
+    - ?
   o Dataflow analysis
     - Liveness analysis? for while-language
-  o Infinitary types? 
+  o Infinitary types?
     - ie, no infinite descending chains, but may nonterminate
       (lattice with top element)
-  o 
-
