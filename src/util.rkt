@@ -51,7 +51,7 @@
 
 
 ;;; Miscellaneous utilities
-(provide assert! warn! flip andf orf print-error
+(provide assert! warn! flip print-error
          index-of length=? map? foldl1 foldr1 rev-append
          read-file)
 
@@ -59,9 +59,6 @@
 (define (warn! msg) (displayln (format "WARNING: ~a" msg)) )
 
 (define ((flip f) x y) (f y x))         ;do we need this?
-
-(define ((andf . fs) . as) (for/and ([f fs]) (apply f as)))
-(define ((orf . fs) . as) (for/or ([f fs]) (apply f as)))
 
 (define (print-error err)
   (printf "error: ~a\n" (exn-message err)))
