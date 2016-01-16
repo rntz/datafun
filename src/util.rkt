@@ -5,7 +5,7 @@
 
 ;;; Syntax utilities
 (provide
-  define-syntax-parser TODO fn enum enum-case
+  define-syntax-parser TODO fn enum enum-case matches?
   ;; re-export
   (for-syntax syntax-parse syntax-parser))
 
@@ -45,6 +45,9 @@
   (begin
     (struct name () #:transparent)
     (enum-case name branch) ...))
+
+(define-syntax-rule (matches? e p)
+  (match e [p #t] [_ #f]))
 
 
 ;;; Miscellaneous utilities
