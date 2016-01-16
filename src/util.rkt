@@ -52,7 +52,7 @@
 
 ;;; Miscellaneous utilities
 (provide assert! warn! flip andf orf print-error
-         index-of length=? eqmap foldl1 foldr1 rev-append
+         index-of length=? map? foldl1 foldr1 rev-append
          read-file)
 
 (define (assert! t) (unless t (error "ASSERTION FAILURE")))
@@ -76,7 +76,7 @@
   (define len (length l))
   (andmap (lambda (l) (= len (length l))) lsts))
 
-(define (eqmap eq . lsts)
+(define (map? eq . lsts)
   (and (apply length=? lsts) (apply andmap eq lsts)))
 
 (define (foldl1 f l)

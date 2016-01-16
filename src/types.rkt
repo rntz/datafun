@@ -63,7 +63,7 @@
 
 ;; Subtyping & the type lattice.
 (define/match (subtype? a b)
-  [((t-tuple as) (t-tuple bs)) (eqmap subtype? as bs)]
+  [((t-tuple as) (t-tuple bs)) (map? subtype? as bs)]
   [((t-record as) (t-record bs))
    ;; records are invariant in their field-sets - adding fields does not
    ;; preserve type. this is because equality of records depends on what fields
