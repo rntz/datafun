@@ -5,8 +5,9 @@
 (require "util.rkt")
 (provide (all-defined-out))
 
-;; Whether a variable/hypothesis, function, etc. is unrestricted or monotone.
-(define tone? (or/c 'any 'mono))
+;; Whether a variable/hypothesis, function, etc. is unrestricted, monotone, or
+;; antitone.
+(define tone? (or/c 'any 'mono 'anti))
 
 ;; TODO?: make these types print better under ~a?
 (enum type
@@ -38,10 +39,10 @@
   (e-lit value) ;; literals
   (e-prim prim) ;; primitive functions
   (e-fix var body)
-  ;; let binding. tone is either 'any or 'mono. (in theory, this is just unary
-  ;; case. but case doesn't account for tone yet.)
+  ;; let binding. in theory, this is just unary case. but case doesn't account
+  ;; for tone yet.
   (e-let tone var expr body)
-  ;; this moves all our "monotone" variables into the unrestricted context.
+  ;; this moves all our mono/antitone variables into the unrestricted context.
   (e-trustme expr)
 
   ;; ---------- usl operations ----------

@@ -1,9 +1,10 @@
 (x : nat)
 (x = 2)
 
-;; negation
-(not : bool -> bool)
-(not x = (case x [#t #f] [#f #t]))
+;; negation. if we had an antitone version of the `when' eliminator, we could
+;; implement this without trustme.
+(not : bool ->- bool)
+(not x = (trustme (case x [#t #f] [#f #t])))
 
 ;; disjunction, eagerly
 ;; this is easy because disjunction *is* the join operator on bools.
@@ -15,16 +16,12 @@
 (and x y = (when x y))
 
 
-;; XXX: how can we write this?
-(< : nat -> nat ~> bool)
-;; this works but is a hack, not extensible to other types:
-(< x y = (<= (+ x 1) y))
+;; now that we have antitone negation, we can write < properly!
+(< : nat ->- nat ~> bool)
+(< x y = (not (<= y x)))
 
-;; this does not work, 'not is not monotone, can't see 'y:
-;; (< x y = (not (<= y x)))
-;; this *could* work, perhaps, if we accounted for antitonicity and made
-;; negation and <= appropriately antitone - but then I don't know how we'd
-;; write 'not!
+;; previously, we used this hack:
+;; (< x y = (<= (+ x 1) y))
 
 
 ;; representing booleans as sets of units

@@ -31,8 +31,8 @@
   (eval-defns (parse-all-decls lines) env))
 
 (define (eval-defns defns env)
-  (for ([d defns] #:when (equal? 'mono (defn-tone d)))
-    (error "monotone definitions not allowed at top-level: " d))
+  (for ([d defns] #:when (not (equal? 'any (defn-tone d))))
+    (error "monotone/antitone definitions not allowed at top-level: " d))
   (for ([d defns])
     (set! env (eval-defn d env)))
   env)
@@ -40,7 +40,7 @@
 ;; evaluates a definition in a global-env. returns updated env.
 (define (eval-defn d env)
   (match-define (defn name tone decl-type expr) d)
-  (assert! (not (equal? 'mono tone)))
+  (assert! (equal? 'any tone))
   (debug (printf "defn: ~a = ~s\n" name (expr->sexp expr)))
   ;; elaborate the expression.
   (define-values (elab-info type)

@@ -25,16 +25,26 @@ when typechecking expression: ~s" (exn-message e) (expr->sexp root-expr))))
 ;; annotated with their tones & their types. tones can be:
 ;; - 'any, for ordinary unrestricted variables
 ;; - 'mono, for monotone variables
+;; - 'anti, for antitone variables
 ;; - #f, for previously-monotone variables hidden by entry into a constant
 ;;   expression
 (struct hyp (tone type) #:transparent)
 
 (define (env-for-tone tone Γ)
   (match tone
-    ['mono (elab-env)]
-    ['any (env-map (match-lambda [(hyp (not 'any) t) (hyp #f t)] [x x]) Γ)]
+    ['mono Γ]
+    ;; reverse the polarity!
+    ['anti (env-map (match-lambda [(hyp o t) (hyp (tone-inverse o) t)]) Γ)]
+    ['any  (env-map (match-lambda [(hyp (not 'any) t) (hyp #f t)] [x x]) Γ)]
     ;; hilarious hack
-    ['trustme (env-map (match-lambda [(hyp 'mono t) (hyp 'any t)] [x x]) Γ)]))
+    ['trustme
+     (env-map (match-lambda [(hyp (not #f) t) (hyp 'any t)] [x x]) Γ)]))
+
+(define/match (tone-inverse o)
+  [('any) 'any]
+  [('mono) 'anti]
+  [('anti) 'mono]
+  [(#f) #f])
 
 (define-syntax-rule (with-tone tone body ...)
   (parameterize ([elab-env (env-for-tone tone (elab-env))]) body ...))
@@ -45,20 +55,24 @@ when typechecking expression: ~s" (exn-message e) (expr->sexp root-expr))))
   ((lambda (x) (and x (parse-type x)))
    (match p
      [(or '+ '*) '(nat nat ~> nat)]
-     ['- '(nat ~> nat -> nat)]
+     ['- '(nat ~> nat ->- nat)]
      ['++ '(str str -> str)]
      ['puts '(str -> (*))]
      [_ #:when (prim? p) #f])))
 
 (define (prim-has-type? p t)
   (define pt (prim-type-infer p))
-  (if pt (type=? t pt)
+  (if pt
+      (subtype? pt t)
       (match* (p t)
         [('= (t-fun 'any a (t-fun 'any b (t-bool))))
          (and (type=? a b) (eqtype? a))]
-        [('<= (t-fun 'any a (t-fun _ b (t-bool))))
+        [('<= (t-fun (or 'anti 'any) a
+                     (t-fun (or 'mono 'any) b (t-bool))))
          (and (type=? a b) (eqtype? a))]
-        [('size (t-fun _ (t-set a) (t-nat))) (eqtype? a)]
+        [('size (t-fun (or 'mono 'any) (t-set a) (t-nat))) (eqtype? a)]
+        ;; print is actually *bitonic*, since it's constant, but we don't have a
+        ;; way to represent that in its type.
         [('print (t-fun _ _ (t-tuple '()))) #t]
         [(_ _) #f])))
 
@@ -127,7 +141,8 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
     [(e-app (and prim-expr (e-prim (and p (or '= '<= 'size 'print))))
             arg)
      (define tone (match p
-                    [(or '= '<=) 'any]
+                    ['= 'any]
+                    ['<= 'anti]
                     [(or 'size 'print) 'mono]))
      (define arg-type (with-tone tone (expr-check arg)))
      (define result-type (match p
@@ -171,8 +186,14 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
 
     [(e-var n)
      (match (env-ref (elab-env) n (lambda () (fail "~a is not bound" n)))
-       [(hyp (or 'any 'mono) t) t]
-       [(hyp #f _) (fail "~a is a hidden monotone variable" n)])]
+       ;; TODO: better error message.
+       [(hyp #f _) (fail "variable ~a is hidden due to tonicity" n)]
+       ;; [(hyp (or 'any 'mono) t) t]
+       ;; [(hyp 'anti t) (fail "~a is an antitone variable" n)]
+       ;; alternative way to phrase this:
+       [(hyp o t) #:when (subtone? o 'mono) t]
+       [(hyp _ _) (fail "non-monotone use of variable ~a" n)]
+       )]
 
     [(e-app func arg)
      (match (expr-check func)

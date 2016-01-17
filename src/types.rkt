@@ -75,11 +75,10 @@
   [((t-sum as) (t-sum bs))
     (for/and ([(k v) as])
       (and (hash-has-key? bs k) (subtype? v (hash-ref bs k))))]
-  [((t-fun o a x) (t-fun p b y))
-   (and (subtone? o p) (subtype? b a) (subtype? x y))]
+  [((t-fun o1 a1 b1) (t-fun o2 a2 b2))
+   ;; the reversal of o1 and o2 in the call to subtype? is deliberate
+   (and (subtone? o2 o1) (subtype? a2 a1) (subtype? b1 b2))]
   [(x y) (type=? x y)])
-
-(define/match (subtone? o p) [('any 'mono) #f] [(_ _) #t])
 
 (define/match (type-lub a b)
   [((t-tuple as) (t-tuple bs)) (t-tuple (type-lubs as bs))]
@@ -88,7 +87,7 @@
    (t-record (hash-intersection-with as bs type-lub))]
   [((t-sum as) (t-sum bs)) (t-sum (hash-union-with as bs type-lub))]
   [((t-fun o a x) (t-fun p b y))
-   (t-fun (tone-lub o p) (type-glb a b) (type-lub x y))]
+   (t-fun (tone-glb o p) (type-glb a b) (type-lub x y))]
   [((t-set a) (t-set b)) (t-set (type-lub a b))]
   [(x y) #:when (type=? x y) x]
   [(x y) (type-error "no lub: ~v and ~v" x y)])
@@ -100,13 +99,21 @@
    (t-record (hash-union-with as bs type-glb))]
   [((t-sum as) (t-sum bs)) (t-sum (hash-intersection-with as bs type-glb))]
   [((t-fun o a x) (t-fun p b y))
-   (t-fun (tone-glb o p) (type-lub a b) (type-glb x y))]
+   (t-fun (tone-lub o p) (type-lub a b) (type-glb x y))]
   [((t-set a) (t-set b)) (t-set (type-glb a b))]
   [(x y) #:when (type=? x y) x]
   [(x y) (type-error "no glb: ~v and ~v" x y)])
 
-(define/match (tone-lub o p) [('mono 'mono) 'mono] [(_ _) 'any])
-(define/match (tone-glb o p) [('any 'any)   'any]  [(_ _) 'mono])
+;; any <: mono, any <: anti
+(define (subtone? o1 o2) (equal? o2 (tone-lub o1 o2)))
+(define/match (tone-lub o p)
+  [(x x) x]
+  [('any x) x]
+  [(x 'any) x]
+  [(_ _) (type-error "tones have no lub: ~a, ~a" o p)])
+(define/match (tone-glb o p)
+  [(x x) x]
+  [(_ _) 'any])
 
 (define (type-lubs as bs)
   (unless (length=? as bs) (type-error "lists of unequal length"))
