@@ -46,7 +46,8 @@
      [(e-set es) `(set ,@(map expr->sexp es))]
      [(e-join-in pat arg body)
       `(for ([,pat ,(expr->sexp arg)]) ,(expr->sexp body))]
-     [(e-when subj body) `(when ,(expr->sexp subj) ,(expr->sexp body))]
+     [(e-cond 'mono subj body) `(when   ,(expr->sexp subj) ,(expr->sexp body))]
+     [(e-cond 'anti subj body) `(unless ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-fix var body) `(fix ,var ,(expr->sexp body))]
      [(e-let tone var expr body)
       `(let ([,@(match tone ['any '()] ['mono '(mono)] ['anti '(anti)])
@@ -82,7 +83,8 @@
     [`(set . ,es) (e-set (map parse-expr es))]
     [`(join-in ,pat ,arg ,body)
      (e-join-in (parse-pat pat) (parse-expr arg) (parse-expr body))]
-    [`(when ,subj ,body) (e-when (parse-expr subj) (parse-expr body))]
+    [`(when ,subj ,body)   (e-cond 'mono (parse-expr subj) (parse-expr body))]
+    [`(unless ,subj ,body) (e-cond 'anti (parse-expr subj) (parse-expr body))]
     [`(fix ,x ,body) (e-fix x (parse-expr body))]
     [`(trustme ,e) (e-trustme (parse-expr e))]
     [(and e `(,f ,as ...))
@@ -109,6 +111,8 @@
    `(join-in ,pat ,expr (for ,clauses ,body))]
   [(`(for (#:when ,cnd . ,clauses) ,body))
    `(when ,cnd (for ,clauses ,body))]
+  [(`(for (#:unless ,cnd . ,clauses) ,body))
+   `(unless ,cnd (for ,clauses ,body))]
   ;; end for loop syntax
   [(`(for/set ,clauses ,body))
    `(for ,clauses (set ,body))]

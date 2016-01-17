@@ -78,7 +78,7 @@ when typechecking expression: ~s" (exn-message e) (expr->sexp root-expr))))
 
 ;; whether we need to remember the type of an expression
 (define/match (should-remember-type? expr)
-  [((or (e-join _) (e-join-in _ _ _) (e-when _ _) (e-fix _ _))) #t]
+  [((or (e-join _) (e-join-in _ _ _) (e-cond _ _ _) (e-fix _ _))) #t]
   ;; we actually don't need to remember primitives; see do-prim in compile.rkt
   ;; [((e-prim _)) #t]
   [(_) #f])
@@ -160,8 +160,11 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
      (define subj-t (with-tone tone (expr-check subj)))
      (with-var var (hyp tone subj-t) (expr-check body type))]
 
-    [(e-when subj body)
-     (expr-check subj (t-bool))
+    [(e-cond tone subj body)
+     (unless (matches? tone (or 'mono 'anti))
+       ;; TODO: better error message.
+       (type-error "bad tone for e-cond"))
+     (with-tone tone (expr-check subj (t-bool)))
      (define body-type (expr-check body type))
      (unless (lattice-type? body-type)
        (fail "cannot join at non-lattice type ~s" (type->sexp body-type)))

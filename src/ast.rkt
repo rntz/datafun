@@ -36,18 +36,28 @@
   ;; ---------- miscellanea ----------
   (e-ann type expr)
   (e-var name)
-  (e-lit value) ;; literals
-  (e-prim prim) ;; primitive functions
-  (e-fix var body)
   ;; let binding. in theory, this is just unary case. but case doesn't account
   ;; for tone yet.
   (e-let tone var expr body)
   ;; this moves all our mono/antitone variables into the unrestricted context.
   (e-trustme expr)
 
+  ;; ---------- base types & primitive operations ----------
+  (e-lit value)       ;; literals
+  (e-prim prim)       ;; primitive functions
+
+  ;; e-cond is the mono/antitone eliminator for booleans. tone is 'mono or
+  ;; 'anti. if 'mono, acts as (when arg body). if 'anti, acts as (unless arg
+  ;; body).
+  (e-cond tone arg body)   ;; monotone eliminator for booleans
+
+  ;; ---------- sets ----------
+  (e-set exprs)
+  (e-join-in pat arg body)
+
   ;; ---------- usl operations ----------
-  (e-when arg body)   ;; usl eliminator for booleans.
   (e-join exprs)
+  (e-fix var body)
 
   ;; ---------- functions ----------
   ;; bidirectional type inference / elaboration figures out which kind (ordinary
@@ -70,10 +80,11 @@
   ;; branches is a list of case-branch structs.
   (e-case subject branches)
   ;; TODO: (e-case-mono subject branches)
-
-  ;; ---------- sets ----------
-  (e-set exprs)
-  (e-join-in pat arg body))
+  ;;
+  ;; NOTE: a difficulty with e-case-mono is we can only case monotonically on
+  ;; types of the form (A + B). we cannot, for example, case monotonically on
+  ;; bool! because bool has an ordering! ugh.
+  )
 
 (struct case-branch (pat body) #:transparent)
 

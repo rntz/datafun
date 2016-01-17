@@ -56,7 +56,8 @@
                  #`(match elt
                      #,@(do-case-branches (list (case-branch pat body)))
                      [_ #,(join)])))]
-    [(e-when subj body) #`(if #,(do-expr subj) #,(do-expr body) #,(join))]
+    [(e-cond 'mono subj body) #`(if #,(do-expr subj) #,(do-expr body) #,(join))]
+    [(e-cond 'anti subj body) #`(if #,(do-expr subj) #,(join) #,(do-expr body))]
     [(e-fix v body)
      (define var (gensym v))
      #`(df-fix #,(join) (lambda (#,var) #,(with-var v var (do-expr body))))]

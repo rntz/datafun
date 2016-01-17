@@ -1,10 +1,15 @@
 (x : nat)
 (x = 2)
 
-;; negation. if we had an antitone version of the `when' eliminator, we could
-;; implement this without trustme.
+;; negation.
 (not : bool ->- bool)
-(not x = (trustme (case x [#t #f] [#f #t])))
+(not x = (unless x #t))
+
+;; any two of `not', `when', and `unless' would let us derive the third
+;; (although polymorphism might be an issue for typechecking it).
+;; for example:
+(unless-bool : bool ->- bool ~> bool)
+(unless-bool c X = (when (not c) X))
 
 ;; disjunction, eagerly
 ;; this is easy because disjunction *is* the join operator on bools.
@@ -41,6 +46,19 @@
 
 (set->bool : (set (*)) ~> bool)
 (set->bool x = (for ([_ x]) #t))
+
+;; kind of a hack.
+(negate : (set (*)) ->- (set (*)))
+(negate X = (unless (set->bool X) (set (cons))))
+
+
+;; operations on sets of naturals
+(member : nat -> (set nat) ~> bool)
+(member a X = (for ([x X]) (= a x)))
+
+(setminus : (set nat) ~> (set nat) ->- (set nat))
+(setminus X Y = (for/set ([x X] #:unless (member x Y))
+                  x))
 
 
 ;; ancestors example
