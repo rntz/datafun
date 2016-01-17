@@ -62,34 +62,50 @@
   (Var index name)
   ;; an application of a form to a list of arguments.
   ;; the form is a symbol, usually.
-  ;; the arguments are Binds.
+  ;; the arguments are binders.
   (App form args)
   ;; applies a substitution to a term.
   (Subst term subst))
 
-;; TODO: maybe, instead of an explicit Bind datastructure, use cons-lists
-;; terminated by terms? can still define Bind-vars, Bind-term, and make a
-;; pattern-matcher for it.
+;; binder variable names: A, B, C
+;;
+;; A binder is an improper list of variable names (symbols), the tail of which
+;; is a term. For example, ('x 'y . (Var 1 'x)) represents (x,y. x).
+(define binder? (flat-rec-contract binder? term? (cons/c symbol? binder?)))
+(define-match-expander binder
+  (syntax-parser [(_ vars term)
+                  #'(app improper-list->pair
+                         (cons (and vars (list (? symbol?) (... ...)))
+                               (? term? term)))])
+  (syntax-parser [(_ vars term) #'(foldr cons term vars)]))
 
-;; Bind variable names: A, B, C
-;; vars is a list of names/annotations for variables. as far as binding
-;; structure goes, only its length matters.
-(struct Bind (vars term) #:transparent)
+(define (improper-list->pair l)
+  (let loop ([acc '()] [l l])
+    (if (pair? l) (loop (cons (car l) acc) (cdr l))
+        (cons (reverse acc) l))))
 
 
 ;;; ---------- SUBSTITUTION OPERATIONS PROPER ----------
-;; binds/substitutes-for all variables in a Bind, yielding a term
-(define (bind A terms)
-  (assert! (length=? terms (Bind-vars A)))
-  (bind-in-term (Bind-term A) terms))
+;; binds/substitutes-for all variables in a binder, yielding a term
+(define/contract (bind A terms)
+  (-> binder? (listof term?) term?)
+  (match-define (binder vars a) A)
+  (assert! (length=? vars terms))
+  (bind-in-term a terms))
 
 ;; using this directly forgoes check that we're substituting the right # of
 ;; variables.
-(define (bind-in-term a terms)
+(define/contract (bind-in-term a terms)
+  (-> term? (listof term?) term?)
   (Subst a (foldr Cons id-subst terms)))
 
-;; Shallowly views a term or Bind in a subst, returning a Var, App, or Bind (but
-;; never a Subst).
+(define (subst-under-binder vars s)
+  (define n (length vars))
+  (foldr Cons (Compose s (Shift n))
+         (map Var (sequence->list n) vars)))
+
+;; Shallowly views a term or binder in a subst, returning a Var, App, or binder
+;; (but never a Subst).
 (define (view a [s id-subst])
   (match a
     [(Subst b t) (view b (Compose t s))]
@@ -97,20 +113,17 @@
     ;; it's necessary for the case after it to work.
     [a #:when (eq? s id-subst) a]
     [(Var index name) (view (subst-ref s index name) id-subst)]
-    [(App form args) (App form (map (lambda (A) (view A s)) args))]
-    [(Bind vars term) (Bind vars (Subst term (subst-under-bind vars s)))]))
+    [(App form args)
+     (App form (map (lambda (A) (view A s)) args))]
+    [(binder vars term)
+     (binder vars (Subst term (subst-under-binder vars s)))]))
 
-;; eliminates all instances of Subst from a term or Bind.
+;; eliminates all instances of Subst from a term or binder.
 (define (deep-view a [s id-subst])
   (match a
     [(Subst b t) (deep-view b (Compose t s))]
     [(Var _ _) #:when (eq? s id-subst) a]
     [(Var index name) (deep-view (subst-ref s index name) id-subst)]
     [(App form args) (App form (map (lambda (A) (deep-view A s)) args))]
-    [(Bind vars term) (Bind vars (deep-view term (subst-under-bind vars s)))]))
-
-;; used for substituting under a binder.
-(define (subst-under-bind vars s)
-  (define n (length vars))
-  (foldr Cons (Compose s (Shift n))
-         (map Var (sequence->list n) vars)))
+    [(binder vars term)
+     (binder vars (deep-view term (subst-under-binder vars s)))]))
