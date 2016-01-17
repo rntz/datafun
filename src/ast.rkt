@@ -32,14 +32,29 @@
 (define prims (list->set '(= <= + - * size print puts ++)))
 
 (enum expr
+  ;; ---------- miscellanea ----------
   (e-ann type expr)
   (e-var name)
   (e-lit value) ;; literals
   (e-prim prim) ;; primitive functions
+  (e-fix var body)
+  ;; let binding. tone is either 'any or 'mono. (in theory, this is just unary
+  ;; case. but case doesn't account for tone yet.)
+  (e-let tone var expr body)
+  ;; this moves all our "monotone" variables into the unrestricted context.
+  (e-trustme expr)
+
+  ;; ---------- usl operations ----------
+  (e-when arg body)   ;; usl eliminator for booleans.
+  (e-join exprs)
+
+  ;; ---------- functions ----------
   ;; bidirectional type inference / elaboration figures out which kind (ordinary
   ;; or monotonic) of lambda / application we meant
   (e-lam var body)
   (e-app func arg)
+
+  ;; ---------- products ----------
   (e-tuple exprs)
   ;; projection index is a nat when projecting from a tuple; a symbol when
   ;; projecting from a record.
@@ -48,20 +63,16 @@
   (e-record fields)
   ;; TODO?: e-record-project (project a set of fields, like in rel.alg.)
   (e-record-merge left right) ;; merges two records, right-biased.
+
+  ;; ---------- sums ----------
   (e-tag tag expr)
   ;; branches is a list of case-branch structs.
   (e-case subject branches)
   ;; TODO: (e-case-mono subject branches)
-  (e-join exprs)
+
+  ;; ---------- sets ----------
   (e-set exprs)
-  (e-join-in pat arg body)
-  (e-when arg body) ;; usl eliminator for booleans.
-  (e-fix var body)
-  ;; let binding. tone is either 'any or 'mono. (in theory, this is just unary
-  ;; case. but case doesn't account for tone yet.)
-  (e-let tone var expr body)
-  ;; this moves all our "monotone" variables into the unrestricted context.
-  (e-trustme expr))
+  (e-join-in pat arg body))
 
 (struct case-branch (pat body) #:transparent)
 
