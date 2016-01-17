@@ -93,8 +93,8 @@
 (define (do-prim p)
   (match p
     ['= #'(curry equal?)]
-    ['subset? #'(curry subset?)]
-    ['+ #'df+] ['* #'df*] ['- #'df-] ['<= #'df<=]
+    ['<= #'df<=]
+    ['+ #'df+] ['* #'df*] ['- #'df-]
     ['++ #'df++]
     ['puts #'df-puts]
     ['print #'df-print]

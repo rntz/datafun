@@ -29,7 +29,7 @@
   [(_) #f])
 
 (define (prim? x) (set-member? prims x))
-(define prims (list->set '(= <= + - * subset? size print puts ++)))
+(define prims (list->set '(= <= + - * size print puts ++)))
 
 (enum expr
   (e-ann type expr)

@@ -58,8 +58,6 @@ when typechecking expression: ~s" (exn-message e) (expr->sexp root-expr))))
          (and (type=? a b) (eqtype? a))]
         [('<= (t-fun 'any a (t-fun _ b (t-bool))))
          (and (type=? a b) (eqtype? a))]
-        [('subset? (t-fun 'any (t-set a) (t-fun _ (t-set b) (t-bool))))
-         (and (type=? a b) (eqtype? a))]
         [('size (t-fun _ (t-set a) (t-nat))) (eqtype? a)]
         [('print (t-fun _ _ (t-tuple '()))) #t]
         [(_ _) #f])))
@@ -126,17 +124,17 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
   (match expr
     ;; ===== SPECIAL CASES FOR INFERRING PRIMITIVES =====
     ;; it would be nice if somehow we didn't need this *and* prim-has-type
-    [(e-app (and prim-expr (e-prim (and p (or '= '<= 'subset? 'size 'print))))
+    [(e-app (and prim-expr (e-prim (and p (or '= '<= 'size 'print))))
             arg)
      (define tone (match p
-                    [(or '= '<= 'subset?) 'any]
+                    [(or '= '<=) 'any]
                     [(or 'size 'print) 'mono]))
      (define arg-type (with-tone tone (expr-check arg)))
      (define result-type (match p
                            ['print (t-tuple '())]
                            ['size (t-nat)]
                            ['= (t-fun 'any arg-type (t-bool))]
-                           [(or '<= 'subset?) (t-fun 'mono arg-type (t-bool))]))
+                           ['<= (t-fun 'mono arg-type (t-bool))]))
      (expr-check prim-expr (t-fun tone arg-type result-type))
      result-type]
 
