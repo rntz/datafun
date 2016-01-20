@@ -38,13 +38,30 @@
         [(c.pattern) c.body ...]
         ...)])
 
-(define-syntax-rule (enum-case enum-name (branch-name args ...))
-  (struct branch-name enum-name (args ...) #:transparent))
-
 (define-syntax-rule (enum name branch ...)
   (begin
     (struct name () #:transparent)
     (enum-case name branch) ...))
+
+(begin-for-syntax
+  (define-syntax-class enum-case-field
+    (pattern name:id #:attr contract #'any/c)
+    (pattern (name:id contract:expr)))
+  ;; Adjusts the lexical context of the outermost piece of a syntax object; i.e.
+  ;; changes the context of a syntax pair but not its contents. Got this from
+  ;; lexi-lambda in #racket on freenode.
+  (define (adjust-outer-context ctx stx)
+    (datum->syntax ctx (syntax-e stx))))
+
+(define-syntax-parser
+  (enum-case enum-name:id (case-name:id field:enum-case-field ...))
+  ;; works around define-struct/contract being weird and pulling lexical info
+  ;; about the parent struct from the type/super-type name pair. Adapted from
+  ;; code by lexi-lambda in #racket on freenode.
+  (with-syntax ([type/super (adjust-outer-context
+                             #'enum-name #'(case-name enum-name))])
+       #'(define-struct/contract type/super ((field.name field.contract) ...)
+           #:transparent)))
 
 (define-syntax-rule (matches? e p)
   (match e [p #t] [_ #f]))
