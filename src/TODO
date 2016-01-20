@@ -14,14 +14,15 @@
   bind x to the first argument of the cons.
 
 - add some type constructors & intro & elim forms for them
+  - finite maps
   - flat lattices, (Flat A) = bottom <= .... A ... <= top
+  - tensor products of semilats???!?
 
 - allow pattern let-binding (for irrefutable patterns)
   - move pat-irrefutable? into elab.rkt, since it requires type-checking.
 
-- implement e-case-mono?
-
-- implement antitonicity? (and e-case-anti?)
+- add tonicity to e-case? problem here is that some things we *can't*
+  case-examine {mono,anti}tonically, for example, bools.
 
 EVENTUALLY
 - implement polymorphism

@@ -78,13 +78,7 @@
   ;; ---------- sums ----------
   (e-tag tag expr)
   ;; branches is a list of case-branch structs.
-  (e-case subject branches)
-  ;; TODO: (e-case-mono subject branches)
-  ;;
-  ;; NOTE: a difficulty with e-case-mono is we can only case monotonically on
-  ;; types of the form (A + B). we cannot, for example, case monotonically on
-  ;; bool! because bool has an ordering! ugh.
-  )
+  (e-case subject branches))
 
 (struct case-branch (pat body) #:transparent)
 
