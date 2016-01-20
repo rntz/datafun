@@ -1,5 +1,3 @@
-- bug: subtraction can produce unnatural numbers like -10
-
 - document how nonlinear patterns work. document how equality patterns work.
 
   nonlinear patterns: multiple uses of same variable check for equality.

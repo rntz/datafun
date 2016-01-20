@@ -10,7 +10,7 @@
 (define (df-print x) (println x) '())
 (define ((df= x) y) (equal? x y))
 (define ((df+ x) y) (+ x y))
-(define ((df- x) y) (- x y))
+(define ((df- x) y) (max 0 (- x y)))
 (define ((df* x) y) (* x y))
 (define ((df++ x) y) (string-append x y))
 (define (df-max . xs) (if (null? xs) 0 (apply max xs)))
