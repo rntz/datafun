@@ -29,8 +29,8 @@
 ;; Type "classes" or predicates
 (define (lattice-type? x)
   (match x
-    [(or (t-bool) (t-nat) (t-set _)) #t]
-    [(or (t-str) (t-sum _)) #f]
+    [(or (t-base 'bool) (t-base 'nat) (t-set _)) #t]
+    [(or (t-base 'str) (t-sum _)) #f]
     [(t-tuple ts) (andmap lattice-type? ts)]
     [(t-record as) (andmap lattice-type? (hash-values as))]
     [(t-map _ v) (lattice-type? v)]
@@ -38,7 +38,7 @@
 
 (define (eqtype? x)
   (match x
-    [(or (t-bool) (t-nat) (t-str)) #t]
+    [(t-base _) #t]
     [(or (t-record (app hash-values as)) (t-sum (app hash-values as))
          (t-tuple as))
      (andmap eqtype? as)]
@@ -48,7 +48,7 @@
 
 (define (finite-type? t)
   (match t
-    [(t-bool) #t]
+    [(t-base 'bool) #t]
     [(t-set a) (finite-type? a)]
     [(t-map k v) (and (finite-type? k) (finite-type? v))]
     [(or (t-tuple as)

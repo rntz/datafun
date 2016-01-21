@@ -46,8 +46,8 @@
 ;; 2. for joining hashes, which represent both Datafun records and maps.
 (define (df-join type args)
   (match type
-    [(t-bool) (ormap identity args)]
-    [(t-nat) (apply df-max args)]
+    [(t-base 'bool) (ormap identity args)]
+    [(t-base 'nat) (apply df-max args)]
     [(t-fun _ a b) (lambda (x) (df-join b (for/list ([f args]) (f x))))]
     [(t-set _) (apply df-union args)]
     [(t-map _ value-type)

@@ -59,13 +59,13 @@
   (if pt
       (subtype? pt t)
       (match* (p t)
-        [('= (t-fun 'any a (t-fun 'any b (t-bool))))
+        [('= (t-fun 'any a (t-fun 'any b (t-base 'bool))))
          (and (type=? a b) (eqtype? a))]
         [('<= (t-fun (or 'anti 'any) a
-                     (t-fun (or 'mono 'any) b (t-bool))))
+                     (t-fun (or 'mono 'any) b (t-base 'bool))))
          (and (type=? a b) (eqtype? a))]
         ;; TODO?: make size work for t-map, too?
-        [('size (t-fun (or 'mono 'any) (t-set a) (t-nat))) (eqtype? a)]
+        [('size (t-fun (or 'mono 'any) (t-set a) (t-base 'nat))) (eqtype? a)]
         ;; print is actually *bitonic*, since it's constant, but we don't have a
         ;; way to represent that in its type.
         [('print (t-fun _ _ (t-tuple '()))) #t]
@@ -161,9 +161,9 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (define arg-type (with-tone tone (expr-check arg)))
      (define result-type (match p
                            ['print (t-tuple '())]
-                           ['size (t-nat)]
-                           ['= (t-fun 'any arg-type (t-bool))]
-                           ['<= (t-fun 'mono arg-type (t-bool))]))
+                           ['size (t-base 'nat)]
+                           ['= (t-fun 'any arg-type (t-base 'bool))]
+                           ['<= (t-fun 'mono arg-type (t-base 'bool))]))
      (expr-check prim-expr (t-fun tone arg-type result-type))
      result-type]
 
@@ -178,7 +178,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (unless (matches? tone (or 'mono 'anti))
        ;; TODO: better error message.
        (type-error "bad tone for e-cond: ~a" tone))
-     (with-tone tone (expr-check subj (t-bool)))
+     (with-tone tone (expr-check subj (t-base 'bool)))
      (define body-type (expr-check body type))
      (unless (lattice-type? body-type)
        (fail "cannot join at non-lattice type ~s" (type->sexp body-type)))

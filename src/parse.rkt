@@ -141,9 +141,7 @@
     (for/list ([(name type) h])
       `(,name ,(type->sexp type))))
   (match t
-    [(t-bool) 'bool]
-    [(t-nat) 'nat]
-    [(t-str) 'str]
+    [(t-base name) name]
     [(t-tuple ts) `(* ,@(map type->sexp ts))]
     [(t-record fields) `(record ,@(hash->sexps fields))]
     [(t-sum branches) `(+ ,@(hash->sexps branches))]
@@ -160,9 +158,7 @@
 
 (define (parse-type t)
   (match t
-    ['bool (t-bool)]
-    ['nat (t-nat)]
-    ['str (t-str)]
+    [(? base-type?) (t-base t)]
     [`(* ,as ...) (t-tuple (map parse-type as))]
     [`(record (,ns ,ts) ...)
      (t-record (for/hash ([n ns] [t ts])

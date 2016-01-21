@@ -8,11 +8,11 @@
 ;; Whether a variable/hypothesis, function, etc. is unrestricted, monotone, or
 ;; antitone.
 (define tone? (or/c 'any 'mono 'anti))
+(define base-type? (or/c 'bool 'nat 'str))
 
 ;; TODO?: make these types print better under ~a?
 (enum type
-  ;; TODO: merge into (t-base name) for name in '(bool nat str)
-  (t-bool) (t-nat) (t-str)
+  (t-base name)
   (t-tuple types)
   ;; fields is a hash from field names to types
   (t-record fields)
@@ -29,9 +29,9 @@
 ;; Literals & primitives
 (define (lit? x) (if (lit-type x) #t #f))
 (define/match (lit-type l)
-  [((? boolean?)) (t-bool)]
-  [((? exact-nonnegative-integer?)) (t-nat)]
-  [((? string?)) (t-str)]
+  [((? boolean?)) (t-base 'bool)]
+  [((? exact-nonnegative-integer?)) (t-base 'nat)]
+  [((? string?)) (t-base 'str)]
   [((? null?)) (t-tuple '())]
   [(_) #f])
 
