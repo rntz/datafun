@@ -1,6 +1,6 @@
 #lang racket
 
-(require "util.rkt" "ast.rkt")
+(require "util.rkt" "ast.rkt" "parse.rkt")
 (provide (all-defined-out))
 
 (struct exn:type-error exn:fail () #:transparent)
@@ -84,50 +84,42 @@
   [((t-fun o1 a1 b1) (t-fun o2 a2 b2))
    ;; the reversal of o1 and o2 in the call to subtype? is deliberate
    (and (subtone? o2 o1) (subtype? a2 a1) (subtype? b1 b2))]
+  [((t-set a) (t-set b)) (subtype? a b)]
+  [((t-map a x) (t-map b y)) (and (subtype? a b) (subtype? x y))]
   [(x y) (type=? x y)])
 
-;; TODO: merge type-lub and type-glb?
-(define/match (type-lub a b)
-  [((t-tuple as) (t-tuple bs)) (t-tuple (type-lubs as bs))]
-  [((t-record as) (t-record bs))
-   #:when (set=? (hash-key-set as) (hash-key-set bs))
-   (t-record (hash-intersection-with as bs type-lub))]
-  [((t-sum as) (t-sum bs)) (t-sum (hash-union-with as bs type-lub))]
-  [((t-fun o a x) (t-fun p b y))
-   (t-fun (tone-glb o p) (type-glb a b) (type-lub x y))]
-  [((t-set a) (t-set b)) (t-set (type-lub a b))]
-  [((t-map k1 v1) (t-map k2 v2)) (t-map (type-lub k1 k2) (type-lub v1 v2))]
-  [(x y) #:when (type=? x y) x]
-  [(x y) (type-error "no lub: ~v and ~v" x y)])
+;; `lub' is a boolean. If #t, we find the least upper bound of types `a' and
+;; `b', if it exists. If #f, we find their greatest lower bound, if it exists.
+(define (unify lub? a b)
+  (define glb? (not lub?))
+  (define lub (curry unify lub?))
+  (define glb (curry unify glb?))
+  (define union (if lub? hash-union-with hash-intersection-with))
+  (match* (a b)
+    [((t-tuple as) (t-tuple bs)) (t-tuple (unifys lub? as bs))]
+    [((t-record as) (t-record bs))
+     #:when (set=? (hash-key-set as) (hash-key-set bs))
+     (t-record (hash-intersection-with as bs lub))]
+    [((t-sum as) (t-sum bs)) (t-sum (union as bs lub))]
+    [((t-fun o a x) (t-fun p b y))
+     (t-fun (tone-unify (not lub?) o p) (glb a b) (lub x y))]
+    [((t-set a) (t-set b)) (t-set (lub a b))]
+    [((t-map a x) (t-map b y)) (t-map (lub a b) (lub x y))]
+    [(x y) #:when (type=? x y) x]
+    [(x y) (type-error "no ~a: ~s and ~s" (if lub? 'lub 'glb)
+                       (type->sexp x) (type->sexp y))]))
 
-(define/match (type-glb a b)
-  [((t-tuple as) (t-tuple bs)) (t-tuple (type-glbs as bs))]
-  [((t-record as) (t-record bs))
-   #:when (set=? (hash-key-set as) (hash-key-set bs))
-   (t-record (hash-union-with as bs type-glb))]
-  [((t-sum as) (t-sum bs)) (t-sum (hash-intersection-with as bs type-glb))]
-  [((t-fun o a x) (t-fun p b y))
-   (t-fun (tone-lub o p) (type-lub a b) (type-glb x y))]
-  [((t-set a) (t-set b)) (t-set (type-glb a b))]
-  [((t-map k1 v1) (t-map k2 v2)) (t-map (type-glb k1 k2) (type-glb v1 v2))]
-  [(x y) #:when (type=? x y) x]
-  [(x y) (type-error "no glb: ~v and ~v" x y)])
+(define type-lub (curry unify #t))
+(define type-glb (curry unify #f))
+(define (unifys lub? as bs)
+  (unless (length=? as bs) (type-error "lists of unequal length"))
+  (map (curry unify lub?) as bs))
 
 ;; any <: mono, any <: anti
-(define (subtone? o1 o2) (equal? o2 (tone-lub o1 o2)))
-(define/match (tone-lub o p)
-  [(x x) x]
-  [('any x) x]
-  [(x 'any) x]
-  [(_ _) (type-error "tones have no lub: ~a, ~a" o p)])
-(define/match (tone-glb o p)
-  [(x x) x]
-  [(_ _) 'any])
-
-(define (type-lubs as bs)
-  (unless (length=? as bs) (type-error "lists of unequal length"))
-  (map type-lub as bs))
-
-(define (type-glbs as bs)
-  (unless (length=? as bs) (type-error "lists of unequal length"))
-  (map type-glb as bs))
+(define (subtone? o1 o2) (equal? o2 (tone-unify #t o1 o2)))
+(define/match (tone-unify lub? o p)
+  [(_ x x) x]
+  [(#f _ _) 'any]
+  [(#t 'any x) x]
+  [(#t x 'any) x]
+  [(#t _ _) (type-error "tones have no lub: ~a, ~a" o p)])
