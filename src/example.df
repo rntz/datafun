@@ -1,6 +1,11 @@
-(x : nat)
-(x = 2)
+(two : nat)
+(two = 2)
 
+;; test of subtyping.
+(alkdsjf : (set (nat -> nat)))
+(alkdsjf = (set (+ 3) (- 4) (fn x x)))
+
+
 ;; negation.
 (not : bool ->- bool)
 (not x = (unless x #t))
