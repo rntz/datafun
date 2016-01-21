@@ -79,8 +79,9 @@
    (and (set=? (hash-key-set as) (hash-key-set bs))
         (for/and ([(field a) as]) (subtype? a (hash-ref bs field))))]
   [((t-sum as) (t-sum bs))
-    (for/and ([(k v) as])
-      (and (hash-has-key? bs k) (subtype? v (hash-ref bs k))))]
+   (for/and ([(k v) as])
+     (and (hash-has-key? bs k)
+          (subtype? v (hash-ref bs k))))]
   [((t-fun o1 a1 b1) (t-fun o2 a2 b2))
    ;; the reversal of o1 and o2 in the call to subtype? is deliberate
    (and (subtone? o2 o1) (subtype? a2 a1) (subtype? b1 b2))]
@@ -123,3 +124,53 @@
   [(#t 'any x) x]
   [(#t x 'any) x]
   [(#t _ _) (type-error "tones have no lub: ~a, ~a" o p)])
+
+;;; ---------- TODO: an alternate approach
+
+;; (define/match (type-zip a b [co list] [contra co])
+;;   [((t-base x) (t-base x)) a]
+;;   [((t-tuple as) (t-tuple bs)) (t-tuple (map co as bs))]
+;;   [((t-record as) (t-record bs))
+;;    #:when (set=? (hash-key-set as) (hash-key-set bs))
+;;    (t-record (for/hash ([(k av) as])
+;;                (values k (co av (hash-ref b k)))))]
+;;   [((t-sum as) (t-sum bs))
+;;    (t-sum (for/hash ([k (union (hash-key-set as) (hash-key-set bs))])
+;;             (values k (co (hash-ref a k #f) (hash-ref b k #f)))))]
+;;   [((t-fun o a x) (t-fun p b y))
+;;    (t-fun (contra o p) (contra a b) (co x y))]
+;;   [((t-set a) (t-set b)) (t-set (co a b))]
+;;   [((t-map a x) (t-map b y)) (t-map (co a b) (co x y))]
+;;   [(_ _) #f])
+
+;; (define (subtype? a b)
+;;   (define/match (recur l)
+;;     [((list #f _)) #t]
+;;     [((list _ #f)) #f]
+;;     [((list a b)) (subtype? a b)])
+;;   (match (type-zip a b list (lambda (x y) (list y x)))
+;;     [(t-base _) #t]
+;;     [(t-tuple as) (andmap recur as)]
+;;     [(t-record as) (andmap recur (hash-values as))]
+;;     [(t-sum as) (andmap recur (hash-values as))]
+;;     [(t-fun (list o p) a b) (and (subtone? o p) (recur a) (recur b))]
+;;     [(t-set a) (recur a)]
+;;     [(t-map a b) (and (recur a) (recur b))]
+;;     [#f #f]))
+
+;; (define (unify lub? a b)
+;;   ;; FIXME: needs to handle #fs
+;;   (define/match (recur x)
+;;     [((list #t x y)) TODO]
+;;     [((list #f x y)) TODO])
+;;   (match (type-zip a b (curry list lub?) (curry list (not lub?)))
+;;     [(? t-base? t) t]
+;;     [(t-tuple as) (t-tuple (map recur as))]
+;;     [(t-record as) (t-record (hash-map-values recur as))]
+;;     ;; FIXME: what do we do with #fs?
+;;     [(t-sum as) (t-sum (hash-map-values recur as))]
+;;     [(t-fun o a b) (t-fun (apply tone-unify o) (recur a) (recur b))]
+;;     [(t-set a) (t-set (recur a))]
+;;     [(t-map a b) (t-map (recur a) (recur b))]
+;;     [#f (type-error "no ~a: ~s and ~s" (if lub? 'lub 'glb)
+;;                     (type->sexp x) (type->sexp y))]))
