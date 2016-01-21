@@ -13,6 +13,9 @@
   (list->set '(case cons empty extend-record fix fn for for/set if isa join let
                mono proj quote record record-merge set tag trustme when λ π)))
 
+(define (arrow? x) (set-member? arrows x))
+(define arrows (list->set '(-> ~> ->+ ->-)))
+
 (define (ident? x) (and (symbol? x) (not (reserved? x))))
 
 
@@ -167,7 +170,7 @@
     [`(+ (,tags ,types) ...)
       (t-sum (for/hash ([tag tags] [type types])
                (values tag (parse-type type))))]
-    [`(,_ ... ,(or '-> '~> '->-) ,_) (parse-arrow-type t)]
+    [`(,_ ... ,(? arrow?) ,_) (parse-arrow-type t)]
     [`(set ,a) (t-set (parse-type a))]
     [`(map ,k ,v) (t-map (parse-type k) (parse-type v))]
     [_ (error "unfamiliar type:" t)]))
@@ -181,9 +184,10 @@
   (define (parse tone as bs)
     (foldr (curry t-fun tone) (parse-arrow-type bs) (map parse-type as)))
   (match t
-    [`(,(and as (not '-> '~> '->-)) ... ->  ,bs ..1) (parse 'any  as bs)]
-    [`(,(and as (not '-> '~> '->-)) ... ~>  ,bs ..1) (parse 'mono as bs)]
-    [`(,(and as (not '-> '~> '->-)) ... ->- ,bs ..1) (parse 'anti as bs)]
+    [`(,(and as (not (? arrow?))) ... ->  ,bs ..1) (parse 'any  as bs)]
+    [`(,(and as (not (? arrow?))) ... ~>  ,bs ..1) (parse 'mono as bs)]
+    [`(,(and as (not (? arrow?))) ... ->+ ,bs ..1) (parse 'mono as bs)]
+    [`(,(and as (not (? arrow?))) ... ->- ,bs ..1) (parse 'anti as bs)]
     [`(,t) (parse-type t)]))
 
 
