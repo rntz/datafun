@@ -283,7 +283,7 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
         type]
        [_ (fail "tagged expression must have sum type")])]
 
-    [(e-set '()) (or type (fail "can't infer type of empty set"))]
+    [(e-set '()) #:when (not type) (fail "can't infer type of empty set")]
     [(e-set elems)
      (with-tone 'any
        (match type
