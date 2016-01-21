@@ -5,9 +5,10 @@
 
 (struct exn:type-error exn:fail () #:transparent)
 
-(define (type-error fmt . args)
-  (define msg (string-append "TYPE ERROR\n" (apply format fmt args)))
-  (raise (exn:type-error msg (current-continuation-marks))))
+(define (type-error fmt . args) (type-error-raw (apply format fmt args)))
+(define (type-error-raw msg)
+  (raise (exn:type-error (string-append "TYPE ERROR\n" msg)
+                         (current-continuation-marks))))
 
 ;; for now, type equality is simple
 (define type=? equal?)

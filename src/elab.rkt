@@ -9,16 +9,10 @@
 ;;; returns (values info-table type-of-expr)
 ;;; if `type' is #f, we infer the type of `expr'.
 ;;; otherwise, we check that `expr' has type `type'.
-(define (elab root-expr #:type [root-type #f] #:env [root-Γ empty-env])
-  ;; we annotate errors with the whole expression for context
-  (define (on-err e)
-    (error (format "~a
-when typechecking expression: ~s" (exn-message e) (expr->sexp root-expr))))
-
+(define (elab root-expr #:type [root-type #f] #:env [root-env empty-env])
   (parameterize ([elab-info (make-hasheq)]
-                 [elab-env root-Γ])
-    (define type (with-handlers ([exn:type-error? on-err])
-                   (expr-check root-expr root-type)))
+                 [elab-env root-env])
+    (define type (expr-check root-expr root-type))
     (values (elab-info) type)))
 
 ;; Elaboration uses envs mapping bound variables to hyp(othese)s. Hypotheses are
@@ -97,37 +91,49 @@ when typechecking expression: ~s" (exn-message e) (expr->sexp root-expr))))
 (define-syntax-rule (with-env more-env body ...)
   (parameterize ([elab-env (env-extend (elab-env) more-env)]) body ...))
 
+;;; ===== ERROR MESSAGE STUFF =====
+(define expr-stack (make-parameter #f))
+
+(define (top-expr) (last (expr-stack)))
+(define (current-expr) (first (expr-stack)))
+
+;; TODO?: rename elab-error to expr-error?
+;; we annotate errors with the whole expression for context
+(define (elab-error fmt . args) (elab-error-raw (apply format fmt args)))
+(define (elab-error-raw msg)
+  (type-error "when typechecking expression: ~s
+sub-expression: ~s
+~a" (expr->sexp (top-expr)) (expr->sexp (current-expr)) msg))
+
 
 ;;; ---------- INTERNALS ----------
 ;; if `type' is #f, we're inferring.
 ;; if not, we're checking.
 ;; returns the type of `expr', which is always be a subtype of `type'.
 (define (expr-check expr [type #f])
-  (define expr-type (expr-infer expr type))
-  (when (should-remember-type? expr)
-    (set-info! expr expr-type))
-  ;; NB: optimization: could use eq? to avoid call to subtype? here
-  (when (and type (not (subtype? expr-type type)))
-    ;; TODO: better formatting here
-    (type-error
-"        expression: ~s
-          has type: ~s
-but we expect type: ~s"
-     (expr->sexp expr) (type->sexp expr-type) (type->sexp type)))
-  expr-type)
+  (parameterize ([expr-stack (cons expr (expr-stack))])
+    (define expr-type (infer expr type))
+
+    ;; remember if necessary
+    (when (should-remember-type? expr)
+      (set-info! expr expr-type))
+
+    ;; check (expr-type <: type).
+    (when (and type (not (subtype? expr-type type)))
+      (elab-error
+"has type:      ~s
+but we expect: ~s" (type->sexp expr-type) (type->sexp type)))
+
+    expr-type))
 
 ;; if `type' is #f, we're inferring. if not, we're checking.
-(define (expr-infer expr type)
-  (define (fail [why #f] . format-args)
-    (define message
-      (if type
-          (format "expression: ~s
-cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
-          (format "cannot infer type of expression: ~s" (expr->sexp expr))))
-    (when why
-      (define why-msg (apply format (string-append why) format-args))
-      (set! message (string-append message "\nreason: " why-msg)))
-    (type-error "~a" message))
+(define (infer expr type)
+  (define (fail-raw msg)
+    (if type
+        (elab-error "cannot be given type: ~s\n~a" msg)
+        (elab-error "cannot infer type of sub-expression\n~a" msg)))
+  (define (fail [fmt #f] . fmt-args)
+    (fail-raw (if fmt (apply format fmt fmt-args) "")))
 
   (define (visit-branch tone pat-type body-type branch)
     (match-define (case-branch pat body) branch)
@@ -135,11 +141,11 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
       (expr-check body body-type)))
 
   ;; ---------- COMMENCE BIG GIANT CASE ANALYSIS ----------
+  ;; TODO: turn this into a match* on (expr type)?
   (match expr
     ;; ===== SPECIAL CASES FOR INFERRING PRIMITIVES =====
     ;; it would be nice if somehow we didn't need this *and* prim-has-type
-    [(e-app (and prim-expr (e-prim (and p (or '= '<= 'size 'print))))
-            arg)
+    [(e-app (and prim-expr (e-prim (and p (or '= '<= 'size 'print)))) arg)
      (define tone (match p
                     ['= 'any]
                     ['<= 'anti]
@@ -163,7 +169,7 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
     [(e-cond tone subj body)
      (unless (matches? tone (or 'mono 'anti))
        ;; TODO: better error message.
-       (type-error "bad tone for e-cond"))
+       (type-error "bad tone for e-cond: ~a" tone))
      (with-tone tone (expr-check subj (t-bool)))
      (define body-type (expr-check body type))
      (unless (lattice-type? body-type)
@@ -223,14 +229,14 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
 
     ;; ===== ANALYSIS-ONLY TERMS ====
     ;; we need `type' to be non-#f to check these
-    [(e-lam _ _) #:when (not type) (fail "lambdas not inferrable")]
+    [(e-lam _ _) #:when (not type) (fail "lambdas are not inferrable")]
     [(e-lam var body) #:when type
      (match-define (t-fun tone a body-type) type)
      (with-var var (hyp tone a)
        (expr-check body body-type))
      type]
 
-    [(e-fix _ _) #:when (not type) (fail "fix expressions not inferrable")]
+    [(e-fix _ _) #:when (not type) (fail "fix expressions are not inferrable")]
     [(e-fix var body) #:when type
      (unless (fixpoint-type? type)
        (fail "cannot calculate fixpoints of type ~s" (type->sexp type)))
@@ -315,35 +321,35 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
 ;; times. if it is, this indicates an equality check. for example, (cons x x)
 ;; matches only pairs of two of the same value.
 ;;
-;; TODO: better error messages
+;; TODO: better error messages - maybe keep a pat-stack, like expr-stack?
 ;; FIXME: needs to be given the tonicity we're binding variables in.
 (define/match (pat-check p t)
   [((p-wild) _) (hash)]
   [((p-var name) t) (hash name t)]
   [((p-lit l) t)
-   (if (subtype? t (or (lit-type l) (type-error "unknown literal type")))
+   (if (subtype? t (or (lit-type l) (elab-error "unknown literal type")))
        (hash)
-       (type-error "wrong type when matched against literal"))]
+       (elab-error "wrong type when matched against literal"))]
   [((and pat (p-tuple pats)) (t-tuple types)) #:when (length=? pats types)
    (union-pat-envs pat (map pat-check pats types))]
-  [((p-tuple _) (t-tuple _)) (type-error "wrong length tuple pattern")]
-  [((p-tuple _) t) (type-error "not a tuple type: ~s" (type->sexp t))]
+  [((p-tuple _) (t-tuple _)) (elab-error "wrong length tuple pattern")]
+  [((p-tuple _) t) (elab-error "not a tuple type: ~s" (type->sexp t))]
   [((p-tag tag pat) (t-sum bs))
    (if (dict-has-key? bs tag)
        (pat-check pat (hash-ref bs tag))
        ;; TODO: this is actually ok, it's just dead code; should warn, not
        ;; error
-       (type-error "(WARNING) no such branch in tagged sum"))]
-  [((p-tag _ _) _) (type-error "not a sum")]
+       (elab-error "(WARNING) no such branch in tagged sum"))]
+  [((p-tag _ _) _) (elab-error "not a sum")]
   [((and pat (p-and ps)) t)
    (union-pat-envs pat (map (lambda (p) (pat-check p t)) ps))]
   [((and pat (p-or ps)) t)
    (when (empty? ps)
-     (type-error "or-pattern cannot be empty: s" (pat->sexp pat)))
+     (elab-error "or-pattern cannot be empty: ~s" (pat->sexp pat)))
    (define hashes (for/list ([p ps]) (pat-check p t)))
    (define vars (hash-key-set (first hashes)))
    (unless (andmap (lambda (x) (equal? vars (hash-key-set x))) hashes)
-     (type-error "all branches of or-pattern must bind same variables: ~s"
+     (elab-error "all branches of or-pattern must bind same variables: ~s"
                  (type->sexp pat)))
    (foldl1 (lambda (x y) (hash-union-with x y type-lub)) hashes)]
   [((p-let v body result-p) t)
@@ -368,6 +374,6 @@ cannot be given type: ~s" (expr->sexp expr) (type->sexp type))
   (define type (type-glb a b))
   (unless (eqtype? type)
     ;; TODO: as usual, better error message
-    (type-error "pattern variable used multiple times has non-equality type ~s"
+    (elab-error "pattern variable used multiple times has non-equality type ~s"
                 (type->sexp type)))
   type)

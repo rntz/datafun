@@ -65,7 +65,7 @@
   (e-lam var body)
   (e-app func arg)
 
-  ;; ---------- products ----------
+  ;; ---------- products (tuples & records) ----------
   (e-tuple exprs)
   ;; projection index is a nat when projecting from a tuple; a symbol when
   ;; projecting from a record.
