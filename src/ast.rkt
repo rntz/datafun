@@ -11,6 +11,7 @@
 
 ;; TODO?: make these types print better under ~a?
 (enum type
+  ;; TODO: merge into (t-base name) for name in '(bool nat str)
   (t-bool) (t-nat) (t-str)
   (t-tuple types)
   ;; fields is a hash from field names to types

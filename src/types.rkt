@@ -71,9 +71,9 @@
 (define/match (subtype? a b)
   [((t-tuple as) (t-tuple bs)) (map? subtype? as bs)]
   [((t-record as) (t-record bs))
-   ;; records are invariant in their field-sets - adding fields does not
-   ;; preserve type. this is because equality of records depends on what fields
-   ;; the *actual* value has, so it's not parametric in the field-set. the
+   ;; records are invariant in their field-sets - adding fields does not produce
+   ;; a subtype. this is because equality of records depends on what fields the
+   ;; *actual* value has, so it's not parametric in the field-set. the
    ;; alternative is to make the meaning of equality type-indexed, and screw
    ;; that.
    (and (set=? (hash-key-set as) (hash-key-set bs))
