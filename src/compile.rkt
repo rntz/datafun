@@ -49,6 +49,7 @@
      #`(match #,(do-expr subj) #,@(do-case-branches branches))]
     [(e-join es) (apply join (map do-expr es))]
     [(e-set es) #`(set #,@(map do-expr es))]
+    [(e-map kvs) #`(hash #,@(map do-expr (append* kvs)))]
     [(e-join-in pat arg body)
      #`(for/fold ([acc #,(join)])
                  ([elt #,(do-expr arg)])

@@ -34,16 +34,25 @@
    (match-lambda [(list (? symbol? tag2) value2)
              (and (equal? tag1 tag2) (df<= value1 value2))])]
   [((? list? as)) (curry andmap (lambda (a b) ((df<= a) b)) as)]
-  ;; NB: would need to change if we had record subtyping.
-  [((? hash? a)) (lambda (b) (for/and ([(k v) a]) ((df<= v) (hash-ref b k))))])
+  ;; NB: Both records and maps are represented as hashes. Luckily, the same code
+  ;; works for both! (although hash-has-key? is redundant for records)
+  [((? hash? a))
+   (lambda (b) (for/and ([(k v) a])
+            (and (hash-has-key? b k)
+                 ((df<= v) (hash-ref b k)))))])
 
-;; this needs us to give it the type, in case `args' is empty.
+;; this needs us to give it the type, for two reasons:
+;; 1. in case `args' is empty.
+;; 2. for joining hashes, which represent both Datafun records and maps.
 (define (df-join type args)
   (match type
     [(t-bool) (ormap identity args)]
     [(t-nat) (apply df-max args)]
-    [(t-set _) (apply df-union args)]
     [(t-fun _ a b) (lambda (x) (df-join b (for/list ([f args]) (f x))))]
+    [(t-set _) (apply df-union args)]
+    [(t-map _ value-type)
+     (for/fold ([h (hash)]) ([a args])
+       (hash-union-with h a (lambda l (df-join value-type l))))]
     [(t-tuple ts)
      (for/list ([i (length ts)] [t ts])
        (df-join t (map (lambda (x) (list-ref x i)) args)))]

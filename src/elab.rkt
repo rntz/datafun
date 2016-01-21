@@ -64,6 +64,7 @@
         [('<= (t-fun (or 'anti 'any) a
                      (t-fun (or 'mono 'any) b (t-bool))))
          (and (type=? a b) (eqtype? a))]
+        ;; TODO?: make size work for t-map, too?
         [('size (t-fun (or 'mono 'any) (t-set a) (t-nat))) (eqtype? a)]
         ;; print is actually *bitonic*, since it's constant, but we don't have a
         ;; way to represent that in its type.
@@ -123,6 +124,13 @@ sub-expression: ~s
       (elab-error
 "has type:      ~s
 but we expect: ~s" (type->sexp expr-type) (type->sexp type)))
+
+    ;; well-formedness checks on expr-type.
+    (match expr-type
+      [(t-map k v) #:when (not (eqtype? k))
+       (elab-error "has map type: ~s
+but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
+      [_ (void)])
 
     expr-type))
 
@@ -296,6 +304,19 @@ but we expect: ~s" (type->sexp expr-type) (type->sexp type)))
          [#f (t-set (foldl1 type-lub (map expr-check elems)))]
          [(t-set a) (for ([elem elems]) (expr-check elem a)) type]
          [_ (fail "set expression must have set type")]))]
+
+    [(e-map '()) #:when (not type) (fail "can't infer type of empty map")]
+    [(e-map `((,keys ,values) ...))
+     ;; NB. we don't need to check the key type is an equality type; expr-check
+     ;; will do that for us.
+     (match type
+       [#f (t-map (foldl1 type-lub (with-tone 'any (map expr-check keys)))
+                  (foldl1 type-lub (map expr-check values)))]
+       [(t-map kt vt)
+        (with-tone 'any (for ([k keys]) (expr-check k kt)))
+        (for ([v values]) (expr-check v vt))
+        type]
+       [_ (fail "map expression must have map type")])]
 
     [(e-case _ '()) #:when (not type)
      (fail "can't infer type of case with no branches")]

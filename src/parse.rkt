@@ -44,6 +44,7 @@
      [(e-join '()) 'empty]
      [(e-join l) `(join ,@(map expr->sexp l))]
      [(e-set es) `(set ,@(map expr->sexp es))]
+     [(e-map kvs) `(map ,@(map (curry map expr->sexp) kvs))]
      [(e-join-in pat arg body)
       `(for ([,pat ,(expr->sexp arg)]) ,(expr->sexp body))]
      [(e-cond 'mono subj body) `(when   ,(expr->sexp subj) ,(expr->sexp body))]
@@ -81,6 +82,7 @@
           (case-branch (parse-pat p) (parse-expr e))))]
     [`(join . ,es) (e-join (map parse-expr es))]
     [`(set . ,es) (e-set (map parse-expr es))]
+    [`(map (,ks ,vs) ...) (e-map (map (lambda l (map parse-expr l)) ks vs))]
     [`(join-in ,pat ,arg ,body)
      (e-join-in (parse-pat pat) (parse-expr arg) (parse-expr body))]
     [`(when ,subj ,body)   (e-cond 'mono (parse-expr subj) (parse-expr body))]
@@ -143,6 +145,7 @@
     [(t-record fields) `(record ,@(hash->sexps fields))]
     [(t-sum branches) `(+ ,@(hash->sexps branches))]
     [(t-set a) `(set ,(type->sexp a))]
+    [(t-map k v) `(map ,(type->sexp k) ,(type->sexp v))]
     [(t-fun tone a b)
      (let loop ([args (list a)] [result b])
        (match result
@@ -166,6 +169,7 @@
                (values tag (parse-type type))))]
     [`(,_ ... ,(or '-> '~> '->-) ,_) (parse-arrow-type t)]
     [`(set ,a) (t-set (parse-type a))]
+    [`(map ,k ,v) (t-map (parse-type k) (parse-type v))]
     [_ (error "unfamiliar type:" t)]))
 
 (define (arrow-type->sexp t)

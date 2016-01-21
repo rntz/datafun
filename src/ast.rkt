@@ -18,7 +18,12 @@
   ;; branches is a hash from branch names to types
   (t-sum branches)
   (t-fun tone arg result)
-  (t-set type))
+  (t-set type)
+  ;; key must be eqtype?
+  (t-map key value)
+  ;; TODO: flat lattice on a type. (Flat A) = bot <| ... A ... <| top
+  ;; (t-flat type)
+  )
 
 ;; Literals & primitives
 (define (lit? x) (if (lit-type x) #t #f))
@@ -30,6 +35,7 @@
   [(_) #f])
 
 (define (prim? x) (set-member? prims x))
+;;; TODO: prims for accessing maps, once I know what I need.
 (define prims (list->set '(= <= + - * size print puts ++)))
 
 (enum expr
@@ -54,6 +60,11 @@
   ;; ---------- sets ----------
   (e-set exprs)
   (e-join-in pat arg body)
+
+  ;; ---------- maps ----------
+  (e-map [key-value-exprs (listof (list/c expr? expr?))])
+  ;; other map operations: some builtin functions, and e-join if the value type
+  ;; is a lattice.
 
   ;; ---------- usl operations ----------
   (e-join exprs)

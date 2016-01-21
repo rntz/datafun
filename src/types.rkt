@@ -14,10 +14,12 @@
 (define type=? equal?)
 
 ;; type well-formedness
+;; NB. currently unused.
 (define (type-wf? x)
   (match x
     [(t-fun _ a b) (and (type-wf? a) (type-wf? b))]
     [(t-set a) (type-wf? a)]
+    [(t-map k v) (and (type-wf? k) (type-wf? v) (eqtype? k))]
     [(t-tuple ts) (andmap type-wf? ts)]
     [(t-sum bs) ((hash/c symbol? type-wf? #:immutable #t) bs)]
     [(t-record as) ((hash/c symbol? type-wf? #:immutable #t) as)]
@@ -31,6 +33,7 @@
     [(or (t-str) (t-sum _)) #f]
     [(t-tuple ts) (andmap lattice-type? ts)]
     [(t-record as) (andmap lattice-type? (hash-values as))]
+    [(t-map _ v) (lattice-type? v)]
     [(t-fun _ _ r) (lattice-type? r)]))
 
 (define (eqtype? x)
@@ -40,12 +43,14 @@
          (t-tuple as))
      (andmap eqtype? as)]
     [(t-fun _ _ _) #f]
-    [(t-set a) (eqtype? a)]))
+    [(t-set a) (eqtype? a)]
+    [(t-map k v) (assert! (eqtype? k)) (eqtype? v)]))
 
 (define (finite-type? t)
   (match t
     [(t-bool) #t]
     [(t-set a) (finite-type? a)]
+    [(t-map k v) (and (finite-type? k) (finite-type? v))]
     [(or (t-tuple as)
          (t-record (app hash-values as))
          (t-sum (app hash-values as)))
@@ -81,6 +86,7 @@
    (and (subtone? o2 o1) (subtype? a2 a1) (subtype? b1 b2))]
   [(x y) (type=? x y)])
 
+;; TODO: merge type-lub and type-glb?
 (define/match (type-lub a b)
   [((t-tuple as) (t-tuple bs)) (t-tuple (type-lubs as bs))]
   [((t-record as) (t-record bs))
@@ -90,6 +96,7 @@
   [((t-fun o a x) (t-fun p b y))
    (t-fun (tone-glb o p) (type-glb a b) (type-lub x y))]
   [((t-set a) (t-set b)) (t-set (type-lub a b))]
+  [((t-map k1 v1) (t-map k2 v2)) (t-map (type-lub k1 k2) (type-lub v1 v2))]
   [(x y) #:when (type=? x y) x]
   [(x y) (type-error "no lub: ~v and ~v" x y)])
 
@@ -102,6 +109,7 @@
   [((t-fun o a x) (t-fun p b y))
    (t-fun (tone-lub o p) (type-lub a b) (type-glb x y))]
   [((t-set a) (t-set b)) (t-set (type-glb a b))]
+  [((t-map k1 v1) (t-map k2 v2)) (t-map (type-glb k1 k2) (type-glb v1 v2))]
   [(x y) #:when (type=? x y) x]
   [(x y) (type-error "no glb: ~v and ~v" x y)])
 
