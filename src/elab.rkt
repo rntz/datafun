@@ -92,7 +92,7 @@
   (parameterize ([elab-env (env-extend (elab-env) more-env)]) body ...))
 
 ;;; ===== ERROR MESSAGE STUFF =====
-(define expr-stack (make-parameter #f))
+(define expr-stack (make-parameter '()))
 
 (define (top-expr) (last (expr-stack)))
 (define (current-expr) (first (expr-stack)))
