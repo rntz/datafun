@@ -13,6 +13,8 @@
   the (cons x (= x)) will match only if foo is of the form (cons _ 0), and will
   bind x to the first argument of the cons.
 
+- add type definitions to language
+
 - add some type constructors & intro & elim forms for them
   - flat lattices, (Flat A) = bottom <= .... A ... <= top
   - lexical sums (A <+ B)? lexical products (A <* B)?
