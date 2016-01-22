@@ -26,7 +26,7 @@
     [_ #t]))
 
 
-;; Type "classes" or predicates
+;; ========== Type Predicates ==========
 (define (lattice-type? x)
   (match x
     [(or (t-base 'bool) (t-base 'nat) (t-set _)) #t]
@@ -67,7 +67,7 @@
   (and (lattice-type? t) (eqtype? t)))
 
 
-;; Subtyping & the type lattice.
+;; ========== The type lattice ==========
 (define/match (subtype? a b)
   [((t-tuple as) (t-tuple bs)) (map? subtype? as bs)]
   [((t-record as) (t-record bs))
@@ -116,11 +116,20 @@
   (unless (length=? as bs) (type-error "lists of unequal length"))
   (map (curry unify lub?) as bs))
 
+
+;; ========== The tone lattice ==========
 ;; any <: mono, any <: anti
 (define (subtone? o1 o2) (equal? o2 (tone-unify #t o1 o2)))
+
 (define/match (tone-unify lub? o p)
   [(_ x x) x]
   [(#f _ _) 'any]
   [(#t 'any x) x]
   [(#t x 'any) x]
   [(#t _ _) (type-error "tones have no lub: ~a, ~a" o p)])
+
+(define/match (tone-inverse o)
+  [('any) 'any]
+  [('mono) 'anti]
+  [('anti) 'mono]
+  [(#f) #f])

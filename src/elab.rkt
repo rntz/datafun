@@ -3,48 +3,33 @@
 (require "util.rkt" "ast.rkt" "parse.rkt" "types.rkt" "env.rkt")
 (provide elab (struct-out hyp))
 
-;; The elaborator generates an info hashtable that maps some exprs to their
-;; types. see should-remember-type?, below.
-
-;;; returns (values info-table type-of-expr)
-;;; if `type' is #f, we infer the type of `expr'.
-;;; otherwise, we check that `expr' has type `type'.
+;; ========== Entry point ==========
+;; returns (values info-table type-of-expr)
+;; if `type' is #f, we infer the type of `expr'.
+;; otherwise, we check that `expr' has type `type'.
 (define (elab root-expr #:type [root-type #f] #:env [root-env empty-env])
   (parameterize ([elab-info (make-hasheq)]
                  [elab-env root-env])
     (define type (expr-check root-expr root-type))
     (values (elab-info) type)))
 
-;; Elaboration uses envs mapping bound variables to hyp(othese)s. Hypotheses are
-;; annotated with their tones & their types. tones can be:
-;; - 'any, for ordinary unrestricted variables
-;; - 'mono, for monotone variables
-;; - 'anti, for antitone variables
-;; - #f, for previously-monotone variables hidden by entry into a constant
-;;   expression
-(struct hyp (tone type) #:transparent)
+
+;;; ===== Error messages =====
+(define expr-stack (make-parameter '()))
 
-(define (env-for-tone tone Γ)
-  (match tone
-    ['mono Γ]
-    ;; reverse the polarity!
-    ['anti (env-map (match-lambda [(hyp o t) (hyp (tone-inverse o) t)]) Γ)]
-    ['any  (env-map (match-lambda [(hyp (not 'any) t) (hyp #f t)] [x x]) Γ)]
-    ;; hilarious hack
-    ['trustme
-     (env-map (match-lambda [(hyp (not #f) t) (hyp 'any t)] [x x]) Γ)]))
+(define (top-expr) (last (expr-stack)))
+(define (current-expr) (first (expr-stack)))
 
-(define/match (tone-inverse o)
-  [('any) 'any]
-  [('mono) 'anti]
-  [('anti) 'mono]
-  [(#f) #f])
-
-(define-syntax-rule (with-tone tone body ...)
-  (parameterize ([elab-env (env-for-tone tone (elab-env))]) body ...))
+;; TODO?: rename elab-error to expr-error?
+;; we annotate errors with the whole expression for context
+(define (elab-error fmt . args) (elab-error-raw (apply format fmt args)))
+(define (elab-error-raw msg)
+  (type-error "when typechecking expression: ~s
+sub-expression: ~s
+~a" (expr->sexp (top-expr)) (expr->sexp (current-expr)) msg))
 
 
-;;; Helper functions.
+;; ========== Primitives and their types ==========
 (define (prim-type-infer p)
   ((lambda (x) (and x (parse-type x)))
    (match p
@@ -71,6 +56,19 @@
         [('print (t-fun _ _ (t-tuple '()))) #t]
         [(_ _) #f])))
 
+
+;; ========== Elab info ==========
+
+;; The elaborator generates an info hashtable that maps some exprs to their
+;; types. This is later used during compilation (see compile.rkt).
+;;
+;; elab-info is the parameter holding that hashtable. It is written to during
+;; elaboration.
+(define elab-info (make-parameter #f))
+(define (set-info! e i)
+  (assert! (not (hash-has-key? (elab-info) e)))
+  (hash-set! (elab-info) e i))
+
 ;; whether we need to remember the type of an expression
 (define/match (should-remember-type? expr)
   [((or (e-join _) (e-join-in _ _ _) (e-cond _ _ _) (e-fix _ _))) #t]
@@ -79,35 +77,40 @@
   [(_) #f])
 
 
-;;; ---------- PARAMETERS ----------
-;;; these are used to communicate in the internals of elab
-(define elab-info (make-parameter #f))
-(define (set-info! e i)
-  (assert! (not (hash-has-key? (elab-info) e)))
-  (hash-set! (elab-info) e i))
+;; ========== Elaboration envs ==========
+;;
+;; Elaboration uses envs (see env.rkt) mapping bound variables to hyp(othese)s.
+;; Hypotheses are annotated with their tones & their types. tones can be:
+;;
+;; - 'any, for ordinary unrestricted variables
+;; - 'mono, for monotone variables
+;; - 'anti, for antitone variables
+;; - #f, for previously-monotone variables hidden by entry into a constant
+;;   expression
+(struct hyp (tone type) #:transparent)
 
+;; elab-env is the parameter holding the current env.
 (define elab-env (make-parameter #f))
-(define-syntax-rule (with-var var id body ...)
-  (parameterize ([elab-env (env-bind var id (elab-env))]) body ...))
+
+(define-syntax-rule (with-var var info body ...)
+  (parameterize ([elab-env (env-bind var info (elab-env))]) body ...))
 (define-syntax-rule (with-env more-env body ...)
   (parameterize ([elab-env (env-extend (elab-env) more-env)]) body ...))
+(define-syntax-rule (with-tone tone body ...)
+  (parameterize ([elab-env (env-for-tone tone (elab-env))]) body ...))
 
-;;; ===== ERROR MESSAGE STUFF =====
-(define expr-stack (make-parameter '()))
-
-(define (top-expr) (last (expr-stack)))
-(define (current-expr) (first (expr-stack)))
-
-;; TODO?: rename elab-error to expr-error?
-;; we annotate errors with the whole expression for context
-(define (elab-error fmt . args) (elab-error-raw (apply format fmt args)))
-(define (elab-error-raw msg)
-  (type-error "when typechecking expression: ~s
-sub-expression: ~s
-~a" (expr->sexp (top-expr)) (expr->sexp (current-expr)) msg))
+(define (env-for-tone tone Γ)
+  (match tone
+    ['mono Γ]
+    ;; reverse the polarity!
+    ['anti (env-map (match-lambda [(hyp o t) (hyp (tone-inverse o) t)]) Γ)]
+    ['any  (env-map (match-lambda [(hyp (not 'any) t) (hyp #f t)] [x x]) Γ)]
+    ;; hilarious hack
+    ['trustme
+     (env-map (match-lambda [(hyp (not #f) t) (hyp 'any t)] [x x]) Γ)]))
 
 
-;;; ---------- INTERNALS ----------
+;;; ========== Expression elaboration ==========
 ;; if `type' is #f, we're inferring.
 ;; if not, we're checking.
 ;; returns the type of `expr', which is always be a subtype of `type'.
@@ -334,6 +337,9 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (or type (foldl1 type-lub branch-types))])
   ;; ---------- END BIG GIANT CASE ANALYSIS ----------
   )
+
+
+;; ========== Pattern elaboration ==========
 
 ;; checks a pattern against a type and returns a hash mapping pattern
 ;; variables to their types.
