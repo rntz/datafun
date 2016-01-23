@@ -1,4 +1,27 @@
-- document how nonlinear patterns work. document how equality patterns work.
+- add recursive types
+
+- remove subtyping? would simplify language.
+
+- add type definitions to language
+
+- add some type constructors & intro & elim forms for them
+  - flat lattices, (Flat A) = bottom <= .... A ... <= top
+  - lexical sums (A <+ B)? lexical products (A <* B)?
+  - tensor products of semilats??! (don't know of good impl strategy.)
+
+- allow pattern let-binding (for irrefutable patterns)
+  - move pat-irrefutable? into elab.rkt, since it requires type-checking.
+
+- add tonicity to e-case? problem here is that some things we *can't*
+  case-examine {mono,anti}tonically, for example, bools.
+
+EVENTUALLY
+- implement polymorphism
+
+TO DOCUMENT
+- update README.md
+
+- nonlinear patterns & equality patterns
 
   nonlinear patterns: multiple uses of same variable check for equality.
 
@@ -12,19 +35,3 @@
 
   the (cons x (= x)) will match only if foo is of the form (cons _ 0), and will
   bind x to the first argument of the cons.
-
-- add type definitions to language
-
-- add some type constructors & intro & elim forms for them
-  - flat lattices, (Flat A) = bottom <= .... A ... <= top
-  - lexical sums (A <+ B)? lexical products (A <* B)?
-  - tensor products of semilats?
-
-- allow pattern let-binding (for irrefutable patterns)
-  - move pat-irrefutable? into elab.rkt, since it requires type-checking.
-
-- add tonicity to e-case? problem here is that some things we *can't*
-  case-examine {mono,anti}tonically, for example, bools.
-
-EVENTUALLY
-- implement polymorphism
