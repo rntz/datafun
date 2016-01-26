@@ -10,8 +10,10 @@
 ;; only prefix syntax forms are relevant here. thus =, ->, etc. not included.
 (define (reserved? x) (set-member? reserved x))
 (define reserved
-  (list->set '(case cons empty extend-record fix fn for for/set if isa join let
-               mono proj quote record record-merge set tag trustme when λ π)))
+  (list->set '(case cons empty extend-record fix fn for for/set get if isa join
+               let map mono proj quote record record-merge set tag trustme when
+               ;; TODO: e-map-for
+               λ π)))
 
 (define (arrow? x) (set-member? arrows x))
 (define arrows (list->set '(-> ~> ->+ ->-)))
@@ -48,6 +50,7 @@
      [(e-join l) `(join ,@(map expr->sexp l))]
      [(e-set es) `(set ,@(map expr->sexp es))]
      [(e-map kvs) `(map ,@(map (curry map expr->sexp) kvs))]
+     [(e-map-get d k) `(get ,(expr->sexp d) ,(expr->sexp k))]
      [(e-join-in pat arg body)
       `(for ([,pat ,(expr->sexp arg)]) ,(expr->sexp body))]
      [(e-cond 'mono subj body) `(when   ,(expr->sexp subj) ,(expr->sexp body))]
@@ -86,6 +89,7 @@
     [`(join . ,es) (e-join (map parse-expr es))]
     [`(set . ,es) (e-set (map parse-expr es))]
     [`(map (,ks ,vs) ...) (e-map (map (lambda l (map parse-expr l)) ks vs))]
+    [`(get ,d ,k) (e-map-get (parse-expr d) (parse-expr k))]
     [`(join-in ,pat ,arg ,body)
      (e-join-in (parse-pat pat) (parse-expr arg) (parse-expr body))]
     [`(when ,subj ,body)   (e-cond 'mono (parse-expr subj) (parse-expr body))]

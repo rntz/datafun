@@ -37,7 +37,8 @@
 
 (define (prim? x) (set-member? prims x))
 ;;; TODO: prims for accessing maps, once I know what I need.
-(define prims (list->set '(= <= + - * size print puts ++)))
+(define prims (list->set '(= <= + - * size print puts ++
+                           keys get lookup)))
 
 (enum expr
   ;; ---------- miscellanea ----------
@@ -64,6 +65,9 @@
 
   ;; ---------- maps ----------
   (e-map [key-value-exprs (listof (list/c expr? expr?))])
+  ;; (e-map-for x keys e) means {k: [k/x]e | k <- keys}
+  (e-map-for var key-set body)
+  (e-map-get map key)
   ;; other map operations: some builtin functions, and e-join if the value type
   ;; is a lattice.
 

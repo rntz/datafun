@@ -50,6 +50,12 @@
     [(e-join es) (apply join (map do-expr es))]
     [(e-set es) #`(set #,@(map do-expr es))]
     [(e-map kvs) #`(hash #,@(map do-expr (append* kvs)))]
+    [(e-map-for v keys body)
+     (define var (gensym v))
+     #`(for/hash ([#,var #,(do-expr keys)])
+         #,(with-var v var (do-expr body)))]
+    [(e-map-get d k)
+     #`(hash-ref #,(do-expr d) #,(do-expr k) (lambda () #,(join)))]
     [(e-join-in pat arg body)
      #`(for/fold ([acc #,(join)])
                  ([elt #,(do-expr arg)])
@@ -100,4 +106,6 @@
     ['++ #'df++]
     ['puts #'df-puts]
     ['print #'df-print]
-    ['size #'set-count]))
+    ['size #'set-count]
+    ['keys #'hash-key-set]
+    ['lookup #'df-lookup]))

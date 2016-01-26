@@ -50,6 +50,14 @@ sub-expression: ~s
          (eqtype=? a b)]
         ;; TODO?: make size work for t-map, too?
         [('size (t-fun (or 'mono 'any) (t-set a) (t-base 'nat))) (eqtype? a)]
+        [('keys (t-fun (or 'mono 'any) (t-map a _) (t-set b))) (eqtype=? a b)]
+        [('lookup (t-fun (or 'mono 'any)
+                         (t-map k v1)
+                         (t-fun 'any k (t-sum (hash-table ['none (t-tuple '())]
+                                                          ['just v2]
+                                                          [_ _] ...)))))
+         ;; as long as v1 & v2 are type-compatible we're ok.
+         (type-compatible? v1 v2)]
         ;; print is actually *bitonic*, since it's constant, but we don't have a
         ;; way to represent that in its type.
         [('print (t-fun _ _ (t-tuple '()))) #t]
@@ -70,7 +78,8 @@ sub-expression: ~s
 
 ;; whether we need to remember the type of an expression
 (define/match (should-remember-type? expr)
-  [((or (e-join _) (e-join-in _ _ _) (e-cond _ _ _) (e-fix _ _))) #t]
+  [((or (e-join _) (e-join-in _ _ _) (e-map-get _ _)
+        (e-cond _ _ _) (e-fix _ _))) #t]
   ;; we actually don't need to remember primitives; see do-prim in compile.rkt
   ;; [((e-prim _)) #t]
   [(_) #f])
@@ -154,12 +163,12 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
   ;; TODO: turn this into a match* on (expr type)?
   (match expr
     ;; ===== SPECIAL CASES FOR INFERRING PRIMITIVES =====
-    ;; it would be nice if somehow we didn't need this *and* prim-has-type
+    ;; it would be nice if somehow we didn't need this *and* prim-has-type?
     [(e-app (and prim-expr (e-prim (and p (or '= '<= 'size 'print)))) arg)
      (define tone (match p
                     ['= 'any]
                     ['<= 'anti]
-                    [(or 'size 'print) 'mono]))
+                    [(or 'size 'print 'get) 'mono]))
      (define arg-type (with-tone tone (expr-check arg)))
      (define result-type (match p
                            ['print (t-tuple '())]
@@ -168,6 +177,16 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
                            ['<= (t-fun 'mono arg-type (t-base 'bool))]))
      (expr-check prim-expr (t-fun tone arg-type result-type))
      result-type]
+
+    [(e-app (e-prim 'keys) arg)
+     (match (expr-check arg)
+       [(t-map k v) (t-set k)]
+       [t (fail "argument to `keys' of non-map type ~s" (type->sexp t))])]
+
+    [(e-app (e-prim 'lookup) arg)
+     (match (expr-check arg)
+       [(t-map k v) (t-fun 'any k (t-sum (hash 'none (t-tuple '()) 'just v)))]
+       [t (fail "argument to `lookup' of non-map type ~s" (type->sexp t))])]
 
     ;; ===== TRANSPARENT / BOTH SYNTHESIS AND ANALYSIS EXPRESSIONS =====
     [(e-trustme e) (with-tone 'trustme (expr-check e type))]
@@ -236,6 +255,22 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
          [t (fail "merge argument is not a record: ~s : ~s"
                   (expr->sexp e) (type->sexp t))]))
      (t-record (hash-union-right (infer-record l) (infer-record r)))]
+
+    [(e-map-get map-expr key-expr)
+     (match (expr-check map-expr)
+       [(t-map k v)
+        (unless (lattice-type? v)
+          (fail "cannot `get' at non-lattice type ~s" (type->sexp v)))
+        (expr-check key-expr k)
+        v]
+       [t (fail "`get' from non-map of type ~s" (type->sexp t))])]
+
+    [(e-map-for x keys body)
+     (match (expr-check keys)
+       [(t-set key-type)
+        (t-map key-type
+               (with-var x (hyp 'any key-type) (expr-check body)))]
+       [t (fail "iterating over non-set type ~s" (type->sexp t))])]
 
     ;; ===== ANALYSIS-ONLY TERMS ====
     ;; we need `type' to be non-#f to check these

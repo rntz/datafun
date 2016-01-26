@@ -19,6 +19,10 @@
   (define next (iter init))
   (if (equal? init next) init
       (df-fix next iter)))
+(define ((df-lookup d) k)
+  (if (hash-has-key? d k)
+      (list 'just (hash-ref d k))
+      (list 'none '())))
 
 ;; dynamic diiiiiiiispaaaaaaaaatch b/c why not
 (define/match (df<= a)

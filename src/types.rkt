@@ -24,7 +24,7 @@
   (match x
     [(t-fun _ a b) (and (type-wf? a) (type-wf? b))]
     [(t-set a) (type-wf? a)]
-    [(t-map k v) (and (type-wf? k) (type-wf? v) (eqtype? k))]
+    [(t-map k v) (and (type-wf? k) (eqtype? k) (type-wf? v))]
     [(t-tuple ts) (andmap type-wf? ts)]
     [(t-sum bs) ((hash/c symbol? type-wf? #:immutable #t) bs)]
     [(t-record as) ((hash/c symbol? type-wf? #:immutable #t) as)]
@@ -120,6 +120,12 @@
 (define (unifys lub? as bs)
   (unless (length=? as bs) (type-error "lists of unequal length"))
   (map (curry unify lub?) as bs))
+
+;; two types are *compatible* iff they have a lub.
+(define (type-compatible? a b)
+  (with-handlers ([exn:type-error? (lambda (_) #f)])
+    (type-lub a b)
+    #t))
 
 
 ;; ========== The tone lattice ==========
