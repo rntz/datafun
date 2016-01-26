@@ -44,11 +44,10 @@ sub-expression: ~s
   (if pt
       (subtype? pt t)
       (match* (p t)
-        [('= (t-fun 'any a (t-fun 'any b (t-base 'bool))))
-         (and (type=? a b) (eqtype? a))]
+        [('= (t-fun 'any a (t-fun 'any b (t-base 'bool)))) (eqtype=? a b)]
         [('<= (t-fun (or 'anti 'any) a
                      (t-fun (or 'mono 'any) b (t-base 'bool))))
-         (and (type=? a b) (eqtype? a))]
+         (eqtype=? a b)]
         ;; TODO?: make size work for t-map, too?
         [('size (t-fun (or 'mono 'any) (t-set a) (t-base 'nat))) (eqtype? a)]
         ;; print is actually *bitonic*, since it's constant, but we don't have a

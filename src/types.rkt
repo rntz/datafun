@@ -10,8 +10,13 @@
   (raise (exn:type-error (string-append "TYPE ERROR\n" msg)
                          (current-continuation-marks))))
 
-;; for now, type equality is simple
+;; type equality is simple, but beware! because we have subtyping, testing for
+;; type equality is not the same as testing for type *compatibility*.
 (define type=? equal?)
+
+;; However, there is no subtyping among equality types. So this is much safer to
+;; use, if you know the types tested should be equality types.
+(define (eqtype=? a b) (and (eqtype? a) (type=? a b)))
 
 ;; type well-formedness
 ;; NB. currently unused.
