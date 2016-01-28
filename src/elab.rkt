@@ -196,7 +196,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (with-var var (hyp tone subj-t) (expr-check body type))]
 
     [(e-cond tone subj body)
-     (unless (matches? tone (or 'mono 'anti))
+     (unless (match? tone 'mono 'anti)
        ;; TODO: better error message.
        (type-error "bad tone for e-cond: ~a" tone))
      (with-tone tone (expr-check subj (t-base 'bool)))

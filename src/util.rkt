@@ -5,7 +5,7 @@
 
 ;;; Syntax utilities
 (provide
-  define-syntax-parser TODO fn enum enum-case matches?
+  define-syntax-parser TODO fn enum enum-case enum/c match? match/c
   ;; re-export
   (for-syntax syntax-parse syntax-parser))
 
@@ -63,8 +63,19 @@
        #'(define-struct/contract type/super ((field.name field.contract) ...)
            #:transparent)))
 
-(define-syntax-rule (matches? e p)
-  (match e [p #t] [_ #f]))
+(define-syntax-rule (enum/c (name arg/c ...) ...)
+  (or/c (struct/c name arg/c ...) ...))
+
+(begin-for-syntax
+  (define-splicing-syntax-class match-branch
+    (pattern (~seq pattern #:when condition))
+    (pattern pattern #:attr condition #'#t)))
+
+(define-syntax-parser (match? e p:match-branch ...)
+  #'(match e [p.pattern #:when p.condition #t] ... [_ #f]))
+
+(define-syntax-rule (match/c pattern ...)
+  (lambda (x) (match? x pattern ...)))
 
 
 ;;; Miscellaneous utilities
