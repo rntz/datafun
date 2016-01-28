@@ -5,10 +5,10 @@
 
 ;; contexts Γ are envs mapping variables to what they should compile to (an
 ;; identifier, generally). info maps exprs to elaboration info; see elab.rkt.
-(define (compile e #:env Γ #:info info)
+(define (compile expr #:env env #:info info)
   (parameterize ([elab-info info]
-                 [compile-env Γ])
-    (do-expr e)))
+                 [compile-env env])
+    (do-expr expr)))
 
 
 ;;; ---------- PARAMETERS ----------
