@@ -11,9 +11,8 @@
 (define (reserved? x) (set-member? reserved x))
 (define reserved
   ;; TODO: e-map-for
-  ;; TODO: rename 'isa to 'as
-  (list->set '(case cons empty extend-record fix fn for for/set get if isa lub
-               let map mono proj quote record record-merge set tag trustme
+  (list->set '(as case cons empty extend-record fix fn for for/set get if let
+               lub map mono proj quote record record-merge set tag trustme
                unless when λ π)))
 
 (define (arrow? x) (set-member? arrows x))
@@ -29,7 +28,7 @@
      [(e-var n) n]
      [(e-lit v) v]
      [(e-prim p) p]
-     [(e-ann t e) `(isa ,(type->sexp t) ,(expr->sexp e))]
+     [(e-ann t e) `(as ,(type->sexp t) ,(expr->sexp e))]
      [(e-lam v b) `(λ ,v ,(expr->sexp b))]
      [(e-app f a)
       (let loop ([func f] [args (list a)])
@@ -70,7 +69,7 @@
     [(? ident? v) (e-var v)]
     [`(let ,decls ,body)
      (parse-expr-letting (parse-all-decls decls) body)]
-    [`(isa ,t ,e) (e-ann (parse-type t) (parse-expr e))]
+    [`(as ,t ,e) (e-ann (parse-type t) (parse-expr e))]
     [`(,(or 'fn 'λ) ,xs ... ,e)
      (set! e (parse-expr e))
      (foldr e-lam e xs)]

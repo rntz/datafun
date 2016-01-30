@@ -48,7 +48,6 @@ sub-expression: ~s
         [('<= (t-fun (or 'anti 'any) a
                      (t-fun (or 'mono 'any) b (t-base 'bool))))
          (eqtype=? a b)]
-        ;; TODO?: make size work for t-map, too?
         [('size (t-fun (or 'mono 'any) (t-set a) (t-base 'nat))) (eqtype? a)]
         [('keys (t-fun (or 'mono 'any) (t-map a _) (t-set b))) (eqtype=? a b)]
         [('lookup (t-fun (or 'mono 'any)
@@ -232,8 +231,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
        ;; [(hyp 'anti t) (fail "~a is an antitone variable" n)]
        ;; alternative way to phrase this:
        [(hyp o t) #:when (subtone? o 'mono) t]
-       [(hyp _ _) (fail "non-monotone use of variable ~a" n)]
-       )]
+       [(hyp _ _) (fail "non-monotone use of variable ~a" n)])]
 
     [(e-app func arg)
      (match (expr-check func)
@@ -437,7 +435,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
 (define (eqtype-glb a b)
   (define type (type-glb a b))
   (unless (eqtype? type)
-    ;; TODO: as usual, better error message
+    ;; TODO: better error message
     (elab-error "pattern variable used multiple times has non-equality type ~s"
                 (type->sexp type)))
   type)
