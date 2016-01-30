@@ -110,50 +110,42 @@
     (define expanded (expand-expr-once e))
     (if (eq? e expanded) e (loop expanded))))
 
+;; checks whether something "looks like" a set of loop clauses.
+;; in:                   ((set 2) for x <- X when (< x 3))
+;; the loop clauses are:         (for x <- X when (< x 3))
+(define loop-clauses? (cons/c loop-form? any/c))
+
 (define/match (expand-expr-once expr)
   [('empty) '(lub)]
   [(`(,expr where . ,decls)) `(let ,decls ,expr)]
   [(`(if ,cnd ,thn ,els)) `(case ,cnd [#t ,thn] [#f ,els])]
-  ;; generic lub-comprehensions
-  [(`(,(? (not/c expr-form?) e) . ,(and clauses (cons (? loop-form?) _))))
-   (parse-loop clauses e)]
-  ;; lub- & set-comprehensions
-  ;; TODO: this is offensively complex, remove it
-  [(`(,(and form (or 'lub 'set))
-      ,(and es (not (? loop-form?))) ...
-      . ,(and clauses (cons (? loop-form?) _))))
-   (parse-loop clauses `(,form ,@es))]
-  ;; `for' syntax. TODO: remove.
-  [(`(for () ,body)) body]
-  [(`(for ([,pat ,expr] . ,cs) ,body))  `(set-bind ,pat ,expr (for ,cs ,body))]
-  [(`(for ((when ,cnd) . ,cs) ,body))   `(when ,cnd (for ,cs ,body))]
-  [(`(for ((unless ,cnd) . ,cs) ,body)) `(unless ,cnd (for ,cs ,body))]
+  ;; lub-comprehensions
+  [(`(,(? (not/c expr-form?) e) . ,(? loop-clauses? clauses)))
+   (expand-loop clauses e)]
+  ;; set-comprehensions
+  [(`(set ,(? (not/c expr-form?) es) ... . ,(? loop-clauses? clauses)))
+   `((set ,@es) ,@clauses)]
   [(e) e])
 
-(define (parse-loop clauses body)
+(define (expand-loop clauses body)
   (match clauses
     ['() body]
-    [`(for ,p <- ,e . ,rest) `(set-bind ,p ,e ,(parse-loop rest body))]
-    [`(when ,e . ,rest)   `(when ,e ,(parse-loop rest body))]
-    [`(unless ,e . ,rest) `(unless ,e ,(parse-loop rest body))]))
+    [`(for ,p <- ,e . ,rest) `(set-bind ,p ,e ,(expand-loop rest body))]
+    [`(when ,e . ,rest)   `(when ,e ,(expand-loop rest body))]
+    [`(unless ,e . ,rest) `(unless ,e ,(expand-loop rest body))]))
 
 ;; applies syntax sugar to make expressions prettier
 (define/match (compact-expr expr)
   [('(lub)) 'empty]
   [(`(case ,cnd [#t ,thn] [#f ,els])) `(if ,cnd ,thn ,els)]
-  ;; compacting loop forms is... complicated
-  [(`((,(and form (or 'when 'unless)) ,cnd ,e)
-      . ,(and clauses (cons (? loop-form?) _))))
-   `(,e ,@clauses ,form ,cnd)]
-  [(`((,(? (not/c expr-form?) e) . ,(and inner (cons (? loop-form?) _)))
-      . ,(and outer (cons (? loop-form?) _))))
-   `(,e ,@outer ,@inner)]
-  ;; phew. done compacting loop forms.
-  [(`(for ,clauses-1 (for ,clauses-2 ,body)))
-   `(for ,(append clauses-1 clauses-2) ,body)]
-  [(`(let ,decls-1 (let ,decls-2 ,body)))
-   `(let ,(append decls-1 decls-2) ,body)]
+  [(`(let ,decls-1 (let ,decls-2 ,body))) `(let (,@decls-1 ,@decls-2) ,body)]
   [(`(λ ,x (λ . ,rest))) `(λ ,x . ,rest)]
+  ;; compacting comprehensions is slightly complicated
+  [(`((,(and form (or 'when 'unless)) ,cnd ,e) . ,(? loop-clauses? clauses)))
+   `(,e ,@clauses ,form ,cnd)]
+  [(`((,(? (not/c expr-form?) e) . ,(? loop-clauses? inner))
+      . ,(? loop-clauses? outer)))
+   `(,e ,@outer ,@inner)]
   [(e) e])
 
 
