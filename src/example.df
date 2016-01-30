@@ -1,3 +1,4 @@
+;; -*- scheme-mode -*-
 (two : nat)
 (two = 2)
 

@@ -122,6 +122,7 @@ sub-expression: ~s
 ;; if `type' is #f, we're inferring.
 ;; if not, we're checking.
 ;; returns the type of `expr', which is always be a subtype of `type'.
+;; TODO: rename to elab-expr?
 (define (expr-check expr [type #f])
   (parameterize ([expr-stack (cons expr (expr-stack))])
     (define expr-type (infer expr type))
@@ -145,6 +146,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
 
     expr-type))
 
+;; bad name.
 ;; if `type' is #f, we're inferring. if not, we're checking.
 (define (infer expr type)
   (define (fail-raw msg)
@@ -245,6 +247,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (match* (i (expr-check subj))
        [((? number?) (t-tuple a))  #:when (< i (length a))    (list-ref a i)]
        [((? symbol?) (t-record a)) #:when (hash-has-key? a i) (hash-ref a i)]
+       ;; TODO: better error message
        [(_ _) (fail "bad projection")])]
 
     [(e-record-merge l r)
