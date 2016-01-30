@@ -289,13 +289,6 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (with-var var (hyp 'mono type)
        (expr-check body type))]
 
-    [(e-lub as) #:when (not type) (fail "lub expressions not inferrable")]
-    [(e-lub as) #:when type
-     (unless (lattice-type? type)
-       (error "cannot take lub at non-lattice type ~s" (type->sexp type)))
-     (for ([a as]) (expr-check a type))
-     type]
-
     ;; ===== ANALYSIS (BUT SOMETIMES SYNTHESIZABLE) EXPRESSIONS =====
     ;;
     ;; we can synthesize these (assuming their subterms synthesize), so we do,
@@ -334,6 +327,14 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
         (expr-check subj (hash-ref branches name err))
         type]
        [_ (fail "tagged expression must have sum type")])]
+
+    [(e-lub '()) #:when (not type) (fail "can't infer type of empty lub")]
+    [(e-lub as)
+     (define expr-type
+       (foldl1 type-lub (for/list ([a as]) (expr-check a type))))
+     (unless (lattice-type? expr-type)
+       (error "cannot take lub at non-lattice type ~s" (type->sexp expr-type)))
+     expr-type]
 
     [(e-set '()) #:when (not type) (fail "can't infer type of empty set")]
     [(e-set elems)
