@@ -61,6 +61,7 @@
 
   ;; ---------- sets ----------
   (e-set exprs)
+  ;; TODO: rename e-lub-in?
   (e-join-in pat arg body)
 
   ;; ---------- maps ----------
@@ -72,6 +73,7 @@
   ;; is a lattice.
 
   ;; ---------- usl operations ----------
+  ;; TODO: rename e-lub?
   (e-join exprs)
   (e-fix var body)
 

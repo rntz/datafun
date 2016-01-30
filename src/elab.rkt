@@ -151,7 +151,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
 (define (infer expr type)
   (define (fail-raw msg)
     (if type
-        (elab-error "cannot be given type: ~s\n~a" msg)
+        (elab-error "cannot be given type: ~s\n~a" (type->sexp type) msg)
         (elab-error "cannot infer type of sub-expression\n~a" msg)))
   (define (fail [fmt #f] . fmt-args)
     (fail-raw (if fmt (apply format fmt fmt-args) "")))

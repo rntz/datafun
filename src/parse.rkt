@@ -10,10 +10,10 @@
 ;; only prefix syntax forms are relevant here. thus =, ->, etc. not included.
 (define (reserved? x) (set-member? reserved x))
 (define reserved
+  ;; TODO: e-map-for
   (list->set '(case cons empty extend-record fix fn for for/set get if isa join
-               let map mono proj quote record record-merge set tag trustme when
-               ;; TODO: e-map-for
-               λ π)))
+               let map mono proj quote record record-merge set tag trustme
+               unless when λ π)))
 
 (define (arrow? x) (set-member? arrows x))
 (define arrows (list->set '(-> ~> ->+ ->-)))
@@ -52,7 +52,7 @@
      [(e-map kvs) `(map ,@(map (curry map expr->sexp) kvs))]
      [(e-map-get d k) `(get ,(expr->sexp d) ,(expr->sexp k))]
      [(e-join-in pat arg body)
-      `(for ([,pat ,(expr->sexp arg)]) ,(expr->sexp body))]
+      `(for ([,(pat->sexp pat) ,(expr->sexp arg)]) ,(expr->sexp body))]
      [(e-cond 'mono subj body) `(when   ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-cond 'anti subj body) `(unless ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-fix var body) `(fix ,var ,(expr->sexp body))]
@@ -230,6 +230,9 @@
 
 ;;; Declaration/definition parsing
 ;; TODO?: defn->sexp
+;;
+;; TODO: "fix" decls; (fix x = ...) becomes (x = (fix x ...))
+;; (nested to-do: how to generalize to mutual recursion?)
 
 ;; A definition.
 ;; tone is either 'any, 'mono, or 'anti
