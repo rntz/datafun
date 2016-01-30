@@ -75,9 +75,21 @@
 (member a X = ((= a x) for x <- X))
 
 (setminus : (set nat) ~> (set nat) ->- (set nat))
-(setminus X Y = ((set x)
-                 for x <- X
-                 unless (member x Y)))
+(setminus X Y = (set x
+                     for x <- X
+                     unless (member x Y)))
+
+;; set comprehensions
+(some-nats : (set nat))
+(some-nats = (set x (+ 10 x)
+                  for x <- (set 1 2 3)))
+
+(powers-upto : nat -> nat ~> (set nat))
+(powers-upto b n =
+  (fix P (union (set 1)
+                (set (* b x)
+                     for x <- P
+                     when (<= (* b x) n)))))
 
 
 ;; ancestors example
@@ -91,10 +103,16 @@
                 (cons "neel" "rntz")))
 
 (ancestor : (set (* str str)))
+;; ;; I'd like to be able to write something like this:
+;; (fix ancestor
+;;      = (set (cons p p) for p <- person)
+;;      + (set (cons a c)
+;;             for (cons a b) <- advisor
+;;             for (cons (= b) c) <- ancestor))
 (ancestor = (fix ancestor
-                 (lub
-                  ;; advisor
-                  ((set (cons p p)) for p <- person)
-                  ((set (cons a c))
-                   for (cons a b) <- advisor
-                   for (cons (= b) c) <- advisor))))
+                 (union
+                  advisor
+                  ;; (set (cons p p) for p <- person)
+                  (set (cons a c)
+                       for (cons a b) <- advisor
+                       for (cons (= b) c) <- ancestor))))

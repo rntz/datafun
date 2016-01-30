@@ -117,6 +117,7 @@
 
 (define/match (expand-expr-once expr)
   [('empty) '(lub)]
+  [(`(union . ,es)) `(lub . ,es)] ;; useful for readability
   [(`(,expr where . ,decls)) `(let ,decls ,expr)]
   [(`(if ,cnd ,thn ,els)) `(case ,cnd [#t ,thn] [#f ,els])]
   ;; lub-comprehensions
