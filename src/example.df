@@ -55,27 +55,32 @@
 (ff = (set))
 
 (conj : (set (*)) (set (*)) ~> (set (*)))
-(conj X Y = (for ([_ X] [_ Y]) tt))
+;; (conj X Y = (for ([_ X] [_ Y]) tt))
+(conj X Y = (tt for _ <- X
+                for _ <- Y))
 
 ;; Neel calls this "guard"
 (bool->set : bool ~> (set (*)))
 (bool->set x = (when x tt))
 
 (set->bool : (set (*)) ~> bool)
-(set->bool x = (for ([_ x]) #t))
+;; (set->bool x = (for ([_ x]) #t))
+(set->bool x = (#t for _ <- x))
 
 ;; kind of a hack.
 (negate : (set (*)) ->- (set (*)))
-(negate X = (unless (set->bool X) (set (cons))))
+(negate X = (unless (set->bool X) tt))
 
 
 ;; operations on sets of naturals
 (member : nat -> (set nat) ~> bool)
-(member a X = (for ([x X]) (= a x)))
+;;(member a X = (for ([x X]) (= a x)))
+(member a X = ((= a x) for x <- X))
 
 (setminus : (set nat) ~> (set nat) ->- (set nat))
-(setminus X Y = (for/set ([x X] #:unless (member x Y))
-                  x))
+(setminus X Y = ((set x)
+                 for x <- X
+                 unless (member x Y)))
 
 
 ;; ancestors example
@@ -91,8 +96,16 @@
 (ancestor : (set (* str str)))
 (ancestor = (fix ancestor
                  (lub
-                  ;; (for ([p person]) (set (cons p p)))
-                  advisor
-                  (for/set ([(cons a b) advisor]
-                            [(cons (= b) c) ancestor])
-                    (cons a c)))))
+                  ;; advisor
+                  ((set (cons p p)) for p <- person)
+                  ((set (cons a c))
+                   for (cons a b) <- advisor
+                   for (cons (= b) c) <- advisor))))
+
+;; (ancestor = (fix ancestor
+;;                  (lub
+;;                   ;; (for ([p person]) (set (cons p p)))
+;;                   advisor
+;;                   (for ([(cons a b) advisor]
+;;                         [(cons (= b) c) ancestor])
+;;                     (set (cons a c))))))

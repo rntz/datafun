@@ -7,18 +7,17 @@
 ;; also, "pretty printers", i.e. convert parsed things back to canonical sexps.
 ;; TODO: an exception class for parse failures.
 
-;; only prefix syntax forms are relevant here. thus =, ->, etc. not included.
-(define (reserved? x) (set-member? reserved x))
-(define reserved
-  ;; TODO: e-map-for
-  (list->set '(as case cons empty extend-record fix fn for for/set get if let
-               lub map mono proj quote record record-merge set tag trustme
-               unless when λ π)))
+;; we only consider prefix forms. so =, :, etc. are not included.
+(define decl-form? (or/c 'mono 'anti))
+(define loop-form? (or/c 'for 'when 'unless))
+(define expr-form?
+  (or/c 'as 'case 'cons 'extend-record 'fix 'for 'if 'let 'lub 'map 'proj 'quote
+        'record 'record-merge 'set 'tag 'trustme 'unless 'when 'λ 'π))
+(define ident-reserved? (or/c expr-form? decl-form? loop-form?))
 
-(define (arrow? x) (set-member? arrows x))
-(define arrows (list->set '(-> ~> ->+ ->-)))
+(define arrow? (or/c '-> '~> '->+ '->-))
 
-(define (ident? x) (and (symbol? x) (not (reserved? x))))
+(define (ident? x) (and (symbol? x) (not (ident-reserved? x))))
 
 
 ;;; Expression parsing/pretty-printing
@@ -52,7 +51,8 @@
      [(e-map kvs) `(map ,@(map (curry map expr->sexp) kvs))]
      [(e-map-get d k) `(get ,(expr->sexp d) ,(expr->sexp k))]
      [(e-set-bind pat arg body)
-      `(for ([,(pat->sexp pat) ,(expr->sexp arg)]) ,(expr->sexp body))]
+      ;; `(for ([,(pat->sexp pat) ,(expr->sexp arg)]) ,(expr->sexp body))
+      `(,(expr->sexp body) for ,(pat->sexp pat) <- ,(expr->sexp arg))]
      [(e-cond 'mono subj body) `(when   ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-cond 'anti subj body) `(unless ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-fix var body) `(fix ,var ,(expr->sexp body))]
@@ -97,8 +97,8 @@
     [`(fix ,x ,body) (e-fix x (parse-expr body))]
     [`(trustme ,e) (e-trustme (parse-expr e))]
     [(and e `(,f ,as ...))
-     (if (reserved? f)
-         (error "invalid use of reserved form:" e)
+     (if (expr-form? f)
+         (error (format "invalid use of ~a: ~s" f e))
          (foldl (flip e-app) (parse-expr f) (map parse-expr as)))]
     [e (error "unfamiliar expression:" e)]))
 
@@ -114,23 +114,41 @@
   [('empty) '(lub)]
   [(`(,expr where . ,decls)) `(let ,decls ,expr)]
   [(`(if ,cnd ,thn ,els)) `(case ,cnd [#t ,thn] [#f ,els])]
-  ;; for loop / lub comprehension syntax
+  ;; generic lub-comprehensions
+  [(`(,(? (not/c expr-form?) e) . ,(and clauses (cons (? loop-form?) _))))
+   (parse-loop clauses e)]
+  ;; lub- & set-comprehensions
+  ;; TODO: this is offensively complex, remove it
+  [(`(,(and form (or 'lub 'set))
+      ,(and es (not (? loop-form?))) ...
+      . ,(and clauses (cons (? loop-form?) _))))
+   (parse-loop clauses `(,form ,@es))]
+  ;; `for' syntax. TODO: remove.
   [(`(for () ,body)) body]
-  [(`(for ([,pat ,expr] . ,clauses) ,body))
-   `(set-bind ,pat ,expr (for ,clauses ,body))]
-  [(`(for (#:when ,cnd . ,clauses) ,body))
-   `(when ,cnd (for ,clauses ,body))]
-  [(`(for (#:unless ,cnd . ,clauses) ,body))
-   `(unless ,cnd (for ,clauses ,body))]
-  ;; end for loop syntax
-  [(`(for/set ,clauses ,body))
-   `(for ,clauses (set ,body))]
+  [(`(for ([,pat ,expr] . ,cs) ,body))  `(set-bind ,pat ,expr (for ,cs ,body))]
+  [(`(for ((when ,cnd) . ,cs) ,body))   `(when ,cnd (for ,cs ,body))]
+  [(`(for ((unless ,cnd) . ,cs) ,body)) `(unless ,cnd (for ,cs ,body))]
   [(e) e])
+
+(define (parse-loop clauses body)
+  (match clauses
+    ['() body]
+    [`(for ,p <- ,e . ,rest) `(set-bind ,p ,e ,(parse-loop rest body))]
+    [`(when ,e . ,rest)   `(when ,e ,(parse-loop rest body))]
+    [`(unless ,e . ,rest) `(unless ,e ,(parse-loop rest body))]))
 
 ;; applies syntax sugar to make expressions prettier
 (define/match (compact-expr expr)
   [('(lub)) 'empty]
   [(`(case ,cnd [#t ,thn] [#f ,els])) `(if ,cnd ,thn ,els)]
+  ;; compacting loop forms is... complicated
+  [(`((,(and form (or 'when 'unless)) ,cnd ,e)
+      . ,(and clauses (cons (? loop-form?) _))))
+   `(,e ,@clauses ,form ,cnd)]
+  [(`((,(? (not/c expr-form?) e) . ,(and inner (cons (? loop-form?) _)))
+      . ,(and outer (cons (? loop-form?) _))))
+   `(,e ,@outer ,@inner)]
+  ;; phew. done compacting loop forms.
   [(`(for ,clauses-1 (for ,clauses-2 ,body)))
    `(for ,(append clauses-1 clauses-2) ,body)]
   [(`(let ,decls-1 (let ,decls-2 ,body)))
