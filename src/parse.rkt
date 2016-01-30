@@ -121,6 +121,8 @@
   [(`(union . ,es)) `(lub . ,es)] ;; useful for readability
   [(`(,expr where . ,decls)) `(let ,decls ,expr)]
   [(`(if ,cnd ,thn ,els)) `(case ,cnd [#t ,thn] [#f ,els])]
+  [(`(fix ,name ,exprs ...)) #:when (not (= 1 (length exprs)))
+   `(fix ,name (lub ,@exprs))]
   ;; lub-comprehensions
   [(`(,(? (not/c expr-form?) e) . ,(? loop-clauses? clauses)))
    (expand-loop clauses e)]
@@ -142,6 +144,8 @@
   [(`(case ,cnd [#t ,thn] [#f ,els])) `(if ,cnd ,thn ,els)]
   [(`(let ,decls-1 (let ,decls-2 ,body))) `(let (,@decls-1 ,@decls-2) ,body)]
   [(`(λ ,x (λ . ,rest))) `(λ ,x . ,rest)]
+  [(`(fix ,name (lub . ,exprs))) #:when (not (= 1 (length exprs)))
+   `(fix ,name ,@exprs)]
   ;; compacting comprehensions is slightly complicated
   [(`((,(and form (or 'when 'unless)) ,cnd ,e) . ,(? loop-clauses? clauses)))
    `(,e ,@clauses ,form ,cnd)]

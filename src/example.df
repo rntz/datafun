@@ -76,20 +76,20 @@
 
 (setminus : (set nat) ~> (set nat) ->- (set nat))
 (setminus X Y = (set x
-                     for x <- X
-                     unless (member x Y)))
+                 for x <- X
+                 unless (member x Y)))
 
 ;; set comprehensions
 (some-nats : (set nat))
 (some-nats = (set x (+ 10 x)
-                  for x <- (set 1 2 3)))
+              for x <- (set 1 2 3)))
 
 (powers-upto : nat -> nat ~> (set nat))
 (powers-upto b n =
-  (fix P (union (set 1)
-                (set (* b x)
-                     for x <- P
-                     when (<= (* b x) n)))))
+  (fix P (set 1)
+         (set (* b x)
+          for x <- P
+          when (<= (* b x) n))))
 
 
 ;; ancestors example
@@ -103,15 +103,30 @@
                 (cons "neel" "rntz")))
 
 (ancestor : (set (* str str)))
-;; ;; I'd like to be able to write something like this:
-;; (fix ancestor
-;;      = (set (cons p p) for p <- person)
-;;      + (set (cons a c)
-;;             for (cons a b) <- advisor
-;;             for (cons (= b) c) <- ancestor))
-(fix ancestor = (union
-                 advisor
-                 ;; (set (cons p p) for p <- person)
-                 (set (cons a c)
-                      for (cons a b) <- advisor
-                      for (cons (= b) c) <- ancestor)))
+(fix ancestor = (lub advisor recur)
+     where (mono recur = (set (cons a c)
+                          for (cons a b) <- advisor
+                          for (cons (= b) c) <- ancestor)))
+
+
+;; relation composition
+(compose : (set (* str str)) (set (* str str)) ~> (set (* str str)))
+(compose X Y = (set (cons a c)
+                for (cons a b) <- X
+                for (cons (= b) c) <- Y))
+
+;; reflexivity
+(refl : (set str) ~> (set (* str str)))
+(refl X = (set (cons x x) for x <- X))
+
+;; transitive closure, more generically
+(transitive-closure : (set (* str str)) ~> (set (* str str)))
+(transitive-closure R = (fix T R (compose R T)))
+
+(ancestor-2 = (transitive-closure advisor))
+
+;; reflexive transitive closure
+(to-poset : (set str) (set (* str str)) ~> (set (* str str)))
+(to-poset domain R = (fix self (refl domain) (compose self R)))
+
+(ancestor-3 = (to-poset person advisor))
