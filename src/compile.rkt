@@ -26,7 +26,7 @@
 
 ;;; ---------- INTERNAL FUNCTIONS ----------
 (define (do-expr e)
-  (define (join . args) #`(df-join '#,(info e) (list #,@args)))
+  (define (lub . args) #`(df-lub '#,(info e) (list #,@args)))
   (match e
     [(e-ann _ e) (do-expr e)]
     [(e-var n) (env-ref (compile-env) n)]
@@ -47,7 +47,7 @@
     [(e-tag t e) #`(list '#,t #,(do-expr e))]
     [(e-case subj branches)
      #`(match #,(do-expr subj) #,@(do-case-branches branches))]
-    [(e-join es) (apply join (map do-expr es))]
+    [(e-lub es) (apply lub (map do-expr es))]
     [(e-set es) #`(set #,@(map do-expr es))]
     [(e-map kvs) #`(hash #,@(map do-expr (append* kvs)))]
     [(e-map-for v keys body)
@@ -55,19 +55,19 @@
      #`(for/hash ([#,var #,(do-expr keys)])
          #,(with-var v var (do-expr body)))]
     [(e-map-get d k)
-     #`(hash-ref #,(do-expr d) #,(do-expr k) (lambda () #,(join)))]
-    [(e-join-in pat arg body)
-     #`(for/fold ([acc #,(join)])
+     #`(hash-ref #,(do-expr d) #,(do-expr k) (lambda () #,(lub)))]
+    [(e-set-bind pat arg body)
+     #`(for/fold ([acc #,(lub)])
                  ([elt #,(do-expr arg)])
-         #,(join #'acc
-                 #`(match elt
-                     #,@(do-case-branches (list (case-branch pat body)))
-                     [_ #,(join)])))]
-    [(e-cond 'mono subj body) #`(if #,(do-expr subj) #,(do-expr body) #,(join))]
-    [(e-cond 'anti subj body) #`(if #,(do-expr subj) #,(join) #,(do-expr body))]
+         #,(lub #'acc
+                #`(match elt
+                    #,@(do-case-branches (list (case-branch pat body)))
+                    [_ #,(lub)])))]
+    [(e-cond 'mono subj body) #`(if #,(do-expr subj) #,(do-expr body) #,(lub))]
+    [(e-cond 'anti subj body) #`(if #,(do-expr subj) #,(lub) #,(do-expr body))]
     [(e-fix v body)
      (define var (gensym v))
-     #`(df-fix #,(join) (lambda (#,var) #,(with-var v var (do-expr body))))]
+     #`(df-fix #,(lub) (lambda (#,var) #,(with-var v var (do-expr body))))]
     [(e-let _ v expr body)
      (define var (gensym v))
      #`(let ((#,var #,(do-expr expr)))

@@ -61,20 +61,18 @@
 
   ;; ---------- sets ----------
   (e-set exprs)
-  ;; TODO: rename e-lub-in?
-  (e-join-in pat arg body)
+  (e-set-bind pat arg body) ;; \bigvee(pat <- arg) body
 
   ;; ---------- maps ----------
   (e-map [key-value-exprs (listof (list/c expr? expr?))])
   ;; (e-map-for x keys e) means {k: [k/x]e | k <- keys}
   (e-map-for var key-set body)
   (e-map-get map key)
-  ;; other map operations: some builtin functions, and e-join if the value type
+  ;; other map operations: some builtin functions, and e-lub if the value type
   ;; is a lattice.
 
   ;; ---------- usl operations ----------
-  ;; TODO: rename e-lub?
-  (e-join exprs)
+  (e-lub exprs)
   (e-fix var body)
 
   ;; ---------- functions ----------

@@ -15,7 +15,7 @@
 (mapfns2 : (map str (nat -> nat)))
 (mapfns2 = mapfns1)
 (mapfns3 : (map str (nat -> nat)))
-(mapfns3 = (join mapfns1 (map ["zero" (fn x 0)])))
+(mapfns3 = (lub mapfns1 (map ["zero" (fn x 0)])))
 
 
 ;; negation.
@@ -29,9 +29,9 @@
 (unless-bool c X = (when (not c) X))
 
 ;; disjunction, eagerly
-;; this is easy because disjunction *is* the join operator on bools.
+;; this is easy because disjunction *is* the lub operator on bools.
 (or : bool bool ~> bool)
-(or x y = (join x y))
+(or x y = (lub x y))
 
 ;; conjunction, eagerly
 (and : bool bool ~> bool)
@@ -90,7 +90,7 @@
 
 (ancestor : (set (* str str)))
 (ancestor = (fix ancestor
-                 (join
+                 (lub
                   ;; (for ([p person]) (set (cons p p)))
                   advisor
                   (for/set ([(cons a b) advisor]

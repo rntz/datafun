@@ -11,7 +11,8 @@
 (define (reserved? x) (set-member? reserved x))
 (define reserved
   ;; TODO: e-map-for
-  (list->set '(case cons empty extend-record fix fn for for/set get if isa join
+  ;; TODO: rename 'isa to 'as
+  (list->set '(case cons empty extend-record fix fn for for/set get if isa lub
                let map mono proj quote record record-merge set tag trustme
                unless when λ π)))
 
@@ -46,12 +47,12 @@
          ,@(for/list ([b branches])
              (match-define (case-branch pat body) b)
              `(,(pat->sexp pat) ,(expr->sexp body))))]
-     [(e-join '()) 'empty]
-     [(e-join l) `(join ,@(map expr->sexp l))]
+     [(e-lub '()) 'empty]
+     [(e-lub l) `(lub ,@(map expr->sexp l))]
      [(e-set es) `(set ,@(map expr->sexp es))]
      [(e-map kvs) `(map ,@(map (curry map expr->sexp) kvs))]
      [(e-map-get d k) `(get ,(expr->sexp d) ,(expr->sexp k))]
-     [(e-join-in pat arg body)
+     [(e-set-bind pat arg body)
       `(for ([,(pat->sexp pat) ,(expr->sexp arg)]) ,(expr->sexp body))]
      [(e-cond 'mono subj body) `(when   ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-cond 'anti subj body) `(unless ,(expr->sexp subj) ,(expr->sexp body))]
@@ -86,12 +87,12 @@
       (e-case (parse-expr subj)
         (for/list ([p ps] [e es])
           (case-branch (parse-pat p) (parse-expr e))))]
-    [`(join . ,es) (e-join (map parse-expr es))]
+    [`(lub . ,es) (e-lub (map parse-expr es))]
     [`(set . ,es) (e-set (map parse-expr es))]
     [`(map (,ks ,vs) ...) (e-map (map (lambda l (map parse-expr l)) ks vs))]
     [`(get ,d ,k) (e-map-get (parse-expr d) (parse-expr k))]
-    [`(join-in ,pat ,arg ,body)
-     (e-join-in (parse-pat pat) (parse-expr arg) (parse-expr body))]
+    [`(set-bind ,pat ,arg ,body)
+     (e-set-bind (parse-pat pat) (parse-expr arg) (parse-expr body))]
     [`(when ,subj ,body)   (e-cond 'mono (parse-expr subj) (parse-expr body))]
     [`(unless ,subj ,body) (e-cond 'anti (parse-expr subj) (parse-expr body))]
     [`(fix ,x ,body) (e-fix x (parse-expr body))]
@@ -111,13 +112,13 @@
     (if (eq? e expanded) e (loop expanded))))
 
 (define/match (expand-expr-once expr)
-  [('empty) '(join)]
+  [('empty) '(lub)]
   [(`(,expr where . ,decls)) `(let ,decls ,expr)]
   [(`(if ,cnd ,thn ,els)) `(case ,cnd [#t ,thn] [#f ,els])]
-  ;; for loop / join comprehension syntax
+  ;; for loop / lub comprehension syntax
   [(`(for () ,body)) body]
   [(`(for ([,pat ,expr] . ,clauses) ,body))
-   `(join-in ,pat ,expr (for ,clauses ,body))]
+   `(set-bind ,pat ,expr (for ,clauses ,body))]
   [(`(for (#:when ,cnd . ,clauses) ,body))
    `(when ,cnd (for ,clauses ,body))]
   [(`(for (#:unless ,cnd . ,clauses) ,body))
@@ -129,7 +130,7 @@
 
 ;; applies syntax sugar to make expressions prettier
 (define/match (compact-expr expr)
-  [('(join)) 'empty]
+  [('(lub)) 'empty]
   [(`(case ,cnd [#t ,thn] [#f ,els])) `(if ,cnd ,thn ,els)]
   [(`(for ,clauses-1 (for ,clauses-2 ,body)))
    `(for ,(append clauses-1 clauses-2) ,body)]

@@ -78,7 +78,7 @@ sub-expression: ~s
 
 ;; whether we need to remember the type of an expression
 (define/match (should-remember-type? expr)
-  [((or (e-join _) (e-join-in _ _ _) (e-map-get _ _)
+  [((or (e-lub _) (e-set-bind _ _ _) (e-map-get _ _)
         (e-cond _ _ _) (e-fix _ _))) #t]
   ;; we actually don't need to remember primitives; see do-prim in compile.rkt
   ;; [((e-prim _)) #t]
@@ -204,10 +204,10 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (with-tone tone (expr-check subj (t-base 'bool)))
      (define body-type (expr-check body type))
      (unless (lattice-type? body-type)
-       (fail "cannot join at non-lattice type ~s" (type->sexp body-type)))
+       (fail "cannot take lub at non-lattice type ~s" (type->sexp body-type)))
      body-type]
 
-    [(e-join-in pat arg body)
+    [(e-set-bind pat arg body)
      (define elem-type
        (match (expr-check arg)
          [(t-set a) a]
@@ -216,7 +216,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (define body-type
        (visit-branch 'any elem-type type (case-branch pat body)))
      (unless (lattice-type? body-type)
-       (error "cannot join at non-lattice type ~s" (type->sexp type)))
+       (error "cannot take lub at non-lattice type ~s" (type->sexp type)))
      body-type]
 
     ;; ===== SYNTHESIS-ONLY EXPRESSIONS =====
@@ -291,10 +291,10 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (with-var var (hyp 'mono type)
        (expr-check body type))]
 
-    [(e-join as) #:when (not type) (fail "join expressions not inferrable")]
-    [(e-join as) #:when type
+    [(e-lub as) #:when (not type) (fail "lub expressions not inferrable")]
+    [(e-lub as) #:when type
      (unless (lattice-type? type)
-       (error "cannot join at non-lattice type ~s" (type->sexp type)))
+       (error "cannot take lub at non-lattice type ~s" (type->sexp type)))
      (for ([a as]) (expr-check a type))
      type]
 
@@ -303,7 +303,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
     ;; we can synthesize these (assuming their subterms synthesize), so we do,
     ;; even though it's non-standard.
     ;;
-    ;; TODO: synthesize join expressions when possible
+    ;; TODO: synthesize lub expressions when possible
     [(e-prim p) #:when type (if (prim-has-type? p type) type (fail))]
     [(e-prim p) (let ([t (prim-type-infer p)])
                   (if t t (fail)))]
