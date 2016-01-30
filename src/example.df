@@ -109,10 +109,9 @@
 ;;      + (set (cons a c)
 ;;             for (cons a b) <- advisor
 ;;             for (cons (= b) c) <- ancestor))
-(ancestor = (fix ancestor
-                 (union
-                  advisor
-                  ;; (set (cons p p) for p <- person)
-                  (set (cons a c)
-                       for (cons a b) <- advisor
-                       for (cons (= b) c) <- ancestor))))
+(fix ancestor = (union
+                 advisor
+                 ;; (set (cons p p) for p <- person)
+                 (set (cons a c)
+                      for (cons a b) <- advisor
+                      for (cons (= b) c) <- ancestor)))

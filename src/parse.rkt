@@ -8,7 +8,8 @@
 ;; TODO: an exception class for parse failures.
 
 ;; we only consider prefix forms. so =, :, etc. are not included.
-(define decl-form? (or/c 'mono 'anti))
+;; we don't reuse tone? because 'any isn't a decl form.
+(define decl-form? (or/c 'mono 'anti 'fix))
 (define loop-form? (or/c 'for 'when 'unless))
 (define expr-form?
   (or/c 'as 'case 'cons 'extend-record 'fix 'for 'if 'let 'lub 'map 'proj 'quote
@@ -241,9 +242,6 @@
 
 ;;; Declaration/definition parsing
 ;; TODO?: defn->sexp
-;;
-;; TODO: "fix" decls; (fix x = ...) becomes (x = (fix x ...))
-;; (nested to-do: how to generalize to mutual recursion?)
 
 ;; A definition.
 ;; tone is either 'any, 'mono, or 'anti
@@ -279,15 +277,29 @@
 (define (parse-decl state d)
   (match-define (decl-state tone-sigs type-sigs) state)
   (define (ret x) (values (decl-state tone-sigs type-sigs) x))
+
   (define decl-tone
     (match d
       [(cons (? tone? tone) d-rest) (set! d d-rest) tone]
       [_ #f]))
-  (define (set-tone! n)
+  (define (set-tone! name)
     (when decl-tone
-     (set! tone-sigs (hash-set tone-sigs n decl-tone))))
-  (define (set-type! n t)
-    (set! type-sigs (hash-set type-sigs n t)))
+     (set! tone-sigs (hash-set tone-sigs name decl-tone))))
+  (define (set-type! name type)
+    (set! type-sigs (hash-set type-sigs name type)))
+
+  (define (make-defn name expr)
+    (set-tone! name)
+    (define tone (hash-ref tone-sigs name 'any))
+    (define type (hash-ref type-sigs name #f))
+    (set! tone-sigs (hash-remove tone-sigs name))
+    (set! type-sigs (hash-remove type-sigs name))
+    (ret (list (defn name tone type (parse-expr expr)))))
+
+  (define/match (parse-body body)
+    [(`(,expr)) expr]
+    [(`(,_ where . ,_)) body])
+
   (match d
     ;; just a tonicity declaration
     [`(,(? ident? names) ...) #:when decl-tone
@@ -300,21 +312,14 @@
        (set-tone! n)
        (set-type! n type))
      (ret '())]
-    ;; a value declaration
+    ;; a fixpoint value declaration
+    ;; TODO: generalize to allow mutual recursion?
+    [`(fix ,(? ident? name) = . ,body)
+     (make-defn name `(fix ,name ,(parse-body body)))]
+    ;; TODO: irrefutable pattern declarations
+    ;; a value or function declaration
     [`(,(? ident? name) ,(? ident? args) ... = . ,body)
-     (set-tone! name)
-     (define expr
-       `(λ ,@args
-          ,(match body
-             [`(,expr) expr]
-             [`(,expr where . ,decls) body])))
-     ;; grab tone & type
-     (define tone (hash-ref tone-sigs name 'any))
-     (define type (hash-ref type-sigs name #f))
-     (set! tone-sigs (hash-remove tone-sigs name))
-     (set! type-sigs (hash-remove type-sigs name))
-     ;; parse the decl & give it up.
-     (ret (list (defn name tone type (parse-expr expr))))]
+     (make-defn name `(λ ,@args ,(parse-body body)))]
     [_ (error "could not parse declaration:" d)]))
 
 ;; given some defns and an unparsed expr, parses the expr in the appropriate
