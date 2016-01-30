@@ -60,8 +60,8 @@
   ;; code by lexi-lambda in #racket on freenode.
   (with-syntax ([type/super (adjust-outer-context
                              #'enum-name #'(case-name enum-name))])
-       #'(define-struct/contract type/super ((field.name field.contract) ...)
-           #:transparent)))
+    #'(define-struct/contract type/super ((field.name field.contract) ...)
+        #:transparent)))
 
 (define-syntax-rule (enum/c (name arg/c ...) ...)
   (or/c (struct/c name arg/c ...) ...))
@@ -83,10 +83,14 @@
          index-of length=? map? foldl1 foldr1 rev-append
          read-file)
 
-(define (assert! t) (unless t (error "ASSERTION FAILURE")))
-(define (warn! msg) (displayln (format "WARNING: ~a" msg)) )
+(define (assert! t)
+  (unless t (error "ASSERTION FAILURE")))
 
-(define ((flip f) x y) (f y x))         ;do we need this?
+(define (warn! msg)
+  (displayln (format "WARNING: ~a" msg)) )
+
+(define ((flip f) x y)
+  (f y x))
 
 (define (print-error err)
   (printf "error: ~a\n" (exn-message err)))
