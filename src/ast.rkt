@@ -10,6 +10,12 @@
 (define tone? (or/c 'any 'mono 'anti))
 (define base-type? (or/c 'bool 'nat 'str))
 
+(define/match (tone-inverse o)
+  [('any) 'any]
+  [('mono) 'anti]
+  [('anti) 'mono]
+  [(#f) #f])
+
 ;; TODO?: make these types print better under ~a?
 (enum type
   (t-base name)

@@ -2,21 +2,6 @@
 (two = 2)
 
 
-;; subtyping tests
-(add3 : nat -> nat)
-(add3 = (+ 3))
-
-(somefns : (set (nat -> nat)))
-(somefns = (set (+ 3) (- 4) (fn x x)))
-
-;; this should be type-inferrable
-(mapfns1 = (map ["add3" (+ 3)] ["minus4" (- 4)]))
-(mapfns2 : (map str (nat -> nat)))
-(mapfns2 = mapfns1)
-(mapfns3 : (map str (nat -> nat)))
-(mapfns3 = (join mapfns1 (map ["zero" (fn x 0)])))
-
-
 ;; negation.
 (not : bool ->- bool)
 (not x = (unless x #t))

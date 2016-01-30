@@ -42,22 +42,18 @@ sub-expression: ~s
 (define (prim-has-type? p t)
   (define pt (prim-type-infer p))
   (if pt
-      (subtype? pt t)
+      (type=? pt t)
       (match* (p t)
-        [('= (t-fun 'any a (t-fun 'any b (t-base 'bool)))) (eqtype=? a b)]
-        [('<= (t-fun (or 'anti 'any) a
-                     (t-fun (or 'mono 'any) b (t-base 'bool))))
-         (eqtype=? a b)]
+        [('= (t-fun 'any a (t-fun 'any a (t-base 'bool)))) (eqtype? a)]
+        [('<= (t-fun 'anti a (t-fun 'mono a (t-base 'bool)))) (eqtype? a)]
         ;; TODO?: make size work for t-map, too?
-        [('size (t-fun (or 'mono 'any) (t-set a) (t-base 'nat))) (eqtype? a)]
-        [('keys (t-fun (or 'mono 'any) (t-map a _) (t-set b))) (eqtype=? a b)]
-        [('lookup (t-fun (or 'mono 'any)
-                         (t-map k v1)
+        [('size (t-fun 'mono (t-set a) (t-base 'nat))) (eqtype? a)]
+        [('keys (t-fun 'mono (t-map a _) (t-set a))) #t]
+        [('lookup (t-fun 'any (t-map k v1)
                          (t-fun 'any k (t-sum (hash-table ['none (t-tuple '())]
-                                                          ['just v2]
-                                                          [_ _] ...)))))
-         ;; as long as v1 & v2 are type-compatible we're ok.
-         (type-compatible? v1 v2)]
+                                                          ['just v2])))))
+         ;; hash-table can't do nonlinear pattern matching.
+         (type=? v1 v2)]
         ;; print is actually *bitonic*, since it's constant, but we don't have a
         ;; way to represent that in its type.
         [('print (t-fun _ _ (t-tuple '()))) #t]
@@ -121,7 +117,7 @@ sub-expression: ~s
 ;;; ========== Expression elaboration ==========
 ;; if `type' is #f, we're inferring.
 ;; if not, we're checking.
-;; returns the type of `expr', which is always be a subtype of `type'.
+;; returns the type of `expr' (which is type=? to `type' if provided).
 (define (expr-check expr [type #f])
   (parameterize ([expr-stack (cons expr (expr-stack))])
     (define expr-type (infer expr type))
@@ -130,8 +126,8 @@ sub-expression: ~s
     (when (should-remember-type? expr)
       (set-info! expr expr-type))
 
-    ;; check (expr-type <: type).
-    (when (and type (not (subtype? expr-type type)))
+    ;; check (expr-type = type).
+    (when (and type (not (type=? expr-type type)))
       (elab-error
 "has type:      ~s
 but we expect: ~s" (type->sexp expr-type) (type->sexp type)))
@@ -224,14 +220,9 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
 
     [(e-var n)
      (match (env-ref (elab-env) n (lambda () (fail "~a is not bound" n)))
-       ;; TODO: better error message.
+       [(hyp (or 'any 'mono) t) t]
        [(hyp #f _) (fail "variable ~a is hidden due to tonicity" n)]
-       ;; [(hyp (or 'any 'mono) t) t]
-       ;; [(hyp 'anti t) (fail "~a is an antitone variable" n)]
-       ;; alternative way to phrase this:
-       [(hyp o t) #:when (subtone? o 'mono) t]
-       [(hyp _ _) (fail "non-monotone use of variable ~a" n)]
-       )]
+       [(hyp _ _) (fail "non-monotone use of variable ~a" n)])]
 
     [(e-app func arg)
      (match (expr-check func)
@@ -318,8 +309,8 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (match type
        [#f (t-record (hash-map-values expr-check fields))]
        [(t-record field-types)
-        ;; we return the inferred type, and the subtype check will ensure it
-        ;; has all the necessary fields.
+        ;; we return the inferred type; expr-check will ensure it has all the
+        ;; necessary fields.
         (t-record (for/hash ([(n e) fields])
                     (define (err) (fail "extra field: ~a" n))
                     (values n (expr-check e (hash-ref field-types e err)))))]
@@ -338,7 +329,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
     [(e-set elems)
      (with-tone 'any
        (match type
-         [#f (t-set (foldl1 type-lub (map expr-check elems)))]
+         [#f (t-set (types-unify (map expr-check elems)))]
          [(t-set a) (for ([elem elems]) (expr-check elem a)) type]
          [_ (fail "set expression must have set type")]))]
 
@@ -347,8 +338,8 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      ;; NB. we don't need to check the key type is an equality type; expr-check
      ;; will do that for us.
      (match type
-       [#f (t-map (foldl1 type-lub (with-tone 'any (map expr-check keys)))
-                  (foldl1 type-lub (map expr-check values)))]
+       [#f (t-map (types-unify (with-tone 'any (map expr-check keys)))
+                  (types-unify (map expr-check values)))]
        [(t-map kt vt)
         (with-tone 'any (for ([k keys]) (expr-check k kt)))
         (for ([v values]) (expr-check v vt))
@@ -368,7 +359,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      ;; when checking subj.
      (define check-branch (curry visit-branch 'any subj-t type))
      (define branch-types (map check-branch branches))
-     (or type (foldl1 type-lub branch-types))])
+     (or type (types-unify branch-types))])
   ;; ---------- END BIG GIANT CASE ANALYSIS ----------
   )
 
@@ -388,7 +379,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
   [((p-wild) _) (hash)]
   [((p-var name) t) (hash name t)]
   [((p-lit l) t)
-   (if (subtype? t (or (lit-type l) (elab-error "unknown literal type")))
+   (if (type=? t (or (lit-type l) (elab-error "unknown literal type")))
        (hash)
        (elab-error "wrong type when matched against literal"))]
   [((and pat (p-tuple pats)) (t-tuple types)) #:when (length=? pats types)
@@ -412,27 +403,20 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
    (unless (andmap (lambda (x) (equal? vars (hash-key-set x))) hashes)
      (elab-error "all branches of or-pattern must bind same variables: ~s"
                  (type->sexp pat)))
-   (foldl1 (lambda (x y) (hash-union-with x y type-lub)) hashes)]
+   (foldl1 (lambda (x y) (hash-union-with x y type-unify)) hashes)]
   [((p-let v body result-p) t)
    ;; FIXME: assumes we're matching with tonicity 'any
    (pat-check result-p (with-var v (hyp 'any t) (expr-check body)))])
 
 (define (union-pat-envs pat hashes)
   (for/fold ([var-types (hash)]) ([h hashes])
-    ;; we use type-glb because, when the same variable is used multiple times,
-    ;; it must have a value which satisfies *all* of the types it is assigned.
-    (hash-union-with var-types h eqtype-glb)))
+    (hash-union-with var-types h eqtype-unify)))
 
-;; finds glb of two types, checking that they are eqtypes. this is used for
-;; combining types of pattern variables which are used multiple times. these
-;; need to be eqtypes so that we can test equality; they are combined with
-;; type-glb the variable must have a value which satisfies *all* the types it
-;; was assigned.
-;;
-;; for this to be a reasonable approach requires that no equality type have a
-;; non-equality supertype. luckily, this is true for Datafun.
-(define (eqtype-glb a b)
-  (define type (type-glb a b))
+;; "unifies" (checks equality of) two types, checking also that they are
+;; eqtypes. this is used for combining types of pattern variables which are used
+;; multiple times. these need to be eqtypes so that we can test equality.
+(define (eqtype-unify a b)
+  (define type (type-unify a b))
   (unless (eqtype? type)
     ;; TODO: as usual, better error message
     (elab-error "pattern variable used multiple times has non-equality type ~s"
