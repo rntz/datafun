@@ -149,7 +149,7 @@
 (define-syntax-rule (generate/stream body ...)
   (sequence->stream (in-generator body ...)))
 (define-syntax-rule (generate/list body ...)
-  (for/list ([i (in-generator body ...)]) i))
+  (sequence->list (in-generator body ...)))
 (define-syntax-rule (for/generate/list clauses body ...)
   (generate/list (for clauses body ...)))
 
