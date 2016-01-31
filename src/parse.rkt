@@ -42,7 +42,7 @@
      [(e-record fs) `(record ,@(for/list ([(n e) fs])
                                  `(,n ,(expr->sexp e))))]
      [(e-record-merge l r) `(record-merge ,(expr->sexp l) ,(expr->sexp r))]
-     [(e-tag t e) `(',t ,(expr->sexp e))]
+     [(e-tag t es) `(',t ,@(map expr->sexp es))]
      [(e-case subj branches)
       `(case ,(expr->sexp subj)
          ,@(for/list ([b branches])
@@ -86,8 +86,9 @@
     [`(record-merge ,a ,b) (e-record-merge (parse-expr a) (parse-expr b))]
     [`(extend-record ,base . ,as)
      (e-record-merge (parse-expr base) (parse-expr `(record . ,as)))]
-    [(or `(tag ,name ,e) `(',name ,e)) #:when (symbol? name)
-     (e-tag name (parse-expr e))]
+    [`',(? symbol? name) (e-tag name '())]
+    [(or `(tag ,name . ,es) `(',name . ,es)) #:when (symbol? name)
+     (e-tag name (map parse-expr es))]
     [`(case ,subj (,ps ,es) ...)
       (e-case (parse-expr subj)
         (for/list ([p ps] [e es])
@@ -169,8 +170,12 @@
     [(t-name name) name]
     [(t-base name) name]
     [(t-tuple ts) `(* ,@(map type->sexp ts))]
-    [(t-record fields) `(record ,@(hash->sexps fields))]
-    [(t-sum branches) `(+ ,@(hash->sexps branches))]
+    [(t-record fields)
+     `(record ,@(for/list ([(name type) fields])
+                  `(,name ,(type->sexp type))))]
+    [(t-sum branches)
+     `(+ ,@(for/list ([(name types) branches])
+             `(,name ,@(map type->sexp types))))]
     [(t-set a) `(set ,(type->sexp a))]
     [(t-map k v) `(map ,(type->sexp k) ,(type->sexp v))]
     [(t-fun tone a b)
@@ -190,9 +195,11 @@
     [`(record (,ns ,ts) ...)
      (t-record (for/hash ([n ns] [t ts])
                  (values n (parse-type t))))]
-    [`(+ (,tags ,types) ...)
-      (t-sum (for/hash ([tag tags] [type types])
-               (values tag (parse-type type))))]
+    [`(+ . ,branches)
+     (t-sum (for/hash ([b branches])
+              (match b
+                [(? symbol? name) (values name '())]
+                [(cons name types) (values name (map parse-type types))])))]
     [`(,_ ... ,(? arrow?) ,_) (parse-arrow-type t)]
     [`(set ,a) (t-set (parse-type a))]
     [`(map ,k ,v) (t-map (parse-type k) (parse-type v))]
@@ -220,8 +227,8 @@
     [(p-wild) '_]
     [(p-var x) x]
     [(p-lit x) x]
-    [(p-tuple ps) `(cons ,(map pat->sexp ps))]
-    [(p-tag name p) `(',name ,(pat->sexp p))]
+    [(p-tuple ps) `(cons ,@(map pat->sexp ps))]
+    [(p-tag name pats) `(',name ,@(map pat->sexp pats))]
     [(p-or `(,p)) (pat->sexp p)]
     [(p-or pats) `(or ,@(map pat->sexp pats))]
     [(p-and `(,p)) (pat->sexp p)]
@@ -238,8 +245,9 @@
     [(? ident?) (p-var p)]
     [(? lit?) (p-lit p)]
     [`(cons ,ps ...) (p-tuple (map parse-pat ps))]
-    [(or `(tag ,name ,pat) `(',name ,pat))
-      (p-tag name (parse-pat pat))]
+    [`',(? symbol? name) (p-tag name '())]
+    [(or `(tag ,name . ,pats) `(',name . ,pats))
+      (p-tag name (map parse-pat pats))]
     [`(or ,ps ...) (p-or (map parse-pat ps))]
     [`(and ,ps ...) (p-and (map parse-pat ps))]
     [`(let ,x ,e ,p) (p-let x (parse-expr e) (parse-pat p))]

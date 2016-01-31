@@ -43,7 +43,7 @@
     [(t-name n) (env-ref-type e n (lambda () (orelse n)))]
     [(t-tuple ts) (t-tuple (map r ts))]
     [(t-record fs) (t-record (hash-map-values r fs))]
-    [(t-sum bs) (t-sum (hash-map-values r bs))]
+    [(t-sum bs) (t-sum (hash-map-values (curry map r) bs))]
     [(t-fun o a b) (t-fun o (r a) (r b))]
     [(t-set a) (t-set (r a))]
     [(t-map k v) (t-map (r k) (r v))]))

@@ -60,8 +60,8 @@ sub-expression: ~s
         [('keys (t-fun (or 'mono 'any) (t-map a _) (t-set b))) (eqtype=? a b)]
         [('lookup (t-fun (or 'mono 'any)
                          (t-map k v1)
-                         (t-fun 'any k (t-sum (hash-table ['none (t-tuple '())]
-                                                          ['just v2]
+                         (t-fun 'any k (t-sum (hash-table ['none (list)]
+                                                          ['just (list v2)]
                                                           [_ _] ...)))))
          ;; as long as v1 & v2 are type-compatible we're ok.
          (type-compatible? v1 v2)]
@@ -211,7 +211,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
 
     [(e-app (e-prim 'lookup) arg)
      (match (expr-check arg)
-       [(t-map k v) (t-fun 'any k (t-sum (hash 'none (t-tuple '()) 'just v)))]
+       [(t-map k v) (t-fun 'any k (t-sum (hash 'none '() 'just (list v))))]
        [t (fail "argument to `lookup' of non-map type ~s" (type->sexp t))])]
 
     ;; ===== TRANSPARENT / BOTH SYNTHESIS AND ANALYSIS EXPRESSIONS =====
@@ -348,12 +348,16 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
                     (values n (expr-check e (hash-ref field-types e err)))))]
        [_ (fail "record expression must have record type")])]
 
-    [(e-tag name subj)
+    [(e-tag name exprs)
      (match type
-       [#f (t-sum (hash name (expr-check subj)))]
+       [#f (t-sum (hash name (map expr-check exprs)))]
        [(t-sum branches)
         (define (err) (fail "no such branch in sum type: ~a" name))
-        (expr-check subj (hash-ref branches name err))
+        (define types (hash-ref branches name err))
+        (unless (length=? types exprs)
+          ;; TODO: better error message
+          (fail "constructor length mismatch"))
+        (for ([e exprs] [t types]) (expr-check e t))
         type]
        [_ (fail "tagged expression must have sum type")])]
 
@@ -362,7 +366,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (define expr-type
        (foldl1 type-lub (for/list ([a as]) (expr-check a type))))
      (unless (lattice-type? expr-type)
-       (error "cannot take lub at non-lattice type ~s" (type->sexp expr-type)))
+       (fail "cannot take lub at non-lattice type ~s" (type->sexp expr-type)))
      expr-type]
 
     [(e-set '()) #:when (not type) (fail "can't infer type of empty set")]
@@ -423,18 +427,21 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
        (hash)
        (elab-error "wrong type when matched against literal"))]
   [((and pat (p-tuple pats)) (t-tuple types)) #:when (length=? pats types)
-   (union-pat-envs pat (map pat-check pats types))]
+   (union-pat-envs (map pat-check pats types))]
   [((p-tuple _) (t-tuple _)) (elab-error "wrong length tuple pattern")]
   [((p-tuple _) t) (elab-error "not a tuple type: ~s" (type->sexp t))]
-  [((p-tag tag pat) (t-sum bs))
-   (if (dict-has-key? bs tag)
-       (pat-check pat (hash-ref bs tag))
-       ;; TODO: this is actually ok, it's just dead code; should warn, not
-       ;; error
-       (elab-error "(WARNING) no such branch in tagged sum"))]
+  [((p-tag tag pats) (t-sum bs))
+   (define (err)
+     ;; TODO: this is actually ok, it's just dead code; should warn, not error
+     (elab-error "(WARNING) no such branch in tagged sum"))
+   (define types (hash-ref bs tag err))
+   (unless (length=? pats types)
+     ;; TODO: better error message
+     (elab-error "constructor length mismatch"))
+   (union-pat-envs (map pat-check pats types))]
   [((p-tag _ _) _) (elab-error "not a sum")]
   [((and pat (p-and ps)) t)
-   (union-pat-envs pat (map (lambda (p) (pat-check p t)) ps))]
+   (union-pat-envs (map (lambda (p) (pat-check p t)) ps))]
   [((and pat (p-or ps)) t)
    (when (empty? ps)
      (elab-error "or-pattern cannot be empty: ~s" (pat->sexp pat)))
@@ -448,7 +455,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
    ;; FIXME: assumes we're matching with tonicity 'any
    (pat-check result-p (with-var v (hyp 'any t) (expr-check body)))])
 
-(define (union-pat-envs pat hashes)
+(define (union-pat-envs hashes)
   (for/fold ([var-types (hash)]) ([h hashes])
     ;; we use type-glb because, when the same variable is used multiple times,
     ;; it must have a value which satisfies *all* of the types it is assigned.

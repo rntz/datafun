@@ -17,8 +17,8 @@
   (t-tuple types)
   ;; fields is a hash from field names to types
   (t-record fields)
-  ;; branches is a hash from branch names to types
-  (t-sum branches)
+  ;; branches is a hash from branch names to *lists* of types
+  (t-sum [branches (hash/c symbol? (listof type?) #:immutable #t)])
   (t-fun tone arg result)
   (t-set type)
   ;; key must be eqtype?
@@ -95,7 +95,7 @@
   (e-record-merge left right) ;; merges two records, right-biased.
 
   ;; ---------- sums ----------
-  (e-tag tag expr)
+  (e-tag tag exprs)
   ;; branches is a list of case-branch structs.
   (e-case subject branches))
 
@@ -107,7 +107,7 @@
   (p-wild)
   (p-var name)
   (p-tuple pats)
-  (p-tag tag pat)
+  (p-tag tag [pats (listof pat?)])
   (p-lit lit)
   (p-and pats)
   (p-or pats)

@@ -20,7 +20,7 @@
     [(t-name _) #f]
     [(t-tuple ts) (andmap type-wf? ts)]
     [(t-record as) ((hash/c symbol? type-wf? #:immutable #t) as)]
-    [(t-sum bs) ((hash/c symbol? type-wf? #:immutable #t) bs)]
+    [(t-sum bs) ((hash/c symbol? (listof type-wf?) #:immutable #t) bs)]
     [(t-fun _ a b) (and (type-wf? a) (type-wf? b))]
     [(t-set a) (type-wf? a)]
     [(t-map k v) (and (type-wf? k) (eqtype? k) (type-wf? v))]
@@ -51,9 +51,9 @@
   (-> type-wf? boolean?)
   (match x
     [(t-base _) #t]
-    [(or (t-record (app hash-values as)) (t-sum (app hash-values as))
-         (t-tuple as))
-     (andmap eqtype? as)]
+    [(t-tuple as)  (andmap eqtype? as)]
+    [(t-record as) (andmap eqtype? (hash-values as))]
+    [(t-sum as)    (andmap eqtype? (append* (hash-values as)))]
     [(t-fun _ _ _) #f]
     [(t-set a) (eqtype? a)]
     [(t-map k v) (assert! (eqtype? k)) (eqtype? v)]))
@@ -64,10 +64,9 @@
     [(t-base 'bool) #t]
     [(t-set a) (finite-type? a)]
     [(t-map k v) (and (finite-type? k) (finite-type? v))]
-    [(or (t-tuple as)
-         (t-record (app hash-values as))
-         (t-sum (app hash-values as)))
-     (andmap finite-type? as)]
+    [(t-tuple as)  (andmap finite-type? as)]
+    [(t-record as) (andmap finite-type? (hash-values as))]
+    [(t-sum as)    (andmap finite-type? (append* (hash-values as)))]
     [(t-fun _ a b) (andmap finite-type? (list a b))]
     [_ #f]))
 
@@ -92,9 +91,9 @@
    (and (set=? (hash-key-set as) (hash-key-set bs))
         (for/and ([(field a) as]) (subtype? a (hash-ref bs field))))]
   [((t-sum as) (t-sum bs))
-   (for/and ([(k v) as])
+   (for/and ([(k vs) as])
      (and (hash-has-key? bs k)
-          (subtype? v (hash-ref bs k))))]
+          (map? subtype? vs (hash-ref bs k))))]
   [((t-fun o1 a1 b1) (t-fun o2 a2 b2))
    ;; the reversal of o1 and o2 in the call to subtype? is deliberate
    (and (subtone? o2 o1) (subtype? a2 a1) (subtype? b1 b2))]
@@ -114,7 +113,7 @@
     [((t-record as) (t-record bs))
      #:when (set=? (hash-key-set as) (hash-key-set bs))
      (t-record (hash-intersection-with as bs lub))]
-    [((t-sum as) (t-sum bs)) (t-sum (union as bs lub))]
+    [((t-sum as) (t-sum bs)) (t-sum (union as bs (curry unifys lub?)))]
     [((t-fun o a x) (t-fun p b y))
      (t-fun (tone-unify (not lub?) o p) (glb a b) (lub x y))]
     [((t-set a) (t-set b)) (t-set (lub a b))]

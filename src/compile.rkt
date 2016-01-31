@@ -48,7 +48,7 @@
                             [x (list #`'#,n (do-expr e))])
                   x))]
     [(e-record-merge a b) #`(hash-union-right #,(do-expr a) #,(do-expr b))]
-    [(e-tag t e) #`(list '#,t #,(do-expr e))]
+    [(e-tag t es) #`(list '#,t #,@(map do-expr es))]
     [(e-case subj branches)
      #`(match #,(do-expr subj) #,@(do-case-branches branches))]
     [(e-lub es) (apply lub (map do-expr es))]
@@ -92,7 +92,7 @@
     [((p-wild)) #'_]
     [((p-var x)) #`#,(hash-ref! ids x (lambda () (gensym x)))]
     [((p-tuple ps)) #`(list #,@(map visit ps))]
-    [((p-tag tag pat)) #`(list '#,tag #,(visit pat))]
+    [((p-tag tag pats)) #`(list '#,tag #,@(map visit pats))]
     [((p-lit l)) #`'#,l]
     [((p-and ps)) #`(and #,@(map visit ps))]
     [((p-or ps)) #`(or #,@(map visit ps))]
