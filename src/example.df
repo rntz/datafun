@@ -71,13 +71,16 @@
 
 
 ;; operations on sets of naturals
-(member : nat -> (set nat) ~> bool)
-(member a X = ((= a x) for x <- X))
+(nat-member : nat -> (set nat) ~> bool)
+(nat-member a X = ((= a x) for x <- X))
+
+(str-member : str -> (set str) ~> bool)
+(str-member a X = ((= a x) for x <- X))
 
 (setminus : (set nat) ~> (set nat) ->- (set nat))
 (setminus X Y = (set x
                  for x <- X
-                 unless (member x Y)))
+                 unless (nat-member x Y)))
 
 ;; set comprehensions
 (some-nats : (set nat))
@@ -119,6 +122,11 @@
 (refl : (set str) ~> (set (* str str)))
 (refl X = (set (cons x x) for x <- X))
 
+;; making a relation symmetric
+(symm : (set (* str str)) ~> (set (* str str)))
+(symm X = (set (cons a b) (cons b a)
+               for (cons a b) <- X))
+
 ;; transitive closure, more generically
 (transitive-closure : (set (* str str)) ~> (set (* str str)))
 (transitive-closure R = (fix T R (compose R T)))
@@ -126,7 +134,22 @@
 (ancestor-2 = (transitive-closure advisor))
 
 ;; reflexive transitive closure
-(to-poset : (set str) (set (* str str)) ~> (set (* str str)))
-(to-poset domain R = (fix self (refl domain) (compose self R)))
+(dag->preorder : (set str) (set (* str str)) ~> (set (* str str)))
+(dag->preorder V E = (fix self (refl V) (compose self E)))
 
-(ancestor-3 = (to-poset person advisor))
+(ancestor-3 = (dag->preorder person advisor))
+
+;; reachability
+(reachable : (set (* str str)) ~> str str -> bool)
+(reachable R a b = (#t for (cons (= a) (= b)) <- (dag->preorder domain R))
+  where (mono domain = (set x for (cons x _) <- R)))
+
+(ancestor? : str str -> bool)
+(ancestor? = (reachable ancestor))
+
+;; reachability, again
+(reachable-from : (set (* str str)) ~> str -> (set str))
+(reachable-from R start = (fix S
+    (set start)
+    (set b for (cons a b) <- R
+           when (str-member a S))))
