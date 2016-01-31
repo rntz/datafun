@@ -18,6 +18,11 @@
 EVENTUALLY
 - implement polymorphism
 
+- a reasonable way of handling binding. maybe abt.rkt? in particular, the way we
+  handle defined types is annoying: we have to traverse every type to substitute
+  away all currently defined type-names as soon as we encounter it, because
+  nothing handles (t-name _) properly.
+
 TO DOCUMENT
 - update README.md
 
