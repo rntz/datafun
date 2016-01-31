@@ -72,6 +72,7 @@
 ;;; Enumeration types ;;;
 (define-syntax-rule (enum name branch ...)
   (begin
+    ;; FIXME: shouldn't expose a constructor for `name'.
     (struct name () #:transparent)
     (enum-case name branch) ...))
 
