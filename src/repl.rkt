@@ -28,19 +28,20 @@
   (eval-decls (read-file filename) env))
 
 (define (eval-decls lines env)
-  (eval-defns (parse-all-decls lines) env))
+  (eval-defns (parse-decls lines) env))
 
-(define (eval-defns defns env)
-  (for ([d defns] #:when (not (equal? 'any (defn-tone d))))
-    (error "monotone/antitone definitions not allowed at top-level: " d))
-  (for ([d defns])
+;; evaluates the d-vals in a list of defns. returns updated env.
+(define/contract (eval-defns defns env)
+  (-> (listof defn?) env? env?)
+  (for ([d defns] #:when (d-val? d))
+    (unless (equal? 'any (d-val-tone d))
+      (error "monotone/antitone definitions not allowed at top-level: " d))
     (set! env (eval-defn d env)))
   env)
 
-;; evaluates a definition in a global-env. returns updated env.
+;; evaluates a d-val in a global-env. returns updated env.
 (define (eval-defn d env)
-  (match-define (defn name tone decl-type expr) d)
-  (assert! (equal? 'any tone))
+  (match-define (d-val name 'any decl-type expr) d)
   (debug (printf "defn: ~a = ~s\n" name (expr->sexp expr)))
   ;; elaborate the expression.
   (define-values (elab-info type)
@@ -62,9 +63,6 @@
   ;; env-box is a box containing a global-env mapping names to globals.
   (define (env) (unbox env-box))
   (define (set-env! e) (set-box! env-box e))
-
-  ;; what we use to parse decls. gets set! repeatedly in the main loop.
-  (define decl-parser empty-decl-state)
 
   (define (handle-expr expr)
     (debug (printf "expr: ~s\n" (expr->sexp expr)))
@@ -92,23 +90,23 @@ could not parse expression: ~a" (exn-message e1) (exn-message e2))))
                           (with-handlers ([exn:fail? (curry on-err e1)])
                             (parse-expr line)))
                         (lambda () (handle-expr expr)))])
-       (define-values (new-state defns) (parse-decl decl-parser line))
-       (set! decl-parser new-state)
+       (define defns (generate/list (parse-decl! line)))
        (lambda () (handle-defns defns)))))
 
   ;; main loop
   (let/ec quit
-    (let loop ()
-      (display "- DF> ")
-      (with-handlers ([exn:fail? show-err])
-        (match (read)
-          [(or #:quit (? eof-object?)) (quit)]
-          [#:debug (df-debug (not (df-debug)))]
-          [`(#:load ,filename)
-           (unless (string? filename) (error "filename must be a string"))
-           (set-env! (eval-file filename (env)))]
-          [#:env (for ([(name g) (env)])
-                   (match-define (global type value) g)
-                   (printf "~a : ~s = ~v\n" name (type->sexp type) value))]
-          [line (handle-line line)]))
-      (loop))))
+    (with-decl-parser
+     (let loop ()
+       (display "- DF> ")
+       (with-handlers ([exn:fail? show-err])
+         (match (read)
+           [(or #:quit (? eof-object?)) (quit)]
+           [#:debug (df-debug (not (df-debug)))]
+           [`(#:load ,filename)
+            (unless (string? filename) (error "filename must be a string"))
+            (set-env! (eval-file filename (env)))]
+           [#:env (for ([(name g) (env)])
+                    (match-define (global type value) g)
+                    (printf "~a : ~s = ~v\n" name (type->sexp type) value))]
+           [line (handle-line line)]))
+       (loop)))))
