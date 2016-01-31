@@ -3,9 +3,9 @@
 (require racket (for-syntax syntax/parse))
 
 
-;;; Syntax utilities
+;;; Syntax utilities ;;;
 (provide
-  define-syntax-parser TODO fn enum enum-case enum/c match? match/c
+  define-syntax-parser TODO fn exception match? match/c enum enum-case enum/c
   ;; re-export
   (for-syntax syntax-parse syntax-parser))
 
@@ -23,6 +23,7 @@
 (define-syntax-parser TODO
   [_:id #'(error "TODO: unimplemented")])
 
+;;;; function definitions ;;;;
 (begin-for-syntax
   (define-syntax-class fn-clause
     (pattern ((param ...) body ...)
@@ -38,6 +39,37 @@
         [(c.pattern) c.body ...]
         ...)])
 
+;;;; exceptions ;;;;
+(define-for-syntax (format-id fmt id)
+  (datum->syntax id (string->symbol (format fmt (syntax->datum id)))))
+
+(define-syntax-parser exception
+  [(_ name) #'(exception name exn:fail)]
+  [(_ name parent)
+   (with-syntax ([exn:name       (format-id "exn:~a"      #'name)]
+                 [make-exn:name  (format-id "make-exn:~a" #'name)]
+                 [raise-name     (format-id "raise-~a"    #'name)])
+    #'(begin
+        (struct exn:name parent ()
+          #:transparent
+          #:extra-constructor-name make-exn:name)
+        (define (raise-name message)
+          (raise (make-exn:name message (current-continuation-marks))))))])
+
+;;;; pattern matching ;;;;
+(begin-for-syntax
+  (define-splicing-syntax-class match-branch
+    (pattern (~seq pattern #:when condition))
+    (pattern pattern #:attr condition #'#t)))
+
+(define-syntax-parser (match? e p:match-branch ...)
+  #'(match e [p.pattern #:when p.condition #t] ... [_ #f]))
+
+(define-syntax-rule (match/c pattern ...)
+  (lambda (x) (match? x pattern ...)))
+
+
+;;; Enumeration types ;;;
 (define-syntax-rule (enum name branch ...)
   (begin
     (struct name () #:transparent)
@@ -66,19 +98,8 @@
 (define-syntax-rule (enum/c (name arg/c ...) ...)
   (or/c (struct/c name arg/c ...) ...))
 
-(begin-for-syntax
-  (define-splicing-syntax-class match-branch
-    (pattern (~seq pattern #:when condition))
-    (pattern pattern #:attr condition #'#t)))
-
-(define-syntax-parser (match? e p:match-branch ...)
-  #'(match e [p.pattern #:when p.condition #t] ... [_ #f]))
-
-(define-syntax-rule (match/c pattern ...)
-  (lambda (x) (match? x pattern ...)))
-
 
-;;; Miscellaneous utilities
+;;; Miscellaneous utilities ;;;
 (provide assert! warn! flip print-error
          index-of length=? map? foldl1 foldr1 rev-append
          read-file)
@@ -126,7 +147,7 @@
             (loop (read) (cons line acc)))))))
 
 
-;;; stream and generator utilities
+;;; stream and generator utilities ;;;
 (require racket/generator)
 (provide stream-take stream-append-lazy
   (all-from-out racket/generator)
@@ -154,7 +175,7 @@
   (generate/list (for clauses body ...)))
 
 
-;;; set utilities
+;;; set utilities ;;;
 (provide freeze-set set-unions set-intersects set-filter)
 
 (define (freeze-set s) (for/set ([x s]) x))
@@ -170,7 +191,7 @@
   (for/set ([x s] #:when (p x)) x))
 
 
-;;; hash utilities
+;;; hash utilities ;;;
 (provide freeze-hash hash-union-with hash-union-right hash-unions-right
          hash-intersection-with hash-filter-keys hash-select-keys
          hash-map-values hash-key-set)
@@ -208,7 +229,7 @@
     (f (dict-ref a k) (dict-ref b k))))
 
 
-;;; racket 6.2 compatibility shims.
+;;; racket 6.2 compatibility shims. ;;;
 (define-syntax-parser static-when
   [(_ condition body ...)
    (if (eval #'condition)
