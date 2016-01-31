@@ -153,3 +153,80 @@
     (set start)
     (set b for (cons a b) <- R
            when (str-member a S))))
+
+
+;; the WHILE language & static analysis
+(type label = nat)
+(type var = str)
+
+(type bool-op  = (+ eq le))
+(type arith-op = (+ add sub mul div))
+(type imm      = (+ (var var) (num nat)))
+(type expr     = (+ (imm imm)
+                    (arith arith-op imm imm)
+                    (test bool-op imm imm)))
+(type stmt     = (+ skip
+                    (assn var expr)
+                    (if expr label label)))
+
+;; some basic helper functions
+(imm-vars : imm -> (set var))
+(imm-vars i = (case i [('var x) (set x)] [_ (set)]))
+
+(expr-vars : expr -> (set var))
+(expr-vars e = (case e
+                 [('imm i) (imm-vars i)]
+                 [(or ('arith _ a b) ('test _ a b))
+                  (union (imm-vars a) (imm-vars b))]))
+
+(stmt-uses : stmt -> (set var))
+(stmt-uses s = (case s
+                 [('assn _ e) (expr-vars e)]
+                 [_ (set)]))
+
+(stmt-defines : stmt -> (set var))
+(stmt-defines s = (case s
+                    [('assn x _) (set x)]
+                    [_ (set)]))
+
+;; code flow
+(type code = (map label stmt))
+(type flow = (set (* label label)))
+
+(code->set : code -> (set (* label stmt)))
+(code->set C = (set (cons i s)
+                    for i <- (keys C)
+                    for s <- (case (lookup C i)
+                               [('just x) (set x)]
+                               ['none (as (set stmt) (set))])))
+
+(flow : code -> flow)
+(flow C = (union
+           ;; if-statements branch
+           ((set (cons i j) (cons i k))
+            for (cons i ('if _ j k)) <- (code->set C))
+           ;; otherwise, execution continues in a straight line
+           ((set (cons i (+ i 1)))
+            for (cons i (or 'skip ('assn _ _))) <- (code->set C)
+            for (= (+ i 1)) <- (keys C))))
+
+;; reaching definitions analysis
+(rd : code flow -> (set (* label label var)))
+(rd code flow =
+    (fix RD
+     (set (cons i i v)
+        for (cons i s) <- (code->set code)
+        for v <- (stmt-defines s))
+     (set (cons j l v)
+        for (cons j s) <- (code->set code)
+        ;; for any statement that flows to us
+        for (cons i (= j)) <- flow
+        ;; we inherit its defined variables
+        for (cons i l v) <- RD
+        ;; unless we redefine them
+        unless (#t for (= v) <- (stmt-defines s)))))
+
+;; (rd-2 : code flow -> (map (* label var) label))
+;; (rd-2 code flow = TODO)
+
+;; live variable analysis
