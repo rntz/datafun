@@ -3,8 +3,11 @@
 (require "util.rkt" "ast.rkt" "parse.rkt" "env.rkt" "elab.rkt" "runtime.rkt")
 (provide compile)
 
-;; contexts Γ are envs mapping variables to what they should compile to (an
-;; identifier, generally). info maps exprs to elaboration info; see elab.rkt.
+;; `env' is an env (see env.rkt) mapping variables to what they should compile
+;; to (an identifier, generally). it also maps type names to their definitions,
+;; but we don't care about that during compilation (I think).
+;;
+;; `info' is a hash mapping exprs to elaboration info; see elab.rkt.
 (define (compile expr #:env env #:info info)
   (parameterize ([elab-info info]
                  [compile-env env])
@@ -17,11 +20,12 @@
 (define (info e [orelse (lambda () (no-info e))])
   (hash-ref (elab-info) e orelse))
 
-(define compile-env (make-parameter #f))
+(define/contract compile-env (parameter/c env?) (make-parameter #f))
 (define-syntax-rule (with-var var id body ...)
-  (parameterize ([compile-env (env-bind var id (compile-env))]) body ...))
-(define-syntax-rule (with-env more-env body ...)
-  (parameterize ([compile-env (env-extend (compile-env) more-env)]) body ...))
+  (parameterize ([compile-env (env-bind-var var id (compile-env))]) body ...))
+(define-syntax-rule (with-env var-hash body ...)
+  (parameterize ([compile-env (env-bind-vars var-hash (compile-env))])
+    body ...))
 
 
 ;;; ---------- INTERNAL FUNCTIONS ----------
@@ -29,7 +33,7 @@
   (define (lub . args) #`(df-lub '#,(info e) (list #,@args)))
   (match e
     [(e-ann _ e) (do-expr e)]
-    [(e-var n) (env-ref (compile-env) n)]
+    [(e-var n) (env-ref-var (compile-env) n)]
     [(e-lit l) #`'#,l]
     [(e-prim p) (do-prim p)]
     [(e-lam v body)
@@ -72,6 +76,7 @@
      (define var (gensym v))
      #`(let ((#,var #,(do-expr expr)))
          #,(with-var v var (do-expr body)))]
+    [(e-let-type _ _ body) (do-expr body)]
     [(e-trustme e) (do-expr e)]))
 
 (define (do-case-branches branches)

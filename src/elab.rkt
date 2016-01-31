@@ -7,10 +7,18 @@
 ;; returns (values info-table type-of-expr)
 ;; if `type' is #f, we infer the type of `expr'.
 ;; otherwise, we check that `expr' has type `type'.
+;;
+;; `env' is an env (see env.rkt) mapping variables to their (closed, i.e.
+;; without use of t-name) types.
 (define (elab root-expr #:type [root-type #f] #:env [root-env empty-env])
   (parameterize ([elab-info (make-hasheq)]
                  [elab-env root-env])
-    (define type (expr-check root-expr root-type))
+    (define type
+      (if root-type
+          (expr-check-annotated root-expr root-type)
+          (expr-check root-expr)))
+    ;; must call (elab-info) *after* running expr-check, since expr-check
+    ;; updates elab-info.
     (values (elab-info) type)))
 
 
@@ -97,32 +105,48 @@ sub-expression: ~s
 (struct hyp (tone type) #:transparent)
 
 ;; elab-env is the parameter holding the current env.
-(define elab-env (make-parameter #f))
+(define/contract elab-env (parameter/c env?) (make-parameter #f))
 
 (define-syntax-rule (with-var var info body ...)
-  (parameterize ([elab-env (env-bind var info (elab-env))]) body ...))
-(define-syntax-rule (with-env more-env body ...)
-  (parameterize ([elab-env (env-extend (elab-env) more-env)]) body ...))
+  (parameterize ([elab-env (env-bind-var var info (elab-env))]) body ...))
+(define-syntax-rule (with-env var-hash body ...)
+  (parameterize ([elab-env (env-bind-vars var-hash (elab-env))]) body ...))
 (define-syntax-rule (with-tone tone body ...)
   (parameterize ([elab-env (env-for-tone tone (elab-env))]) body ...))
+(define-syntax-rule (with-type-definition name type body ...)
+  (parameterize ([elab-env (env-bind-type name type (elab-env))]) body ...))
 
 (define (env-for-tone tone Γ)
   (match tone
     ['mono Γ]
     ;; reverse the polarity!
-    ['anti (env-map (match-lambda [(hyp o t) (hyp (tone-inverse o) t)]) Γ)]
-    ['any  (env-map (match-lambda [(hyp (not 'any) t) (hyp #f t)] [x x]) Γ)]
+    ['anti (env-map-vars (match-lambda [(hyp o t) (hyp (tone-inverse o) t)]) Γ)]
+    ['any (env-map-vars (match-lambda [(hyp (not 'any) t) (hyp #f t)] [x x]) Γ)]
     ;; hilarious hack
     ['trustme
-     (env-map (match-lambda [(hyp (not #f) t) (hyp 'any t)] [x x]) Γ)]))
+     (env-map-vars (match-lambda [(hyp (not #f) t) (hyp 'any t)] [x x]) Γ)]))
 
 
 ;;; ========== Expression elaboration ==========
+
+;; checks an expression annotated with a type. is unlike expr-check in that it
+;; checks whether `type' is closed, and raises a type errors with a useful
+;; message if it isn't.
+(define/contract (expr-check-annotated expr type)
+  (-> expr? type? type-wf?)
+  (define (no-such-type n)
+    (elab-error "cannot understand type: ~s
+type name is not defined: ~a" (type->sexp type) n))
+  (expr-check expr
+   (parameterize ([expr-stack (cons expr (expr-stack))])
+     (env-subst-type (elab-env) type no-such-type))))
+
 ;; if `type' is #f, we're inferring.
 ;; if not, we're checking.
 ;; returns the type of `expr', which is always be a subtype of `type'.
 ;; TODO: rename to elab-expr?
-(define (expr-check expr [type #f])
+(define/contract (expr-check expr [type #f])
+  (->* (expr?) ((or/c type-wf? #f)) type-wf?)
   (parameterize ([expr-stack (cons expr (expr-stack))])
     (define expr-type (infer expr type))
 
@@ -147,7 +171,8 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
 
 ;; bad name.
 ;; if `type' is #f, we're inferring. if not, we're checking.
-(define (infer expr type)
+(define/contract (infer expr type)
+  (expr? (or/c type-wf? #f) . -> . type-wf?)
   (define (fail-raw msg)
     (if type
         (elab-error "cannot be given type: ~s\n~a" (type->sexp type) msg)
@@ -196,6 +221,9 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (define subj-t (with-tone tone (expr-check subj)))
      (with-var var (hyp tone subj-t) (expr-check body type))]
 
+    [(e-let-type name type body)
+     (with-type-definition name type (expr-check body type))]
+
     [(e-cond tone subj body)
      (unless (match? tone 'mono 'anti)
        ;; TODO: better error message.
@@ -220,11 +248,12 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
 
     ;; ===== SYNTHESIS-ONLY EXPRESSIONS =====
     ;; we infer these, and our caller checks the inferred type if necessary
-    [(e-ann t e) (expr-check e t) t]
+    ;; TODO: better error message for unbound type names
+    [(e-ann t e) (expr-check-annotated e t)]
     [(e-lit v) (lit-type v)]
 
     [(e-var n)
-     (match (env-ref (elab-env) n (lambda () (fail "~a is not bound" n)))
+     (match (env-ref-var (elab-env) n (lambda () (fail "~a is not bound" n)))
        ;; TODO: better error message.
        [(hyp #f _) (fail "variable ~a is hidden due to tonicity" n)]
        ;; [(hyp (or 'any 'mono) t) t]

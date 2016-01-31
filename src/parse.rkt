@@ -9,16 +9,18 @@
 
 ;; we only consider prefix forms. so =, :, etc. are not included.
 ;; we don't reuse tone? because 'any isn't a decl form.
-(define decl-form? (or/c 'mono 'anti 'fix))
+(define decl-form? (or/c 'type 'mono 'anti 'fix))
 (define loop-form? (or/c 'for 'when 'unless))
 (define expr-form?
   (or/c 'as 'case 'cons 'extend-record 'fix 'for 'if 'let 'lub 'map 'proj 'quote
         'record 'record-merge 'set 'tag 'trustme 'unless 'when 'λ 'π))
 (define ident-reserved? (or/c expr-form? decl-form? loop-form?))
-
-(define arrow? (or/c '-> '~> '->+ '->-))
+(define type-ident-reserved? base-type?)
 
 (define (ident? x) (and (symbol? x) (not (ident-reserved? x))))
+(define (type-ident? x) (and (symbol? x) (not (type-ident-reserved? x))))
+
+(define arrow? (or/c '-> '~> '->+ '->-))
 
 
 ;;; Expression parsing/pretty-printing
@@ -60,6 +62,9 @@
      [(e-let tone var expr body)
       `(let ([,@(match tone ['any '()] ['mono '(mono)] ['anti '(anti)])
               ,var = ,(expr->sexp expr)])
+         ,(expr->sexp body))]
+     [(e-let-type name type body)
+      `(let ([type ,name = ,(type->sexp type)])
          ,(expr->sexp body))]
      [(e-trustme e) `(trustme ,(expr->sexp e))])))
 
@@ -161,6 +166,7 @@
     (for/list ([(name type) h])
       `(,name ,(type->sexp type))))
   (match t
+    [(t-name name) name]
     [(t-base name) name]
     [(t-tuple ts) `(* ,@(map type->sexp ts))]
     [(t-record fields) `(record ,@(hash->sexps fields))]
@@ -299,6 +305,10 @@
     (yield (d-val name the-tone the-type (parse-expr expr))))
 
   (match d
+    ;; type declaration
+    [`(type ,(? type-ident? name) = ,type)
+     (yield (d-type name (parse-type type)))]
+
     ;; just a tonicity declaration
     [`(,(? ident? names) ...) #:when tone
      (for ([n names]) (set-tone! n tone))]
@@ -332,7 +342,5 @@
   (set! e (parse-expr e))
   (for/fold ([e e]) ([d (reverse defns)])
     (match d
-      [(d-val n k t body)
-       (e-let k n (if t (e-ann t body) body) e)]
-      ;; type declarations can be ignored
-      [(d-type _ _) e])))
+      [(d-val n k t body) (e-let k n (if t (e-ann t body) body) e)]
+      [(d-type name type) (e-let-type name type e)])))

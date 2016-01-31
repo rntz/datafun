@@ -10,8 +10,9 @@
 (define tone? (or/c 'any 'mono 'anti))
 (define base-type? (or/c 'bool 'nat 'str))
 
-;; TODO?: make these types print better under ~a?
+;; TODO?: make types, exprs, pats print better under ~a?
 (enum type
+  (t-name name) ;; types defined by a type decl
   (t-base name)
   (t-tuple types)
   ;; fields is a hash from field names to types
@@ -47,6 +48,8 @@
   ;; let binding. in theory, this is just unary case. but case doesn't account
   ;; for tone yet.
   (e-let tone var expr body)
+  ;; type definitions
+  (e-let-type name type body)
   ;; this moves all our mono/antitone variables into the unrestricted context.
   (e-trustme expr)
 

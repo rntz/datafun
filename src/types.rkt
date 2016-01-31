@@ -3,36 +3,42 @@
 (require "util.rkt" "ast.rkt" "parse.rkt")
 (provide (all-defined-out))
 
-(struct exn:type-error exn:fail () #:transparent)
-
-(define (type-error fmt . args) (type-error-raw (apply format fmt args)))
+(exception type-error)
 (define (type-error-raw msg)
-  (raise (exn:type-error (string-append "TYPE ERROR\n" msg)
-                         (current-continuation-marks))))
+  (raise-type-error (string-append "TYPE ERROR\n" msg)))
+(define (type-error fmt . args)
+  (type-error-raw (apply format fmt args)))
+
+;; type well-formedness
+;; currently used only in contracts.
+(define (type-wf? x)
+  (match x
+    [(t-base b) (base-type? b)]
+    ;; functions that operate on types are generally not expected to handle
+    ;; (t-name _); we substitute declared types for their referents as soon as
+    ;; possible. so we consider (t-name _) not well-formed.
+    [(t-name _) #f]
+    [(t-tuple ts) (andmap type-wf? ts)]
+    [(t-record as) ((hash/c symbol? type-wf? #:immutable #t) as)]
+    [(t-sum bs) ((hash/c symbol? type-wf? #:immutable #t) bs)]
+    [(t-fun _ a b) (and (type-wf? a) (type-wf? b))]
+    [(t-set a) (type-wf? a)]
+    [(t-map k v) (and (type-wf? k) (eqtype? k) (type-wf? v))]
+    ;; catch-all case, since we're used in contracts
+    [_ (assert! (not (type? x))) #f]))
 
 ;; type equality is simple, but beware! because we have subtyping, testing for
 ;; type equality is not the same as testing for type *compatibility*.
-(define type=? equal?)
+(define/contract (type=? a b) (-> type-wf? type-wf? boolean?) (equal? a b))
 
 ;; However, there is no subtyping among equality types. So this is much safer to
 ;; use, if you know the types tested should be equality types.
 (define (eqtype=? a b) (and (eqtype? a) (type=? a b)))
 
-;; type well-formedness
-;; NB. currently unused.
-(define (type-wf? x)
-  (match x
-    [(t-fun _ a b) (and (type-wf? a) (type-wf? b))]
-    [(t-set a) (type-wf? a)]
-    [(t-map k v) (and (type-wf? k) (eqtype? k) (type-wf? v))]
-    [(t-tuple ts) (andmap type-wf? ts)]
-    [(t-sum bs) ((hash/c symbol? type-wf? #:immutable #t) bs)]
-    [(t-record as) ((hash/c symbol? type-wf? #:immutable #t) as)]
-    [_ #t]))
-
 
 ;; ========== Type Predicates ==========
-(define (lattice-type? x)
+(define/contract (lattice-type? x)
+  (-> type-wf? boolean?)
   (match x
     [(or (t-base 'bool) (t-base 'nat) (t-set _)) #t]
     [(or (t-base 'str) (t-sum _)) #f]
@@ -41,7 +47,8 @@
     [(t-map _ v) (lattice-type? v)]
     [(t-fun _ _ r) (lattice-type? r)]))
 
-(define (eqtype? x)
+(define/contract (eqtype? x)
+  (-> type-wf? boolean?)
   (match x
     [(t-base _) #t]
     [(or (t-record (app hash-values as)) (t-sum (app hash-values as))
@@ -51,7 +58,8 @@
     [(t-set a) (eqtype? a)]
     [(t-map k v) (assert! (eqtype? k)) (eqtype? v)]))
 
-(define (finite-type? t)
+(define/contract (finite-type? t)
+  (-> type-wf? boolean?)
   (match t
     [(t-base 'bool) #t]
     [(t-set a) (finite-type? a)]
