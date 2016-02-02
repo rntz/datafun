@@ -68,6 +68,15 @@
                 #`(match elt
                     #,@(do-case-branches (list (case-branch pat body)))
                     [_ #,(lub)])))]
+    [(e-map-bind key-pat value arg body)
+     (define value-var (gensym value))
+     #`(for/fold ([acc #,(lub)])
+                 ([(k #,value-var) #,(do-expr arg)])
+         #,(lub #'acc
+                #`(match k
+                    #,@(with-var value value-var
+                         (do-case-branches (list (case-branch key-pat body))))
+                    [_ #,(lub)])))]
     [(e-cond 'mono subj body) #`(if #,(do-expr subj) #,(do-expr body) #,(lub))]
     [(e-cond 'anti subj body) #`(if #,(do-expr subj) #,(lub) #,(do-expr body))]
     [(e-fix v body)

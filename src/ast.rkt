@@ -70,7 +70,12 @@
   (e-map [key-value-exprs (listof (list/c expr? expr?))])
   ;; (e-map-for x keys e) means {k: [k/x]e | k <- keys}
   (e-map-for var key-set body)
+  ;; NB: e-map-get is just a special case of e-map-bind!
+  ;; although admittedly, one with a fast impl strategy :P
   (e-map-get map key)
+  ;; means (lub of `body' for key-pat,value-var in `arg').
+  ;; key-pat is unrestricted; value-var is bound monotonically.
+  (e-map-bind key-pat value-var arg body)
   ;; other map operations: some builtin functions, and e-lub if the value type
   ;; is a lattice.
 

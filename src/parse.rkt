@@ -58,6 +58,10 @@
       `(make-map ,x ,(expr->sexp key-set) (expr->sexp body))]
      [(e-set-bind pat arg body)
       `(,(expr->sexp body) for ,(pat->sexp pat) in ,(expr->sexp arg))]
+     [(e-map-bind key-pat val arg body)
+      ;; TODO: syntax sugar for map-bind
+      `(map-bind ,(pat->sexp key-pat) ,val ,(expr->sexp arg)
+                 ,(expr->sexp body))]
      [(e-cond 'mono subj body) `(when   ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-cond 'anti subj body) `(unless ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-fix var body) `(fix ,var ,(expr->sexp body))]
@@ -104,6 +108,8 @@
     [`(get ,d ,k) (e-map-get (parse-expr d) (parse-expr k))]
     [`(set-bind ,pat ,arg ,body)
      (e-set-bind (parse-pat pat) (parse-expr arg) (parse-expr body))]
+    [`(map-bind ,key-pat ,val ,arg ,body)
+     (e-map-bind (parse-pat key-pat) val (parse-expr arg) (parse-expr body))]
     [`(when ,subj ,body)   (e-cond 'mono (parse-expr subj) (parse-expr body))]
     [`(unless ,subj ,body) (e-cond 'anti (parse-expr subj) (parse-expr body))]
     [`(fix ,x ,body) (e-fix x (parse-expr body))]

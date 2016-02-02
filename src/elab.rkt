@@ -85,7 +85,7 @@ sub-expression: ~s
 
 ;; whether we need to remember the type of an expression
 (define/match (should-remember-type? expr)
-  [((or (e-lub _) (e-set-bind _ _ _) (e-map-get _ _)
+  [((or (e-lub _) (e-set-bind _ _ _) (e-map-bind _ _ _ _) (e-map-get _ _)
         (e-cond _ _ _) (e-fix _ _))) #t]
   ;; we actually don't need to remember primitives; see do-prim in compile.rkt
   ;; [((e-prim _)) #t]
@@ -232,14 +232,26 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (ensure-lattice-type (expr-check body type))]
 
     [(e-set-bind pat arg body)
-     (define elem-type
-       (match (expr-check arg)
-         [(t-set a) a]
-         ;; TODO: better error message
-         [t (fail "iteratee has non-set type ~s" (type->sexp t))]))
-     (ensure-lattice-type
-       (with-env (pat-hyps 'any pat elem-type)
-         (expr-check body type)))]
+     (match (expr-check arg)
+       [(t-set elem-type)
+        (ensure-lattice-type
+         (with-env (pat-hyps 'any pat elem-type)
+           (expr-check body type)))]
+       ;; TODO: better error message
+       [t (fail "iteratee has non-set type ~s" (type->sexp t))])]
+
+    [(e-map-bind key-pat value-var arg body)
+     (match (expr-check arg)
+       [(t-map key-type value-type)
+        (ensure-lattice-type
+         ;; We need not be monotone in the keys, since increasing keys does not
+         ;; increase the map, only adding more keys does.
+         (with-env (pat-hyps 'any key-pat key-type)
+           ;; But we must be monotone in the value, since maps increase as their
+           ;; values increase.
+           (with-var value-var (hyp 'mono value-type)
+             (expr-check body type))))]
+       [t (fail "iteratee has non-map type ~s" (type->sexp t))])]
 
     ;; ===== SYNTHESIS-ONLY EXPRESSIONS =====
     ;; we infer these, and our caller checks the inferred type if necessary
