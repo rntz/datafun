@@ -59,9 +59,7 @@
      [(e-set-bind pat arg body)
       `(,(expr->sexp body) for ,(pat->sexp pat) in ,(expr->sexp arg))]
      [(e-map-bind key-pat val arg body)
-      ;; TODO: syntax sugar for map-bind
-      `(map-bind ,(pat->sexp key-pat) ,val ,(expr->sexp arg)
-                 ,(expr->sexp body))]
+      `(,(expr->sexp body) for ,(pat->sexp key-pat) ,val in ,(expr->sexp arg))]
      [(e-cond 'mono subj body) `(when   ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-cond 'anti subj body) `(unless ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-fix var body) `(fix ,var ,(expr->sexp body))]
@@ -124,9 +122,8 @@
 ;; expands out syntax sugar. not all syntax sugar goes here, though; for
 ;; example, in some sense 'let is syntax sugar.
 (define (expand-expr e)
-  (let loop ([e e])
-    (define expanded (expand-expr-once e))
-    (if (eq? e expanded) e (loop expanded))))
+  (define expanded (expand-expr-once e))
+  (if (eq? e expanded) e (expand-expr expanded)))
 
 ;; checks whether something "looks like" a set of loop clauses.
 ;; in:                   ((set 2) for x in X when (< x 3))
@@ -152,6 +149,7 @@
   (match clauses
     ['() body]
     [`(for ,p in ,e . ,rest) `(set-bind ,p ,e ,(expand-loop rest body))]
+    [`(for ,p ,v in ,e . ,rest) `(map-bind ,p ,v ,e ,(expand-loop rest body))]
     [`(when ,e . ,rest)   `(when ,e ,(expand-loop rest body))]
     [`(unless ,e . ,rest) `(unless ,e ,(expand-loop rest body))]))
 
@@ -163,6 +161,7 @@
   [(`(λ ,x (λ . ,rest))) `(λ ,x . ,rest)]
   [(`(fix ,name (lub . ,exprs))) #:when (not (= 1 (length exprs)))
    `(fix ,name ,@exprs)]
+  [(`(set-bind ,p ,e ,body)) (compact-expr `(,body for ,p in ,e))]
   ;; compacting comprehensions is slightly complicated
   [(`((,(and form (or 'when 'unless)) ,cnd ,e) . ,(? loop-clauses? clauses)))
    `(,e ,@clauses ,form ,cnd)]
