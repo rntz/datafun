@@ -57,8 +57,7 @@
      [(e-map-for x key-set body)
       `(make-map ,x ,(expr->sexp key-set) (expr->sexp body))]
      [(e-set-bind pat arg body)
-      ;; `(for ([,(pat->sexp pat) ,(expr->sexp arg)]) ,(expr->sexp body))
-      `(,(expr->sexp body) for ,(pat->sexp pat) <- ,(expr->sexp arg))]
+      `(,(expr->sexp body) for ,(pat->sexp pat) in ,(expr->sexp arg))]
      [(e-cond 'mono subj body) `(when   ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-cond 'anti subj body) `(unless ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-fix var body) `(fix ,var ,(expr->sexp body))]
@@ -99,7 +98,7 @@
     [`(lub . ,es) (e-lub (map parse-expr es))]
     [`(set . ,es) (e-set (map parse-expr es))]
     [(or `(make-map ,k ,key-set ,expr)
-         `(map (,k ,expr) for ,(? symbol? k) <- ,key-set))
+         `(map (,k ,expr) for ,(? symbol? k) in ,key-set))
      (e-map-for k (parse-expr key-set) (parse-expr expr))]
     [`(map (,ks ,vs) ...) (e-map (map (lambda l (map parse-expr l)) ks vs))]
     [`(get ,d ,k) (e-map-get (parse-expr d) (parse-expr k))]
@@ -124,8 +123,8 @@
     (if (eq? e expanded) e (loop expanded))))
 
 ;; checks whether something "looks like" a set of loop clauses.
-;; in:                   ((set 2) for x <- X when (< x 3))
-;; the loop clauses are:         (for x <- X when (< x 3))
+;; in:                   ((set 2) for x in X when (< x 3))
+;; the loop clauses are:         (for x in X when (< x 3))
 (define loop-clauses? (cons/c loop-form? any/c))
 
 (define/match (expand-expr-once expr)
@@ -146,7 +145,7 @@
 (define (expand-loop clauses body)
   (match clauses
     ['() body]
-    [`(for ,p <- ,e . ,rest) `(set-bind ,p ,e ,(expand-loop rest body))]
+    [`(for ,p in ,e . ,rest) `(set-bind ,p ,e ,(expand-loop rest body))]
     [`(when ,e . ,rest)   `(when ,e ,(expand-loop rest body))]
     [`(unless ,e . ,rest) `(unless ,e ,(expand-loop rest body))]))
 

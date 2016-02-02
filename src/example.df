@@ -55,15 +55,15 @@
 (ff = (set))
 
 (conj : (set (*)) (set (*)) ~> (set (*)))
-(conj X Y = (tt for _ <- X
-                for _ <- Y))
+(conj X Y = (tt for _ in X
+                for _ in Y))
 
 ;; Neel calls this "guard"
 (bool->set : bool ~> (set (*)))
 (bool->set x = (when x tt))
 
 (set->bool : (set (*)) ~> bool)
-(set->bool x = (#t for _ <- x))
+(set->bool x = (#t for _ in x))
 
 ;; kind of a hack.
 (negate : (set (*)) ->- (set (*)))
@@ -72,26 +72,26 @@
 
 ;; operations on sets of naturals
 (nat-member : nat -> (set nat) ~> bool)
-(nat-member a X = ((= a x) for x <- X))
+(nat-member a X = ((= a x) for x in X))
 
 (str-member : str -> (set str) ~> bool)
-(str-member a X = ((= a x) for x <- X))
+(str-member a X = ((= a x) for x in X))
 
 (setminus : (set nat) ~> (set nat) ->- (set nat))
 (setminus X Y = (set x
-                 for x <- X
+                 for x in X
                  unless (nat-member x Y)))
 
 ;; set comprehensions
 (some-nats : (set nat))
 (some-nats = (set x (+ 10 x)
-              for x <- (set 1 2 3)))
+              for x in (set 1 2 3)))
 
 (powers-upto : nat -> nat ~> (set nat))
 (powers-upto b n =
   (fix P (set 1)
          (set (* b x)
-          for x <- P
+          for x in P
           when (<= (* b x) n))))
 
 
@@ -108,24 +108,24 @@
 (ancestor : (set (* str str)))
 (fix ancestor = (lub advisor recur)
      where (mono recur = (set (cons a c)
-                          for (cons a b) <- advisor
-                          for (cons (= b) c) <- ancestor)))
+                          for (cons a b) in advisor
+                          for (cons (= b) c) in ancestor)))
 
 
 ;; relation composition
 (compose : (set (* str str)) (set (* str str)) ~> (set (* str str)))
 (compose X Y = (set (cons a c)
-                for (cons a b) <- X
-                for (cons (= b) c) <- Y))
+                for (cons a b) in X
+                for (cons (= b) c) in Y))
 
 ;; reflexivity
 (refl : (set str) ~> (set (* str str)))
-(refl X = (set (cons x x) for x <- X))
+(refl X = (set (cons x x) for x in X))
 
 ;; making a relation symmetric
 (symm : (set (* str str)) ~> (set (* str str)))
 (symm X = (set (cons a b) (cons b a)
-               for (cons a b) <- X))
+               for (cons a b) in X))
 
 ;; transitive closure, more generically
 (transitive-closure : (set (* str str)) ~> (set (* str str)))
@@ -141,8 +141,8 @@
 
 ;; reachability
 (reachable : (set (* str str)) ~> str str -> bool)
-(reachable R a b = (#t for (cons (= a) (= b)) <- (dag->preorder domain R))
-  where (mono domain = (set x for (cons x _) <- R)))
+(reachable R a b = (#t for (cons (= a) (= b)) in (dag->preorder domain R))
+  where (mono domain = (set x for (cons x _) in R)))
 
 (ancestor? : str str -> bool)
 (ancestor? = (reachable ancestor))
@@ -151,7 +151,7 @@
 (reachable-from : (set (* str str)) ~> str -> (set str))
 (reachable-from R start = (fix S
     (set start)
-    (set b for (cons a b) <- R
+    (set b for (cons a b) in R
            when (str-member a S))))
 
 
@@ -195,8 +195,8 @@
 
 (code->set : code -> (set (* label stmt)))
 (code->set C = (set (cons i s)
-                    for i <- (keys C)
-                    for s <- (case (lookup C i)
+                    for i in (keys C)
+                    for s in (case (lookup C i)
                                [('just x) (set x)]
                                ['none (as (set stmt) (set))])))
 
@@ -204,29 +204,40 @@
 (flow C = (union
            ;; if-statements branch
            ((set (cons i j) (cons i k))
-            for (cons i ('if _ j k)) <- (code->set C))
+            for (cons i ('if _ j k)) in (code->set C))
            ;; otherwise, execution continues in a straight line
            ((set (cons i (+ i 1)))
-            for (cons i (or 'skip ('assn _ _))) <- (code->set C)
-            for (= (+ i 1)) <- (keys C))))
+            for (cons i (or 'skip ('assn _ _))) in (code->set C)
+            for (= (+ i 1)) in (keys C))))
 
 ;; reaching definitions analysis
 (rd : code flow -> (set (* label label var)))
 (rd code flow =
     (fix RD
      (set (cons i i v)
-        for (cons i s) <- (code->set code)
-        for v <- (stmt-defines s))
+        for (cons i s) in (code->set code)
+        for v in (stmt-defines s))
      (set (cons j l v)
-        for (cons j s) <- (code->set code)
+        for (cons j s) in (code->set code)
         ;; for any statement that flows to us
-        for (cons i (= j)) <- flow
+        for (cons i (= j)) in flow
         ;; we inherit its defined variables
-        for (cons i l v) <- RD
+        for (cons i l v) in RD
         ;; unless we redefine them
-        unless (#t for (= v) <- (stmt-defines s)))))
+        unless (#t for (= v) in (stmt-defines s)))))
 
+;; ;; this "happens" to work b/c label = nat and thus is a lattice type.
+;; ;; kind of a hack.
 ;; (rd-2 : code flow -> (map (* label var) label))
-;; (rd-2 code flow = TODO)
+;; (rd-2 code flow =
+;;       (fix RD
+;;            ((map [(cons i v) i])
+;;             for (cons i s) in (code->set code)
+;;             for v in (stmt-defines s))
+;;            ((map [(cons j v) l])
+;;             for (cons j s) in (code->set code)
+;;             for (cons i (= j)) in flow
+;;             for (cons i l) in (keys RD)
+;;             for (cons i l v) in (lookup RD))))
 
 ;; live variable analysis
