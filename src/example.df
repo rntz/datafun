@@ -226,18 +226,18 @@
         ;; unless we redefine them
         unless (#t for (= v) in (stmt-defines s)))))
 
-;; ;; this "happens" to work b/c label = nat and thus is a lattice type.
-;; ;; kind of a hack.
-;; (rd-2 : code flow -> (map (* label var) label))
-;; (rd-2 code flow =
-;;       (fix RD
-;;            ((map [(cons i v) i])
-;;             for (cons i s) in (code->set code)
-;;             for v in (stmt-defines s))
-;;            ((map [(cons j v) l])
-;;             for (cons j s) in (code->set code)
-;;             for (cons i (= j)) in flow
-;;             for (cons i l) in (keys RD)
-;;             for (cons i l v) in (lookup RD))))
+;; this "happens" to work b/c label = nat and thus is a lattice type.
+;; kind of a hack.
+(rd-2 : code flow -> (map (* label var) label))
+(rd-2 code flow =
+      (fix RD
+           ((map [(cons i v) i])
+            for (cons i s) in (code->set code)
+            for v in (stmt-defines s))
+           ((map [(cons j v) l])
+            for (cons j s) in (code->set code)
+            for (cons i (= j)) in flow
+            for (cons (= i) v) l in RD
+            unless (#t for (= v) in (stmt-defines s)))))
 
 ;; live variable analysis
