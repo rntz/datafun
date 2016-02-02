@@ -55,7 +55,7 @@
      [(e-map kvs) `(map ,@(map (curry map expr->sexp) kvs))]
      [(e-map-get d k) `(get ,(expr->sexp d) ,(expr->sexp k))]
      [(e-map-for x key-set body)
-      `(make-map ,x ,(expr->sexp key-set) (expr->sexp body))]
+      `(make-map ,x ,(expr->sexp key-set) ,(expr->sexp body))]
      [(e-set-bind pat arg body)
       `(,(expr->sexp body) for ,(pat->sexp pat) in ,(expr->sexp arg))]
      [(e-map-bind key-pat val arg body)
