@@ -105,7 +105,7 @@
                 (cons "aldrich" "neel")
                 (cons "neel" "rntz")))
 
-(ancestor : (set (* str str)))
+(ancestor : (rel str str))
 (fix ancestor = (lub advisor recur)
      where (mono recur = (set (cons a c)
                           for (cons a b) in advisor
@@ -113,34 +113,34 @@
 
 
 ;; relation composition
-(compose : (set (* str str)) (set (* str str)) ~> (set (* str str)))
+(compose : (rel str str) (rel str str) ~> (rel str str))
 (compose X Y = (set (cons a c)
                 for (cons a b) in X
                 for (cons (= b) c) in Y))
 
 ;; reflexivity
-(refl : (set str) ~> (set (* str str)))
+(refl : (set str) ~> (rel str str))
 (refl X = (set (cons x x) for x in X))
 
 ;; making a relation symmetric
-(symm : (set (* str str)) ~> (set (* str str)))
+(symm : (rel str str) ~> (rel str str))
 (symm X = (set (cons a b) (cons b a)
                for (cons a b) in X))
 
 ;; transitive closure, more generically
-(transitive-closure : (set (* str str)) ~> (set (* str str)))
+(transitive-closure : (rel str str) ~> (rel str str))
 (transitive-closure R = (fix T R (compose R T)))
 
 (ancestor-2 = (transitive-closure advisor))
 
 ;; reflexive transitive closure
-(dag->preorder : (set str) (set (* str str)) ~> (set (* str str)))
+(dag->preorder : (set str) (rel str str) ~> (rel str str))
 (dag->preorder V E = (fix self (refl V) (compose self E)))
 
 (ancestor-3 = (dag->preorder person advisor))
 
 ;; reachability
-(reachable : (set (* str str)) ~> str str -> bool)
+(reachable : (rel str str) ~> str str -> bool)
 (reachable R a b = (#t for (cons (= a) (= b)) in (dag->preorder domain R))
   where (mono domain = (set x for (cons x _) in R)))
 
@@ -148,7 +148,7 @@
 (ancestor? = (reachable ancestor))
 
 ;; reachability, again
-(reachable-from : (set (* str str)) ~> str -> (set str))
+(reachable-from : (rel str str) ~> str -> (set str))
 (reachable-from R start = (fix S
     (set start)
     (set b for (cons a b) in R
@@ -191,9 +191,9 @@
 
 ;; code flow
 (type code = (map label stmt))
-(type flow = (set (* label label)))
+(type flow = (rel label label))
 
-(code->set : code -> (set (* label stmt)))
+(code->set : code -> (rel label stmt))
 (code->set C = (set (cons i s)
                     for i in (keys C)
                     for s in (case (lookup C i)
@@ -211,7 +211,7 @@
             for (= (+ i 1)) in (keys C))))
 
 ;; reaching definitions analysis
-(rd : code flow -> (set (* label label var)))
+(rd : code flow -> (rel label label var))
 (rd code flow =
     (fix RD
      (set (cons i i v)
