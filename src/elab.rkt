@@ -369,8 +369,8 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
 
     [(e-lub '()) #:when (not type) (fail "can't infer type of empty lub")]
     [(e-lub as)
-     (ensure-lattice-type
-      (foldl1 type-lub (for/list ([a as]) (expr-check a type))))]
+     (define types (for/list ([a as]) (expr-check a type)))
+     (ensure-lattice-type (or type (foldl1 type-lub types)))]
 
     [(e-set '()) #:when (not type) (fail "can't infer type of empty set")]
     [(e-set elems)
