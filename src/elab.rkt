@@ -180,10 +180,10 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
   (define (fail [fmt #f] . fmt-args)
     (fail-raw (if fmt (apply format fmt fmt-args) "")))
 
-  (define (visit-branch tone pat-type body-type branch)
-    (match-define (case-branch pat body) branch)
-    (with-env (hash-map-values (curry hyp tone) (pat-check pat pat-type))
-      (expr-check body body-type)))
+  (define (ensure-lattice-type
+           t #:message [msg "cannot take lub at non-lattice type ~s"])
+    (unless (lattice-type? t) (fail msg (type->sexp t)))
+    t)
 
   ;; ---------- COMMENCE BIG GIANT CASE ANALYSIS ----------
   ;; TODO: turn this into a match* on (expr type)?
@@ -229,10 +229,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
        ;; TODO: better error message.
        (type-error "bad tone for e-cond: ~a" tone))
      (with-tone tone (expr-check subj (t-base 'bool)))
-     (define body-type (expr-check body type))
-     (unless (lattice-type? body-type)
-       (fail "cannot take lub at non-lattice type ~s" (type->sexp body-type)))
-     body-type]
+     (ensure-lattice-type (expr-check body type))]
 
     [(e-set-bind pat arg body)
      (define elem-type
@@ -240,11 +237,9 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
          [(t-set a) a]
          ;; TODO: better error message
          [t (fail "iteratee has non-set type ~s" (type->sexp t))]))
-     (define body-type
-       (visit-branch 'any elem-type type (case-branch pat body)))
-     (unless (lattice-type? body-type)
-       (error "cannot take lub at non-lattice type ~s" (type->sexp type)))
-     body-type]
+     (ensure-lattice-type
+       (with-env (pat-hyps 'any pat elem-type)
+         (expr-check body type)))]
 
     ;; ===== SYNTHESIS-ONLY EXPRESSIONS =====
     ;; we infer these, and our caller checks the inferred type if necessary
@@ -289,8 +284,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
     [(e-map-get map-expr key-expr)
      (match (expr-check map-expr)
        [(t-map k v)
-        (unless (lattice-type? v)
-          (fail "cannot `get' at non-lattice type ~s" (type->sexp v)))
+        (ensure-lattice-type v #:message "cannot `get' at non-lattice type ~s")
         (expr-check key-expr k)
         v]
        [t (fail "`get' from non-map of type ~s" (type->sexp t))])]
@@ -363,11 +357,8 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
 
     [(e-lub '()) #:when (not type) (fail "can't infer type of empty lub")]
     [(e-lub as)
-     (define expr-type
-       (foldl1 type-lub (for/list ([a as]) (expr-check a type))))
-     (unless (lattice-type? expr-type)
-       (fail "cannot take lub at non-lattice type ~s" (type->sexp expr-type)))
-     expr-type]
+     (ensure-lattice-type
+      (foldl1 type-lub (for/list ([a as]) (expr-check a type))))]
 
     [(e-set '()) #:when (not type) (fail "can't infer type of empty set")]
     [(e-set elems)
@@ -399,16 +390,26 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      ;; environment when typechecking the case-subject. I think only for
      ;; irrefutable patterns, a la (let p = e in e)?
      (define subj-t (with-tone 'any (expr-check subj #f)))
-     ;; it's okay to use 'any here ONLY because we hid the monotone environment
-     ;; when checking subj.
-     (define check-branch (curry visit-branch 'any subj-t type))
-     (define branch-types (map check-branch branches))
+
+     (define/match (visit-branch branch)
+       [((case-branch pat body))
+        ;; it's okay to use 'any here ONLY because we hid the monotone
+        ;; environment when checking subj.
+        (with-env (pat-hyps 'any pat subj-t)
+          (expr-check body type))])
+
+     (define branch-types (map visit-branch branches))
      (or type (foldl1 type-lub branch-types))])
   ;; ---------- END BIG GIANT CASE ANALYSIS ----------
   )
 
 
 ;; ========== Pattern elaboration ==========
+
+;; returns a hash mapping pattern variables to `hyp's containing their types and
+;; the given tone.
+(define (pat-hyps tone pat type)
+  (hash-map-values (curry hyp tone) (pat-check pat type)))
 
 ;; checks a pattern against a type and returns a hash mapping pattern
 ;; variables to their types.
@@ -418,7 +419,6 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
 ;; matches only pairs of two of the same value.
 ;;
 ;; TODO: better error messages - maybe keep a pat-stack, like expr-stack?
-;; FIXME: needs to be given the tonicity we're binding variables in.
 (define/match (pat-check p t)
   [((p-wild) _) (hash)]
   [((p-var name) t) (hash name t)]

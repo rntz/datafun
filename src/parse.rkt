@@ -12,6 +12,7 @@
 (define decl-form? (or/c 'type 'mono 'anti 'fix))
 (define loop-form? (or/c 'for 'when 'unless))
 (define expr-form?
+  ;; TODO: e-map-for
   (or/c 'as 'case 'cons 'extend-record 'fix 'for 'if 'let 'lub 'map 'proj 'quote
         'record 'record-merge 'set 'tag 'trustme 'unless 'when 'λ 'π))
 (define ident-reserved? (or/c expr-form? decl-form? loop-form?))
