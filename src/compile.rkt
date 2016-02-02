@@ -57,7 +57,8 @@
     [(e-map-for v keys body)
      (define var (gensym v))
      #`(for/hash ([#,var #,(do-expr keys)])
-         #,(with-var v var (do-expr body)))]
+         (values #,var
+                 #,(with-var v var (do-expr body))))]
     [(e-map-get d k)
      #`(hash-ref #,(do-expr d) #,(do-expr k) (lambda () #,(lub)))]
     [(e-set-bind pat arg body)
