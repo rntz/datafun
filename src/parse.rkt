@@ -212,6 +212,7 @@
                 [(cons name types) (values name (map parse-type types))])))]
     [`(,_ ... ,(? arrow?) ,_) (parse-arrow-type t)]
     [`(set ,a) (t-set (parse-type a))]
+    [`(rel . ,as) (t-set (t-tuple (map parse-type as)))] ;; syntax sugar
     [`(map ,k ,v) (t-map (parse-type k) (parse-type v))]
     [_ (error "unfamiliar type:" t)]))
 
