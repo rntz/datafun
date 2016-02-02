@@ -12,9 +12,9 @@
 (define decl-form? (or/c 'type 'mono 'anti 'fix))
 (define loop-form? (or/c 'for 'when 'unless))
 (define expr-form?
-  ;; TODO: e-map-for
-  (or/c 'as 'case 'cons 'extend-record 'fix 'for 'if 'let 'lub 'map 'proj 'quote
-        'record 'record-merge 'set 'tag 'trustme 'unless 'when 'λ 'π))
+  (or/c 'as 'case 'cons 'extend-record 'fix 'for 'if 'let 'lub 'make-map 'map
+        'proj 'quote 'record 'record-merge 'set 'tag 'trustme 'unless 'when
+        'λ 'π))
 (define ident-reserved? (or/c expr-form? decl-form? loop-form?))
 (define type-ident-reserved? base-type?)
 
@@ -54,6 +54,8 @@
      [(e-set es) `(set ,@(map expr->sexp es))]
      [(e-map kvs) `(map ,@(map (curry map expr->sexp) kvs))]
      [(e-map-get d k) `(get ,(expr->sexp d) ,(expr->sexp k))]
+     [(e-map-for x key-set body)
+      `(make-map ,x ,(expr->sexp key-set) (expr->sexp body))]
      [(e-set-bind pat arg body)
       ;; `(for ([,(pat->sexp pat) ,(expr->sexp arg)]) ,(expr->sexp body))
       `(,(expr->sexp body) for ,(pat->sexp pat) <- ,(expr->sexp arg))]
@@ -96,6 +98,9 @@
           (case-branch (parse-pat p) (parse-expr e))))]
     [`(lub . ,es) (e-lub (map parse-expr es))]
     [`(set . ,es) (e-set (map parse-expr es))]
+    [(or `(make-map ,k ,key-set ,expr)
+         `(map (,k ,expr) for ,(? symbol? k) <- ,key-set))
+     (e-map-for k (parse-expr key-set) (parse-expr expr))]
     [`(map (,ks ,vs) ...) (e-map (map (lambda l (map parse-expr l)) ks vs))]
     [`(get ,d ,k) (e-map-get (parse-expr d) (parse-expr k))]
     [`(set-bind ,pat ,arg ,body)
