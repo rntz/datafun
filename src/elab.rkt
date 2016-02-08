@@ -345,7 +345,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
 
     [(e-record fields)
      (match type
-       [#f (t-record (hash-map-values expr-check fields))]
+       [#f (t-record (hash-map-vals expr-check fields))]
        [(t-record field-types)
         ;; we return the inferred type, and the subtype check will ensure it
         ;; has all the necessary fields.
@@ -421,7 +421,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
 ;; returns a hash mapping pattern variables to `hyp's containing their types and
 ;; the given tone.
 (define (pat-hyps tone pat type)
-  (hash-map-values (curry hyp tone) (pat-check pat type)))
+  (hash-map-vals (curry hyp tone) (pat-check pat type)))
 
 ;; checks a pattern against a type and returns a hash mapping pattern
 ;; variables to their types.
@@ -458,8 +458,8 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
    (when (empty? ps)
      (elab-error "or-pattern cannot be empty: ~s" (pat->sexp pat)))
    (define hashes (for/list ([p ps]) (pat-check p t)))
-   (define vars (hash-key-set (first hashes)))
-   (unless (andmap (lambda (x) (equal? vars (hash-key-set x))) hashes)
+   (define vars (hash-keyset (first hashes)))
+   (unless (andmap (lambda (x) (equal? vars (hash-keyset x))) hashes)
      (elab-error "all branches of or-pattern must bind same variables: ~s"
                  (type->sexp pat)))
    (foldl1 (lambda (x y) (hash-union-with x y type-lub)) hashes)]

@@ -122,5 +122,5 @@
     ['puts #'df-puts]
     ['print #'df-print]
     ['size #'set-count]
-    ['keys #'hash-key-set]
+    ['keys #'hash-keyset]
     ['lookup #'df-lookup]))

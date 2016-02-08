@@ -88,7 +88,7 @@
    ;; *actual* value has, so it's not parametric in the field-set. the
    ;; alternative is to make the meaning of equality type-indexed, and screw
    ;; that.
-   (and (set=? (hash-key-set as) (hash-key-set bs))
+   (and (set=? (hash-keyset as) (hash-keyset bs))
         (for/and ([(field a) as]) (subtype? a (hash-ref bs field))))]
   [((t-sum as) (t-sum bs))
    (for/and ([(k vs) as])
@@ -111,7 +111,7 @@
   (match* (a b)
     [((t-tuple as) (t-tuple bs)) (t-tuple (unifys lub? as bs))]
     [((t-record as) (t-record bs))
-     #:when (set=? (hash-key-set as) (hash-key-set bs))
+     #:when (set=? (hash-keyset as) (hash-keyset bs))
      (t-record (hash-intersection-with as bs lub))]
     [((t-sum as) (t-sum bs)) (t-sum (union as bs (curry unifys lub?)))]
     [((t-fun o a x) (t-fun p b y))

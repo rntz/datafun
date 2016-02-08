@@ -4,7 +4,7 @@
 (provide (all-defined-out))
 
 ;; our "runtime", of sorts.
-(define (df-union . xs) (set-unions xs))
+(define (df-union . xs) (sets-union xs))
 ;; side-effecting funs return the empty tuple, '()
 (define (df-puts x) (displayln x) '())
 (define (df-print x) (println x) '())

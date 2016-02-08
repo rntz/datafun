@@ -129,8 +129,8 @@
 ;;     [(p-var n) (set n)]
 ;;     [(or (p-wild) (p-lit _)) (set)]
 ;;     [(or (p-tag _ p) (p-let _ _ p)) (pat-vars p)]
-;;     [(or (p-tuple ps) (p-and ps)) (set-unions (map pat-vars ps))]
-;;     [(p-or ps) (set-intersects (map pat-vars ps))]))
+;;     [(or (p-tuple ps) (p-and ps)) (sets-union (map pat-vars ps))]
+;;     [(p-or ps) (sets-intersect (map pat-vars ps))]))
 
 ;; ;; commented out b/c unused.
 ;; (define/match (pat-irrefutable? pat type)
