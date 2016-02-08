@@ -57,10 +57,10 @@
      [(e-map-for x key-set body)
       `(make-map ,x ,(expr->sexp key-set) ,(expr->sexp body))]
      [(e-set-bind pat arg body)
-      `(,(expr->sexp body) for ,(pat->sexp pat) in ,(expr->sexp arg))]
+      `(set-bind ,(pat->sexp pat) ,(expr->sexp arg) ,(expr->sexp body))]
      [(e-map-bind key-pat val arg body)
-      `(,(expr->sexp body)
-        for ,(pat->sexp key-pat) : ,val in ,(expr->sexp arg))]
+      `(map-bind ,(pat->sexp key-pat) ,val ,(expr->sexp arg)
+                 ,(expr->sexp body))]
      [(e-cond 'mono subj body) `(when   ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-cond 'anti subj body) `(unless ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-fix var body) `(fix ,var ,(expr->sexp body))]
@@ -122,14 +122,16 @@
 ;; example, in some sense 'let is syntax sugar.
 (define (expand-expr e)
   (define expanded (expand-expr-once e))
-  (if (eq? e expanded) e
+  ;; unfortunately, equal? rather than eq? really is necessary here. see the way
+  ;; 'when and 'unless both expand and are primitive. could probably fix this.
+  (if (equal? e expanded) e
       (begin (debug parse (printf "  expand ~s\n      -> ~s\n" e expanded))
              (expand-expr expanded))))
 
 ;; checks whether something "looks like" a set of loop clauses.
 ;; in:                   ((set 2) for x in X when (< x 3))
 ;; the loop clauses are:         (for x in X when (< x 3))
-(define loop-clauses? (cons/c loop-form? any/c))
+(define loop? (cons/c loop-form? any/c))
 
 (define/match (expand-expr-once expr)
   [('empty) '(lub)]
@@ -138,33 +140,26 @@
   [(`(if ,cnd ,thn ,els)) `(case ,cnd [#t ,thn] [#f ,els])]
   [(`(fix ,name ,exprs ...)) #:when (not (= 1 (length exprs)))
    `(fix ,name (lub ,@exprs))]
+  ;; prefix comprehensions
+  [((? loop?)) (expand-loop expr (match-lambda [`(set . ,es) `(set . ,es)]
+                                          [(or `(,e) `(lub ,e)) e]))]
   ;; postfix lub-comprehensions
-  [(`(,(? (not/c expr-form?) e) . ,(? loop-clauses? clauses)))
+  [(`(,(? (not/c expr-form?) e) . ,(? loop? clauses)))
    (expand-loop clauses (match-lambda ['() e]))]
   ;; postfix set-comprehensions
-  [(`(set ,(? (not/c expr-form?) es) ... . ,(? loop-clauses? clauses)))
+  [(`(set ,(? (not/c expr-form?) es) ... . ,(? loop? clauses)))
    `((set ,@es) ,@clauses)]
-  ;; prefix for-comprehensions
-  ;; [(`(for ))]
   [(e) e])
 
-(define (expand-loop clauses orelse)
+(define (expand-loop clauses at-end)
   (match clauses
-    [`(for ,p in ,e . ,rest)      `(set-bind ,p ,e ,(expand-loop rest orelse))]
+    [`(for ,p in ,e . ,rest)      `(set-bind ,p ,e ,(expand-loop rest at-end))]
     [`(for ,p : ,v in ,e . ,rest)
-     `(map-bind ,p ,v ,e ,(expand-loop rest orelse))]
-    [`(when ,e . ,rest)           `(when ,e ,(expand-loop rest orelse))]
-    [`(unless ,e . ,rest)         `(unless ,e ,(expand-loop rest orelse))]
+     `(map-bind ,p ,v ,e ,(expand-loop rest at-end))]
+    [`(when ,e . ,rest)           `(when ,e ,(expand-loop rest at-end))]
+    [`(unless ,e . ,rest)         `(unless ,e ,(expand-loop rest at-end))]
     [`(,(? loop-form?) . ,_) (error "invalid use of loop form: ~a" clauses)]
-    [x (orelse x)]))
-
-;; (define (expand-loop clauses body)
-;;   (match clauses
-;;     ['() body]
-;;     [`(for ,p in ,e . ,rest) `(set-bind ,p ,e ,(expand-loop rest body))]
-;;     [`(for ,p : ,v in ,e . ,rest) `(map-bind ,p ,v ,e ,(expand-loop rest body))]
-;;     [`(when ,e . ,rest)   `(when ,e ,(expand-loop rest body))]
-;;     [`(unless ,e . ,rest) `(unless ,e ,(expand-loop rest body))]))
+    [x (at-end x)]))
 
 ;; applies syntax sugar to make expressions prettier
 (define/match (compact-expr expr)
@@ -174,12 +169,13 @@
   [(`(λ ,x (λ . ,rest))) `(λ ,x . ,rest)]
   [(`(fix ,name (lub . ,exprs))) #:when (not (= 1 (length exprs)))
    `(fix ,name ,@exprs)]
-  [(`(set-bind ,p ,e ,body)) (compact-expr `(,body for ,p in ,e))]
-  ;; compacting comprehensions is slightly complicated
-  [(`((,(and form (or 'when 'unless)) ,cnd ,e) . ,(? loop-clauses? clauses)))
+  [(`(set-bind ,p ,e ,body))    `(for ,p in ,e ,body)]
+  [(`(map-bind ,p ,v ,e ,body)) `(for ,p : ,v in ,e ,body)]
+  ;; we compact postfix comprehensions, which is slightly complicated
+  [(`((,(and form (or 'when 'unless)) ,cnd ,e) . ,(? loop? clauses)))
    `(,e ,@clauses ,form ,cnd)]
-  [(`((,(? (not/c expr-form?) e) . ,(? loop-clauses? inner))
-      . ,(? loop-clauses? outer)))
+  [(`((,(? (not/c expr-form?) e) . ,(? loop? inner))
+      . ,(? loop? outer)))
    `(,e ,@outer ,@inner)]
   [(e) e])
 

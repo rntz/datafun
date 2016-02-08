@@ -77,15 +77,15 @@
 (str-member : str -> (set str) ~> bool)
 (str-member a X = ((= a x) for x in X))
 
-(setminus : (set nat) ~> (set nat) ->- (set nat))
-(setminus X Y = (set x
-                 for x in X
-                 unless (nat-member x Y)))
+(nat-setminus : (set nat) ~> (set nat) ->- (set nat))
+(nat-setminus X Y = (set x
+                     for x in X
+                     unless (nat-member x Y)))
 
 ;; set comprehensions
 (some-nats : (set nat))
-(some-nats = (set x (+ 10 x)
-              for x in (set 1 2 3)))
+(some-nats = (for x in (set 1 2 3)
+              set x (+ 10 x)))
 
 (powers-upto : nat -> nat ~> (set nat))
 (powers-upto b n =
@@ -124,8 +124,8 @@
 
 ;; making a relation symmetric
 (symm : (rel str str) ~> (rel str str))
-(symm X = (set (cons a b) (cons b a)
-               for (cons a b) in X))
+(symm X = (for (cons a b) in X
+           set (cons a b) (cons b a)))
 
 ;; transitive closure, more generically
 (transitive-closure : (rel str str) ~> (rel str str))
@@ -141,7 +141,7 @@
 
 ;; reachability
 (reachable : (rel str str) ~> str str -> bool)
-(reachable R a b = (#t for (cons (= a) (= b)) in (dag->preorder domain R))
+(reachable R a b = (#t for (= (cons a b)) in (dag->preorder domain R))
   where (mono domain = (set x for (cons x _) in R)))
 
 (ancestor? : str str -> bool)
