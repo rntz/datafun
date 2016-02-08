@@ -1,6 +1,6 @@
 #lang racket
 
-(require "util.rkt" "ast.rkt")
+(require "util.rkt" "ast.rkt" "debug.rkt")
 (provide (all-defined-out))
 
 ;; a simple s-expression syntax for datafun.
@@ -73,6 +73,7 @@
      [(e-trustme e) `(trustme ,(expr->sexp e))])))
 
 (define (parse-expr expr)
+  (debug parse (printf "parse-expr: ~a\n" expr))
   (match (expand-expr expr)
     [(? prim? p) (e-prim p)]
     [(? lit? l) (e-lit l)]
@@ -123,7 +124,9 @@
 ;; example, in some sense 'let is syntax sugar.
 (define (expand-expr e)
   (define expanded (expand-expr-once e))
-  (if (eq? e expanded) e (expand-expr expanded)))
+  (if (eq? e expanded) e
+      (begin (debug parse (printf "  expand ~s\n      -> ~s\n" e expanded))
+             (expand-expr expanded))))
 
 ;; checks whether something "looks like" a set of loop clauses.
 ;; in:                   ((set 2) for x in X when (< x 3))

@@ -36,7 +36,6 @@
 (define (do-line line quit)
   (match line
     [(or #:quit (? eof-object?)) (quit)]
-    [#:debug (df-debug (not (df-debug)))]
     [`(#:load ,filename)
      (unless (string? filename) (error "filename must be a string"))
      (eval-file! filename)]
@@ -80,27 +79,27 @@ could not parse expression: ~a" (exn-message e1) (exn-message e2))))
   [((d-type name type))
    (global-env (env-bind-type name type (global-env)))]
   [((d-val name 'any decl-type expr))
-   (debug (printf "defn: ~a = ~s\n" name (expr->sexp expr)))
+   (debug eval (printf "defn: ~a = ~s\n" name (expr->sexp expr)))
    ;; elaborate the expression.
    (define-values (elab-info type)
      (elab expr #:type decl-type #:env (global-elab-env)))
-   (debug (printf "type: ~s\n" (type->sexp type)))
+   (debug eval (printf "type: ~s\n" (type->sexp type)))
    ;; compile it.
    (define code (compile expr #:info elab-info #:env (global-compile-env)))
-   (debug (display "code: ") (pretty-print (syntax->datum code)))
+   (debug eval (display "code: ") (pretty-print (syntax->datum code)))
    (define val (eval code))
-   (debug (printf "val:  ~v\n" val))
+   (debug eval (printf "val:  ~v\n" val))
    ;; bind name to val in global-env.
    (global-env (env-bind-var name (global type val) (global-env)))])
 
 (define (eval-expr expr)
-  (debug (printf "expr: ~s\n" (expr->sexp expr)))
+  (debug eval (printf "expr: ~s\n" (expr->sexp expr)))
   (define-values (elab-info expr-type)
     (elab expr #:env (global-elab-env)))
-  (debug (printf "type: ~s\n" (type->sexp expr-type)))
+  (debug eval (printf "type: ~s\n" (type->sexp expr-type)))
   (define code
     (compile expr #:info elab-info #:env (global-compile-env)))
-  (debug (display "code: ") (pretty-print (syntax->datum code)))
+  (debug eval (display "code: ") (pretty-print (syntax->datum code)))
   (define value-string (pretty-format (eval code)))
   ;; print type annotation on next line if value takes multiple lines
   (printf (if (string-contains? value-string "\n") "~a\n: ~s\n" "~a : ~s\n")
