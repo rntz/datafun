@@ -2,8 +2,6 @@
 
 - remove subtyping? would simplify language.
 
-- add type definitions to language
-
 - add some type constructors & intro & elim forms for them
   - flat lattices, (Flat A) = bottom <= .... A ... <= top
   - lexical sums (A <+ B)? lexical products (A <* B)?
