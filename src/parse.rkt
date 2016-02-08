@@ -59,7 +59,8 @@
      [(e-set-bind pat arg body)
       `(,(expr->sexp body) for ,(pat->sexp pat) in ,(expr->sexp arg))]
      [(e-map-bind key-pat val arg body)
-      `(,(expr->sexp body) for ,(pat->sexp key-pat) ,val in ,(expr->sexp arg))]
+      `(,(expr->sexp body)
+        for ,(pat->sexp key-pat) : ,val in ,(expr->sexp arg))]
      [(e-cond 'mono subj body) `(when   ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-cond 'anti subj body) `(unless ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-fix var body) `(fix ,var ,(expr->sexp body))]
@@ -75,44 +76,41 @@
 (define (parse-expr expr)
   (debug parse (printf "parse-expr: ~a\n" expr))
   (match (expand-expr expr)
-    [(? prim? p) (e-prim p)]
-    [(? lit? l) (e-lit l)]
-    [(? ident? v) (e-var v)]
-    [`(let ,decls ,body)
-     (parse-expr-letting (parse-decls decls) body)]
-    [`(as ,t ,e) (e-ann (parse-type t) (parse-expr e))]
-    [`(,(or 'fn 'λ) ,xs ... ,e)
-     (set! e (parse-expr e))
-     (foldr e-lam e xs)]
-    [`(cons . ,es) (e-tuple (map parse-expr es))]
+    [(? prim? p)            (e-prim p)]
+    [(? lit? l)             (e-lit l)]
+    [(? ident? v)           (e-var v)]
+    [`(let ,decls ,body)    (parse-expr-letting (parse-decls decls) body)]
+    [`(as ,t ,e)            (e-ann (parse-type t) (parse-expr e))]
+    [`(,(or 'fn 'λ) ,(? symbol? xs) ... ,e) (foldr e-lam (parse-expr e) xs)]
+    [`(cons . ,es)          (e-tuple (map parse-expr es))]
     [`(,(or 'π 'proj) ,i ,e) (e-proj i (parse-expr e))]
     [`(record (,(? symbol? ns) ,es) ...)
      (e-record (for/hash ([n ns] [e es]) (values n (parse-expr e))))]
-    [`(record-merge ,a ,b) (e-record-merge (parse-expr a) (parse-expr b))]
+    [`(record-merge ,a ,b)  (e-record-merge (parse-expr a) (parse-expr b))]
     [`(extend-record ,base . ,as)
      (e-record-merge (parse-expr base) (parse-expr `(record . ,as)))]
-    [`',(? symbol? name) (e-tag name '())]
+    [`',(? symbol? name)    (e-tag name '())]
     [(or `(tag ,name . ,es) `(',name . ,es)) #:when (symbol? name)
      (e-tag name (map parse-expr es))]
     [`(case ,subj (,ps ,es) ...)
       (e-case (parse-expr subj)
         (for/list ([p ps] [e es])
           (case-branch (parse-pat p) (parse-expr e))))]
-    [`(lub . ,es) (e-lub (map parse-expr es))]
-    [`(set . ,es) (e-set (map parse-expr es))]
+    [`(lub . ,es)           (e-lub (map parse-expr es))]
+    [`(set . ,es)           (e-set (map parse-expr es))]
     [(or `(make-map ,k ,key-set ,expr)
          `(map (,k ,expr) for ,(? symbol? k) in ,key-set))
      (e-map-for k (parse-expr key-set) (parse-expr expr))]
-    [`(map (,ks ,vs) ...) (e-map (map (lambda l (map parse-expr l)) ks vs))]
-    [`(get ,d ,k) (e-map-get (parse-expr d) (parse-expr k))]
+    [`(map (,ks ,vs) ...)   (e-map (map (lambda l (map parse-expr l)) ks vs))]
+    [`(get ,d ,k)           (e-map-get (parse-expr d) (parse-expr k))]
     [`(set-bind ,pat ,arg ,body)
      (e-set-bind (parse-pat pat) (parse-expr arg) (parse-expr body))]
     [`(map-bind ,key-pat ,val ,arg ,body)
      (e-map-bind (parse-pat key-pat) val (parse-expr arg) (parse-expr body))]
-    [`(when ,subj ,body)   (e-cond 'mono (parse-expr subj) (parse-expr body))]
-    [`(unless ,subj ,body) (e-cond 'anti (parse-expr subj) (parse-expr body))]
-    [`(fix ,x ,body) (e-fix x (parse-expr body))]
-    [`(trustme ,e) (e-trustme (parse-expr e))]
+    [`(when ,subj ,body)    (e-cond 'mono (parse-expr subj) (parse-expr body))]
+    [`(unless ,subj ,body)  (e-cond 'anti (parse-expr subj) (parse-expr body))]
+    [`(fix ,x ,body)        (e-fix x (parse-expr body))]
+    [`(trustme ,e)          (e-trustme (parse-expr e))]
     [(and e `(,f ,as ...))
      (if (expr-form? f)
          (error (format "invalid use of ~a: ~s" f e))
@@ -140,21 +138,33 @@
   [(`(if ,cnd ,thn ,els)) `(case ,cnd [#t ,thn] [#f ,els])]
   [(`(fix ,name ,exprs ...)) #:when (not (= 1 (length exprs)))
    `(fix ,name (lub ,@exprs))]
-  ;; lub-comprehensions
+  ;; postfix lub-comprehensions
   [(`(,(? (not/c expr-form?) e) . ,(? loop-clauses? clauses)))
-   (expand-loop clauses e)]
-  ;; set-comprehensions
+   (expand-loop clauses (match-lambda ['() e]))]
+  ;; postfix set-comprehensions
   [(`(set ,(? (not/c expr-form?) es) ... . ,(? loop-clauses? clauses)))
    `((set ,@es) ,@clauses)]
+  ;; prefix for-comprehensions
+  ;; [(`(for ))]
   [(e) e])
 
-(define (expand-loop clauses body)
+(define (expand-loop clauses orelse)
   (match clauses
-    ['() body]
-    [`(for ,p in ,e . ,rest) `(set-bind ,p ,e ,(expand-loop rest body))]
-    [`(for ,p ,v in ,e . ,rest) `(map-bind ,p ,v ,e ,(expand-loop rest body))]
-    [`(when ,e . ,rest)   `(when ,e ,(expand-loop rest body))]
-    [`(unless ,e . ,rest) `(unless ,e ,(expand-loop rest body))]))
+    [`(for ,p in ,e . ,rest)      `(set-bind ,p ,e ,(expand-loop rest orelse))]
+    [`(for ,p : ,v in ,e . ,rest)
+     `(map-bind ,p ,v ,e ,(expand-loop rest orelse))]
+    [`(when ,e . ,rest)           `(when ,e ,(expand-loop rest orelse))]
+    [`(unless ,e . ,rest)         `(unless ,e ,(expand-loop rest orelse))]
+    [`(,(? loop-form?) . ,_) (error "invalid use of loop form: ~a" clauses)]
+    [x (orelse x)]))
+
+;; (define (expand-loop clauses body)
+;;   (match clauses
+;;     ['() body]
+;;     [`(for ,p in ,e . ,rest) `(set-bind ,p ,e ,(expand-loop rest body))]
+;;     [`(for ,p : ,v in ,e . ,rest) `(map-bind ,p ,v ,e ,(expand-loop rest body))]
+;;     [`(when ,e . ,rest)   `(when ,e ,(expand-loop rest body))]
+;;     [`(unless ,e . ,rest) `(unless ,e ,(expand-loop rest body))]))
 
 ;; applies syntax sugar to make expressions prettier
 (define/match (compact-expr expr)

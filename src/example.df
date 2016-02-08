@@ -226,8 +226,14 @@
         ;; unless we redefine them
         unless (#t for (= v) in (stmt-defines s)))))
 
-;;(rd-3 : code flow -> (map label (map var label)))
-;; TODO: rd-3
+(rd-2 : code flow -> (map label (map var (set label))))
+(rd-2 code flow = (fix RD
+  ((map [l (lub (make-map v (stmt-defines s) (set l))
+                ((map [var labels])
+                 for (cons m (= l)) in flow
+                 for var : labels in (get RD m)
+                 unless (str-member var (stmt-defines s))))])
+   for (cons l s) in (code->set code))))
 
 ;; ;; live variable analysis
 ;; (live : code flow -> (set (* label var)))
