@@ -22,11 +22,84 @@
       termination
 
 * Examples
-  o Graph reachability/ancestry
+  o Graph reachability/ancestry as running example
   o SQL-style examples:
-    - ?
+    - do some fairly hair concrete SQL thing?
+      some business entity modeling thing?
+      departments and engineers?
+      (PROBLEM: no aggregation!)
+    - joining two relations together (relation composition)
+    - translating relational algebra to datafun?
+  o Chart/CYK parsing
+    - good example for bounded fix-points
   o Dataflow analysis
     - Liveness analysis? for while-language
   o Infinitary types?
     - ie, no infinite descending chains, but may nonterminate
       (lattice with top element)
+
+* Comparisons, tradeoffs & limitations
+** general tradeoffs & design decisions
+- we don't allow general recursion, even in functions. could easily lift this
+  restriction, at cost of guaranteed termination.
+
+- user can't define their own semilattice types w/ their own lub operator. we
+  could *probably* allow this, as long as user is OK with unusual behavior if
+  their operator isn't *actually* a semilattice. or, we could add a "hom"
+  operator, like Machiavelli, which isn't optimizable, but allows application of
+  non-semilattice fns to a set.
+
+- we don't allow side-effects. if we DID, optimizing w/o changing behavior gets
+  wicked hard. we could isolate side-effects with a monad, though (wink wink).
+
+- we allow sets of non-equality types, which have no efficient deduplication
+  strategy. only a problem if you use them. not hard to restrict if you want.
+
+** vs datalog
+- we don't enforce constructor restriction.
+  PRO: can call functional code from sets-code nicely
+  CON: termination gets hairy (choose 1: finite types, bounded fixpoint, or possible nontermination)
+
+- we are functional!
+  PRO: we have datatypes!
+  PRO: we have functions!
+  PRO: sets are just another type!
+  CON: optimization gets harder. how much harder? FUTURE WORK!
+
+** vs SQL
+PRO: we are heaps more expressive, mostly
+CON: optimization??? FUTURE WORK
+CON: no (non-semilattice) aggregates yet (counting, summing, etc.)
+     commutative monoids approach might fix this.
+     or just a Machiavelli-style hom() approach. maybe add that?
+CON: no persistence story (don't replace your databases just yet, folks)
+
+* Future work
+
+- optimization
+  * datalog literature (magic sets?)
+  * SQL literature
+  * dataflow literature? kmett's propagators?
+  * that paper about computing transitive closures via matrix math?!
+
+- enforcing datalog "constructor restriction" / "parametricity" at type level:
+  can it be encoded as (∀(a ≥ A) Set a →⁺ Set a)?
+
+- polymorphism: it's nice to have!
+
+- semantics for nonterminating version
+
+- decomposing Set into Sups and Disc.
+
+- a commutative monoid layer, for big data stuff? (Budiu & Plotkin)
+  a monoid layer, because lists are important?
+
+- connection to LVars?
+- connection to CRDTs? eventual consistency?
+- connection to Bloom?!
+
+- does this + SAC/incremental computation = database views? does indexing figure
+  in somehow?
+
+- (distributed?) FRP with "increasing over time" type, ↑A. ↑ is a functor on
+  Poset!
