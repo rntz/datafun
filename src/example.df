@@ -74,8 +74,9 @@
 (nat-member : nat -> (set nat) ~> bool)
 (nat-member a X = ((= a x) for x in X))
 
+;; an alternative way, using equality patterns
 (str-member : str -> (set str) ~> bool)
-(str-member a X = ((= a x) for x in X))
+(str-member a X = (#t for (= a) in X))
 
 (nat-setminus : (set nat) ~> (set nat) ->- (set nat))
 (nat-setminus X Y = (set x
@@ -141,7 +142,7 @@
 
 ;; reachability
 (reachable : (rel str str) ~> str str -> bool)
-(reachable R a b = (#t for (= (cons a b)) in (dag->preorder domain R))
+(reachable R a b = ((cons a b) in? (dag->preorder domain R))
   where (mono domain = (set x for (cons x _) in R)))
 
 (ancestor? : str str -> bool)
@@ -224,7 +225,7 @@
         ;; we inherit its defined variables
         for (cons i l v) in RD
         ;; unless we redefine them
-        unless (#t for (= v) in (stmt-defines s)))))
+        unless (v in? (stmt-defines s)))))
 
 (rd-2 : code flow -> (map label (map var (set label))))
 (rd-2 code flow = (fix RD

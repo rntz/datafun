@@ -12,9 +12,8 @@
 (define decl-form? (or/c 'type 'mono 'anti 'fix))
 (define loop-form? (or/c 'for 'when 'unless))
 (define expr-form?
-  (or/c 'as 'case 'cons 'extend-record 'fix 'for 'if 'let 'lub 'make-map 'map
-        'proj 'quote 'record 'record-merge 'set 'tag 'trustme 'unless 'when
-        'λ 'π))
+  (or/c loop-form? 'as 'case 'cons 'extend-record 'fix 'if 'let 'lub 'make-map
+        'map 'proj 'quote 'record 'record-merge 'set 'tag 'trustme 'λ 'π))
 (define ident-reserved? (or/c expr-form? decl-form? loop-form?))
 (define type-ident-reserved? base-type?)
 
@@ -140,6 +139,8 @@
   [(`(if ,cnd ,thn ,els)) `(case ,cnd [#t ,thn] [#f ,els])]
   [(`(fix ,name ,exprs ...)) #:when (not (= 1 (length exprs)))
    `(fix ,name (lub ,@exprs))]
+  ;; set membership, which desugars to a composition.
+  [(`(,elem in? ,set)) `(#t for (= ,elem) in ,set)]
   ;; prefix comprehensions
   [((? loop?)) (expand-loop expr (match-lambda [`(set . ,es) `(set . ,es)]
                                           [(or `(,e) `(lub ,e)) e]))]
