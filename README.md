@@ -2,153 +2,146 @@
 
 `system.md`: Current description of Datafun's type theory.
 
-`system-posets.md`: Alternate version of Datafun based on posets as a
-generalization of semilattices.
-
-`system-posets-2layer.md`: More explicitly adjoint version of the above.
-
 `src/`: Implementation of datafun in Racket. `src/repl.rkt` is most useful.
+
+`paper/`: ICFP paper work in progress. Not much here yet.
 
 # Datafun
 
-    types           A,B ::= ℕ | A × B | A → B | L ↝ M | FS A
-    lattice types   L,M ::= ℕ | L × M | A → L | L ↝ M | FS A
-    expressions     e   ::= x | λx.e | λ^x.e | e₁ e₂
-                          | (e₁, e₂) | πᵢ e
-                          | ∅ | e₁ ∨ e₂
-                          | {e} | let x ∈ e₁ in e₂
+    poset types     A,B ::= bool | nat | A × B | A → B | A →⁺ B | Set A | A + B
+    lattice types   L,M ::= bool | nat | L × M | A → L | A →⁺ L | Set A
+    expressions     e   ::= x | λx.e | e e
+                          | (e, e) | πᵢ e
+                          | true | false | if e then e else e
+                          | inᵢ e | case e of in₁ x → e; in₂ x → e
+                          | ∅ | e ∨ e | {e} | ⋁(x ∈ e) e
                           | fix x. e
 
     contexts        Δ   ::= · | Δ,x:A
-    monotone ctxts  Γ   ::= · | Δ,x:L
+    monotone ctxts  Γ   ::= · | Γ,x:A
 
 ## Semantic intuition
 
-Semantics of types, in brief:
+Types correspond to *partially ordered sets* (posets):
 
-- `ℕ`, `A × B`, and `A → B` all mean what you'd expect.
+- `bool` is booleans; `false` < `true`.
 
-- So-called "lattice types" `L` represent *unital semilattices* ─ that is,
-  semilattices with a least element. Lattice types are simply a syntactic
-  restriction of ordinary types: any lattice type is a type, but not all types
-  are lattice types.
+- `nat` is the naturals, ordered 0 < 1 < 2 < ...
 
-- The lattice type `FS A` represents *finite sets of `A`s*, with union as
-  lattice join and ∅ as least element. This is how we represent Datalog
-  predicates; a predicate is a finite set of tuples.
+- `A × B` is pairs, ordered pointwise:
+  `(a₁,b₁) ≤ (a₂,b₂)` iff `a₁ ≤ a₂` and `b₁ ≤ b₂`.
 
-- The lattice type `A → L` represents functions mapping `A` into `L`. The
-  lattice join operation is pointwise; the least element is `λx.∅`, where `∅` is
-  the least element of `L`.
+- `A + B` is sums, ordered disjointly. `in₁ a₁ ≤ in₁ a₂` iff `a₁ ≤ a₂`, and
+  likewise for `in₂`; but `in₁ a` and `in₂ b` are not comparable to one another.
 
-- The lattice type `L ↝ M` represents *monotone functions* from `L` to `M`.
-  These form a unital semilattice in the same way as ordinary functions.
+- `Set A` is *finite* sets of `A`s, ordered by inclusion:
+  `x ≤ y` iff `∀(a ∈ x) a ∈ y`.
+
+- `A → B` are functions, ordered pointwise: `f ≤ g` iff `∀(x : B) f x ≤ g x`.
+
+- `A →⁺ B` are *monotone* functions; for any `f : A →⁺ B`, given `x,y : A` such
+  that `x ≤ y` we know that `f x ≤ f y`. The type system enforces this
+  monotonicity. Monotone functions are ordered pointwise, just like regular
+  functions.
+
+Lattice types `L` are a subset of all types, defined so that every lattice type
+happens to be *unital semilattices* (usls) — that is, join-semilattices with a
+least element. Any lattice type is a type, but not all types are lattice types.
 
 Semantics of expressions, in brief:
 
-- `x`, `λx.e`, `(e₁, e₂)`, and `πᵢ e` all do what you'd expect.
+- `x`, `(e₁, e₂)`, `πᵢ e`, `inᵢ e`, `if`, `true`, `false`, and `case` all do
+  what you'd expect.
 
-- `λ^x.e` is a *monotone lambda*, with type `L ↝ M` for appropriate `L`, `M`.
-  That is, its body `e` must be *monotone* in `x`; this is enforced by the type
-  system.
+- `λx.e` and `e e` both do what you'd expect. However, it is left ambiguous
+  whether they represent ordinary or monotone function creation/application.
 
-- `e₁ e₂` is function application ─ ordinary *or* monotone. If you want type
-  inference, this *might* break Hindley-Milner, but won't break bidirectional
-  type checking.
+  One could of course require the programmer to write ordinary and monotone
+  functions differently (or even ordinary and monotone function *applications*
+  differently). But for our purposes it's simplest to just give two typing rules
+  (ordinary and monotone) for `λx.e` (and likewise `e e`).
+
+  It is definitely possible to infer monotonicity in a bidirectional way, and
+  possibly even in a Damas-Milner-ish way, but that's outside the scope of this
+  README.
+
 - `∅` represents the least element of a lattice type.
 
-- `e₁ ∨ e₂` represents lattice join.
+- `e₁ ∨ e₂` represents the least upper bound ("lattice join") of `e₁` and `e₂`.
 
 - `{e}` represents the singleton set containing `e`.
 
-- `let x ∈ e₁ in e₂` is set-comprehension. `e₁` must have a finite set type;
-  `e₂` must have a lattice type. For each `x` in `e₁`, we compute `e₂`; then we
+- `⋁(x ∈ e₁) e₂` is set-comprehension. `e₁` must have a finite set type; `e₂`
+  must have a lattice type. For each `x` in `e₁`, we compute `e₂`; then we
   lattice-join together all values of `e₂` computed this way, and that is our
   result. This generalizes the "bind" operation of the finite-set monad.
 
-- `fix x.e` finds the least-fixed-point of the monotone expression `e`. We can
-  only find fixed-points at certain types; which types exactly is an open
-  question. We know how to do it at least for `ℕ` and for `FS A` where A is an
-  equality type. Finding least-fixed-points of finite-set-typed expressions is
-  precisely Datalog-style recursion.
+- `fix x. e` finds the least fixed-point of the monotone function `λx. e`.
 
 ## Typing judgment: `Δ;Γ ⊢ e : A`
 
 Our typing judgment is `Δ;Γ ⊢ e : A`
 
-We call `Δ` our *unrestricted* context and `Γ` our *monotone* context.
-
-There is an implicit restriction: Γ may only be nonempty if `A` is a lattice
-type `L`. (This is effectively the same as having two judgments: `Δ ⊢ e : A` and
-`Δ;Γ ⊢ e : L`, where `Δ ⊢ e : L` is implicitly equivalent to `Δ;· ⊢ e : L`.)
-
-Both contexts obey the usual intuitionistic structural rules (weakening,
-exchange). There is one additional (albeit rather useless) structural rule:
-
-    Δ; Γ,x:L ⊢ e : M
-    ---------------- forget
-    Δ,x:L; Γ ⊢ e : M
-
-Read forward, this says that if `e` *is* monotonic in `x`, then we may forget
-this fact and treat it as if it is unrestricted in `x`. Read backward, this says
-we may freely choose to bind ourselves to using an unrestricted variable only
-monotonically within a subterm.
+We call `Δ` our *unrestricted* context and `Γ` our *monotone* context. Both
+contexts obey the usual intuitionistic structural rules (weakening, exchange).
 
 ### Typing rules
 
-     Δ,x:A; Γ ⊢ e : B      Δ; Γ,x:L ⊢ e : M
-    ------------------    -------------------
-    Δ;Γ ⊢ λx.e : A → B    Δ;Γ ⊢ λ^x.e : L ↝ M
+     Δ,x:A; Γ ⊢ e : B       Δ;Γ ⊢ e₁ : A → B   Δ;· ⊢ e₂ : A
+    ------------------ λ    -------------------------------- app
+    Δ;Γ ⊢ λx.e : A → B             Δ;Γ ⊢ e₁ e₂ : B
 
-    Δ;Γ ⊢ e₁ : A → B   Δ;· ⊢ e₂ : A
-    -------------------------------- app
-           Δ;Γ ⊢ e₁ e₂ : B
-
-    Δ;Γ ⊢ e₁ : L ↝ M   Δ;Γ ⊢ e₂ : L
-    ------------------------------- app^
-           Δ;Γ ⊢ e₁ e₂ : M
+     Δ; Γ,x:A ⊢ e : B       Δ;Γ ⊢ e₁ : A →⁺ B   Δ;Γ ⊢ e₂ : A
+    ------------------- λ⁺  --------------------------------- app⁺
+    Δ;Γ ⊢ λx.e : A →⁺ B            Δ;Γ ⊢ e₁ e₂ : B
 
 NB. The monotone context of `e₂` in the rule `app` for applying ordinary
 functions must be empty! Since `A → B` represents an *arbitrary* function, we
 cannot rely on its output being monotone in its argument. Thus its argument must
-be, not *monotone* relative to our current Γ, but *constant*.
+be, not *monotone* in Γ, but *constant*.
+
+TODO: give typing rules for booleans/`if` and sums/`case`.
 
                      Δ;Γ ⊢ eᵢ : L
     -----------    -----------------
     Δ;Γ ⊢ ∅ : L    Δ;Γ ⊢ e₁ ∨ e₂ : L
 
-      Δ;· ⊢ e : A       Δ;Γ ⊢ e₁ : FS A   Δ,x:A; Γ ⊢ e₂ : L
-    ----------------    -----------------------------------
-    Δ;Γ ⊢ {e} : FS A        Δ;Γ ⊢ let x ∈ e₁ in e₂ : L
+      Δ;· ⊢ e : A        Δ;Γ ⊢ e₁ : Set A  Δ,x:A; Γ ⊢ e₂ : L
+    -----------------    ------------------------------------
+    Δ;Γ ⊢ {e} : Set A          Δ;Γ ⊢ ⋁(x ∈ e₁) e₂ : L
 
-    Δ; Γ,x:L ⊢ e : L
-    ----------------- fix
-    Δ;Γ ⊢ fix x.e : L
+    Δ; Γ,x:L ⊢ e : L   L equality
+    ----------------------------- fix
+          Δ;Γ ⊢ fix x.e : L
 
-The last rule, for `fix`, is overly permissive as stated; it needs to be
-restricted to some computationally tractable class of lattice types.
+In the last rule, for `fix`, the premise `L equality` means that the type `L` at
+which the fixed-point is computed must have decidable equality.
 
 # Two-layer formulation
 Alternative, two-layer formulation:
 
-    types           A,B ::= U L | A × B | A → B
-    lattice types   L,M ::= F A | L × M | A → L | L ↝ M
-                          | ℕ
-    expressions     e   ::= x | λx.e | e₁ e₂
-                          | (e₁, e₂) | πᵢ e
+    set types       A,B ::= U P | A ⊗ B | A ⊕ B | A ⊃ B
+    poset types     P,Q ::= bool | nat | P × Q | P →⁺ Q | Set A
+                          | Disc A | P + Q
+    lattice types   L,M ::= bool | nat | L × M | P →⁺ M | Set A
+    expressions     e   ::= x | λx.e | e e | (e, e) | πᵢ e
+                          | inᵢ e | case e of in₁ x → e; in₂ x → e
                           | U u
-    lattice exprs   u   ::= x | λ^x.u | u₁ u₂
-                          | λx.u | u e
-                          | (u₁, u₂) | πᵢ u
-                          | ∅ | u₁ ∨ u₂
-                          | {e} | let x ∈ u₁ in u₂
-                          | U⁻¹ e
+    lattice exprs   u   ::= x | λx.u | u u | (u, u) | πᵢ u
+                          | ∅ | u ∨ u | {e} | ⋁(x ∈ u) u
+                          | fix x. u
+                          | D e | U⁻¹ e | let D x = u in u
 
-    Δ;· ⊢ u : L               Δ ⊢ e : U L
-    -------------           ---------------
-    Δ ⊢ U u : U L           Δ;Γ ⊢ U⁻¹ e : L
+    Δ;· ⊢ u : P               Δ ⊢ e : U P
+    ------------- U         --------------- U⁻¹
+    Δ ⊢ U u : U P           Δ;Γ ⊢ U⁻¹ e : P
 
-NB. In this presentation, `FS` comes apart into `F` and `U`. `U` is the
-*underlying* functor; given a semilattice, it gives the type of its underlying
-values. `F` is the *free* functor: given a type `A` it produces the free unital
-semilattice on `A`, which is to say, finite sets of `A`s under union.
+      Δ ⊢ e : A             Δ;Γ ⊢ u₁ : D A   Δ,x:A; Γ ⊢ u₂ : P
+    --------------- D       ----------------------------------- let-D
+    Δ;Γ ⊢ D e : D A            Δ;Γ ⊢ let D x = u₁ in u₂ : P
+
+I use `⊗` and `⊕` for set types not because they are linear, but simply to
+distinguish them from the `×` and `+` operations on *poset* types.
+
+This version needs to be fleshed out more fully. In particular, we need some
+axioms to ensure that `U (P + Q) = U P ⊕ U Q`.
