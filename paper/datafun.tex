@@ -1,0 +1,103 @@
+%-----------------------------------------------------------------------------
+%
+%               Template for sigplanconf LaTeX Class
+%
+% Name:         sigplanconf-template.tex
+%
+% Purpose:      A template for sigplanconf.cls, which is a LaTeX 2e class
+%               file for SIGPLAN conference proceedings.
+%
+% Guide:        Refer to "Author's Guide to the ACM SIGPLAN Class,"
+%               sigplanconf-guide.pdf
+%
+% Author:       Paul C. Anagnostopoulos
+%               Windfall Software
+%               978 371-2316
+%               paul@windfall.com
+%
+% Created:      15 February 2005
+%
+%-----------------------------------------------------------------------------
+
+
+\documentclass[preprint]{sigplanconf}
+
+% The following \documentclass options may be useful:
+
+% preprint      Remove this option only once the paper is in final form.
+% 10pt          To set in 10-point type instead of 9-point.
+% 11pt          To set in 11-point type instead of 9-point.
+% numbers       To obtain numeric citation style instead of author/year.
+
+\usepackage{amsmath}
+
+\newcommand{\cL}{{\cal L}}
+
+\begin{document}
+
+\special{papersize=8.5in,11in}
+\setlength{\pdfpageheight}{\paperheight}
+\setlength{\pdfpagewidth}{\paperwidth}
+
+\conferenceinfo{ICFP '16}{Month d--d, 20yy, City, ST, Country}
+\copyrightyear{2016}
+\copyrightdata{978-1-nnnn-nnnn-n/yy/mm}
+\copyrightdoi{nnnnnnn.nnnnnnn}
+
+% Uncomment the publication rights you want to use.
+%\publicationrights{transferred}
+%\publicationrights{licensed}     % this is the default
+%\publicationrights{author-pays}
+
+\titlebanner{banner above paper title}        % These are ignored unless
+\preprintfooter{short description of paper}   % 'preprint' option specified.
+
+\title{Title Text}
+\subtitle{Subtitle Text, if any}
+
+\authorinfo{Michael Arntzenius\and Neelakantan R. Krishnaswami}
+           {University of Birmingham}
+           {Email2/3}
+
+\maketitle
+
+\begin{abstract}
+This is the text of the abstract.
+\end{abstract}
+
+\category{CR-number}{subcategory}{third-level}
+
+% general terms are not compulsory anymore,
+% you may leave them out
+\terms
+term1, term2
+
+\keywords
+keyword1, keyword2
+
+\section{Introduction}
+
+The text of the paper begins here.
+
+\paragraph{Contributions}
+
+This is the text of the appendix, if you need one.
+
+\section
+
+\acks
+
+Acknowledgments, if needed.
+
+% We recommend abbrvnat bibliography style.
+
+\bibliographystyle{abbrvnat}
+\bibliography{datafun}
+
+% \appendix
+% \section{Appendix Title}
+
+
+
+
+\end{document}
