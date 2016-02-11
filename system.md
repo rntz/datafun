@@ -4,18 +4,18 @@
 
 $$\begin{array}{lrrl}
 \text{types} & A,B
-&::=& \N \pipe A \x B \pipe A + B \pipe A \to B \pipe A \mono B \pipe \FS\;A\\
-\text{lattice types} & M,N
-&::=& \N \pipe M \x N \pipe A \to M \pipe A \mono M \pipe \FS\;A\\
+&::=& \bool \pipe \N \pipe A \x B \pipe A + B \pipe A \to B
+\pipe A \mono B \pipe \FS\;A\\
+\text{lattice types} & L,M
+&::=& \bool \pipe \N \pipe L \x M \pipe A \to L \pipe A \mono L \pipe \FS\;A\\
 \text{finite types} & F,G
 &::=& F \x G \pipe F + G \pipe F \to G \pipe F \mono G \pipe \FS\;F\\
 \text{expressions} & e
 &::=& x \pipe \fn\bind{x} e \pipe e_1\;e_2
-\pipe (e_1, e_2) \pipe \pi_i\;e \pipe \ms{in}_i\;e\\
-&&|\,& \case{e}{x}{e_1}{y}{e_2}\\
-&&|\,& \monocase{e}{x}{e_1}{y}{e_2}\\
-&&|\,& \{e\} \pipe \letin{x}{e_1}{e_2}\\
-&&|\,& \emptyset \pipe e_1 \vee e_2 \pipe \fix{x}e\\
+\pipe (e_1, e_2) \pipe \pi_i\;e \\
+&&|\,& \ms{in}_i\;e \pipe \case{e}{x}{e_1}{y}{e_2}\\
+&&|\,& \emptyset \pipe e_1 \vee e_2 \pipe \{e\} \pipe \letin{x}{e_1}{e_2}\\
+&&|\,& \fix{x}e\\
 \text{contexts} & \GD,\GG &::=& \cdot \pipe \GD, x \of A \\
 \text{typing judgment} & J &::=& \J{\GD}{\GG}{e}{A}
 \end{array}$$
@@ -43,9 +43,9 @@ However, \ms{forget} is not used in any proofs, and is moreover derivable, as a
 form of $\beta$-expansion, from weakening and the rules for monotone functions
 (with a bit of term elaboration):
 $$
-\infer[\widehat{\ms{app}}]{\J{\GD,x\of A}{\GG}{(\fn\bind{x} e)\; x}{B}}{
+\infer[\ms{app}^+]{\J{\GD,x\of A}{\GG}{(\fn\bind{x} e)\; x}{B}}{
   \infer[\ms{weaken}]{\J{\GD,x\of A}{\GG}{\fn\bind{x}e}{A \mono B}}{
-    \infer[\monofn]{\J{\GD}{\GG}{\fn\bind{x}e}{A \mono B}}{
+    \infer[\fn^+]{\J{\GD}{\GG}{\fn\bind{x}e}{A \mono B}}{
       \J{\GD}{\GG,x\of A}{e}{B}}} &
   \infer[\ms{hyp}]{\J{\GD,x\of A}{\GG}{x}{A}}{}
   }
@@ -57,13 +57,13 @@ $$
 \infer[\ms{hyp}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD \cup \GG} \qquad
 \infer[\fn]{\J{\GD}{\GG}{\fn\bind{x}{e}}{A \to B}}{
   \J{\GD,x\of A}{\GG}{e}{B}} \qquad
-\infer[\monofn]{\J{\GD}{\GG}{\fn\bind{x}{e}}{A \mono B}}{
+\infer[\fn^+]{\J{\GD}{\GG}{\fn\bind{x}{e}}{A \mono B}}{
   \J{\GD}{\GG,x \of A}{e}{B}}
 $$\ $$
 \infer[\ms{app}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
   \J{\GD}{\GG}{e_1}{A \to B} &
   \J{\GD}{\cdot}{e_2}{B}} \qquad
-\infer[\widehat{\ms{app}}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
+\infer[\ms{app}^+]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
   \J{\GD}{\GG}{e_1}{A \mono B} &
   \J{\GD}{\GG}{e_2}{A}}
 $$\ $$
@@ -79,21 +79,21 @@ $$\ $$
   \J{\GD,x_i\of A_i}{\GG}{e_i}{C}
 }
 $$\ $$
-\infer[\widehat{\ms{case}}]{\J{\GD}{\GG}{\monocase{e}{x_1}{e_1}{x_2}{e_2}}{C}}{
+\infer[\ms{case}^+]{\J{\GD}{\GG}{\case{e}{x_1}{e_1}{x_2}{e_2}}{C}}{
   \J{\GD}{\GG}{e}{A_1 + A_2} &
   \J{\GD}{\GG, x_i \of A_i}{e_i}{C}
 }
 $$\ $$
-\infer[\{\}]{\J{\GD}{\GG}{\{e\}}{\FS\;A}}{\J{\GD}{\cdot}{e}{A}} \qquad
+\infer[\emptyset]{\J{\GD}{\GG}{\emptyset}{M}}{} \qquad
+\infer[\vee]{\J{\GD}{\GG}{e_1 \vee e_2}{M}}{\J{\GD}{\GG}{e_i}{M}} \qquad
+\infer[\{\}]{\J{\GD}{\GG}{\{e\}}{\FS\;A}}{\J{\GD}{\cdot}{e}{A}}
+$$\ $$
 \infer[\bigvee_\in]{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{M}}{
   \J{\GD}{\GG}{e_1}{\FS\;A} &
   \J{\GD,x\of A}{\GG}{e_2}{M}}
 $$\ $$
-\infer[\emptyset]{\J{\GD}{\GG}{\emptyset}{M}}{} \qquad
-\infer[\vee]{\J{\GD}{\GG}{e_1 \vee e_2}{M}}{\J{\GD}{\GG}{e_i}{M}}
-\qquad
 \infer[\ms{fix}]{\J{\GD}{\GG}{\fix{x}e}{M}}{
-  \J{\GD}{\GG,x\of M}{e}{M} & M~\ms{finite}}
+  \J{\GD}{\GG,x\of M}{e}{M} & M~\ms{finite} & M~\ms{equality}}
 $$
 
 The restriction of the \ms{fix} rule to finite lattices is necessary to avoid
@@ -245,8 +245,8 @@ $$
   \end{cases}
   & \den{e_i}\text{ monotone}
   \vspace{.8em}\\
-  %% TODO: denotation of \monocase
-  \fux{\J{\GD}{\GG}{\monocase{e}{x_1}{e_1}{x_2}{e_2}}{B}}{
+  %% TODO: denotation of monotone \case
+  \fux{\J{\GD}{\GG}{\case{e}{x_1}{e_1}{x_2}{e_2}}{B}}{
     \J{\GD}{\GG}{e}{A_1 + A_2} &
     \J{\GD}{\GG,x_i\of A_i}{e_i}{B}
   }\dg
@@ -262,7 +262,8 @@ $$
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{\fix{x}e}{M}}{
     \J{\GD}{\GG,x\of M}{e}{M} &
-    M~\ms{finite}
+    M~\ms{finite} &
+    M~\ms{equality}
   }\dg
   &=& \ms{fix}_{\den{M}}\;(\fn\bind{x} \den{e}\;\pair{\delta}{x}\;\gamma)
   & \text{\omitted{TODO}}
@@ -310,8 +311,6 @@ $$
   \sub{e/x}(\ms{in}_i\;e') &=& \ms{in}_i\;(\sub{e/x}e')\\
   \sub{e/x}(\case{e'}{y}{e_1}{z}{e_2})
   &=& \case{\sub{e/x} e'}{y}{\sub{e/x}e_1}{z}{\sub{e/x}e_2}\\
-  \sub{e/x}(\monocase{e'}{y}{e_1}{z}{e_2})
-  &=& \monocase{\sub{e/x} e'}{y}{\sub{e/x}e_1}{z}{\sub{e/x}e_2}\\
   \sub{e/x} \emptyset &=& \emptyset\\
   \sub{e/x}(e_1 \vee e_2) &=& (\sub{e/x}e_1) \vee (\sub{e/x} e_2)\\
   \sub{e/x}\{e'\} &=& \{\sub{e/x}e'\}\\
@@ -363,14 +362,14 @@ case that $\J{\GD}{\cdot}{e}{A}$:
       \J{\GD,y : B}{\GG}{\sub{e/x}e'}{C}}
     \]
 
-  \item[Case $\monofn$]: Given \[
-    \infer[\monofn]{\J{\GD,x\of A}{\GG}{\monofn\bind{y} e'}{M \mono N}}{
+  \item[Case $\fn^+$]: Given \[
+    \infer[\fn^+]{\J{\GD,x\of A}{\GG}{\fn\bind{y} e'}{M \mono N}}{
       \J{\GD,x\of A}{\GG,y \of M}{e'}{N}}
     \]
 
     By our IH, we have $\J{\GD}{\GG,y \of M}{\sub{e/x}e'}{N}$. Thus:
     \[
-    \infer[\monofn]{\J{\GD}{\GG}{\monofn\bind{y} \sub{e/x}e'}{M \mono N}}{
+    \infer[\fn^+]{\J{\GD}{\GG}{\fn\bind{y} \sub{e/x}e'}{M \mono N}}{
       \J{\GD}{\GG,y\of M}{\sub{e/x} e'}{N}
       }
     \]
@@ -388,15 +387,15 @@ case that $\J{\GD}{\cdot}{e}{A}$:
         \J{\GD}{\cdot}{\sub{e/x} e_2}{B}}
     \]
 
-  \item[Case $\widehat{\ms{app}}$:] Given \[
-    \infer[\widehat{\ms{app}}]{\J{\GD,x\of A}{\GG}{e_1\;e_2}{N}}{
+  \item[Case $\ms{app}^+$:] Given \[
+    \infer[\ms{app}^+]{\J{\GD,x\of A}{\GG}{e_1\;e_2}{N}}{
       \J{\GD,x\of A}{\GG}{e_1}{M \mono N} &
       \J{\GD,x\of A}{\GG}{e_2}{N}}
     \]
 
     By our IHs, we have $\J{\GD}{\GG}{\sub{e/x} e_1}{M\to N}$ and
     $\J{\GD}{\GG}{\sub{e/x}e_2}{M}$. Thus: \[
-    \infer[\widehat{\ms{app}}]{
+    \infer[\ms{app}^+]{
       \J{\GD}{\GG}{(\sub{e/x} e_1)\;(\sub{e/x} e_2)}{N}
     }{
         \J{\GD}{\GG}{\sub{e/x} e_1}{M \mono N} &
@@ -430,7 +429,7 @@ case that $\J{\GD}{\cdot}{e}{A}$:
     }
     \]
 
-  \item[Case $\widehat{\ms{case}}$:] \omitted{TODO}
+  \item[Case $\ms{case}^+$:] \omitted{TODO}
 
   \item[Case $\{\}$:] Given \[
     \infer[\{\}]{\J{\GD,x\of A}{\GG}{\{e'\}}{\FS\;B}}{
@@ -508,15 +507,15 @@ $\J{\GD}{\GG}{e}{M}$ in each case:
       \J{\GD,y\of A}{\GG}{\sub{e/x} e'}{N}}
     \]
 
-  \item[Case $\monofn$]: Given \[
-    \infer{\J{\GD}{\GG,x \of M}{\monofn\bind{y} e'}{N \mono O}}{
+  \item[Case $\fn^+$]: Given \[
+    \infer{\J{\GD}{\GG,x \of M}{\fn\bind{y} e'}{N \mono O}}{
       \J{\GD}{\GG,x \of M, y \of N}{e'}{O}}
     \]
 
     By our IH, exchange, and weakening, we have $\J{\GD}{\GG,y\of N}{\sub{e/x}
       e'}{O}$. Thus:
     \[
-    \infer{\J{\GD}{\GG}{\monofn\bind{y} \sub{e/x} e'}{N \mono O}}{
+    \infer{\J{\GD}{\GG}{\fn\bind{y} \sub{e/x} e'}{N \mono O}}{
       \J{\GD}{\GG,y\of N}{\sub{e/x} e'}{O}}
     \]
 
@@ -534,7 +533,7 @@ $\J{\GD}{\GG}{e}{M}$ in each case:
       \J{\GD}{\cdot}{e_2}{A}}
     \]
 
-  \item[Case $\widehat{\ms{app}}$:] Given \[
+  \item[Case $\ms{app}^+$:] Given \[
     \infer{\J{\GD}{\GG,x \of M}{e_1\;e_2}{O}}{
       \J{\GD}{\GG,x \of M}{e_1}{N \mono O} &
       \J{\GD}{\GG,x \of M}{e_2}{N}}
@@ -565,7 +564,7 @@ $\J{\GD}{\GG}{e}{M}$ in each case:
       \J{\GD,z\of B}{\GG}{\sub{e/x} e_2}{N}}
     \]
 
-  \item[Case $\widehat{\ms{case}}$:] \omitted{TODO}
+  \item[Case $\ms{case}^+$:] \omitted{TODO}
 
   \item[Case $\{\}$:] Given \[
     \infer{\J{\GD}{\GG,x\of M}{\{e'\}}{\FS\;A}}{
