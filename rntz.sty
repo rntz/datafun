@@ -9,16 +9,14 @@
 %% for \underaccent
 \usepackage{accents}
 
-% for \mb, \mathbb
-%% \usepackage{bm}
-%% \usepackage{bbm}
-%% \usepackage[bb=boondox]{mathalfa}
-
 % for semantic brackets
 \usepackage{stmaryrd}
 
 % for inference rules
 \usepackage{proof}
+
+%% for mathpar environment
+\usepackage{mathpartir}
 
 % for \scalebox
 \usepackage{graphicx}
@@ -49,6 +47,7 @@
 \newcommand{\GD}{\Delta}
 \newcommand{\GG}{\Gamma}
 \newcommand{\J}[4]{{#1};\,{#2}\ent {#3}:{#4}}
+\newcommand{\isfinite}[1]{#1\ \ms{finite}}
 
 \newcommand{\monofn}{\lambda^+}
 
@@ -84,7 +83,7 @@
 \newcommand{\ifthen}[3]{\ms{if}~{#1}~\ms{then}~{#2}~\ms{else}~{#3}}
 
 \newcommand{\setfor}[2]{\{{#1}~|~{#2}\}}
-\newcommand{\isin}{\mathbin{\in?}}
+\newcommand{\isin}{\mathrel{{\in}\hspace{0.15ex}?}}
 
 %% patterns
 \newcommand{\pwild}{\underline{\phantom{a}}}
