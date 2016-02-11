@@ -4,7 +4,8 @@
 
 $$\begin{array}{lrrl}
 \text{types} & A,B
-&::=& \bool \pipe \N \pipe A \x B \pipe A \to B \pipe A \mto B \pipe \FS\;A\\
+&::=& \bool \pipe \N \pipe A \x B \pipe A \to B
+\pipe A \mto B \pipe \FS\;A\\
 &&|\,& A + B\\
 \text{lattice types} & L,M
 &::=& \bool \pipe \N \pipe L \x M \pipe A \to L \pipe A \mto L \pipe \FS\;A\\
@@ -15,7 +16,7 @@ $$\begin{array}{lrrl}
 \pipe (e_1, e_2) \pipe \pi_i\;e \\
 &&|\,& \ms{in}_i\;e \pipe \case{e}{x}{e_1}{y}{e_2}\\
 &&|\,& \emptyset \pipe e_1 \vee e_2 \pipe \{e\} \pipe \letin{x}{e_1}{e_2}\\
-&&|\,& \fix{x}e\\
+&&|\,& \fix{x}{e}\\
 \text{contexts} & \GD,\GG &::=& \cdot \pipe \GD, x \of A \\
 \text{typing judgment} & J &::=& \J{\GD}{\GG}{e}{A}
 \end{array}$$
@@ -92,7 +93,7 @@ $$\ $$
   \J{\GD}{\GG}{e_1}{\FS\;A} &
   \J{\GD,x\of A}{\GG}{e_2}{M}}
 $$\ $$
-\infer[\ms{fix}]{\J{\GD}{\GG}{\fix{x}e}{M}}{
+\infer[\ms{fix}]{\J{\GD}{\GG}{\fix{x}{e}}{M}}{
   \J{\GD}{\GG,x\of M}{e}{M} & M~\ms{finite} & M~\ms{equality}}
 $$
 
@@ -260,7 +261,7 @@ $$
     \J{\GD}{\GG}{e}{A_1 + A_2}}\dg
   &=& \pi_i\;(\den{e}\dg) & \pi_i,\,\den{e}\text{ monotone}
   \vspace{.8em}\\
-  \fux{\J{\GD}{\GG}{\fix{x}e}{M}}{
+  \fux{\J{\GD}{\GG}{\fix{x}{e}}{M}}{
     \J{\GD}{\GG,x\of M}{e}{M} &
     M~\ms{finite} &
     M~\ms{equality}
@@ -270,7 +271,7 @@ $$
 \end{array}
 $$
 
-Note that the denotation of $\fix{x} e$ being well-defined relies on the
+Note that the denotation of $\fix{x}{e}$ being well-defined relies on the
 following lemma:
 
 \textbf{Lemma:} The denotation $\den{M}$ of a \emph{finite} lattice type $M$ is
@@ -315,7 +316,7 @@ $$
   \sub{e/x}(e_1 \vee e_2) &=& (\sub{e/x}e_1) \vee (\sub{e/x} e_2)\\
   \sub{e/x}\{e'\} &=& \{\sub{e/x}e'\}\\
   \sub{e/x}(\letin{y}{e_1}{e_2}) &=& \letin{y}{\sub{e/x}e_1}{\sub{e/x}e_2}\\
-  \sub{e/x}(\fix{y} e') &=& \fix{y} \sub{e/x} e'
+  \sub{e/x}(\fix{y}{e'}) &=& \fix{y}{\sub{e/x} e'}
 \end{array}
 $$
 
@@ -459,12 +460,12 @@ case that $\J{\GD}{\cdot}{e}{A}$:
     \]
 
   \item[Case $\ms{fix}$:] Given \[
-    \infer[\ms{fix}]{\J{\GD,x\of A}{\GG}{\fix{y} e'}{M}}{
+    \infer[\ms{fix}]{\J{\GD,x\of A}{\GG}{\fix{y}{e'}}{M}}{
       \J{\GD,x\of A}{\GG,y \of M}{e'}{M}}
     \]
 
     By our IH we have $\J{\GD}{\GG,y\of M}{\sub{e/x} e'}{M}$. Thus: \[
-    \infer[\ms{fix}]{\J{\GD}{\GG}{\fix{y} \sub{e/x} e'}{M}}{
+    \infer[\ms{fix}]{\J{\GD}{\GG}{\fix{y}{\sub{e/x} e'}}{M}}{
       \J{\GD}{\GG,y\of M}{\sub{e/x} e'}{M}
     }\]
 
@@ -592,13 +593,13 @@ $\J{\GD}{\GG}{e}{M}$ in each case:
     \]
 
   \item[Case $\ms{fix}$:] Given \[
-    \infer{\J{\GD}{\GG,x\of M}{\fix{y} e'}{N}}{
+    \infer{\J{\GD}{\GG,x\of M}{\fix{y}{e'}}{N}}{
       \J{\GD}{\GG,x\of M,y\of N}{e'}{N}}
     \]
 
     By our IH and weakening, we have $\J{\GD}{\GG,y \of N}{\sub{e/x} e'}{N}$.
     Thus: \[
-    \infer{\J{\GD}{\GG}{\fix{y} \sub{e/x} e'}{N}}{
+    \infer{\J{\GD}{\GG}{\fix{y}{\sub{e/x} e'}}{N}}{
       \J{\GD}{\GG,y\of N}{\sub{e/x} e'}{N}}
     \]
 

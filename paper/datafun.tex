@@ -1,7 +1,5 @@
 \documentclass[preprint]{sigplanconf}
 
-\usepackage{rntz}
-
 % The following \documentclass options may be useful:
 
 % preprint      Remove this option only once the paper is in final form.
@@ -9,7 +7,15 @@
 % 11pt          To set in 11-point type instead of 9-point.
 % numbers       To obtain numeric citation style instead of author/year.
 
-%% \newcommand{\cL}{{\cal L}}
+\usepackage{rntz}
+
+%% some overrides for stuff defined in rntz.sty
+\renewcommand{\pipe}{\;|\;}
+%% \renewcommand{\mto}{\nearrow}
+\newcommand{\uto}{\to}
+
+%% a little more spacing, please
+\def\arraystretch{1.1}
 
 \begin{document}
 
@@ -40,6 +46,7 @@
 
 \maketitle
 
+
 \begin{abstract}
 This is the text of the abstract.
 \end{abstract}
@@ -60,12 +67,79 @@ The text of the paper begins here.
 
 \section{Datafun}
 
+Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nec vero alia sunt
+quaerenda contra Carneadeam illam sententiam. Cum ageremus, inquit, vitae beatum
+et eundem supremum diem, scribebamus haec. Quid sequatur, quid repugnet, vident.
+
+Minime id quidem, inquam, alienum, multumque ad ea, quae quaerimus, explicatio
+tua ista profecerit. Qua ex cognitione facilior facta est investigatio rerum
+occultissimarum. Quis animo aequo videt eum, quem inpure ac flagitiose putet
+vivere? Primum quid tu dicis breve? Ita enim vivunt quidam, ut eorum vita
+refellatur oratio.
+
+
 \begin{figure}
-  \[\begin{array}{lccl}
-  \text{types} & A, B &::=& \bool \pipe \N\\
-  \text{expressions} & e &::=&
+  \[\begin{array}{ccl}
+    %% types
+    A, B     &\bnfeq& A + B \pipe A \x B \pipe A \uto B \pipe A \mto B
+    \\
+    \textsf{types} && \bool \pipe \N \pipe \Set{A} \pipe \Map{\eq{A}}{B}
+    \vspace{0.5em}\\
+    %% usl types
+    L, M         &\bnfeq& L \x M \pipe A \uto L \pipe A \mto L
+    \\
+    \textsf{usl types} && \bool \pipe \N \pipe \Set{A} \pipe \Map{\eq{A}}{L}
+    \vspace{0.5em}\\
+    %% equality types
+    \eq{A}, \eq{B} &\bnfeq& \bool \pipe \N \pipe \Set{\eq{A}}
+                            \pipe \Map{\eq{A}}{\eq{B}}
+                            \pipe \eq{A} + \eq{B} \pipe \eq{A} \x \eq{B}\\
+    \textsf{eqtypes}\vspace{0.5em}\\
+    %%
+    \eq{L}, \eq{M} &\defeq& \eq{A} \cap L
+                    \quad\text{(i.e. both an eqtype and an usl type)}\\
+    \textsf{usl eqtypes} &&
+    \vspace{0.5em}\\
+    %% expressions
+    e &\bnfeq& x \pipe \fn\bind{x} e \pipe e\;e \pipe (e,e) \pipe \pi_i\;e\\
+    \textsf{terms} && \ms{in}_i\;e \pipe \case{e}{x}{e}{x}{e}\\
+    && e = e \pipe \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
+    && \unit \pipe \{e\} \pipe e \vee e \pipe \letin{x}{e}{e}\\
+    %% singleton dictionary?
+    %% && \{e{:}\,e\}\\
+    && \fix{x}{e} \pipe \fixle{x}{e}{e}
   \end{array}\]
-  \caption{Datafun syntax}
+  \caption{Core Datafun: syntax}
+\end{figure}
+
+\begin{figure}
+  \[\begin{array}{ccl}
+  %% expressions
+  e &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
+             \pipe \forin{\mc{L}}{e}\\
+  \textsf{terms}&& \rawcase{e}{[{p} \to {e}]^*}
+  \vspace{0.5em}\\
+  %% patterns
+  p &\bnfeq& \pwild \pipe x \pipe (p,p) \pipe \ms{in}_i\;p
+             \pipe \ms{true} \pipe \ms{false}\\
+  \textsf{patterns}
+  \vspace{0.5em}\\
+  %% loop clauses
+  \mc{L} &\bnfeq& \mc{L}, \mc{L} \pipe p \in e \pipe e\\
+  \textsf{loops}
+  \end{array}\]
+
+  %% the desugaring syntax-expansion itself
+  \begin{eqnarray*}
+    e_1 \isin e_2            &\expandsto& \forin{x \in e_2} e_1 = x\\
+    \setfor{e}{\mc{L}}       &\expandsto& \forin{\mc{L}}{\{e\}}\\
+    \forin{\mc{L}_1,\mc{L}_2}{e}
+    &\expandsto& \forin{\mc{L}_1}{\forin{\mc{L}_2}{e}}\\
+    \forin{p\in e_1}{e_2}
+    &\expandsto& \letin{x}{e_1}{\rawcase{x}{p \to e_2;\,\pwild \to \unit}}\\
+    \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}
+  \end{eqnarray*}
+  \caption{Syntax sugar}
 \end{figure}
 
 \paragraph{Contributions}

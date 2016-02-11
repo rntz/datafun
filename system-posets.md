@@ -48,7 +48,7 @@ $$\begin{array}{lrrl}
 &&|\,& \ms{in}_i\; e \pipe \case{e}{x}{e_1}{y}{e_2}\\
 &&|\,& \emptyset \pipe u_1 \vee u_2\\
 &&|\,& \{u\} \pipe \letin{x}{u_1}{u_2}\\
-&&|\,& \fix{x}u\\
+&&|\,& \fix{x}{u}\\
 &&|\,& |e| \pipe e ~\ms{as}~ P\\
 \text{contexts} & \GG &::=& \cdot \pipe \GG, x \of P \\
 \text{typing judgments} & J &::=& \J{\GG}{e}{P}
@@ -171,7 +171,7 @@ $$\ $$
 \infer[\emptyset]{\J{\GG}{\emptyset}{M}}{} \qquad
 \infer[\vee]{\J{\GG}{e_1 \vee e_2}{M}}{\J{\GG}{e_i}{M}}
 $$\ $$
-\infer[\ms{fix}]{\J{\GG}{\fix{x}e}{M}}{
+\infer[\ms{fix}]{\J{\GG}{\fix{x}{e}}{M}}{
   \J{\GG,x\of M}{e}{M}}
 \qquad
 \infer[\ms{op}]{\J{\GG}{\op{e}}{\op{P}}}{\J{\op{\GG}}{e}{P}}

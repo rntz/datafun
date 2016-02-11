@@ -48,7 +48,7 @@ $$\begin{array}{lrrl}
 &&|\,& \ms{in}_i\; u \pipe \case{u}{x}{u_1}{y}{u_2}\\
 &&|\,& \emptyset \pipe u_1 \vee u_2\\
 &&|\,& \{u\} \pipe \letin{x}{u_1}{u_2}\\
-&&|\,& \fix{x}u\\
+&&|\,& \fix{x}{u}\\
 &&|\,& e ~\ms{as}~ P
 \pipe \disc{e} ~|~ \ms{let}~\disc{x} = u_1 ~\ms{in}~ u_2\\
 \text{contexts} & \GD &::=& \cdot \pipe \GD, x \of A \\
@@ -174,7 +174,7 @@ $$\ $$
   \J{\GD}{\GG}{u_1}{\FS\;A} &
   \J{\GD,x\of A}{\GG}{u_2}{M}}
 $$\ $$
-\infer[\ms{fix}]{\J{\GD}{\GG}{\fix{x} u}{M}}{
+\infer[\ms{fix}]{\J{\GD}{\GG}{\fix{x}{u}}{M}}{
   \J{\GD}{\GG,x\of M}{u}{M}}
 $$
 

@@ -1,8 +1,17 @@
 \usepackage{amssymb,amsmath}
 
+%% uses the AMS Euler math font.
+\usepackage{euler}
+
+%% for coloneqq
+\usepackage{mathtools}
+
+%% for \underaccent
+\usepackage{accents}
+
 % for \mb, \mathbb
-\usepackage{bm}
-\usepackage{bbm}
+%% \usepackage{bm}
+%% \usepackage{bbm}
 %% \usepackage[bb=boondox]{mathalfa}
 
 % for semantic brackets
@@ -11,11 +20,20 @@
 % for inference rules
 \usepackage{proof}
 
+% for \scalebox
+\usepackage{graphicx}
+
 %% My commands
 
 \newcommand{\omitted}[1]{{\color{red}#1}}
 
+\newcommand{\bnfeq}{\dblcolon=}
+\newcommand{\defeq}{\overset{\ms{def}}{=}}
+%% \newcommand{\expandsto}{\Longrightarrow}
+\newcommand{\expandsto}{\xrightarrow{\text{expand}}}
+
 \newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}
 \newcommand{\ent}{\vdash}
 \newcommand{\fn}{\lambda}
 \newcommand{\binder}{.\,}
@@ -36,24 +54,37 @@
 
 %% types
 \newcommand{\N}{\mathbb{N}}
-\newcommand{\tzero}{\bm{0}}
-\newcommand{\tunit}{\bm{1}}
-\newcommand{\bool}{\bm{2}}
+\newcommand{\bool}{2}
+\newcommand{\tzero}{\mathbb{0}}
+\newcommand{\tunit}{\mathbb{1}}
 \newcommand{\x}{\times}
 %% ``monotone \to''
-\newcommand{\mto}{\xrightarrow{+}}
-%% \newcommand{\mto}{\overset{{+}\:}{\to}}
+%% \newcommand{\mto}{\xrightarrow{+}}
+\newcommand{\mto}{\overset{+\:}{\to}}
 %% \newcommand{\mto}{\to^+}
 \newcommand{\FS}{\ms{Set}}
+\newcommand{\Set}[1]{\ensuremath{\ms{Set}\;{#1}}}
+\newcommand{\Map}[2]{\ensuremath{\ms{Map}\;{#1}\;{#2}}}
+\newcommand{\eq}[1]{\underaccent{\ms{eq}}{#1}}
 
 %% expressions
 \newcommand{\sub}[1]{[#1]\,}                   % substitution
-\newcommand{\fix}[1]{\ms{fix}\,{\bind{#1}}}
+\newcommand{\fix}[2]{\ms{fix}~{#1}~\ms{in}~{#2}}
+\newcommand{\fixle}[3]{\ms{fix}~{#1} \le {#2}~\ms{in}~{#3}}
 \newcommand{\tuple}[1]{\langle{#1}\rangle}
 \newcommand{\pair}[2]{\tuple{#1,\,#2}}
 \newcommand{\triple}[3]{\tuple{#1,\,#2,\,#3}}
 \newcommand{\triv}{\tuple{}}
 \newcommand{\unit}{\varepsilon}
-\newcommand{\letin}[3]{\bigvee({#1}\in{#2})\ {#3}}
+\newcommand{\forin}[2]{\textstyle\bigvee({#1})\ {#2}}
+\newcommand{\letin}[3]{\forin{#1 \in #2}{#3}}
+\newcommand{\rawcase}[2]{\ms{case}~{#1}~\ms{of}~{#2}}
 \newcommand{\case}[5]{%
-\ms{case}~{#1}~\ms{of}~\ms{in}_1\,{#2}\to{#3};\,\ms{in}_2\,{#4}\to{#5}}
+\rawcase{#1}{\ms{in}_1\,{#2}\to{#3};\,\ms{in}_2\,{#4}\to{#5}}}
+\newcommand{\ifthen}[3]{\ms{if}~{#1}~\ms{then}~{#2}~\ms{else}~{#3}}
+
+\newcommand{\setfor}[2]{\{{#1}~|~{#2}\}}
+\newcommand{\isin}{\mathbin{\in?}}
+
+%% patterns
+\newcommand{\pwild}{\underline{\phantom{a}}}
