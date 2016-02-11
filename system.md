@@ -4,12 +4,12 @@
 
 $$\begin{array}{lrrl}
 \text{types} & A,B
-&::=& \bool \pipe \N \pipe A \x B \pipe A + B \pipe A \to B
-\pipe A \mono B \pipe \FS\;A\\
+&::=& \bool \pipe \N \pipe A \x B \pipe A \to B \pipe A \mto B \pipe \FS\;A\\
+&&|\,& A + B\\
 \text{lattice types} & L,M
-&::=& \bool \pipe \N \pipe L \x M \pipe A \to L \pipe A \mono L \pipe \FS\;A\\
+&::=& \bool \pipe \N \pipe L \x M \pipe A \to L \pipe A \mto L \pipe \FS\;A\\
 \text{finite types} & F,G
-&::=& F \x G \pipe F + G \pipe F \to G \pipe F \mono G \pipe \FS\;F\\
+&::=& F \x G \pipe F + G \pipe F \to G \pipe F \mto G \pipe \FS\;F\\
 \text{expressions} & e
 &::=& x \pipe \fn\bind{x} e \pipe e_1\;e_2
 \pipe (e_1, e_2) \pipe \pi_i\;e \\
@@ -44,8 +44,8 @@ form of $\beta$-expansion, from weakening and the rules for monotone functions
 (with a bit of term elaboration):
 $$
 \infer[\ms{app}^+]{\J{\GD,x\of A}{\GG}{(\fn\bind{x} e)\; x}{B}}{
-  \infer[\ms{weaken}]{\J{\GD,x\of A}{\GG}{\fn\bind{x}e}{A \mono B}}{
-    \infer[\fn^+]{\J{\GD}{\GG}{\fn\bind{x}e}{A \mono B}}{
+  \infer[\ms{weaken}]{\J{\GD,x\of A}{\GG}{\fn\bind{x}e}{A \mto B}}{
+    \infer[\fn^+]{\J{\GD}{\GG}{\fn\bind{x}e}{A \mto B}}{
       \J{\GD}{\GG,x\of A}{e}{B}}} &
   \infer[\ms{hyp}]{\J{\GD,x\of A}{\GG}{x}{A}}{}
   }
@@ -57,14 +57,14 @@ $$
 \infer[\ms{hyp}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD \cup \GG} \qquad
 \infer[\fn]{\J{\GD}{\GG}{\fn\bind{x}{e}}{A \to B}}{
   \J{\GD,x\of A}{\GG}{e}{B}} \qquad
-\infer[\fn^+]{\J{\GD}{\GG}{\fn\bind{x}{e}}{A \mono B}}{
+\infer[\fn^+]{\J{\GD}{\GG}{\fn\bind{x}{e}}{A \mto B}}{
   \J{\GD}{\GG,x \of A}{e}{B}}
 $$\ $$
 \infer[\ms{app}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
   \J{\GD}{\GG}{e_1}{A \to B} &
   \J{\GD}{\cdot}{e_2}{B}} \qquad
 \infer[\ms{app}^+]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
-  \J{\GD}{\GG}{e_1}{A \mono B} &
+  \J{\GD}{\GG}{e_1}{A \mto B} &
   \J{\GD}{\GG}{e_2}{A}}
 $$\ $$
 \infer[(,\!)]{\J{\GD}{\GG}{(e_1, e_2)}{A_1 \x A_2}}{\J{\GD}{\GG}{e_i}{A_i}}
@@ -131,12 +131,12 @@ Given posets $A,B$ we use the following notation:
     $A + B$ & disjointly-ordered poset on disjoint union of $A$ and $B$\\
     $A \x B$ & pointwise poset on pairs of $A$s and $B$s\\
     $A \to B$ & poset of functions from $A$ to $B$, ordered pointwise\\
-    $A \mono B$
+    $A \mto B$
     & poset of monotone functions from $A$ to $B$, ordered pointwise\\
     $\FS\;A$ & usl of finite subsets of $A$ ordered by inclusion\\
 \end{tabular}\end{center}
 
-Note that $A \x B$ is an usl if $A$ and $B$ are, that $A \to B$ and $A \mono B$
+Note that $A \x B$ is an usl if $A$ and $B$ are, that $A \to B$ and $A \mto B$
 are usls if $B$ is, and $\FS\;A$ is always an usl (indeed, is the free usl on
 the underlying set of $A$). $A + B$ is an usl when exactly one of $A$ or $B$ is
 empty and the other is an usl, as otherwise it has no least element.
@@ -149,7 +149,7 @@ $$\begin{array}{lcl}
   \den{A + B} &=& \den{A} + \den{B}\\
   \den{A \x B} &=& \den{A} \x \den{B}\\
   \den{A \to B} &=& \den{A} \to \den{B}\\
-  \den{A \mono B} &=& \den{A} \mono \den{B}\\
+  \den{A \mto B} &=& \den{A} \mto \den{B}\\
   \den{\FS\;A} &=& \FS\;\den{A}\\
 \end{array}$$
 
@@ -170,7 +170,7 @@ computable $\bigvee$ (and thus computable $\unit$ and $\vee$). \omitted{TODO:
 
 We define a semantics on type derivations $J$ with the following signature:
 $$\begin{array}{lcl}
-  \den{\J{\GD}{\GG}{e}{A}} &\in& \den{\GD} \to \den{\GG} \mono \den{A}
+  \den{\J{\GD}{\GG}{e}{A}} &\in& \den{\GD} \to \den{\GG} \mto \den{A}
 \end{array}$$
 
 $$
@@ -210,7 +210,7 @@ $$
   &=& x \mapsto \den{e}\;\tuple{\delta,x}\;\gamma
   & \den{e}\text{ monotone}
   \vspace{.8em}\\
-  \fux{\J{\GD}{\GG}{\fn\bind{x} e}{A \mono B}}{
+  \fux{\J{\GD}{\GG}{\fn\bind{x} e}{A \mto B}}{
     \J{\GD}{\GG,x\of A}{e}{B}}\dg
   &=& x \mapsto \den{e} \;\delta \;\tuple{\gamma,x}
   & \den{e}\text{ monotone}
@@ -222,7 +222,7 @@ $$
   & \text{\omitted{TODO}}
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{e_1\;e_2}{B}}{
-    \J{\GD}{\GG}{e_1}{A \mono B} &
+    \J{\GD}{\GG}{e_1}{A \mto B} &
     \J{\GD}{\GG}{e_2}{B}} \dg
   &=& \den{e_1}\dg\;(\den{e_2}\dg)
   & \den{e_i}\text{ monotone}
@@ -363,13 +363,13 @@ case that $\J{\GD}{\cdot}{e}{A}$:
     \]
 
   \item[Case $\fn^+$]: Given \[
-    \infer[\fn^+]{\J{\GD,x\of A}{\GG}{\fn\bind{y} e'}{M \mono N}}{
+    \infer[\fn^+]{\J{\GD,x\of A}{\GG}{\fn\bind{y} e'}{M \mto N}}{
       \J{\GD,x\of A}{\GG,y \of M}{e'}{N}}
     \]
 
     By our IH, we have $\J{\GD}{\GG,y \of M}{\sub{e/x}e'}{N}$. Thus:
     \[
-    \infer[\fn^+]{\J{\GD}{\GG}{\fn\bind{y} \sub{e/x}e'}{M \mono N}}{
+    \infer[\fn^+]{\J{\GD}{\GG}{\fn\bind{y} \sub{e/x}e'}{M \mto N}}{
       \J{\GD}{\GG,y\of M}{\sub{e/x} e'}{N}
       }
     \]
@@ -389,7 +389,7 @@ case that $\J{\GD}{\cdot}{e}{A}$:
 
   \item[Case $\ms{app}^+$:] Given \[
     \infer[\ms{app}^+]{\J{\GD,x\of A}{\GG}{e_1\;e_2}{N}}{
-      \J{\GD,x\of A}{\GG}{e_1}{M \mono N} &
+      \J{\GD,x\of A}{\GG}{e_1}{M \mto N} &
       \J{\GD,x\of A}{\GG}{e_2}{N}}
     \]
 
@@ -398,7 +398,7 @@ case that $\J{\GD}{\cdot}{e}{A}$:
     \infer[\ms{app}^+]{
       \J{\GD}{\GG}{(\sub{e/x} e_1)\;(\sub{e/x} e_2)}{N}
     }{
-        \J{\GD}{\GG}{\sub{e/x} e_1}{M \mono N} &
+        \J{\GD}{\GG}{\sub{e/x} e_1}{M \mto N} &
         \J{\GD}{\GG}{\sub{e/x} e_2}{M}}
     \]
 
@@ -508,14 +508,14 @@ $\J{\GD}{\GG}{e}{M}$ in each case:
     \]
 
   \item[Case $\fn^+$]: Given \[
-    \infer{\J{\GD}{\GG,x \of M}{\fn\bind{y} e'}{N \mono O}}{
+    \infer{\J{\GD}{\GG,x \of M}{\fn\bind{y} e'}{N \mto O}}{
       \J{\GD}{\GG,x \of M, y \of N}{e'}{O}}
     \]
 
     By our IH, exchange, and weakening, we have $\J{\GD}{\GG,y\of N}{\sub{e/x}
       e'}{O}$. Thus:
     \[
-    \infer{\J{\GD}{\GG}{\fn\bind{y} \sub{e/x} e'}{N \mono O}}{
+    \infer{\J{\GD}{\GG}{\fn\bind{y} \sub{e/x} e'}{N \mto O}}{
       \J{\GD}{\GG,y\of N}{\sub{e/x} e'}{O}}
     \]
 
@@ -535,15 +535,15 @@ $\J{\GD}{\GG}{e}{M}$ in each case:
 
   \item[Case $\ms{app}^+$:] Given \[
     \infer{\J{\GD}{\GG,x \of M}{e_1\;e_2}{O}}{
-      \J{\GD}{\GG,x \of M}{e_1}{N \mono O} &
+      \J{\GD}{\GG,x \of M}{e_1}{N \mto O} &
       \J{\GD}{\GG,x \of M}{e_2}{N}}
     \]
 
-    By our IHs, we have $\J{\GD}{\GG}{\sub{e/x}e_1}{N \mono O}$ and
+    By our IHs, we have $\J{\GD}{\GG}{\sub{e/x}e_1}{N \mto O}$ and
     $\J{\GD}{\GG}{\sub{e/x}e_2}{N}$. Thus:
     \[
     \infer{\J{\GD}{\GG}{(\sub{e/x} e_1)\;(\sub{e/x} e_2)}{O}}{
-      \J{\GD}{\GG}{\sub{e/x} e_1}{N \mono O} &
+      \J{\GD}{\GG}{\sub{e/x} e_1}{N \mto O} &
       \J{\GD}{\GG}{\sub{e/x} e_2}{N}}
     \]
 

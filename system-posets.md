@@ -21,7 +21,7 @@ following notation:
     $P \uplus_\le Q$ & poset on $P \uplus Q$, ordered disjointly\\
     $P \lhd Q$ & poset on $P \uplus Q$ where
     $\ms{in}_1\; x \le \ms{in}_2\; y\ (\forall x \of P,y \of Q)$\\
-    $P \mono Q$ & poset of monotone maps from $P$ to $Q$\\
+    $P \mto Q$ & poset of monotone maps from $P$ to $Q$\\
     $\ms{D}\,A$ & discrete poset on $A$ (where $x \le y \iff x = y$)\\
     $\FS\;A$ & usl of finite sets of $A$s, ordered by inclusion
   \end{tabular}
@@ -69,7 +69,7 @@ $$\begin{array}{rcl}
   \den{P \x Q} &=& \den{P} \x_\le \den{Q}\\
   \den{P + Q} &=& \den{P} \uplus_\le \den{Q}\\
   \den{P \lhd Q} &=& \den{P} \lhd \den{Q}\\
-  \den{P \to Q} &=& \den{P} \mono \den{Q}\\
+  \den{P \to Q} &=& \den{P} \mto \den{Q}\\
   \den{N} &=& \pair{\N}{\le}\\
   \den{\FS\;A} &=& \FS\;|\den{A}|
 \end{array}$$

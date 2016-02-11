@@ -11,11 +11,11 @@ sunt in culpa qui officia deserunt mollit anim id est laborum. -->
 
 $$\begin{array}{lrrl}
 \text{types} & A,B
-&::=& \N \pipe A \x B \pipe A \to B \pipe M \mono N \pipe \FS\;A \pipe A + B\\
+&::=& \N \pipe A \x B \pipe A \to B \pipe M \mto N \pipe \FS\;A \pipe A + B\\
 \text{lattice types} & M,N
-&::=& \N \pipe M \x N \pipe A \to M \pipe M \mono N \pipe \FS\;A\\
+&::=& \N \pipe M \x N \pipe A \to M \pipe M \mto N \pipe \FS\;A\\
 \text{finite lattices} & F,G
-&::=& F \x G \pipe F \to G \pipe F \mono G \pipe \FS\;F\\
+&::=& F \x G \pipe F \to G \pipe F \mto G \pipe \FS\;F\\
 \text{expressions} & e
 &::=& x \pipe \fn\bind{x} e \pipe \monofn\bind{x} e \pipe e_1\;e_2\\
 &&|\,& (e_1, e_2) \pipe \pi_i\;e\\
@@ -52,8 +52,8 @@ However, \ms{forget} is not used in any proofs, and is moreover derivable from
 weakening and the rules for monotone functions (with a bit of term elaboration):
 $$
 \infer[\widehat{\ms{app}}]{\J{\GD,x\of M}{\GG}{(\monofn\bind{x} e)\; x}{N}}{
-  \infer[\ms{weaken}]{\J{\GD,x\of M}{\GG}{\monofn\bind{x}e}{M \mono N}}{
-    \infer[\monofn]{\J{\GD}{\GG}{\monofn\bind{x}e}{M \mono N}}{
+  \infer[\ms{weaken}]{\J{\GD,x\of M}{\GG}{\monofn\bind{x}e}{M \mto N}}{
+    \infer[\monofn]{\J{\GD}{\GG}{\monofn\bind{x}e}{M \mto N}}{
       \J{\GD}{\GG,x\of M}{e}{N}}} &
   \infer[\ms{hyp}]{\J{\GD,x\of M}{\GG}{x}{M}}{}
   }
@@ -69,10 +69,10 @@ $$
   \J{\GD}{\GG}{e_1}{A \to B} &
   \J{\GD}{\cdot}{e_2}{B}}
 $$\ $$
-\infer[\monofn]{\J{\GD}{\GG}{\monofn\bind{x}{e}}{M \mono N}}{
+\infer[\monofn]{\J{\GD}{\GG}{\monofn\bind{x}{e}}{M \mto N}}{
   \J{\GD}{\GG,x \of M}{e}{N}} \qquad
 \infer[\widehat{\ms{app}}]{\J{\GD}{\GG}{e_1\;e_2}{N}}{
-  \J{\GD}{\GG}{e_1}{M \mono N} &
+  \J{\GD}{\GG}{e_1}{M \mto N} &
   \J{\GD}{\GG}{e_2}{M}}
 $$\ $$
 \infer[(,\!)]{\J{\GD}{\GG}{(e_1, e_2)}{A_1 \x A_2}}{\J{\GD}{\GG}{e_i}{A_i}}
@@ -131,13 +131,13 @@ of usls and monotone functions.
 Given sets $A,B$ and usls $M$, $N$ we use the following notation:
 \begin{center}\begin{tabular}{cl}
     \one & one-element set, $\{\triv\}$\\
-    $M \mono N$ & set of monotone functions from $M$ to $N$\\
+    $M \mto N$ & set of monotone functions from $M$ to $N$\\
     $\FS\;A$ & set of finite subsets of $A$\\
     $|M|$ & underlying set of $M$\\
     $\one_L$ & trivial one-element usl\\
     $M \x_L N$ & pointwise usl on pairs of $M$s and $N$s\\
     $A \to_L M$ & pointwise usl of functions from $A$ to $M$\\
-    $M \mono_L N$ & pointwise usl of monotone functions from $M$ to $N$\\
+    $M \mto_L N$ & pointwise usl of monotone functions from $M$ to $N$\\
     $\FS_L\;A$ & usl of finite subsets of $A$ under inclusion\\
 \end{tabular}\end{center}
 
@@ -158,7 +158,7 @@ $$\begin{array}{lcl}
   \den{A + B} &=& \den{A} \uplus \den{B}\\
   %% \den{\FS\;A} &=& \{x ~|~ x \subseteq \den{A} \wedge x\text{ is finite}\}\\
   \den{\FS\;A} &=& \FS\;\den{A}\\
-  \den{M \mono N} &=& \den{M}_L \mono \den{N}_L
+  \den{M \mto N} &=& \den{M}_L \mto \den{N}_L
 \end{array}$$
 
 We define $\den{M}_L$ as follows:
@@ -172,8 +172,8 @@ $$\begin{array}{lcl}
   %%   \fn\bind{\tuple{\tuple{a,x},\tuple{b,y}}} \pair{a \vee b}{x \vee y}}\\
   %% \den{\FS\;A}_L &=& \triple{\den{\FS\;A}}{\emptyset}{\cup}\\
   \den{\FS\;A}_L &=& \FS_L\;\den{A}\\
-  \den{M \mono N}_L &=& \den{M}_L \mono_L \den{N}_L\\
-  %% &=& \triple{\den{M}_L \mono \den{N}_L}{\fn\bind{x}\unit}{%
+  \den{M \mto N}_L &=& \den{M}_L \mto_L \den{N}_L\\
+  %% &=& \triple{\den{M}_L \mto \den{N}_L}{\fn\bind{x}\unit}{%
   %%   \fn\bind{\tuple{f,g}}\fn\bind{x} f(x) \vee g(x)}
 \end{array}$$
 
@@ -189,13 +189,13 @@ $$\begin{array}{lcl}
 
 We define a semantics on type derivations $J$ with the following signature:
 $$\begin{array}{lcl}
-  \den{\J{\GD}{\GG}{e}{M}} &\in& \den{\GD} \to \den{\GG}_L \mono \den{M}_L\\
+  \den{\J{\GD}{\GG}{e}{M}} &\in& \den{\GD} \to \den{\GG}_L \mto \den{M}_L\\
   \den{\J{\GD}{\cdot}{e}{A}} &\in& \den{\GD} \to \one \to \den{A}\\
 \end{array}$$
 
 The above signatures overlap in the case of type derivations of the form
 $\J{\GD}{\cdot}{e}{M}$. However, this is not a problem, since $(\den{\cdot}_L
-\mono \den{M}_L) = (\one_L \mono \den{M}_L) = (\one \to \den{M})$ as all
+\mto \den{M}_L) = (\one_L \mto \den{M}_L) = (\one \to \den{M})$ as all
 functions out of \one{} are monotone.
 
 \newcommand{\fux}[2]{\Den{\vcenter{\infer{#1}{#2}}}}
@@ -244,13 +244,13 @@ $$
   &=& \den{e_1}\dg\;(\den{e_2}\;\delta\;\triv)
   & \text{\omitted{TODO}}
   \vspace{.8em}\\
-  \fux{\J{\GD}{\GG}{\monofn\bind{x} e}{M \mono N}}{
+  \fux{\J{\GD}{\GG}{\monofn\bind{x} e}{M \mto N}}{
     \J{\GD}{\GG,x\of M}{e}{N}}\dg
   &=& x \mapsto \den{e} \;\delta \;\tuple{\gamma,x}
   & \den{e}\text{ monotone}\\
   \vspace{.8em}\\
   \fux{\J{\GD}{\GG}{e_1\;e_2}{N}}{
-    \J{\GD}{\GG}{e_1}{M \mono N} &
+    \J{\GD}{\GG}{e_1}{M \mto N} &
     \J{\GD}{\GG}{e_2}{N}} \dg
   &=& \den{e_1}\dg\;(\den{e_2}\dg)
   & \den{e_i}\text{ monotone}
@@ -386,13 +386,13 @@ case that $\J{\GD}{\cdot}{e}{A}$:
     \]
 
   \item[Case $\monofn$]: Given \[
-    \infer[\monofn]{\J{\GD,x\of A}{\GG}{\monofn\bind{y} e'}{M \mono N}}{
+    \infer[\monofn]{\J{\GD,x\of A}{\GG}{\monofn\bind{y} e'}{M \mto N}}{
       \J{\GD,x\of A}{\GG,y \of M}{e'}{N}}
     \]
 
     By our IH, we have $\J{\GD}{\GG,y \of M}{\sub{e/x}e'}{N}$. Thus:
     \[
-    \infer[\monofn]{\J{\GD}{\GG}{\monofn\bind{y} \sub{e/x}e'}{M \mono N}}{
+    \infer[\monofn]{\J{\GD}{\GG}{\monofn\bind{y} \sub{e/x}e'}{M \mto N}}{
       \J{\GD}{\GG,y\of M}{\sub{e/x} e'}{N}
       }
     \]
@@ -412,7 +412,7 @@ case that $\J{\GD}{\cdot}{e}{A}$:
 
   \item[Case $\widehat{\ms{app}}$:] Given \[
     \infer[\widehat{\ms{app}}]{\J{\GD,x\of A}{\GG}{e_1\;e_2}{N}}{
-      \J{\GD,x\of A}{\GG}{e_1}{M \mono N} &
+      \J{\GD,x\of A}{\GG}{e_1}{M \mto N} &
       \J{\GD,x\of A}{\GG}{e_2}{N}}
     \]
 
@@ -421,7 +421,7 @@ case that $\J{\GD}{\cdot}{e}{A}$:
     \infer[\widehat{\ms{app}}]{
       \J{\GD}{\GG}{(\sub{e/x} e_1)\;(\sub{e/x} e_2)}{N}
     }{
-        \J{\GD}{\GG}{\sub{e/x} e_1}{M \mono N} &
+        \J{\GD}{\GG}{\sub{e/x} e_1}{M \mto N} &
         \J{\GD}{\GG}{\sub{e/x} e_2}{M}}
     \]
 
@@ -529,14 +529,14 @@ $\J{\GD}{\GG}{e}{M}$ in each case:
     \]
 
   \item[Case $\monofn$]: Given \[
-    \infer{\J{\GD}{\GG,x \of M}{\monofn\bind{y} e'}{N \mono O}}{
+    \infer{\J{\GD}{\GG,x \of M}{\monofn\bind{y} e'}{N \mto O}}{
       \J{\GD}{\GG,x \of M, y \of N}{e'}{O}}
     \]
 
     By our IH, exchange, and weakening, we have $\J{\GD}{\GG,y\of N}{\sub{e/x}
       e'}{O}$. Thus:
     \[
-    \infer{\J{\GD}{\GG}{\monofn\bind{y} \sub{e/x} e'}{N \mono O}}{
+    \infer{\J{\GD}{\GG}{\monofn\bind{y} \sub{e/x} e'}{N \mto O}}{
       \J{\GD}{\GG,y\of N}{\sub{e/x} e'}{O}}
     \]
 
@@ -556,15 +556,15 @@ $\J{\GD}{\GG}{e}{M}$ in each case:
 
   \item[Case $\widehat{\ms{app}}$:] Given \[
     \infer{\J{\GD}{\GG,x \of M}{e_1\;e_2}{O}}{
-      \J{\GD}{\GG,x \of M}{e_1}{N \mono O} &
+      \J{\GD}{\GG,x \of M}{e_1}{N \mto O} &
       \J{\GD}{\GG,x \of M}{e_2}{N}}
     \]
 
-    By our IHs, we have $\J{\GD}{\GG}{\sub{e/x}e_1}{N \mono O}$ and
+    By our IHs, we have $\J{\GD}{\GG}{\sub{e/x}e_1}{N \mto O}$ and
     $\J{\GD}{\GG}{\sub{e/x}e_2}{N}$. Thus:
     \[
     \infer{\J{\GD}{\GG}{(\sub{e/x} e_1)\;(\sub{e/x} e_2)}{O}}{
-      \J{\GD}{\GG}{\sub{e/x} e_1}{N \mono O} &
+      \J{\GD}{\GG}{\sub{e/x} e_1}{N \mto O} &
       \J{\GD}{\GG}{\sub{e/x} e_2}{N}}
     \]
 

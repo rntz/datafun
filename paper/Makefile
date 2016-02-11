@@ -1,6 +1,6 @@
 SOURCES := $(wildcard *.tex)
 # also rerun if any of $(AUXIL) change
-AUXIL   := Makefile datafun.bib sigplanconf.cls
+AUXIL   := Makefile datafun.bib sigplanconf.cls $(wildcard *.sty)
 
 PDFS    := $(SOURCES:.tex=.pdf)
 GARBAGE := $(SOURCES:.tex=.dvi) $(SOURCES:.tex=.bbl)
@@ -16,6 +16,7 @@ clean:
 
 %.pdf: %.tex $(AUXIL)
 	latexmk --pdf $<
+	# rubber --pdf $<
 
 # debugging: `make print-FOO` will print the value of $(FOO)
 .PHONY: print-%

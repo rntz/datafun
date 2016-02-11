@@ -1,3 +1,18 @@
+\usepackage{amssymb,amsmath}
+
+% for \mb, \mathbb
+\usepackage{bm}
+\usepackage{bbm}
+%% \usepackage[bb=boondox]{mathalfa}
+
+% for semantic brackets
+\usepackage{stmaryrd}
+
+% for inference rules
+\usepackage{proof}
+
+%% My commands
+
 \newcommand{\omitted}[1]{{\color{red}#1}}
 
 \newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
@@ -21,13 +36,14 @@
 
 %% types
 \newcommand{\N}{\mathbb{N}}
-\newcommand{\bool}{\mathbbm{2}}
-\newcommand{\tunit}{\mathbbm{1}}
-\newcommand{\tzero}{\mathbbm{0}}
+\newcommand{\tzero}{\bm{0}}
+\newcommand{\tunit}{\bm{1}}
+\newcommand{\bool}{\bm{2}}
 \newcommand{\x}{\times}
-\newcommand{\mono}{\xrightarrow{+}}
-%% \newcommand{\mono}{\overset{{+}\:}{\to}}
-%% \newcommand{\mono}{\to^+}
+%% ``monotone \to''
+\newcommand{\mto}{\xrightarrow{+}}
+%% \newcommand{\mto}{\overset{{+}\:}{\to}}
+%% \newcommand{\mto}{\to^+}
 \newcommand{\FS}{\ms{Set}}
 
 %% expressions

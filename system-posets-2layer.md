@@ -16,7 +16,7 @@ following notation:
     $P +_\le Q$ & poset on the disjoint sum of $P$ and $Q$, ordered disjointly\\
     $P \lhd Q$ & poset on the disjoint sum of $P$ and $Q$ where
     $\ms{in}_1\; x \le \ms{in}_2\; y\ (\forall x \of P,y \of Q)$\\
-    $P \mono Q$ & poset of monotone maps from $P$ to $Q$\\
+    $P \mto Q$ & poset of monotone maps from $P$ to $Q$\\
     $\D{A}$ & discrete poset on $A$ (where $x \le y \iff x = y$)\\
     $\FS\;A$ & usl of finite sets of $A$s, ordered by inclusion
   \end{tabular}
@@ -91,7 +91,7 @@ $$\begin{array}{rcl}
   \posden{P \x Q} &=& \posden{P} \x_\le \posden{Q}\\
   \posden{P + Q} &=& \posden{P} +_\le \posden{Q}\\
   \posden{P \lhd Q} &=& \posden{P} \lhd \posden{Q}\\
-  \posden{P \to Q} &=& \posden{P} \mono \posden{Q}\\
+  \posden{P \to Q} &=& \posden{P} \mto \posden{Q}\\
   \posden{\FS\;A} &=& \FS\;\setden{A}
 \end{array}$$
 

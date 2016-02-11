@@ -1,13 +1,13 @@
 \documentclass[preprint]{sigplanconf}
 
+\usepackage{rntz}
+
 % The following \documentclass options may be useful:
 
 % preprint      Remove this option only once the paper is in final form.
 % 10pt          To set in 10-point type instead of 9-point.
 % 11pt          To set in 11-point type instead of 9-point.
 % numbers       To obtain numeric citation style instead of author/year.
-
-\usepackage{amsmath}
 
 %% \newcommand{\cL}{{\cal L}}
 
@@ -27,11 +27,12 @@
 %\publicationrights{licensed}     % this is the default
 %\publicationrights{author-pays}
 
-\titlebanner{preprint}        % These are ignored unless
-\preprintfooter{short description of paper}   % 'preprint' option specified.
+% These are ignored unless 'preprint' option specified.
+\titlebanner{preprint}
+\preprintfooter{Datafun, or, Datalog with datatypes (PREPRINT)}
 
-\title{Title Text}
-\subtitle{Subtitle Text, if any}
+\title{Datafun}
+\subtitle{or, Datalog with datatypes}
 
 \authorinfo{Michael Arntzenius\and Neelakantan R. Krishnaswami}
            {University of Birmingham}
@@ -57,11 +58,17 @@ keyword1, keyword2
 
 The text of the paper begins here.
 
+\section{Datafun}
+
+\begin{figure}
+  \[\begin{array}{lccl}
+  \text{types} & A, B &::=& \bool \pipe \N\\
+  \text{expressions} & e &::=&
+  \end{array}\]
+  \caption{Datafun syntax}
+\end{figure}
+
 \paragraph{Contributions}
-
-This is the text of the appendix, if you need one.
-
-\section{acknowledgments?}
 
 \acks
 
@@ -72,10 +79,10 @@ Acknowledgments, if needed.
 \bibliographystyle{abbrvnat}
 \bibliography{datafun}
 
-% \appendix
-% \section{Appendix Title}
+%% \appendix
+%% \section{Appendix Title}
 
-
+%% This is the text of the appendix, if you need one.
 
 
 \end{document}

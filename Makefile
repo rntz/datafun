@@ -1,7 +1,7 @@
 # TODO: bibliography file
 # pandoc --filter pandoc-citeproc $< --biblio BIBLIOFILE
 PANDOC:=pandoc --standalone
-PANDOC_TEX:=--include-in-header header.sty --variable=geometry:margin=1in
+PANDOC_TEX:=--include-in-header rntz.sty --variable=geometry:margin=1in
 
 SOURCES:=$(wildcard system*.md)
 AUXIL:=$(wildcard *.sty) Makefile
