@@ -100,7 +100,25 @@ functions must be empty! Since `A → B` represents an *arbitrary* function, we
 cannot rely on its output being monotone in its argument. Thus its argument must
 be, not *monotone* in Γ, but *constant*.
 
-TODO: give typing rules for booleans/`if` and sums/`case`.
+The typing rules for tuples, sums, and booleans are *mostly* boring:
+
+        Δ;Γ ⊢ eᵢ : Aᵢ            Δ;Γ ⊢ e : A₁ × A₂
+    -----------------------      ------------------
+    Δ;Γ ⊢ (e₁,e₂) : A₁ × A₂       Δ;Γ ⊢ πᵢ e : Aᵢ
+
+                                           Δ;Γ ⊢ e : bool    Δ;Γ ⊢ eᵢ : A
+    -----------------  ------------------  -------------------------------
+    Δ;Γ ⊢ true : bool  Δ;Γ ⊢ false : bool  Δ;Γ ⊢ if e then e₁ else e₂ : A
+
+        Δ;Γ ⊢ e : Aᵢ
+    ---------------------
+    Δ;Γ ⊢ inᵢ e : A₁ + A₂
+
+However, there are *two* eliminators for sum types:
+
+TODO
+
+The typing rules get more interesting now:
 
                      Δ;Γ ⊢ eᵢ : L
     -----------    -----------------
