@@ -70,6 +70,8 @@ keyword1, keyword2
 
 The text of the paper begins here.
 
+\paragraph{Contributions}
+
 \section{Datafun}
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nec vero alia sunt
@@ -82,31 +84,37 @@ occultissimarum. Quis animo aequo videt eum, quem inpure ac flagitiose putet
 vivere? Primum quid tu dicis breve? Ita enim vivunt quidam, ut eorum vita
 refellatur oratio.
 
-\paragraph{Contributions}
-
 
 %% FIGURE: CORE SYNTAX
 \begin{figure}
   \[\begin{array}{ccl}
     %% types
-    A, B     &\bnfeq& A + B \pipe A \x B \pipe A \uto B \pipe A \mto B
+    A, B     &\bnfeq& \bool \pipe \N \pipe \Str \pipe \Set{A}
+                      \pipe \Map{\eq{A}}{B}
     \\
-    \textsf{types} && \bool \pipe \Set{A} \pipe \Map{\eq{A}}{B}
+    \textsf{types} && A + B \pipe A \x B \pipe A \uto B \pipe A \mto B
     \vspace{0.5em}\\
     %% usl types
-    L, M         &\bnfeq& L \x M \pipe A \uto L \pipe A \mto L
+    L, M         &\bnfeq& \bool \pipe \N \pipe \Set{A} \pipe \Map{\eq{A}}{L}
     \\
-    \textsf{usl types} && \bool \pipe \Set{A} \pipe \Map{\eq{A}}{L}
+    \textsf{usl types} && L \x M \pipe A \uto L \pipe A \mto L
     \vspace{0.5em}\\
     %% equality types
-    \eq{A}, \eq{B} &\bnfeq& \bool \pipe \Set{\eq{A}}
+    \eq{A}, \eq{B} &\bnfeq& \bool \pipe \N \pipe \Str \pipe \Set{\eq{A}}
                             \pipe \Map{\eq{A}}{\eq{B}}
-                            \pipe \eq{A} + \eq{B} \pipe \eq{A} \x \eq{B}\\
-    \textsf{eqtypes} &&
+    \\
+    \textsf{eqtypes} && \eq{A} + \eq{B} \pipe \eq{A} \x \eq{B}
     \vspace{0.5em}\\
-    %%
-    \eq{L}, \eq{M} &\defeq& \textsf{usl types}~\cap~\textsf{eqtypes}\\
-    \textsf{usl eqtypes} &&
+    %% finite equality types
+    \fineq{A},\fineq{B}
+    &\bnfeq& \bool \pipe \Set{\fineq{A}}
+       \pipe \Map{\fineq{A}}{\fineq{B}}
+       \pipe \fineq{A} + \fineq{B} \pipe \fineq{A} \x \fineq{B}\\
+    \textsf{finite eqtypes}
+    \vspace{0.5em}\\
+    %% usl finite eqtypes
+    \fineq{L}, \fineq{M}
+    &\defeq& \textsf{usl types}~\cap~\textsf{finite eqtypes}
     \vspace{0.5em}\\
     \GD, \GG &\bnfeq& \cdot \pipe \GD, x\of A\\
     \textsf{contexts}\\
@@ -114,31 +122,46 @@ refellatur oratio.
     e &\bnfeq& x \pipe \fn\bind{x} e \pipe e\;e \pipe (e,e) \pipe \pi_i\;e\\
     \textsf{terms} && \ms{in}_i\;e \pipe \case{e}{x}{e}{x}{e}\\
     && e = e \pipe \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
-    && \unit \pipe \{e\} \pipe e \vee e \pipe \letin{x}{e}{e}\\
-    %% singleton dictionary?
-    %% && \{e{:}\,e\}\\
+    && \singleset{e} \pipe \singlemap{e}{e}
+       \pipe \unit \pipe e \vee e \pipe \letin{x}{e}{e}\\
     && \fix{x}{e} \pipe \fixle{x}{e}{e}
   \end{array}\]
   \caption{Syntax of core Datafun}
 \end{figure}
 
 %% FIGURE: SYNTAX SUGAR
-\begin{figure}
-  \[\begin{array}{lccl}
+\begin{figure}n
+  %% \[\begin{array}{lccl}
+  %% %% expressions
+  %% \textsf{terms} &
+  %% e &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
+  %%            \pipe \forin{\mc{L}}{e}\\
+  %% &&& \rawcase{e}{[{p} \to {e}]^*}
+  %% \vspace{0.5em}\\
+  %% %% patterns
+  %% \textsf{patterns} &
+  %% p &\bnfeq& \pwild \pipe x \pipe (p,p) \pipe \ms{in}_i\;p
+  %%            \pipe \ms{true} \pipe \ms{false}
+  %% \vspace{0.5em}\\
+  %% %% loop clauses
+  %% \textsf{loops} &
+  %% \mc{L} &\bnfeq& \mc{L}, \mc{L} \pipe p \in e \pipe e
+  %% \end{array}\]
+
+  \[\begin{array}{ccl}
   %% expressions
-  \textsf{terms} &
-  e &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
-             \pipe \forin{\mc{L}}{e}\\
-  &&& \rawcase{e}{[{p} \to {e}]^*}
+  e         &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
+                     \pipe \forin{\mc{L}}{e}\\
+  \textsf{terms} && \rawcase{e}{[{p} \to {e}]^*}
   \vspace{0.5em}\\
   %% patterns
-  \textsf{patterns} &
   p &\bnfeq& \pwild \pipe x \pipe (p,p) \pipe \ms{in}_i\;p
-             \pipe \ms{true} \pipe \ms{false}
+             \pipe \ms{true} \pipe \ms{false}\\
+  \textsf{patterns}
   \vspace{0.5em}\\
   %% loop clauses
-  \textsf{loops} &
-  \mc{L} &\bnfeq& \mc{L}, \mc{L} \pipe p \in e \pipe e
+  \mc{L} &\bnfeq& \mc{L}, \mc{L} \pipe p \in e \pipe e\\
+  \textsf{loops}
   \end{array}\]
 
   %% the desugaring syntax-expansion itself
@@ -156,13 +179,9 @@ refellatur oratio.
 
 %% FIGURE: Typing rules
 \begin{figure*}
-  %% \[\begin{array}{lccl}
-  %% \textsf{contexts} & \Delta,\Gamma &\bnfeq& \cdot \pipe \Delta, x \of A\\
-  %% \textsf{judgments} & J &\bnfeq& \J{\Delta}{\Gamma}{e}{A}
-  %% \end{array}\]\vspace{0.5em}
   \boxed{\ensuremath{\mathsz{10pt}{\J{\Delta}{\Gamma}{e}{A}}}}
   \begin{mathpar}
-    \infer{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD \cup \GG}
+    \infer[\rn{var}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD \cup \GG}
     %% function rules
     \and
     \infer[\fn]{\J{\GD}{\GG}{\fn\bind{x} e}{A \uto B}}{
@@ -180,11 +199,12 @@ refellatur oratio.
       \J{\GD}{\GG}{e_2}{A}}
     %% product & sum rules
     \and
-    \infer{\J{\GD}{\GG}{(e_1,e_2)}{A_1 \x A_2}}{\J{\GD}{\GG}{e_i}{A_i}}
+    \infer[\rn{pair}]{\J{\GD}{\GG}{(e_1,e_2)}{A_1 \x A_2}}{
+      \J{\GD}{\GG}{e_i}{A_i}}
     \and
-    \infer{\J{\GD}{\GG}{\pi_i\;e}{A_i}}{\J{\GD}{\GG}{e}{A_1 \x A_2}}
+    \infer[\rn{\pi}]{\J{\GD}{\GG}{\pi_i\;e}{A_i}}{\J{\GD}{\GG}{e}{A_1 \x A_2}}
     \and
-    \infer{\J{\GD}{\GG}{\ms{in}_i\;e}{A_1 + A_2}}{\J{\GD}{\GG}{e}{A_i}}
+    \infer[\rn{in}]{\J{\GD}{\GG}{\ms{in}_i\;e}{A_1 + A_2}}{\J{\GD}{\GG}{e}{A_i}}
     \and
     \infer[\rn{case}]{\J{\GD}{\GG}{\case{e}{x}{e_1}{x}{e_2}}{C}}{
       \J{\GD}{\cdot}{e}{A_1 + A_2} &
@@ -195,30 +215,37 @@ refellatur oratio.
       \J{\GD}{\GG,x\of A_i}{e_i}{C}}
     %% boolean rules
     \and
-    \infer{\J{\GD}{\GG}{e_1 = e_2}{\bool}}{\J{\GD}{\GG}{e_i}{\eq{A}}}
+    \infer[\rn{=}]{\J{\GD}{\GG}{e_1 = e_2}{\bool}}{\J{\GD}{\GG}{e_i}{\eq{A}}}
     \and
-    \infer{\J{\GD}{\GG}{\ms{true}}{\bool}}{}
+    \infer[\rn{true}]{\J{\GD}{\GG}{\ms{true}}{\bool}}{}
     \and
-    \infer{\J{\GD}{\GG}{\ms{false}}{\bool}}{}
+    \infer[\rn{false}]{\J{\GD}{\GG}{\ms{false}}{\bool}}{}
     \and
-    \infer{\J{\GD}{\GG}{\ifthen{e}{e_1}{e_2}}{A}}{
-      \J{\GD}{\GG}{e}{\bool} &
+    \infer[\rn{if}]{\J{\GD}{\GG}{\ifthen{e}{e_1}{e_2}}{A}}{
+      \J{\GD}{\cdot}{e}{\bool} &
       \J{\GD}{\GG}{e_i}{A}}
+    \and
+    \infer[\rn{if^+}]{\J{\GD}{\GG}{\ifthen{e}{e_1}{\unit}}{L}}{
+      \J{\GD}{\GG}{e}{\bool} &
+      \J{\GD}{\GG}{e_1}{L}}
     %% set & semilattice rules
+    \and
+    \infer[\rn{\{\}}]{\J{\GD}{\GG}{\{e\}}{\Set{A}}}{\J{\GD}{\cdot}{e}{A}}
+    \and
+    \infer[\rn{\{:\}}]{\J{\GD}{\GG}{\singlemap{e_1}{e_2}}{\Map{\eq{A}}{B}}}{
+      \J{\GD}{\cdot}{e_1}{\eq{A}} &
+      \J{\GD}{\GG}{e_2}{B}}
     \and
     \infer[\unit]{\J{\GD}{\GG}{\unit}{L}}{}
     \and
     \infer[\rn{\vee}]{\J{\GD}{\GG}{e_1 \vee e_2}{L}}{\J{\GD}{\GG}{e_i}{L}}
     \and
-    \infer[\rn{\{\}}]{\J{\GD}{\GG}{\{e\}}{\Set{A}}}{\J{\GD}{\cdot}{e}{A}}
-    \and
     \infer[\rn{\bigvee}]{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{L}}{
       \J{\GD}{\GG}{e_1}{\Set{A}} &
       \J{\GD,x\of A}{\GG}{e_2}{L}}
     \and
-    \infer[\rn{fix}]{\J{\GD}{\GG}{\fix{x}{e}}{\eq{L}}}{
-      \J{\GD}{\GG,x\of L}{e}{\eq{L}} &
-      \isfinite{\eq{L}}}
+    \infer[\rn{fix}]{\J{\GD}{\GG}{\fix{x}{e}}{\fineq{L}}}{
+      \J{\GD}{\GG,x\of L}{e}{\fineq{L}}}
     \and
     \infer[\rn{fix_{\le}}]{\J{\GD}{\GG}{\fixle{x}{e_1}{e_2}}{\eq{L}}}{
       \J{\GD}{\GG}{e_1}{\eq{L}} &
@@ -228,7 +255,38 @@ refellatur oratio.
   \caption{Typing rules for core Datafun}
 \end{figure*}
 
+\newcommand{\fname}{\ms}
+\begin{figure}
+  \[\begin{array}{cll}
+  \le &\of& \eq{A} \uto \eq{A} \uto \bool\\
+  \fname{keys}     &:& \Map{\eq{A}}{B} \mto \Set{\eq{A}}\\
+  \fname{tabulate} &:& \Set{\eq{A}} \mto (\eq{A} \to B) \mto \Map{\eq{A}}{B}\\
+  \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
+  \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
+  %% \fname{substrings} &\of& \ms{Str} \to \Set{\ms{Str}}\\
+  %% \fname{size}     &:& \Set{\eq{A}} \mto \N\\
+  \end{array}\]
+  \caption{Built-in functions and their type schemes}
+\end{figure}
+
 
+%%
+\section{Datafun by example}
+
+\section{Semantics}
+
+\section{Implementation}
+We have built a prototype implementation of Datafun in Racket \todo{CITE}. In
+addition to core Datafun, it supports pattern-matching, record types, subtyping,
+antitone functions and variables, and unbounded (potentially nonterminating)
+fixed points. It has no optimizations whatsoever.
+
+\todo{LINK}
+
+%% not sure how many sections to split this up into.
+\section{Tradeoffs, limitations, and design decisions}
+\section{Related and future work}
+
 %% ACKNOWLEDGMENTS
 \acks
 

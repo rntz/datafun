@@ -21,9 +21,13 @@
 % for \scalebox
 \usepackage{graphicx}
 
+%% for colors
+\usepackage{color}
+
 %% My commands
 
 \newcommand{\omitted}[1]{{\color{red}#1}}
+\newcommand{\todo}[1]{{\color{red}(TODO: #1)}}
 
 \newcommand{\bnfeq}{\dblcolon=}
 \newcommand{\defeq}{\overset{\ms{def}}{=}}
@@ -53,6 +57,7 @@
 
 %% types
 \newcommand{\N}{\mathbb{N}}
+\newcommand{\Str}{\ms{Str}}
 \newcommand{\bool}{2}
 \newcommand{\tzero}{\mathbb{0}}
 \newcommand{\tunit}{\mathbb{1}}
@@ -65,7 +70,7 @@
 \newcommand{\Set}[1]{\ensuremath{\ms{Set}\;{#1}}}
 \newcommand{\Map}[2]{\ensuremath{\ms{Map}\;{#1}\;{#2}}}
 \newcommand{\eq}[1]{\underaccent{\ms{eq}}{#1}}
-
+\newcommand{\fineq}[1]{\underaccent{\ms{fin}}{#1}}
 %% expressions
 \newcommand{\sub}[1]{[#1]\,}                   % substitution
 \newcommand{\fix}[2]{\ms{fix}~{#1}~\ms{in}~{#2}}
@@ -81,6 +86,13 @@
 \newcommand{\case}[5]{%
 \rawcase{#1}{\ms{in}_1\,{#2}\to{#3};\,\ms{in}_2\,{#4}\to{#5}}}
 \newcommand{\ifthen}[3]{\ms{if}~{#1}~\ms{then}~{#2}~\ms{else}~{#3}}
+
+\newcommand{\setlit}[1]{\{#1\}}
+\newcommand{\singleset}[1]{\setlit{#1}}
+
+\newcommand{\maplit}[1]{\{#1\}}
+\newcommand{\kv}[2]{#1{:}\,#2}
+\newcommand{\singlemap}[2]{\maplit{\kv{#1}{#2}}}
 
 \newcommand{\setfor}[2]{\{{#1}~|~{#2}\}}
 \newcommand{\isin}{\mathrel{{\in}\hspace{0.15ex}?}}
