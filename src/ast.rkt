@@ -36,10 +36,9 @@
   [((? null?)) (t-tuple '())]
   [(_) #f])
 
-(define (prim? x) (set-member? prims x))
-;;; TODO: prims for accessing maps, once I know what I need.
-(define prims (list->set '(= <= + - * size print puts ++
-                           keys get lookup)))
+(define prim?
+  (or/c '= '<= '+ '- '* 'size 'print 'puts '++ 'strlen 'substr
+        'keys 'get 'lookup))
 
 (enum expr
   ;; ---------- miscellanea ----------

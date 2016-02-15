@@ -15,6 +15,8 @@
 (define ((df++ x) y) (string-append x y))
 (define (df-max . xs) (if (null? xs) 0 (apply max xs)))
 (define (df-or . xs) (ormap identity xs))
+(define (((df-substr s) i) j)
+  (substring s (min i (string-length s)) (min (max i j) (string-length s))))
 (define (df-fix init iter)
   (define next (iter init))
   (if (equal? init next) init

@@ -45,6 +45,8 @@ sub-expression: ~s
      ['- '(nat ~> nat ->- nat)]
      ['++ '(str str -> str)]
      ['puts '(str -> (*))]
+     ['strlen '(str -> nat)]
+     ['substr '(str nat nat -> str)]
      [_ #:when (prim? p) #f])))
 
 (define (prim-has-type? p t)
