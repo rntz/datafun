@@ -95,6 +95,57 @@
           for x in P
           when (<= (* b x) n))))
 
+;; some things I originally didn't think Datafun could express, but it can!
+(nat-subsets : (set nat) ~> (set (set nat)))
+(nat-subsets n = (fix P (set (set))
+                        (set (set x) for x in n)
+                        (set (lub x y) for x in P for y in P)))
+
+;; upto n = {x | x <= n}; includes upper bound.
+;; below n = {x | x < n}; excludes upper bound.
+(upto below : nat ~> (set nat))
+(upto n = (fix P (set 0) (set (+ x 1) for x in P when (< x n))))
+(below n = (set x for x in (upto n) when (< x n)))
+
+;; range i j = {x | i <= x <= j}; inclusive.
+(range : nat ->- nat ~> (set nat))
+(range m n = (nat-setminus (upto n) (below m)))
+
+
+;; CYK parsing(!)
+(type sym = str)
+(type rule = (+ (string str) (cat sym sym)))
+(type grammar = (rel sym rule))
+
+;; (cons A i j) represents that symbol A produces the substring w[i..j].
+(type item = (* sym nat nat))
+
+(parse-cat : str -> grammar ~> (set item) ~> (set item))
+(parse-cat w g prev = (set (cons sym i k)
+                       for (cons sym ('cat a b)) in g
+                       for (cons a i j) in prev
+                       for (cons b (= j) k) in prev))
+
+(parse-init : str -> grammar ~> (set item))
+(parse-init w g = (set (cons sym i (+ i (strlen s)))
+                   for (cons sym ('string s)) in g
+                   for i in (range 0 (- len (strlen s)))
+                   when (= s (substr w i (+ i (strlen s)))))
+  where (len = (strlen w)))
+
+(parse : str -> grammar ~> (set sym))
+(parse w g = (let [(mono state : (set item))
+                   (fix state = (lub (parse-init w g) (parse-iter w g state)))]
+               (set sym for (cons sym 0 (= (strlen w))) in state)))
+
+;; a grammar to test on
+(G-hello : grammar)
+(G-hello = (set (cons "S" ('cat "H" "W"))
+                (cons "H" ('string "hello"))
+                (cons "W" ('string "world"))))
+
+(test-string = "helloworld")
+
 
 ;; ancestors example
 (person = (set "constable" "harper" "arbob"
