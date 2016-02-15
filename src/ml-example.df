@@ -1,0 +1,147 @@
+(* -*- mode: sml -*- *)
+
+val two : nat
+val two = 2
+
+val add3 : nat -> nat
+fun add3 x = x + 3
+
+val somefns : set (nat -> nat)
+val somefns = {add3, (fn x => x)}
+
+val not : bool ->- bool
+fun not x = unless x then true
+
+val or : bool ~> bool ~> bool
+fun or x y = x lub y
+
+val and : bool ~> bool ~> bool
+fun and x y = when x then y
+
+(* now that we have antitone negation, we can write < properly! *)
+val lt : nat ->- nat ~> bool
+fun lt x y = not (y <= x)
+
+(* NB: this (incorrect) implementation of lt gives an UTTERLY useless error
+ * message about tonicities mono & anti having no lub:
+ *
+ * fun lt x y = not (x <= y)
+ *)
+
+
+(* representing booleans as sets of units *)
+val triv : ()
+val triv = ()
+
+val tt, ff : set ()
+val tt = {()}
+val ff = {}
+
+val conj : set () ~> set () ~> set ()
+fun conj x y = ⋁(_ ∈ x, _ ∈ y) tt
+(* fun conj x y = {() | _ ∈ x, _ ∈ y} *)
+
+(* neel calls this "guard" *)
+val bool2set : bool ~> set ()
+fun bool2set x = when x then tt
+
+val set2bool : set () ~> bool
+fun set2bool x = () in? x
+(* fun set2bool x = for (_ in x) true *) (* alternative *)
+
+val negate : set () ->- set ()
+fun negate x = unless set2bool x then tt
+
+
+(* operations on sets of naturals *)
+val nat_member : nat -> set nat ~> bool
+fun nat_member a s = for (x in s) a = x
+
+(* or, using equality patterns *)
+val str_member : str -> set str ~> bool
+fun str_member a s = for (=a in s) true
+
+val nat_setminus : set nat ~> set nat ->- set nat
+fun nat_setminus a b = {x | x in a, not (nat_member x b)}
+
+(* set comprehension demos *)
+val some_nats : set nat
+val some_nats = for (x in {1,2,3}) {x, x + 10}
+
+val powers_upto : nat -> nat ~> set nat
+fun powers_upto b n = fix s = {1} ∨ {b*x | x in s, (b*x) <= n}
+
+
+(* some things I originally thought datafun couldn't do, but it can! *)
+val nat_subsets : set nat ~> set (set nat)
+fun nat_subsets n =
+  fix s = {{}}
+        ∨ {{x} | x in n}
+        ∨ {x ∨ y | x in s, y in s}
+
+(* upto n = {x | x <= n}; includes upper bound
+ * below n = {x | x < n}; excludes upper bound
+ *)
+val upto, below : nat ~> set nat
+fun upto n = fix s = {0} ∨ {x+1 | x in s, (x+1) <= n}
+fun below n = {x | x ∈ upto n, lt x n}
+
+(* range i j = {x | i <= x <= j}; inclusive. *)
+val range : nat ->- nat ~> set nat
+fun range i j = nat_setminus (upto j) (below i)
+
+
+(* ancestors *)
+val person = { "constable", "harper", "arbob", "aldrich", "reynolds", "neel"
+             , "rntz" }
+
+val advisor = { ("constable", "harper"), ("harper", "arbob")
+              , ("reynolds", "neel"), ("aldrich", "neel"), ("neel", "rntz") }
+
+val ancestor : set (str * str)
+fix ancestor = advisor ∨ {(a,c) | (a,b) ∈ advisor, (=b,c) ∈ ancestor}
+
+
+(* CYK parsing! *)
+type sym = str
+type rule = String(str) + Cat(sym, sym)
+type grammar = set (sym * rule)
+
+(* (a,i,j) represents that symbol a produces the substring w[i..j] *)
+type item = sym * nat * nat
+
+val parse_cat : str -> grammar ~> set item ~> set item
+fun parse_cat w g prev
+  = {(a,i,k) | (a, Cat(b,c)) ∈ g, (b,i,j) ∈ prev, (c,j,k) ∈ prev}
+
+val parse_init : str -> grammar ~> set item
+fun parse_init w g
+  = for ((a, String(s)) ∈ g)
+    let val n = strlen s
+    in {(a, i, i+n) | i ∈ range 0 (strlen w - n), s = substr w i (i+n)}
+
+val parse : str -> grammar ~> set sym
+fun parse w g =
+  (* TODO: make monotone let-binding the default. (what about the toplevel?) *)
+  let mono val state : set item
+      val state = fix self = parse_init w g ∨ parse_cat w g self
+  in {a | (a, 0, =strlen w) ∈ state}
+
+(* all in one declaration, for minimum LOC *)
+val parse : str -> grammar ~> set sym
+fun parse w g =
+  let val len = strlen w
+      mono val state : set item
+      fix state = {(a,i,k) | (a, Cat(b,c)) ∈ g
+                           , (=b,i,j) ∈ state, (=c,=j,k) ∈ state}
+                ∨ (for ((a, String(s)) ∈ g)
+                   let val n = strlen s
+                   in {(a,i,i+n) | i ∈ range 0 (len-n), s = substr w i (i+n)})
+  in {a | (a,0,=len) ∈ state}
+
+(* a grammar to test on *)
+val gram_hello = { ("Start", Cat("H", "W"))
+                 , ("H", String("hello"))
+                 , ("W", String("world")) }
+
+val test_string = "helloworld"

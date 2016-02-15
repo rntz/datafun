@@ -29,9 +29,9 @@
    ;; patterns
    WILD
    ;; expressions
-   LAMBDA LET FIX CASE IF THEN ELSE
-   IN ∈ FOR
-   TRUE FALSE UNIT))
+   LAMBDA LET FIX CASE IF THEN ELSE WHEN UNLESS
+   IN ∈ FOR IN?
+   TRUE FALSE EMPTY))
 
 
 ;; ========== LEXER ==========
@@ -66,10 +66,13 @@
    ;; expressions
    [(:or "fn" "λ") 'LAMBDA] ["let" 'LET] ["fix" 'FIX] ["in" 'IN] ["case" 'CASE]
    ["if" 'IF] ["then" 'THEN] ["else" 'ELSE]
-   [(:or "<=" "<" ">=" ">") (token-binop (string->symbol lexeme))]
-   [(:or "in?" "∈?") (token-binop 'in?)]
+   ["when" 'WHEN] ["unless" 'UNLESS]
+   [(:or "-" "<=" "<" ">=" ">") (token-binop (string->symbol lexeme))]
+   ;; ideally IN? would be a token-binop, but parse.rkt handles 'in? with infix
+   ;; notation instead of prefix.
+   [(:or "in?" "∈?") 'IN?]
    [(:or "∨" "lub")  (token-binop 'lub)]
-   [(:or "empty" "ε") 'UNIT]
+   [(:or "empty" "ε") 'EMPTY]
    [(:or "for" "⋁")   'FOR]
    ["∈" '∈]
 
@@ -81,24 +84,26 @@
 
    ;; identifiers
    [(:: (:& alphabetic lower-case)
-        (:* (:or alphabetic numeric (char-set "-_"))))
+        (:* (:or alphabetic numeric (char-set "_"))))
     (token-id (string->symbol lexeme))]
    [(:: (:& alphabetic upper-case)
-        (:* (:or alphabetic numeric (char-set "-_"))))
+        (:* (:or alphabetic numeric (char-set "_"))))
     (token-Id (string->symbol lexeme))]))
 
 
 ;; ========== GRAMMAR / PARSER ==========
 
 ;; this has hella shift-reduce conflicts, but I don't care.
-(match-define (list datafun-parse-decl datafun-parse-type datafun-parse-pat
-                    datafun-parse-expr)
+(match-define (list datafun-parse-decls datafun-parse-decl
+                    datafun-parse-type datafun-parse-pat datafun-parse-expr)
   (parser
-   (start decl type pat expr)
+   (start decls decl type pat expr)
    (src-pos)
    (tokens datafun-tokens datafun-empty-tokens)
    ;; FIXME: error handling.
-   (error (lambda _ (error "fuck")))
+   (error (lambda (tok-ok? tok-name tok-value start-pos end-pos)
+            (error "parse error:" tok-ok? tok-name tok-value
+                   start-pos end-pos)))
    (end eof)
    ;; for now, just for testing/bootstrapping, our semantic actions generate
    ;; s-expressions that parse.rkt can parse.
@@ -106,13 +111,18 @@
 
     (decls (() '())
            ((decl decls) (append $1 $2)))
-    (decl ((TYPE id = type)             `((type ,$2 ,$4)))
-          ((tone? VAL id : type)        `((,@$1 ,$3 : ,$5)))
+    (decl ((TYPE id = type)             `((type ,$2 = ,$4)))
+          ((tone? VAL comma-ids1 : type) `((,@$1 ,@$3 : ,$5)))
+          ;; gah. this is conflicting with the previous rule somehow.
+          ;; for example, (parse "val x : nat" #:as 'decls) errors.
+          ;((tone? VAL id : type = expr) `((,@$1 ,$3 : ,$5) (,$3 = ,$7)))
           ((tone? VAL id = expr)        `((,@$1 ,$3 = ,$5)))
-          ((tone? VAL id : type = expr) `((,@$1 ,$3 : ,$5) (,$3 = ,$7)))
+          ((tone? FIX id = expr)        `((,@$1 fix ,$3 = ,$5)))
           ((tone? FUN id args = expr)   `((,@$1 ,$3 ,@$4 = ,$6))))
     (args (() '())
           ((id args) (cons $1 $2)))
+    (comma-ids1 ((id) `(,$1))
+                ((id COMMA comma-ids1) (cons $1 $3)))
 
     (tone? (()     '())
            ((tone) (list $1)))
@@ -138,8 +148,8 @@
     (summand-types1
      ((summand-type)                    (list $1))
      ((summand-type + summand-types1)   (cons $1 $3)))
-    (summand-type ((Id) `',$1)
-                  ((Id LPAREN comma-types RPAREN) `(',$1 ,@$3)))
+    (summand-type ((Id) $1)
+                  ((Id LPAREN comma-types RPAREN) `(,$1 ,@$3)))
     (comma-types (()                        '())
                  ((type)                    `(,$1))
                  ((type COMMA comma-types)  (cons $1 $3)))
@@ -171,6 +181,8 @@
           ((LET decls IN expr)          `(let ,$2 ,$4))
           ((CASE op-expr cases)         `(case ,$2 ,@$3))
           ((IF op-expr THEN op-expr ELSE op-expr)    `(if ,$2 ,$4 ,$6))
+          ((WHEN op-expr THEN expr)     `(when ,$2 ,$4))
+          ((UNLESS op-expr THEN expr)   `(unless ,$2 ,$4))
           ((FIX id = expr)              `(fix ,$2 ,$4))
           ((FIX id : type = expr)       `(as ,$4 (fix ,$2 ,$6)))
           ((FOR LPAREN loops RPAREN expr) `(,@$3 lub ,$5))
@@ -178,18 +190,20 @@
     (asc-expr ((asc-expr : type)    `(as ,$3 ,$1))
               ((op-expr)            $1))
     (op-expr
-     ((app-expr binop app-expr)     `(,$2 ,$1 ,$3)) ;woo prefix notation
-     ((app-expr * app-expr)         `(* ,$1 ,$3))
-     ((app-expr + app-expr)         `(+ ,$1 ,$3))
-     ((app-expr = app-expr)         `(= ,$1 ,$3))
+     ;; for now, everything is left associative. TODO: precedence parsing.
+     ((op-expr oper app-expr)      `(,$2 ,$1 ,$3))
+     ((op-expr IN? app-expr)       `(,$1 in? ,$3))
+     ((Id LPAREN comma-exprs RPAREN) `(',$1 ,@$3))
+     ((Id)                          `',$1)
      ((app-expr)                    $1))
+    (oper ((binop) $1) ((=) '=) ((+) '+) ((*) '*))
     (app-expr
      ((app-expr arg-expr)   `(,$1 ,$2))
      ((arg-expr)            $1))
     (arg-expr
      ((id)                              $1)
      ((lit)                             $1)
-     ((UNIT)                            'empty)
+     ((EMPTY)                           'empty)
      ((LPAREN expr RPAREN)              $2)
      ((LPAREN comma-exprs* RPAREN)      `(cons ,@$2))
      ((LCURLY comma-exprs RCURLY)       `(set ,@$2))
@@ -229,11 +243,25 @@
        (yield tok)
        (loop)))))
 
+(define/match (parse-func how)
+  [('expr)  datafun-parse-expr]
+  [('type)  datafun-parse-type]
+  [('pat)   datafun-parse-pat]
+  [('decl)  datafun-parse-decl]
+  [('decls) datafun-parse-decls])
+
 (define (parse s #:as [how 'expr])
   (define port (open-input-string s))
-  ((match how
-     ['expr datafun-parse-expr]
-     ['type datafun-parse-type]
-     ['pat  datafun-parse-pat]
-     ['decl datafun-parse-decl])
-   (lambda () (datafun-lex port))))
+  ((parse-func how) (lambda () (datafun-lex port))))
+
+(define (parse-file filename #:as [how 'decls])
+  (call-with-input-file filename
+    (lambda (p)
+      (port-count-lines! p)
+      ((parse-func how) (lambda () (datafun-lex p))))))
+
+
+;; TESTING
+;; (require "repl.rkt")
+;; (define decls (parse-file "ml-example.df"))
+;; (define defns (parse-decls decls))
