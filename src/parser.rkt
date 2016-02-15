@@ -161,16 +161,16 @@
          ((FALSE)       '#f))
 
     ;; patterns
-    (pat  ((id)                         $1)
-          ((lit)                        $1)
-          ((WILD)                       '_)
-          ((= expr)                     `(= ,$2))
-          ((LPAREN pat RPAREN)          $2)
-          ((LPAREN comma-pats* RPAREN)  `(cons ,@$2))
-          ((Id)                         `',$1)
-          ((Id LPAREN comma-pats RPAREN)    (match $3
-                                              ['()  `',$1]
-                                              [pats `(',$1 ,@pats)])))
+    (pat ((id)                         $1)
+         ((lit)                        $1)
+         ((WILD)                       '_)
+         ((= expr)                     `(= ,$2))
+         ((LPAREN pat RPAREN)          $2)
+         ((LPAREN comma-pats* RPAREN)  `(cons ,@$2))
+         ((Id)                         `',$1)
+         ((Id LPAREN comma-pats RPAREN)    (match $3
+                                             ['()  `',$1]
+                                             [pats `(',$1 ,@pats)])))
     (comma-pats* (() '())
                  ((pat COMMA comma-pats) (cons $1 $3)))
     (comma-pats ((comma-pats*) $1)
@@ -205,6 +205,7 @@
      ((lit)                             $1)
      ((EMPTY)                           'empty)
      ((LPAREN expr RPAREN)              $2)
+     ((LPAREN expr BAR loops RPAREN)    `(,$2 ,@$4))
      ((LPAREN comma-exprs* RPAREN)      `(cons ,@$2))
      ((LCURLY comma-exprs RCURLY)       `(set ,@$2))
      ((LCURLY op-expr BAR loops RCURLY) `((set ,$2) ,@$4))
@@ -263,5 +264,9 @@
 
 ;; TESTING
 ;; (require "repl.rkt")
-;; (define decls (parse-file "ml-example.df"))
-;; (define defns (parse-decls decls))
+;; (define decls (void))
+;; (define defns (void))
+;; (define (test)
+;;   (set! decls (parse-file "ml-example.df"))
+;;   (set! defns (parse-decls decls))
+;;   (eval-defns! defns))

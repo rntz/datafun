@@ -39,6 +39,7 @@ val ff = {}
 
 val conj : set () ~> set () ~> set ()
 fun conj x y = ⋁(_ ∈ x, _ ∈ y) tt
+(* fun conj x y = (tt | _ ∈ x, _ ∈ y) *)
 (* fun conj x y = {() | _ ∈ x, _ ∈ y} *)
 
 (* neel calls this "guard" *)
@@ -47,7 +48,7 @@ fun bool2set x = when x then tt
 
 val set2bool : set () ~> bool
 fun set2bool x = () in? x
-(* fun set2bool x = for (_ in x) true *) (* alternative *)
+(* fun set2bool x = ⋁(_ in x) true *) (* alternative *)
 
 val negate : set () ->- set ()
 fun negate x = unless set2bool x then tt
@@ -55,18 +56,18 @@ fun negate x = unless set2bool x then tt
 
 (* operations on sets of naturals *)
 val nat_member : nat -> set nat ~> bool
-fun nat_member a s = for (x in s) a = x
+fun nat_member a s = (a = x | x in s)
 
 (* or, using equality patterns *)
 val str_member : str -> set str ~> bool
-fun str_member a s = for (=a in s) true
+fun str_member a s = (true | =a in s)
 
 val nat_setminus : set nat ~> set nat ->- set nat
 fun nat_setminus a b = {x | x in a, not (nat_member x b)}
 
 (* set comprehension demos *)
 val some_nats : set nat
-val some_nats = for (x in {1,2,3}) {x, x + 10}
+val some_nats = ⋁(x ∈ {1,2,3}) {x, x + 10}
 
 val powers_upto : nat -> nat ~> set nat
 fun powers_upto b n = fix s = {1} ∨ {b*x | x in s, (b*x) <= n}
@@ -116,7 +117,7 @@ fun parse_cat w g prev
 
 val parse_init : str -> grammar ~> set item
 fun parse_init w g
-  = for ((a, String(s)) ∈ g)
+  = ⋁((a, String(s)) ∈ g)
     let val n = strlen s
     in {(a, i, i+n) | i ∈ range 0 (strlen w - n), s = substr w i (i+n)}
 
@@ -134,7 +135,7 @@ fun parse w g =
       mono val state : set item
       fix state = {(a,i,k) | (a, Cat(b,c)) ∈ g
                            , (=b,i,j) ∈ state, (=c,=j,k) ∈ state}
-                ∨ (for ((a, String(s)) ∈ g)
+                ∨ (⋁((a, String(s)) ∈ g)
                    let val n = strlen s
                    in {(a,i,i+n) | i ∈ range 0 (len-n), s = substr w i (i+n)})
   in {a | (a,0,=len) ∈ state}
