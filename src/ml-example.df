@@ -30,9 +30,6 @@ fun lt x y = not (y <= x)
 
 
 (* representing booleans as sets of units *)
-val triv : ()
-val triv = ()
-
 val tt, ff : set ()
 val tt = {()}
 val ff = {}
@@ -111,24 +108,6 @@ type grammar = set (sym * rule)
 (* (a,i,j) represents that symbol a produces the substring w[i..j] *)
 type item = sym * nat * nat
 
-val parse_cat : str -> grammar ~> set item ~> set item
-fun parse_cat w g prev
-  = {(a,i,k) | (a, Cat(b,c)) ∈ g, (b,i,j) ∈ prev, (c,j,k) ∈ prev}
-
-val parse_init : str -> grammar ~> set item
-fun parse_init w g
-  = ⋁((a, String(s)) ∈ g)
-    let val n = strlen s
-    in {(a, i, i+n) | i ∈ range 0 (strlen w - n), s = substr w i (i+n)}
-
-val parse : str -> grammar ~> set sym
-fun parse w g =
-  (* TODO: make monotone let-binding the default. (what about the toplevel?) *)
-  let mono val state : set item
-      val state = fix self = parse_init w g ∨ parse_cat w g self
-  in {a | (a, 0, =strlen w) ∈ state}
-
-(* all in one declaration, for minimum LOC *)
 val parse : str -> grammar ~> set sym
 fun parse w g =
   let val len = strlen w
