@@ -41,9 +41,14 @@
 \titlebanner{preprint}
 \preprintfooter{Datafun, or, Datalog with datatypes (PREPRINT)}
 
-\title{Datafun}
-\subtitle{or, Datalog with datatypes}
-%% \subtitle{a functional Datalog}
+\title{Datafun: a functional Datalog}
+%% \subtitle{}
+
+%% \title{Datafun}
+%% \subtitle{or, Datalog with datatypes}
+
+%% \title{Datalog with Datatypes}
+%% \subtitle{Toward a functional language of finite sets}
 
 \authorinfo{Michael Arntzenius\and Neelakantan R. Krishnaswami}
            {University of Birmingham}
@@ -90,12 +95,12 @@ refellatur oratio.
   \[\begin{array}{ccl}
     %% types
     A, B     &\bnfeq& \bool \pipe \N \pipe \Str \pipe \Set{A}
-                      \pipe \Map{\eq{A}}{B}
+                      \pipe \Map{A}{B}
     \\
     \textsf{types} && A + B \pipe A \x B \pipe A \uto B \pipe A \mto B
     \vspace{0.5em}\\
     %% usl types
-    L, M         &\bnfeq& \bool \pipe \N \pipe \Set{A} \pipe \Map{\eq{A}}{L}
+    L, M         &\bnfeq& \bool \pipe \N \pipe \Set{A} \pipe \Map{A}{L}
     \\
     \textsf{usl types} && L \x M \pipe A \uto L \pipe A \mto L
     \vspace{0.5em}\\
@@ -112,10 +117,13 @@ refellatur oratio.
        \pipe \fineq{A} + \fineq{B} \pipe \fineq{A} \x \fineq{B}\\
     \textsf{finite eqtypes}
     \vspace{0.5em}\\
-    %% usl finite eqtypes
-    \fineq{L}, \fineq{M}
-    &\defeq& \textsf{usl types}~\cap~\textsf{finite eqtypes}
-    \vspace{0.5em}\\
+    %% usl (finite) eqtypes
+    %% \eq{L}, \eq{M} &\defeq& \textsf{usl types}~\cap~\textsf{eqtypes}
+    %% \vspace{0.5em}\\
+    %% \fineq{L}, \fineq{M}
+    %% &\defeq& \textsf{usl types}~\cap~\textsf{finite eqtypes}
+    %% \vspace{0.5em}\\
+    %% contexts
     \GD, \GG &\bnfeq& \cdot \pipe \GD, x\of A\\
     \textsf{contexts}\\
     %% expressions
@@ -130,39 +138,43 @@ refellatur oratio.
 \end{figure}
 
 %% FIGURE: SYNTAX SUGAR
-\begin{figure}n
-  %% \[\begin{array}{lccl}
-  %% %% expressions
-  %% \textsf{terms} &
-  %% e &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
-  %%            \pipe \forin{\mc{L}}{e}\\
-  %% &&& \rawcase{e}{[{p} \to {e}]^*}
-  %% \vspace{0.5em}\\
-  %% %% patterns
-  %% \textsf{patterns} &
-  %% p &\bnfeq& \pwild \pipe x \pipe (p,p) \pipe \ms{in}_i\;p
-  %%            \pipe \ms{true} \pipe \ms{false}
-  %% \vspace{0.5em}\\
-  %% %% loop clauses
-  %% \textsf{loops} &
-  %% \mc{L} &\bnfeq& \mc{L}, \mc{L} \pipe p \in e \pipe e
-  %% \end{array}\]
-
-  \[\begin{array}{ccl}
+\begin{figure}
+  \[\begin{array}{lccl}
   %% expressions
-  e         &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
-                     \pipe \forin{\mc{L}}{e}\\
-  \textsf{terms} && \rawcase{e}{[{p} \to {e}]^*}
+  \textsf{terms} &
+  e &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
+             \pipe \forin{\mc{L}}{e}\\
+  &&& \mathcal{C}\;e \pipe \rawcase{e}{[{p} \to {e}]^*}
   \vspace{0.5em}\\
   %% patterns
+  \textsf{patterns} &
   p &\bnfeq& \pwild \pipe x \pipe (p,p) \pipe \ms{in}_i\;p
-             \pipe \ms{true} \pipe \ms{false}\\
-  \textsf{patterns}
+             \pipe \ms{true} \pipe \ms{false} \pipe \mathcal{C}\;p
+  \vspace{0.5em}\\
+  \textsf{constructors} & \mathcal{C} && \text{are abstract identifiers}
   \vspace{0.5em}\\
   %% loop clauses
-  \mc{L} &\bnfeq& \mc{L}, \mc{L} \pipe p \in e \pipe e\\
-  \textsf{loops}
+  \textsf{loops} &
+  \mc{L} &\bnfeq& \mc{L}, \mc{L} \pipe p \in e \pipe e
   \end{array}\]
+
+  %% \[\begin{array}{ccl}
+  %% %% expressions
+  %% e         &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
+  %%                    \pipe \forin{\mc{L}}{e}\\
+  %% \textsf{terms} && \rawcase{e}{[{p} \to {e}]^*}
+  %% \vspace{0.5em}\\
+  %% %% patterns
+  %% p &\bnfeq& \pwild \pipe x \pipe (p,p) \pipe \ms{in}_i\;p
+  %%            \pipe \ms{true} \pipe \ms{false}\\
+  %% \textsf{patterns}
+  %% \vspace{0.5em}\\
+  %% %% loop clauses
+  %% \mc{L} &\bnfeq& \mc{L}, \mc{L} \pipe p \in e \pipe e\\
+  %% \textsf{loops}
+  %% \end{array}\]
+
+  %% TODO: constructors?
 
   %% the desugaring syntax-expansion itself
   \begin{eqnarray*}
@@ -174,7 +186,7 @@ refellatur oratio.
     &\expandsto& \letin{x}{e_1}{\rawcase{x}{p \to e_2;\,\pwild \to \unit}}\\
     \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}
   \end{eqnarray*}
-  \caption{Some useful syntax sugar}
+  \caption{Syntax sugar}
 \end{figure}
 
 %% FIGURE: Typing rules
@@ -232,7 +244,7 @@ refellatur oratio.
     \and
     \infer[\rn{\{\}}]{\J{\GD}{\GG}{\{e\}}{\Set{A}}}{\J{\GD}{\cdot}{e}{A}}
     \and
-    \infer[\rn{\{:\}}]{\J{\GD}{\GG}{\singlemap{e_1}{e_2}}{\Map{\eq{A}}{B}}}{
+    \infer[\rn{\{:\}}]{\J{\GD}{\GG}{\singlemap{e_1}{e_2}}{\Map{A}{B}}}{
       \J{\GD}{\cdot}{e_1}{\eq{A}} &
       \J{\GD}{\GG}{e_2}{B}}
     \and
@@ -258,9 +270,9 @@ refellatur oratio.
 \newcommand{\fname}{\ms}
 \begin{figure}
   \[\begin{array}{cll}
-  \le &\of& \eq{A} \uto \eq{A} \uto \bool\\
-  \fname{keys}     &:& \Map{\eq{A}}{B} \mto \Set{\eq{A}}\\
-  \fname{tabulate} &:& \Set{\eq{A}} \mto (\eq{A} \to B) \mto \Map{\eq{A}}{B}\\
+  \le &\of& \eq{A} \uto \eq{A} \mto \bool\\
+  \fname{keys}     &:& \Map{A}{B} \mto \Set{A}\\
+  \fname{tabulate} &:& \Set{A} \mto (A \to B) \mto \Map{A}{B}\\
   \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
   \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
   %% \fname{substrings} &\of& \ms{Str} \to \Set{\ms{Str}}\\
@@ -277,8 +289,8 @@ refellatur oratio.
 
 \section{Implementation}
 We have built a prototype implementation of Datafun in Racket \todo{CITE}. In
-addition to core Datafun, it supports pattern-matching, record types, subtyping,
-antitone functions and variables, and unbounded (potentially nonterminating)
+addition to core Datafun, it supports pattern-matching, variant types, record
+types, subtyping, antitone functions, and unbounded (potentially nonterminating)
 fixed points. It has no optimizations whatsoever.
 
 \todo{LINK}
