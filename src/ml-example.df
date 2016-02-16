@@ -6,8 +6,8 @@ val two = 2
 val add3 : nat -> nat
 fun add3 x = x + 3
 
-val somefns : set (nat -> nat)
-val somefns = {add3, (fn x => x)}
+val somefns : {nat -> nat}
+val somefns = {add3, (-) 4, (fn x => x)}
 
 val not : bool ->- bool
 fun not x = unless x then true
@@ -19,35 +19,36 @@ val and : bool ~> bool ~> bool
 fun and x y = when x then y
 
 (* now that we have antitone negation, we can write < properly! *)
-val lt : nat ->- nat ~> bool
-fun lt x y = not (y <= x)
+val (<) : nat ->- nat ~> bool
+fun (x < y) = not (y <= x)
 
-(* NB: this (incorrect) implementation of lt gives an UTTERLY useless error
+(* NB: this (incorrect) implementation of < gives an UTTERLY useless error
  * message about tonicities mono & anti having no lub:
  *
- * fun lt x y = not (x <= y)
+ * fun (x < y) = not (x <= y)
  *)
 
 
 (* representing booleans as sets of units *)
-val tt, ff : set ()
+val tt, ff : {()}
 val tt = {()}
 val ff = {}
 
-val conj : set () ~> set () ~> set ()
+val conj : {()} ~> {()} ~> {()}
 fun conj x y = ⋁(_ ∈ x, _ ∈ y) tt
 (* fun conj x y = (tt | _ ∈ x, _ ∈ y) *)
 (* fun conj x y = {() | _ ∈ x, _ ∈ y} *)
 
 (* neel calls this "guard" *)
-val bool2set : bool ~> set ()
+val bool2set : bool ~> {()}
 fun bool2set x = when x then tt
 
-val set2bool : set () ~> bool
+val set2bool : {()} ~> bool
 fun set2bool x = () in? x
 (* fun set2bool x = ⋁(_ in x) true *) (* alternative *)
 
-val negate : set () ->- set ()
+(* kind of a hack *)
+val negate : {()} ->- {()}
 fun negate x = unless set2bool x then tt
 
 
@@ -71,7 +72,7 @@ fun powers_upto b n = fix s = {1} ∨ {b*x | x in s, (b*x) <= n}
 
 
 (* some things I originally thought datafun couldn't do, but it can! *)
-val nat_subsets : set nat ~> set (set nat)
+val nat_subsets : {nat} ~> {{nat}}
 fun nat_subsets n =
   fix s = {{}}
         ∨ {{x} | x in n}
@@ -80,12 +81,12 @@ fun nat_subsets n =
 (* upto n = {x | x <= n}; includes upper bound
  * below n = {x | x < n}; excludes upper bound
  *)
-val upto, below : nat ~> set nat
-fun upto n = fix s = {0} ∨ {x+1 | x in s, (x+1) <= n}
-fun below n = {x | x ∈ upto n, lt x n}
+val upto, below : nat ~> {nat}
+fun upto n = fix s = {0} ∨ {x+1 | x in s, x < n}
+fun below n = {x | x ∈ upto n, x < n}
 
 (* range i j = {x | i <= x <= j}; inclusive. *)
-val range : nat ->- nat ~> set nat
+val range : nat ->- nat ~> {nat}
 fun range i j = nat_setminus (upto j) (below i)
 
 
@@ -96,19 +97,19 @@ val person = { "constable", "harper", "arbob", "aldrich", "reynolds", "neel"
 val advisor = { ("constable", "harper"), ("harper", "arbob")
               , ("reynolds", "neel"), ("aldrich", "neel"), ("neel", "rntz") }
 
-val ancestor : set (str * str)
+val ancestor : {str, str}
 fix ancestor = advisor ∨ {(a,c) | (a,b) ∈ advisor, (=b,c) ∈ ancestor}
 
 
 (* CYK parsing! *)
 type sym = str
-type rule = String(str) + Cat(sym, sym)
-type grammar = set (sym * rule)
+type rule = String(str) | Cat(sym, sym)
+type grammar = {sym, rule}
 
 (* (a,i,j) represents that symbol a produces the substring w[i..j] *)
 type item = sym * nat * nat
 
-val parse : str -> grammar ~> set sym
+val parse : str -> grammar ~> {sym}
 fun parse w g =
   let val len = strlen w
       mono val state : set item

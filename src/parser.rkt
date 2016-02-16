@@ -1,7 +1,7 @@
 #lang racket
 
 (require "util.rkt" "ast.rkt" "debug.rkt" "parse.rkt")
-(provide (all-defined-out))
+(provide source-info parse-port parse-string parse-file)
 
 (require parser-tools/lex parser-tools/yacc)
 (require (prefix-in : parser-tools/lex-sre))
@@ -79,6 +79,19 @@
 
 
 ;; ========== GRAMMAR / PARSER ==========
+
+;; bind source-info to a mutable hasheq (a weak hasheq is advisable, but not
+;; mandatory) if you want parsing to annotate the expressions/decls/etc it
+;; parses with source position info.
+;;
+;; it will bind each expression, pat, and decl to (list start-pos end-pos),
+;; where start-pos & end-pos are position structures.
+(define source-info (make-parameter (make-weak-hasheq)))
+(define (annotate! obj start-pos end-pos)
+  (when (source-info)
+    (hash-set! (source-info) obj (list start-pos end-pos)))
+  obj)
+
 (define/match (parse-func how)
   [('expr)  expr-parse]
   [('type)  type-parse]
@@ -92,7 +105,7 @@
    (start decls decl type pat expr)
    (src-pos)
    (tokens datafun-tokens datafun-empty-tokens)
-   ;; FIXME: error handling.
+   ;; TODO: more useful error handling / error messages
    (error (lambda (tok-ok? tok-name tok-value start-pos end-pos)
             (error "parse error:" tok-ok? tok-name tok-value
                    start-pos end-pos)))
@@ -101,31 +114,39 @@
    ;; s-expressions that parse.rkt can parse.
    (grammar
 
+    ;; names - like identifiers, but allowing binding of infix operators.
+    (name ((id) $1) ((LP oper RP) $2))
+    (names (() '()) ((name names) (cons $1 $2)))
+    (names1 ((name names) (cons $1 $2)))
+    (name-list1
+     ((name) `(,$1))
+     ((name COMMA name-list1) (cons $1 $3)))
+
     ;; ----- decls -----
     (decls
      (() '())
      ((decl decls) (append $1 $2)))
-    (decl
-     ((TYPE id = type)             `((type ,$2 = ,$4)))
-     ((tone? VAL ids-list1 : type) `((,@$1 ,@$3 : ,$5)))
+    (decl ((d) (annotate! $1 $1-start-pos $1-end-pos)))
+    (d
+     ((TYPE name = type)            `((type ,$2 = ,$4)))
+     ((tone? VAL name-list1 : type) `((,@$1 ,@$3 : ,$5)))
      ;; gah. this is conflicting with the previous rule somehow.
      ;; for example, (parse "val x : nat" #:as 'decls) errors.
-     ;((tone? VAL id : type = expr) `((,@$1 ,$3 : ,$5) (,$3 = ,$7)))
-     ((tone? VAL id = expr)        `((,@$1 ,$3 = ,$5)))
-     ((tone? FIX id = expr)        `((,@$1 fix ,$3 = ,$5)))
-     ((tone? FUN id ids = expr)   `((,@$1 ,$3 ,@$4 = ,$6))))
-
-    (ids (() '()) ((id ids) (cons $1 $2)))
-    (ids-list1
-     ((id) `(,$1))
-     ((id COMMA ids-list1) (cons $1 $3)))
+     ;((tone? VAL name : type = expr) `((,@$1 ,$3 : ,$5) (,$3 = ,$7)))
+     ((tone? VAL name = expr)       `((,@$1 ,$3 = ,$5)))
+     ((tone? FIX name = expr)       `((,@$1 fix ,$3 = ,$5)))
+     ((tone? FUN name names1 = expr)            `((,@$1 ,$3 ,@$4 = ,$6)))
+     ((tone? FUN LP name oper name RP = expr)   `((,@$1 ,$5 ,$4 ,$6 = ,$9))))
 
     (tone? (() '()) ((tone) (list $1)))
     (tone ((CONST) 'const) ((MONO) 'mono) ((ANTI) 'anti))
 
     ;; ----- types -----
     ;; TODO: record types
-    (type ((t-func) $1))
+    (type ((t) (annotate! $1 $1-start-pos $1-end-pos)))
+    (t
+     ((t-func) $1)
+     ((t-sum)  `(+ ,@$1)))
     (t-func
      ((t-arg) $1)
      ((t-arg -> t-func) `(,$1 -> ,$3))
@@ -140,17 +161,19 @@
      ((t-factor)              (list $1))
      ((t-factor * t-product)  (cons $1 $3)))
     (t-factor
-     ((t-atom)              $1)
-     ((t-sum)               `(+ ,@$1))
-     ((SET t-atom)          `(set ,$2))
-     ((MAP t-atom t-atom)   `(map ,$2 ,$3)))
+     ((t-atom)                      $1)
+     ((SET t-atom)                  `(set ,$2))
+     ((MAP t-atom t-atom)           `(map ,$2 ,$3))
+     ((LCURLY type RCURLY)          `(set ,$2))
+     ((LCURLY t-list+ RCURLY)       `(set (* ,@$2)))
+     ((LCURLY type : type RCURLY)   `(map ,$2 ,$4)))
     (t-atom
      ((id)          $1)
      ((LP RP)       '(*))
      ((LP type RP)  $2))
     (t-sum
-     ((t-ctor)         (list $1))
-     ((t-ctor + t-sum) (cons $1 $3)))
+     ((t-ctor)           (list $1))
+     ((t-ctor BAR t-sum) (cons $1 $3)))
     (t-ctor
      ((Id) $1)
      ((Id LP t-list RP) `(,$1 ,@$3)))
@@ -158,6 +181,8 @@
      (()                        '())
      ((type)                    `(,$1))
      ((type COMMA t-list)  (cons $1 $3)))
+    (t-list+
+     ((type COMMA t-list) (cons $1 $3)))
 
     ;; ----- literals -----
     (lit ((number)      $1)
@@ -166,8 +191,9 @@
          ((FALSE)       '#f))
 
     ;; ----- patterns -----
-    (pat
-     ((id)              $1)
+    (pat ((p) (annotate! $1 $1-start-pos $1-end-pos)))
+    (p
+     ((name)            $1)
      ((lit)             $1)
      ((_)               '_)
      ((= expr)          `(= ,$2))
@@ -183,15 +209,16 @@
             ((pat)         (list $1)))
 
     ;; ----- expressions -----
-    (expr
-     ((LAMBDA ids => expr)          `(fn ,@$2 ,$4))
+    (expr ((e) (annotate! $1 $1-start-pos $1-end-pos)))
+    (e
+     ((LAMBDA names => expr)        `(fn ,@$2 ,$4))
      ((LET decls IN expr)           `(let ,$2 ,$4))
      ((CASE e-op cases)             `(case ,$2 ,@$3))
      ((IF e-op THEN e-op ELSE e-op) `(if ,$2 ,$4 ,$6))
      ((WHEN e-op THEN expr)         `(when ,$2 ,$4))
      ((UNLESS e-op THEN expr)       `(unless ,$2 ,$4))
-     ((FIX id = expr)               `(fix ,$2 ,$4))
-     ((FIX id : type = expr)        `(as ,$4 (fix ,$2 ,$6)))
+     ((FIX name = expr)             `(fix ,$2 ,$4))
+     ((FIX name : type = expr)      `(as ,$4 (fix ,$2 ,$6)))
      ((⋁ LP loops RP expr)          `(,@$3 lub ,$5))
      ((FOR LP loops RP expr)        `(,@$3 lub ,$5))
      ((e-asc)                       $1))
@@ -209,7 +236,7 @@
      ((e-app e-atom)   `(,$1 ,$2))
      ((e-atom)         $1))
     (e-atom
-     ((id)                              $1)
+     ((name)                            $1)
      ((lit)                             $1)
      ((EMPTY)                           'empty)
      ((LP expr RP)                      $2)
@@ -221,7 +248,7 @@
      ((LCURLY : RCURLY)                 `(map))
      ((LCURLY e-kv-list1 RCURLY)        `(map ,@$2)))
 
-    (oper ((=) '=) ((<=) '<=) ((>=) '>=)
+    (oper ((=) '=) ((<=) '<=) ((>=) '>=) ((<) '<) ((>) '>)
           ((++) '++) ((+) '+) ((-) '-) ((*) '*) ((/) '/)
           ((∨) 'lub) ((LUB) 'lub))
 
@@ -249,22 +276,28 @@
     (loop
      ((e-op)         `(when ,$1))
      ((pat IN e-op)  `(for ,$1 in ,$3))
-     ((pat ∈ e-op)   `(for ,$1 in ,$3)))
+     ((pat ∈ e-op)   `(for ,$1 in ,$3))))))
 
-    )))
+(define (parse-port port #:as how)
+  (define func (parse-func how))
+  (source-info (make-weak-hasheq))
+  (func (lambda () (datafun-lex port))))
 
-(define (parse s #:as [how 'expr])
-  (define port (open-input-string s))
-  ((parse-func how) (lambda () (datafun-lex port))))
+(define (parse-string s #:as [how 'expr])
+  (define p (open-input-string s))
+  (port-count-lines! p)
+  (parse-port p #:as how))
 
 (define (parse-file filename #:as [how 'decls])
   (call-with-input-file filename
-    (lambda (p)
-      (port-count-lines! p)
-      ((parse-func how) (lambda () (datafun-lex p))))))
+    (lambda (port)
+      (port-count-lines! port)
+      (parse-port port #:as how))))
 
 
 ;; TESTING
+;; (define parse parse-string)
+
 ;; (define (tokenize s)
 ;;   (define port (open-input-string s))
 ;;   (define (gen) (datafun-lex port))
