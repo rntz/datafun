@@ -117,6 +117,8 @@
   (p-or pats)
   ;; binds `var' to thing being matched in `body'. the result of `body' is then
   ;; matched against `pat'.
+  ;;
+  ;; TODO: replace this with equality pattern, p-eq.
   (p-let var body pat))
 
 

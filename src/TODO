@@ -1,3 +1,5 @@
+- make default tone mono in let-bindings
+
 - stop substituting everything immediately during typechecking so we don't get
   800-char long type names in error messages
 
