@@ -137,7 +137,7 @@
             (loop (read) (cons line acc)))))))
 
 ;;; List utilities
-(provide index-of length=? map? foldl1 foldr1 rev-append)
+(provide index-of length=? map? foldl1 foldr1 rev-append for/append)
 
 (define (index-of v lst)
   (let loop ([i 0] [l lst])
@@ -160,6 +160,9 @@
 
 (define (rev-append x y)
   (append (reverse x) y))
+
+(define-syntax-rule (for/append clauses body ...)
+  (append* (for/list clauses body ...)))
 
 
 ;;; Stream and generator utilities
