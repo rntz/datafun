@@ -39,7 +39,7 @@
 
 % These are ignored unless 'preprint' option specified.
 \titlebanner{preprint}
-\preprintfooter{Datafun, or, Datalog with datatypes (PREPRINT)}
+\preprintfooter{Datafun: a Functional Datalog (PREPRINT)}
 
 \title{Datafun: a Functional Datalog}
 %% \subtitle{}
@@ -134,7 +134,7 @@ refellatur oratio.
     \textsf{contexts}\\
     %% expressions
     e &\bnfeq& x \pipe \fn\bind{x} e \pipe e\;e \pipe (e,e) \pipe \pi_i\;e\\
-    \textsf{terms} && \ms{in}_i\;e \pipe \case{e}{x}{e}{x}{e}\\
+    \textsf{terms} && \ms{in}_i\; e \pipe \case{e}{x}{e}{x}{e}\\
     && e = e \pipe \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
     && \singleset{e} \pipe \singlemap{e}{e}
        \pipe \unit \pipe e \vee e \pipe \letin{x}{e}{e}\\
@@ -192,11 +192,11 @@ refellatur oratio.
     &\expandsto& \forin{\mc{L}_1}{\forin{\mc{L}_2}{e}}\\
     \forin{p\in e_1}{e_2}
     &\expandsto& \letin{x}{e_1}{\rawcase{x}{p \to e_2;\,\pwild \to \unit}}\\
-    \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}\\
-    \ms{let}~x = e_1 ~\ms{in}~ e_2
-    &\expandsto& (\fn\bind{x} e_2)\; e_1\\
-    \ms{let}~[x_i = e_i]^* ~\ms{in}~ e
-    &\expandsto& [\ms{let}~x_i = e_i~\ms{in}]^* e
+    \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}%% \\
+    %% \ms{let}~x = e_1 ~\ms{in}~ e_2
+    %% &\expandsto& (\fn\bind{x} e_2)\; e_1\\
+    %% \ms{let}~[x_i = e_i]^* ~\ms{in}~ e
+    %% &\expandsto& [\ms{let}~x_i = e_i~\ms{in}]^* e
   \end{eqnarray*}
   \caption{Syntax sugar}
 \end{figure}
@@ -371,15 +371,31 @@ nonterminating) fixed points. It performs no optimizations whatsoever.
 %% not sure how many sections to split this up into.
 \section{Tradeoffs, limitations, and design decisions}
 
-\paragraph{Bounded fix-points and the constructor restriction} \todo{Discuss
-  datalog's constructor restriction (name?), not being sure how to encode it in
-  a type theory, its disadvantages, and the disadvantages of our approach ---
-  finitude \& bounded fixed-points}
+\paragraph{Bounded fix-points} \TODO Discuss
+datalog's constructor restriction (name?), not being sure how to encode it in a
+type theory, its disadvantages, and the disadvantages of our approach ---
+bounded fixed-points.
 
-\todo{in particular, could bounded fix-points have adverse performance
-  implications?}
+\TODO discuss ``finite equality types'' option which we discarded. bounded
+fixpoints strictly more general, but at possible runtime cost, but finite types
+very restrictive in practice
 
-\paragraph{Termination} \todo{discuss nontermination and declarativeness}
+\TODO In particular, could bounded fix-points have adverse performance
+implications?
+
+\paragraph{Termination} \TODO nontermination and declarativeness.
+
+For example, one powerful optimization technique is \emph{loop reordering} (in
+SQL terminology, \emph{join reordering}), that is, taking advantage of the
+equation
+\begin{eqnarray*}
+  \forin{x \in e_1} \forin{y \in e_2} e
+  &=& \forin{y \in e_2} \forin{x \in e_1} e
+\end{eqnarray*}
+when $x,y \notin \ms{FV}(e_1) \cup \ms{FV}(e_2)$. (\TODO Explain why join
+reordering is powerful). But this equation does not always hold in the presence
+of nontermination; for example, if $e_1 = \unit$ and $e_2$ diverges. \TODO
+finish up
 
 \paragraph{Type inference} Typechecking needs to distinguish between ordinary
 and monotone $\lambda$, application, \ms{case}, \ms{let}, and \ms{if}. In our
@@ -392,19 +408,47 @@ implementation we solve this in two ways:
   (\texttt{when e then e1}) to indicate the rule $\ms{if}^+$ applies.
 \end{enumerate}
 
-It remains an open question how much annotation is necessary. We speculate that
-bidirectional inference could be replaced by a Damas-Milner\todo{CITE} style
-algorithm, which infers a principal type for any term without any annotation at
-all, \emph{if} we add polymorphism, tone-polymorphism, and subtyping---so that,
-for example, $\fn\bind{f}\fn\bind{x} f\;x$ can be assigned the principal type
+It remains an open question how much annotation is necessary. See
+Section \ref{sec:futurework}, \emph{Related and future work}.
+
+\paragraph{Lexical types} (\todo{TODO})
+\begin{itemize}
+\item Pro: allow expressing many things more generally, for example, map lookup
+\item Con: have no good general monotone elimination rule
+\item Con: complicate the type theory
+\end{itemize}
+
+\section{Related and future work}
+\label{sec:futurework}
+
+\paragraph{Optimization}
+\begin{itemize}
+\item \TODO the datalog literature
+\end{itemize}
+
+\paragraph{Polymorphism}
+\begin{itemize}
+\item \TODO quantification over different classes of type variable (ordinary,
+  equality, lattice); amounts to a typeclass system, so this is not new work.
+\item \TODO tone polymorphism and why you need it for principal types; e.g.
+  what is the type of $\fn\bind{f}\fn\bind{x} f\;x$?
+\end{itemize}
+
+\paragraph{Type inference} blah
+
+\TODO Ref Dunfield \& Krishnaswami, higher-order bidirectional type inference.
+
+\todo{REWRITE} We speculate that bidirectional inference could be replaced by a
+Damas-Milner \todo{CITE} style algorithm, which infers a principal type for any
+term without any annotation at all, \emph{if} we add polymorphism,
+tone-polymorphism, and subtyping---so that, for example, $\fn\bind{f}\fn\bind{x}
+f\;x$ can be assigned the principal type
 $\forall\bind{o\of\ms{tone}}\forall\bind{\alpha,\beta \of \ms{type}} (\alpha
 \overset{o}\to \beta) \mto (\alpha \overset{o}\to \beta)$, where
 $\overset{o}\to$ indicates a function of tone $o$, which may be empty (for an
 ordinary function) or ${+}$ for a monotone function.
 
 \todo{does Neel think this is a reasonable conjecture?}
-
-\section{Related and future work}
 
 %% ACKNOWLEDGMENTS
 \acks

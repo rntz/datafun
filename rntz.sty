@@ -27,7 +27,8 @@
 %% My commands
 
 \newcommand{\omitted}[1]{{\color{red}#1}}
-\newcommand{\todo}[1]{{\color{red}(TODO: #1)}}
+\newcommand{\todo}[1]{{\color{red}#1}}
+\newcommand{\TODO}{\todo{TODO} }
 
 \newcommand{\bnfeq}{\dblcolon=}
 \newcommand{\defeq}{\overset{\ms{def}}{=}}
@@ -82,7 +83,7 @@
 \newcommand{\triple}[3]{\tuple{#1,\,#2,\,#3}}
 \newcommand{\triv}{\tuple{}}
 \newcommand{\unit}{\varepsilon}
-\newcommand{\forin}[2]{\textstyle\bigvee({#1})\ {#2}}
+\newcommand{\forin}[1]{\textstyle\bigvee({#1})\ }
 \newcommand{\letin}[3]{\forin{#1 \in #2}{#3}}
 \newcommand{\rawcase}[2]{\ms{case}~{#1}~\ms{of}~{#2}}
 \newcommand{\case}[5]{%
