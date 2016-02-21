@@ -57,7 +57,7 @@
 
 %% types
 \newcommand{\N}{\mathbb{N}}
-\newcommand{\Str}{\ms{Str}}
+\newcommand{\str}{\ms{str}}
 \newcommand{\bool}{2}
 \newcommand{\tzero}{\mathbb{0}}
 \newcommand{\tunit}{\mathbb{1}}
@@ -67,14 +67,16 @@
 \newcommand{\mto}{\overset{+\:}{\to}}
 %% \newcommand{\mto}{\to^+}
 \newcommand{\FS}{\ms{Set}}
-\newcommand{\Set}[1]{\ensuremath{\ms{Set}\;{#1}}}
-\newcommand{\Map}[2]{\ensuremath{\ms{Map}\;{#1}\;{#2}}}
+\newcommand{\Set}[1]{\ensuremath{\ms{set}~{#1}}}
+\newcommand{\Map}[2]{\ensuremath{\ms{map}~{#1}~{#2}}}
+\renewcommand{\Set}[1]{\{#1\}}
+\renewcommand{\Map}[2]{\ensuremath{\{{#1}\!: {#2}\}}}
 \newcommand{\eq}[1]{\underaccent{\ms{eq}}{#1}}
 \newcommand{\fineq}[1]{\underaccent{\ms{fin}}{#1}}
 %% expressions
 \newcommand{\sub}[1]{[#1]\,}                   % substitution
-\newcommand{\fix}[2]{\ms{fix}~{#1}~\ms{in}~{#2}}
-\newcommand{\fixle}[3]{\ms{fix}~{#1} \le {#2}~\ms{in}~{#3}}
+\newcommand{\fix}[1]{\ms{fix}~{#1}~\ms{is}~}
+\newcommand{\fixle}[2]{\fix{#1 \le #2}}
 \newcommand{\tuple}[1]{\langle{#1}\rangle}
 \newcommand{\pair}[2]{\tuple{#1,\,#2}}
 \newcommand{\triple}[3]{\tuple{#1,\,#2,\,#3}}
@@ -99,3 +101,5 @@
 
 %% patterns
 \newcommand{\pwild}{\underline{\phantom{a}}}
+
+\newcommand{\ctor}[1]{\textit{#1}}

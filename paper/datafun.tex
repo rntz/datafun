@@ -113,7 +113,7 @@ refellatur oratio.
 \begin{figure}
   \[\begin{array}{ccl}
     %% types
-    A, B     &\bnfeq& \bool \pipe \N \pipe \Str \pipe \Set{A}
+    A, B     &\bnfeq& \bool \pipe \N \pipe \str \pipe \Set{A}
                       \pipe \Map{A}{B}
     \\
     \textsf{types} && A + B \pipe A \x B \pipe A \uto B \pipe A \mto B
@@ -124,7 +124,7 @@ refellatur oratio.
     \textsf{usl types} && L \x M \pipe A \uto L \pipe A \mto L
     \vspace{0.5em}\\
     %% equality types
-    \eq{A}, \eq{B} &\bnfeq& \bool \pipe \N \pipe \Str \pipe \Set{\eq{A}}
+    \eq{A}, \eq{B} &\bnfeq& \bool \pipe \N \pipe \str \pipe \Set{\eq{A}}
                             \pipe \Map{\eq{A}}{\eq{B}}
     \\
     \textsf{eqtypes} && \eq{A} + \eq{B} \pipe \eq{A} \x \eq{B}
@@ -296,13 +296,16 @@ refellatur oratio.
   \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
   %% \fname{substrings} &\of& \ms{Str} \to \Set{\ms{Str}}\\
   %% \fname{size}     &:& \Set{\eq{A}} \mto \N\\
-  \fname{range}    &:& \N \to \N \mto \Set{\N}
+  \fname{range}    &:& \N \uto \N \mto \Set{\N}\\
+  \fname{length}   &:& \str \uto \N\\
+  \fname{substring} &:& \str \uto \N \uto \N \uto \str
   \end{array}\]
   \caption{Built-in functions and their type schemes}
 \end{figure}
 
 
 %%
+\pagebreak
 \section{Datafun by example}
 
 %% Examples
@@ -321,23 +324,14 @@ refellatur oratio.
 
 \[\begin{array}{l}
 %% FIXME: names
-\mathbf{data}~\ms{Person} =
-\ms{E\ddot{a}rendil} ~|~ \ms{Elrond} ~|~ \ms{Arwen}\\
-\ms{parent},~\ms{ancestor} : \Set{(\ms{Person} \x \ms{Person})}\\
-\ms{parent} = \{(\ms{E\ddot{a}rendil}, \ms{Elrond}),
-(\ms{Elrond}, \ms{Arwen})\}\\
+\mathbf{data}~\ms{person} =
+\ctor{E\"arendil} ~|~ \ctor{Elrond} ~|~ \ctor{Arwen}\\
+\fname{parent},~\ms{ancestor} : \Set{\ms{person} \x \ms{person}}\\
+\ms{parent} =
+\{(\ctor{E\"arendil}, \ctor{Elrond}), (\ctor{Elrond}, \ctor{Arwen})\}\\
 \ms{ancestor} = \fix{S} \ms{parent} \vee
 \setfor{(a,c)}{(a,b) \in \ms{parent}, (b,c) \in S}\\
 \end{array}\]
-
-%% \begin{verbatim}
-%% type person = Elrond | Arwen | Eldarion
-%% parent, ancestor : set (person * person)
-%% parent = {(Elrond, Arwen), (Arwen, Eldarion)}
-%% fix ancestor = parent lub
-%%                {(a,c) | (a,b) in parent
-%%                       , (=b,c) in ancestor}
-%% \end{verbatim}
 
 \subsubsection{Transitive closure with an upper bound}
 
@@ -347,9 +341,9 @@ an upper bound which you know the desired answer will not exceed. For this we
 write $(\fixle{x}{e_\top} e)$
 
 \[\begin{array}{l}
-\ms{persons} ~:~ \Set{\Str}\\
+\ms{persons} ~:~ \Set{\str}\\
 \ms{persons} = \{\texttt{"e\"arendil"}, \texttt{"elrond"}, \texttt{"arwen"}\}\\
-\ms{parent}, \ms{ancestor} ~:~ \Set{(\Str \x \Str)}\\
+\ms{parent}, \ms{ancestor} ~:~ \Set{\str \x \str}\\
 \ms{parent} = \{(\texttt{"e\"arendil"}, \texttt{"elrond"}),
 (\texttt{"elrond"}, \texttt{"arwen"})\}\\
 \ms{ancestor} = \fixle{S}{\setfor{(a,b)}{a \in \ms{person}, b \in \ms{person}}}
@@ -373,9 +367,26 @@ For any eqtype $\eq{A}$, we may write:
 \subsection{CYK parsing}
 
 \[\begin{array}{l}
-\mathbf{type}~\ms{Sym} = \Str\\
-\mathbf{data}~\ms{Rule} = \ms{String}~\Str ~|~ \ms{Cat}~\ms{Sym}~\ms{Sym}\\
-\mathbf{type}~\ms{Grammar} = \Map{\ms{Sym}}{(\Set{\ms{Rule}})}
+\mathbf{type}~\ms{sym} = \str\\
+\mathbf{data}~\ms{rule} = \ctor{String}~\str ~|~ \ctor{Cat}~\ms{sym}~\ms{sym}\\
+\mathbf{type}~\ms{grammar} = \Set{\ms{sym} \x \ms{rule}}\\
+\mathbf{type}~\ms{fact} = \ms{sym} \x \N \x \N\\
+\fname{parse} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{sym}}\\
+\fname{iter} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{fact}}
+\mto \Set{\ms{fact}}\\
+\fname{parse}\;w\;g =\\
+\hspace{1em} \ms{let}~ n = \ms{length}\;w\\
+\hspace{2.375em}u \overset{+}{=}
+  \setfor{(a,i,j)}{(a,\pwild) \in g, i \in \ms{range}\;0\;n,
+  j\in\fname{range}\;i\;n}\\
+\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in \fixle{s}{u} \ms{iter}\;w\;g}\\
+\fname{iter}\;w\;g\;s =\\
+\hspace{1em}\phantom{\vee~}\setfor{(a,i,k)}{(a, \ctor{Cat}~b~c) \in g,
+  (b,i,j) \in s, (c,j,k) \in s}\\
+\hspace{1em}\vee~ \{(a,i,i+\fname{length}\;s)\\
+\hspace{2.1em}|~ (a, \ctor{String}~s) \in g,
+i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
+\hspace{2.2em}\phantom{|~} s = \fname{substring}\;w\;i\;(i+\ms{length}\;s)\}
 \end{array}\]
 
 
