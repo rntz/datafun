@@ -1,5 +1,7 @@
 -*- mode: outline -*-
 
+Should we remove the finite types thing? Just have bounded fixpoints?
+
 * Syntax
   - 1-level syntax (ie, one grammar of types)
 

@@ -163,12 +163,13 @@ refellatur oratio.
   \textsf{terms} &
   e &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
              \pipe \forin{\mc{L}}{e}\\
-  &&& \mathcal{C}\;e \pipe \rawcase{e}{[{p} \to {e}]^*}
+  &&& \mathcal{C}[\;e]^* \pipe \rawcase{e}{[{p} \to {e}]^*}\\
+  &&& \ms{let}~ [x = e]^* ~\ms{in}~ e
   \vspace{0.5em}\\
   %% patterns
   \textsf{patterns} &
   p &\bnfeq& \pwild \pipe x \pipe (p,p)
-             \pipe \ms{true} \pipe \ms{false} \pipe \mathcal{C}\;p
+             \pipe \ms{true} \pipe \ms{false} \pipe \mathcal{C}[\;p]^*
   \vspace{0.5em}\\
   \textsf{constructors} & \mathcal{C} && \text{are abstract identifiers}
   \vspace{0.5em}\\
@@ -203,7 +204,11 @@ refellatur oratio.
     &\expandsto& \forin{\mc{L}_1}{\forin{\mc{L}_2}{e}}\\
     \forin{p\in e_1}{e_2}
     &\expandsto& \letin{x}{e_1}{\rawcase{x}{p \to e_2;\,\pwild \to \unit}}\\
-    \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}
+    \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}\\
+    \ms{let}~x = e_1 ~\ms{in}~ e_2
+    &\expandsto& (\fn\bind{x} e_2)\; e_1\\
+    \ms{let}~[x_i = e_i]^* ~\ms{in}~ e
+    &\expandsto& [\ms{let}~x_i = e_i~\ms{in}]^* e
   \end{eqnarray*}
   \caption{Syntax sugar}
 \end{figure}
@@ -292,7 +297,7 @@ refellatur oratio.
   \le &\of& \eq{A} \uto \eq{A} \mto \bool\\
   \fname{keys}     &:& \Map{A}{B} \mto \Set{A}\\
   \fname{tabulate} &:& \Set{A} \mto (A \to B) \mto \Map{A}{B}\\
-  \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
+  %% \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
   \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
   %% \fname{substrings} &\of& \ms{Str} \to \Set{\ms{Str}}\\
   %% \fname{size}     &:& \Set{\eq{A}} \mto \N\\
@@ -379,7 +384,7 @@ For any eqtype $\eq{A}$, we may write:
 \hspace{2.375em}u \overset{+}{=}
   \setfor{(a,i,j)}{(a,\pwild) \in g, i \in \ms{range}\;0\;n,
   j\in\fname{range}\;i\;n}\\
-\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in \fixle{s}{u} \ms{iter}\;w\;g}\\
+\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in \fixle{S}{u} \ms{iter}\;w\;g\;S}\\
 \fname{iter}\;w\;g\;s =\\
 \hspace{1em}\phantom{\vee~}\setfor{(a,i,k)}{(a, \ctor{Cat}~b~c) \in g,
   (b,i,j) \in s, (c,j,k) \in s}\\
@@ -402,6 +407,40 @@ nonterminating) fixed points. It performs no optimizations whatsoever.
 
 %% not sure how many sections to split this up into.
 \section{Tradeoffs, limitations, and design decisions}
+
+\paragraph{Bounded fix-points and the constructor restriction} \todo{Discuss
+  datalog's constructor restriction (name?), not being sure how to encode it in
+  a type theory, its disadvantages, and the disadvantages of our approach ---
+  finitude \& bounded fixed-points}
+
+\todo{in particular, could bounded fix-points have adverse performance
+  implications?}
+
+\paragraph{Termination} \todo{discuss nontermination and declarativeness}
+
+\paragraph{Type inference} Typechecking needs to distinguish between ordinary
+and monotone $\lambda$, application, \ms{case}, \ms{let}, and \ms{if}. In our
+implementation we solve this in two ways:
+\begin{enumerate}
+\item Bidirectional type inference \todo{CITE} determines whether $\fn$s and
+  applications are ordinary or monotone.
+\item For $\ms{if}$, $\ms{case}$, and $\ms{let}$, the programmer annotates which
+  form is intended; for example, $(\ifthen{e}{e_1}{\unit})$ is written
+  (\texttt{when e then e1}) to indicate the rule $\ms{if}^+$ applies.
+\end{enumerate}
+
+It remains an open question how much annotation is necessary. We speculate that
+bidirectional inference could be replaced by a Damas-Milner\todo{CITE} style
+algorithm, which infers a principal type for any term without any annotation at
+all, \emph{if} we add polymorphism, tone-polymorphism, and subtyping---so that,
+for example, $\fn\bind{f}\fn\bind{x} f\;x$ can be assigned the principal type
+$\forall\bind{o\of\ms{tone}}\forall\bind{\alpha,\beta \of \ms{type}} (\alpha
+\overset{o}\to \beta) \mto (\alpha \overset{o}\to \beta)$, where
+$\overset{o}\to$ indicates a function of tone $o$, which may be empty (for an
+ordinary function) or ${+}$ for a monotone function.
+
+\todo{does Neel think this is a reasonable conjecture?}
+
 \section{Related and future work}
 
 %% ACKNOWLEDGMENTS
