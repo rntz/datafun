@@ -3,6 +3,11 @@
 (require "util.rkt" "ast.rkt" "parse.rkt" "types.rkt" "env.rkt")
 (provide elab (struct-out hyp))
 
+;; TODO: report source-info on type error
+;; probably want to keep a stack of source-info spans or something.
+;;
+;; (require "source-info.rkt")
+
 ;; ========== Entry point ==========
 ;; returns (values info-table type-of-expr)
 ;; if `type' is #f, we infer the type of `expr'.
