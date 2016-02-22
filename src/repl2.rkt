@@ -2,10 +2,8 @@
 
 (provide (all-defined-out))
 
-(require "util.rkt" "ast.rkt" "types.rkt" "env.rkt" "elab.rkt" "defns.rkt"
-         "parser.rkt" "runtime.rkt" "compile.rkt" "debug.rkt"
-         ;; holdover
-         (only-in "parse.rkt" expr->sexp type->sexp))
+(require "util.rkt" "debug.rkt" "ast.rkt" "types.rkt" "env.rkt" "elab.rkt"
+         "defns.rkt" "parser.rkt" "runtime.rkt" "compile.rkt" "to-sexp.rkt")
 
 (define (show-err e)
   (displayln "* ERROR")

@@ -1,6 +1,6 @@
 #lang racket
 
-(require "util.rkt" "ast.rkt" "parse.rkt" "types.rkt" "env.rkt")
+(require "util.rkt" "ast.rkt" "to-sexp.rkt" "types.rkt" "env.rkt")
 (provide elab (struct-out hyp))
 
 ;; TODO: report source-info on type error
@@ -44,15 +44,14 @@ sub-expression: ~s
 
 ;; ========== Primitives and their types ==========
 (define (prim-type-infer p)
-  ((lambda (x) (and x (parse-type x)))
-   (match p
-     [(or '+ '*) '(nat nat ~> nat)]
-     ['- '(nat ~> nat ->- nat)]
-     ['++ '(str str -> str)]
-     ['puts '(str -> (*))]
-     ['strlen '(str -> nat)]
-     ['substr '(str nat nat -> str)]
-     [_ #:when (prim? p) #f])))
+  (match p
+    [(or '+ '*) (T (~> nat nat))]
+    ['- (T (~> nat (->- nat nat)))]
+    ['++ (T (-> str str str))]
+    ['puts (T (-> str (*)))]
+    ['strlen (T (-> str nat))]
+    ['substr (T (-> str nat nat str))]
+    [_ #:when (prim? p) #f]))
 
 (define (prim-has-type? p t)
   (define pt (prim-type-infer p))
