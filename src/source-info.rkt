@@ -3,7 +3,8 @@
 (provide source-info source-span? get-source-info with-source-info!
          source-span-from-port! source-span-from-file source-span-from-string)
 
-(require parser-tools/lex)            ;for (struct position)
+(require "util.rkt")                    ;assert!
+(require parser-tools/lex)              ;for (struct position)
 
 ;; A source span is just a pair of positions.
 (define source-span? (list/c position? position?))
