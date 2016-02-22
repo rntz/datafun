@@ -26,6 +26,8 @@ fun (x < y) = not (y <= x)
  * message about tonicities mono & anti having no lub:
  *
  * fun (x < y) = not (x <= y)
+ *
+ * TODO: fix this error message.
  *)
 
 
@@ -36,10 +38,11 @@ val ff = {}
 
 val conj : {()} ~> {()} ~> {()}
 fun conj x y = ⋁(_ ∈ x, _ ∈ y) tt
+(* alternative implementations: *)
 (* fun conj x y = (tt | _ ∈ x, _ ∈ y) *)
 (* fun conj x y = {() | _ ∈ x, _ ∈ y} *)
 
-(* neel calls this "guard" *)
+(* Neel calls this "guard" *)
 val bool2set : bool ~> {()}
 fun bool2set x = when x then tt
 
@@ -100,11 +103,15 @@ val advisor = { ("constable", "harper"), ("harper", "arbob")
 val ancestor : {str, str}
 fix ancestor = advisor ∨ {(a,c) | (a,b) ∈ advisor, (=b,c) ∈ ancestor}
 
+(* relation composition *)
+val compose : {str, str} ~> {str, str} ~> {str, str}
+fun compose x y = {(a,c) | (a,b) in x, (=b,c) in y}
+
 
 (* CYK parsing! *)
 type sym = str
 type rule = String(str) | Cat(sym, sym)
-type grammar = {sym, rule}
+type grammar = {sym * rule}
 
 (* (a,i,j) represents that symbol a produces the substring w[i..j] *)
 type item = sym * nat * nat
@@ -112,7 +119,7 @@ type item = sym * nat * nat
 val parse : str -> grammar ~> {sym}
 fun parse w g =
   let val len = strlen w
-      mono val state : set item
+      mono state : set item
       fix state = {(a,i,k) | (a, Cat(b,c)) ∈ g
                            , (=b,i,j) ∈ state, (=c,=j,k) ∈ state}
                 ∨ (⋁((a, String(s)) ∈ g)

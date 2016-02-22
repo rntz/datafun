@@ -174,6 +174,9 @@
      ((name) `(,$1))
      ((name COMMA name-list1) (cons $1 $3)))
 
+    (oper ((=) '=) ((<=) '<=) ((>=) '>=) ((<) '<) ((>) '>)
+          ((++) '++) ((+) '+) ((-) '-) ((*) '*) ((/) '/))
+
     ;; ----- decls -----
     (decls
      (() '())
@@ -284,31 +287,30 @@
     (e-op ((e-op-) (annotate! $1)))
     (e-op-
      ;; for now, everything is left associative. TODO: precedence parsing.
-     ((e-op oper e-app)      (e-app (e-app $2 $1) $3))
+     ((e-op e-oper e-app)    (e-app (e-app $2 $1) $3))
      ((e-op ∨ e-app)         (e-lub (list $1 $3)))
      ((e-op LUB e-app)       (e-lub (list $1 $3)))
      ((e-op IN? e-app)       (e-in? $1 $3))
      ((Id LP e-list RP)      (e-tag $1 $3))
      ((Id)                   (e-tag $1 '()))
      ((e-app)                $1))
+    (e-oper
+     ((oper) (annotate! (if (prim? $1) (e-prim $1) (e-var $1)))))
     (e-app
      ((e-app e-atom)   (annotate! (e-app $1 $2)))
      ((e-atom)         $1))
     (e-atom ((e-atom-) (annotate! $1)))
     (e-atom-
-     ((name)                            (e-var $1))
+     ((name)                            (if (prim? $1) (e-prim $1) (e-var $1)))
      ((lit)                             (e-lit $1))
      ((EMPTY)                           (e-lub '()))
      ((LP expr RP)                      $2)
      ((LP expr BAR loops RP)            (e-loop $4 $2))
      ((LP e-list* RP)                   (e-tuple $2))
      ((LCURLY e-list RCURLY)            (e-set $2))
-     ((LCURLY e-op BAR loops RCURLY)    (e-loop $4 (e-set $2)))
+     ((LCURLY e-op BAR loops RCURLY)    (e-loop $4 (e-set (list $2))))
      ((LCURLY : RCURLY)                 (e-map '()))
      ((LCURLY e-kv-list1 RCURLY)        (e-map $2)))
-
-    (oper ((=) '=) ((<=) '<=) ((>=) '>=) ((<) '<) ((>) '>)
-          ((++) '++) ((+) '+) ((-) '-) ((*) '*) ((/) '/))
 
     (e-kv ((e-op : e-op) (list $1 $3)))
     (e-kv-list1

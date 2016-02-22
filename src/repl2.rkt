@@ -40,11 +40,10 @@
 
 (define (do-line line quit)
   (match line
-    [(or #:quit (? eof-object?)) (quit)]
-    [`(#:load ,filename)
-     (unless (string? filename) (error "filename must be a string"))
+    [(or (? eof-object?) (app string-trim ":quit")) (quit)]
+    [(pregexp #px"^:load\\s*(\\S+)\\s*$" (list _ filename))
      (eval-file! filename)]
-    [#:env
+    [(app string-trim ":env")
      (match-define (env vars types) (global-env))
      (for ([(name type) types])
        (printf "type ~a = ~s\n" name (type->sexp type)))

@@ -458,7 +458,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      ;; TODO: better error message
      (elab-error "constructor length mismatch"))
    (union-pat-envs (map pat-check pats types))]
-  [((p-tag _ _) _) (elab-error "not a sum")]
+  [((p-tag _ _) _) (elab-error "not a sum type: ~s" (type->sexp t))]
   [((and pat (p-and ps)) t)
    (union-pat-envs (map (lambda (p) (pat-check p t)) ps))]
   [((and pat (p-or ps)) t)
