@@ -196,7 +196,8 @@ refellatur oratio.
     %% \ms{let}~x = e_1 ~\ms{in}~ e_2
     %% &\expandsto& (\fn\bind{x} e_2)\; e_1\\
     %% \ms{let}~[x_i = e_i]^* ~\ms{in}~ e
-    %% &\expandsto& [\ms{let}~x_i = e_i~\ms{in}]^* e
+    %% &\expandsto& [\ms{let}~x_i = e_i~\ms{in}]^* e\\
+    %% \rawcase{e}{[p \to e]^*} &\expandsto& \text{(omitted, see \todo{CITE})}
   \end{eqnarray*}
   \caption{Syntax sugar}
 \end{figure}
@@ -332,6 +333,8 @@ For any eqtype $\eq{A}$, we may write:
 \hspace{5.35em}\ms{is}~ E \vee \setfor{(a,c)}{(a,b) \in E, (b,c) \in S}
 \end{array}\]
 
+\TODO This already shows how we go beyond Datalog's .
+
 \subsection{CYK parsing}
 
 \[\begin{array}{l}
@@ -445,7 +448,7 @@ tone-polymorphism, and subtyping---so that, for example, $\fn\bind{f}\fn\bind{x}
 f\;x$ can be assigned the principal type
 $\forall\bind{o\of\ms{tone}}\forall\bind{\alpha,\beta \of \ms{type}} (\alpha
 \overset{o}\to \beta) \mto (\alpha \overset{o}\to \beta)$, where
-$\overset{o}\to$ indicates a function of tone $o$, which may be empty (for an
+$\overset{o}\to$ indicates a function of tone $o$; a tone may be empty (for an
 ordinary function) or ${+}$ for a monotone function.
 
 \todo{does Neel think this is a reasonable conjecture?}
