@@ -135,7 +135,7 @@
 
 (parse : str -> grammar ~> (set sym))
 (parse w g = (let [(mono state : (set item))
-                   (fix state = (lub (parse-init w g) (parse-iter w g state)))]
+                   (fix state = (lub (parse-init w g) (parse-cat w g state)))]
                (set sym for (cons sym 0 (= (strlen w))) in state)))
 
 ;; a grammar to test on
