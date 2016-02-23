@@ -106,10 +106,7 @@
     [((p-lit l)) #`'#,l]
     [((p-and ps)) #`(and #,@(map visit ps))]
     [((p-or ps)) #`(or #,@(map visit ps))]
-    [((p-let v body result-pat))
-     (define var (gensym v))
-     #`(app (lambda (#,var) #,(with-var v var (do-expr body)))
-            #,(visit result-pat))])
+    [((p-eq expr)) #`(== #,(do-expr expr) equal?)])
   (define rkt-pat (visit p))
   (values rkt-pat (freeze-hash ids)))
 

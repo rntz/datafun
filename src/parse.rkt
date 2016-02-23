@@ -254,11 +254,7 @@
     [(p-or pats) `(or ,@(map pat->sexp pats))]
     [(p-and `(,p)) (pat->sexp p)]
     [(p-and pats) `(and ,@(map pat->sexp pats))]
-    [(p-let x (e-app (e-app (e-prim '=) (e-var y)) e) (p-lit #t))
-     #:when (equal? x y)
-     `(= ,(expr->sexp e))]
-    [(p-let x e (p-and ps)) `(let ,x ,(expr->sexp e) ,@(map pat->sexp ps))]
-    [(p-let x e p) `(let ,x ,(expr->sexp e) ,(pat->sexp p))]))
+    [(p-eq e) `(= ,(expr->sexp e))]))
 
 (define (parse-pat p)
   (match p
@@ -271,12 +267,7 @@
       (p-tag name (map parse-pat pats))]
     [`(or ,ps ...) (p-or (map parse-pat ps))]
     [`(and ,ps ...) (p-and (map parse-pat ps))]
-    [`(let ,x ,e ,p) (p-let x (parse-expr e) (parse-pat p))]
-    [`(let ,x ,e ,ps ..1) (parse-pat `(let ,x ,e (p-and ,@ps)))]
-    ;; matches a value equal to e
-    [`(= ,e)
-     (define t (gensym 'tmp))           ;bleh, gensym
-     (parse-pat `(let ,t (= ,t ,e) #t))]
+    [`(= ,e) (p-eq (parse-expr e))]
     [_ (error "unfamiliar pattern:" p)]))
 
 

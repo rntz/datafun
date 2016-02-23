@@ -470,9 +470,10 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (elab-error "all branches of or-pattern must bind same variables: ~s"
                  (type->sexp pat)))
    (foldl1 (lambda (x y) (hash-union-with x y type-lub)) hashes)]
-  [((p-let v body result-p) t)
-   ;; FIXME: assumes we're matching with tonicity 'any
-   (pat-check result-p (with-var v (hyp 'any t) (expr-check body)))])
+  [((p-eq expr) t)
+   ;; TODO: does this assume we're matching with a specific tonicity?
+   (expr-check expr t)
+   (hash)])
 
 (define (union-pat-envs hashes)
   (for/fold ([var-types (hash)]) ([h hashes])
