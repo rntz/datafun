@@ -129,6 +129,19 @@ refellatur oratio.
     \\
     \textsf{eqtypes} && \eq{A} + \eq{B} \pipe \eq{A} \x \eq{B}
     \vspace{0.5em}\\
+    %% finite equality types
+    \fineq{A},\fineq{B}
+    &\bnfeq& \bool \pipe \Set{\fineq{A}}
+       \pipe \Map{\fineq{A}}{\fineq{B}}
+       \pipe \fineq{A} + \fineq{B} \pipe \fineq{A} \x \fineq{B}\\
+    \textsf{finite eqtypes}
+    \vspace{0.5em}\\
+    %% usl (finite) eqtypes
+    %% \eq{L}, \eq{M} &\defeq& \textsf{usl types}~\cap~\textsf{eqtypes}
+    %% \vspace{0.5em}\\
+    %% \fineq{L}, \fineq{M}
+    %% &\defeq& \textsf{usl types}~\cap~\textsf{finite eqtypes}
+    %% \vspace{0.5em}\\
     %% contexts
     \GD, \GG &\bnfeq& \cdot \pipe \GD, x\of A\\
     \textsf{contexts}\\
@@ -138,8 +151,7 @@ refellatur oratio.
     && e = e \pipe \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
     && \singleset{e} \pipe \singlemap{e}{e}
        \pipe \unit \pipe e \vee e \pipe \letin{x}{e}{e}\\
-    && %% \fix{x}{e} \pipe
-       \fixle{x}{e}{e}
+    && \fix{x}{e} \pipe \fixle{x}{e}{e}
   \end{array}\]
   \caption{Syntax of core Datafun}
 \end{figure}
@@ -268,9 +280,9 @@ refellatur oratio.
     \infer[\rn{\bigvee}]{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{L}}{
       \J{\GD}{\GG}{e_1}{\Set{A}} &
       \J{\GD,x\of A}{\GG}{e_2}{L}}
-    %% \and
-    %% \infer[\rn{fix}]{\J{\GD}{\GG}{\fix{x}{e}}{\fineq{L}}}{
-    %%   \J{\GD}{\GG,x\of L}{e}{\fineq{L}}}
+    \and
+    \infer[\rn{fix}]{\J{\GD}{\GG}{\fix{x}{e}}{\fineq{L}}}{
+      \J{\GD}{\GG,x\of L}{e}{\fineq{L}}}
     \and
     \infer[\rn{fix_{\le}}]{\J{\GD}{\GG}{\fixle{x}{e_1}{e_2}}{\eq{L}}}{
       \J{\GD}{\GG}{e_1}{\eq{L}} &
@@ -308,6 +320,31 @@ refellatur oratio.
 
 % what's a good example for parenthood? a dickens novel?
 % how about Tolkien?
+% Elrond - Arwen
+% Arathorn - Aragorn
+% Arwen + Aragorn - ???
+%
+% Melian - Luthien - ???
+
+\subsubsection{Transitive closure with finite types}
+
+\[\begin{array}{l}
+%% FIXME: names
+\mathbf{data}~\ms{person} =
+\ctor{E\"arendil} ~|~ \ctor{Elrond} ~|~ \ctor{Arwen}\\
+\fname{parent},~\ms{ancestor} : \Set{\ms{person} \x \ms{person}}\\
+\ms{parent} =
+\{(\ctor{E\"arendil}, \ctor{Elrond}), (\ctor{Elrond}, \ctor{Arwen})\}\\
+\ms{ancestor} = \fix{S} \ms{parent} \vee
+\setfor{(a,c)}{(a,b) \in \ms{parent}, (b,c) \in S}\\
+\end{array}\]
+
+\subsubsection{Transitive closure with an upper bound}
+
+If you know the type over which you are taking your transitive closure is
+finite, this suffices. But the more general way to take a fixed-point is to give
+an upper bound which you know the desired answer will not exceed. For this we
+write $(\fixle{x}{e_\top} e)$
 
 \[\begin{array}{l}
 \ms{persons} ~:~ \Set{\str}\\
@@ -321,7 +358,7 @@ refellatur oratio.
 \setfor{(a,c)}{(a,b) \in \ms{parent}, (b,c) \in S}
 \end{array}\]
 
-\subsection{Generic transitive closure}
+\subsubsection{Generic transitive closure with an upper bound}
 
 For any eqtype $\eq{A}$, we may write:
 \[\begin{array}{l}
