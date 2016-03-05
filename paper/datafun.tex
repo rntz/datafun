@@ -169,21 +169,17 @@ keyword1, keyword2
     %% &\defeq& \textsf{usl types}~\cap~\textsf{finite eqtypes}
     %% \vspace{0.5em}\\
     %% contexts
-    \GD &\bnfeq& \cdot \pipe \GD, x\of A\\
-    \GG &\bnfeq& \cdot \pipe \GG{}, \m{x}\of A\\
-    \textsf{contexts}
-    \vspace{0.3em}\\
+    \GD,\GG &\bnfeq& \cdot \pipe \GD, x\of A\\
+    \textsf{contexts}\\
     %% expressions
-    e &\bnfeq& x \pipe \m{x} \pipe \fn\bind{x} e \pipe \fn\bind{\m{x}} e
-    \pipe e\;e\\
+    e &\bnfeq& x \pipe \fn\bind{x} e \pipe e\;e
+    \pipe (e,e) \pipe \pi_i\;e \pipe \ms{in}_i\;e\\
     \textsf{terms}
-    && (e,e) \pipe \pi_i\;e \pipe \ms{in}_i\;e \pipe e = e\\
     && \case{e}{x}{e}{x}{e}\\
-    && \case{e}{\m{x}}{e}{\m{x}}{e}\\
-    && \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
+    && e = e \pipe \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
     && \singleset{e} \pipe \singlemap{e}{e}
        \pipe \unit \pipe e \vee e \pipe \letin{x}{e}{e}\\
-    && \fix{\m{x}}{e} \pipe \fixle{\m{x}}{e}{e}
+    && \fix{x}{e} \pipe \fixle{x}{e}{e}
   \end{array}\]
   \caption{Syntax of core Datafun}
   \label{fig:syntax}
@@ -207,15 +203,18 @@ simply-typed $\lambda$-calculus extended in four major ways:
 \item We add a type of \emph{monotone functions}, $A \mto B$. Consequently
   Datafun has two flavors of variable, \emph{ordinary} and \emph{monotone}.
   Ordinary functions introduce ordinary variables; monotone functions introduce
-  monotone variables, which we write in \textbf{bold}.
+  monotone variables. This distinction is left latent in the formal syntax,
+  \todo{TODO: why?}, but for clarity we write monotone variables in
+  \textbf{bold} in our examples.
 
   In order for ``monotone'' to have meaning, our types are implicitly partially
-  ordered. \todo{Discuss orderings.} Sets are ordered by inclusion: $a \le b :
+  ordered. \todo{Discuss orderings}. Sets are ordered by inclusion: $a \le b :
   \Set{A}$ iff $a \subseteq b$. Maps are ordered both by inclusion and
   pointwise.
 
-\item We add a \emph{monotone least fixed point} term, $(\fix{\m{x}}{e})$. This
-  allows us to express Datalog-style recursion.
+\item We add a \emph{monotone least fixed point} term, $(\fix{\m{x}}{e})$,
+  where $e$ must be monotone in $\m{x}$. This allows us to express
+  Datalog-style recursion.
 
   \todo{TODO: Explain without as much reference to Datalog.}
 
@@ -313,16 +312,14 @@ simply-typed $\lambda$-calculus extended in four major ways:
 \begin{figure*}
   \boxed{\ensuremath{\mathsz{10pt}{\J{\Delta}{\Gamma}{e}{A}}}}
   \begin{mathpar}
-    \infer[\rn{var}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD}
-    \and
-    \infer[\rn{var^+}]{\J{\GD}{\GG}{\m{x}}{A}}{\m{x} \of A \in \GG}
+    \infer[\rn{var}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD \cup \GG}
     %% function rules
     \and
     \infer[\fn]{\J{\GD}{\GG}{\fn\bind{x} e}{A \uto B}}{
       \J{\GD,x\of A}{\GG}{e}{B}}
     \and
-    \infer[\monofn]{\J{\GD}{\GG}{\fn\bind{\m{x}} e}{A \mto B}}{
-      \J{\GD}{\GG,\m{x} \of A}{e}{B}}
+    \infer[\monofn]{\J{\GD}{\GG}{\fn\bind{x} e}{A \mto B}}{
+      \J{\GD}{\GG,x \of A}{e}{B}}
     \and
     \infer[\rn{app}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
       \J{\GD}{\GG}{e_1}{A \uto B} &
@@ -344,9 +341,9 @@ simply-typed $\lambda$-calculus extended in four major ways:
       \J{\GD}{\cdot}{e}{A_1 + A_2} &
       \J{\GD,x\of A_i}{\GG}{e_i}{C}}
     \and
-    \infer[\rn{case^+}]{\J{\GD}{\GG}{\case{e}{\m{x}}{e_1}{\m{x}}{e_2}}{C}}{
+    \infer[\rn{case^+}]{\J{\GD}{\GG}{\case{e}{x}{e_1}{x}{e_2}}{C}}{
       \J{\GD}{\GG}{e}{A_1 + A_2} &
-      \J{\GD}{\GG,\m{x}\of A_i}{e_i}{C}}
+      \J{\GD}{\GG,x\of A_i}{e_i}{C}}
     %% boolean rules
     \and
     \infer[\rn{=}]{\J{\GD}{\GG}{e_1 = e_2}{\bool}}{\J{\GD}{\GG}{e_i}{\eq{A}}}
@@ -377,13 +374,13 @@ simply-typed $\lambda$-calculus extended in four major ways:
     \infer[\rn{\bigvee}]{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{L}}{
       \J{\GD}{\GG}{e_1}{\Set{A}} &
       \J{\GD,x\of A}{\GG}{e_2}{L}}
-    \\
-    \infer[\rn{fix}]{\J{\GD}{\GG}{\fix{\m{x}}{e}}{\fineq{L}}}{
-      \J{\GD}{\GG,\m{x}\of L}{e}{\fineq{L}}}
     \and
-    \infer[\rn{fix_{\le}}]{\J{\GD}{\GG}{\fixle{\m{x}}{e_1}{e_2}}{\eq{L}}}{
+    \infer[\rn{fix}]{\J{\GD}{\GG}{\fix{x}{e}}{\fineq{L}}}{
+      \J{\GD}{\GG,x\of L}{e}{\fineq{L}}}
+    \and
+    \infer[\rn{fix_{\le}}]{\J{\GD}{\GG}{\fixle{x}{e_1}{e_2}}{\eq{L}}}{
       \J{\GD}{\GG}{e_1}{\eq{L}} &
-      \J{\GD}{\GG,\m{x} \of \eq{L}}{e_2}{\eq{L}}}
+      \J{\GD}{\GG,x \of \eq{L}}{e_2}{\eq{L}}}
   \end{mathpar}
 
   \caption{Typing rules for core Datafun}
