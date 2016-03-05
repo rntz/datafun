@@ -227,9 +227,9 @@ simply-typed $\lambda$-calculus extended in four major ways:
 \item Generalizing the empty set $\emptyset$ and the union operator $\cup$, we
   identify a subset of types that have a \emph{least element} $\unit$ and
   support a \emph{least-upper bound} operator $\vee$. We call these \emph{usl
-    types}\footnote{\emph{Usl} stands for ``unitary semilattice'', meaning that
-    the partial orderings on these types form join-semilattices with a unit
-    (least element).}, and denote them by the metavariables $L,M$.
+    types}\footnote{\emph{Usl} stands for ``unitary semilattice'', because the
+    partial orderings on these types form join-semilattices with a unit (least
+    element).}, and denote them by the metavariables $L,M$.
 
   Usl types are the ``glue'' of Datafun; they do not serve one single purpose,
   but simplify the language by satisfying many small ones at once.
@@ -258,8 +258,7 @@ simply-typed $\lambda$-calculus extended in four major ways:
   \textsf{terms} &
   e &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
              \pipe \forin{\mc{L}}{e}\\
-  &&& \mathcal{C}[\;e]^* \pipe \rawcase{e}{[{p} \to {e}]^*}\\
-  &&& \ms{let}~ [x = e]^* ~\ms{in}~ e
+  &&& \mathcal{C}[\;e]^* \pipe \rawcase{e}{[{p} \to {e}]^*}
   \vspace{0.5em}\\
   %% patterns
   \textsf{patterns} &
@@ -397,8 +396,8 @@ simply-typed $\lambda$-calculus extended in four major ways:
 
 For purposes of these examples, we use a simple Haskell-like syntax for
 top-level type and function definitions. We also permit ourselves
-pattern-matching\todo{(CITE)} and some other syntax sugar, defined in Figure
-\ref{fig:sugar}.
+pattern-matching\todo{(CITE)}, let-binding, and additional syntax sugar given in
+Figure \ref{fig:sugar}.
 
 \todo{TODO: mention \& cite monadic query syntax}
 
