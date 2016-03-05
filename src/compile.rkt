@@ -123,6 +123,7 @@
     ['print #'df-print]
     ['size #'set-count]
     ['keys #'hash-keyset]
+    ['entries #'df-entries]
     ['strlen #'string-length]
     ['substr #'df-substr]
     ['lookup #'df-lookup]))

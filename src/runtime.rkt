@@ -13,6 +13,7 @@
 (define ((df- x) y) (max 0 (- x y)))
 (define ((df* x) y) (* x y))
 (define ((df++ x) y) (string-append x y))
+(define (df-entries h) (for/set ([(k v) h]) (list k v)))
 (define (df-max . xs) (if (null? xs) 0 (apply max xs)))
 (define (df-or . xs) (ormap identity xs))
 (define (((df-substr s) i) j)

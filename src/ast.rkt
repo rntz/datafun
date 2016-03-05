@@ -38,7 +38,7 @@
 
 (define prim?
   (or/c '= '<= '+ '- '* 'size 'print 'puts '++ 'strlen 'substr
-        'keys 'get 'lookup))
+        'keys 'get 'lookup 'entries))
 
 (enum expr
   ;; ---------- miscellanea ----------
