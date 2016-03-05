@@ -74,39 +74,118 @@ term1, term2
 \keywords
 keyword1, keyword2
 
+
 \section{Introduction}
 
-The text of the paper begins here.
+%% Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nec vero alia sunt
+%% quaerenda contra Carneadeam illam sententiam. Cum ageremus, inquit, vitae beatum
+%% et eundem supremum diem, scribebamus haec. Quid sequatur, quid repugnet, vident.
+
+%% Minime id quidem, inquam, alienum, multumque ad ea, quae quaerimus, explicatio
+%% tua ista profecerit. Qua ex cognitione facilior facta est investigatio rerum
+%% occultissimarum. Quis animo aequo videt eum, quem inpure ac flagitiose putet
+%% vivere? Primum quid tu dicis breve? Ita enim vivunt quidam, ut eorum vita
+%% refellatur oratio.
+
+\TODO
 
 \paragraph{Contributions}
 \begin{itemize}
-\item foo
+\item We describe Datafun, a typed language capturing the expressive power of
+  Datalog and extending it to support higher-order functional programming.
+  Datafun's key feature is to \emph{track monotonicity with types}.
+
+\item We present examples illustrating the expressive power of Datafun,
+  including relational-algebra-style operations, transitive closure, CYK
+  parsing, and dataflow analysis.
+
+\item We identify the semantic structures underpinning Datalog, and use this to
+  give a denotational semantics for Datafun in terms of a pair of adjunctions
+  between \ms{Set}, \ms{Poset}, and the category of join-semilattices with a
+  least element.
+
+\item We have a prototype implementation of Datafun in Racket. \todo{(CITE)}
 \end{itemize}
 
-%% Notes from skype with Neel:
-
-% Contributions:
-%
-% - Datafun: like datalog but functional
-%
-% - give many examples, some classic datalog problems, some datalog can't do
-%
-% - denotational semantics based on 2 adjunctions found by analysing
-%   semantics of datalog
-%
+%% Contributions (as summarized by Michael):
+% - Datafun, like Datalog but functional
+% - examples, incl. both datalog examples & things datalog can’t do
+% - key ingredient is monotonicity; ``found'' semantics by analyzing
+%   datalog: two adjunctions, three categories
 % - prototype implementation
 
+%% Contributions (as written by Neel):
+
+% - We describe Datafun, a type theory for a language capturing the expressive
+%   power of Datalog and extends it to both relax the constructor term
+%   restriction and to support higher-order functional programming.
+
+% - We give a variety of examples that illustrate the expressive power of
+%   Datafun, such as CYK parsing, dataflow analysis, and transitive closure on
+%   graphs, etc. Many of these examples are traditional examples of Datalog,
+%   but we are also able to support things like first-class relations (eg,
+%   generic transitive closure) and higher-order functions (example using
+%   monotonicity and HO?). (doing a fix-point code analysis / parsing something
+%   & dispatching on result?)
+
+% - We identify the semantic structures underpinning Datalog, and use this to
+%   give a denotational semantics for Datafun in terms of a pair of adjunctions
+%   between Set, Poset, and the category of semilattices with finitary joins.
+
+% - We have a prototype implementation of Datafun in Racket. 
+
+
 \section{Intuition}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nec vero alia sunt
-quaerenda contra Carneadeam illam sententiam. Cum ageremus, inquit, vitae beatum
-et eundem supremum diem, scribebamus haec. Quid sequatur, quid repugnet, vident.
+Datafun can be thought of as a simply-typed $\lambda$-calculus extended in four
+major ways:
+\begin{enumerate}
+\item We add a type of \emph{monotone functions}, $A \mto B$. Consequently
+  Datafun has two flavors of variable, \emph{ordinary} and \emph{monotone}.
+  Ordinary functions introduce ordinary variables; monotone functions introduce
+  monotone variables. This distinction is left latent in the syntax itself,
+  \todo{TODO: why?}.
 
-Minime id quidem, inquam, alienum, multumque ad ea, quae quaerimus, explicatio
-tua ista profecerit. Qua ex cognitione facilior facta est investigatio rerum
-occultissimarum. Quis animo aequo videt eum, quem inpure ac flagitiose putet
-vivere? Primum quid tu dicis breve? Ita enim vivunt quidam, ut eorum vita
-refellatur oratio.
+  In order for ``monotone'' to have meaning, our types are implicitly partially
+  ordered.
+
+\item We add a type of finite sets $\Set{A}$. We use finite sets to represent
+  Datalog predicates; one might also think of them as tables or views in a
+  database setting. We also include finite maps $\Map{A}{B}$, as they are useful
+  for some examples.
+
+  \todo{TODO: make clearer bit about what we use finite sets for}
+
+  Sets are ordered by inclusion: $a \le b : \Set{A}$ iff $a \subseteq b$. Maps
+  are ordered both by inclusion and pointwise.
+
+\item We add a \emph{monotone fixed point} operator over \emph{finite-set-typed}
+  expressions. This allows us to express Datalog-style recursion.
+
+\item Generalizing the \emph{union} operator $\cup$ and the empty set
+  $\emptyset$, we identify a \todo{syntactic} subset of types as \emph{usl
+  types}, which support a \emph{least-upper bound} operation $\vee$ and have a
+  \emph{least element} $\unit$.
+
+  \emph{usl} stands for ``unitary semilattice'', and signifies that the partial
+  orderings on these types form join-semilattices with a least element (unit).
+  We use the metavariables $L,M$ for usl types.
+
+  Usl types provide a natural comprehension-style eliminator for sets: given $e
+  : \Set{A}$ we may write $\letin{x}{e}{e'}$ for the least-upper-bound, over all
+  elements $x \in e$, of $e'$, as long as $e' : L$ is of usl type.
+
+  Notably, if $e'$ is itself of set type, this provides a monadic bind
+  operation.
+
+  \todo{Rewrite this to be clearer.}
+
+  \todo{Explain how usl types + monotone fixed-points account for Datalog-style
+    mutual recursion?}
+
+  \todo{Perhaps explain monotone fixed point first?}
+
+\end{enumerate}
 
 
 %% FIGURE: CORE SYNTAX
@@ -177,24 +256,6 @@ refellatur oratio.
   \textsf{loops} &
   \mc{L} &\bnfeq& \mc{L}, \mc{L} \pipe p \in e \pipe e
   \end{array}\]
-
-  %% \[\begin{array}{ccl}
-  %% %% expressions
-  %% e         &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
-  %%                    \pipe \forin{\mc{L}}{e}\\
-  %% \textsf{terms} && \rawcase{e}{[{p} \to {e}]^*}
-  %% \vspace{0.5em}\\
-  %% %% patterns
-  %% p &\bnfeq& \pwild \pipe x \pipe (p,p) \pipe \ms{in}_i\;p
-  %%            \pipe \ms{true} \pipe \ms{false}\\
-  %% \textsf{patterns}
-  %% \vspace{0.5em}\\
-  %% %% loop clauses
-  %% \mc{L} &\bnfeq& \mc{L}, \mc{L} \pipe p \in e \pipe e\\
-  %% \textsf{loops}
-  %% \end{array}\]
-
-  %% TODO: constructors?
 
   %% the desugaring syntax-expansion itself
   \begin{eqnarray*}
@@ -419,6 +480,19 @@ For any eqtype $\eq{A}$, we may write:
 i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
 \hspace{2.2em}\phantom{|~} s = \fname{substring}\;w\;i\;(i+\ms{length}\;s)\}
 \end{array}\]
+
+\TODO Since Datalog provides no way to represent a \emph{grammar} as a piece of
+data (because it's compound, not an atom), there is simply no way in Datalog
+proper to express a generic CYK parser. This demonstrates the benefits of moving
+to a functional language.
+
+\TODO Moreover, Datalog's strategy for proving termination involves a
+constructor restriction to ensure all relations are finite. Primitives such as
+\ms{range} and \ms{substring} violate this restriction (as relations, they are
+infinite); it is not immediately obvious that Datalog programs extended with
+these primitives remain terminating. Our use of bounded fixed-points to
+guarantee termination is robust under such extensions; as long as no primitive
+partial functions are introduced, Datafun programs always terminate.
 
 
 \section{Typing rules}

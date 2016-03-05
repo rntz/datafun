@@ -1,6 +1,7 @@
 -*- mode: outline -*-
 
-Should we remove the finite types thing? Just have bounded fixpoints?
+We never use the fact that N is a semilattice type! Should we replace naturals N
+with integers Z?
 
 * Syntax
   - 1-level syntax (ie, one grammar of types)
