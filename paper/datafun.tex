@@ -96,7 +96,7 @@ The text of the paper begins here.
 %
 % - prototype implementation
 
-\section{Datafun}
+\section{Intuition}
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nec vero alia sunt
 quaerenda contra Carneadeam illam sententiam. Cum ageremus, inquit, vitae beatum
@@ -270,7 +270,7 @@ refellatur oratio.
     \infer[\rn{\{\}}]{\J{\GD}{\GG}{\{e\}}{\Set{A}}}{\J{\GD}{\cdot}{e}{A}}
     \and
     \infer[\rn{\{:\}}]{\J{\GD}{\GG}{\singlemap{e_1}{e_2}}{\Map{A}{B}}}{
-      \J{\GD}{\cdot}{e_1}{\eq{A}} &
+      \J{\GD}{\cdot}{e_1}{A} &
       \J{\GD}{\GG}{e_2}{B}}
     \and
     \infer[\unit]{\J{\GD}{\GG}{\unit}{L}}{}
@@ -312,31 +312,43 @@ refellatur oratio.
 
 %%
 \pagebreak
-\section{Datafun by example}
+\section{Examples}
+
+For purposes of these examples, we use a simple Haskell-like syntax for
+top-level type and function definitions.
+
+\todo{\begin{itemize}
+\item composition of relations?
+\item \texttt{make}-style topological sort?
+\item SQL-style examples?
+\item translating relational algebra into datafun?
+\end{itemize}}
 
 %% Examples
 
 \subsection{Transitive closure}
 
-% what's a good example for parenthood? a dickens novel?
-% how about Tolkien?
-% Elrond - Arwen
-% Arathorn - Aragorn
-% Arwen + Aragorn - ???
-%
-% Melian - Luthien - ???
+Consider the following Datalog program:
+\begin{verbatim}
+parent(earendil, elrond).
+parent(elrond, arwen).
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).
+\end{verbatim}
 
-\subsubsection{Transitive closure with finite types}
+%% already shows how datalog is not just a restriction of prolog: in datalog
+%% this actually works, while in prolog, it suffers from infinite loops.
+
+In Datafun, we may write this as:
 
 \[\begin{array}{l}
-%% FIXME: names
 \mathbf{data}~\ms{person} =
 \ctor{E\"arendil} ~|~ \ctor{Elrond} ~|~ \ctor{Arwen}\\
 \fname{parent},~\ms{ancestor} : \Set{\ms{person} \x \ms{person}}\\
 \ms{parent} =
 \{(\ctor{E\"arendil}, \ctor{Elrond}), (\ctor{Elrond}, \ctor{Arwen})\}\\
-\ms{ancestor} = \fix{S} \ms{parent} \vee
-\setfor{(a,c)}{(a,b) \in \ms{parent}, (b,c) \in S}\\
+\ms{ancestor} = \fix{X} \ms{parent} \vee
+\setfor{(a,c)}{(a,b) \in X, (b,c) \in X}\\
 \end{array}\]
 
 \subsubsection{Transitive closure with an upper bound}
@@ -352,22 +364,32 @@ write $(\fixle{x}{e_\top} e)$
 \ms{parent}, \ms{ancestor} ~:~ \Set{\str \x \str}\\
 \ms{parent} = \{(\texttt{"e\"arendil"}, \texttt{"elrond"}),
 (\texttt{"elrond"}, \texttt{"arwen"})\}\\
-\ms{ancestor} = \fixle{S}{\setfor{(a,b)}{a \in \ms{person}, b \in \ms{person}}}
+\ms{ancestor} = \fixle{X}{\setfor{(a,b)}{a \in \ms{person}, b \in \ms{person}}}
 \\
 \hspace{4.87em}\ms{parent} \vee
-\setfor{(a,c)}{(a,b) \in \ms{parent}, (b,c) \in S}
+\setfor{(a,c)}{(a,b) \in X, (b,c) \in X}
 \end{array}\]
 
-\subsubsection{Generic transitive closure with an upper bound}
+\subsubsection{Generic transitive closure}
+
+For any finite eqtype $\fineq{A}$, we may write:
+
+\[\begin{array}{l}
+\ms{trans} ~:~ \Set{\fineq{A} \x \fineq{A}} \mto \Set{\fineq{A} \x \fineq{A}}\\
+%% \ms{trans}\ E = \fix{X} E \vee \setfor{(a,c)}{(a,b) \in E, (b,c) \in X}
+\ms{trans}\ E = \fix{X} E \vee \setfor{(a,c)}{(a,b) \in X, (b,c) \in X}
+\end{array}\]
+
+\TODO (and similarly for any eqtype $\eq{A}$ by using a bounded fixed-point)
 
 For any eqtype $\eq{A}$, we may write:
 \[\begin{array}{l}
 \ms{trans} ~:~
 \Set{\eq{A}} \mto \Set{\eq{A} \x \eq{A}} \mto \Set{\eq{A} \x \eq{A}}
 \vspace{0.3em}\\
-\ms{trans}\ V\ E = \ms{fix}~ S \le \setfor{(a,b)}{a\in V, b \in V}
-\\
-\hspace{5.35em}\ms{is}~ E \vee \setfor{(a,c)}{(a,b) \in E, (b,c) \in S}
+\ms{trans}\ V\ E = \ms{fix}~ S \le \setfor{(a,b)}{a\in V, b \in V}\\
+\hspace{5.35em}\ms{is}~ E \vee \setfor{(a,c)}{(a,b) \in E, (b,c) \in S}\\
+%% \ms{trans}\ V\ E = \fixle{S}{V \x V} E \vee (S \bullet S)
 \end{array}\]
 
 \TODO This already shows how we go beyond Datalog's .
@@ -387,10 +409,10 @@ For any eqtype $\eq{A}$, we may write:
 \hspace{2.375em}u \overset{+}{=}
   \setfor{(a,i,j)}{(a,\pwild) \in g, i \in \ms{range}\;0\;n,
   j\in\fname{range}\;i\;n}\\
-\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in \fixle{S}{u} \ms{iter}\;w\;g\;S}\\
-\fname{iter}\;w\;g\;s =\\
+\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in \fixle{X}{u} \ms{iter}\;w\;g\;X}\\
+\fname{iter}\;w\;g\;X =\\
 \hspace{1em}\phantom{\vee~}\setfor{(a,i,k)}{(a, \ctor{Cat}~b~c) \in g,
-  (b,i,j) \in s, (c,j,k) \in s}\\
+  (b,i,j) \in X, (c,j,k) \in X}\\
 \hspace{1em}\vee~ \{(a,i,i+\fname{length}\;s)\\
 \hspace{2.1em}|~ (a, \ctor{String}~s) \in g,
 i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
@@ -398,6 +420,8 @@ i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
 \end{array}\]
 
 
+\section{Typing rules}
+
 \section{Semantics}
 
 \section{Implementation}
@@ -411,14 +435,13 @@ nonterminating) fixed points. It performs no optimizations whatsoever.
 %% not sure how many sections to split this up into.
 \section{Tradeoffs, limitations, and design decisions}
 
-\paragraph{Bounded fix-points} \TODO Discuss
-datalog's constructor restriction (name?), not being sure how to encode it in a
-type theory, its disadvantages, and the disadvantages of our approach ---
-bounded fixed-points.
+\paragraph{Finite and bounded fixed-points} \TODO Discuss
+Datalog's constructor restriction (name?), not being sure how to encode it in a
+type theory, its disadvantages, and the disadvantages of our approaches ---
+finite \& bounded fixed-points.
 
-\TODO discuss ``finite equality types'' option which we discarded. bounded
-fixpoints strictly more general, but at possible runtime cost, but finite types
-very restrictive in practice
+bounded fixed-points strictly more general than finitary-type fixed-points, but
+at possible runtime cost, but finite types very restrictive in practice
 
 \TODO In particular, could bounded fix-points have adverse performance
 implications?
