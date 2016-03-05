@@ -233,7 +233,7 @@
 
 (stmt-uses : stmt -> (set var))
 (stmt-uses s = (case s
-                 [('assn _ e) (expr-vars e)]
+                 [(or ('assn _ e) ('if e _ _)) (expr-vars e)]
                  [_ (set)]))
 
 (stmt-defines : stmt -> (set var))
