@@ -163,3 +163,8 @@ fun stmt_defines s = case s | Assign(v,_) => {v}
 (* code flow *)
 type code = {label: stmt}
 type flow = {label, label}
+
+val flow : code -> flow
+fun flow code = ⋁((i,s) ∈ entries code)
+                case s | If(_,j,k) => {(i,j), (i,k)}
+                       | _ => {(i,i+1) | i+1 ∈? keys code}
