@@ -96,7 +96,7 @@ The text of the paper begins here.
 %
 % - prototype implementation
 
-\section{Datafun}
+\section{Intuition}
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nec vero alia sunt
 quaerenda contra Carneadeam illam sententiam. Cum ageremus, inquit, vitae beatum
@@ -129,6 +129,19 @@ refellatur oratio.
     \\
     \textsf{eqtypes} && \eq{A} + \eq{B} \pipe \eq{A} \x \eq{B}
     \vspace{0.5em}\\
+    %% finite equality types
+    \fineq{A},\fineq{B}
+    &\bnfeq& \bool \pipe \Set{\fineq{A}}
+       \pipe \Map{\fineq{A}}{\fineq{B}}
+       \pipe \fineq{A} + \fineq{B} \pipe \fineq{A} \x \fineq{B}\\
+    \textsf{finite eqtypes}
+    \vspace{0.5em}\\
+    %% usl (finite) eqtypes
+    %% \eq{L}, \eq{M} &\defeq& \textsf{usl types}~\cap~\textsf{eqtypes}
+    %% \vspace{0.5em}\\
+    %% \fineq{L}, \fineq{M}
+    %% &\defeq& \textsf{usl types}~\cap~\textsf{finite eqtypes}
+    %% \vspace{0.5em}\\
     %% contexts
     \GD, \GG &\bnfeq& \cdot \pipe \GD, x\of A\\
     \textsf{contexts}\\
@@ -138,8 +151,7 @@ refellatur oratio.
     && e = e \pipe \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
     && \singleset{e} \pipe \singlemap{e}{e}
        \pipe \unit \pipe e \vee e \pipe \letin{x}{e}{e}\\
-    && %% \fix{x}{e} \pipe
-       \fixle{x}{e}{e}
+    && \fix{x}{e} \pipe \fixle{x}{e}{e}
   \end{array}\]
   \caption{Syntax of core Datafun}
 \end{figure}
@@ -196,7 +208,8 @@ refellatur oratio.
     %% \ms{let}~x = e_1 ~\ms{in}~ e_2
     %% &\expandsto& (\fn\bind{x} e_2)\; e_1\\
     %% \ms{let}~[x_i = e_i]^* ~\ms{in}~ e
-    %% &\expandsto& [\ms{let}~x_i = e_i~\ms{in}]^* e
+    %% &\expandsto& [\ms{let}~x_i = e_i~\ms{in}]^* e\\
+    %% \rawcase{e}{[p \to e]^*} &\expandsto& \text{(omitted, see \todo{CITE})}
   \end{eqnarray*}
   \caption{Syntax sugar}
 \end{figure}
@@ -257,7 +270,7 @@ refellatur oratio.
     \infer[\rn{\{\}}]{\J{\GD}{\GG}{\{e\}}{\Set{A}}}{\J{\GD}{\cdot}{e}{A}}
     \and
     \infer[\rn{\{:\}}]{\J{\GD}{\GG}{\singlemap{e_1}{e_2}}{\Map{A}{B}}}{
-      \J{\GD}{\cdot}{e_1}{\eq{A}} &
+      \J{\GD}{\cdot}{e_1}{A} &
       \J{\GD}{\GG}{e_2}{B}}
     \and
     \infer[\unit]{\J{\GD}{\GG}{\unit}{L}}{}
@@ -267,9 +280,9 @@ refellatur oratio.
     \infer[\rn{\bigvee}]{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{L}}{
       \J{\GD}{\GG}{e_1}{\Set{A}} &
       \J{\GD,x\of A}{\GG}{e_2}{L}}
-    %% \and
-    %% \infer[\rn{fix}]{\J{\GD}{\GG}{\fix{x}{e}}{\fineq{L}}}{
-    %%   \J{\GD}{\GG,x\of L}{e}{\fineq{L}}}
+    \and
+    \infer[\rn{fix}]{\J{\GD}{\GG}{\fix{x}{e}}{\fineq{L}}}{
+      \J{\GD}{\GG,x\of L}{e}{\fineq{L}}}
     \and
     \infer[\rn{fix_{\le}}]{\J{\GD}{\GG}{\fixle{x}{e_1}{e_2}}{\eq{L}}}{
       \J{\GD}{\GG}{e_1}{\eq{L}} &
@@ -284,6 +297,7 @@ refellatur oratio.
   \[\begin{array}{cll}
   \le &\of& \eq{A} \uto \eq{A} \mto \bool\\
   \fname{keys}     &:& \Map{A}{B} \mto \Set{A}\\
+  \fname{entries}  &:& \Map{A}{B} \uto \Set{A \x B}\\
   \fname{tabulate} &:& \Set{A} \mto (A \to B) \mto \Map{A}{B}\\
   %% \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
   \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
@@ -299,14 +313,51 @@ refellatur oratio.
 
 %%
 \pagebreak
-\section{Datafun by example}
+\section{Examples}
+
+For purposes of these examples, we use a simple Haskell-like syntax for
+top-level type and function definitions.
+
+\todo{\begin{itemize}
+\item composition of relations?
+\item \texttt{make}-style topological sort?
+\item SQL-style examples?
+\item translating relational algebra into datafun?
+\end{itemize}}
 
 %% Examples
 
 \subsection{Transitive closure}
 
-% what's a good example for parenthood? a dickens novel?
-% how about Tolkien?
+Consider the following Datalog program:
+\begin{verbatim}
+parent(earendil, elrond).
+parent(elrond, arwen).
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).
+\end{verbatim}
+
+%% already shows how datalog is not just a restriction of prolog: in datalog
+%% this actually works, while in prolog, it suffers from infinite loops.
+
+In Datafun, we may write this as:
+
+\[\begin{array}{l}
+\mathbf{data}~\ms{person} =
+\ctor{E\"arendil} ~|~ \ctor{Elrond} ~|~ \ctor{Arwen}\\
+\fname{parent},~\ms{ancestor} : \Set{\ms{person} \x \ms{person}}\\
+\ms{parent} =
+\{(\ctor{E\"arendil}, \ctor{Elrond}), (\ctor{Elrond}, \ctor{Arwen})\}\\
+\ms{ancestor} = \fix{X} \ms{parent} \vee
+\setfor{(a,c)}{(a,b) \in X, (b,c) \in X}\\
+\end{array}\]
+
+\subsubsection{Transitive closure with an upper bound}
+
+If you know the type over which you are taking your transitive closure is
+finite, this suffices. But the more general way to take a fixed-point is to give
+an upper bound which you know the desired answer will not exceed. For this we
+write $(\fixle{x}{e_\top} e)$
 
 \[\begin{array}{l}
 \ms{persons} ~:~ \Set{\str}\\
@@ -314,23 +365,35 @@ refellatur oratio.
 \ms{parent}, \ms{ancestor} ~:~ \Set{\str \x \str}\\
 \ms{parent} = \{(\texttt{"e\"arendil"}, \texttt{"elrond"}),
 (\texttt{"elrond"}, \texttt{"arwen"})\}\\
-\ms{ancestor} = \fixle{S}{\setfor{(a,b)}{a \in \ms{person}, b \in \ms{person}}}
+\ms{ancestor} = \fixle{X}{\setfor{(a,b)}{a \in \ms{person}, b \in \ms{person}}}
 \\
 \hspace{4.87em}\ms{parent} \vee
-\setfor{(a,c)}{(a,b) \in \ms{parent}, (b,c) \in S}
+\setfor{(a,c)}{(a,b) \in X, (b,c) \in X}
 \end{array}\]
 
-\subsection{Generic transitive closure}
+\subsubsection{Generic transitive closure}
+
+For any finite eqtype $\fineq{A}$, we may write:
+
+\[\begin{array}{l}
+\ms{trans} ~:~ \Set{\fineq{A} \x \fineq{A}} \mto \Set{\fineq{A} \x \fineq{A}}\\
+%% \ms{trans}\ E = \fix{X} E \vee \setfor{(a,c)}{(a,b) \in E, (b,c) \in X}
+\ms{trans}\ E = \fix{X} E \vee \setfor{(a,c)}{(a,b) \in X, (b,c) \in X}
+\end{array}\]
+
+\TODO (and similarly for any eqtype $\eq{A}$ by using a bounded fixed-point)
 
 For any eqtype $\eq{A}$, we may write:
 \[\begin{array}{l}
 \ms{trans} ~:~
 \Set{\eq{A}} \mto \Set{\eq{A} \x \eq{A}} \mto \Set{\eq{A} \x \eq{A}}
 \vspace{0.3em}\\
-\ms{trans}\ V\ E = \ms{fix}~ S \le \setfor{(a,b)}{a\in V, b \in V}
-\\
-\hspace{5.35em}\ms{is}~ E \vee \setfor{(a,c)}{(a,b) \in E, (b,c) \in S}
+\ms{trans}\ V\ E = \ms{fix}~ S \le \setfor{(a,b)}{a\in V, b \in V}\\
+\hspace{5.35em}\ms{is}~ E \vee \setfor{(a,c)}{(a,b) \in E, (b,c) \in S}\\
+%% \ms{trans}\ V\ E = \fixle{S}{V \x V} E \vee (S \bullet S)
 \end{array}\]
+
+\TODO This already shows how we go beyond Datalog's .
 
 \subsection{CYK parsing}
 
@@ -347,10 +410,10 @@ For any eqtype $\eq{A}$, we may write:
 \hspace{2.375em}u \overset{+}{=}
   \setfor{(a,i,j)}{(a,\pwild) \in g, i \in \ms{range}\;0\;n,
   j\in\fname{range}\;i\;n}\\
-\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in \fixle{S}{u} \ms{iter}\;w\;g\;S}\\
-\fname{iter}\;w\;g\;s =\\
+\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in \fixle{X}{u} \ms{iter}\;w\;g\;X}\\
+\fname{iter}\;w\;g\;X =\\
 \hspace{1em}\phantom{\vee~}\setfor{(a,i,k)}{(a, \ctor{Cat}~b~c) \in g,
-  (b,i,j) \in s, (c,j,k) \in s}\\
+  (b,i,j) \in X, (c,j,k) \in X}\\
 \hspace{1em}\vee~ \{(a,i,i+\fname{length}\;s)\\
 \hspace{2.1em}|~ (a, \ctor{String}~s) \in g,
 i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
@@ -358,6 +421,8 @@ i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
 \end{array}\]
 
 
+\section{Typing rules}
+
 \section{Semantics}
 
 \section{Implementation}
@@ -371,14 +436,13 @@ nonterminating) fixed points. It performs no optimizations whatsoever.
 %% not sure how many sections to split this up into.
 \section{Tradeoffs, limitations, and design decisions}
 
-\paragraph{Bounded fix-points} \TODO Discuss
-datalog's constructor restriction (name?), not being sure how to encode it in a
-type theory, its disadvantages, and the disadvantages of our approach ---
-bounded fixed-points.
+\paragraph{Finite and bounded fixed-points} \TODO Discuss
+Datalog's constructor restriction (name?), not being sure how to encode it in a
+type theory, its disadvantages, and the disadvantages of our approaches ---
+finite \& bounded fixed-points.
 
-\TODO discuss ``finite equality types'' option which we discarded. bounded
-fixpoints strictly more general, but at possible runtime cost, but finite types
-very restrictive in practice
+bounded fixed-points strictly more general than finitary-type fixed-points, but
+at possible runtime cost, but finite types very restrictive in practice
 
 \TODO In particular, could bounded fix-points have adverse performance
 implications?
@@ -445,7 +509,7 @@ tone-polymorphism, and subtyping---so that, for example, $\fn\bind{f}\fn\bind{x}
 f\;x$ can be assigned the principal type
 $\forall\bind{o\of\ms{tone}}\forall\bind{\alpha,\beta \of \ms{type}} (\alpha
 \overset{o}\to \beta) \mto (\alpha \overset{o}\to \beta)$, where
-$\overset{o}\to$ indicates a function of tone $o$, which may be empty (for an
+$\overset{o}\to$ indicates a function of tone $o$; a tone may be empty (for an
 ordinary function) or ${+}$ for a monotone function.
 
 \todo{does Neel think this is a reasonable conjecture?}

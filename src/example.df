@@ -160,7 +160,7 @@
 (ancestor : (rel str str))
 (fix ancestor = (lub advisor recur)
      where (mono recur = (set (cons a c)
-                          for (cons a b) in advisor
+                          for (cons a b) in ancestor
                           for (cons (= b) c) in ancestor)))
 
 
