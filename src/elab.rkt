@@ -45,7 +45,7 @@ sub-expression: ~s
 ;; ========== Primitives and their types ==========
 (define (prim-type-infer p)
   (match p
-    [(or '+ '*) (T (~> nat nat))]
+    [(or '+ '*) (T (~> nat nat nat))]
     ['- (T (~> nat (->- nat nat)))]
     ['++ (T (-> str str str))]
     ['puts (T (-> str (*)))]
