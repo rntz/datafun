@@ -133,3 +133,33 @@ val gram_hello = { ("Start", Cat("H", "W"))
                  , ("W", String("world")) }
 
 val test_string = "helloworld"
+
+
+(* the WHILE language & static analysis *)
+type label = nat
+type var = str
+
+type bool_op = EQ | LE
+type arith_op = ADD | SUB | MUL | DIV
+type imm = Var(var) | Num(nat)
+type expr = Imm(imm) | Arith(arith_op, imm, imm) | Test(bool_op, imm, imm)
+type stmt = Skip | Assign(var, expr) | If(expr, label, label)
+
+val imm_vars : imm -> {var}
+val expr_vars : expr -> {var}
+val stmt_uses : stmt -> {var}
+val stmt_defines : stmt -> {var}
+fun imm_vars i = case i | Var(v) => {v}
+                        | Num(_) => {}
+fun expr_vars e = case e | Imm(i) => imm_vars i
+                         | Arith(_, a, b)
+                         | Test (_, a, b) => imm_vars a ∨ imm_vars b
+fun stmt_uses s = case s | Assign(_,e)
+                         | If(e,_,_) => expr_vars e
+                         | _ => {}
+fun stmt_defines s = case s | Assign(v,_) => {v}
+                            | _ => {}
+
+(* code flow *)
+type code = {label: stmt}
+type flow = {label, label}

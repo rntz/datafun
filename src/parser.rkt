@@ -63,7 +63,7 @@
   (eof
    ;; punctuation
    LP RP LSQUARE RSQUARE LCURLY RCURLY
-   COMMA BAR : SEMI _
+   COMMA BAR : SEMI _ &
    = <= < >= >
    -> ~> ->- ->+ =>
    + * - / ++
@@ -96,7 +96,7 @@
    ["(" 'LP]      [")" 'RP]
    ["{" 'LCURLY]  ["}" 'RCURLY]
    ["[" 'LSQUARE] ["]" 'RSQUARE]
-   ["," 'COMMA] ["|" 'BAR] [":" ':] [";" 'SEMI] ["_" '_]
+   ["," 'COMMA] ["|" 'BAR] [":" ':] [";" 'SEMI] ["_" '_] ["&" '&]
    ["=" '=] ["<=" '<=] ["<" '<] [">=" '>=] [">" '>]
    ["=>" '=>] ["->" '->] ["~>"  '~>] ["->+" '->+] ["->-" '->-]
    ["+" '+] ["-" '-] ["*" '*] ["/" '/]
@@ -260,6 +260,9 @@
      ((lit)             (p-lit $1))
      ((_)               (p-wild))
      ((= expr)          (p-eq $2))
+     ;; TODO: precedence, associativity of `|', `&'
+     ((pat BAR pat)     (p-or (list $1 $3)))
+     ((pat & pat)       (p-and (list $1 $3)))
      ((LP pat RP)       $2)
      ((LP p-list* RP)   (p-tuple $2))
      ((Id)              (p-tag $1 '()))
