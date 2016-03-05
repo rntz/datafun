@@ -65,6 +65,8 @@ sub-expression: ~s
          (eqtype=? a b)]
         [('size (t-fun (or 'mono 'any) (t-set a) (t-base 'nat))) (eqtype? a)]
         [('keys (t-fun (or 'mono 'any) (t-map a _) (t-set b))) (eqtype=? a b)]
+        [('entries (t-fun 'any (t-map k1 v1) (t-set (t-tuple (list k2 v2)))))
+         (and (eqtype=? k1 k2) (subtype? v1 v2))]
         [('lookup (t-fun (or 'mono 'any)
                          (t-map k v1)
                          (t-fun 'any k (t-sum (hash-table ['none (list)]
@@ -215,6 +217,11 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (match (expr-check arg)
        [(t-map k v) (t-set k)]
        [t (fail "argument to `keys' of non-map type ~s" (type->sexp t))])]
+
+    [(e-app (e-prim 'entries) arg)
+     (match (with-tone 'any (expr-check arg))
+       [(t-map k v) (t-set (t-tuple (list k v)))]
+       [t (fail "argument to `entries' of non-map type ~s" (type->sexp t))])]
 
     [(e-app (e-prim 'lookup) arg)
      (match (expr-check arg)
