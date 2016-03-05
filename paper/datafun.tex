@@ -135,59 +135,6 @@ keyword1, keyword2
 % - We have a prototype implementation of Datafun in Racket. 
 
 
-\section{Intuition}
-
-Datafun can be thought of as a simply-typed $\lambda$-calculus extended in four
-major ways:
-\begin{enumerate}
-\item We add a type of \emph{monotone functions}, $A \mto B$. Consequently
-  Datafun has two flavors of variable, \emph{ordinary} and \emph{monotone}.
-  Ordinary functions introduce ordinary variables; monotone functions introduce
-  monotone variables. This distinction is left latent in the syntax itself,
-  \todo{TODO: why?}.
-
-  In order for ``monotone'' to have meaning, our types are implicitly partially
-  ordered.
-
-\item We add a type of finite sets $\Set{A}$. We use finite sets to represent
-  Datalog predicates; one might also think of them as tables or views in a
-  database setting. We also include finite maps $\Map{A}{B}$, as they are useful
-  for some examples.
-
-  \todo{TODO: make clearer bit about what we use finite sets for}
-
-  Sets are ordered by inclusion: $a \le b : \Set{A}$ iff $a \subseteq b$. Maps
-  are ordered both by inclusion and pointwise.
-
-\item We add a \emph{monotone fixed point} operator over \emph{finite-set-typed}
-  expressions. This allows us to express Datalog-style recursion.
-
-\item Generalizing the \emph{union} operator $\cup$ and the empty set
-  $\emptyset$, we identify a \todo{syntactic} subset of types as \emph{usl
-  types}, which support a \emph{least-upper bound} operation $\vee$ and have a
-  \emph{least element} $\unit$.
-
-  \emph{usl} stands for ``unitary semilattice'', and signifies that the partial
-  orderings on these types form join-semilattices with a least element (unit).
-  We use the metavariables $L,M$ for usl types.
-
-  Usl types provide a natural comprehension-style eliminator for sets: given $e
-  : \Set{A}$ we may write $\letin{x}{e}{e'}$ for the least-upper-bound, over all
-  elements $x \in e$, of $e'$, as long as $e' : L$ is of usl type.
-
-  Notably, if $e'$ is itself of set type, this provides a monadic bind
-  operation.
-
-  \todo{Rewrite this to be clearer.}
-
-  \todo{Explain how usl types + monotone fixed-points account for Datalog-style
-    mutual recursion?}
-
-  \todo{Perhaps explain monotone fixed point first?}
-
-\end{enumerate}
-
-
 %% FIGURE: CORE SYNTAX
 \begin{figure}
   \[\begin{array}{ccl}
@@ -222,19 +169,87 @@ major ways:
     %% &\defeq& \textsf{usl types}~\cap~\textsf{finite eqtypes}
     %% \vspace{0.5em}\\
     %% contexts
-    \GD, \GG &\bnfeq& \cdot \pipe \GD, x\of A\\
+    \GD,\GG &\bnfeq& \cdot \pipe \GD, x\of A\\
     \textsf{contexts}\\
     %% expressions
-    e &\bnfeq& x \pipe \fn\bind{x} e \pipe e\;e \pipe (e,e) \pipe \pi_i\;e\\
-    \textsf{terms} && \ms{in}_i\; e \pipe \case{e}{x}{e}{x}{e}\\
+    e &\bnfeq& x \pipe \fn\bind{x} e \pipe e\;e
+    \pipe (e,e) \pipe \pi_i\;e \pipe \ms{in}_i\;e\\
+    \textsf{terms}
+    && \case{e}{x}{e}{x}{e}\\
     && e = e \pipe \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
     && \singleset{e} \pipe \singlemap{e}{e}
        \pipe \unit \pipe e \vee e \pipe \letin{x}{e}{e}\\
     && \fix{x}{e} \pipe \fixle{x}{e}{e}
   \end{array}\]
   \caption{Syntax of core Datafun}
+  \label{fig:syntax}
 \end{figure}
 
+
+\section{Intuition}
+
+We give the core syntax of Datafun in Figure \ref{fig:syntax}. Datafun is a
+simply-typed $\lambda$-calculus extended in four major ways:
+
+\begin{enumerate}
+\item We add a type of finite sets $\Set{A}$. We use finite sets to represent
+  Datalog predicates; one might also think of them as tables or views in a
+  database setting. We also include finite maps $\Map{A}{B}$, as they are useful
+  for some examples.
+
+  \todo{TODO: make clearer bit about what we use finite sets for. don't rely on
+    Datalog so heavily.}
+
+\item We add a type of \emph{monotone functions}, $A \mto B$. Consequently
+  Datafun has two flavors of variable, \emph{ordinary} and \emph{monotone}.
+  Ordinary functions introduce ordinary variables; monotone functions introduce
+  monotone variables. This distinction is left latent in the formal syntax,
+  \todo{TODO: why?}, but for clarity we write monotone variables in
+  \textbf{bold} in our examples.
+
+  In order for ``monotone'' to have meaning, our types are implicitly partially
+  ordered. \todo{Discuss orderings}. Sets are ordered by inclusion: $a \le b :
+  \Set{A}$ iff $a \subseteq b$. Maps are ordered both by inclusion and
+  pointwise.
+
+\item We add a \emph{monotone least fixed point} term, $(\fix{\m{x}}{e})$,
+  where $e$ must be monotone in $\m{x}$. This allows us to express
+  Datalog-style recursion.
+
+  \todo{TODO: Explain without as much reference to Datalog.}
+
+  To ensure termination, the type at which this fixed-point is taken must be
+  \emph{finite} (this corresponds directly to Datalog's requirement that
+  predicates be finite). To ensure uniqueness of the least fixed point, the type
+  must have a \emph{least element}.
+
+\item Generalizing the empty set $\emptyset$ and the union operator $\cup$, we
+  identify a subset of types that have a \emph{least element} $\unit$ and
+  support a \emph{least-upper bound} operator $\vee$. We call these \emph{usl
+    types}\footnote{\emph{Usl} stands for ``unitary semilattice'', meaning that
+    the partial orderings on these types form join-semilattices with a unit
+    (least element).}, and denote them by the metavariables $L,M$.
+
+  Usl types are the ``glue'' of Datafun; they do not serve one single purpose,
+  but simplify the language by satisfying many small ones at once.
+
+  First, usl types provide a natural comprehension-style eliminator for sets:
+  given $e : \Set{A}$ we may write $\letin{x}{e}{e'}$ for the least-upper-bound,
+  over all elements $x \in e$, of $e'$, as long as $e' : L$ is of usl type.
+  Notably, if $e'$ is itself of set type, this provides a monadic bind
+  operation. \todo{explain testing for set membership?}
+
+  Second, we restrict fixed-points $(\fix{\m{x}}{e})$ to usl types, which
+  guarantees that we take
+
+  \todo{Explain how usl types + monotone fixed-points account for Datalog-style
+    mutual recursion.}
+
+  \todo{Rewrite this to be clearer.}
+
+\end{enumerate}
+
+
 %% FIGURE: SYNTAX SUGAR
 \begin{figure}
   \[\begin{array}{lccl}
@@ -418,8 +433,8 @@ In Datafun, we may write this as:
 \fname{parent},~\ms{ancestor} ~:~ \Set{\ms{person} \x \ms{person}}\\
 \ms{parent} =
 \{(\ctor{E\"arendil}, \ctor{Elrond}), (\ctor{Elrond}, \ctor{Arwen})\}\\
-\ms{ancestor} = \fix{X} \ms{parent} \vee
-\setfor{(a,c)}{(a,b) \in X, (b,c) \in X}\\
+\ms{ancestor} = \fix{\m{X}} \ms{parent} \vee
+\setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}\\
 \end{array}\]
 
 \subsubsection{Transitive closure with an upper bound}
@@ -427,7 +442,7 @@ In Datafun, we may write this as:
 If you know the type over which you are taking your transitive closure is
 finite, this suffices. But the more general way to take a fixed-point is to give
 an upper bound which you know the desired answer will not exceed. For this we
-write $(\fixle{x}{e_\top} e)$
+write $(\fixle{\m{x}}{e_\top} e)$
 
 \[\begin{array}{l}
 \ms{persons} ~:~ \Set{\str}\\
@@ -435,10 +450,11 @@ write $(\fixle{x}{e_\top} e)$
 \ms{parent}, \ms{ancestor} ~:~ \Set{\str \x \str}\\
 \ms{parent} = \{(\texttt{"e\"arendil"}, \texttt{"elrond"}),
 (\texttt{"elrond"}, \texttt{"arwen"})\}\\
-\ms{ancestor} = \fixle{X}{\setfor{(a,b)}{a \in \ms{person}, b \in \ms{person}}}
+\ms{ancestor} = \fixle{\m{X}}{%
+  \setfor{(a,b)}{a \in \ms{person}, b \in \ms{person}}}
 \\
 \hspace{4.87em}\ms{parent} \vee
-\setfor{(a,c)}{(a,b) \in X, (b,c) \in X}
+\setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
 \end{array}\]
 
 \subsubsection{Generic transitive closure}
@@ -446,9 +462,11 @@ write $(\fixle{x}{e_\top} e)$
 For any finite eqtype $\fineq{A}$, we may write:
 
 \[\begin{array}{l}
-\ms{trans} ~:~ \Set{\fineq{A} \x \fineq{A}} \mto \Set{\fineq{A} \x \fineq{A}}\\
+\ms{trans} ~:~ \Set{\fineq{A} \x \fineq{A}} \mto \Set{\fineq{A} \x \fineq{A}}
+\vspace{0.3em}\\
 %% \ms{trans}\ E = \fix{X} E \vee \setfor{(a,c)}{(a,b) \in E, (b,c) \in X}
-\ms{trans}\ E = \fix{X} E \vee \setfor{(a,c)}{(a,b) \in X, (b,c) \in X}
+\ms{trans}\ \m{E} = \fix{\m{X}} \m{E} \vee %
+\setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
 \end{array}\]
 
 \TODO (and similarly for any eqtype $\eq{A}$ by using a bounded fixed-point)
@@ -458,8 +476,10 @@ For any eqtype $\eq{A}$, we may write:
 \ms{trans} ~:~
 \Set{\eq{A}} \mto \Set{\eq{A} \x \eq{A}} \mto \Set{\eq{A} \x \eq{A}}
 \vspace{0.3em}\\
-\ms{trans}\ V\ E = \ms{fix}~ S \le \setfor{(a,b)}{a\in V, b \in V}\\
-\hspace{5.35em}\ms{is}~ E \vee \setfor{(a,c)}{(a,b) \in E, (b,c) \in S}\\
+\ms{trans}\ \m{V}\ \m{E} = %
+\ms{fix}~ \m{S} \le \setfor{(a,b)}{a\in \m{V}, b \in \m{V}}\\
+\hspace{5.35em}\ms{is}~ \m{E} \vee %
+\setfor{(a,c)}{(a,b) \in \m{E}, (b,c) \in \m{S}}\\
 %% \ms{trans}\ V\ E = \fixle{S}{V \x V} E \vee (S \bullet S)
 \end{array}\]
 
@@ -475,17 +495,18 @@ For any eqtype $\eq{A}$, we may write:
 \fname{parse} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{sym}}\\
 \fname{iter} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{fact}}
 \mto \Set{\ms{fact}}\\
-\fname{parse}\;w\;g =\\
+\fname{parse}\;w\;\m{g} =\\
 \hspace{1em} \ms{let}~ n = \ms{length}\;w\\
-\hspace{2.375em}u \overset{+}{=}
-  \setfor{(a,i,j)}{(a,\pwild) \in g, i \in \ms{range}\;0\;n,
+\hspace{2.375em}\m{u} =
+  \setfor{(a,i,j)}{(a,\pwild) \in \m{g}, i \in \ms{range}\;0\;n,
   j\in\fname{range}\;i\;n}\\
-\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in \fixle{X}{u} \ms{iter}\;w\;g\;X}\\
-\fname{iter}\;w\;g\;X =\\
-\hspace{1em}\phantom{\vee~}\setfor{(a,i,k)}{(a, \ctor{Cat}~b~c) \in g,
-  (b,i,j) \in X, (c,j,k) \in X}\\
+\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in %
+  \fixle{\m{X}}{\m{u}} \ms{iter}\;w\;\m{g}\;\m{X}}\\
+\fname{iter}\;w\;\m{g}\;\m{X} =\\
+\hspace{1em}\phantom{\vee~}\setfor{(a,i,k)}{(a, \ctor{Cat}~b~c) \in \m{g},
+  (b,i,j) \in \m{X}, (c,j,k) \in \m{X}}\\
 \hspace{1em}\vee~ \{(a,i,i+\fname{length}\;s)\\
-\hspace{2.1em}|~ (a, \ctor{String}~s) \in g,
+\hspace{2.1em}|~ (a, \ctor{String}~s) \in \m{g},
 i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
 \hspace{2.2em}\phantom{|~} s = \fname{substring}\;w\;i\;(i+\ms{length}\;s)\}
 \end{array}\]
