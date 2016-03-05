@@ -273,8 +273,27 @@ major ways:
     %% \rawcase{e}{[p \to e]^*} &\expandsto& \text{(omitted, see \todo{CITE})}
   \end{eqnarray*}
   \caption{Syntax sugar}
+  \label{fig:sugar}
 \end{figure}
 
+\begin{figure}
+  \[\begin{array}{cll}
+  \le &\of& \eq{A} \uto \eq{A} \mto \bool\\
+  \fname{keys}     &:& \Map{A}{B} \mto \Set{A}\\
+  \fname{entries}  &:& \Map{A}{B} \uto \Set{A \x B}\\
+  \fname{tabulate} &:& \Set{A} \mto (A \to B) \mto \Map{A}{B}\\
+  %% \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
+  \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
+  %% \fname{substrings} &\of& \ms{Str} \to \Set{\ms{Str}}\\
+  %% \fname{size}     &:& \Set{\eq{A}} \mto \N\\
+  \fname{range}    &:& \N \uto \N \mto \Set{\N}\\
+  \fname{length}   &:& \str \uto \N\\
+  \fname{substring} &:& \str \uto \N \uto \N \uto \str
+  \end{array}\]
+  \caption{Built-in functions and their type schemes}
+\end{figure}
+
+
 %% FIGURE: Typing rules
 \begin{figure*}
   \boxed{\ensuremath{\mathsz{10pt}{\J{\Delta}{\Gamma}{e}{A}}}}
@@ -353,31 +372,17 @@ major ways:
   \caption{Typing rules for core Datafun}
 \end{figure*}
 
-\newcommand{\fname}{\ms}
-\begin{figure}
-  \[\begin{array}{cll}
-  \le &\of& \eq{A} \uto \eq{A} \mto \bool\\
-  \fname{keys}     &:& \Map{A}{B} \mto \Set{A}\\
-  \fname{entries}  &:& \Map{A}{B} \uto \Set{A \x B}\\
-  \fname{tabulate} &:& \Set{A} \mto (A \to B) \mto \Map{A}{B}\\
-  %% \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
-  \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
-  %% \fname{substrings} &\of& \ms{Str} \to \Set{\ms{Str}}\\
-  %% \fname{size}     &:& \Set{\eq{A}} \mto \N\\
-  \fname{range}    &:& \N \uto \N \mto \Set{\N}\\
-  \fname{length}   &:& \str \uto \N\\
-  \fname{substring} &:& \str \uto \N \uto \N \uto \str
-  \end{array}\]
-  \caption{Built-in functions and their type schemes}
-\end{figure}
-
 
 %%
 \pagebreak
 \section{Examples}
 
 For purposes of these examples, we use a simple Haskell-like syntax for
-top-level type and function definitions.
+top-level type and function definitions. We also permit ourselves
+pattern-matching\todo{(CITE)} and some other syntax sugar, defined in Figure
+\ref{fig:sugar}.
+
+\todo{TODO: mention \& cite monadic query syntax}
 
 \todo{\begin{itemize}
 \item composition of relations?
@@ -387,6 +392,10 @@ top-level type and function definitions.
 \end{itemize}}
 
 %% Examples
+
+\subsection{Filtering, mapping, and cross products}
+
+\TODO
 
 \subsection{Transitive closure}
 
@@ -406,7 +415,7 @@ In Datafun, we may write this as:
 \[\begin{array}{l}
 \mathbf{data}~\ms{person} =
 \ctor{E\"arendil} ~|~ \ctor{Elrond} ~|~ \ctor{Arwen}\\
-\fname{parent},~\ms{ancestor} : \Set{\ms{person} \x \ms{person}}\\
+\fname{parent},~\ms{ancestor} ~:~ \Set{\ms{person} \x \ms{person}}\\
 \ms{parent} =
 \{(\ctor{E\"arendil}, \ctor{Elrond}), (\ctor{Elrond}, \ctor{Arwen})\}\\
 \ms{ancestor} = \fix{X} \ms{parent} \vee

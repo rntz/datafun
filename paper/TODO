@@ -3,6 +3,13 @@
 We never use the fact that N is a semilattice type! Should we replace naturals N
 with integers Z?
 
+Should we mark monotone variables in the paper for the convenience of the
+reader? How?
+
+ransack Neel's memory for papers to cite on:
+- pattern matching
+- monadic query syntax
+
 * Syntax
   - 1-level syntax (ie, one grammar of types)
 
