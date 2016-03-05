@@ -245,32 +245,22 @@
 (type code = (map label stmt))
 (type flow = (rel label label))
 
-(code->set : code -> (rel label stmt))
-(code->set C = (set (cons i s)
-                    for i in (keys C)
-                    for s in (case (lookup C i)
-                               [('just x) (set x)]
-                               ['none (as (set stmt) (set))])))
-
 (flow : code -> flow)
-(flow C = (union
-           ;; if-statements branch
-           ((set (cons i j) (cons i k))
-            for (cons i ('if _ j k)) in (code->set C))
-           ;; otherwise, execution continues in a straight line
-           ((set (cons i (+ i 1)))
-            for (cons i (or 'skip ('assn _ _))) in (code->set C)
-            for (= (+ i 1)) in (keys C))))
+(flow C = (for (cons i s) in (entries C)
+           lub (case s
+                 [('if _ j k) (set (cons i j) (cons i k))]
+                 [_ (set (cons i (+ 1 i))
+                     when ((+ 1 i) in? (keys C)))])))
 
 ;; reaching definitions analysis
 (rd : code flow -> (rel label label var))
 (rd code flow =
     (fix RD
      (set (cons i i v)
-        for (cons i s) in (code->set code)
+        for (cons i s) in (entries code)
         for v in (stmt-defines s))
      (set (cons j l v)
-        for (cons j s) in (code->set code)
+        for (cons j s) in (entries code)
         ;; for any statement that flows to us
         for (cons i (= j)) in flow
         ;; we inherit its defined variables
@@ -285,7 +275,7 @@
                  for (cons m (= l)) in flow
                  for var : labels in (get RD m)
                  unless (str-member var (stmt-defines s))))])
-   for (cons l s) in (code->set code))))
+   for (cons l s) in (entries code))))
 
 ;; ;; live variable analysis
 ;; (live : code flow -> (set (* label var)))
