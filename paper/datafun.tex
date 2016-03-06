@@ -132,7 +132,7 @@ keyword1, keyword2
 %   give a denotational semantics for Datafun in terms of a pair of adjunctions
 %   between Set, Poset, and the category of semilattices with finitary joins.
 
-% - We have a prototype implementation of Datafun in Racket. 
+% - We have a prototype implementation of Datafun in Racket.
 
 
 %% FIGURE: CORE SYNTAX
@@ -394,7 +394,8 @@ simply-typed $\lambda$-calculus extended in four major ways:
 For purposes of these examples, we use a simple Haskell-like syntax for
 top-level type and function definitions. We also permit ourselves
 pattern-matching\todo{(CITE)}, let-binding, and additional syntax sugar given in
-Figure \ref{fig:sugar}.
+Figure \ref{fig:sugar}. All of these conveniences are supported (with slightly
+different concrete syntax) by our prototype implementation.
 
 \todo{TODO: mention \& cite monadic query syntax}
 
@@ -409,7 +410,32 @@ Figure \ref{fig:sugar}.
 
 \subsection{Filtering, mapping, and cross products}
 
+Although, \todo{for the sake of simplicity(?)}, Datafun as presented does not
+have polymorphism
+
+\[\begin{array}{l}
+\fname{map} : (A \uto B) \to \Set{A} \uto \Set{B}\\
+\fname{map}\;f\;a = \setfor{f\;x}{x \in a}\\
+\\
+\fname{filter} : (A \uto 2) \to \Set{A} \uto \Set{A}\\
+\fname{filter}\;f\;a = \setfor{x}{x \in a, f\; x}
+\end{array}\]
+
+
+
 \TODO
+
+\subsection{Composition of relations}
+
+\todo{Is this really a great example? It's basically a polymorphism example and
+  we don't have polymorphism.}
+
+As a simple example of Datafun's capacity to express higher-order relations,
+consider:
+\[\begin{array}{l}
+\fname{compose} ~:~ \Set{A \x B} \mto \Set{B \x C} \mto \Set{A \x C}\\
+\fname{compose}\;\m{x}\;\m{y} = \setfor{(a,c)}{(a,b) \in \m{x}, (b,c) \in \m{y}}
+\end{array}\]
 
 \subsection{Transitive closure}
 
@@ -459,7 +485,6 @@ write $(\fixle{\m{x}}{e_\top} e)$
 \subsubsection{Generic transitive closure}
 
 For any finite eqtype $\fineq{A}$, we may write:
-
 \[\begin{array}{l}
 \ms{trans} ~:~ \Set{\fineq{A} \x \fineq{A}} \mto \Set{\fineq{A} \x \fineq{A}}
 \vspace{0.3em}\\
@@ -468,9 +493,7 @@ For any finite eqtype $\fineq{A}$, we may write:
 \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
 \end{array}\]
 
-\TODO (and similarly for any eqtype $\eq{A}$ by using a bounded fixed-point)
-
-For any eqtype $\eq{A}$, we may write:
+\noindent Similarly, for any eqtype $\eq{A}$, we may write:
 \[\begin{array}{l}
 \ms{trans} ~:~
 \Set{\eq{A}} \mto \Set{\eq{A} \x \eq{A}} \mto \Set{\eq{A} \x \eq{A}}
@@ -526,8 +549,10 @@ partial functions are introduced, Datafun programs always terminate.
 
 \section{Typing rules}
 
+
 \section{Semantics}
 
+
 \section{Implementation}
 We have built a proof-of-concept implementation of Datafun in Racket
 \todo{CITE}. In addition to core Datafun, it supports pattern-matching, variant
@@ -536,6 +561,7 @@ nonterminating) fixed points. It performs no optimizations whatsoever.
 
 \todo{LINK}
 
+
 %% not sure how many sections to split this up into.
 \section{Tradeoffs, limitations, and design decisions}
 
@@ -578,13 +604,29 @@ implementation we solve this in two ways:
 It remains an open question how much annotation is necessary. See
 Section \ref{sec:futurework}, \emph{Related and future work}.
 
-\paragraph{Lexical types} (\todo{TODO})
+\paragraph{User-defined usls}
+The two fundamental usl types Datafun provides are booleans and sets; other type
+constructors such as products, functions, and finite maps merely preserve usl
+structure where they find it. One might contemplate allowing the programmer to
+define their own usl structures using something like Haskell's
+\texttt{newtype}/\texttt{instance}. Unfortunately, this \TODO
 \begin{itemize}
+\item User-defined functions give the compiler no guarantee that they are
+  commutative, associative, and idempotent.
+\item Without further information it would be impossible to
+\end{itemize}
+
+Unfortunately, there is no simple characterization of the space of all possible
+computable usls.
+
+\paragraph{Lexical types}
+\todo{\begin{itemize}
 \item Pro: allow expressing many things more generally, for example, map lookup
 \item Con: have no good general monotone elimination rule
 \item Con: complicate the type theory
-\end{itemize}
+\end{itemize}}
 
+
 \section{Related and future work}
 \label{sec:futurework}
 
@@ -614,8 +656,6 @@ $\forall\bind{o\of\ms{tone}}\forall\bind{\alpha,\beta \of \ms{type}} (\alpha
 \overset{o}\to \beta) \mto (\alpha \overset{o}\to \beta)$, where
 $\overset{o}\to$ indicates a function of tone $o$; a tone may be empty (for an
 ordinary function) or ${+}$ for a monotone function.
-
-\todo{does Neel think this is a reasonable conjecture?}
 
 %% ACKNOWLEDGMENTS
 \acks
