@@ -418,9 +418,12 @@ different concrete syntax) in our implementation.
 Although, \todo{for the sake of simplicity(?)}, Datafun as presented does not
 have polymorphism
 
+\todo{these examples are perhaps a good place to point out subtleties of
+  monotonicity typing}
+
 \[\begin{array}{l}
 \fname{map} : (A \uto B) \to \Set{A} \mto \Set{B}\\
-\fname{map}\;f\;a = \setfor{f\;x}{x \in \m{a}}\\
+\fname{map}\;f\;\m{a} = \setfor{f\;x}{x \in \m{a}}\\
 \\
 \fname{filter} : (A \uto 2) \mto \Set{A} \mto \Set{A}\\
 \fname{filter}\;\m{f}\;\m{a} = \setfor{x}{x \in \m{a}, \m{f}\; x}
