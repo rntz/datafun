@@ -83,6 +83,13 @@
                      for x in X
                      unless (nat-member x Y)))
 
+;; map & filter
+(str-map : (str -> str) -> (set str) ~> (set str))
+(str-map f a = (set (f x) for x in a))
+
+(str-filter : (str -> bool) (set str) ~> (set str))
+(str-filter p a = (set x for x in a when (p x)))
+
 ;; set comprehensions
 (some-nats : (set nat))
 (some-nats = (for x in (set 1 2 3)

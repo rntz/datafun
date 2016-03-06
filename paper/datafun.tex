@@ -419,11 +419,11 @@ Although, \todo{for the sake of simplicity(?)}, Datafun as presented does not
 have polymorphism
 
 \[\begin{array}{l}
-\fname{map} : (A \uto B) \to \Set{A} \uto \Set{B}\\
-\fname{map}\;f\;a = \setfor{f\;x}{x \in a}\\
+\fname{map} : (A \uto B) \to \Set{A} \mto \Set{B}\\
+\fname{map}\;f\;a = \setfor{f\;x}{x \in \m{a}}\\
 \\
-\fname{filter} : (A \uto 2) \to \Set{A} \uto \Set{A}\\
-\fname{filter}\;f\;a = \setfor{x}{x \in a, f\; x}
+\fname{filter} : (A \uto 2) \mto \Set{A} \mto \Set{A}\\
+\fname{filter}\;\m{f}\;\m{a} = \setfor{x}{x \in \m{a}, \m{f}\; x}
 \end{array}\]
 
 
