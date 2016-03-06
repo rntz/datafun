@@ -192,7 +192,7 @@ We give the core syntax of Datafun in Figure \ref{fig:syntax}. Datafun is a
 simply-typed $\lambda$-calculus extended in four major ways:
 
 \begin{enumerate}
-\item We add a type of finite sets $\Set{A}$. We use finite sets to represent
+\item We add a type of finite sets, $\Set{A}$. We use finite sets to represent
   Datalog predicates; one might also think of them as tables or views in a
   database setting. We also include finite maps $\Map{A}{B}$, as they are useful
   for some examples.
@@ -204,8 +204,8 @@ simply-typed $\lambda$-calculus extended in four major ways:
   Datafun has two flavors of variable, \emph{ordinary} and \emph{monotone}.
   Ordinary functions introduce ordinary variables; monotone functions introduce
   monotone variables. This distinction is left latent in the formal syntax,
-  \todo{TODO: why?}, but for clarity we write monotone variables in
-  \textbf{bold} in our examples.
+  \todo{TODO: why?}, but for clarity our examples put monotone variables in
+  \textbf{bold}.
 
   In order for ``monotone'' to have meaning, our types are implicitly partially
   ordered. \todo{Discuss orderings}. Sets are ordered by inclusion: $a \le b :
@@ -221,9 +221,10 @@ simply-typed $\lambda$-calculus extended in four major ways:
   To ensure termination, the type at which this fixed-point is taken must be
   \emph{finite} (this corresponds directly to Datalog's requirement that
   predicates be finite). To ensure uniqueness of the least fixed point, the type
-  must have a \emph{least element}.
+  must have a \emph{least element}, which we guarantee by only allowing fixed
+  points at \emph{usl types} (see point \ref{item:usls}, just below).
 
-\item Generalizing the empty set $\emptyset$ and the union operator $\cup$, we
+\item\label{item:usls} Generalizing the empty set $\emptyset$ and the union operator $\cup$, we
   identify a subset of types that have a \emph{least element} $\unit$ and
   support a \emph{least-upper bound} operator $\vee$. We call these \emph{usl
     types}\footnote{\emph{Usl} stands for ``unitary semilattice'', because the
@@ -279,7 +280,9 @@ simply-typed $\lambda$-calculus extended in four major ways:
     &\expandsto& \forin{\mc{L}_1}{\forin{\mc{L}_2}{e}}\\
     \forin{p\in e_1}{e_2}
     &\expandsto& \letin{x}{e_1}{\rawcase{x}{p \to e_2;\,\pwild \to \unit}}\\
-    \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}%% \\
+    \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}\\
+    e_1 \x e_2 &\expandsto& \setfor{(a,b)}{a \in e_1, b \in e_2}\\
+    e_1 \bullet e_2 &\expandsto& \setfor{(a,c)}{(a,b) \in e_1, (b,c) \in e_2}
     %% \ms{let}~x = e_1 ~\ms{in}~ e_2
     %% &\expandsto& (\fn\bind{x} e_2)\; e_1\\
     %% \ms{let}~[x_i = e_i]^* ~\ms{in}~ e
@@ -395,7 +398,9 @@ For purposes of these examples, we use a simple Haskell-like syntax for
 top-level type and function definitions. We also permit ourselves
 pattern-matching\todo{(CITE)}, let-binding, and additional syntax sugar given in
 Figure \ref{fig:sugar}. All of these conveniences are supported (with slightly
-different concrete syntax) by our prototype implementation.
+different concrete syntax) in our implementation.
+
+\todo{TODO: Explain nonlinear variable usage means equality.}
 
 \todo{TODO: mention \& cite monadic query syntax}
 
@@ -433,8 +438,8 @@ have polymorphism
 As a simple example of Datafun's capacity to express higher-order relations,
 consider:
 \[\begin{array}{l}
-\fname{compose} ~:~ \Set{A \x B} \mto \Set{B \x C} \mto \Set{A \x C}\\
-\fname{compose}\;\m{x}\;\m{y} = \setfor{(a,c)}{(a,b) \in \m{x}, (b,c) \in \m{y}}
+(\bullet) ~:~ \Set{A \x B} \mto \Set{B \x C} \mto \Set{A \x C}\\
+\m{x} \bullet \m{y} = \setfor{(a,c)}{(a,b) \in \m{x}, (b,c) \in \m{y}}
 \end{array}\]
 
 \subsection{Transitive closure}
@@ -459,7 +464,9 @@ In Datafun, we may write this as:
 \ms{parent} =
 \{(\ctor{E\"arendil}, \ctor{Elrond}), (\ctor{Elrond}, \ctor{Arwen})\}\\
 \ms{ancestor} = \fix{\m{X}} \ms{parent} \vee
-\setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}\\
+\m{X} \bullet \m{X}
+%% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
+\\
 \end{array}\]
 
 \subsubsection{Transitive closure with an upper bound}
@@ -475,11 +482,14 @@ write $(\fixle{\m{x}}{e_\top} e)$
 \ms{parent}, \ms{ancestor} ~:~ \Set{\str \x \str}\\
 \ms{parent} = \{(\texttt{"e\"arendil"}, \texttt{"elrond"}),
 (\texttt{"elrond"}, \texttt{"arwen"})\}\\
-\ms{ancestor} = \fixle{\m{X}}{%
-  \setfor{(a,b)}{a \in \ms{person}, b \in \ms{person}}}
-\\
-\hspace{4.87em}\ms{parent} \vee
-\setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
+\ms{ancestor} = \fixle{\m{X}}{(\ms{person} \x \ms{person})}
+\ms{parent} \vee (\m{X} \bullet \m{X})
+%% \ms{ancestor} = \fixle{\m{X}}{%
+%%   \setfor{(a,b)}{a \in \ms{person}, b \in \ms{person}}
+%% }
+%% \\
+%% \hspace{4.87em}\ms{parent} \vee
+%% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
 \end{array}\]
 
 \subsubsection{Generic transitive closure}
@@ -489,8 +499,9 @@ For any finite eqtype $\fineq{A}$, we may write:
 \ms{trans} ~:~ \Set{\fineq{A} \x \fineq{A}} \mto \Set{\fineq{A} \x \fineq{A}}
 \vspace{0.3em}\\
 %% \ms{trans}\ E = \fix{X} E \vee \setfor{(a,c)}{(a,b) \in E, (b,c) \in X}
-\ms{trans}\ \m{E} = \fix{\m{X}} \m{E} \vee %
-\setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
+%% \ms{trans}\ \m{E} = \fix{\m{X}} \m{E} \vee %
+%% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
+\ms{trans}\ \m{E} = \fix{\m{X}} \m{E} \vee (\m{X} \bullet \m{X})
 \end{array}\]
 
 \noindent Similarly, for any eqtype $\eq{A}$, we may write:
@@ -498,11 +509,12 @@ For any finite eqtype $\fineq{A}$, we may write:
 \ms{trans} ~:~
 \Set{\eq{A}} \mto \Set{\eq{A} \x \eq{A}} \mto \Set{\eq{A} \x \eq{A}}
 \vspace{0.3em}\\
+%% \ms{trans}\ \m{V}\ \m{E} = %
+%% \ms{fix}~ \m{S} \le \setfor{(a,b)}{a\in \m{V}, b \in \m{V}}\\
+%% \hspace{5.35em}\ms{is}~ \m{E} \vee %
+%% \setfor{(a,c)}{(a,b) \in \m{S}, (b,c) \in \m{S}}\\
 \ms{trans}\ \m{V}\ \m{E} = %
-\ms{fix}~ \m{S} \le \setfor{(a,b)}{a\in \m{V}, b \in \m{V}}\\
-\hspace{5.35em}\ms{is}~ \m{E} \vee %
-\setfor{(a,c)}{(a,b) \in \m{E}, (b,c) \in \m{S}}\\
-%% \ms{trans}\ V\ E = \fixle{S}{V \x V} E \vee (S \bullet S)
+\fixle{\m{S}}{(\m{V} \x \m{V})} \m{E} \vee (\m{S} \bullet \m{S})
 \end{array}\]
 
 \TODO This already shows how we go beyond Datalog's .
@@ -551,6 +563,63 @@ partial functions are introduced, Datafun programs always terminate.
 
 
 \section{Semantics}
+
+\begin{figure}
+  \todo{TODO: DIAGRAM HERE}
+  \label{fig:semcats}
+  \caption{Semantic categories of Datafun}
+\end{figure}
+
+The semantics for Datafun is given in terms of three categories (\ms{Set},
+\ms{Poset}, and \ms{Usl}) and two adjunctions between them (see Figure
+\ref{fig:semcats}).
+
+Given posets $A$, $B$ we use the following notation: \TODO
+
+\subsection{The category \ms{Usl}}
+
+The category \ms{Usl} is the category of join-semilattices with least elements
+(``\emph{usls}''). Directly, an usl is a poset $\tuple{A, \le}$ in which every
+finite subset $X \subseteq_{\ms{fin}} A$ has a least upper bound, written
+$\bigvee X$. We define $\unit$ and $\vee$ with respect to an arbitrary usl as
+follows:
+\begin{eqnarray*}
+  \unit &=& \textstyle\bigvee \emptyset\\
+  a \vee b &=& \textstyle\bigvee \{a,b\}
+\end{eqnarray*}
+
+An \ms{Usl}-morphism $f \in \ms{Usl}(A,B)$ is a function from $A$ to $B$
+satisfying $f(\bigvee X) = \bigvee \setfor{f(x)}{x \in X}$. This is equivalent
+to the two equations:
+\begin{eqnarray*}
+  f(a \vee_A b) &=& f(a) \vee_B f(b)\\
+  f(\unit_A) &=& \unit_B
+\end{eqnarray*}
+
+\ms{Usl} is a subcategory of \ms{Poset}; every \ms{Usl}-morphism is monotone,
+since $a \le b \iff a \vee b = b$, and so given $a \le b$ we have $f(a) \vee
+f(b) = f(a \vee b) = f(b)$, thus $f(a) \le f(b)$ for any \ms{Usl}-morphism $f$.
+
+\subsection{Denotation of Datafun types}
+Datafun types denote posets (see figure \ref{fig:semtypes}). Datafun's usl types
+correspond to posets which happen to be usls.
+
+\newcommand{\powerset}{\mathcal{P}}
+
+\begin{figure}
+  \[\begin{array}{rcl}
+  \den{2} &=& \{0,1\} ~\text{with}~ 0 < 1\\
+  \den{A \x B} &=& \den{A} \x \den{B}\\
+  \den{A + B} &=& \den{A} + \den{B}\\
+  \den{\Set{A}} &=& \powerset(|\den{A}|)\textsf{, ordered by inclusion}
+  \end{array}\]
+  \label{fig:semtypes}
+  \caption{Denotations of Datafun types}
+\end{figure}
+
+%% \ms{Set} is isomorphic to a subcategory of \ms{Poset}, since a set $A$ may be
+%% identified with the discrete poset on $A$ (in which $x \le x$ for every $x \in
+%% A$, but otherwise no inequalities hold).
 
 
 \section{Implementation}
