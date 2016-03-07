@@ -55,7 +55,7 @@ val negate : {()} ->- {()}
 fun negate x = unless set2bool x then tt
 
 
-(* operations on sets of naturals *)
+(* operations on sets of naturals & strings *)
 val nat_member : nat -> set nat ~> bool
 fun nat_member a s = (a = x | x in s)
 
@@ -72,6 +72,16 @@ val some_nats = ⋁(x ∈ {1,2,3}) {x, x + 10}
 
 val powers_upto : nat -> nat ~> set nat
 fun powers_upto b n = fix s = {1} ∨ {b*x | x in s, (b*x) <= n}
+
+(* map & filter *)
+val nat_map : (nat -> nat) -> {nat} ~> {nat}
+fun nat_map f a = {f x | x ∈ a}
+
+val nat_filter : (nat -> bool) ~> {nat} ~> {nat}
+fun nat_filter p a = {x | x ∈ a, p x}
+
+val nat_cross : {nat} ~> {nat} ~> {nat * nat}
+fun nat_cross a b = {(x,y) | x ∈ a, y ∈ b}
 
 
 (* some things I originally thought datafun couldn't do, but it can! *)
@@ -104,8 +114,8 @@ val ancestor : {str, str}
 fix ancestor = advisor ∨ {(a,c) | (a,b) ∈ advisor, (=b,c) ∈ ancestor}
 
 (* relation composition *)
-val compose : {str, str} ~> {str, str} ~> {str, str}
-fun compose x y = {(a,c) | (a,b) in x, (=b,c) in y}
+val str_compose : {str, str} ~> {str, str} ~> {str, str}
+fun str_compose x y = {(a,c) | (a,b) in x, (=b,c) in y}
 
 
 (* CYK parsing! *)
