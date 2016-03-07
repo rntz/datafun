@@ -13,6 +13,8 @@
 \newcommand{\uto}{\to}
 \newcommand{\rn}[1]{\mathsz{8pt}{\ms{#1}}} %for inference rule names
 \def\arraystretch{1.1}                     %a little more spacing, please
+\renewcommand{\FS}[1]{\ms{FS}\;{#1}}
+\newcommand{\FM}[2]{\ms{Map}\;{#1}\;{#2}}
 
 %% taken from the source for Dunfield & Krishnaswami's paper "Complete and Easy
 %% Bidirectional Typechecking for Higher-Rank Polymorphism"
@@ -281,8 +283,8 @@ simply-typed $\lambda$-calculus extended in four major ways:
     \forin{p\in e_1}{e_2}
     &\expandsto& \letin{x}{e_1}{\rawcase{x}{p \to e_2;\,\pwild \to \unit}}\\
     \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}\\
-    e_1 \x e_2 &\expandsto& \setfor{(a,b)}{a \in e_1, b \in e_2}\\
-    e_1 \bullet e_2 &\expandsto& \setfor{(a,c)}{(a,b) \in e_1, (b,c) \in e_2}
+    %% e_1 \x e_2 &\expandsto& \setfor{(a,b)}{a \in e_1, b \in e_2}\\
+    %% e_1 \bullet e_2 &\expandsto& \setfor{(a,c)}{(a,b) \in e_1, (b,c) \in e_2}
     %% \ms{let}~x = e_1 ~\ms{in}~ e_2
     %% &\expandsto& (\fn\bind{x} e_2)\; e_1\\
     %% \ms{let}~[x_i = e_i]^* ~\ms{in}~ e
@@ -395,9 +397,10 @@ simply-typed $\lambda$-calculus extended in four major ways:
 \section{Examples}
 
 For purposes of these examples, we use a simple Haskell-like syntax for
-top-level type and function definitions. We also permit ourselves
-pattern-matching\todo{(CITE)}, let-binding, and additional syntax sugar given in
-Figure \ref{fig:sugar}. All of these conveniences are supported (with slightly
+top-level type and function definitions. We also permit ourselves let-binding,
+$n$-ary product types, \todo{labelled sum-types} and
+pattern-matching\todo{(CITE)}, and additional syntax sugar given in Figure
+\ref{fig:sugar}. All of these conveniences are supported (with slightly
 different concrete syntax) in our implementation.
 
 \todo{TODO: Explain nonlinear variable usage means equality.}
@@ -423,13 +426,14 @@ have polymorphism
 
 \[\begin{array}{l}
 \fname{map} : (A \uto B) \to \Set{A} \mto \Set{B}\\
-\fname{map}\;f\;\m{a} = \setfor{f\;x}{x \in \m{a}}\\
+\fname{map}\;f\;\m{A} = \setfor{f\;x}{x \in \m{A}}\\
 \\
 \fname{filter} : (A \uto 2) \mto \Set{A} \mto \Set{A}\\
-\fname{filter}\;\m{f}\;\m{a} = \setfor{x}{x \in \m{a}, \m{f}\; x}
+\fname{filter}\;\m{f}\;\m{A} = \setfor{x}{x \in \m{A}, \m{f}\; x}\\
+\\
+(\times) : \Set{A} \mto \Set{B} \mto \Set{A \x B}\\
+\m{A} \times \m{B} = \setfor{(a,b)}{a \in \m{A}, b \in \m{B}}
 \end{array}\]
-
-
 
 \TODO
 
@@ -455,8 +459,9 @@ ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).
 \end{verbatim}
 
-%% already shows how datalog is not just a restriction of prolog: in datalog
-%% this actually works, while in prolog, it suffers from infinite loops.
+\todo{Discuss how this works in Datalog, but not in Prolog, b/c Prolog is
+  defined by operational semantics of unification while Datalog is denotational,
+  least-model semantics. It also works in Datafun!}
 
 In Datafun, we may write this as:
 
@@ -466,8 +471,7 @@ In Datafun, we may write this as:
 \fname{parent},~\ms{ancestor} ~:~ \Set{\ms{person} \x \ms{person}}\\
 \ms{parent} =
 \{(\ctor{E\"arendil}, \ctor{Elrond}), (\ctor{Elrond}, \ctor{Arwen})\}\\
-\ms{ancestor} = \fix{\m{X}} \ms{parent} \vee
-\m{X} \bullet \m{X}
+\ms{ancestor} = \fix{\m{X}} \ms{parent} \vee (\m{X} \bullet \m{X})
 %% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
 \\
 \end{array}\]
@@ -577,7 +581,33 @@ The semantics for Datafun is given in terms of three categories (\ms{Set},
 \ms{Poset}, and \ms{Usl}) and two adjunctions between them (see Figure
 \ref{fig:semcats}).
 
-Given posets $A$, $B$ we use the following notation: \TODO
+Given sets $A$, $B$, posets $P$, $Q$, and usls $L$, $M$ we use the following
+notation:
+\begin{center}
+  \begin{tabular}{cl}
+    $\U{P}$ & Underlying set of the poset $P$\\
+    $\stringset$ & Set of strings\\
+    $A \boxtimes B$ & cartesian product of sets $A$, $B$\\
+    $A \boxplus B$ & disjoint union of sets $A$, $B$\\
+    $A \Arr B$ & functions $\ms{Set}(A,B)$\\
+    \two & two-element poset $\{0,1\}$, with $0 < 1$\\
+    $P + Q$ & disjointly-ordered poset on disjoint union of $P,Q$\\
+    $P \x Q$ & pointwise poset on pairs of $P$s and $Q$s\\
+    $P \arr Q$ & pointwise poset on monotone maps $\ms{Poset}(P, Q)$\\
+    $L \lol M$ & pointwise poset on usl-morphisms $\ms{Usl}(L,M)$\\
+    $\Disc{A}$ & discrete poset on underlying set $A$\\
+    $\Sups{P}$ & free usl on an underlying poset $P$\\
+    $\FS{A}$ & free usl on the set $A$; same as $\Sups{(\Disc{A})}$\\
+    $\FM{A}{P}$ & poset of finite maps from $A$ to $P$
+  \end{tabular}
+\end{center}
+
+We use $\boxplus$ and $\boxtimes$ for sum and product of sets to distinguish
+them from sum and product of posets, which we will use more often
+
+rather than the
+more usual $+$ and $\times$ because we will more often be taking the sum and
+product of posets.
 
 \subsection{The category \ms{Usl}}
 
@@ -611,10 +641,16 @@ correspond to posets which happen to be usls.
 
 \begin{figure}
   \[\begin{array}{rcl}
-  \den{2} &=& \{0,1\} ~\text{with}~ 0 < 1\\
+  \den{\cdot} &\in& \ms{Poset}_0\\
+  \den{2} &=& \two\\
+  \den{\N} &=& \N_\le\\
+  \den{\str} &=& \Disc{\mathbb{S}}\\
   \den{A \x B} &=& \den{A} \x \den{B}\\
   \den{A + B} &=& \den{A} + \den{B}\\
-  \den{\Set{A}} &=& \powerset(|\den{A}|)\textsf{, ordered by inclusion}
+  \den{A \mto B} &=& \den{A} \arr \den{B}\\
+  \den{A \uto B} &=& \Disc{\U{\den{A}}} \arr \den{B}\\
+  \den{\Set{A}} &=& \FS{\U{\den{A}}}\\
+  \den{\Map{A}{B}} &=& \FM{\U{\den{A}}}{\den{B}}
   \end{array}\]
   \label{fig:semtypes}
   \caption{Denotations of Datafun types}

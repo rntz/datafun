@@ -1,4 +1,5 @@
 \usepackage{amssymb,amsmath}
+\usepackage{latexsym}
 
 %% uses the AMS Euler math font.
 \usepackage{euler}
@@ -44,10 +45,7 @@
 \newcommand{\bind}[1]{#1\binder}
 \newcommand{\pipe}{\hspace{0.5em}|\hspace{0.5em}}
 \newcommand{\of}{\,{:}\,}
-\newcommand{\den}[1]{\ensuremath{\llbracket{#1}\rrbracket}} % denotation
-% denotation for vertically large things
-\newcommand{\Den}[1]{\left\llbracket{#1}\right\rrbracket}
-\newcommand{\one}{\ensuremath{\mathbf{1}}}
+
 
 %% judgments & rules
 \newcommand{\GD}{\Delta}
@@ -56,6 +54,7 @@
 \newcommand{\isfinite}[1]{#1\ \ms{finite}}
 
 \newcommand{\monofn}{\lambda^+}
+
 
 %% types
 \newcommand{\N}{\mathbb{N}}
@@ -76,10 +75,11 @@
 \newcommand{\eq}[1]{\underaccent{\ms{eq}}{#1}}
 \newcommand{\fineq}[1]{\underaccent{\ms{fin}}{#1}}
 
+
 %% expressions
 \newcommand{\m}[1]{\ensuremath{\mathbf{#1}}}  %monotone variable
 \newcommand{\sub}[1]{[#1]\,}                   % substitution
-\newcommand{\fix}[1]{\ms{fix}~{#1}~\ms{is}~}
+\newcommand{\fix}[1]{\ms{fix}~{#1} = }
 \newcommand{\fixle}[2]{\fix{#1 \le #2}}
 \newcommand{\tuple}[1]{\langle{#1}\rangle}
 \newcommand{\pair}[2]{\tuple{#1,\,#2}}
@@ -103,7 +103,25 @@
 \newcommand{\setfor}[2]{\setlit{{#1}~|~{#2}}}
 \newcommand{\isin}{\mathrel{{\in}\hspace{0.15ex}?}}
 
+
 %% patterns
 \newcommand{\pwild}{\underline{\phantom{a}}}
 
 \newcommand{\ctor}[1]{\textit{#1}}
+
+
+%% semantics
+\newcommand{\den}[1]{\ensuremath{\llbracket{#1}\rrbracket}} % denotation
+% denotation for vertically large things
+\newcommand{\Den}[1]{\left\llbracket{#1}\right\rrbracket}
+\newcommand{\one}{\ensuremath{\mathbf{1}}}
+\newcommand{\two}{\ensuremath{\mathbf{2}}}
+%% \newcommand{\Arr}{\supset}
+\newcommand{\Arr}{\rightarrowtriangle}
+\newcommand{\arr}{\shortrightarrow}
+\newcommand{\lol}{\multimap}
+\newcommand{\Disc}[1]{\ensuremath{\ms{Disc}\;#1}}
+\newcommand{\Sups}[1]{\ensuremath{\ms{Sups}\;#1}}
+\newcommand{\U}[1]{|#1|}
+\newcommand{\stringset}{\mathbb{S}}
+\newcommand{\natposet}{\N_\le}
