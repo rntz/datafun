@@ -24,10 +24,6 @@
 
 
 ;; ========== SYNTAX SUGAR ==========
-(define (p-eq expr)
-  (define t (gensym 'tmp))
-  (p-let t (e-app (e-app (e-prim '=) (e-var t)) expr) (p-lit #t)))
-
 (define (e-lam* ids body) (foldr e-lam body ids))
 
 (define (e-if cnd thn els)

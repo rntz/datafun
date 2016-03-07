@@ -132,9 +132,5 @@
     [(p-or pats) `(or ,@(map pat->sexp pats))]
     [(p-and `(,p)) (pat->sexp p)]
     [(p-and pats) `(and ,@(map pat->sexp pats))]
-    [(p-let x (e-app (e-app (e-prim '=) (e-var y)) e) (p-lit #t))
-     #:when (equal? x y)
-     `(= ,(expr->sexp e))]
-    [(p-let x e (p-and ps)) `(let ,x ,(expr->sexp e) ,@(map pat->sexp ps))]
-    [(p-let x e p) `(let ,x ,(expr->sexp e) ,(pat->sexp p))]))
+    [(p-eq e) `(= ,(expr->sexp e))]))
 
