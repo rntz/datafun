@@ -573,49 +573,53 @@ partial functions are introduced, Datafun programs always terminate.
 
 \begin{figure}
   \todo{TODO: DIAGRAM HERE}
-  \label{fig:semcats}
+  \label{fig:sem-cats}
   \caption{Semantic categories of Datafun}
 \end{figure}
 
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{cl}
+      \multicolumn{2}{c}{\textbf{Set notation}}\\
+      $\U{P}$ & Underlying set of the poset $P$\\
+      $\stringset$ & Set of strings\\
+      $A \boxtimes B$ & Cartesian product of sets $A$, $B$\\
+      $A \boxplus B$ & Disjoint union of sets $A$, $B$\\
+      $A \Arr B$ & Functions from set $A$ to set $B$
+      \vspace{0.5em}\\
+      \multicolumn{2}{c}{\textbf{Poset notation}}\\
+      \two & Two-element poset $\{0,1\}$, with $0 < 1$\\
+      $P + Q$ & Disjointly-ordered poset on disjoint union of $P,Q$\\
+      $P \x Q$ & Pointwise poset on pairs of $P$s and $Q$s\\
+      $P \arr Q$ & Pointwise poset on monotone maps $\ms{Poset}(P, Q)$\\
+      $\Disc{A}$ & Discrete poset on underlying set $A$\\
+      $\FM{A}{P}$ & Poset of finite maps from $A$ to $P$
+      \vspace{0.5em}\\
+      \multicolumn{2}{c}{\textbf{Usl notation}}\\
+      $L \lol M$ & Pointwise poset on usl-morphisms $\ms{Usl}(L,M)$\\
+      $\Sups{P}$ & Free usl on an underlying poset $P$\\
+      $\FS{A}$ & Free usl on the set $A$; same as $\Sups{(\Disc{A})}$\\
+    \end{tabular}
+  \end{center}
+
+  \caption{Semantic notation}
+  \label{fig:sem-notation}
+\end{figure}
+
+
 The semantics for Datafun is given in terms of three categories (\ms{Set},
 \ms{Poset}, and \ms{Usl}) and two adjunctions between them (see Figure
-\ref{fig:semcats}).
-
-Given sets $A$, $B$, posets $P$, $Q$, and usls $L$, $M$ we use the following
-notation:
-\begin{center}
-  \begin{tabular}{cl}
-    $\U{P}$ & Underlying set of the poset $P$\\
-    $\stringset$ & Set of strings\\
-    $A \boxtimes B$ & cartesian product of sets $A$, $B$\\
-    $A \boxplus B$ & disjoint union of sets $A$, $B$\\
-    $A \Arr B$ & functions $\ms{Set}(A,B)$\\
-    \two & two-element poset $\{0,1\}$, with $0 < 1$\\
-    $P + Q$ & disjointly-ordered poset on disjoint union of $P,Q$\\
-    $P \x Q$ & pointwise poset on pairs of $P$s and $Q$s\\
-    $P \arr Q$ & pointwise poset on monotone maps $\ms{Poset}(P, Q)$\\
-    $L \lol M$ & pointwise poset on usl-morphisms $\ms{Usl}(L,M)$\\
-    $\Disc{A}$ & discrete poset on underlying set $A$\\
-    $\Sups{P}$ & free usl on an underlying poset $P$\\
-    $\FS{A}$ & free usl on the set $A$; same as $\Sups{(\Disc{A})}$\\
-    $\FM{A}{P}$ & poset of finite maps from $A$ to $P$
-  \end{tabular}
-\end{center}
-
-We use $\boxplus$ and $\boxtimes$ for sum and product of sets to distinguish
-them from sum and product of posets, which we will use more often
-
-rather than the
-more usual $+$ and $\times$ because we will more often be taking the sum and
-product of posets.
+\ref{fig:sem-cats}). We use nonstandard notation to avoid confusion between
+operations on sets and posets (see Figure \ref{fig:sem-notation}). We take less
+care to distinguish posets and usls, since while a set can be partially ordered
+in many ways, a poset simply either \emph{is} or \emph{is not} an usl.
 
 \subsection{The category \ms{Usl}}
 
 The category \ms{Usl} is the category of join-semilattices with least elements
-(``\emph{usls}''). Directly, an usl is a poset $\tuple{A, \le}$ in which every
-finite subset $X \subseteq_{\ms{fin}} A$ has a least upper bound, written
-$\bigvee X$. We define $\unit$ and $\vee$ with respect to an arbitrary usl as
-follows:
+(``\emph{usls}''). Directly, an usl is a poset $P$ in which every finite subset
+$X \subseteq_{\ms{fin}} |P|$ has a least upper bound $\bigvee X$ in $P$. We
+define $\unit$ and $\vee$ with respect to an arbitrary usl as follows:
 \begin{eqnarray*}
   \unit &=& \textstyle\bigvee \emptyset\\
   a \vee b &=& \textstyle\bigvee \{a,b\}
@@ -635,7 +639,9 @@ f(b) = f(a \vee b) = f(b)$, thus $f(a) \le f(b)$ for any \ms{Usl}-morphism $f$.
 
 \subsection{Denotation of Datafun types}
 Datafun types denote posets (see figure \ref{fig:semtypes}). Datafun's usl types
-correspond to posets which happen to be usls.
+denote posets which are also usls --- and moreover, are usls where the
+least-upper-bound operator $\bigvee$ is
+\emph{computable}.\todo{\footnote{\todo{should this have a proof?}}}
 
 \newcommand{\powerset}{\mathcal{P}}
 
