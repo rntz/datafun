@@ -27,6 +27,11 @@
       (list 'just (hash-ref d k))
       (list 'none)))
 
+(define ((df-cross as) bs) (for*/set ([a as] [b bs]) (list a b)))
+(define ((df-compose a) b)
+  (for*/set ([x a] [y b] #:when (equal? (second x) (first y)))
+    (list (first x) (second y))))
+
 ;; dynamic diiiiiiiispaaaaaaaaatch b/c why not
 (define/match (df<= a)
   [(#f) (const #t)]
