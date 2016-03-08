@@ -66,6 +66,17 @@ sub-expression: ~s
         [('keys (t-fun (or 'mono 'any) (t-map a _) (t-set b))) (eqtype=? a b)]
         [('entries (t-fun 'any (t-map k1 v1) (t-set (t-tuple (list k2 v2)))))
          (and (eqtype=? k1 k2) (subtype? v1 v2))]
+        [('cross (t-fun (or 'mono 'any) (t-set a)
+                        (t-fun (or 'mono 'any)
+                               (t-set b)
+                               (t-tuple (list a1 b1)))))
+         (and (subtype? a a1) (subtype? b b1))]
+        [('compose (t-fun (or 'mono 'any)
+                          (t-set (t-tuple (list a b1)))
+                          (t-fun (or 'mono 'any)
+                                 (t-set (t-tuple (list b2 c)))
+                                 (t-set (t-tuple (list a1 c1))))))
+         (and (eqtype=? b1 b2) (subtype? a a1) (subtype? c c1))]
         [('lookup (t-fun (or 'mono 'any)
                          (t-map k v1)
                          (t-fun 'any k (t-sum (hash-table ['none (list)]
@@ -226,6 +237,20 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (match (expr-check arg)
        [(t-map k v) (t-fun 'any k (t-sum (hash 'none '() 'just (list v))))]
        [t (fail "argument to `lookup' of non-map type ~s" (type->sexp t))])]
+
+    [(e-app (e-app (e-prim 'cross) arg1) arg2)
+     (match* ((expr-check arg1) (expr-check arg2))
+       [((t-set a) (t-set b)) (t-set (t-tuple (list a b)))]
+       [(_ _) (fail "argument to `cross' of non-set type")])]
+
+    [(e-app (e-app (e-prim 'compose) arg1) arg2)
+     (match* ((expr-check arg1) (expr-check arg2))
+       [((t-set (t-tuple (list a b1)))
+         (t-set (t-tuple (list b2 c))))
+        (unless (eqtype=? b1 b2)
+          (fail "arguments to `compose' have incompatible types"))
+        (t-set (t-tuple (list a c)))]
+       [(_ _) (fail "argument to `compose' of non-set-of-pairs type")])]
 
     ;; ===== TRANSPARENT / BOTH SYNTHESIS AND ANALYSIS EXPRESSIONS =====
     [(e-trustme e) (with-tone 'trustme (expr-check e type))]
