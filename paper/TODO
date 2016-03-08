@@ -3,9 +3,11 @@
 * To cover during meeting 2016-03-07
 1. We never use the fact that N is a semilattice type! Should we replace
 naturals N with integers Z?
+- DOESN'T MUCH MATTER, WHICHEVER WE LIKE
 
 2. I've marked monotone vars in bold face to help reader. Should we *also* mark
 monotone variables in formal syntax, or no?
+- IF IT'S EASY.
 
 3. how to divide up work on paper:
 Neel:
@@ -21,6 +23,7 @@ Michael:
 - edit to stay within page limit (refs do NOT count against page limit)
 
 4. Does appendix w/ proofs need to be ready for icfp deadline?
+- YES, NEEDS TO BE READY FOR THE DEADLINE
 
 5. What should go in "Typing rules" section?
 What else should go in "Implementation" section?
