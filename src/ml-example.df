@@ -80,6 +80,7 @@ fun nat_map f a = {f x | x ∈ a}
 val nat_filter : (nat -> bool) ~> {nat} ~> {nat}
 fun nat_filter p a = {x | x ∈ a, p x}
 
+(* can also be invoked with primitive `cross' / (**) / (×) *)
 val nat_cross : {nat} ~> {nat} ~> {nat * nat}
 fun nat_cross a b = {(x,y) | x ∈ a, y ∈ b}
 
@@ -111,9 +112,10 @@ val advisor = { ("constable", "harper"), ("harper", "arbob")
               , ("reynolds", "neel"), ("aldrich", "neel"), ("neel", "rntz") }
 
 val ancestor : {str, str}
-fix ancestor = advisor ∨ {(a,c) | (a,b) ∈ advisor, (=b,c) ∈ ancestor}
+(* fix ancestor = advisor ∨ {(a,c) | (a,b) ∈ advisor, (=b,c) ∈ ancestor} *)
+fix ancestor = advisor ∨ (ancestor • ancestor)
 
-(* relation composition *)
+(* relation composition. can also use primitive operator (•) / `compose'. *)
 val str_compose : {str, str} ~> {str, str} ~> {str, str}
 fun str_compose x y = {(a,c) | (a,b) in x, (=b,c) in y}
 
