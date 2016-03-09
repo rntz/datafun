@@ -1,0 +1,102 @@
+\section{Semantics}
+
+\begin{figure}
+  \todo{TODO: DIAGRAM HERE}
+  \caption{Semantic categories of Datafun}
+  \label{fig:sem-cats}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{cl}
+      \multicolumn{2}{c}{\textbf{Set notation}}\\
+      $\U{P}$ & Underlying set of the poset $P$\\
+      $\stringset$ & Set of strings\\
+      $A \boxtimes B$ & Cartesian product of sets $A$, $B$\\
+      $A \boxplus B$ & Disjoint union of sets $A$, $B$\\
+      $A \Arr B$ & Functions from set $A$ to set $B$
+      \vspace{0.5em}\\
+      \multicolumn{2}{c}{\textbf{Poset notation}}\\
+      \two & Two-element poset $\{0,1\}$, with $0 < 1$\\
+      $P + Q$ & Disjointly-ordered poset on disjoint union of $P,Q$\\
+      $P \x Q$ & Pointwise poset on pairs of $P$s and $Q$s\\
+      $P \arr Q$ & Pointwise poset on monotone maps $\ms{Poset}(P, Q)$\\
+      $\Disc{A}$ & Discrete poset on underlying set $A$\\
+      $\FM{A}{P}$ & Poset of finite maps from the set $A$ to the poset $P$
+      \vspace{0.5em}\\
+      \multicolumn{2}{c}{\textbf{Semilattice notation}}\\
+      $L \lol M$ & Pointwise poset on $\ms{Semilat}(L,M)$\\
+      $\Sups{P}$ & Free semilattice on a poset $P$\\
+      $\FS{A}$ & Free semilattice on a set $A$; same as $\Sups{(\Disc{A})}$\\
+    \end{tabular}
+  \end{center}
+
+  \caption{Semantic notation}
+  \label{fig:sem-notation}
+\end{figure}
+
+
+We give a denotational semantics for Datafun in terms of three categories
+(\ms{Set}, \ms{Poset}, and \ms{Semilat}) and two adjunctions between them (see
+Figure \ref{fig:sem-cats}). We use nonstandard notation to avoid confusion
+between sets and posets (see Figure \ref{fig:sem-notation}). We take less care
+to distinguish posets and semilattices, since while a set can be partially
+ordered in many ways, a poset either \emph{is} or \emph{is not} a semilattice.
+
+\subsection{The category \ms{Semilat}}
+
+The category \ms{Semilat} is the category of join-semilattices with least
+elements (for brevity, simply ``semilattices'').
+
+Directly, a semilattice is a poset $L$ with a least element $\unit$ in which any
+two elements $a,b$ have a least-upper-bound $a \vee b$. From $\unit$ and $\vee$
+it follows that any finite subset $X \subseteq_{\ms{fin}} \U{L}$ has a least
+upper bound, written $\bigvee X$.
+
+A morphism $f \in \ms{Semilat}(L, M)$ is a function from $\U{L}$ to $\U{M}$
+satisfying:
+\begin{eqnarray*}
+  f(a \vee_A b) &=& f(a) \vee_B f(b)\\
+  f(\unit_A) &=& \unit_B
+\end{eqnarray*}
+
+\ms{Semilat} is a subcategory of \ms{Poset}; every \ms{Semilat}-morphism $f$ is
+monotone, since $a \le b \iff a \vee b = b$, and so from $a \le b$ we know $f(a)
+\vee f(b) = f(a \vee b) = f(b)$, thus $f(a) \le f(b)$.
+
+\subsection{Denotation of Datafun types}
+\begin{figure}
+  \[\begin{array}{rcl}
+  \den{\cdot} &\in& \ms{Poset}_0\\
+  \den{\bool} &=& \two\\
+  \den{\N} &=& \N_\le\\
+  \den{\str} &=& \Disc{\mathbb{S}}\\
+  \den{A \x B} &=& \den{A} \x \den{B}\\
+  \den{A + B} &=& \den{A} + \den{B}\\
+  \den{A \mto B} &=& \den{A} \arr \den{B}\\
+  \den{A \uto B} &=& \Disc{\U{\den{A}}} \arr \den{B}\\
+  \den{\Set{A}} &=& \FS{\U{\den{A}}}\\
+  \den{\Map{A}{B}} &=& \FM{\U{\den{A}}}{\den{B}}
+  \end{array}\]
+  \caption{Denotations of Datafun types}
+  \label{fig:sem-types}
+\end{figure}
+
+Datafun types denote posets as shown in Figure \ref{fig:sem-types}. Datafun's
+semilattice types denote posets which are also semilattices --- and moreover,
+semilattices where the least-upper-bound operator $\bigvee$ is
+\emph{computable}. \todo{should this have a proof?} \todo{EXTEND TO CONTEXTS}
+
+\subsection{Denotation of Datafun terms}
+
+We give a denotation for typing derivations with the following signature:
+\begin{eqnarray*}
+  \den{\J{\GD}{\GG}{e}{A}} &\in&
+  \ms{Set}(\U{\den{\GD}}, \ms{Poset}(\den{\GG}, \den{A}))
+  %% \\ &\in&
+  %% \U{\den{\GD}} \Arr \U{\den{\GG} \arr \den{A}}
+\end{eqnarray*}
+
+Colloquially, $\J{\GD}{\GG}{e}{A}$ denotes a function from $\den{\GD} \x
+\den{\GG}$ to $\den{A}$ that must be monotone in $\den{\GG}$ (but not in
+$\den{\GD}$).

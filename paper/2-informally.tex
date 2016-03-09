@@ -1,0 +1,116 @@
+%% FIGURE: CORE SYNTAX
+\begin{figure}
+  \[\begin{array}{ccl}
+    %% types
+    A, B     &\bnfeq& \bool \pipe \N \pipe \str \pipe \Set{A}
+                      \pipe \Map{A}{B}
+    \\
+    \textsf{types} && A + B \pipe A \x B \pipe A \uto B \pipe A \mto B
+    \vspace{0.5em}\\
+    %% semilattice types
+    L, M         &\bnfeq& \bool \pipe \N \pipe \Set{A} \pipe \Map{A}{L}
+    \\
+    \textsf{semilattice types} && L \x M \pipe A \uto L \pipe A \mto L
+    \vspace{0.5em}\\
+    %% equality types
+    \eq{A}, \eq{B} &\bnfeq& \bool \pipe \N \pipe \str \pipe \Set{\eq{A}}
+                            \pipe \Map{\eq{A}}{\eq{B}}
+    \\
+    \textsf{eqtypes} && \eq{A} + \eq{B} \pipe \eq{A} \x \eq{B}
+    \vspace{0.5em}\\
+    %% finite equality types
+    \fineq{A},\fineq{B}
+    &\bnfeq& \bool \pipe \Set{\fineq{A}}
+       \pipe \Map{\fineq{A}}{\fineq{B}}
+       \pipe \fineq{A} + \fineq{B} \pipe \fineq{A} \x \fineq{B}\\
+    \textsf{finite eqtypes}
+    \vspace{0.5em}\\
+    %% contexts
+    \GD,\GG &\bnfeq& \cdot \pipe \GD, x\of A\\
+    \textsf{contexts}\\
+    %% expressions
+    e &\bnfeq& x \pipe \fn\bind{x} e \pipe e\;e
+    \pipe (e,e) \pipe \pi_i\;e \pipe \ms{in}_i\;e\\
+    \textsf{terms}
+    && \case{e}{x}{e}{x}{e}\\
+    && e = e \pipe \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
+    && \singleset{e} \pipe \singlemap{e}{e}
+       \pipe \unit \pipe e \vee e \pipe \letin{x}{e}{e}\\
+    && \fix{x}{e} \pipe \fixle{x}{e}{e}
+  \end{array}\]
+  \caption{Syntax of core Datafun}
+  \label{fig:syntax}
+\end{figure}
+
+\section{Datafun, informally}
+
+We give the core syntax of Datafun in Figure \ref{fig:syntax}. Datafun is a
+simply-typed $\lambda$-calculus extended in four major ways:
+
+\begin{enumerate}
+\item We add a type of finite sets, $\Set{A}$. We use finite sets to represent
+  Datalog predicates; one might also think of them as tables or views in a
+  database setting. We also include finite maps $\Map{A}{B}$, as they are useful
+  for some examples.
+
+  \todo{TODO: make clearer bit about what we use finite sets for. don't rely on
+    Datalog so heavily.}
+
+\item We add a type of \emph{monotone functions}, $A \mto B$. Consequently
+  Datafun has two flavors of variable, \emph{ordinary} and \emph{monotone}.
+  Ordinary functions introduce ordinary variables; monotone functions introduce
+  monotone variables. This distinction is left latent in the formal syntax,
+  \todo{TODO: why?}, but for clarity our examples put monotone variables in
+  \textbf{bold}.
+
+  In order for ``monotone'' to have meaning, our types are implicitly partially
+  ordered. \todo{Discuss orderings}. Sets are ordered by inclusion: $a \le b :
+  \Set{A}$ iff $a \subseteq b$. Maps are ordered both by inclusion and
+  pointwise.
+
+\item We add a \emph{monotone least fixed point} term, $(\fix{\m{x}}{e})$,
+  where $e$ must be monotone in $\m{x}$. This allows us to express
+  Datalog-style recursion.
+
+  \todo{Explain:
+    \begin{itemize}
+    \item compute fixpoint (at least conceptually) by iteration
+    \item start from a least element
+    \item to ensure termination, need finite height of lattice
+    \item finiteness guarantees finite height!
+    \item (\emph{only then} mention analogy to Datalog)
+  \end{itemize}}
+
+  To ensure termination, the type at which this fixed-point is taken must be
+  \emph{finite} (this corresponds directly to Datalog's requirement that
+  predicates be finite). To ensure uniqueness of the least fixed point, the type
+  must have a \emph{least element}, which we guarantee by only allowing fixed
+  points at \emph{semilattice types} (see point \ref{item:semilattice-types},
+  just below).
+
+\item\label{item:semilattice-types} Generalizing the empty set $\emptyset$ and
+  the union operator $\cup$, we identify a subset of types that have a
+  \emph{least element} $\unit$ and support a \emph{least-upper bound} operator
+  $\vee$. We call these \emph{semilattice types}\footnote{Technically, the
+    partial orderings on these types form \emph{join-semilattices with a least
+      element}. For brevity's sake, we call these structures simply
+    ``semilattices.''}, and denote them by the metavariables $L,M$.
+
+  Semilattice types are the ``glue'' of Datafun; they do not serve one single
+  purpose, but simplify the language by satisfying many small ones at once.
+
+  First, semilattice types provide a natural comprehension-style eliminator for
+  sets: given $e : \Set{A}$ we may write $\letin{x}{e}{e'}$ for the
+  least-upper-bound, over all elements $x \in e$, of $e'$, as long as $e' : L$
+  is of semilattice type. Notably, if $e'$ is itself of set type, this provides
+  a monadic bind operation. \todo{explain testing for set membership?}
+
+  Second, we restrict fixed-points $(\fix{\m{x}}{e})$ to semilattice types,
+  which guarantees that we take
+
+  \todo{Explain how products of semilattice being semilattice + monotone
+    fixed-points account for mutual recursion.}
+
+  \todo{Rewrite this to be clearer.}
+
+\end{enumerate}

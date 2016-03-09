@@ -2,12 +2,13 @@
 # $pdflatex = 'pdflatex -interaction=nonstopmode';
 # it makes latexmk quit on compilation failure.
 
-TEXS := $(wildcard *.tex)
-# also rerun if any of $(AUXIL) change
-AUXIL   := Makefile datafun.bib sigplanconf.cls $(wildcard *.sty)
+TEXS   := datafun.tex
+# other things which affect compilation result
+AUXIL  := Makefile datafun.bib sigplanconf.cls
+AUXIL  += $(wildcard *.sty) $(wildcard *.tex)
 
-PDFS    := $(TEXS:.tex=.pdf)
-GARBAGE := $(TEXS:.tex=.dvi) $(TEXS:.tex=.bbl)
+PDFS   := $(TEXS:.tex=.pdf)
+JUNK   := $(TEXS:.tex=.dvi) $(TEXS:.tex=.bbl)
 
 .PHONY: all watch view clean
 all: $(PDFS)
@@ -19,7 +20,7 @@ view:
 
 clean:
 	latexmk -c
-	rm -f $(PDFS) $(GARBAGE)
+	rm -f $(PDFS) $(JUNK)
 
 %.pdf: %.tex $(AUXIL)
 	latexmk --pdf $<

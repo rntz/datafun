@@ -7,6 +7,7 @@
 % 11pt          To set in 11-point type instead of 9-point.
 % numbers       To obtain numeric citation style instead of author/year.
 
+%% ---------- Macros & such ----------
 \usepackage{rntz}
 
 \renewcommand{\pipe}{\mathrel{\mid}} %overrides rntz.sty
@@ -23,6 +24,8 @@
 {\fontsize{\zzfontsz}{1.2\zzfontsz}\selectfont{#2}}}
 \newcommand{\mathsz}[2]{\text{\fontsz{#1}{$#2$}}}
 
+
+%% ---------- Setup ----------
 \begin{document}
 
 \special{papersize=8.5in,11in}
@@ -39,6 +42,8 @@
 %\publicationrights{licensed}     % this is the default
 %\publicationrights{author-pays}
 
+
+%% ---------- The title ----------
 % These are ignored unless 'preprint' option specified.
 \titlebanner{preprint}
 \preprintfooter{Datafun: a Functional Datalog (PREPRINT)}
@@ -66,6 +71,7 @@
 \maketitle
 
 
+%% ---------- The abstract ----------
 \begin{abstract}
 This is the text of the abstract.
 \end{abstract}
@@ -81,755 +87,38 @@ term1, term2
 keyword1, keyword2
 
 
-\section{Introduction}
+%% ---------- Paper body ----------
+%% Section 1: Introduction
+\input{1-introduction}
 
-%% Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nec vero alia sunt
-%% quaerenda contra Carneadeam illam sententiam. Cum ageremus, inquit, vitae beatum
-%% et eundem supremum diem, scribebamus haec. Quid sequatur, quid repugnet, vident.
+%% Section 2: Datafun, informally
+\input{2-informally}
 
-%% Minime id quidem, inquam, alienum, multumque ad ea, quae quaerimus, explicatio
-%% tua ista profecerit. Qua ex cognitione facilior facta est investigatio rerum
-%% occultissimarum. Quis animo aequo videt eum, quem inpure ac flagitiose putet
-%% vivere? Primum quid tu dicis breve? Ita enim vivunt quidam, ut eorum vita
-%% refellatur oratio.
+%% Section 3: examples
+\input{3-examples}
 
-\TODO
+%% Section 4: Typing rules
+\input{4-typing-rules}
 
-\paragraph{Contributions}
-\begin{itemize}
-\item We describe Datafun, a typed language capturing the expressive power of
-  Datalog and extending it to support higher-order functional programming.
-  Datafun's key feature is to \emph{track monotonicity with types}.
+%% Section 5: Semantics
+\input{5-semantics}
 
-\item We present examples illustrating the expressive power of Datafun,
-  including relational-algebra-style operations, transitive closure, CYK
-  parsing, and dataflow analysis.
+%% Section 6: Implementation
+\input{6-implementation}
 
-\item We identify the semantic structures underpinning Datalog, and use this to
-  give a denotational semantics for Datafun in terms of a pair of adjunctions
-  between \ms{Set}, \ms{Poset}, and the category of join-semilattices with a
-  least element.
+%% Section 7: Tradeoffs, etc.
+\input{7-tradeoffs}
 
-\item We have a prototype implementation of Datafun in Racket. \todo{(CITE)}
-\end{itemize}
-
-%% Contributions (as summarized by Michael):
-% - Datafun, like Datalog but functional
-% - examples, incl. both datalog examples & things datalog can’t do
-% - key ingredient is monotonicity; ``found'' semantics by analyzing
-%   datalog: two adjunctions, three categories
-% - prototype implementation
-
-%% Contributions (as written by Neel):
-
-% - We describe Datafun, a type theory for a language capturing the expressive
-%   power of Datalog and extends it to both relax the constructor term
-%   restriction and to support higher-order functional programming.
-
-% - We give a variety of examples that illustrate the expressive power of
-%   Datafun, such as CYK parsing, dataflow analysis, and transitive closure on
-%   graphs, etc. Many of these examples are traditional examples of Datalog,
-%   but we are also able to support things like first-class relations (eg,
-%   generic transitive closure) and higher-order functions (example using
-%   monotonicity and HO?). (doing a fix-point code analysis / parsing something
-%   & dispatching on result?)
-
-% - We identify the semantic structures underpinning Datalog, and use this to
-%   give a denotational semantics for Datafun in terms of a pair of adjunctions
-%   between Set, Poset, and the category of semilattices with finitary joins.
-
-% - We have a prototype implementation of Datafun in Racket.
+%% Section 8: Related & future work
+\input{8-related-future-work}
 
 
-%% FIGURE: CORE SYNTAX
-\begin{figure}
-  \[\begin{array}{ccl}
-    %% types
-    A, B     &\bnfeq& \bool \pipe \N \pipe \str \pipe \Set{A}
-                      \pipe \Map{A}{B}
-    \\
-    \textsf{types} && A + B \pipe A \x B \pipe A \uto B \pipe A \mto B
-    \vspace{0.5em}\\
-    %% semilattice types
-    L, M         &\bnfeq& \bool \pipe \N \pipe \Set{A} \pipe \Map{A}{L}
-    \\
-    \textsf{semilattice types} && L \x M \pipe A \uto L \pipe A \mto L
-    \vspace{0.5em}\\
-    %% equality types
-    \eq{A}, \eq{B} &\bnfeq& \bool \pipe \N \pipe \str \pipe \Set{\eq{A}}
-                            \pipe \Map{\eq{A}}{\eq{B}}
-    \\
-    \textsf{eqtypes} && \eq{A} + \eq{B} \pipe \eq{A} \x \eq{B}
-    \vspace{0.5em}\\
-    %% finite equality types
-    \fineq{A},\fineq{B}
-    &\bnfeq& \bool \pipe \Set{\fineq{A}}
-       \pipe \Map{\fineq{A}}{\fineq{B}}
-       \pipe \fineq{A} + \fineq{B} \pipe \fineq{A} \x \fineq{B}\\
-    \textsf{finite eqtypes}
-    \vspace{0.5em}\\
-    %% contexts
-    \GD,\GG &\bnfeq& \cdot \pipe \GD, x\of A\\
-    \textsf{contexts}\\
-    %% expressions
-    e &\bnfeq& x \pipe \fn\bind{x} e \pipe e\;e
-    \pipe (e,e) \pipe \pi_i\;e \pipe \ms{in}_i\;e\\
-    \textsf{terms}
-    && \case{e}{x}{e}{x}{e}\\
-    && e = e \pipe \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
-    && \singleset{e} \pipe \singlemap{e}{e}
-       \pipe \unit \pipe e \vee e \pipe \letin{x}{e}{e}\\
-    && \fix{x}{e} \pipe \fixle{x}{e}{e}
-  \end{array}\]
-  \caption{Syntax of core Datafun}
-  \label{fig:syntax}
-\end{figure}
-
-
-\section{Datafun, informally}
-
-We give the core syntax of Datafun in Figure \ref{fig:syntax}. Datafun is a
-simply-typed $\lambda$-calculus extended in four major ways:
-
-\begin{enumerate}
-\item We add a type of finite sets, $\Set{A}$. We use finite sets to represent
-  Datalog predicates; one might also think of them as tables or views in a
-  database setting. We also include finite maps $\Map{A}{B}$, as they are useful
-  for some examples.
-
-  \todo{TODO: make clearer bit about what we use finite sets for. don't rely on
-    Datalog so heavily.}
-
-\item We add a type of \emph{monotone functions}, $A \mto B$. Consequently
-  Datafun has two flavors of variable, \emph{ordinary} and \emph{monotone}.
-  Ordinary functions introduce ordinary variables; monotone functions introduce
-  monotone variables. This distinction is left latent in the formal syntax,
-  \todo{TODO: why?}, but for clarity our examples put monotone variables in
-  \textbf{bold}.
-
-  In order for ``monotone'' to have meaning, our types are implicitly partially
-  ordered. \todo{Discuss orderings}. Sets are ordered by inclusion: $a \le b :
-  \Set{A}$ iff $a \subseteq b$. Maps are ordered both by inclusion and
-  pointwise.
-
-\item We add a \emph{monotone least fixed point} term, $(\fix{\m{x}}{e})$,
-  where $e$ must be monotone in $\m{x}$. This allows us to express
-  Datalog-style recursion.
-
-  \todo{Explain:
-    \begin{itemize}
-    \item compute fixpoint (at least conceptually) by iteration
-    \item start from a least element
-    \item to ensure termination, need finite height of lattice
-    \item finiteness guarantees finite height!
-    \item (\emph{only then} mention analogy to Datalog)
-  \end{itemize}}
-
-  To ensure termination, the type at which this fixed-point is taken must be
-  \emph{finite} (this corresponds directly to Datalog's requirement that
-  predicates be finite). To ensure uniqueness of the least fixed point, the type
-  must have a \emph{least element}, which we guarantee by only allowing fixed
-  points at \emph{semilattice types} (see point \ref{item:semilattice-types},
-  just below).
-
-\item\label{item:semilattice-types} Generalizing the empty set $\emptyset$ and
-  the union operator $\cup$, we identify a subset of types that have a
-  \emph{least element} $\unit$ and support a \emph{least-upper bound} operator
-  $\vee$. We call these \emph{semilattice types}\footnote{Technically, the
-    partial orderings on these types form \emph{join-semilattices with a least
-      element}. For brevity's sake, we call these structures simply
-    ``semilattices.''}, and denote them by the metavariables $L,M$.
-
-  Semilattice types are the ``glue'' of Datafun; they do not serve one single
-  purpose, but simplify the language by satisfying many small ones at once.
-
-  First, semilattice types provide a natural comprehension-style eliminator for
-  sets: given $e : \Set{A}$ we may write $\letin{x}{e}{e'}$ for the
-  least-upper-bound, over all elements $x \in e$, of $e'$, as long as $e' : L$
-  is of semilattice type. Notably, if $e'$ is itself of set type, this provides
-  a monadic bind operation. \todo{explain testing for set membership?}
-
-  Second, we restrict fixed-points $(\fix{\m{x}}{e})$ to semilattice types,
-  which guarantees that we take
-
-  \todo{Explain how products of semilattice being semilattice + monotone
-    fixed-points account for mutual recursion.}
-
-  \todo{Rewrite this to be clearer.}
-
-\end{enumerate}
-
-
-%% FIGURE: SYNTAX SUGAR
-\begin{figure}
-  \[\begin{array}{lccl}
-  %% expressions
-  \textsf{terms} &
-  e &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
-             \pipe \forin{\mc{L}}{e}\\
-  &&& \mathcal{C}[\;e]^* \pipe \rawcase{e}{[{p} \to {e}]^*}
-  \vspace{0.5em}\\
-  %% patterns
-
-  %% TODO: maybe remove the pattern-matching stuff? since we don't explain how
-  %% to translate it & we also use various other sugar we don't explain how to
-  %% translate, why do we include only pattern-matching here?
-  \textsf{patterns} &
-  p &\bnfeq& \pwild \pipe x \pipe (p,p)
-             \pipe \ms{true} \pipe \ms{false} \pipe \mathcal{C}[\;p]^*
-  \vspace{0.5em}\\
-  \textsf{constructors} & \mathcal{C} && \text{are abstract identifiers}
-  \vspace{0.5em}\\
-  %% loop clauses
-  \textsf{loops} &
-  \mc{L} &\bnfeq& \mc{L}, \mc{L} \pipe p \in e \pipe e
-  \end{array}\]
-
-  %% the desugaring syntax-expansion itself
-  \begin{eqnarray*}
-    %% e_1 \isin e_2            &\expandsto& \forin{x \in e_2} e_1 = x\\
-    \setfor{e}{\mc{L}}       &\expandsto& \forin{\mc{L}}{\{e\}}\\
-    \forin{\mc{L}_1,\mc{L}_2}{e}
-    &\expandsto& \forin{\mc{L}_1}{\forin{\mc{L}_2}{e}}\\
-    \forin{p\in e_1}{e_2}
-    &\expandsto& \letin{x}{e_1}{\rawcase{x}{p \to e_2;\,\pwild \to \unit}}\\
-    \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}
-    %% e_1 \x e_2 &\expandsto& \setfor{(a,b)}{a \in e_1, b \in e_2}\\
-    %% e_1 \bullet e_2 &\expandsto& \setfor{(a,c)}{(a,b) \in e_1, (b,c) \in e_2}
-    %% \ms{let}~x = e_1 ~\ms{in}~ e_2
-    %% &\expandsto& (\fn\bind{x} e_2)\; e_1\\
-    %% \ms{let}~[x_i = e_i]^* ~\ms{in}~ e
-    %% &\expandsto& [\ms{let}~x_i = e_i~\ms{in}]^* e\\
-    %% \rawcase{e}{[p \to e]^*} &\expandsto& \text{(omitted, see \todo{CITE})}
-  \end{eqnarray*}
-  \caption{Syntax sugar}
-  \label{fig:sugar}
-\end{figure}
-
-
-\section{Examples}
-
-For purposes of these examples, we use a simple Haskell-like syntax for
-top-level type and function definitions. We also permit ourselves infix
-notation, \ms{let}-binding, $n$-ary tuples, $n$-ary sum types with named
-constructors, pattern-matching\todo{(CITE)}, and additional syntax sugar given
-in Figure \ref{fig:sugar} \todo{(TODO: mention \& cite monadic query syntax)}.
-All of these conveniences are supported (with slightly different concrete
-syntax) in our implementation.
-
-For clarity, we set the names of top-level variables in \textsf{sans-serif};
-ordinary variables in $script$; and monotone variables in \m{bold}.
-
-\todo{TODO: Explain nonlinear variable usage means equality.}
-
-\todo{\begin{itemize}
-\item composition of relations?
-\item \texttt{make}-style topological sort?
-\item SQL-style examples?
-\item translating relational algebra into datafun?
-\end{itemize}}
-
-%% Examples
-
-\subsection{Filtering, mapping, and cross products}
-
-Although Datafun as presented does not have polymorphism, we give our examples
-the most general possible type schema. \todo{why?}
-
-\todo{these examples are perhaps a good place to point out subtleties of
-  monotonicity typing}
-
-\[\begin{array}{l}
-\fname{map} ~:~ (A \uto B) \to \Set{A} \mto \Set{B}\\
-\fname{map}\;f\;\m{A} = \setfor{f\;x}{x \in \m{A}}\\
-\\
-\fname{filter} ~:~ (A \uto \bool) \mto \Set{A} \mto \Set{A}\\
-\fname{filter}\;\m{f}\;\m{A} = \setfor{x}{x \in \m{A}, \m{f}\; x}\\
-\\
-(\times) ~:~ \Set{A} \mto \Set{B} \mto \Set{A \x B}\\
-\m{A} \times \m{B} = \setfor{(a,b)}{a \in \m{A}, b \in \m{B}}
-\end{array}\]
-
-\TODO
-
-\subsection{Testing for membership}
-
-\todo{Use this as example of $\bigvee$ at non-set (here, boolean) type.}
-
-\[\begin{array}{l}
-(\isin) ~:~ \eq{A} \to \Set{\eq{A}} \mto \bool\\
-x \isin \m{A} = \forin{y \in \m{A}} x = y
-\end{array}\]
-
-\todo{TODO: discuss nonlinear pattern-matching}
-
-An equivalent definition, making use of nonlinear pattern-matching, would be:
-\[\begin{array}{l}
-x \isin \m{A} = \forin{x \in \m{A}} \ms{true}
-\end{array}\]
-
-\todo{Nonlinear pattern matching makes implicit the equality test and attendant
-  restriction to equality types, but is often extremely convenient.}
-
-\subsection{Composition of relations}
-
-\todo{mention eqtypes again here? or use this to show them off instead of
-  $({\isin})$?} \todo{work phrase ``higher-order'' in here somewhere?}
-
-\noindent As an example of a function over relations, consider:
-\[\begin{array}{l}
-(\bullet) : \Set{A \x \eq{B}} \mto \Set{\eq{B} \x C} \mto \Set{A \x C}\\
-\m{R} \bullet \m{S} = \setfor{(a,c)}{(a,b) \in \m{R}, (b,c) \in \m{S}}
-\end{array}\]
-
-\todo{TODO: mention you can extend to all relational algebra? give example?}
-
-\subsection{Transitive closure}
-
-Consider the following Datalog program:
-\begin{verbatim}
-parent(earendil, elrond).
-parent(elrond, arwen).
-ancestor(X, Y) :- parent(X, Y).
-ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).
-\end{verbatim}
-
-\todo{Discuss how this works in Datalog, but not in Prolog, b/c Prolog is
-  defined by operational semantics of unification while Datalog is denotational,
-  least-model semantics. It also works in Datafun!}
-
-\todo{Neel suggests using distinction b/w backward \& forward chaining here,
-  rather than operational/denotational. see Logical Algorithms paper by
-  McAllister \& co for phrasing?}
-
-In Datafun, we may write this as:
-
-\[\begin{array}{l}
-\mathbf{data}~\ms{person} =
-\ctor{E\"arendil} ~|~ \ctor{Elrond} ~|~ \ctor{Arwen}\\
-\fname{parent},~\ms{ancestor} ~:~ \Set{\ms{person} \x \ms{person}}\\
-\ms{parent} =
-\{(\ctor{E\"arendil}, \ctor{Elrond}), (\ctor{Elrond}, \ctor{Arwen})\}\\
-\ms{ancestor} = \fix{\m{X}} \ms{parent} \vee (\m{X} \bullet \m{X})
-%% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
-\\
-\end{array}\]
-
-\subsubsection{Transitive closure with an upper bound}
-
-If you know the type over which you are taking your transitive closure is
-finite, this suffices. But the more general way to take a fixed-point is to give
-an upper bound which you know the desired answer will not exceed. For this we
-write $(\fixle{\m{x}}{e_\top} e)$
-
-\todo{mention using $\str$ as example}
-
-\todo{explain what happens when $e \ge e_\top$ --- it gets clamped}
-
-\[\begin{array}{l}
-\ms{person} ~:~ \Set{\str}\\
-\ms{person} = \{\texttt{"e\"arendil"}, \texttt{"elrond"}, \texttt{"arwen"}\}\\
-\ms{parent}, \ms{ancestor} ~:~ \Set{\str \x \str}\\
-\ms{parent} = \{(\texttt{"e\"arendil"}, \texttt{"elrond"}),
-(\texttt{"elrond"}, \texttt{"arwen"})\}\\
-\ms{ancestor} = \fixle{\m{X}}{(\ms{person} \x \ms{person})}
-\ms{parent} \vee (\m{X} \bullet \m{X})
-%% \ms{ancestor} = \fixle{\m{X}}{%
-%%   \setfor{(a,b)}{a \in \ms{person}, b \in \ms{person}}
-%% }
-%% \\
-%% \hspace{4.87em}\ms{parent} \vee
-%% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
-\end{array}\]
-
-\subsubsection{Generic transitive closure}
-
-For any finite eqtype $\fineq{A}$, we may write:
-\[\begin{array}{l}
-\ms{trans} ~:~ \Set{\fineq{A} \x \fineq{A}} \mto \Set{\fineq{A} \x \fineq{A}}
-\vspace{0.3em}\\
-%% \ms{trans}\ E = \fix{X} E \vee \setfor{(a,c)}{(a,b) \in E, (b,c) \in X}
-%% \ms{trans}\ \m{E} = \fix{\m{X}} \m{E} \vee %
-%% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
-\ms{trans}\ \m{E} = \fix{\m{X}} \m{E} \vee (\m{X} \bullet \m{X})
-\end{array}\]
-
-\noindent Similarly, for any eqtype $\eq{A}$, we may write:
-\[\begin{array}{l}
-\ms{trans} ~:~
-\Set{\eq{A}} \mto \Set{\eq{A} \x \eq{A}} \mto \Set{\eq{A} \x \eq{A}}
-\vspace{0.3em}\\
-%% \ms{trans}\ \m{V}\ \m{E} = %
-%% \ms{fix}~ \m{S} \le \setfor{(a,b)}{a\in \m{V}, b \in \m{V}}\\
-%% \hspace{5.35em}\ms{is}~ \m{E} \vee %
-%% \setfor{(a,c)}{(a,b) \in \m{S}, (b,c) \in \m{S}}\\
-\ms{trans}\ \m{V}\ \m{E} = %
-\fixle{\m{S}}{(\m{V} \x \m{V})} \m{E} \vee (\m{S} \bullet \m{S})
-\end{array}\]
-
-\TODO This already shows how we go beyond Datalog's .
-
-
-%% FIGURE: PRIMITIVES
-\begin{figure}
-  %% TODO: remove unused primitives.
-  \[\begin{array}{cll}
-  \le &\of& \eq{A} \uto \eq{A} \mto \bool\\
-  \fname{keys}     &:& \Map{A}{B} \mto \Set{A}\\
-  \fname{entries}  &:& \Map{A}{B} \uto \Set{A \x B}\\
-  \fname{tabulate} &:& \Set{A} \mto (A \to B) \mto \Map{A}{B}\\
-  %% \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
-  \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
-  %% \fname{substrings} &\of& \ms{Str} \to \Set{\ms{Str}}\\
-  %% \fname{size}     &:& \Set{\eq{A}} \mto \N\\
-  \fname{range}    &:& \N \uto \N \mto \Set{\N}\\
-  \fname{length}   &:& \str \uto \N\\
-  \fname{substring} &:& \str \uto \N \uto \N \uto \str
-  \end{array}\]
-  \caption{Primitive functions and their type schemes}
-\end{figure}
-
-\subsection{CYK parsing}
-
-\[\begin{array}{l}
-\mathbf{type}~\ms{sym} = \str\\
-\mathbf{data}~\ms{rule} = \ctor{String}~\str ~|~ \ctor{Cat}~\ms{sym}~\ms{sym}\\
-\mathbf{type}~\ms{grammar} = \Set{\ms{sym} \x \ms{rule}}\\
-\mathbf{type}~\ms{fact} = \ms{sym} \x \N \x \N\\
-\fname{parse} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{sym}}\\
-\fname{iter} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{fact}}
-\mto \Set{\ms{fact}}\\
-\fname{parse}\;w\;\m{g} =\\
-\hspace{1em} \ms{let}~ n = \ms{length}\;w\\
-\hspace{2.375em}\m{u} =
-  \setfor{(a,i,j)}{(a,\pwild) \in \m{g}, i \in \ms{range}\;0\;n,
-  j\in\fname{range}\;i\;n}\\
-\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in %
-  \fixle{\m{X}}{\m{u}} \ms{iter}\;w\;\m{g}\;\m{X}}\\
-\fname{iter}\;w\;\m{g}\;\m{X} =\\
-\hspace{1em}\phantom{\vee~}\setfor{(a,i,k)}{(a, \ctor{Cat}~b~c) \in \m{g},
-  (b,i,j) \in \m{X}, (c,j,k) \in \m{X}}\\
-\hspace{1em}\vee~ \{(a,i,i+\fname{length}\;s)\\
-\hspace{2.1em}|~ (a, \ctor{String}~s) \in \m{g},
-i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
-\hspace{2.2em}\phantom{|~} s = \fname{substring}\;w\;i\;(i+\ms{length}\;s)\}
-\end{array}\]
-
-\TODO Since Datalog provides no way to represent a \emph{grammar} as a piece of
-data (because it's compound, not an atom), there is simply no way in Datalog
-proper to express a generic CYK parser. This demonstrates the benefits of moving
-to a functional language.
-
-\TODO Moreover, Datalog's strategy for proving termination involves a
-constructor restriction to ensure all relations are finite. Primitives such as
-\ms{range} and \ms{substring} violate this restriction (as relations, they are
-infinite); it is not immediately obvious that Datalog programs extended with
-these primitives remain terminating. Our use of bounded fixed-points to
-guarantee termination is robust under such extensions; as long as all primitive
-functions are total, Datafun programs always terminate.
-
-\subsection{Dataflow analysis}
-
-\TODO
-
-
-%% FIGURE: Typing rules
-\begin{figure*}
-  \boxed{\ensuremath{\mathsz{10pt}{\J{\Delta}{\Gamma}{e}{A}}}}
-  \begin{mathpar}
-    \infer[\rn{var}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD \cup \GG}
-    %% function rules
-    \and
-    \infer[\fn]{\J{\GD}{\GG}{\fn\bind{x} e}{A \uto B}}{
-      \J{\GD,x\of A}{\GG}{e}{B}}
-    \and
-    \infer[\monofn]{\J{\GD}{\GG}{\fn\bind{x} e}{A \mto B}}{
-      \J{\GD}{\GG,x \of A}{e}{B}}
-    \and
-    \infer[\rn{app}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
-      \J{\GD}{\GG}{e_1}{A \uto B} &
-      \J{\GD}{\cdot}{e_2}{A}}
-    \and
-    \infer[\rn{app^+}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
-      \J{\GD}{\GG}{e_1}{A \mto B} &
-      \J{\GD}{\GG}{e_2}{A}}
-    %% product & sum rules
-    \and
-    \infer[\rn{pair}]{\J{\GD}{\GG}{(e_1,e_2)}{A_1 \x A_2}}{
-      \J{\GD}{\GG}{e_i}{A_i}}
-    \and
-    \infer[\rn{\pi}]{\J{\GD}{\GG}{\pi_i\;e}{A_i}}{\J{\GD}{\GG}{e}{A_1 \x A_2}}
-    \and
-    \infer[\rn{in}]{\J{\GD}{\GG}{\ms{in}_i\;e}{A_1 + A_2}}{\J{\GD}{\GG}{e}{A_i}}
-    \and
-    \infer[\rn{case}]{\J{\GD}{\GG}{\case{e}{x}{e_1}{x}{e_2}}{C}}{
-      \J{\GD}{\cdot}{e}{A_1 + A_2} &
-      \J{\GD,x\of A_i}{\GG}{e_i}{C}}
-    \and
-    \infer[\rn{case^+}]{\J{\GD}{\GG}{\case{e}{x}{e_1}{x}{e_2}}{C}}{
-      \J{\GD}{\GG}{e}{A_1 + A_2} &
-      \J{\GD}{\GG,x\of A_i}{e_i}{C}}
-    %% boolean rules
-    \and
-    \infer[\rn{=}]{\J{\GD}{\GG}{e_1 = e_2}{\bool}}{\J{\GD}{\GG}{e_i}{\eq{A}}}
-    \and
-    \infer[\rn{true}]{\J{\GD}{\GG}{\ms{true}}{\bool}}{}
-    \and
-    \infer[\rn{false}]{\J{\GD}{\GG}{\ms{false}}{\bool}}{}
-    \and
-    \infer[\rn{if}]{\J{\GD}{\GG}{\ifthen{e}{e_1}{e_2}}{A}}{
-      \J{\GD}{\cdot}{e}{\bool} &
-      \J{\GD}{\GG}{e_i}{A}}
-    \and
-    \infer[\rn{if^+}]{\J{\GD}{\GG}{\ifthen{e}{e_1}{\unit}}{L}}{
-      \J{\GD}{\GG}{e}{\bool} &
-      \J{\GD}{\GG}{e_1}{L}}
-    %% set & semilattice rules
-    \and
-    \infer[\rn{\{\}}]{\J{\GD}{\GG}{\{e\}}{\Set{A}}}{\J{\GD}{\cdot}{e}{A}}
-    \and
-    \infer[\rn{\{:\}}]{\J{\GD}{\GG}{\singlemap{e_1}{e_2}}{\Map{A}{B}}}{
-      \J{\GD}{\cdot}{e_1}{A} &
-      \J{\GD}{\GG}{e_2}{B}}
-    \and
-    \infer[\unit]{\J{\GD}{\GG}{\unit}{L}}{}
-    \and
-    \infer[\rn{\vee}]{\J{\GD}{\GG}{e_1 \vee e_2}{L}}{\J{\GD}{\GG}{e_i}{L}}
-    \and
-    \infer[\rn{\bigvee}]{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{L}}{
-      \J{\GD}{\GG}{e_1}{\Set{A}} &
-      \J{\GD,x\of A}{\GG}{e_2}{L}}
-    \and
-    \infer[\rn{fix}]{\J{\GD}{\GG}{\fix{x}{e}}{\fineq{L}}}{
-      \J{\GD}{\GG,x\of L}{e}{\fineq{L}}}
-    \and
-    \infer[\rn{fix_{\le}}]{\J{\GD}{\GG}{\fixle{x}{e_1}{e_2}}{\eq{L}}}{
-      \J{\GD}{\GG}{e_1}{\eq{L}} &
-      \J{\GD}{\GG,x \of \eq{L}}{e_2}{\eq{L}}}
-  \end{mathpar}
-
-  \caption{Typing rules for core Datafun}
-\end{figure*}
-
-
-\section{Typing rules}
-
-
-\section{Semantics}
-
-\begin{figure}
-  \todo{TODO: DIAGRAM HERE}
-  \caption{Semantic categories of Datafun}
-  \label{fig:sem-cats}
-\end{figure}
-
-\begin{figure}
-  \begin{center}
-    \begin{tabular}{cl}
-      \multicolumn{2}{c}{\textbf{Set notation}}\\
-      $\U{P}$ & Underlying set of the poset $P$\\
-      $\stringset$ & Set of strings\\
-      $A \boxtimes B$ & Cartesian product of sets $A$, $B$\\
-      $A \boxplus B$ & Disjoint union of sets $A$, $B$\\
-      $A \Arr B$ & Functions from set $A$ to set $B$
-      \vspace{0.5em}\\
-      \multicolumn{2}{c}{\textbf{Poset notation}}\\
-      \two & Two-element poset $\{0,1\}$, with $0 < 1$\\
-      $P + Q$ & Disjointly-ordered poset on disjoint union of $P,Q$\\
-      $P \x Q$ & Pointwise poset on pairs of $P$s and $Q$s\\
-      $P \arr Q$ & Pointwise poset on monotone maps $\ms{Poset}(P, Q)$\\
-      $\Disc{A}$ & Discrete poset on underlying set $A$\\
-      $\FM{A}{P}$ & Poset of finite maps from the set $A$ to the poset $P$
-      \vspace{0.5em}\\
-      \multicolumn{2}{c}{\textbf{Semilattice notation}}\\
-      $L \lol M$ & Pointwise poset on $\ms{Semilat}(L,M)$\\
-      $\Sups{P}$ & Free semilattice on a poset $P$\\
-      $\FS{A}$ & Free semilattice on a set $A$; same as $\Sups{(\Disc{A})}$\\
-    \end{tabular}
-  \end{center}
-
-  \caption{Semantic notation}
-  \label{fig:sem-notation}
-\end{figure}
-
-
-We give a denotational semantics for Datafun in terms of three categories
-(\ms{Set}, \ms{Poset}, and \ms{Semilat}) and two adjunctions between them (see
-Figure \ref{fig:sem-cats}). We use nonstandard notation to avoid confusion
-between sets and posets (see Figure \ref{fig:sem-notation}). We take less care
-to distinguish posets and semilattices, since while a set can be partially
-ordered in many ways, a poset either \emph{is} or \emph{is not} a semilattice.
-
-\subsection{The category \ms{Semilat}}
-
-The category \ms{Semilat} is the category of join-semilattices with least
-elements (for brevity, simply ``semilattices'').
-
-Directly, a semilattice is a poset $L$ with a least element $\unit$ in which any
-two elements $a,b$ have a least-upper-bound $a \vee b$. From $\unit$ and $\vee$
-it follows that any finite subset $X \subseteq_{\ms{fin}} \U{L}$ has a least
-upper bound, written $\bigvee X$.
-
-A morphism $f \in \ms{Semilat}(L, M)$ is a function from $\U{L}$ to $\U{M}$
-satisfying:
-\begin{eqnarray*}
-  f(a \vee_A b) &=& f(a) \vee_B f(b)\\
-  f(\unit_A) &=& \unit_B
-\end{eqnarray*}
-
-\ms{Semilat} is a subcategory of \ms{Poset}; every \ms{Semilat}-morphism $f$ is
-monotone, since $a \le b \iff a \vee b = b$, and so from $a \le b$ we know $f(a)
-\vee f(b) = f(a \vee b) = f(b)$, thus $f(a) \le f(b)$.
-
-\subsection{Denotation of Datafun types}
-\begin{figure}
-  \[\begin{array}{rcl}
-  \den{\cdot} &\in& \ms{Poset}_0\\
-  \den{\bool} &=& \two\\
-  \den{\N} &=& \N_\le\\
-  \den{\str} &=& \Disc{\mathbb{S}}\\
-  \den{A \x B} &=& \den{A} \x \den{B}\\
-  \den{A + B} &=& \den{A} + \den{B}\\
-  \den{A \mto B} &=& \den{A} \arr \den{B}\\
-  \den{A \uto B} &=& \Disc{\U{\den{A}}} \arr \den{B}\\
-  \den{\Set{A}} &=& \FS{\U{\den{A}}}\\
-  \den{\Map{A}{B}} &=& \FM{\U{\den{A}}}{\den{B}}
-  \end{array}\]
-  \caption{Denotations of Datafun types}
-  \label{fig:sem-types}
-\end{figure}
-
-Datafun types denote posets as shown in Figure \ref{fig:sem-types}. Datafun's
-semilattice types denote posets which are also semilattices --- and moreover,
-semilattices where the least-upper-bound operator $\bigvee$ is
-\emph{computable}. \todo{should this have a proof?} \todo{EXTEND TO CONTEXTS}
-
-\subsection{Denotation of Datafun terms}
-
-We give a denotation for typing derivations with the following signature:
-\begin{eqnarray*}
-  \den{\J{\GD}{\GG}{e}{A}} &\in&
-  \ms{Set}(\U{\den{\GD}}, \ms{Poset}(\den{\GG}, \den{A}))
-  %% \\ &\in&
-  %% \U{\den{\GD}} \Arr \U{\den{\GG} \arr \den{A}}
-\end{eqnarray*}
-
-Colloquially, $\J{\GD}{\GG}{e}{A}$ denotes a function from $\den{\GD} \x
-\den{\GG}$ to $\den{A}$ that must be monotone in $\den{\GG}$ (but not in
-$\den{\GD}$).
-
-
-\section{Implementation}
-We have built a proof-of-concept implementation of Datafun in Racket
-\todo{CITE}. In addition to core Datafun, it supports pattern-matching, variant
-types, record types, subtyping, antitone functions, and unbounded (potentially
-nonterminating) fixed points. It performs no optimizations whatsoever.
-
-\todo{LINK}
-
-
-%% not sure how many sections to split this up into.
-\section{Tradeoffs, limitations, and design decisions}
-
-\paragraph{Finite and bounded fixed-points} \TODO Discuss
-Datalog's constructor restriction (name?), not being sure how to encode it in a
-type theory, its disadvantages, and the disadvantages of our approaches ---
-finite \& bounded fixed-points.
-
-bounded fixed-points strictly more general than finitary-type fixed-points, but
-at possible runtime cost, but finite types very restrictive in practice
-
-\TODO In particular, could bounded fix-points have adverse performance
-implications?
-
-\paragraph{Termination} \TODO nontermination and declarativeness.
-
-For example, one powerful optimization technique is \emph{loop reordering} (in
-SQL terminology, \emph{join reordering}), that is, taking advantage of the
-equation
-\begin{eqnarray*}
-  \forin{x \in e_1} \forin{y \in e_2} e
-  &=& \forin{y \in e_2} \forin{x \in e_1} e
-\end{eqnarray*}
-when $x,y \notin \ms{FV}(e_1) \cup \ms{FV}(e_2)$. (\TODO Explain why join
-reordering is powerful). But this equation does not always hold in the presence
-of nontermination; for example, if $e_1 = \unit$ and $e_2$ diverges. \TODO
-finish up
-
-\paragraph{Type inference} Typechecking needs to distinguish between ordinary
-and monotone $\lambda$, application, \ms{case}, \ms{let}, and \ms{if}. In our
-implementation we solve this in two ways:
-\begin{enumerate}
-\item Bidirectional type inference \todo{CITE} determines whether $\fn$s and
-  applications are ordinary or monotone.
-\item For $\ms{if}$, $\ms{case}$, and $\ms{let}$, the programmer annotates which
-  form is intended; for example, $(\ifthen{e}{e_1}{\unit})$ is written
-  (\texttt{when e then e1}) to indicate the rule $\ms{if}^+$ applies.
-\end{enumerate}
-
-It remains an open question how much annotation is necessary. See
-Section \ref{sec:futurework}, \emph{Related and future work}.
-
-\paragraph{User-defined usls}
-The two fundamental usl types Datafun provides are booleans and sets; other type
-constructors such as products, functions, and finite maps merely preserve usl
-structure where they find it. One might contemplate allowing the programmer to
-define their own usl structures using something like Haskell's
-\texttt{newtype}/\texttt{instance}. Unfortunately, this \TODO
-\begin{itemize}
-\item User-defined functions give the compiler no guarantee that they are
-  commutative, associative, and idempotent.
-\item Without further information it would be impossible to
-\end{itemize}
-
-Unfortunately, there is no simple characterization of the space of all possible
-computable usls.
-
-\paragraph{Lexical types}
-\todo{\begin{itemize}
-\item Pro: allow expressing many things more generally, for example, map lookup
-\item Con: have no good general monotone elimination rule
-\item Con: complicate the type theory
-\end{itemize}}
-
-
-\section{Related and future work}
-\label{sec:futurework}
-
-\paragraph{Optimization}
-\begin{itemize}
-\item \TODO the datalog literature
-\end{itemize}
-
-\paragraph{Polymorphism}
-\begin{itemize}
-\item \TODO quantification over different classes of type variable (ordinary,
-  equality, lattice); amounts to a typeclass system, so this is not new work.
-\item \TODO tone polymorphism and why you need it for principal types; e.g.
-  what is the type of $\fn\bind{f}\fn\bind{x} f\;x$?
-\end{itemize}
-
-\paragraph{Type inference} blah
-
-\TODO Ref Dunfield \& Krishnaswami, higher-order bidirectional type inference.
-
-\todo{REWRITE} We speculate that bidirectional inference could be replaced by a
-Damas-Milner \todo{CITE} style algorithm, which infers a principal type for any
-term without any annotation at all, \emph{if} we add polymorphism,
-tone-polymorphism, and subtyping---so that, for example, $\fn\bind{f}\fn\bind{x}
-f\;x$ can be assigned the principal type
-$\forall\bind{o\of\ms{tone}}\forall\bind{\alpha,\beta \of \ms{type}} (\alpha
-\overset{o}\to \beta) \mto (\alpha \overset{o}\to \beta)$, where
-$\overset{o}\to$ indicates a function of tone $o$; a tone may be empty (for an
-ordinary function) or ${+}$ for a monotone function.
-
-%% ACKNOWLEDGMENTS
+%% ---------- End matter ----------
 \acks
 
 Acknowledgments, if needed.
 
 % We recommend abbrvnat bibliography style.
-
 \bibliographystyle{abbrvnat}
 \bibliography{datafun}
 
