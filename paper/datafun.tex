@@ -7,22 +7,7 @@
 % 11pt          To set in 11-point type instead of 9-point.
 % numbers       To obtain numeric citation style instead of author/year.
 
-%% ---------- Macros & such ----------
-\usepackage{rntz}
-
-\renewcommand{\pipe}{\mathrel{\mid}} %overrides rntz.sty
-\newcommand{\uto}{\to}
-\newcommand{\rn}[1]{\mathsz{8pt}{\ms{#1}}} %for inference rule names
-\def\arraystretch{1.1}                     %a little more spacing, please
-\renewcommand{\FS}[1]{\ms{FS}\;{#1}}
-\newcommand{\FM}[2]{\ms{Map}\;{#1}\;{#2}}
-
-%% taken from the source for Dunfield & Krishnaswami's paper "Complete and Easy
-%% Bidirectional Typechecking for Higher-Rank Polymorphism"
-\newdimen\zzfontsz
-\newcommand{\fontsz}[2]{\zzfontsz=#1%
-{\fontsize{\zzfontsz}{1.2\zzfontsz}\selectfont{#2}}}
-\newcommand{\mathsz}[2]{\text{\fontsz{#1}{$#2$}}}
+\usepackage{datafun}
 
 
 %% ---------- Setup ----------
