@@ -1,15 +1,19 @@
 -*- mode: outline -*-
 
 * To cover during meeting 2016-03-07
-1. We never use the fact that N is a semilattice type! Should we replace
-naturals N with integers Z?
-- DOESN'T MUCH MATTER, WHICHEVER WE LIKE
+** 1. Replace naturals by integers?
+We never use the fact that N is a semilattice type! Should we replace naturals N
+with integers Z?
 
-2. I've marked monotone vars in bold face to help reader. Should we *also* mark
+DOESN'T MUCH MATTER, WHICHEVER WE LIKE
+
+** 2. Monotone variable marking
+I've marked monotone vars in bold face to help reader. Should we *also* mark
 monotone variables in formal syntax, or no?
-- IF IT'S EASY.
 
-3. how to divide up work on paper:
+IF IT'S EASY.
+
+** 3. how to divide up work on paper:
 Neel:
 - abstract, introduction
 - check semantics section once done, and rest of paper if have time
@@ -22,15 +26,28 @@ Michael:
 - anonymize paper for blind reviewing
 - edit to stay within page limit (refs do NOT count against page limit)
 
-4. Does appendix w/ proofs need to be ready for icfp deadline?
-- YES, NEEDS TO BE READY FOR THE DEADLINE
+** 4. Does appendix w/ proofs need to be ready for icfp deadline?
+YES, NEEDS TO BE READY FOR THE DEADLINE
 
-5. What should go in "Typing rules" section?
-What else should go in "Implementation" section?
+** 5. What should go in "Typing rules" section?
+Explain in english the judgment and each of the typing rules. Explain all rules,
+but can say "this is standard" for ordinary rules (like products).
 
-6. ransack Neel's memory for papers to cite on:
-- pattern matching
-- monadic query syntax
+- explain variable rule: two ordinary intuitionistic contexts, can use variables from either
+
+- explain why they are two application rules app, and why regular application
+  can't use monotone variables in the argument.
+
+- explain sums (why 2 elims)
+
+** 6. What else should go in "Implementation" section?
+- we built a PoC in racket
+- we added these additional features
+- ?? ML-like surface syntax?
+- call-by-value, naive implementation
+- bidirectional typechecking (move the tradeoff stuff there?)
+- all examples in paper have been implemented
+  you can download it at the following github repository
 
 * Syntax
   - 1-level syntax (ie, one grammar of types)
