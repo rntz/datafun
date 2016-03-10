@@ -2,18 +2,20 @@
 \begin{figure*}
   %% \boxed{\ensuremath{\mathsz{10pt}{\J{\Delta}{\Gamma}{e}{A}}}}
   \begin{mathpar}
-    \infer[\rn{var}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD \cup \GG}
+    \infer[\rn{var}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD}
+    \and
+    \infer[\rn{var}^+]{\J{\GD}{\GG}{\m{x}}{A}}{\m{x}\of A \in \GG}
     %% function rules
     \and
     \infer[\fn]{\J{\GD}{\GG}{\fn\bind{x} e}{A \uto B}}{
       \J{\GD,x\of A}{\GG}{e}{B}}
     \and
-    \infer[\monofn]{\J{\GD}{\GG}{\fn\bind{x} e}{A \mto B}}{
-      \J{\GD}{\GG,x \of A}{e}{B}}
-    \and
     \infer[\rn{app}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
       \J{\GD}{\GG}{e_1}{A \uto B} &
       \J{\GD}{\cdot}{e_2}{A}}
+    \and
+    \infer[\monofn]{\J{\GD}{\GG}{\fn\bind{x} e}{A \mto B}}{
+      \J{\GD}{\GG,x \of A}{e}{B}}
     \and
     \infer[\rn{app^+}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
       \J{\GD}{\GG}{e_1}{A \mto B} &
@@ -31,12 +33,12 @@
       \J{\GD}{\cdot}{e}{A_1 + A_2} &
       \J{\GD,x\of A_i}{\GG}{e_i}{C}}
     \and
-    \infer[\rn{case^+}]{\J{\GD}{\GG}{\case{e}{x}{e_1}{x}{e_2}}{C}}{
+    \infer[\rn{case^+}]{\J{\GD}{\GG}{\case{e}{\m{x}}{e_1}{\m{x}}{e_2}}{C}}{
       \J{\GD}{\GG}{e}{A_1 + A_2} &
-      \J{\GD}{\GG,x\of A_i}{e_i}{C}}
+      \J{\GD}{\GG,\m{x}\of A_i}{e_i}{C}}
     %% boolean rules
-    \and
-    \infer[\rn{=}]{\J{\GD}{\GG}{e_1 = e_2}{\bool}}{\J{\GD}{\GG}{e_i}{\eq{A}}}
+    %% \and
+    %% \infer[\rn{=}]{\J{\GD}{\GG}{e_1 = e_2}{\bool}}{\J{\GD}{\GG}{e_i}{\eq{A}}}
     \and
     \infer[\rn{true}]{\J{\GD}{\GG}{\ms{true}}{\bool}}{}
     \and
@@ -65,10 +67,10 @@
       \J{\GD}{\GG}{e_1}{\Set{A}} &
       \J{\GD,x\of A}{\GG}{e_2}{L}}
     \and
-    \infer[\rn{fix}]{\J{\GD}{\GG}{\fix{x}{e}}{\fineq{L}}}{
+    \infer[\rn{fix}]{\J{\GD}{\GG}{\fix{\m{x}}{e}}{\fineq{L}}}{
       \J{\GD}{\GG,x\of L}{e}{\fineq{L}}}
     \and
-    \infer[\rn{fix_{\le}}]{\J{\GD}{\GG}{\fixle{x}{e_1}{e_2}}{\eq{L}}}{
+    \infer[\rn{fix_{\le}}]{\J{\GD}{\GG}{\fixle{\m{x}}{e_1}{e_2}}{\eq{L}}}{
       \J{\GD}{\GG}{e_1}{\eq{L}} &
       \J{\GD}{\GG,x \of \eq{L}}{e_2}{\eq{L}}}
   \end{mathpar}

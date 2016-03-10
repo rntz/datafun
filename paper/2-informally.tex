@@ -26,17 +26,21 @@
     \textsf{finite eqtypes}
     \vspace{0.5em}\\
     %% contexts
-    \GD,\GG &\bnfeq& \cdot \pipe \GD, x\of A\\
+    \GD &\bnfeq& \cdot \pipe \GD, x\of A\\
+    \GG &\bnfeq& \cdot \pipe \GG{},\m{x}\of A\\
     \textsf{contexts}\\
     %% expressions
-    e &\bnfeq& x \pipe \fn\bind{x} e \pipe e\;e
-    \pipe (e,e) \pipe \pi_i\;e \pipe \ms{in}_i\;e\\
+    e &\bnfeq& x \pipe \m{x} \pipe \fn\bind{x} e \pipe \fn\bind{\m{x}} e
+    \pipe e\;e\\
     \textsf{terms}
+    && (e,e) \pipe \pi_1\;e \pipe \pi_2\;e
+    \pipe \ms{in}_1\;e \pipe \ms{in}_2\;e\\
     && \case{e}{x}{e}{x}{e}\\
-    && e = e \pipe \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
+    && \case{e}{\m{x}}{e}{\m{x}}{e}\\
+    && \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
     && \singleset{e} \pipe \singlemap{e}{e}
        \pipe \unit \pipe e \vee e \pipe \letin{x}{e}{e}\\
-    && \fix{x}{e} \pipe \fixle{x}{e}{e}
+    && \fix{\m{x}}{e} \pipe \fixle{\m{x}}{e}{e}
   \end{array}\]
   \caption{Syntax of core Datafun}
   \label{fig:syntax}
