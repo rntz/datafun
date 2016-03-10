@@ -89,21 +89,23 @@ simply-typed $\lambda$-calculus extended in four major ways:
   just below).
 
 \item\label{item:semilattice-types} Generalizing the empty set $\emptyset$ and
-  the union operator $\cup$, we identify a subset of types that have a
-  \emph{least element} $\unit$ and support a \emph{least-upper bound} operator
-  $\vee$. We call these \emph{semilattice types}\footnote{Technically, the
-    partial orderings on these types form \emph{join-semilattices with a least
-      element}. For brevity's sake, we call these structures simply
-    ``semilattices.''}, and denote them by the metavariables $L,M$.
+  union $\cup$, we identify a subset of types that have a \emph{least element}
+  $\unit$ and a \emph{least upper bound} operator $\vee$. We call these
+  \emph{semilattice types}\footnote{Technically, the partial orderings on these
+    types form \emph{join-semilattices with a least element}. For brevity's
+    sake, we call these structures simply ``semilattices.''}, and denote them by
+  the metavariables $L,M$.
 
-  Semilattice types are the ``glue'' of Datafun; they do not serve one single
-  purpose, but simplify the language by satisfying many small ones at once.
+  Semilattice types are the ``glue'' of Datafun; they serve several small
+  purposes that together simplify and unify the language.
 
-  First, semilattice types provide a natural comprehension-style eliminator for
-  sets: given $e : \Set{A}$ we may write $\letin{x}{e}{e'}$ for the
-  least-upper-bound, over all elements $x \in e$, of $e'$, as long as $e' : L$
-  is of semilattice type. Notably, if $e'$ is itself of set type, this provides
-  a monadic bind operation. \todo{explain testing for set membership?}
+  First, they provide a natural eliminator for sets: given $e : \Set{A}$ we may
+  write $\letin{x}{e}{e'}$ for the least upper bound, over all elements $x \in
+  e$, of $e'$, as long as $e' : L$ has a semilattice type. If $e' : \Set{B}$ is
+  itself a set, for example, this serves as the set type's monadic ``bind''
+  operation. For example, $\forin{x \in \setlit{1,2,3}} \{10 \cdot x, x^2\}$
+  denotes the set $\{1, 4, 9, 10, 20, 30\}$. \todo{explain testing for set
+    membership?}
 
   Second, we restrict fixed-points $(\fix{\m{x}}{e})$ to semilattice types,
   which guarantees that we take
