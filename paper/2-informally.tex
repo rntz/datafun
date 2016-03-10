@@ -48,13 +48,12 @@ We give the core syntax of Datafun in Figure \ref{fig:syntax}. Datafun is a
 simply-typed $\lambda$-calculus extended in four major ways:
 
 \begin{enumerate}
-\item We add a type of finite sets, $\Set{A}$. We use finite sets to represent
-  Datalog predicates; one might also think of them as tables or views in a
-  database setting. We also include finite maps $\Map{A}{B}$, as they are useful
-  for some examples.
+\item We add a type of finite sets, $\Set{A}$. We also include finite maps
+  $\Map{A}{B}$, as they are useful for some examples. \todo{Describe why sets
+  are useful?}
 
-  \todo{TODO: make clearer bit about what we use finite sets for. don't rely on
-    Datalog so heavily.}
+  %% We use finite sets to represent Datalog predicates; one might also think of
+  %% them as tables or views in a database setting.
 
 \item We add a type of \emph{monotone functions}, $A \mto B$. Consequently
   Datafun has two flavors of variable, \emph{ordinary} and \emph{monotone}.
