@@ -67,24 +67,28 @@ simply-typed $\lambda$-calculus extended in four major ways:
   In order for ``monotone'' to have meaning, our types are implicitly partially
   ordered:
   \begin{itemize}
-  \item Booleans are ordered $\ms{false} < \ms{true}$.
+  \item Booleans $\bool$ are ordered $\ms{false} < \ms{true}$.
   \item Natural numbers $\N$ have the usual order: $0 < 1 < 2 < ...$.
-  \item We have no particular use-case for comparing strings in this paper, so
-    we order them discretely; $a \le b$ iff $a = b$. \todo{Better explanation?}
+  \item We have no particular use-case for comparing strings $\str$ in
+    this paper, so we order them discretely; $a \le b$ iff $a = b$. \todo{Better
+      explanation?}
   \item Pairs and functions are ordered pointwise:
     \begin{itemize}
     %% \item $(a_1, b_1) \le (a_2, b_2)$ iff $a_1 \le a_2 \wedge b_1 \le b_2$
     \item $(a, x) \le (b, y)$ iff $a \le b \wedge x \le y$
     \item $f \le g$ iff $\forall \bind{x} f(x) \le g(x)$
     \end{itemize}
-  \item Sum types are ordered disjointly: $\ms{in}_i\; a \le \ms{in}_i\; b$ iff
-    $a \le b$, but $\ms{in}_1\; a$ and $\ms{in}_2\; b$ are never comparable.
+  \item Sum types are ordered disjointly: $\ms{in}_i\; a \le
+    \ms{in}_i\; b$ iff $a \le b$, but $\ms{in}_1\; a$ and $\ms{in}_2\; b$ are
+    never comparable.
   \item Sets are ordered by inclusion: $a \le b$ iff $a \subseteq b$.
   \item Maps are ordered both by inclusion and pointwise.
   \end{itemize}
 
 \item We add a term $(\fix{\m{x}}{e})$ denoting the least fixed point of the
-  monotone function $(\fn\bind{\m{x}} e)$.
+  monotone function $(\fn\bind{\m{x}} e)$. Unlike the more traditional use of
+  fixed points to define recursive functions, the value of $(\fix{\m{x}} e)$ is
+  computed \emph{eagerly}, by iteration from an initial value.
 
   \todo{Explain:
     \begin{itemize}
