@@ -73,7 +73,8 @@ simply-typed $\lambda$-calculus extended in four major ways:
     we order them discretely; $a \le b$ iff $a = b$. \todo{Better explanation?}
   \item Pairs and functions are ordered pointwise:
     \begin{itemize}
-    \item $(a_1, b_1) \le (a_2, b_2)$ iff $a_1 \le a_2 \wedge b_1 \le b_2$
+    %% \item $(a_1, b_1) \le (a_2, b_2)$ iff $a_1 \le a_2 \wedge b_1 \le b_2$
+    \item $(a, x) \le (b, y)$ iff $a \le b \wedge x \le y$
     \item $f \le g$ iff $\forall \bind{x} f(x) \le g(x)$
     \end{itemize}
   \item Sum types are ordered disjointly: $\ms{in}_i\; a \le \ms{in}_i\; b$ iff
