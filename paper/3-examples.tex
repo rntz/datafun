@@ -90,6 +90,27 @@ the most general possible type schema. \todo{why?}
 \TODO
 
 
+%% FIGURE: PRIMITIVES
+\begin{figure}
+  %% TODO: remove unused primitives.
+  \[\begin{array}{cll}
+  =   &\of& \eq{A} \uto \eq{A} \uto \bool\\
+  \le &\of& \eq{A} \uto \eq{A} \mto \bool\\
+  \fname{keys}     &:& \Map{A}{B} \mto \Set{A}\\
+  \fname{entries}  &:& \Map{A}{B} \uto \Set{A \x B}\\
+  \fname{tabulate} &:& \Set{A} \mto (A \to B) \mto \Map{A}{B}\\
+  %% \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
+  \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
+  %% \fname{substrings} &\of& \ms{Str} \to \Set{\ms{Str}}\\
+  %% \fname{size}     &:& \Set{\eq{A}} \mto \N\\
+  \fname{range}    &:& \N \uto \N \mto \Set{\N}\\
+  \fname{length}   &:& \str \uto \N\\
+  \fname{substring} &:& \str \uto \N \uto \N \uto \str
+  \end{array}\]
+  \caption{Primitive functions and their type schemes}
+\end{figure}
+
+
 \subsection{Testing for membership}
 
 \todo{Use this as example of $\bigvee$ at non-set (here, boolean) type.}
@@ -210,27 +231,6 @@ For any finite eqtype $\fineq{A}$, we may write:
 \end{array}\]
 
 \TODO This already shows how we go beyond Datalog's .
-
-
-%% FIGURE: PRIMITIVES
-\begin{figure}
-  %% TODO: remove unused primitives.
-  \[\begin{array}{cll}
-  =   &\of& \eq{A} \uto \eq{A} \uto \bool\\
-  \le &\of& \eq{A} \uto \eq{A} \mto \bool\\
-  \fname{keys}     &:& \Map{A}{B} \mto \Set{A}\\
-  \fname{entries}  &:& \Map{A}{B} \uto \Set{A \x B}\\
-  \fname{tabulate} &:& \Set{A} \mto (A \to B) \mto \Map{A}{B}\\
-  %% \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
-  \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
-  %% \fname{substrings} &\of& \ms{Str} \to \Set{\ms{Str}}\\
-  %% \fname{size}     &:& \Set{\eq{A}} \mto \N\\
-  \fname{range}    &:& \N \uto \N \mto \Set{\N}\\
-  \fname{length}   &:& \str \uto \N\\
-  \fname{substring} &:& \str \uto \N \uto \N \uto \str
-  \end{array}\]
-  \caption{Primitive functions and their type schemes}
-\end{figure}
 
 
 \subsection{CYK parsing}
