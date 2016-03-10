@@ -49,8 +49,9 @@ simply-typed $\lambda$-calculus extended in four major ways:
 
 \begin{enumerate}
 \item We add a type of finite sets, $\Set{A}$. We also include finite maps
-  $\Map{A}{B}$, as they are useful for some examples. \todo{Describe why sets
-  are useful?}
+  $\Map{A}{B}$, as they are useful for some examples.
+
+  \todo{Describe why sets are useful?}
 
   %% We use finite sets to represent Datalog predicates; one might also think of
   %% them as tables or views in a database setting.
@@ -67,9 +68,8 @@ simply-typed $\lambda$-calculus extended in four major ways:
   \Set{A}$ iff $a \subseteq b$. Maps are ordered both by inclusion and
   pointwise.
 
-\item We add a \emph{monotone least fixed point} term, $(\fix{\m{x}}{e})$,
-  where $e$ must be monotone in $\m{x}$. This allows us to express
-  Datalog-style recursion.
+\item We add a term $(\fix{\m{x}}{e})$ denoting the least fixed point of the
+  monotone function $(\fn\bind{\m{x}} e)$.
 
   \todo{Explain:
     \begin{itemize}
@@ -103,8 +103,9 @@ simply-typed $\lambda$-calculus extended in four major ways:
   e$, of $e'$, as long as $e' : L$ has a semilattice type. If $e' : \Set{B}$ is
   itself a set, for example, this serves as the set type's monadic ``bind''
   operation. For example, $\forin{x \in \setlit{1,2,3}} \{10 \cdot x, x^2\}$
-  denotes the set $\{1, 4, 9, 10, 20, 30\}$. \todo{explain testing for set
-    membership?}
+  denotes the set $\{1, 4, 9, 10, 20, 30\}$.
+
+  \todo{explain testing for set membership?}
 
   Second, we restrict fixed-points $(\fix{\m{x}}{e})$ to semilattice types,
   which guarantees that we take
