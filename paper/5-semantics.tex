@@ -20,12 +20,12 @@
       \two & Two-element poset $\{0,1\}$, with $0 < 1$\\
       $P + Q$ & Disjointly-ordered poset on disjoint union of $P,Q$\\
       $P \x Q$ & Pointwise poset on pairs of $P$s and $Q$s\\
-      $P \arr Q$ & Pointwise poset on monotone maps $\ms{Poset}(P, Q)$\\
+      $P \arr Q$ & Pointwise poset on monotone maps $\cPoset(P, Q)$\\
       $\Disc{A}$ & Discrete poset on underlying set $A$\\
       $\FM{A}{P}$ & Poset of finite maps from the set $A$ to the poset $P$
       \vspace{0.5em}\\
       \multicolumn{2}{c}{\textbf{Semilattice notation}}\\
-      $L \lol M$ & Pointwise poset on $\ms{Semilat}(L,M)$\\
+      $L \lol M$ & Pointwise poset on $\cSL(L,M)$\\
       $\Sups{P}$ & Free semilattice on a poset $P$\\
       $\FS{A}$ & Free semilattice on a set $A$; same as $\Sups{(\Disc{A})}$\\
     \end{tabular}
@@ -37,37 +37,36 @@
 
 
 We give a denotational semantics for Datafun in terms of three categories
-(\ms{Set}, \ms{Poset}, and \ms{Semilat}) and two adjunctions between them (see
-Figure \ref{fig:sem-cats}). We use nonstandard notation to avoid confusion
-between sets and posets (see Figure \ref{fig:sem-notation}). We take less care
-to distinguish posets and semilattices, since while a set can be partially
-ordered in many ways, a poset either \emph{is} or \emph{is not} a semilattice.
+(\cSet{}, \cPoset{}, and \cSL{}) and two adjunctions between them (see Figure
+\ref{fig:sem-cats}). We use nonstandard notation to avoid confusion between sets
+and posets (see Figure \ref{fig:sem-notation}). We take less care to distinguish
+posets and semilattices, since while a set can be partially ordered in many
+ways, a poset either \emph{is} or \emph{is not} a semilattice.
 
-\subsection{The category \ms{Semilat}}
+\subsection{The category \cSL{}}
 
-The category \ms{Semilat} is the category of join-semilattices with least
-elements (for brevity, simply ``semilattices'').
+The category \cSL{} is the category of join-semilattices with least elements
+(for brevity, simply ``semilattices'').
 
 Directly, a semilattice is a poset $L$ with a least element $\unit$ in which any
 two elements $a,b$ have a least-upper-bound $a \vee b$. From $\unit$ and $\vee$
 it follows that any finite subset $X \subseteq_{\ms{fin}} \U{L}$ has a least
 upper bound, written $\bigvee X$.
 
-A morphism $f \in \ms{Semilat}(L, M)$ is a function from $\U{L}$ to $\U{M}$
-satisfying:
+A morphism $f \in \cSL(L, M)$ is a function from $\U{L}$ to $\U{M}$ satisfying:
 \begin{eqnarray*}
   f(a \vee_A b) &=& f(a) \vee_B f(b)\\
   f(\unit_A) &=& \unit_B
 \end{eqnarray*}
 
-\ms{Semilat} is a subcategory of \ms{Poset}; every \ms{Semilat}-morphism $f$ is
+\cSL{} is a subcategory of \ms{Poset}; every \ms{Semilat}-morphism $f$ is
 monotone, since $a \le b \iff a \vee b = b$, and so from $a \le b$ we know $f(a)
 \vee f(b) = f(a \vee b) = f(b)$, thus $f(a) \le f(b)$.
 
 \subsection{Denotation of Datafun types}
 \begin{figure}
   \[\begin{array}{rcl}
-  \den{\cdot} &\in& \ms{Poset}_0\\
+  \den{\cdot} &\in& \cPoset_0\\
   \den{\bool} &=& \two\\
   \den{\N} &=& \N_\le\\
   \den{\str} &=& \Disc{\mathbb{S}}\\
@@ -92,7 +91,7 @@ semilattices where the least-upper-bound operator $\bigvee$ is
 We give a denotation for typing derivations with the following signature:
 \begin{eqnarray*}
   \den{\J{\GD}{\GG}{e}{A}} &\in&
-  \ms{Set}(\U{\den{\GD}}, \ms{Poset}(\den{\GG}, \den{A}))
+  \cSet(\U{\den{\GD}}, \cPoset(\den{\GG}, \den{A}))
   %% \\ &\in&
   %% \U{\den{\GD}} \Arr \U{\den{\GG} \arr \den{A}}
 \end{eqnarray*}

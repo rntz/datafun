@@ -61,16 +61,26 @@ simply-typed $\lambda$-calculus extended in four major ways:
   %% them as tables or views in a database setting.
 
 \item We add a type of \emph{monotone functions}, $A \mto B$. Consequently
-  Datafun has two flavors of variable, \emph{ordinary} and \emph{monotone}.
-  Ordinary functions introduce ordinary variables; monotone functions introduce
-  monotone variables. This distinction is left latent in the formal syntax,
-  \todo{TODO: why?}, but for clarity our examples put monotone variables in
-  \textbf{bold}.
+  Datafun has two flavors of variable, \emph{ordinary} and \emph{monotone}. We
+  write ordinary variables in $script$ and monotone variables in \m{bold}.
 
   In order for ``monotone'' to have meaning, our types are implicitly partially
-  ordered. \todo{Discuss orderings}. Sets are ordered by inclusion: $a \le b :
-  \Set{A}$ iff $a \subseteq b$. Maps are ordered both by inclusion and
-  pointwise.
+  ordered:
+  \begin{itemize}
+  \item Booleans are ordered $\ms{false} < \ms{true}$.
+  \item Natural numbers $\N$ have the usual order: $0 < 1 < 2 < ...$.
+  \item We have no particular use-case for comparing strings in this paper, so
+    we order them discretely; $a \le b$ iff $a = b$. \todo{Better explanation?}
+  \item Pairs and functions are ordered pointwise:
+    \begin{itemize}
+    \item $(a_1, b_1) \le (a_2, b_2)$ iff $a_1 \le a_2 \wedge b_1 \le b_2$
+    \item $f \le g$ iff $\forall \bind{x} f(x) \le g(x)$
+    \end{itemize}
+  \item Sum types are ordered disjointly: $\ms{in}_i\; a \le \ms{in}_i\; b$ iff
+    $a \le b$, but $\ms{in}_1\; a$ and $\ms{in}_2\; b$ are never comparable.
+  \item Sets are ordered by inclusion: $a \le b$ iff $a \subseteq b$.
+  \item Maps are ordered both by inclusion and pointwise.
+  \end{itemize}
 
 \item We add a term $(\fix{\m{x}}{e})$ denoting the least fixed point of the
   monotone function $(\fn\bind{\m{x}} e)$.
@@ -89,7 +99,7 @@ simply-typed $\lambda$-calculus extended in four major ways:
   predicates be finite). To ensure uniqueness of the least fixed point, the type
   must have a \emph{least element}, which we guarantee by only allowing fixed
   points at \emph{semilattice types} (see point \ref{item:semilattice-types},
-  just below).
+  below).
 
 \item\label{item:semilattice-types} Generalizing the empty set $\emptyset$ and
   union $\cup$, we identify a subset of types that have a \emph{least element}
