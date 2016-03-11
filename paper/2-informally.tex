@@ -86,25 +86,38 @@ simply-typed $\lambda$-calculus extended in four major ways:
   \end{itemize}
 
 \item We add a term $(\fix{\m{x}}{e})$ denoting the least fixed point of the
-  monotone function $(\fn\bind{\m{x}} e)$. Unlike the more traditional use of
-  fixed points to define recursive functions, the value of $(\fix{\m{x}} e)$ is
-  computed \emph{eagerly}, by iteration from an initial value.
+  monotone function $(\fn\bind{\m{x}} e)$. \todo{Explain why this is useful?}
+  This is computed (modulo optimizations) by iteration, starting from the
+  smallest value of the desired type and halting once a fixed point is found.
+  This strategy constrains the types of \ms{fix} terms in several ways:
+  \begin{itemize}
+  \item The type must have a smallest value. We enforce this using semilattice
+    types (see item \ref{item:semilattice-types}, below).
 
-  \todo{Explain:
-    \begin{itemize}
-    \item compute fixpoint (at least conceptually) by iteration
-    \item start from a least element
-    \item to ensure termination, need finite height of lattice
-    \item finiteness guarantees finite height!
-    \item (\emph{only then} mention analogy to Datalog)
-  \end{itemize}}
+  \item The type must support equality tests, to determine when a fixed point
+    has been reached. We call a type supporting equality tests an \emph{eqtype}.
+    \todo{CITE}
 
-  To ensure termination, the type at which this fixed-point is taken must be
-  \emph{finite} (this corresponds directly to Datalog's requirement that
-  predicates be finite). To ensure uniqueness of the least fixed point, the type
-  must have a \emph{least element}, which we guarantee by only allowing fixed
-  points at \emph{semilattice types} (see point \ref{item:semilattice-types},
-  below).
+  \item To ensure termination, the type must have finite height.\footnote{The
+    height of a poset is the cardinality of its largest chain (totally-ordered
+    subset).} We conservatively approximate this property by limiting \ms{fix}
+    to finite types.
+  \end{itemize}
+
+  In summary, \ms{fix} may only be used at \emph{finite semilattice eqtypes}.
+
+  \todo{TODO: connection to Datalog via finiteness of predicates}
+
+  \todo{explain $\fixle{\m{x}}{e_\top}{e}$?}
+
+  %% \todo{Explain:
+  %%   \begin{itemize}
+  %%   \item compute fixpoint (at least conceptually) by iteration
+  %%   \item start from a least element
+  %%   \item to ensure termination, need finite height of lattice
+  %%   \item finiteness guarantees finite height!
+  %%   \item (\emph{only then} mention analogy to Datalog)
+  %% \end{itemize}}
 
 \item\label{item:semilattice-types} Generalizing the empty set $\emptyset$ and
   union $\cup$, we identify a subset of types that have a \emph{least element}
@@ -114,24 +127,23 @@ simply-typed $\lambda$-calculus extended in four major ways:
     sake, we call these structures simply ``semilattices.''}, and denote them by
   the metavariables $L,M$.
 
-  Semilattice types are the ``glue'' of Datafun; they serve several small
-  purposes that together simplify and unify the language.
+  Semilattice types serve two primary purposes:
 
-  First, they provide a natural eliminator for sets: given $e : \Set{A}$ we may
-  write $\letin{x}{e}{e'}$ for the least upper bound, over all elements $x \in
-  e$, of $e'$, as long as $e' : L$ has a semilattice type. If $e' : \Set{B}$ is
-  itself a set, for example, this serves as the set type's monadic ``bind''
-  operation. For example, $\forin{x \in \setlit{1,2,3}} \{10 \cdot x, x^2\}$
-  denotes the set $\{1, 4, 9, 10, 20, 30\}$.
+  \textbf{First}, they provide a natural eliminator for sets. Given $e :
+  \Set{A}$, we write $\letin{x}{e'}{e_x}$ for the least upper bound, over all
+  elements $x \in e'$, of $e_x$, for $e_x$ of some semilattice type $L$. If
+  $e_x$ is a set, for example, this provides the set type's monadic ``bind''
+  operation.%% For example, $\forin{x \in \setlit{1,2,3}} \{10 \cdot x, x^2\}$
+  %% denotes the set $\{1, 4, 9, 10, 20, 30\}$.
+
+  \todo{example?}
 
   \todo{explain testing for set membership?}
 
-  Second, we restrict fixed-points $(\fix{\m{x}}{e})$ to semilattice types,
-  which guarantees that we take
+  \textbf{Second}, as already mentioned, they guarantee the presence of a least
+  element, needed to compute \ms{fix} terms.
 
   \todo{Explain how products of semilattice being semilattice + monotone
     fixed-points account for mutual recursion.}
-
-  \todo{Rewrite this to be clearer.}
 
 \end{enumerate}
