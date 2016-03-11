@@ -58,13 +58,15 @@ Prolog satisfying three restrictions on the clauses defining a program:
 \item No predicate can be negated unless it has already been fully
   defined.  This is sometimes called ``stratified negation''.
 \end{enumerate}
-These are drastic restrictions making the language Turing
-incomplete. For example, it is even impossible to implement arithmetic
-in Datalog, since adding 2 and 3 produces 5, which is a new term not
-equal to either 2 or 3!  As functional programmers are well aware,
+These drastic restrictions make Datalog Turing-eincomplete -- all
+queries are decidable. As functional programmers are well aware,
 though, there is often power in restraint: for example, in a total
 functional language, the compiler is free to switch between strict and
-lazy evaluation as it deems fit.
+lazy evaluation as it deems fit. Similarly, in Datalog decidability
+means that implementations are free to use both forward and backwards
+chaining, and so can easily support queries (like reachability and
+transitive closure) which are difficult to implement in ordinary
+Prolog.
 
 Over the last decade or so, this freedom has been put to very good
 use, with Datalog appearing at the heart of a a wild variety of
@@ -84,14 +86,23 @@ in Clojure) as its query language. Microsoft's SecPAL
 language~\cite{secpal} uses Datalog as the foundation of its
 decentralised authorization specification language.
 
-All of these applications are built on the foundation of Datalog, but
-one common feature is that they all needed to extend it.
+In all of these cases, the use of Datalog permits giving
+specifications and implementations which are drastically shorter than
+alternatives implemented in conventional languages. However, while all
+of these applications are built on the foundation of Datalog, they all
+also need to extend it significantly. For example, it is impossible
+even to implement arithmetic in Datalog, since adding 2 and 3 produces
+5, which is a new term not equal to either 2 or 3! As a result, even
+though Datalog has a very clean semantics, its metatheory needs to be
+re-established once again for each application-specific extension to
+it.
 
+So it would be very desirable to undestand what makes Datalog tick, so
+that we can embed into a more expressive language \emph{without}
+sacrificing the features that make it so powerful within its domain.
+In this way, extensions can be
 
-
-
-
-
+In this paper, we present Datafun, a typed functional language
 
 
 \paragraph{Contributions}
