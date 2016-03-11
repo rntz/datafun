@@ -1,0 +1,278 @@
+%% FIGURE: SYNTAX SUGAR
+\begin{figure}
+  \[\begin{array}{lccl}
+  %% expressions
+  \textsf{terms} &
+  e &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
+             \pipe \forin{\mc{L}}{e}\\
+  &&& \mathcal{C}[\;e]^* \pipe \rawcase{e}{[{p} \to {e}]^*}
+  \vspace{0.5em}\\
+  %% patterns
+
+  %% TODO: maybe remove the pattern-matching stuff? since we don't explain how
+  %% to translate it & we also use various other sugar we don't explain how to
+  %% translate, why do we include only pattern-matching here?
+  \textsf{patterns} &
+  p &\bnfeq& \pwild \pipe x \pipe (p,p)
+             \pipe \ms{true} \pipe \ms{false} \pipe \mathcal{C}[\;p]^*
+  \vspace{0.5em}\\
+  \textsf{constructors} & \mathcal{C} && \text{are abstract identifiers}
+  \vspace{0.5em}\\
+  %% loop clauses
+  \textsf{loops} &
+  \mc{L} &\bnfeq& \mc{L}, \mc{L} \pipe p \in e \pipe e
+  \end{array}\]
+
+  %% the desugaring syntax-expansion itself
+  \begin{eqnarray*}
+    %% e_1 \isin e_2            &\expandsto& \forin{x \in e_2} e_1 = x\\
+    \setfor{e}{\mc{L}}       &\expandsto& \forin{\mc{L}}{\{e\}}\\
+    \forin{\mc{L}_1,\mc{L}_2}{e}
+    &\expandsto& \forin{\mc{L}_1}{\forin{\mc{L}_2}{e}}\\
+    \forin{p\in e_1}{e_2}
+    &\expandsto& \letin{x}{e_1}{\rawcase{x}{p \to e_2;\,\pwild \to \unit}}\\
+    \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}
+    %% e_1 \x e_2 &\expandsto& \setfor{(a,b)}{a \in e_1, b \in e_2}\\
+    %% e_1 \bullet e_2 &\expandsto& \setfor{(a,c)}{(a,b) \in e_1, (b,c) \in e_2}
+    %% \ms{let}~x = e_1 ~\ms{in}~ e_2
+    %% &\expandsto& (\fn\bind{x} e_2)\; e_1\\
+    %% \ms{let}~[x_i = e_i]^* ~\ms{in}~ e
+    %% &\expandsto& [\ms{let}~x_i = e_i~\ms{in}]^* e\\
+    %% \rawcase{e}{[p \to e]^*} &\expandsto& \text{(omitted, see \todo{CITE})}
+  \end{eqnarray*}
+  \caption{Syntax sugar}
+  \label{fig:sugar}
+\end{figure}
+
+
+\section{Examples}
+
+For purposes of these examples, we use a simple Haskell-like syntax for
+top-level type and function definitions. We also permit ourselves infix
+notation, \ms{let}-binding, $n$-ary tuples, $n$-ary sum types with named
+constructors, pattern-matching\todo{(CITE)}, and additional syntax sugar given
+in Figure \ref{fig:sugar} \todo{(TODO: mention \& cite monadic query syntax)}.
+All of these conveniences are supported (with slightly different concrete
+syntax) in our implementation.
+
+For clarity, we set the names of top-level variables in \textsf{sans-serif};
+ordinary variables in $script$; and monotone variables in \m{bold}.
+
+\todo{TODO: Explain nonlinear variable usage means equality.}
+
+\todo{\begin{itemize}
+\item composition of relations?
+\item \texttt{make}-style topological sort?
+\item SQL-style examples?
+\item translating relational algebra into datafun?
+\end{itemize}}
+
+
+\subsection{Filtering, mapping, and cross products}
+
+Although Datafun as presented does not have polymorphism, we give our examples
+their most general possible type schemes. \todo{why?}
+
+\todo{these examples are perhaps a good place to point out subtleties of
+  monotonicity typing}
+
+\[\begin{array}{l}
+\fname{map} ~:~ (A \uto B) \to \Set{A} \mto \Set{B}\\
+\fname{map}\;f\;\m{A} = \setfor{f\;x}{x \in \m{A}}\\
+\\
+\fname{filter} ~:~ (A \uto \bool) \mto \Set{A} \mto \Set{A}\\
+\fname{filter}\;\m{f}\;\m{A} = \setfor{x}{x \in \m{A}, \m{f}\; x}\\
+\\
+(\times) ~:~ \Set{A} \mto \Set{B} \mto \Set{A \x B}\\
+\m{A} \times \m{B} = \setfor{(a,b)}{a \in \m{A}, b \in \m{B}}
+\end{array}\]
+
+\TODO
+
+
+%% FIGURE: PRIMITIVES
+\begin{figure}
+  %% TODO: remove unused primitives.
+  \[\begin{array}{cll}
+  =   &\of& \eq{A} \uto \eq{A} \uto \bool\\
+  \le &\of& \eq{A} \uto \eq{A} \mto \bool\\
+  \fname{keys}     &:& \Map{A}{B} \mto \Set{A}\\
+  \fname{entries}  &:& \Map{A}{B} \uto \Set{A \x B}\\
+  \fname{tabulate} &:& \Set{A} \mto (A \to B) \mto \Map{A}{B}\\
+  %% \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
+  \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
+  %% \fname{substrings} &\of& \ms{Str} \to \Set{\ms{Str}}\\
+  %% \fname{size}     &:& \Set{\eq{A}} \mto \N\\
+  \fname{range}    &:& \N \uto \N \mto \Set{\N}\\
+  \fname{length}   &:& \str \uto \N\\
+  \fname{substring} &:& \str \uto \N \uto \N \uto \str
+  \end{array}\]
+  \caption{Primitive functions and their type schemes}
+\end{figure}
+
+
+\subsection{Testing for membership}
+
+\todo{Use this as example of $\bigvee$ at non-set (here, boolean) type.}
+
+\[\begin{array}{l}
+(\isin) ~:~ \eq{A} \to \Set{\eq{A}} \mto \bool\\
+x \isin \m{A} = \forin{y \in \m{A}} x = y
+\end{array}\]
+
+\todo{TODO: discuss nonlinear pattern-matching}
+
+An equivalent definition, making use of nonlinear pattern-matching, would be:
+\[\begin{array}{l}
+x \isin \m{A} = \forin{x \in \m{A}} \ms{true}
+\end{array}\]
+
+\todo{Nonlinear pattern matching makes implicit the equality test and attendant
+  restriction to equality types, but is often extremely convenient.}
+
+
+\subsection{Composition of relations}
+
+\todo{mention eqtypes again here? or use this to show them off instead of
+  $({\isin})$?} \todo{work phrase ``higher-order'' in here somewhere?}
+
+\noindent As an example of a function over relations, consider:
+\[\begin{array}{l}
+(\bullet) : \Set{A \x \eq{B}} \mto \Set{\eq{B} \x C} \mto \Set{A \x C}\\
+\m{R} \bullet \m{S} = \setfor{(a,c)}{(a,b) \in \m{R}, (b,c) \in \m{S}}
+\end{array}\]
+
+\todo{TODO: mention you can extend to all relational algebra? give example?}
+
+
+\subsection{Transitive closure}
+
+Consider the following Datalog program:
+\begin{verbatim}
+parent(earendil, elrond).
+parent(elrond, arwen).
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).
+\end{verbatim}
+
+\todo{Discuss how this works in Datalog, but not in Prolog, b/c Prolog is
+  defined by operational semantics of unification while Datalog is denotational,
+  least-model semantics. It also works in Datafun!}
+
+\todo{Neel suggests using distinction b/w backward \& forward chaining here,
+  rather than operational/denotational. see Logical Algorithms paper by
+  McAllister \& co for phrasing?}
+
+In Datafun, we may write this as:
+
+\[\begin{array}{l}
+\mathbf{data}~\ms{person} =
+\ctor{E\"arendil} ~|~ \ctor{Elrond} ~|~ \ctor{Arwen}\\
+\fname{parent},~\ms{ancestor} ~:~ \Set{\ms{person} \x \ms{person}}\\
+\ms{parent} =
+\{(\ctor{E\"arendil}, \ctor{Elrond}), (\ctor{Elrond}, \ctor{Arwen})\}\\
+\ms{ancestor} = \fix{\m{X}} \ms{parent} \vee (\m{X} \bullet \m{X})
+%% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
+\\
+\end{array}\]
+
+
+\subsubsection{Transitive closure with an upper bound}
+
+If you know the type over which you are taking your transitive closure is
+finite, this suffices. But the more general way to take a fixed-point is to give
+an upper bound which you know the desired answer will not exceed. For this we
+write $(\fixle{\m{x}}{e_\top} e)$
+
+\todo{mention using $\str$ as example}
+
+\todo{explain what happens when $e \ge e_\top$ --- it gets clamped}
+
+\[\begin{array}{l}
+\ms{person} ~:~ \Set{\str}\\
+\ms{person} = \{\texttt{"e\"arendil"}, \texttt{"elrond"}, \texttt{"arwen"}\}\\
+\ms{parent}, \ms{ancestor} ~:~ \Set{\str \x \str}\\
+\ms{parent} = \{(\texttt{"e\"arendil"}, \texttt{"elrond"}),
+(\texttt{"elrond"}, \texttt{"arwen"})\}\\
+\ms{ancestor} = \fixle{\m{X}}{(\ms{person} \x \ms{person})}
+\ms{parent} \vee (\m{X} \bullet \m{X})
+%% \ms{ancestor} = \fixle{\m{X}}{%
+%%   \setfor{(a,b)}{a \in \ms{person}, b \in \ms{person}}
+%% }
+%% \\
+%% \hspace{4.87em}\ms{parent} \vee
+%% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
+\end{array}\]
+
+
+\subsubsection{Generic transitive closure}
+
+For any finite eqtype $\fineq{A}$, we may write:
+\[\begin{array}{l}
+\ms{trans} ~:~ \Set{\fineq{A} \x \fineq{A}} \mto \Set{\fineq{A} \x \fineq{A}}
+\vspace{0.3em}\\
+%% \ms{trans}\ E = \fix{X} E \vee \setfor{(a,c)}{(a,b) \in E, (b,c) \in X}
+%% \ms{trans}\ \m{E} = \fix{\m{X}} \m{E} \vee %
+%% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
+\ms{trans}\ \m{E} = \fix{\m{X}} \m{E} \vee (\m{X} \bullet \m{X})
+\end{array}\]
+
+\noindent Similarly, for any eqtype $\eq{A}$, we may write:
+\[\begin{array}{l}
+\ms{trans} ~:~
+\Set{\eq{A}} \mto \Set{\eq{A} \x \eq{A}} \mto \Set{\eq{A} \x \eq{A}}
+\vspace{0.3em}\\
+%% \ms{trans}\ \m{V}\ \m{E} = %
+%% \ms{fix}~ \m{S} \le \setfor{(a,b)}{a\in \m{V}, b \in \m{V}}\\
+%% \hspace{5.35em}\ms{is}~ \m{E} \vee %
+%% \setfor{(a,c)}{(a,b) \in \m{S}, (b,c) \in \m{S}}\\
+\ms{trans}\ \m{V}\ \m{E} = %
+\fixle{\m{S}}{(\m{V} \x \m{V})} \m{E} \vee (\m{S} \bullet \m{S})
+\end{array}\]
+
+\TODO This already shows how we go beyond Datalog's .
+
+
+\subsection{CYK parsing}
+
+\[\begin{array}{l}
+\mathbf{type}~\ms{sym} = \str\\
+\mathbf{data}~\ms{rule} = \ctor{String}~\str ~|~ \ctor{Cat}~\ms{sym}~\ms{sym}\\
+\mathbf{type}~\ms{grammar} = \Set{\ms{sym} \x \ms{rule}}\\
+\mathbf{type}~\ms{fact} = \ms{sym} \x \N \x \N\\
+\fname{parse} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{sym}}\\
+\fname{iter} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{fact}}
+\mto \Set{\ms{fact}}\\
+\fname{parse}\;w\;\m{g} =\\
+\hspace{1em} \ms{let}~ n = \ms{length}\;w\\
+\hspace{2.375em}\m{u} =
+  \setfor{(a,i,j)}{(a,\pwild) \in \m{g}, i \in \ms{range}\;0\;n,
+  j\in\fname{range}\;i\;n}\\
+\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in %
+  \fixle{\m{X}}{\m{u}} \ms{iter}\;w\;\m{g}\;\m{X}}\\
+\fname{iter}\;w\;\m{g}\;\m{X} =\\
+\hspace{1em}\phantom{\vee~}\setfor{(a,i,k)}{(a, \ctor{Cat}~b~c) \in \m{g},
+  (b,i,j) \in \m{X}, (c,j,k) \in \m{X}}\\
+\hspace{1em}\vee~ \{(a,i,i+\fname{length}\;s)\\
+\hspace{2.1em}|~ (a, \ctor{String}~s) \in \m{g},
+i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
+\hspace{2.2em}\phantom{|~} s = \fname{substring}\;w\;i\;(i+\ms{length}\;s)\}
+\end{array}\]
+
+\TODO Since Datalog provides no way to represent a \emph{grammar} as a piece of
+data (because it's compound, not an atom), there is simply no way in Datalog
+proper to express a generic CYK parser. This demonstrates the benefits of moving
+to a functional language.
+
+\TODO Moreover, Datalog's strategy for proving termination involves a
+constructor restriction to ensure all relations are finite. Primitives such as
+\ms{range} and \ms{substring} violate this restriction (as relations, they are
+infinite); it is not immediately obvious that Datalog programs extended with
+these primitives remain terminating. Our use of bounded fixed-points to
+guarantee termination is robust under such extensions; as long as all primitive
+functions are total, Datafun programs always terminate.
+
+
+\subsection{Dataflow analysis}
+
+\TODO

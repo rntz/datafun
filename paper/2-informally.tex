@@ -1,0 +1,137 @@
+%% FIGURE: CORE SYNTAX
+\begin{figure}
+  \[\begin{array}{ccl}
+    %% types
+    A, B     &\bnfeq& \bool \pipe \N \pipe \str \pipe \Set{A}
+                      \pipe \Map{A}{B}
+    \\
+    \textsf{types} && A + B \pipe A \x B \pipe A \uto B \pipe A \mto B
+    \vspace{0.5em}\\
+    %% semilattice types
+    L, M         &\bnfeq& \bool \pipe \N \pipe \Set{A} \pipe \Map{A}{L}
+    \\
+    \textsf{semilattice types} && L \x M \pipe A \uto L \pipe A \mto L
+    \vspace{0.5em}\\
+    %% equality types
+    \eq{A}, \eq{B} &\bnfeq& \bool \pipe \N \pipe \str \pipe \Set{\eq{A}}
+                            \pipe \Map{\eq{A}}{\eq{B}}
+    \\
+    \textsf{eqtypes} && \eq{A} + \eq{B} \pipe \eq{A} \x \eq{B}
+    \vspace{0.5em}\\
+    %% finite equality types
+    \fineq{A},\fineq{B}
+    &\bnfeq& \bool \pipe \Set{\fineq{A}}
+       \pipe \Map{\fineq{A}}{\fineq{B}}
+       \pipe \fineq{A} + \fineq{B} \pipe \fineq{A} \x \fineq{B}\\
+    \textsf{finite eqtypes}
+    \vspace{0.5em}\\
+    %% contexts
+    \GD &\bnfeq& \cdot \pipe \GD, x\of A\\
+    \GG &\bnfeq& \cdot \pipe \GG{},\m{x}\of A\\
+    \textsf{contexts}\\
+    %% expressions
+    e &\bnfeq& x \pipe \m{x} \pipe \fn\bind{x} e \pipe \fn\bind{\m{x}} e
+    \pipe e\;e\\
+    \textsf{terms}
+    && (e,e) \pipe \pi_1\;e \pipe \pi_2\;e
+    \pipe \ms{in}_1\;e \pipe \ms{in}_2\;e\\
+    && \case{e}{x}{e}{x}{e}\\
+    && \case{e}{\m{x}}{e}{\m{x}}{e}\\
+    && \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
+    && \singleset{e} \pipe \singlemap{e}{e}
+       \pipe \unit \pipe e \vee e \pipe \letin{x}{e}{e}\\
+    && \fix{\m{x}}{e} \pipe \fixle{\m{x}}{e}{e}
+  \end{array}\]
+  \caption{Syntax of core Datafun}
+  \label{fig:syntax}
+\end{figure}
+
+\section{Datafun, informally}
+
+We give the core syntax of Datafun in Figure \ref{fig:syntax}. Datafun is a
+simply-typed $\lambda$-calculus extended in four major ways:
+
+\begin{enumerate}
+\item We add a type of finite sets, $\Set{A}$. We also include finite maps
+  $\Map{A}{B}$, as they are useful for some examples.
+
+  \todo{Describe why sets are useful?}
+
+  %% We use finite sets to represent Datalog predicates; one might also think of
+  %% them as tables or views in a database setting.
+
+\item We add a type of \emph{monotone functions}, $A \mto B$. Consequently
+  Datafun has two flavors of variable, \emph{ordinary} and \emph{monotone}. We
+  write ordinary variables in $script$ and monotone variables in \m{bold}.
+
+  In order for ``monotone'' to have meaning, our types are implicitly partially
+  ordered:
+  \begin{itemize}
+  \item Booleans $\bool$ are ordered $\ms{false} < \ms{true}$.
+  \item Natural numbers $\N$ have the usual order: $0 < 1 < 2 < ...$.
+  \item We have no particular use-case for comparing strings $\str$ in
+    this paper, so we order them discretely; $a \le b$ iff $a = b$. \todo{Better
+      explanation?}
+  \item Pairs and functions are ordered pointwise:
+    \begin{itemize}
+    %% \item $(a_1, b_1) \le (a_2, b_2)$ iff $a_1 \le a_2 \wedge b_1 \le b_2$
+    \item $(a, x) \le (b, y)$ iff $a \le b \wedge x \le y$
+    \item $f \le g$ iff $\forall \bind{x} f(x) \le g(x)$
+    \end{itemize}
+  \item Sum types are ordered disjointly: $\ms{in}_i\; a \le
+    \ms{in}_i\; b$ iff $a \le b$, but $\ms{in}_1\; a$ and $\ms{in}_2\; b$ are
+    never comparable.
+  \item Sets are ordered by inclusion: $a \le b$ iff $a \subseteq b$.
+  \item Maps are ordered both by inclusion and pointwise.
+  \end{itemize}
+
+\item We add a term $(\fix{\m{x}}{e})$ denoting the least fixed point of the
+  monotone function $(\fn\bind{\m{x}} e)$. Unlike the more traditional use of
+  fixed points to define recursive functions, the value of $(\fix{\m{x}} e)$ is
+  computed \emph{eagerly}, by iteration from an initial value.
+
+  \todo{Explain:
+    \begin{itemize}
+    \item compute fixpoint (at least conceptually) by iteration
+    \item start from a least element
+    \item to ensure termination, need finite height of lattice
+    \item finiteness guarantees finite height!
+    \item (\emph{only then} mention analogy to Datalog)
+  \end{itemize}}
+
+  To ensure termination, the type at which this fixed-point is taken must be
+  \emph{finite} (this corresponds directly to Datalog's requirement that
+  predicates be finite). To ensure uniqueness of the least fixed point, the type
+  must have a \emph{least element}, which we guarantee by only allowing fixed
+  points at \emph{semilattice types} (see point \ref{item:semilattice-types},
+  below).
+
+\item\label{item:semilattice-types} Generalizing the empty set $\emptyset$ and
+  union $\cup$, we identify a subset of types that have a \emph{least element}
+  $\unit$ and a \emph{least upper bound} operator $\vee$. We call these
+  \emph{semilattice types}\footnote{Technically, the partial orderings on these
+    types form \emph{join-semilattices with a least element}. For brevity's
+    sake, we call these structures simply ``semilattices.''}, and denote them by
+  the metavariables $L,M$.
+
+  Semilattice types are the ``glue'' of Datafun; they serve several small
+  purposes that together simplify and unify the language.
+
+  First, they provide a natural eliminator for sets: given $e : \Set{A}$ we may
+  write $\letin{x}{e}{e'}$ for the least upper bound, over all elements $x \in
+  e$, of $e'$, as long as $e' : L$ has a semilattice type. If $e' : \Set{B}$ is
+  itself a set, for example, this serves as the set type's monadic ``bind''
+  operation. For example, $\forin{x \in \setlit{1,2,3}} \{10 \cdot x, x^2\}$
+  denotes the set $\{1, 4, 9, 10, 20, 30\}$.
+
+  \todo{explain testing for set membership?}
+
+  Second, we restrict fixed-points $(\fix{\m{x}}{e})$ to semilattice types,
+  which guarantees that we take
+
+  \todo{Explain how products of semilattice being semilattice + monotone
+    fixed-points account for mutual recursion.}
+
+  \todo{Rewrite this to be clearer.}
+
+\end{enumerate}
