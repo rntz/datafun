@@ -1,0 +1,18 @@
+#!/bin/bash
+
+hook_dir=$(dirname "$0")
+git_dir=${hook_dir}/..
+githook_dir=${git_dir}/.git/hooks
+
+hooks=pre-commit
+
+for hook in $hooks; do
+    if test -e "${githook_dir}/${hook}"; then
+        echo "${hook} already exists; not overwriting"
+    else
+        echo "Installing ${hook} hook."
+        ln -s "../../hooks/${hook}" "${githook_dir}/${hook}"
+    fi
+done
+
+echo "done!"
