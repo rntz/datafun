@@ -80,65 +80,8 @@ term1, term2
 \keywords
 keyword1, keyword2
 
-
-\section{Introduction}
 
-%% Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nec vero alia sunt
-%% quaerenda contra Carneadeam illam sententiam. Cum ageremus, inquit, vitae beatum
-%% et eundem supremum diem, scribebamus haec. Quid sequatur, quid repugnet, vident.
-
-%% Minime id quidem, inquam, alienum, multumque ad ea, quae quaerimus, explicatio
-%% tua ista profecerit. Qua ex cognitione facilior facta est investigatio rerum
-%% occultissimarum. Quis animo aequo videt eum, quem inpure ac flagitiose putet
-%% vivere? Primum quid tu dicis breve? Ita enim vivunt quidam, ut eorum vita
-%% refellatur oratio.
-
-\TODO
-
-\paragraph{Contributions}
-\begin{itemize}
-\item We describe Datafun, a typed language capturing the expressive power of
-  Datalog and extending it to support higher-order functional programming.
-  Datafun's key feature is to \emph{track monotonicity with types}.
-
-\item We present examples illustrating the expressive power of Datafun,
-  including relational-algebra-style operations, transitive closure, CYK
-  parsing, and dataflow analysis.
-
-\item We identify the semantic structures underpinning Datalog, and use this to
-  give a denotational semantics for Datafun in terms of a pair of adjunctions
-  between \ms{Set}, \ms{Poset}, and the category of join-semilattices with a
-  least element.
-
-\item We have a prototype implementation of Datafun in Racket. \todo{(CITE)}
-\end{itemize}
-
-%% Contributions (as summarized by Michael):
-% - Datafun, like Datalog but functional
-% - examples, incl. both datalog examples & things datalog can’t do
-% - key ingredient is monotonicity; ``found'' semantics by analyzing
-%   datalog: two adjunctions, three categories
-% - prototype implementation
-
-%% Contributions (as written by Neel):
-
-% - We describe Datafun, a type theory for a language capturing the expressive
-%   power of Datalog and extends it to both relax the constructor term
-%   restriction and to support higher-order functional programming.
-
-% - We give a variety of examples that illustrate the expressive power of
-%   Datafun, such as CYK parsing, dataflow analysis, and transitive closure on
-%   graphs, etc. Many of these examples are traditional examples of Datalog,
-%   but we are also able to support things like first-class relations (eg,
-%   generic transitive closure) and higher-order functions (example using
-%   monotonicity and HO?). (doing a fix-point code analysis / parsing something
-%   & dispatching on result?)
-
-% - We identify the semantic structures underpinning Datalog, and use this to
-%   give a denotational semantics for Datafun in terms of a pair of adjunctions
-%   between Set, Poset, and the category of semilattices with finitary joins.
-
-% - We have a prototype implementation of Datafun in Racket.
+\input{introduction.tex}
 
 
 %% FIGURE: CORE SYNTAX
