@@ -1,16 +1,80 @@
 \section{Introduction}
 
-%% Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nec vero alia sunt
-%% quaerenda contra Carneadeam illam sententiam. Cum ageremus, inquit, vitae beatum
-%% et eundem supremum diem, scribebamus haec. Quid sequatur, quid repugnet, vident.
+The phrase ``declarative programming'' is as popular as it is
+ambiguous, with seemingly hundreds of disparate senses in which it is
+used. However, two of those usages stand out for popularity: both
+\emph{functional programming} and \emph{logic programming} are
+commonly called declarative languages.
 
-%% Minime id quidem, inquam, alienum, multumque ad ea, quae quaerimus, explicatio
-%% tua ista profecerit. Qua ex cognitione facilior facta est investigatio rerum
-%% occultissimarum. Quis animo aequo videt eum, quem inpure ac flagitiose putet
-%% vivere? Primum quid tu dicis breve? Ita enim vivunt quidam, ut eorum vita
-%% refellatur oratio.
+The fact that logic programming languages and functional languages
+have largely evolved separately (with a few honorable exceptions such
+as Curry~\cite{curry}) can be seen as either an occasion for sorrow,
+or it can be seen as an opportunity -- as functional language
+designers, we can look at logic languages to discover new ideas to
+steal.
 
-\TODO
+A Prolog program can be understood as a collection of logical axioms
+formulated as Horn clauses (i.e., first-order formulas of the form
+$\forall \vec{x}.\;P_1(\vec{x}) \land \ldots \land P_n(\vec{x}) \to
+\exists \vec{y}.\; Q(\vec{x}, \vec{y})$, where $P_i$ and $Q$ are
+atomic formulas).  Execution of a Prolog program can be understood as
+running a proof search algorithm on these clauses to figure out
+whether a particular formula is derivable or not.
+
+In other words, functional and logic programming languages embody the
+Curry-Howard correspondence in two different ways. In a functional
+language, types are propositions, terms are proofs, and program
+evaluation corresponds to proof normalization. On the other hand, for
+logic programming languages, \emph{terms} are propositions, and
+program evaluation corresponds to \emph{proof search}.
+
+Due to the undecidability of general theorem proving, designers of
+logic programming languages have to both be very careful about the
+kinds of formulas they admit as programs, and to be careful about the
+proof search algorithm they implement. Prolog offers a very expressive
+language --- full Horn clauses --- and so it faces an undecidable
+proof search problem. So to make its operational behaviour
+predictable, its designers specified a particular proof search
+strategy, namely depth-first goal-directed search. As a result,
+programmers can reliably reason about the behaviour of a Prolog
+program, at the cost of making certain logically natural programs go
+into infinite loops. (Notoriously, transitive closure calculations are
+much less elegant to program in Prolog than one might naively hope,
+since they are naturally computed using a breadth-first proof search
+strategy.)
+
+However, this view of Prolog suggests that there are other possible
+design choices, such as restricting the logical language sufficiently
+to make the proof search problem decidable. Indeed, one of the most
+successful evolutions of logic programming in the last decade has been
+Datalog~\cite{datalog}, which has taken precisely this tack. Datalog
+can be understood as a subset of Prolog carefully designed so as to
+ensure the decidability of the proof search problem.
+
+\todo{Be more specific about the restrictions}
+
+\todo{Say something about sub-Turing languages being more optimizable}
+
+As a result of this decidability, the implementors of Datalog have the
+freedom to tailor their proof search strategy to the program, and so
+Datalog programs can both be extremely concise (and ``declarative'')
+and extremely efficient. For example, \citet{whaley-lam} implemented
+pointer analysis algorithms in Datalog, and found that they could
+reduce the size of their analyses from thousands of lines of code to
+\emph{tens} of lines of code, while still retaining competitive
+performance.
+
+Obviously, not all 
+
+
+
+
+
+
+
+
+
+
 
 \paragraph{Contributions}
 \begin{itemize}
@@ -24,7 +88,8 @@
 
 \item We identify the semantic structures underpinning Datalog, and use this to
   give a denotational semantics for Datafun in terms of a pair of adjunctions
-  between \cSet{}, \cPoset{}, and \cSL{}.
+  between \ms{Set}, \ms{Poset}, and the category of join-semilattices with a
+  least element.
 
 \item We have a prototype implementation of Datafun in Racket. \todo{(CITE)}
 \end{itemize}
@@ -55,3 +120,7 @@
 %   between Set, Poset, and the category of semilattices with finitary joins.
 
 % - We have a prototype implementation of Datafun in Racket.
+
+% Local Variables:
+% TeX-master: "datafun"
+% End:
