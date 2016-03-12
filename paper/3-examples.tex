@@ -5,10 +5,10 @@
   \textsf{terms} &
   e &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
              \pipe \forin{\mc{L}}{e}\\
-  &&& \mathcal{C}[\;e]^* \pipe \rawcase{e}{[{p} \to {e}]^*}
+  &&& \mathcal{C}[\;e]^* \pipe \rawcase{e}{[{p} \cto {e}]^*}
   \vspace{0.5em}\\
   %% patterns
-
+  %%
   %% TODO: maybe remove the pattern-matching stuff? since we don't explain how
   %% to translate it & we also use various other sugar we don't explain how to
   %% translate, why do we include only pattern-matching here?
@@ -29,8 +29,8 @@
     \setfor{e}{\mc{L}}       &\expandsto& \forin{\mc{L}}{\{e\}}\\
     \forin{\mc{L}_1,\mc{L}_2}{e}
     &\expandsto& \forin{\mc{L}_1}{\forin{\mc{L}_2}{e}}\\
-    \forin{p\in e_1}{e_2}
-    &\expandsto& \letin{x}{e_1}{\rawcase{x}{p \to e_2;\,\pwild \to \unit}}\\
+    \forin{p\in e_1}{e_2} &\expandsto&
+    \letin{x}{e_1}{\rawcase{x}{p \cto e_2;\,\pwild \cto \unit}}\\
     \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}
     %% e_1 \x e_2 &\expandsto& \setfor{(a,b)}{a \in e_1, b \in e_2}\\
     %% e_1 \bullet e_2 &\expandsto& \setfor{(a,c)}{(a,b) \in e_1, (b,c) \in e_2}
@@ -38,7 +38,7 @@
     %% &\expandsto& (\fn\bind{x} e_2)\; e_1\\
     %% \ms{let}~[x_i = e_i]^* ~\ms{in}~ e
     %% &\expandsto& [\ms{let}~x_i = e_i~\ms{in}]^* e\\
-    %% \rawcase{e}{[p \to e]^*} &\expandsto& \text{(omitted, see \todo{CITE})}
+    %% \rawcase{e}{[p \cto e]^*} &\expandsto& \text{(omitted, see \todo{CITE})}
   \end{eqnarray*}
   \caption{Syntax sugar}
   \label{fig:sugar}
@@ -56,7 +56,8 @@ All of these conveniences are supported (with slightly different concrete
 syntax) in our implementation.
 
 For clarity, we set the names of top-level variables in \textsf{sans-serif};
-ordinary variables in $script$; and monotone variables in \m{bold}.
+ordinary variables in $script$ or \mi{italic} (for long variable names); and
+monotone variables in \m{bold}.
 
 \todo{TODO: Explain nonlinear variable usage means equality.}
 
@@ -77,7 +78,7 @@ their most general possible type schemes. \todo{why?}
   monotonicity typing}
 
 \[\begin{array}{l}
-\fname{map} ~:~ (A \uto B) \to \Set{A} \mto \Set{B}\\
+\fname{map} ~:~ (A \uto B) \uto \Set{A} \mto \Set{B}\\
 \fname{map}\;f\;\m{A} = \setfor{f\;x}{x \in \m{A}}\\
 \\
 \fname{filter} ~:~ (A \uto \bool) \mto \Set{A} \mto \Set{A}\\
@@ -94,14 +95,15 @@ their most general possible type schemes. \todo{why?}
 \begin{figure}
   %% TODO: remove unused primitives.
   \[\begin{array}{cll}
+  \neg &\of& \bool \uto \bool\\
   =   &\of& \eq{A} \uto \eq{A} \uto \bool\\
   \le &\of& \eq{A} \uto \eq{A} \mto \bool\\
   \fname{keys}     &:& \Map{A}{B} \mto \Set{A}\\
   \fname{entries}  &:& \Map{A}{B} \uto \Set{A \x B}\\
-  \fname{tabulate} &:& \Set{A} \mto (A \to B) \mto \Map{A}{B}\\
+  \fname{tabulate} &:& \Set{A} \mto (A \uto B) \mto \Map{A}{B}\\
   %% \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
   \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
-  %% \fname{substrings} &\of& \ms{Str} \to \Set{\ms{Str}}\\
+  %% \fname{substrings} &\of& \ms{Str} \uto \Set{\ms{Str}}\\
   %% \fname{size}     &:& \Set{\eq{A}} \mto \N\\
   \fname{range}    &:& \N \uto \N \mto \Set{\N}\\
   \fname{length}   &:& \str \uto \N\\
@@ -116,7 +118,7 @@ their most general possible type schemes. \todo{why?}
 \todo{Use this as example of $\bigvee$ at non-set (here, boolean) type.}
 
 \[\begin{array}{l}
-(\isin) ~:~ \eq{A} \to \Set{\eq{A}} \mto \bool\\
+(\isin) ~:~ \eq{A} \uto \Set{\eq{A}} \mto \bool\\
 x \isin \m{A} = \forin{y \in \m{A}} x = y
 \end{array}\]
 
@@ -237,26 +239,63 @@ For any finite eqtype $\fineq{A}$, we may write:
 
 \[\begin{array}{l}
 \mathbf{type}~\ms{sym} = \str\\
-\mathbf{data}~\ms{rule} = \ctor{String}~\str ~|~ \ctor{Cat}~\ms{sym}~\ms{sym}\\
+\mathbf{data}~\ms{rule} = \ctor{String}~\str ~|~ \ctor{Concat}~\ms{sym}~\ms{sym}\\
 \mathbf{type}~\ms{grammar} = \Set{\ms{sym} \x \ms{rule}}\\
 \mathbf{type}~\ms{fact} = \ms{sym} \x \N \x \N\\
 \fname{parse} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{sym}}\\
 \fname{iter} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{fact}}
 \mto \Set{\ms{fact}}\\
-\fname{parse}\;w\;\m{g} =\\
-\hspace{1em} \ms{let}~ n = \ms{length}\;w\\
-\hspace{2.375em}\m{u} =
-  \setfor{(a,i,j)}{(a,\pwild) \in \m{g}, i \in \ms{range}\;0\;n,
-  j\in\fname{range}\;i\;n}\\
-\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in %
-  \fixle{\m{X}}{\m{u}} \ms{iter}\;w\;\m{g}\;\m{X}}\\
-\fname{iter}\;w\;\m{g}\;\m{X} =\\
-\hspace{1em}\phantom{\vee~}\setfor{(a,i,k)}{(a, \ctor{Cat}~b~c) \in \m{g},
-  (b,i,j) \in \m{X}, (c,j,k) \in \m{X}}\\
+%% parse
+\fname{parse} \;\mi{text} \;\m{G} =\\
+\hspace{1em} \ms{let}~ n = \ms{length} \;\mi{text}\\
+\hspace{2.375em}\m{bound} =
+  \{(a,i,j) ~|~ (a,\pwild) \in \m{G},\\
+\hspace{10.5em}i \in \ms{range}\;0\;n, \\
+\hspace{10.5em}j\in\fname{range}\;i\;n\}\\
+\hspace{2.375em} \m{chart} = \fixle{\m{C}}{\m{bound}}
+  \ms{iter} \;\mi{text} \;\m{G} \;\m{C}\\
+\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in \m{chart}}\\
+%% iter with \forin
+\\
+\fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
+\hspace{1em}\phantom{\vee~}
+(\bigvee((a, \ctor{Concat} \;b \;c) \in \m{G},\\
+\hspace{1.25em}\phantom{\vee~ \bigvee(}
+(b,i,j) \in \m{chart}, (c,j,k) \in \m{chart})\\
+\hspace{1.25em}\phantom{\vee~}\, \setlit{(a,i,k)})\\
+\hspace{1em}\vee~ (\bigvee((a, \ctor{String} \;s) \in \m{G},\\
+\hspace{1.25em}\phantom{\vee~\bigvee(}
+i \in \ms{range} \;0 \;(n - \ms{length} \; s),\\
+\hspace{1.25em}\phantom{\vee~\bigvee(}
+s = \ms{substring} \;\mi{text} \;i \;(i+\ms{length}\;s))\\
+\hspace{1.25em}\phantom{\vee~}\, \setlit{(a,i,i+ \ms{length}\;s)})
+\\
+%% iter with case. I like this version best.
+\\
+\fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
+\hspace{1em}\forin{(a,r) \in \m{G}}\\
+\hspace{1.875em}\ms{case}~ r\\
+\hspace{2.4em}\ms{of}~
+%% \hspace{3.05em}\pipe
+\ctor{Concat} \;b \;c \cto \{(a,i,k) ~|~ (b,i,j) \in \m{chart},\\
+\hspace{14.42em}(c,j,k) \in \m{chart}\}\\
+\hspace{3.05em}\pipe \ctor{String} \;s \cto
+\{\,(a, i, i+\ms{length}\;s)\\
+\hspace{9em}|~ i \in \ms{range} \;0 \;(n-\ms{length}\;s),\\
+\hspace{9em}\phantom{|~}
+s = \ms{substring} \;\mi{text} \;i \;(i+\ms{length}\;s)\}
+\\
+%% iter
+\\
+\fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
+\hspace{1em}\phantom{\vee~}
+\{(a,i,k) ~|~ (a, \ctor{Concat}~b~c) \in \m{G},\\
+\hspace{6.25em} (b,i,j) \in \m{chart}, (c,j,k) \in \m{chart}\}\\
 \hspace{1em}\vee~ \{(a,i,i+\fname{length}\;s)\\
-\hspace{2.1em}|~ (a, \ctor{String}~s) \in \m{g},
-i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
-\hspace{2.2em}\phantom{|~} s = \fname{substring}\;w\;i\;(i+\ms{length}\;s)\}
+\hspace{2.1em}|~ (a, \ctor{String}~s) \in \m{G},\\
+\hspace{2.2em}\phantom{|~} i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
+\hspace{2.2em}\phantom{|~}
+s = \fname{substring} \;\mi{text} \;i \;(i+\ms{length}\;s)\}
 \end{array}\]
 
 \TODO Since Datalog provides no way to represent a \emph{grammar} as a piece of
@@ -274,5 +313,57 @@ functions are total, Datafun programs always terminate.
 
 
 \subsection{Dataflow analysis}
+
+\[\begin{array}{l}
+\textbf{type}~\ms{var} = \str\\
+\textbf{type}~\ms{label} = \N\\
+\textbf{data}~\ms{oper} = \ctor{Eq} \pipe \ctor{Le}
+\pipe \ctor{Add} \pipe \ctor{Sub} \pipe\ctor{Mul}\pipe\ctor{Div}\\
+\textbf{data}~\ms{atom} = \ctor{Var}\;\ms{var} \pipe \ctor{Num}\;\N\\
+\textbf{data}~\ms{expr} = \ctor{Atom}\;\ms{atom}
+\pipe \ctor{Apply}\;\ms{oper}\;\ms{atom}\;\ms{atom}\\
+\textbf{data}~\ms{stmt} =
+\ctor{Assign} \;\ms{var} \;\ms{expr}
+\pipe \ctor{If} \;\ms{expr} \;\ms{label}\;\ms{label}\\
+\textbf{type}~\ms{code} = \Map{\ms{label}}{\ms{stmt}}
+\vspace{0.5em}\\
+%% omitted functions
+\ms{vars} ~:~ \ms{code} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}\\
+\ms{uses} ~:~ \ms{stmt} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}\\
+\ms{defines} ~:~ \ms{stmt} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}
+\vspace{0.5em}\\
+%% control flow
+\textbf{type}~\ms{flow} = \Set{\ms{label} \x \ms{label}}\\
+\fname{flow} ~:~ \ms{code} \uto \ms{flow}\\
+\fname{flow}\;c = \forin{(i,s) \in \ms{entries}\;c}\\
+\hspace{4em}\ms{case}~ s ~\ms{of}~
+\ctor{If} \;\pwild \;j \;k \cto \setlit{(i,j),(i,k)}\\
+\hspace{7.45em}\pipe\pwild \cto \setfor{(i,i+1)}{i+1 \isin \ms{keys}\;c}
+\vspace{0.5em}\\
+%% live code analysis
+\ms{live} ~:~ \ms{code} \uto \ms{flow} \uto \Set{\ms{label} \x \ms{var}}\\
+\ms{live} \;\mi{code} \;\mi{flow} =\\
+\hspace{2em} \fixle{\m{Live}}{ %
+  \ms{keys}\;\mi{code} \x \ms{vars}\;\mi{code}}\\
+\hspace{2em}\forin{(i,\mi{stmt}) \in \ms{entries} \;\mi{code}}\\
+\hspace{2.875em} (\phantom{\vee~}\setfor{(i,v)}{v \in \ms{uses}\;\mi{stmt}}\\
+\hspace{3.2em} \vee~ \{(i,v) ~|~ (i,j) \in \mi{flow},\\
+\hspace{7.4em}(j,v) \in \m{Live},\\
+\hspace{7.4em}\neg (v \isin \ms{defines}\; \mi{stmt})\})
+\vspace{0.5em}\\
+%% reaching definitions analysis
+\textsf{\todo{explain which label means what}}\\
+\ms{reachingDefinitions} ~:~ \ms{code} \uto \ms{flow}
+\uto \Set{\ms{label} \x \ms{label} \x \ms{var}}\\
+\ms{reachingDefinitions} \;\mi{code} \;\mi{flow} =\\
+\hspace{2em}\fixle{\m{RD}}{%
+  \ms{keys}\;\mi{code} \x \ms{keys}\;\mi{code} \x \ms{vars}\;\mi{code}}\\
+\hspace{2em}\forin{(i,\mi{stmt}) \in \ms{entries}\;\mi{code}}\\
+\hspace{2.875em} (
+\phantom{\vee~}\setfor{(i,i,v)}{v \in \ms{defines}\;\mi{stmt}}\\
+\hspace{3.2em} \vee~ \{(i,l,v) ~|~ (j,i) \in \mi{flow},\\
+\hspace{8.14em}(j,l,v) \in \m{RD},\\
+\hspace{8.14em}\neg(v \isin \ms{defines}\;\mi{stmt})\})
+\end{array}\]
 
 \TODO

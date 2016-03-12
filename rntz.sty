@@ -32,6 +32,7 @@
 \newcommand{\TODO}{\todo{TODO} }
 
 \newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\mi}[1]{\ensuremath{\mathit{#1}}}
 \newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}
 \newcommand{\fname}{\ms}
 \newcommand{\ent}{\vdash}
@@ -75,6 +76,7 @@
 
 
 %% expressions
+%% \renewcommand{\v}[1]{\mi{#1}}                %ordinary variables
 \newcommand{\m}[1]{\ensuremath{\mathbf{#1}}}  %monotone variable
 \newcommand{\sub}[1]{[#1]\,}                   % substitution
 \newcommand{\fix}[1]{\ms{fix}~{#1}~\ms{is}~}
@@ -87,8 +89,9 @@
 \newcommand{\forin}[1]{\textstyle\bigvee({#1})\ }
 \newcommand{\letin}[3]{\forin{#1 \in #2}{#3}}
 \newcommand{\rawcase}[2]{\ms{case}~{#1}~\ms{of}~{#2}}
+\newcommand{\cto}{\arr}         % "case to"
 \newcommand{\case}[5]{%
-\rawcase{#1}{\ms{in}_1\,{#2}\to{#3};\,\ms{in}_2\,{#4}\to{#5}}}
+\rawcase{#1}{\ms{in}_1\,{#2}\cto{#3};\,\ms{in}_2\,{#4}\cto{#5}}}
 \newcommand{\ifthen}[3]{\ms{if}~{#1}~\ms{then}~{#2}~\ms{else}~{#3}}
 
 \newcommand{\setlit}[1]{\{#1\}}
@@ -105,7 +108,7 @@
 %% patterns
 \newcommand{\pwild}{\underline{\phantom{a}}}
 
-\newcommand{\ctor}[1]{\textit{#1}}
+\newcommand{\ctor}[1]{\textsc{#1}}
 
 
 %% semantics

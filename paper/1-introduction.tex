@@ -28,41 +28,44 @@ evaluation corresponds to proof normalization. On the other hand, for
 logic programming languages, \emph{terms} are propositions, and
 program evaluation corresponds to \emph{proof search}.
 
-Due to the undecidability of general theorem proving, designers of
-logic programming languages have to both be very careful about the
-kinds of formulas they admit as programs, and to be careful about the
-proof search algorithm they implement. Prolog offers a very expressive
-language --- full Horn clauses --- and so it faces an undecidable
-proof search problem. So to make its operational behaviour
-predictable, its designers specified a particular proof search
-strategy, namely depth-first goal-directed search. As a result,
-programmers can reliably reason about the behaviour of a Prolog
-program, at the cost of making certain logically natural programs go
-into infinite loops. (Notoriously, transitive closure calculations are
-much less elegant to program in Prolog than one might naively hope,
-since they are naturally computed using a breadth-first proof search
-strategy.)
+Since proof search is in general undecidable, designers of logic
+programming languages must be careful both about the kinds of formulas
+they admit as programs, and about the proof search algorithm they
+implement. Prolog offers a very expressive language --- full Horn
+clauses --- and so faces an undecidable proof search problem.
+Therefore, Prolog specifies its proof search strategy: depth-first
+goal-directed search. This lets Prolog programmers reason about the
+behaviour of their programs; however, it also means many logically
+natural programs fail to terminate. Notoriously, transitive closure
+calculations are much less elegant to program in Prolog than one might
+na\"ively hope, since they are naturally computed using a
+breadth-first proof search strategy.
 
-However, this view of Prolog suggests that there are other possible
-design choices, such as restricting the logical language sufficiently
-to make the proof search problem decidable. Indeed, one of the most
-successful evolutions of logic programming in the last decade has been
-Datalog~\cite{datalog}, which has taken precisely this tack. Datalog
-can be understood as a subset of Prolog carefully designed so as to
-ensure the decidability of the proof search problem.
+\todo{Don't we mean ``a bottom-up/forward-chaining proof search
+  strategy''? Does breadth-first backward-chaining search work for
+  transitive closure?}
+
+This view of Prolog suggests considering other possible design
+choices, such as restricting the logical language so as to make proof
+search decidable. Indeed, one of the most successful evolutions of
+logic programming in the last decade has been Datalog~\cite{datalog},
+which takes precisely this tack. Datalog can be understood as a subset
+of Prolog carefully chosen to ensure the decidability of the proof
+search problem.
+
+\todo{Isn't Datalog older than ``the last decade''?}
 
 \todo{Be more specific about the restrictions}
 
 \todo{Say something about sub-Turing languages being more optimizable}
 
-As a result of this decidability, the implementors of Datalog have the
-freedom to tailor their proof search strategy to the program, and so
-Datalog programs can both be extremely concise (and ``declarative'')
-and extremely efficient. For example, \citet{whaley-lam} implemented
-pointer analysis algorithms in Datalog, and found that they could
-reduce the size of their analyses from thousands of lines of code to
-\emph{tens} of lines of code, while still retaining competitive
-performance.
+Thanks to this decidability, Datalog implementations are free to
+tailor their proof search strategy to the program being executed.
+Consequently Datalog programs can be both concise and efficient. For
+example, \citet{whaley-lam} implemented pointer analysis algorithms in
+Datalog, and found that they could reduce their analyses from
+\emph{thousands} to \emph{tens} of lines of code while retaining
+competitive performance.
 
 Obviously, not all 
 
