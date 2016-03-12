@@ -1,4 +1,7 @@
-\section{Comparing Datalog and Datafun} At this point, we have
+\section{Comparing Datalog and Datafun}
+\label{sec:datalog-vs-datafun}
+
+At this point, we have
 demonstrated by example that Datafun programs are rather similar to
 Datalog programs, and we have given the typing and denotational
 semantics of Datafun. However, we still need to explain \emph{why} our
@@ -51,15 +54,24 @@ computations which actually \emph{compute} with the data they see.
 
 
 
-\section{Related and future work}
+\section{Other Related and Future Work}
 \label{sec:futurework}
 
-\paragraph{Deleting Facts} \citet{logical-algorithms} showed how
-forwards-chaining logic programming permits a concise and elegant
+\paragraph{Deletion} \citet{logical-algorithms} showed how
+forwards-chaining logic programming permits concise and elegant
 expression of a wide variety of algorithms, including a natural cost
-semantics for them. However, they noted that there were some
-algorithms (such as union-find, and spanning tree algorithms) which
-could be formulated in this style, \emph{if} the
+semantics. However, they noted that there were some algorithms (such
+as union-find and greedy algorithms) which could be formulated in this
+style, \emph{if} there were additionally support for deleting facts
+from a database. Later, \citet{linear-logical-algorithms} went on to
+show how deletion could be given a logical interpretation by
+formulating in terms of linear logic programming.
+
+This naturally raises the question of whether we could identify a
+``linear Datafun'' corresponding to this style of programming, where
+we might linear types to model features like deletion. There are many
+nontrivial semantic issues (e.g., how to define monotonicity), but
+it seems a promising question for future work.
 
 
 
