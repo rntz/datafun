@@ -1,5 +1,16 @@
 # -*- mode: org -*-
 
+What fixed-point theorem do we need for (fix x <= e_top in e : L)?
+
+Consider the sub-semilattice of L: {a | a <= e_top}. Call this P. Since L is
+all-finite-height, P has finite height.
+
+Let (f x = if e <= e_top then e else e_top).
+Then f is a monotone map P -> P!
+
+So by Theorem 1, f has a fixed point, and by theorem 3, we can find it by
+iteration.
+
 * Definitions
 Definition: All-finite-height
 A poset A is all-finite-height if every element x : A has finite height.
