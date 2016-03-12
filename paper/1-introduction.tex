@@ -51,8 +51,9 @@ program:
   will not introduce terms that do not occur in the source of the
   program.
 
-\item All variables in the consequent (head) of a clause must also occur
-  positively in its premises (body).
+\item Clauses are \emph{range-restricted}: all variables in the
+  consequent (head) of a clause must also occur positively in its
+  premises (body).
 
 \item The negation of a predicate may be used in a definition only if
   it has already been fully defined. (That is, within the recursive
