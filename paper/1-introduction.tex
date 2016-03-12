@@ -46,26 +46,28 @@ subset of Prolog satisfying three restrictions on the clauses defining a
 program:
 
 \begin{enumerate}
-\item Terms occurring in predicates are forbidden from being composites: they
-  can only be ground terms, or variables. This restriction ensures that
-  deduction will never introduce new terms that do not occur in the source of
-  the program.
+\item Composite terms are forbidden; only ground terms and variables are
+  permitted. This ensures that deduction will not introduce terms that do not
+  occur in the source of the program.
 
-\item Variables occurring in the head of a clause (i.e., the consequent of a
-  Horn clause) must also occur (positively) in the body (i.e., the premises of a
-  Horn clause).
+  \todo{actually, I think it's stronger: only \emph{atoms} and variables are
+    permitted. But this doesn't seem necessary for the properties we discuss?
+    I'm not sure why it was chosen. for simplicity, maybe?}
 
-\item No predicate can be negated unless it has already been fully defined. This
-  is sometimes called ``stratified negation''.
+\item All variables in the consequent (head) of a clause must also occur
+  positively in its premises (body).
+
+\item A predicate may not be negated until it has been fully defined. This is
+  called ``stratified negation''.
 \end{enumerate}
 
-These drastic restrictions make Datalog Turing-incomplete -- all queries are
-decidable. As functional programmers are well aware, though, there is often
-power in restraint: for example, in a total functional language, the compiler is
-free to switch between strict and lazy evaluation as it deems fit. Similarly, in
-Datalog decidability means that implementations are free to use forwards
-chaining, and so can easily support queries (like reachability and transitive
-closure) which are difficult to implement in ordinary Prolog.
+These restrictions make Datalog Turing-\emph{in}complete: all queries are
+decidable. As functional programmers are well aware, though, there is power in
+restraint: for example, in a total functional language, the compiler may switch
+between strict and lazy evaluation at will. Similarly, in Datalog decidability
+means that implementations are free to use forwards chaining, and so can easily
+support queries (like reachability and transitive closure) which are difficult
+to implement in ordinary Prolog.
 
 %% PREVIOUS PARAGRAPH:
 %
@@ -77,13 +79,12 @@ closure) which are difficult to implement in ordinary Prolog.
 % \emph{thousands} to \emph{tens} of lines of code while retaining
 % competitive performance.
 
-Over the last decade or so, this freedom has been put to very good use, with
-Datalog appearing at the heart of a a wild variety of applications in both
-research and industry. For example, Whaley and Lam \cite{whaley-lam,whaley-phd}
-implemented pointer analysis algorithms in Datalog, and found that they could
-reduce the size of their analyses from thousands of lines of C code to
-\emph{tens} of lines of Datalog code, while still retaining competitive
-performance. Semmle has developed the .QL
+Over the last decade or so, this freedom has been put to good use, with Datalog
+appearing at the heart of a a wild variety of applications in both research and
+industry. For example, Whaley and Lam \cite{whaley-lam,whaley-phd} implemented
+pointer analysis algorithms in Datalog, and found that they could reduce their
+analyses from thousands of lines of C code to \emph{tens} of lines of Datalog
+code, while retaining competitive performance. Semmle has developed the .QL
 language~\cite{semmlecode,ql-inference} based on Datalog for analysing source
 code (which was used to analyze the code for NASA's Curiosity Mars rover), and
 LogicBlox has developed the LogiQL~\cite{logicblox} language for business
