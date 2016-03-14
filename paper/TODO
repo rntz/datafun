@@ -1,5 +1,19 @@
 -*- mode: org -*-
 
+* To cover during meeting 2016-03-14
+** Who writes the abstract and when?
+** Rename "maps" to "dictionaries" to avoid Gibbons confusion?
+"Dictionaries" phrase more common among practitioners.
+
+** Remove singleton typing rule for maps?
+No examples use it. We don't have a rule for empty maps (which we need if
+they're not of semilattice type; or we could introduce a primitive). We likewise
+have no rules for strings.
+
+** Which version of `iter' in CYK parsing?
+Should we use `case' or pattern-comprehension?
+If `case', put the first \bigvee on same line as = or below it?
+
 * To cover during meeting 2016-03-07
 ** 1. Replace naturals by integers?
 We never use the fact that N is a semilattice type! Should we replace naturals N
@@ -33,12 +47,23 @@ YES, NEEDS TO BE READY FOR THE DEADLINE
 Explain in english the judgment and each of the typing rules. Explain all rules,
 but can say "this is standard" for ordinary rules (like products).
 
-- explain variable rule: two ordinary intuitionistic contexts, can use variables from either
+- explain variable rule: two ordinary intuitionistic contexts, can use variables
+  from either
 
 - explain why they are two application rules app, and why regular application
   can't use monotone variables in the argument.
 
-- explain sums (why 2 elims)
+- explain sums (why 1 intro but 2 elims)
+
+- explain if (why 2 elims, weirdness of if^+)
+
+- explain {}, why e gets a wiped monotone context
+- explain {:} by analogy
+
+- epsilon & vee are straightforward.
+- bigvee?
+
+- fix, notation L_{fin}.
 
 ** 6. What else should go in "Implementation" section?
 - we built a PoC in racket
