@@ -237,44 +237,79 @@ For any finite eqtype $\fineq{A}$, we may write:
 
 
 \subsection{CYK parsing}
-Parsing can be understood logically, with a parse tree representing
-a proof that a certain string belongs to a language described by a
+Parsing can be understood logically, with a parse tree representing a
+proof that a certain string belongs to a language described by a
 context-free grammar. As a result, it is possible to formulate parsing
-in terms of proof search~\cite{schieber-deductive-parsing}. One of the
+in terms of proof search~\cite{deductive-parsing}. One of the
 simplest algorithms for parsing context free grammars is the
 Cocke-Younger-Kasami (CYK) algorithm for parsing with grammars in
 Chomsky normal form.\footnote{In Chomsky normal form, each production
-  is of the form $A \to B \cdot C$ or $A \to a$, with $A,B,C$ ranging
-  over nonterminals, and $a$ over terminals.}
-Given a grammar $G$, we begin by introducing a family of formulas
-$A(i,j)$, with one $A$ for each nonterminal, and $i$ and $j$
-representing indices into a string. Given a word $w$, we write $w_i$
-for the $i$-th element of the word. Then, we can specify the CYK algorithm
-with the following two inference rules:
-
+  is of the form $A \to B \cdot C$ or $A \to \vec{a}$, with $A,B,C$
+  ranging over nonterminals, and $\vec{a}$ over nonempty strings of
+  terminals.}  Given a grammar $G$, we begin by introducing a family
+of predicates (sometimes called \emph{facts} or \emph{items}) $A(i,j)$,
+with one $A$ for each nonterminal, and $i$ and $j$ representing
+indices into a string. Given a word $w$, we write $w[i,n]$ for the
+$n$-element substring of $w$ beginning at position $i$. Then, we can
+specify the CYK algorithm with the following two inference rules:
 \begin{mathpar}
-  \inferrule*{ (A \to a) \in G \\ w_i = a }
-             {A(i,i+1)}
-  \and
   \inferrule*{B(i, j) \\ C(j, k) \\ (A \to B\; C) \in G}
              {A(i, k)}
+  \and
+  \inferrule*{ (A \to \vec{a}) \in G \\ w[i,n] = \vec{a} }
+             {A(i,i+n)}
 \end{mathpar}
 Then, the predicate $A(i,j)$ means that $A$ is derivable from the
 substring of $w$ running from $i$ to $j$, and so the whole word $w$ is
 derivable from the start symbol $S$ if $S(0, \mathit{length}\;w)$ is
 derivable.
 
-
-
+In Datafun, this rule-based description of the algorithm can be
+transliterated almost directly into code. We begin by introducing a
+few basic types.
 \[\begin{array}{l}
 \mathbf{type}~\ms{sym} = \str\\
 \mathbf{data}~\ms{rule} = \ctor{String}~\str ~|~ \ctor{Concat}~\ms{sym}~\ms{sym}\\
 \mathbf{type}~\ms{grammar} = \Set{\ms{sym} \x \ms{rule}}\\
 \mathbf{type}~\ms{fact} = \ms{sym} \x \N \x \N\\
-\fname{parse} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{sym}}\\
-\fname{iter} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{fact}}
-\mto \Set{\ms{fact}}\\
+\end{array}\]
+The $\ms{sym}$ type is a type synonym representing nonterminal names
+with strings.  The $\ms{rule}$ type is the type of the
+right-hand-sides of productions Chomsky normal form -- either a
+string, or a pair of nonterminals. A $\ms{grammar}$ is just a set of
+productions -- a set of pairs of nonterminals paired with their rules.
+The type $\ms{fact}$ is the type representing the atomic facts derived
+by the CYK inference system -- they are triples of the rulename, the
+start position, and the end position.
+
+With these types in hand, we can write the CYK algorithm as a fixed
+point computation. In fact, it is convenient to break it into two
+pieces, by first defining the function whose fixed point we take. So
+we can write down the $\fname{iter}$ function, which represents one step of
+the fixed point iteration.
+\[\begin{array}{l}
+\fname{iter} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{fact}} \mto \Set{\ms{fact}}\\
+\fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
+\hspace{1em}\phantom{\vee~}
+\{(a,i,k) ~|~ (a, \ctor{Concat}~b~c) \in \m{G},\\
+\hspace{6.25em} (b,i,j) \in \m{chart}, (c,j,k) \in \m{chart}\}\\
+\hspace{1em}\vee~ \{(a,i,i+\fname{length}\;s)\\
+\hspace{2.1em}|~ (a, \ctor{String}~s) \in \m{G},\\
+\hspace{2.2em}\phantom{|~} i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
+\hspace{2.2em}\phantom{|~}
+s = \fname{substring} \;\mi{text} \;i \;(i+\ms{length}\;s)\}
+\end{array}\]
+This function works by taking a string $\mi{text}$ and a grammar $\m{G}$, and
+then taking a set of facts $\m{chart}$, and taking a union. The first clause
+is a set comprehension, saying that we return $(a, i, k)$ if $(b, i, j)$ and $(c, j, k)$
+are in $\m{chart}$ -- this corresponds to applications of the first rule. The
+second clause corresponds to the second rule above, saying that $(a, i, i + length(s))$
+is a generated fact if $s$ is a substring of $\mi{text}$ at position $i$.
+
+We can then use $\fname{iter}$ to implement the $\fname{parse}$ function.
 %% parse
+\[\begin{array}{l}
+\fname{parse} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{sym}}\\
 \fname{parse} \;\mi{text} \;\m{G} =\\
 \hspace{1em} \ms{let}~ n = \ms{length} \;\mi{text}\\
 \hspace{2.375em}\m{bound} =
@@ -315,30 +350,37 @@ derivable.
 %% s = \ms{substring} \;\mi{text} \;i \;(i+\ms{length}\;s)\}
 %% \\
 %% iter. Neel prefers this. People know set-comprehension.
-\\
-\fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
-\hspace{1em}\phantom{\vee~}
-\{(a,i,k) ~|~ (a, \ctor{Concat}~b~c) \in \m{G},\\
-\hspace{6.25em} (b,i,j) \in \m{chart}, (c,j,k) \in \m{chart}\}\\
-\hspace{1em}\vee~ \{(a,i,i+\fname{length}\;s)\\
-\hspace{2.1em}|~ (a, \ctor{String}~s) \in \m{G},\\
-\hspace{2.2em}\phantom{|~} i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
-\hspace{2.2em}\phantom{|~}
-s = \fname{substring} \;\mi{text} \;i \;(i+\ms{length}\;s)\}
 \end{array}\]
+This function just takes the fixed point of $\fname{iter}$ --
+almost. Because facts are triples $\ms{sym} \x \N \x \N$, sets of
+facts may in general grow unboundedly.  To ensure termination, we
+construct a set $\m{bound}$ to bound the sets of facts we consider in
+our fixed point computation, by bounding the symbols to names found in
+the grammar $\m{G}$, and the indices to positions of the string. Since
+all of these are finite, we know that the computation of $\m{chart}$
+as a bounded fixed point will terminate. Then, having computed the
+fixed point, we can check chart to see if $(a, 0, \ms{length}\;\mi{text})$
+is derivable.
 
-\TODO Since Datalog provides no way to represent a \emph{grammar} as a piece of
-data (because it's compound, not an atom), there is simply no way in Datalog
-proper to express a generic CYK parser. This demonstrates the benefits of moving
-to a functional language.
+There are three things worth noting about this program. First, it is
+not expressible in Datalog. Because Datalog provides no way to
+represent a \emph{grammar} as a piece of data (it's compound, not an
+atom), there is simply no way in Datalog to express a \emph{generic}
+parser taking a grammar as an input. This demonstrates one of the key
+benefits of moving to a functional language like Datafun.
 
-\TODO Moreover, Datalog's strategy for proving termination involves a
+Moreover, Datalog's strategy for proving termination involves a
 constructor restriction to ensure all relations are finite. Primitives such as
 \ms{range} and \ms{substring} violate this restriction (as relations, they are
 infinite); it is not immediately obvious that Datalog programs extended with
 these primitives remain terminating. Our use of bounded fixed-points to
 guarantee termination is robust under such extensions; as long as all primitive
 functions are total, Datafun programs always terminate.
+
+Finally, having computed a set via a fixed point, we can test whether
+or not an element is in that set \emph{or not} -- the ability to test
+for negative information after the fixed point computation completes
+corresponds to a use of stratified negation in Datalog.
 
 
 \subsection{Dataflow analysis}
