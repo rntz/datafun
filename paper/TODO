@@ -2,6 +2,15 @@
 
 * To cover during meeting 2016-03-14
 ** Who writes the abstract and when?
+Me, at the last minute.
+
+** Where should the comparison b/w Datalog & Datafun go?
+Can it be condensed? Put in intro?
+Between examples and typing rules?
+after semantics?
+3. examples
+4. datalog and datafun
+
 ** Rename "maps" to "dictionaries" to avoid Gibbons confusion?
 "Dictionaries" phrase more common among practitioners.
 
