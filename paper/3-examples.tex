@@ -384,7 +384,8 @@ corresponds to a use of stratified negation in Datalog.
 
 
 \subsection{Dataflow analysis}
-
+In this section, we show how some simple dataflow analyses can be expressed in
+Datafun. We begin with the types in these programs.
 \[\begin{array}{l}
 \textbf{type}~\ms{var} = \str\\
 \textbf{type}~\ms{label} = \N\\
@@ -395,32 +396,64 @@ corresponds to a use of stratified negation in Datalog.
 \pipe \ctor{Apply}\;\ms{oper}\;\ms{atom}\;\ms{atom}\\
 \textbf{data}~\ms{stmt} =
 \ctor{Assign} \;\ms{var} \;\ms{expr}
-\pipe \ctor{If} \;\ms{expr} \;\ms{label}\;\ms{label}
-\end{array}\]
+\pipe \ctor{If} \;\ms{expr} \;\ms{label}\;\ms{label} \\
+\textbf{type}~\ms{program} = \Set{\ms{label} \x \ms{stmt}}
 
-%% TODO: rename `code' to `program'?
-We represent a program as a set of label, statement pairs. \todo{Explain
-  invariant}
+\end{array}\]
+The basic idea is that we represent a program as a kind of control
+flow graph. Each node of this graph has a $\ms{label}$, which is a
+natural number, and contains a statement of type $\ms{stmt}$, which is
+either an assignment of an expression (of type $\ms{expr}$) to a
+variable (of type $\ms{var}$), or a conditional jump.  A program is
+then just the set of nodes -- i.e., a set of label, statement pairs --
+with the invariant that the relation is functional (i.e., if $(l, s)$
+and $(l,s')$ are both in a program, then $s = s'$).
+
+In what follows, we use a few trivial functions whose definitions are omitted
+for space reasons.
 \[\begin{array}{l}
-\textbf{type}~\ms{code} = \Set{\ms{label} \x \ms{stmt}}
 \vspace{0.5em}\\
 %% omitted functions
-\ms{labels} ~:~ \ms{code} \uto \Set{\ms{label}}\quad\textsf{-{}- omitted}\\
-\ms{vars} ~:~ \ms{code} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}\\
+\ms{labels} ~:~ \ms{program} \uto \Set{\ms{label}}\quad\textsf{-{}- omitted}\\
+\ms{vars} ~:~ \ms{program} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}\\
 \ms{uses} ~:~ \ms{stmt} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}\\
 \ms{defines} ~:~ \ms{stmt} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}
-\vspace{0.5em}\\
+\end{array}
+\]
+The $\ms{labels}$ function returns the set of labels in a program. The
+$\ms{vars}$ function returns the set of variables used in a program (both in
+expressions and as targets for assignments). The $\ms{uses}$ function
+returns the set of variables used by the expressions in a statement. The
+$\ms{defines}$ function returns the set of variables defined by a statement
+(i.e., at most one variable -- the target of the assignment).
+
+Given a program, we define the 1-step control flow graph with the $\ms{flow}$
+function.
+\[\begin{array}{l}
 %% control flow
 %% TODO: use long variable name for argument.
 \textbf{type}~\ms{flow} = \Set{\ms{label} \x \ms{label}}\\
-\fname{flow} ~:~ \ms{code} \uto \ms{flow}\\
+\fname{flow} ~:~ \ms{program} \uto \ms{flow}\\
 \fname{flow}\;c = \forin{(i,s) \in c}\\
 \hspace{4em}\ms{case}~ s ~\ms{of}~
 \ctor{If} \;\pwild \;j \;k \cto \setlit{(i,j),(i,k)}\\
 \hspace{7.45em}\pipe\pwild \cto \setfor{(i,i+1)}{i+1 \isin \ms{labels}\;c}
 \vspace{0.5em}\\
+\end{array}
+\]
+It says that if $(i, s)$ is a node of the program, then if $s$ is a
+conditional jump $\ctor{If} \;\pwild \;j \;k$, then control can flow from $i$
+to $j$, and from $i$ to $k$ -- i.e., we add both $(i, j)$ and $(i, k)$ to the
+set of edges. Otherwise, it's an assignment, and there is just a control flows
+to the next statement (i.e., we add $(i, i+1)$ to the set of edges).
+
+Now, we can define liveness analysis, one of the classic ``backwards'' dataflow
+analyses. The type of $\ms{live}$ say that given a program and its flow graph,
+it returns a set of label/variable pairs, which can be viewed as a relation saying
+for each label which variables are live.
 %% live code analysis
-\ms{live} ~:~ \ms{code} \uto \ms{flow} \uto \Set{\ms{label} \x \ms{var}}\\
+\[\begin{array}{l}
+\ms{live} ~:~ \ms{program} \uto \ms{flow} \uto \Set{\ms{label} \x \ms{var}}\\
 \ms{live} \;\mi{code} \;\mi{flow} =\\
 \hspace{2em} \fixle{\m{Live}}{ %
   \ms{labels}\;\mi{code} \x \ms{vars}\;\mi{code}}\\
@@ -430,9 +463,20 @@ We represent a program as a set of label, statement pairs. \todo{Explain
 \hspace{7.4em}(j,v) \in \m{Live},\\
 \hspace{7.4em}\neg (v \isin \ms{defines}\; \mi{stmt})\})
 \vspace{0.5em}\\
+\end{array}\]
+For a statement $\mi{stmt}$ at label $i$, we say that the variable
+$v$ is live at $i$ if $v$ is used by $\mi{stmt}$. The variable $v$
+is also live at $i$ if control flows from $i$ to $j$, and and $v$
+is live at $j$, assuming that $\mi{stmt}$ isn't a definition site for $v$.
+
+When computing this analysis, we again need to use a bounded fixed
+point, which we do by taking the Cartesian product of the labels and
+variables occuring in the program.
+
 %% reaching definitions analysis
+\[\begin{array}{l}
 \textsf{\todo{explain which label means what}}\\
-\ms{reachingDefinitions} ~:~ \ms{code} \uto \ms{flow}
+\ms{reachingDefinitions} ~:~ \ms{program} \uto \ms{flow}
 \uto \Set{\ms{label} \x \ms{label} \x \ms{var}}\\
 \ms{reachingDefinitions} \;\mi{code} \;\mi{flow} =\\
 \hspace{2em}\fixle{\m{RD}}{%
