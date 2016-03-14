@@ -256,7 +256,7 @@ For any finite eqtype $\fineq{A}$, we may write:
 \hspace{2.375em} \m{chart} = \fixle{\m{C}}{\m{bound}}
   \ms{iter} \;\mi{text} \;\m{G} \;\m{C}\\
 \hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in \m{chart}}\\
-%% iter with \forin
+%% %% iter with \forin
 %% \\
 %% \fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
 %% \hspace{1em}\phantom{\vee~}
@@ -271,32 +271,32 @@ For any finite eqtype $\fineq{A}$, we may write:
 %% s = \ms{substring} \;\mi{text} \;i \;(i+\ms{length}\;s))\\
 %% \hspace{1.25em}\phantom{\vee~}\, \setlit{(a,i,i+ \ms{length}\;s)})
 %% \\
-%% iter with case. I like this version best.
-\\
-\fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
-\hspace{1em}\forin{(a,r) \in \m{G}}\\
-\hspace{1.875em}\ms{case}~ r\\
-\hspace{2.4em}\ms{of}~
-%% \hspace{3.05em}\pipe
-\ctor{Concat} \;b \;c \cto \{(a,i,k) ~|~ (b,i,j) \in \m{chart},\\
-\hspace{14.42em}(c,j,k) \in \m{chart}\}\\
-\hspace{3.05em}\pipe \ctor{String} \;s \cto
-\{\,(a, i, i+\ms{length}\;s)\\
-\hspace{9em}|~ i \in \ms{range} \;0 \;(n-\ms{length}\;s),\\
-\hspace{9em}\phantom{|~}
-s = \ms{substring} \;\mi{text} \;i \;(i+\ms{length}\;s)\}
-\\
-%% iter
+%% %% iter with case. I like this version best.
 %% \\
 %% \fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
-%% \hspace{1em}\phantom{\vee~}
-%% \{(a,i,k) ~|~ (a, \ctor{Concat}~b~c) \in \m{G},\\
-%% \hspace{6.25em} (b,i,j) \in \m{chart}, (c,j,k) \in \m{chart}\}\\
-%% \hspace{1em}\vee~ \{(a,i,i+\fname{length}\;s)\\
-%% \hspace{2.1em}|~ (a, \ctor{String}~s) \in \m{G},\\
-%% \hspace{2.2em}\phantom{|~} i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
-%% \hspace{2.2em}\phantom{|~}
-%% s = \fname{substring} \;\mi{text} \;i \;(i+\ms{length}\;s)\}
+%% \hspace{1em}\forin{(a,r) \in \m{G}}\\
+%% \hspace{1.875em}\ms{case}~ r\\
+%% \hspace{2.4em}\ms{of}~
+%% %% \hspace{3.05em}\pipe
+%% \ctor{Concat} \;b \;c \cto \{(a,i,k) ~|~ (b,i,j) \in \m{chart},\\
+%% \hspace{14.42em}(c,j,k) \in \m{chart}\}\\
+%% \hspace{3.05em}\pipe \ctor{String} \;s \cto
+%% \{\,(a, i, i+\ms{length}\;s)\\
+%% \hspace{9em}|~ i \in \ms{range} \;0 \;(n-\ms{length}\;s),\\
+%% \hspace{9em}\phantom{|~}
+%% s = \ms{substring} \;\mi{text} \;i \;(i+\ms{length}\;s)\}
+%% \\
+%% iter. Neel prefers this. People know set-comprehension.
+\\
+\fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
+\hspace{1em}\phantom{\vee~}
+\{(a,i,k) ~|~ (a, \ctor{Concat}~b~c) \in \m{G},\\
+\hspace{6.25em} (b,i,j) \in \m{chart}, (c,j,k) \in \m{chart}\}\\
+\hspace{1em}\vee~ \{(a,i,i+\fname{length}\;s)\\
+\hspace{2.1em}|~ (a, \ctor{String}~s) \in \m{G},\\
+\hspace{2.2em}\phantom{|~} i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
+\hspace{2.2em}\phantom{|~}
+s = \fname{substring} \;\mi{text} \;i \;(i+\ms{length}\;s)\}
 \end{array}\]
 
 \TODO Since Datalog provides no way to represent a \emph{grammar} as a piece of

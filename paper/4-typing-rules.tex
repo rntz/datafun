@@ -164,7 +164,13 @@ we have yet to find a case where this is problematic.
 \todo{Mention that $e_1 \ge e_2$ is in general statically undecidable (rice's
   theorem), and that a typesystem to check it would amount to dependent typing?}
 
-\subsection{Sets and semilattices}
+\subsection{Semilattices and sets}
+The semilattice $\unit$ and $\vee$ operations are typed by their
+correspondingly-named rules. Since $\vee$ is by definition monotone, its
+arguments have full access to the monotone context $\GG$.
+
+Sets are simply the free semilattice on an underlying set, so aside from the
+semilattice rules,
 
 \subsection{Maps}
 Finite maps are an abstract type, and most of their interface is exposed through

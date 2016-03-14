@@ -48,6 +48,10 @@ satisfying three restrictions:
   will not introduce terms that do not occur in the source of the
   program.
 
+  \todo{Maybe name this ``constructor-function free'', ``constructor-free'',
+    ``constructor restriction''? It apparently doesn't have a name and needs
+    one.}
+
 \item Clauses are \emph{range-restricted}: all variables in the
   consequent (head) of a clause must also occur positively in its
   premises (body).
@@ -102,12 +106,12 @@ metatheory needs to be re-established once again for each application-specific
 extension to it.
 
 As a result, it would be very desirable to understand what makes Datalog tick,
-so that we can embed into a more expressive language \emph{without} sacrificing
-the properties that make it so powerful within its domain. In this way,
-extensions can become ``a simple matter of programming'', without having to do a
-custom redesign of the language for each application.
+so that we can embed it into a more expressive language \emph{without}
+sacrificing the properties that make it so powerful within its domain. In this
+way, extensions can become ``a small matter of programming'', without having to
+do a custom redesign of the language for each application.
 
-\todo{Is ``a simple matter of programming'' a quote? If so, where from?}
+%% TODO: cite the jargon file for SMOP?
 
 In this paper, we present Datafun, a typed functional language which permits
 programming in the style of Datalog, while still supporting the full power of

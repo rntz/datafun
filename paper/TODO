@@ -1,11 +1,39 @@
 -*- mode: org -*-
 
+TODO: Put theorems into the semantics section.
+
+WHAT ARE THE THEOREMS. Put the statements into Section 5.
+- Syntactic substitution
+- Semantic substitution
+- Lemmas for fixed-point theorems
+
+* Next to-dos
+** Michael
+- Typing rules
+- Semantics
+- related work: optimizing datalog
+- think about where to put "Comparing Datalog & Datafun"
+
+** Neel
+- Related Work
+- explain CYK parsing and/or dataflow analysis
+
 * To cover during meeting 2016-03-14
 ** Who writes the abstract and when?
 Me, at the last minute.
 
+** Another example: SQL vs Datalog vs Datafun for simple data manipulation
+
 ** Where should the comparison b/w Datalog & Datafun go?
 Can it be condensed? Put in intro?
+1. integrate into introduction? this would be nice if we could manage it without
+   confusing audience.
+
+2. after informally, or after examples
+   or integrate into "informally" section?
+
+3. after semantics
+
 Between examples and typing rules?
 after semantics?
 3. examples
@@ -14,12 +42,21 @@ after semantics?
 ** Rename "maps" to "dictionaries" to avoid Gibbons confusion?
 "Dictionaries" phrase more common among practitioners.
 
+** ALTERNATIVE: remove Map entirely, use {label x stmt} for that one example.
+Mention in implementation section.
+
+Seems like a good idea, simplifies everything.
+
 ** Remove singleton typing rule for maps?
 No examples use it. We don't have a rule for empty maps (which we need if
 they're not of semilattice type; or we could introduce a primitive). We likewise
 have no rules for strings.
 
 ** Which version of `iter' in CYK parsing?
+
+A: Use the compact version, it uses set-comprehensions, which people are
+familiar with.
+
 Should we use `case' or pattern-comprehension?
 If `case', put the first \bigvee on same line as = or below it?
 
