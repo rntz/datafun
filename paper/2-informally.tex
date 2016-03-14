@@ -55,8 +55,11 @@ We give the core syntax of Datafun in Figure \ref{fig:syntax}. Datafun is a
 simply-typed $\lambda$-calculus extended in four major ways:
 
 \begin{enumerate}
-\item We add a type of finite sets, $\Set{A}$. We also include finite maps
-  $\Map{A}{B}$, as they are useful for some examples.
+\item We add a type of finite sets, $\Set{A}$. We also include finite
+  maps\footnote{By ``finite maps'', we mean not ``total maps from a finite
+    domain'', but rather ``partial maps with finitely many present keys'', also
+    called \emph{dictionaries}.} $\Map{A}{B}$, as they are useful for some
+  examples.
 
   \todo{Describe why sets are useful?}
 
@@ -130,23 +133,21 @@ simply-typed $\lambda$-calculus extended in four major ways:
     sake, we call these structures simply ``semilattices.''}, and denote them by
   the metavariables $L,M$.
 
-  Semilattice types serve two primary purposes:
+  Semilattice types serve two purposes. First, as already mentioned, they
+  guarantee the presence of a least element, needed to compute \ms{fix} terms.
 
-  \textbf{First}, they provide a natural eliminator for sets. Given $e :
-  \Set{A}$, we write $\letin{x}{e'}{e_x}$ for the least upper bound, over all
-  elements $x \in e'$, of $e_x$, for $e_x$ of some semilattice type $L$. If
-  $e_x$ is a set, for example, this provides the set type's monadic ``bind''
-  operation.%% For example, $\forin{x \in \setlit{1,2,3}} \{10 \cdot x, x^2\}$
-  %% denotes the set $\{1, 4, 9, 10, 20, 30\}$.
+  \todo{Explain how products of semilattice being semilattice + monotone
+    fixed-points account for mutual recursion.}
+
+  Second, they provide a natural eliminator for sets. Given $e : \Set{A}$, we
+  write $\letin{x}{e'}{e_x}$ for the least upper bound, over all elements $x \in
+  e'$, of $e_x$, for $e_x$ of some semilattice type $L$. If $e_x$ is a set, for
+  example, this provides the set type's monadic ``bind'' operation. For example,
+  $\forin{x \in \setlit{1,2,3}} \{10 \cdot x, x^2\}$ denotes the set $\{1, 4, 9,
+  10, 20, 30\}$.
 
   \todo{example?}
 
   \todo{explain testing for set membership?}
-
-  \textbf{Second}, as already mentioned, they guarantee the presence of a least
-  element, needed to compute \ms{fix} terms.
-
-  \todo{Explain how products of semilattice being semilattice + monotone
-    fixed-points account for mutual recursion.}
 
 \end{enumerate}

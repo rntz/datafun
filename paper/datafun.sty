@@ -2,21 +2,23 @@
 
 \def\arraystretch{1.1}                     % a little more spacing, please
 
-%% for some reason, this causes compiling *.md in root dir to complain.
-\newcommand{\U}[1]{|#1|}
-
-%% Some overrides of stuff defined in rntz.sty
-\renewcommand{\pipe}{\mathrel{\mid}}       % overrides rntz.sty.
-\newcommand{\rn}[1]{\mathsz{8pt}{\ms{#1}}} % could this go in rntz.sty?
-\newcommand{\uto}{\to}                     % could this go in rntz.sty?
-
-%% system.md & so forth use \FS for \ms{Set}. should fix this.
-\renewcommand{\FS}[1]{\ms{FS}\;{#1}}
-\newcommand{\FM}[2]{\ms{Map}\;{#1}\;{#2}}
-
 %% taken from the source for Dunfield & Krishnaswami's paper "Complete and Easy
 %% Bidirectional Typechecking for Higher-Rank Polymorphism"
 \newdimen\zzfontsz
 \newcommand{\fontsz}[2]{\zzfontsz=#1%
 {\fontsize{\zzfontsz}{1.2\zzfontsz}\selectfont{#2}}}
 \newcommand{\mathsz}[2]{\text{\fontsz{#1}{$#2$}}}
+
+%% for some reason, this causes compiling *.md in root dir to complain.
+\newcommand{\U}[1]{|#1|}
+
+%% Some overrides of stuff defined in rntz.sty
+\renewcommand{\pipe}{\mathrel{\mid}}       % overrides rntz.sty.
+\newcommand{\uto}{\to}                     % could this go in rntz.sty?
+%% for rule names.
+\newcommand{\rn}[1]{\mathsz{8pt}{#1}} % could this go in rntz.sty?
+\newcommand{\rt}[1]{\textsc{#1}}           % could this go in rntz.sty?
+
+%% system.md & so forth use \FS for \ms{Set}. should fix this.
+\renewcommand{\FS}[1]{\ms{FS}\;{#1}}
+\newcommand{\FM}[2]{\ms{Map}\;{#1}\;{#2}}
