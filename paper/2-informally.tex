@@ -3,26 +3,23 @@
   \[\begin{array}{ccl}
     %% types
     A, B     &\bnfeq& \bool \pipe \N \pipe \str \pipe \Set{A}
-                      \pipe \Map{A}{B}
-    \\
-    \textsf{types} && A + B \pipe A \x B \pipe A \uto B \pipe A \mto B
+    \pipe A + B \pipe A \x B\\
+    \textsf{types} && A \uto B \pipe A \mto B
     \vspace{0.5em}\\
     %% semilattice types
-    L, M         &\bnfeq& \bool \pipe \N \pipe \Set{A} \pipe \Map{A}{L}
-    \\
-    \textsf{semilattice types} && L \x M \pipe A \uto L \pipe A \mto L
+    L, M         &\bnfeq& \bool \pipe \N \pipe \Set{A}
+    \pipe L \x M \pipe A \uto L \pipe A \mto L\\
+    \textsf{semilattice types}
     \vspace{0.5em}\\
     %% equality types
     \eq{A}, \eq{B} &\bnfeq& \bool \pipe \N \pipe \str \pipe \Set{\eq{A}}
-                            \pipe \Map{\eq{A}}{\eq{B}}
-    \\
-    \textsf{eqtypes} && \eq{A} + \eq{B} \pipe \eq{A} \x \eq{B}
+    \pipe \eq{A} + \eq{B} \pipe \eq{A} \x \eq{B}\\
+    \textsf{eqtypes} &&
     \vspace{0.5em}\\
     %% finite equality types
     \fineq{A},\fineq{B}
     &\bnfeq& \bool \pipe \Set{\fineq{A}}
-       \pipe \Map{\fineq{A}}{\fineq{B}}
-       \pipe \fineq{A} + \fineq{B} \pipe \fineq{A} \x \fineq{B}\\
+             \pipe \fineq{A} + \fineq{B} \pipe \fineq{A} \x \fineq{B}\\
     \textsf{finite eqtypes}
     \vspace{0.5em}\\
     %% contexts
@@ -31,9 +28,8 @@
     \textsf{contexts}
     \vspace{0.5em}\\
     %% expressions
-    %% x\\
-    %% \textsf{variables}\\
-    e &\bnfeq& x \pipe \m{x} \pipe \fn\bind{x} e \pipe \fn\bind{\m{x}} e
+    e &\bnfeq& x \pipe \m{x} %% \pipe n \pipe s
+    \pipe \fn\bind{x} e \pipe \fn\bind{\m{x}} e
     \pipe e\;e\\
     \textsf{terms}
     && (e,e) \pipe \pi_1\;e \pipe \pi_2\;e
@@ -41,9 +37,12 @@
     && \case{e}{x}{e}{x}{e}\\
     && \case{e}{\m{x}}{e}{\m{x}}{e}\\
     && \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
-    && \singleset{e} \pipe \singlemap{e}{e}
-       \pipe \unit \pipe e \vee e \pipe \letin{x}{e}{e}\\
+    && \singleset{e} \pipe \unit \pipe e \vee e \pipe \letin{x}{e}{e}\\
     && \fix{\m{x}}{e} \pipe \fixle{\m{x}}{e}{e}
+    %% \vspace{0.5em}\\
+    %% x, \m{x} && \text{variables}\\
+    %% n && \text{numerals}\\
+    %% s && \text{string literals}
   \end{array}\]
   \caption{Syntax of core Datafun}
   \label{fig:syntax}
@@ -55,11 +54,7 @@ We give the core syntax of Datafun in Figure \ref{fig:syntax}. Datafun is a
 simply-typed $\lambda$-calculus extended in four major ways:
 
 \begin{enumerate}
-\item We add a type of finite sets, $\Set{A}$. We also include finite
-  maps\footnote{By ``finite maps'', we mean not ``total maps from a finite
-    domain'', but rather ``partial maps with finitely many present keys'', also
-    called \emph{dictionaries}.} $\Map{A}{B}$, as they are useful for some
-  examples.
+\item We add a type of finite sets, $\Set{A}$.
 
   \todo{Describe why sets are useful?}
 
@@ -88,7 +83,6 @@ simply-typed $\lambda$-calculus extended in four major ways:
     \ms{in}_i\; b$ iff $a \le b$, but $\ms{in}_1\; a$ and $\ms{in}_2\; b$ are
     never comparable.
   \item Sets are ordered by inclusion: $a \le b$ iff $a \subseteq b$.
-  \item Maps are ordered both by inclusion and pointwise.
   \end{itemize}
 
 \item We add a term $(\fix{\m{x}}{e})$ denoting the least fixed point of the

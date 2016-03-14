@@ -98,11 +98,11 @@ their most general possible type schemes. \todo{why?}
   \neg &\of& \bool \uto \bool\\
   =   &\of& \eq{A} \uto \eq{A} \uto \bool\\
   \le &\of& \eq{A} \uto \eq{A} \mto \bool\\
-  \fname{keys}     &:& \Map{A}{B} \mto \Set{A}\\
-  \fname{entries}  &:& \Map{A}{B} \uto \Set{A \x B}\\
-  \fname{tabulate} &:& \Set{A} \mto (A \uto B) \mto \Map{A}{B}\\
+  %% \fname{keys}     &:& \Map{A}{B} \mto \Set{A}\\
+  %% \fname{entries}  &:& \Map{A}{B} \uto \Set{A \x B}\\
+  %% \fname{tabulate} &:& \Set{A} \mto (A \uto B) \mto \Map{A}{B}\\
   %% \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
-  \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
+  %% \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
   %% \fname{substrings} &\of& \ms{Str} \uto \Set{\ms{Str}}\\
   %% \fname{size}     &:& \Set{\eq{A}} \mto \N\\
   \fname{range}    &:& \N \uto \N \mto \Set{\N}\\
@@ -353,28 +353,36 @@ functions are total, Datafun programs always terminate.
 \pipe \ctor{Apply}\;\ms{oper}\;\ms{atom}\;\ms{atom}\\
 \textbf{data}~\ms{stmt} =
 \ctor{Assign} \;\ms{var} \;\ms{expr}
-\pipe \ctor{If} \;\ms{expr} \;\ms{label}\;\ms{label}\\
-\textbf{type}~\ms{code} = \Map{\ms{label}}{\ms{stmt}}
+\pipe \ctor{If} \;\ms{expr} \;\ms{label}\;\ms{label}
+\end{array}\]
+
+%% TODO: rename `code' to `program'?
+We represent a program as a set of label, statement pairs. \todo{Explain
+  invariant}
+\[\begin{array}{l}
+\textbf{type}~\ms{code} = \Set{\ms{label} \x \ms{stmt}}
 \vspace{0.5em}\\
 %% omitted functions
+\ms{labels} ~:~ \ms{code} \uto \Set{\ms{label}}\quad\textsf{-{}- omitted}\\
 \ms{vars} ~:~ \ms{code} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}\\
 \ms{uses} ~:~ \ms{stmt} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}\\
 \ms{defines} ~:~ \ms{stmt} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}
 \vspace{0.5em}\\
 %% control flow
+%% TODO: use long variable name for argument.
 \textbf{type}~\ms{flow} = \Set{\ms{label} \x \ms{label}}\\
 \fname{flow} ~:~ \ms{code} \uto \ms{flow}\\
-\fname{flow}\;c = \forin{(i,s) \in \ms{entries}\;c}\\
+\fname{flow}\;c = \forin{(i,s) \in c}\\
 \hspace{4em}\ms{case}~ s ~\ms{of}~
 \ctor{If} \;\pwild \;j \;k \cto \setlit{(i,j),(i,k)}\\
-\hspace{7.45em}\pipe\pwild \cto \setfor{(i,i+1)}{i+1 \isin \ms{keys}\;c}
+\hspace{7.45em}\pipe\pwild \cto \setfor{(i,i+1)}{i+1 \isin \ms{labels}\;c}
 \vspace{0.5em}\\
 %% live code analysis
 \ms{live} ~:~ \ms{code} \uto \ms{flow} \uto \Set{\ms{label} \x \ms{var}}\\
 \ms{live} \;\mi{code} \;\mi{flow} =\\
 \hspace{2em} \fixle{\m{Live}}{ %
-  \ms{keys}\;\mi{code} \x \ms{vars}\;\mi{code}}\\
-\hspace{2em}\forin{(i,\mi{stmt}) \in \ms{entries} \;\mi{code}}\\
+  \ms{labels}\;\mi{code} \x \ms{vars}\;\mi{code}}\\
+\hspace{2em}\forin{(i,\mi{stmt}) \in \mi{code}}\\
 \hspace{2.875em} (\phantom{\vee~}\setfor{(i,v)}{v \in \ms{uses}\;\mi{stmt}}\\
 \hspace{3.2em} \vee~ \{(i,v) ~|~ (i,j) \in \mi{flow},\\
 \hspace{7.4em}(j,v) \in \m{Live},\\
@@ -386,8 +394,8 @@ functions are total, Datafun programs always terminate.
 \uto \Set{\ms{label} \x \ms{label} \x \ms{var}}\\
 \ms{reachingDefinitions} \;\mi{code} \;\mi{flow} =\\
 \hspace{2em}\fixle{\m{RD}}{%
-  \ms{keys}\;\mi{code} \x \ms{keys}\;\mi{code} \x \ms{vars}\;\mi{code}}\\
-\hspace{2em}\forin{(i,\mi{stmt}) \in \ms{entries}\;\mi{code}}\\
+  \ms{labels}\;\mi{code} \x \ms{labels}\;\mi{code} \x \ms{vars}\;\mi{code}}\\
+\hspace{2em}\forin{(i,\mi{stmt}) \in \mi{code}}\\
 \hspace{2.875em} (
 \phantom{\vee~}\setfor{(i,i,v)}{v \in \ms{defines}\;\mi{stmt}}\\
 \hspace{3.2em} \vee~ \{(i,l,v) ~|~ (j,i) \in \mi{flow},\\
