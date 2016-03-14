@@ -4,7 +4,7 @@ The phrase ``declarative programming'' is as popular as it is ambiguous, with
 seemingly hundreds of disparate senses in which it is used. However, two of
 those usages stand out for popularity: both \emph{functional} and \emph{logic}
 programming languages are generally deemed declarative languages. Despite this
-common epithet, the logic and functional programming traditions have largely
+shared epithet, the logic and functional programming traditions have largely
 evolved independently of one another (with a few honorable exceptions such as
 Mercury~\cite{mercury}, Curry~\cite{curry} and Kanren~\cite{kanren}). This could
 be seen as an occasion for sorrow, but we prefer to view it as an opportunity:
@@ -30,14 +30,12 @@ languages must be careful both about the kinds of formulas they admit as
 programs, and about the proof search algorithm they implement. Prolog offers a
 very expressive language --- full Horn clauses --- and so faces an undecidable
 proof search problem. Therefore, Prolog specifies its proof search strategy:
-depth-first goal-directed search. This lets Prolog programmers reason about the
-behaviour of their programs; however, it also means many logically natural
-programs fail to terminate. Notoriously, transitive closure calculations are
-much less elegant in Prolog than one might hope, since their most natural
-specification is best computed with a breadth-first proof search strategy.
-
-\todo{Don't we mean ``a bottom-up/forward-chaining proof search strategy''? Does
-  breadth-first backward-chaining search work for transitive closure?}
+depth-first goal-directed/top-down search. This lets Prolog programmers reason
+about the behaviour of their programs; however, it also means many logically
+natural programs fail to terminate. Notoriously, transitive closure calculations
+are much less elegant in Prolog than one might hope, since their most natural
+specification is best computed with a bottom-up (aka ``forwards chaining'')
+proof search strategy.
 
 This view of Prolog suggests considering other possible design choices, such as
 restricting the logical language so as to make proof search decidable. One of
@@ -45,19 +43,19 @@ the oldest such variants is Datalog~\cite{datalog}, a syntactic subset of Prolog
 satisfying three restrictions:
 
 \begin{enumerate}
-\item Composite terms are forbidden; only ground terms and variables are
-  permitted. This ensures that deduction will not introduce terms that do not
-  occur in the source of the program.
+\item Composite terms are forbidden; only atomic terms and variables
+  are permitted to appear in predicates. This ensures that deduction
+  will not introduce terms that do not occur in the source of the
+  program.
 
-  \todo{actually, I think it's stronger: only \emph{atoms} and variables are
-    permitted. But this doesn't seem necessary for the properties we discuss?
-    I'm not sure why it was chosen. for simplicity, maybe?}
+\item Clauses are \emph{range-restricted}: all variables in the
+  consequent (head) of a clause must also occur positively in its
+  premises (body).
 
-\item All variables in the consequent (head) of a clause must also occur
-  positively in its premises (body).
-
-\item A predicate may not be negated until it has been fully defined. This is
-  called ``stratified negation''.
+\item The negation of a predicate may be used in a definition only if
+  it has already been fully defined. (That is, within the recursive
+  definition of a predicate, it cannot be used in negated form.) This
+  is called ``stratified negation''.
 \end{enumerate}
 
 These restrictions make Datalog Turing-\emph{in}complete: all queries are
@@ -127,11 +125,11 @@ higher-order functional programming.
   including relational-algebra-style operations, transitive closure, CYK
   parsing, and dataflow analysis. Some of these examples are familiar from
   Datalog, but many of them go well beyond what can be expressed in it,
-  illustrating the benefits of our analysis.
+  illustrating the benefits of our approach.
 
-\item We identify the semantic structures underpinning Datalog, and use this to
-  give a denotational semantics for Datafun in terms of a pair of adjunctions
-  between \cSet{}, \cPoset{}, \cSL{}.
+\item We identify the semantic structures underpinning Datalog, and
+  use this to give a denotational semantics for Datafun in terms of a
+  pair of adjunctions between \cSet{}, \cPoset{}, \cSL{}.
 
 \item We have a prototype implementation of Datafun in Racket. \todo{(CITE)}
 \end{itemize}
