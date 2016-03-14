@@ -67,10 +67,10 @@
     \infer[\rn{\bigvee}]{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{L}}{
       \J{\GD}{\GG}{e_1}{\Set{A}} &
       \J{\GD,x\of A}{\GG}{e_2}{L}}
-    \and
-    \infer[\rn{\{:\}}]{\J{\GD}{\GG}{\singlemap{e_1}{e_2}}{\Map{A}{B}}}{
-      \J{\GD}{\cdot}{e_1}{A} &
-      \J{\GD}{\GG}{e_2}{B}}
+    %% \and
+    %% \infer[\rn{\{:\}}]{\J{\GD}{\GG}{\singlemap{e_1}{e_2}}{\Map{A}{B}}}{
+    %%   \J{\GD}{\cdot}{e_1}{A} &
+    %%   \J{\GD}{\GG}{e_2}{B}}
     \and
     \infer[\rn{\rt{fix}}]{\J{\GD}{\GG}{\fix{\m{x}}{e}}{\fineq{L}}}{
       \J{\GD}{\GG,x\of L}{e}{\fineq{L}}}
@@ -172,11 +172,11 @@ arguments have full access to the monotone context $\GG$.
 Sets are simply the free semilattice on an underlying set, so aside from the
 semilattice rules,
 
-\subsection{Maps}
-Finite maps are an abstract type, and most of their interface is exposed through
-primitive functions (see Figure \ref{fig:primitives}). The only typing rule is
-$\{:\}$, the introduction rule for singleton maps. By analogy with the
-introduction rule for singleton sets $\{\}$,
+%% \subsection{Maps}
+%% Finite maps are an abstract type, and most of their interface is exposed through
+%% primitive functions (see Figure \ref{fig:primitives}). The only typing rule is
+%% $\{:\}$, the introduction rule for singleton maps. By analogy with the
+%% introduction rule for singleton sets $\{\}$,
 
 \subsection{Fixed points}
 

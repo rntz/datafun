@@ -41,11 +41,11 @@ It remains an open question how much annotation is necessary. See
 Section \ref{sec:futurework}, \emph{Related and future work}.
 
 \paragraph{User-defined usls}
-The two fundamental usl types Datafun provides are booleans and sets; other type
-constructors such as products, functions, and finite maps merely preserve usl
-structure where they find it. One might contemplate allowing the programmer to
-define their own usl structures using something like Haskell's
-\texttt{newtype}/\texttt{instance}. Unfortunately, this \TODO
+The two fundamental usl types Datafun provides are booleans and sets; products
+and functions merely preserve usl structure where they find it. One might
+contemplate allowing the programmer to define their own usl structures using
+something like Haskell's \texttt{newtype}/\texttt{instance}. Unfortunately, this
+\TODO
 \begin{itemize}
 \item User-defined functions give the compiler no guarantee that they are
   commutative, associative, and idempotent.
