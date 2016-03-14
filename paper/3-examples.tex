@@ -237,6 +237,34 @@ For any finite eqtype $\fineq{A}$, we may write:
 
 
 \subsection{CYK parsing}
+Parsing can be understood logically, with a parse tree representing
+a proof that a certain string belongs to a language described by a
+context-free grammar. As a result, it is possible to formulate parsing
+in terms of proof search~\cite{schieber-deductive-parsing}. One of the
+simplest algorithms for parsing context free grammars is the
+Cocke-Younger-Kasami (CYK) algorithm for parsing with grammars in
+Chomsky normal form.\footnote{In Chomsky normal form, each production
+  is of the form $A \to B \cdot C$ or $A \to a$, with $A,B,C$ ranging
+  over nonterminals, and $a$ over terminals.}
+Given a grammar $G$, we begin by introducing a family of formulas
+$A(i,j)$, with one $A$ for each nonterminal, and $i$ and $j$
+representing indices into a string. Given a word $w$, we write $w_i$
+for the $i$-th element of the word. Then, we can specify the CYK algorithm
+with the following two inference rules:
+
+\begin{mathpar}
+  \inferrule*{ (A \to a) \in G \\ w_i = a }
+             {A(i,i+1)}
+  \and
+  \inferrule*{B(i, j) \\ C(j, k) \\ (A \to B\; C) \in G}
+             {A(i, k)}
+\end{mathpar}
+Then, the predicate $A(i,j)$ means that $A$ is derivable from the
+substring of $w$ running from $i$ to $j$, and so the whole word $w$ is
+derivable from the start symbol $S$ if $S(0, \mathit{length}\;w)$ is
+derivable.
+
+
 
 \[\begin{array}{l}
 \mathbf{type}~\ms{sym} = \str\\
