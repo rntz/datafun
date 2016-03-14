@@ -109,8 +109,9 @@ the argument $e_2$ gets an \emph{empty} monotone context.
 
 To understand why, recall our gloss: the application $e_1\;e_2$ must be monotone
 in $\GG$. But $e_1$ is an ordinary, and in general \emph{non-monotone}, function
-$A \uto B$: there is no guarantee that it respect any order on its argument. We
-work around this scoff-law behavior on $e_1$'s part by ensuring its argument
+$A \uto B$: there is no guarantee that it respect any order on its argument.
+(Suppose, for example, $e_2$ were some monotone variable $\m{x} : A \in \GG$.)
+We work around this scoff-law behavior on $e_1$'s part by ensuring its argument
 $e_2$ is \emph{constant} with respect to $\GG$---which we accomplish by simply
 prohibiting $e_2$ from using any of $\GG$'s variables.
 
@@ -118,8 +119,15 @@ This technique of \emph{wiping clean} the monotone context to guarantee
 constancy\footnote{Wherever we write ``constant'' in this section, substitute
   ``constant with respect to the monotone context''. The ordinary context is
   never ``wiped clean'', and behaves entirely as it would in a simply-typed
-  $\lambda$-calculus.} of a subterm recurs in several other rules. \todo{Mention
-  comonads and modal logic?}
+  $\lambda$-calculus.} of a subterm recurs in several other rules. Readers
+familiar with judgmental formulations of modal logics of necessity such as
+\citet{jrml} may notice a feeling of \textit{d\'ej\`a vu}; indeed, there is a
+hidden comonad at work here. But we are getting ahead of ourselves. For more on
+that, turn to Section \ref{sec:semantics}.
+
+\todo{Get Neel to provide more citations here?}
+
+\todo{Mention comonads and modal logic?}
 
 \subsection{Products and sums}
 The pairing and projection rules, \rt{pair} and $\pi$, are completely standard,
@@ -154,9 +162,8 @@ This is a conservative approach: there are many semantically monotone, but
 untypeable, \ms{if}-terms. However, it is complete for semilattice types, for in
 that case $(\ifthen{e}{e_1}{e_2})$ may be rewritten $(e_2 \vee
 \ifthen{e}{e_1}{\unit})$; as long as $e_1 \ge e_2$ and so $e_2 \vee e_1 = e_1$,
-this will not change the meaning of the expression.\footnote{If Datafun were
-  Turing-complete, this would no longer be the case; consider the case where
-  $e_2$ diverges.}
+this will not change the meaning of the expression, only (potentially) its
+execution efficiency.
 
 Thus the only meaningful restriction here is to semilattice types. In practice,
 we have yet to find a case where this is problematic.
@@ -166,11 +173,21 @@ we have yet to find a case where this is problematic.
 
 \subsection{Semilattices and sets}
 The semilattice $\unit$ and $\vee$ operations are typed by their
-correspondingly-named rules. Since $\vee$ is by definition monotone, its
-arguments have full access to the monotone context $\GG$.
+correspondingly-named rules. As $\vee$ is monotone, its arguments have full
+access to the monotone context $\GG$.
 
-Sets are simply the free semilattice on an underlying set, so aside from the
-semilattice rules,
+Recall that sets are ordered by inclusion: although $2 \le 3$, nonetheless
+$\singleset{2} \not\le \singleset{3}$. For this reason the rule $\{\}$ for
+constructing a singleton set $\singleset{e}$ wipes clean its element $e$'s
+monotone context. Datafun does not need empty-set or union operators, since
+$\unit$ and $\vee$ generalize them.
+
+Finally, we come to $\bigvee$, the set-comprehension rule. This rule has the
+flavor of a monadic ``bind'' operation, but generalized to a result of any
+semilattice type. This operation is naturally monotone both in the set $e_1$
+being iterated over and in the expression $e_2$ which we are taking the least
+upper bound of. Moreover, $e_2$ is \emph{not} required to be monotone in the
+elements $x \in e_1$. \todo{Why not?}
 
 %% \subsection{Maps}
 %% Finite maps are an abstract type, and most of their interface is exposed through
