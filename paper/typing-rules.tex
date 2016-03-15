@@ -88,6 +88,7 @@
 
 
 \section{Typing rules}
+\label{sec:typing-rules}
 
 Datafun's typing judgment $\J{\GD}{\GG}{e}{A}$ is defined by the inference rules
 given in Figure \ref{fig:typing-rules}. We gloss $\J{\GD}{\GG}{e}{A}$ as
@@ -140,6 +141,8 @@ context --- and thus is allowed to introduce the variable $x$ into the ordinary
 context $\GD$. \todo{rewrite for clarity}
 
 \subsection{Booleans}
+\label{sec:typing-rules-booleans}
+
 While \rt{true} and \rt{false} are straightforward, there are two rules for
 boolean elimination, \rt{if} and $\rt{if}^+$. This is because in Datafun, $1$
 plus $1$ does not equal $\bool$: booleans are \emph{not} a sum of

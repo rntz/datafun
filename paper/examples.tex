@@ -97,18 +97,25 @@ observe, for example, that:
 \end{eqnarray*}
 
 However, it is perhaps unclear how Datafun's type system ``knows''
-\fname{filter} is monotone. Consider the desugaring of \ms{filter}:
-\[\begin{array}{l}
-\fname{filter}\;\m{f}\;\m{A} = \forin{x \in \m{A}}
-\ifthen{\m{f}\;x}{\singleset{x}}{\unit}
-\end{array}\]
-\fname{filter}'s type asserts that it uses \m{f} monotonically. This in turn
-depends on
+\fname{filter} is monotone in \m{f}. In brief, Datafun knows that application
+$(\m{f}\;x)$ is monotone in the function, and moreover, testing a boolean guard
+$(\m{f}\;x)$ in a set-comprehension such as $\setfor{x}{x \in \m{A}, \m{f}\;x}$
+is monotone in the guard expression. A fuller explanation is given in Section
+\ref{sec:typing-rules}.
 
-\todo{these examples are perhaps a good place to point out subtleties of
-  monotonicity typing}
+%% Consider the desugaring of \ms{filter}:
+%% \[\begin{array}{l}
+%% \fname{filter}\;\m{f}\;\m{A} = \forin{x \in \m{A}}
+%% \ifthen{\m{f}\;x}{\singleset{x}}{\unit}
+%% \end{array}\]
+%% \fname{filter}'s type asserts that it uses \m{f} monotonically. This in turn
+%% requires that $(\ifthen{\m{f}\;x}{\setlit{x}}{\unit})$ increases monotonically
+%% as the value of \m{f} increases.
 
-\TODO
+%% \todo{these examples are perhaps a good place to point out subtleties of
+%%   monotonicity typing}
+
+%% \TODO
 
 
 %% FIGURE: PRIMITIVES
@@ -136,21 +143,20 @@ depends on
 
 \subsection{Equality, membership, and intersection}
 
-\todo{Use this as example of $\bigvee$ at non-set (here, boolean) type.}
-
+Given a set, it's natural to ask whether it contains a value $x$. As long as the
+type of the set's elements supports equality, we can do this:
 \[\begin{array}{l}
 (\isin) ~:~ \eq{A} \uto \Set{\eq{A}} \mto \bool\\
 x \isin \m{A} = \forin{y \in \m{A}} x = y
 \end{array}\]
 
-\todo{TODO: discuss nonlinear pattern-matching}
+The expression $\forin{y \in \m{A}} x = y$ takes the \emph{least upper bound at
+  boolean type} of the values of $x = y$ for every $y \in \m{A}$. As booleans
+are ordered $\ms{false} < \ms{true}$, ``least upper bound'' is simply logical
+disjunction! In plain English, this code says ``a set \m{A} contains an element
+$x$ if some element $y \in \m{A}$ tests equal to $x$''.
 
-%% An equivalent definition, making use of nonlinear pattern-matching, would be:
-%% \[\begin{array}{l}
-%% x \isin \m{A} = \forin{x \in \m{A}} \ms{true}
-%% \end{array}\]
-
-Along a similar line, we can define set intersection by testing for equality:
+Likewise, we can define set intersection by testing for equality:
 \[\begin{array}{l}
 (\cap) ~:~ \Set{\eq{A}} \mto \Set{\eq{A}} \mto \Set{\eq{A}}\\
 \m{A} \cap \m{B} = \setfor{x}{x \in \m{A}, y \in \m{B}, x = y}
