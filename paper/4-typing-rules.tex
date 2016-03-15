@@ -73,13 +73,13 @@
     %%   \J{\GD}{\GG}{e_2}{B}}
     \and
     \infer[\rn{\rt{fix}}]{\J{\GD}{\GG}{\fix{\m{x}}{e}}{\fineq{L}}}{
-      \J{\GD}{\GG,x\of L}{e}{\fineq{L}}}
+      \J{\GD}{\GG,\m{x}\of L}{e}{\fineq{L}}}
     \and
     \infer[\rn{\rt{fix}_{\le}}]{
       \J{\GD}{\GG}{\fixle{\m{x}}{e_1}{e_2}}{\eq{L}}
     }{
       \J{\GD}{\GG}{e_1}{\eq{L}} &
-      \J{\GD}{\GG,x \of \eq{L}}{e_2}{\eq{L}}}
+      \J{\GD}{\GG,\m{x} \of \eq{L}}{e_2}{\eq{L}}}
   \end{mathpar}
 
   \caption{Typing rules for core Datafun}
@@ -197,6 +197,4 @@ elements $x \in e_1$. \todo{Why not?}
 
 \subsection{Fixed points}
 
-$\rt{fix}_\le$ exploits the fact that a
-
-\newpage
+\todo{explain \rt{fix}, $\rt{fix}_\le$}
