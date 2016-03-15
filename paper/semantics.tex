@@ -58,6 +58,9 @@
 \section{Semantics and metatheory}
 \label{sec:semantics}
 
+\todo{Somewhere in this we should talk about the comonad $\Disc{\U{\cdot}}$, the
+  monad $\FS{\U{\cdot}}$, and adjoint logic.}
+
 We give a denotational semantics for Datafun in terms of three categories
 (\cSet{}, \cPoset{}, and \cSL{}) and two adjunctions between them (see Figure
 \ref{fig:sem-cats}). We use nonstandard notation to avoid confusion between sets
@@ -113,13 +116,9 @@ semilattices to posets by forgetting the lattice structure.
 \end{figure}
 
 Datafun types and contexts denote posets as shown in Figure \ref{fig:sem-types}.
-Datafun's semilattice types denote posets which are also semilattices---and
-moreover, semilattices where the least-upper-bound operator $\bigvee$ is
-\emph{computable}. \todo{should this have a proof?}
-
-To complete our semantics, we require a few simple lemmas about the denotations
-of Datafun types. Firstly, we need to know that our semilattice types are
-semilattices, and that our finite types are finite:
+To complete our semantics, we will need a few simple lemmas about the
+denotations of Datafun types. First, we need to know that our semilattice types
+are semilattices, and that our finite types are finite:
 
 \todo{TODO: lemma/theorem formatting}
 
@@ -130,7 +129,7 @@ The denotation $\den{L}$ of a semilattice type $L$ is a semilattice.
 The poset $\den{\fineq{A}}$ denoted by a finite eqtype $\fineq{A}$ is finite.
 
 \paragraph{}
-Secondly, to show that bounded fixed-points $(\fixle{\m{x}}{e_\top}{e})$
+Second, to show that bounded fixed-points $(\fixle{\m{x}}{e_\top}{e})$
 terminate, we need any possible $e_\top$ to pick out a finite-height sub-poset:
 
 \paragraph{Lemma:}
@@ -290,34 +289,34 @@ Our semantics requires the following lemma regarding fixed-points of monotone
 functions:
 
 \paragraph{Lemma: Fixed points in finite-height pointed posets.}
-Any monotone map $f : A \to A$ on a poset $A$ of finite height with a least
+Any monotone map $f : P \to P$ on a poset $P$ of finite height with a least
 element $\unit$ has a least fixed point of the form $f^n(\unit)$.
 
 \paragraph{Proof:}
 Consider the sequence $\unit, f(\unit), f^2(\unit), f^3(\unit), ...$. Note that
 $\unit \le f(\unit)$, so by monotonicity of $f$ and induction $f^i(\unit) \le
-f^{i+1}(\unit)$. Thus this sequence forms an ascending chain. Since $A$ has
+f^{i+1}(\unit)$. Thus this sequence forms an ascending chain. Since $P$ has
 finite height, this chain cannot be infinite; thus there is an $n$ such that
 $f^n(\unit) = f^{n+1}(\unit)$, i.e. $f^n(\unit)$ is a fixed-point of $f$.
 
 Now consider any fixed-point $x$ of $f$. Since $\unit \le x$, by monotonicity of
-$f$, induction, and $x = f(x)$, we have $f^i(\unit) \le x$. Thus $f^n(\unit) \le
-x$. Thus $f^n(\unit)$ is the least fixed point of $f$. \qed
+$f$, induction, and $x = f(x)$, we have $f^n(\unit) \le x$. Thus $f^n(\unit)$ is
+the least fixed point of $f$. \qed
 
 \paragraph{}
 We write $(\lfpin{L}{f})$ for the least fixed point of a monotone map $f$ on a
 semilattice $L$ of finite height.
 
 %% \paragraph{Lemma 1: Existence of fixed points in posets of finite height.}
-%% Any monotone map $f : A \to A$ on a nonempty poset $A$ of finite height has at
-%% least one fixed point.
+%% Any monotone map $f : A \to A$ on a nonempty poset $A$ of finite height has
+%% at least one fixed point.
 
-%% \paragraph{Lemma 2: Finding least fixed points in pointed posets.}
-%% For any poset $A$ with a least element $\unit$, for any monotone map $f : A \to
-%% A$, if $f$ has a fixed point $x$ of finite height\footnote{The height of an
-%%   element $x$ in a poset $A$ is the height of the sub-poset $\{y \in A ~|~ y \le
-%%   x\}$.}, then $f$ has a least fixed point of the form $f^n(\unit)$ for some $n
-%% \in \N$.
+%% \paragraph{Lemma 2: Finding least fixed points in pointed posets.} For any
+%% poset $A$ with a least element $\unit$, for any monotone map $f : A \to A$,
+%% if $f$ has a fixed point $x$ of finite height\footnote{The height of an
+%% element $x$ in a poset $A$ is the height of the sub-poset $\{y \in A ~|~ y
+%% \le x\}$.}, then $f$ has a least fixed point of the form $f^n(\unit)$ for
+%% some $n \in \N$.
 
 
 \subsection{Metatheory of Datafun}
