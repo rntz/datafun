@@ -117,6 +117,29 @@ Datafun's semilattice types denote posets which are also semilattices---and
 moreover, semilattices where the least-upper-bound operator $\bigvee$ is
 \emph{computable}. \todo{should this have a proof?}
 
+To complete our semantics, we require a few simple lemmas about the denotations
+of Datafun types. Firstly, we need to know that our semilattice types are
+semilattices, and that our finite types are finite:
+
+\todo{TODO: lemma/theorem formatting}
+
+\paragraph{Lemma:}
+The denotation $\den{L}$ of a semilattice type $L$ is a semilattice.
+
+\paragraph{Lemma:}
+The poset $\den{\fineq{A}}$ denoted by a finite eqtype $\fineq{A}$ is finite.
+
+\paragraph{}
+Secondly, to show that bounded fixed-points $(\fixle{\m{x}}{e_\top}{e})$
+terminate, we need any possible $e_\top$ to pick out a finite-height sub-poset:
+
+\paragraph{Lemma:}
+For any semilattice equality type $\eq{L}$, for any $x \in \den{\eq{L}}$, the
+height of $\below{x}{\den{\eq{L}}}$ is finite.
+
+\paragraph{}
+All of these are trivial to prove by induction over types.
+
 
 %% TERM DENOTATION FIGURE
 \newcommand{\fux}[2]{\Den{\vcenter{\infer{#1}{#2}}}}
@@ -215,8 +238,9 @@ moreover, semilattices where the least-upper-bound operator $\bigvee$ is
   \fux{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{L}}{
     \J{\GD}{\GG}{e_1}{\Set{A}} &
     \J{\GD,x\of A}{\GG}{e_2}{L}}\dg
-  &=& \displaystyle\bigvee_{x ~\in~ \den{e_1}\,\delta\,\gamma}
+  &=& \displaystyle\bigvee \left\{
   \den{e_2}\;\tuple{\delta,x}\;\gamma
+  ~|~ {x \in \den{e_1}\dg}\right\}
   \vspace{.8em}\\
 
   %% fix rules
@@ -265,8 +289,6 @@ $\den{\GD}$).
 Our semantics requires the following lemma regarding fixed-points of monotone
 functions:
 
-\todo{TODO: lemma/theorem formatting}
-
 \paragraph{Lemma: Fixed points in finite-height pointed posets.}
 Any monotone map $f : A \to A$ on a nonempty poset $A$ of finite height with a
 least element $\unit$ has a least fixed point of the form $f^n(\unit)$.
@@ -281,17 +303,6 @@ $f^n(\unit) = f^{n+1}(\unit)$, i.e. $f^n(\unit)$ is a fixed-point of $f$.
 Now consider any fixed-point $x$ of $f$. Since $\unit \le x$, by monotonicity of
 $f$, induction, and $x = f(x)$, we have $f^i(\unit) \le x$. Thus $f^n(\unit) \le
 x$. Thus $f^n(\unit)$ is the least fixed point of $f$. \qed
-
-\paragraph{}
-For the case of bounded fixed-points $(\fixle{\m{x}}{e_1}{e_2})$, we need a
-further lemma:
-
-\paragraph{Lemma:}
-The denotation $\den{L}$ of any semilattice equality type $\eq{L}$ is
-\emph{all-finite-height}: that is, for any $x \in \den{\eq{L}}$, the height of
-$\below{x}{\den{\eq{L}}}$ is finite.
-
-\paragraph{Proof:} By induction over semilattice equality types $\eq{L}$. \qed
 
 \paragraph{}
 We notate the least-fixed point of a monotone function $f$ on a semilattice $L$
