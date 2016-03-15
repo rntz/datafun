@@ -26,20 +26,6 @@ reordering is powerful). But this equation does not always hold in the presence
 of nontermination; for example, if $e_1 = \unit$ and $e_2$ diverges. \TODO
 finish up
 
-\paragraph{Type inference} Typechecking needs to distinguish between ordinary
-and monotone $\lambda$, application, \ms{case}, \ms{let}, and \ms{if}. In our
-implementation we solve this in two ways:
-\begin{enumerate}
-\item Bidirectional type inference \todo{CITE} determines whether $\fn$s and
-  applications are ordinary or monotone.
-\item For $\ms{if}$, $\ms{case}$, and $\ms{let}$, the programmer annotates which
-  form is intended; for example, $(\ifthen{e}{e_1}{\unit})$ is written
-  (\texttt{when e then e1}) to indicate the rule $\ms{if}^+$ applies.
-\end{enumerate}
-
-It remains an open question how much annotation is necessary. See
-Section \ref{sec:futurework}, \emph{Related and future work}.
-
 \paragraph{User-defined usls}
 The two fundamental usl types Datafun provides are booleans and sets; products
 and functions merely preserve usl structure where they find it. One might
