@@ -1,4 +1,3 @@
-
 \section{Other Related and Future Work}
 \label{sec:futurework}
 
@@ -18,7 +17,41 @@ we might linear types to model features like deletion. There are many
 nontrivial semantic issues (e.g., how to define monotonicity), but
 it seems a promising question for future work.
 
+\paragraph{User-Defined Posets and Semilattices}
+The two fundamental semilattice types Datafun provides are booleans and sets;
+products and functions merely preserve semilattice structure where they find
+it. One might contemplate allowing the programmer to define their own
+semilattice structures using something like Haskell's
+\texttt{newtype}/\texttt{instance}. In general, this is a difficult
+problem, because we may need to do serious mathematical
+reasoning to prove that a datatype has a partial ordering, or can be
+equipped with a semilattice structure which is commutative, associative
+and idempotent.
 
+One example of such a family of types are the \emph{lexicographic sum
+  types}. Given two posets $P$ and $Q$, their disjoint union $P + Q$
+is also a poset, with left values compared by the $P$-ordering, and
+right values compared by the $Q$-ordering, and no ordering between
+left and right values. However, this is not the only way that the
+disjoint union could be equipped with an order structure.
+
+For example, we could define the \emph{lexicographic} sum $P \lhd Q$,
+which has the same elements as the sum, but extending the coproduct order
+relation with the additional
+facts that $\ms{in}_1(p) \leq \ms{in}_2(q)$. Indeed, we already have a
+special case of this: as we noted earlier, our boolean type is not $1
++ 1$, but it \emph{is} $1 \lhd 1$.
+
+But as our Booleans already show, giving good syntax for their
+eliminators is difficult, because we have to show that not just a term
+is monotone, but that the different branches of a lexicographic case
+expression are ordered with respect to each other. For the case of
+ordered Booleans, we were able to give a special eliminator which
+guaranteed it, but in general it requires proof.
+
+One natural direction for future work is to extend the syntax of
+Datafun with support for these kinds of proofs, perhaps taking
+inspiration from dependent type theory.
 
 \paragraph{Optimization}
 \begin{itemize}

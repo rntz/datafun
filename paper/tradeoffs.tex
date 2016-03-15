@@ -40,27 +40,3 @@ implementation we solve this in two ways:
 It remains an open question how much annotation is necessary. See
 Section \ref{sec:futurework}, \emph{Related and future work}.
 
-\paragraph{User-defined usls}
-The two fundamental usl types Datafun provides are booleans and sets; products
-and functions merely preserve usl structure where they find it. One might
-contemplate allowing the programmer to define their own usl structures using
-something like Haskell's \texttt{newtype}/\texttt{instance}. Unfortunately, this
-\TODO
-\begin{itemize}
-\item User-defined functions give the compiler no guarantee that they are
-  commutative, associative, and idempotent.
-\item Without further information it would be impossible to
-\end{itemize}
-
-Unfortunately, there is no simple characterization of the space of all possible
-computable usls.
-
-\paragraph{Lexical types}
-The category \cPoset{} has a much richer structure than \cSet{} (which may
-indeed be seen as a subcategory of \cPoset{}).
-
-\todo{\begin{itemize}
-\item Pro: allow expressing many things more generally, for example, map lookup
-\item Con: have no good general monotone elimination rule
-\item Con: complicate the type theory
-\end{itemize}}
