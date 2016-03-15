@@ -412,7 +412,6 @@ and $(l,s')$ are both in a program, then $s = s'$).
 In what follows, we use a few trivial functions whose definitions are omitted
 for space reasons.
 \[\begin{array}{l}
-\vspace{0.5em}\\
 %% omitted functions
 \ms{labels} ~:~ \ms{program} \uto \Set{\ms{label}}\quad\textsf{-{}- omitted}\\
 \ms{vars} ~:~ \ms{program} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}\\
@@ -438,7 +437,6 @@ function.
 \hspace{4em}\ms{case}~ s ~\ms{of}~
 \ctor{If} \;\pwild \;j \;k \cto \setlit{(i,j),(i,k)}\\
 \hspace{7.45em}\pipe\pwild \cto \setfor{(i,i+1)}{i+1 \isin \ms{labels}\;c}
-\vspace{0.5em}\\
 \end{array}
 \]
 It says that if $(i, s)$ is a node of the program, then if $s$ is a
@@ -462,7 +460,6 @@ for each label which variables are live.
 \hspace{3.2em} \vee~ \{(i,v) ~|~ (i,j) \in \mi{flow},\\
 \hspace{7.4em}(j,v) \in \m{Live},\\
 \hspace{7.4em}\neg (v \isin \ms{defines}\; \mi{stmt})\})
-\vspace{0.5em}\\
 \end{array}\]
 For a statement $\mi{stmt}$ at label $i$, we say that the variable
 $v$ is live at $i$ if $v$ is used by $\mi{stmt}$. The variable $v$
