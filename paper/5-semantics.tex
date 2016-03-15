@@ -116,12 +116,126 @@ moreover, semilattices where the least-upper-bound operator $\bigvee$ is
 \emph{computable}. \todo{should this have a proof?}
 
 
-\subsection{Denotation of Datafun terms}
-\begin{figure}
-  \TODO
+%% TERM DENOTATION FIGURE
+\newcommand{\fux}[2]{\Den{\vcenter{\infer{#1}{#2}}}}
+%% \newcommand{\fuxn}[3]{\Den{\vcenter{\infer[\rn{#1}]{#2}{#3}}}}
+\newcommand{\dg}{\;\delta\;\gamma}
+
+\begin{figure*}
+  \[\begin{array}{rcll}
+  \textbf{Derivation}\;\phantom{\dg} && \textbf{Denotation}
+  \vspace{.8em}\\
+  \den{\J{\GD}{\GG}{e}{A}}\;\phantom{\dg} &\in&
+  \U{\den{\GD}} \Arr \U{\den{\GG} \arr \den{A}}
+  \vspace{.8em}\\
+  \fux{\J{x_1\of A_1, ..., x_n\of A_N}{\GG}{x_i}{A_i}}{
+    \phantom{.}}\dg
+  &=& \pi_i\;\delta
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\m{x}_1\of L_1, ..., \m{x}_n\of L_n}{\m{x}_i}{L_i}}{
+    \phantom{.}}\dg
+  &=& \pi_i\;\gamma
+  \vspace{.8em}\\
+
+  %% function rules
+  \fux{\J{\GD}{\GG}{\fn\bind{x} e}{A \uto B}}{
+    \J{\GD,x\of A}{\GG}{e}{B}}\dg
+  &=& x \mapsto \den{e}\;\tuple{\delta,x}\;\gamma
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\fn\bind{\m{x}} e}{A \mto B}}{
+    \J{\GD}{\GG,\m{x}\of A}{e}{B}}\dg
+  &=& x \mapsto \den{e} \;\delta \;\tuple{\gamma,x}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{e_1\;e_2}{B}}{
+    \J{\GD}{\GG}{e_1}{A \uto B} &
+    \J{\GD}{\cdot}{e_2}{A}} \dg
+  &=& \den{e_1}\dg\;(\den{e_2}\;\delta\;\triv)
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{e_1\;e_2}{B}}{
+    \J{\GD}{\GG}{e_1}{A \mto B} &
+    \J{\GD}{\GG}{e_2}{B}} \dg
+  &=& \den{e_1}\dg\;(\den{e_2}\dg)
+  \vspace{.8em}\\
+
+  %% product types
+  \fux{\J{\GD}{\GG}{(e_1, e_2)}{A_1 \x A_2}}{
+    \J{\GD}{\GG}{e_i}{A_i}}\dg
+  &=& \pair{\den{e_1}\dg}{\den{e_2}\dg}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\pi_i\;e}{A_i}}{
+    \J{\GD}{\GG}{e}{A_1 + A_2}}\dg
+  &=& \pi_i\;(\den{e}\dg)
+  \vspace{.8em}\\
+
+  %% sum type rules
+  \fux{\J{\GD}{\GG}{\ms{in}_i\;e}{A_1 + A_2}}{
+    \J{\GD}{\GG}{e}{A_i}}\dg
+  &=& \ms{in}_i\;(\den{e}\dg)
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\case{e}{x}{e_1}{x}{e_2}}{B}}{
+    \J{\GD}{\cdot}{e}{A_1 + A_2} &
+    \J{\GD,x\of A_i}{\GG}{e_i}{B}}
+  \dg
+  &=&
+  \begin{cases}
+    \den{e_1}\;\pair{\delta}{x}\;\gamma
+    &\text{if }\den{e}\;\delta\;\triv = \ms{in}_1\;x\\
+    \den{e_2}\;\pair{\delta}{x}\;\gamma
+    &\text{if }\den{e}\;\delta\;\triv = \ms{in}_2\;x\\
+  \end{cases}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\case{e}{\m{x}}{e_1}{\m{x}}{e_2}}{B}}{
+    \J{\GD}{\GG}{e}{A_1 + A_2} &
+    \J{\GD}{\GG,\m{x}\of A_i}{e_i}{B}
+  }\dg
+  &=&
+  \begin{cases}
+    \den{e_1}\;\delta\;\pair{\gamma}{x}
+    &\text{if }\den{e} \dg = \ms{in}_1\;x\\
+    \den{e_2}\;\delta\;\pair{\gamma}{x}
+    &\text{if }\den{e} \dg = \ms{in}_2\;x\\
+  \end{cases}
+  \vspace{.8em}\\
+
+  %% semilattice rules
+  \fux{\J{\GD}{\GG}{\unit}{L}}{\phantom{.}}\dg
+  &=& \unit_{\den{L}}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{e_1 \vee e_2}{L}}{
+    \J{\GD}{\GG}{e_i}{L}}\dg
+  &=& \den{e_1}\dg \vee_{\den{L}} \den{e_2}\dg
+  \vspace{.8em}\\
+
+  %% set intro/elim rules
+  \fux{\J{\GD}{\GG}{\singleset{e}}{\Set{A}}}{\J{\GD}{\cdot}{e}{A}}\dg
+  &=& \{\den{e}\;\delta\;\triv\}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{L}}{
+    \J{\GD}{\GG}{e_1}{\Set{A}} &
+    \J{\GD,x\of A}{\GG}{e_2}{L}}\dg
+  &=& \displaystyle\bigvee_{x ~\in~ \den{e_1}\,\delta\,\gamma}
+  \den{e_2}\;\tuple{\delta,x}\;\gamma
+  \vspace{.8em}\\
+
+  %% fix rules
+  \fux{\J{\GD}{\GG}{\fix{\m{x}}{e}}{\fineq{L}}}{
+    \J{\GD}{\GG,\m{x}\of \fineq{L}}{e}{\fineq{L}}
+  }\dg
+  &=&
+  \ms{fix}_{\den{\fineq{L}}}\;(\fn\bind{x} \den{e}\;\pair{\delta}{x}\;\gamma)
+  \vspace{0.8em}\\
+  \fux{\J{\GD}{\GG}{\fixle{\m{x}}{e_\top}{e}}{\eq{L}}}{
+    \J{\GD}{\GG}{e_\top}{\eq{L}} &
+    \J{\GD}{\GG,\m{x}\of \eq{L}}{e}{\eq{L}}}\dg
+  &=& \TODO
+  \end{array}\]
+
   \caption{Denotations of Datafun typing derivations}
   \label{fig:sem-terms}
-\end{figure}
+\end{figure*}
+
+
+\subsection{Denotation of Datafun terms}
 
 In Figure \ref{fig:sem-terms} we give a denotation for typing derivations with
 the following signature:
