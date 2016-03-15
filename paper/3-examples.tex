@@ -449,7 +449,7 @@ to the next statement (i.e., we add $(i, i+1)$ to the set of edges).
 
 Now, we can define liveness analysis, one of the classic ``backwards'' dataflow
 analyses. The type of $\ms{live}$ say that given a program and its flow graph,
-it returns a set of label/variable pairs, which can be viewed as a relation saying
+it returns a set of label/variable pairs, which determine a relation saying
 for each label which variables are live.
 %% live code analysis
 \[\begin{array}{l}
@@ -473,20 +473,35 @@ When computing this analysis, we again need to use a bounded fixed
 point, which we do by taking the Cartesian product of the labels and
 variables occuring in the program.
 
+
+Next, we give one of the classic forwards dataflow analyses,
+reaching definitions. This analysis is used to figure out whether
+an assignment (a ``definition'') can influence the value of later
+expressions or not.
 %% reaching definitions analysis
 \[\begin{array}{l}
-\textsf{\todo{explain which label means what}}\\
 \ms{reachingDefinitions} ~:~ \ms{program} \uto \ms{flow}
-\uto \Set{\ms{label} \x \ms{label} \x \ms{var}}\\
+\uto \Set{\ms{label} \x (\ms{label} \x \ms{var})}\\
 \ms{reachingDefinitions} \;\mi{code} \;\mi{flow} =\\
 \hspace{2em}\fixle{\m{RD}}{%
-  \ms{labels}\;\mi{code} \x \ms{labels}\;\mi{code} \x \ms{vars}\;\mi{code}}\\
+  \ms{labels}\;(\ms{labels}\;\mi{code} \x \ms{vars}\;\mi{code}) \x \mi{code} }\\
 \hspace{2em}\forin{(i,\mi{stmt}) \in \mi{code}}\\
 \hspace{2.875em} (
-\phantom{\vee~}\setfor{(i,i,v)}{v \in \ms{defines}\;\mi{stmt}}\\
-\hspace{3.2em} \vee~ \{(i,l,v) ~|~ (j,i) \in \mi{flow},\\
-\hspace{8.14em}(j,l,v) \in \m{RD},\\
-\hspace{8.14em}\neg(v \isin \ms{defines}\;\mi{stmt})\})
+\phantom{\vee~}\setfor{((i,v), i)}{v \in \ms{defines}\;\mi{stmt}}\\
+\hspace{3.2em} \vee~ \{((l,v), i) ~|~ (j,i) \in \mi{flow},\\
+\hspace{8.95em}((l,v), j) \in \m{RD},\\
+\hspace{8.95em}\neg(v \isin \ms{defines}\;\mi{stmt})\})
 \end{array}\]
+We define a function $\fname{reachingDefinitions}$ which takes a
+program and a set of flows as arguments, and returns a relation of
+type $\Set{(\ms{label} \x \ms{var}) \x \ms{label}}$. An entry $((l,v),
+i)$ in this relation means the definition of $v$ at $l$ reaches program
+point $i$.
 
-\TODO
+This is then computed as a fixed point of two clauses. First, if there
+is a definition $v$ at program point $i$, then $i$ is reached by that
+definition. Second, if $(l,v)$ reaches $j$, and $j$ flows to $i$, then
+$(l,v)$ reaches $i$ as long as $v$ is not re-defined at $i$.
+
+As \citet{whaley-lam} observed, Datalog makes it very easy to express
+dataflow analyses, and it is similarly easy in Datafun.
