@@ -53,7 +53,7 @@
 %%   example.}
 
 
-\section{Semantics}
+\section{Semantics and metatheory}
 \label{sec:semantics}
 
 We give a denotational semantics for Datafun in terms of three categories
@@ -222,7 +222,7 @@ moreover, semilattices where the least-upper-bound operator $\bigvee$ is
     \J{\GD}{\GG,\m{x}\of \fineq{L}}{e}{\fineq{L}}
   }\dg
   &=&
-  \ms{fix}_{\den{\fineq{L}}}\;(\fn\bind{x} \den{e}\;\pair{\delta}{x}\;\gamma)
+  \ms{lfp\ in}~{\den{\fineq{L}}} ~\ms{of}~ (\fn\bind{x} \den{e}\;\pair{\delta}{x}\;\gamma)
   \vspace{0.8em}\\
   \fux{\J{\GD}{\GG}{\fixle{\m{x}}{e_\top}{e}}{\eq{L}}}{
     \J{\GD}{\GG}{e_\top}{\eq{L}} &
@@ -249,3 +249,50 @@ the following signature:
 Colloquially, $\J{\GD}{\GG}{e}{A}$ denotes a function from $\den{\GD} \x
 \den{\GG}$ to $\den{A}$ that must be monotone in $\den{\GG}$ (but not in
 $\den{\GD}$).
+
+Our semantics requires the following lemma regarding fixed-points of monotone
+functions:
+
+\todo{TODO: lemma/theorem formatting}
+
+\paragraph{Lemma: Fixed points in finite-height pointed posets.}
+Any monotone map $f : A \to A$ on a nonempty poset $A$ of finite height with a
+least element $\unit$ has a least fixed point of the form $f^n(\unit)$.
+
+\paragraph{Proof:}
+Consider the sequence $\unit, f(\unit), f^2(\unit), f^3(\unit), ...$. Note that
+$\unit \le f(\unit)$, so by monotonicity of $f$ and induction $f^i(\unit) \le
+f^{i+1}(\unit)$. Thus this sequence forms an ascending chain. Since $A$ is
+finite-height, this chain must be finite; thus there exists $n$ such that
+$f^n(\unit) = f^{n+1}(\unit)$, i.e. $f^n(\unit)$ is a fixed-point of $f$.
+
+Now consider any fixed-point $x$ of $f$. Since $\unit \le x$, by monotonicity of
+$f$, induction, and $x = f(x)$, we have $f^i(\unit) \le x$ for any $i \in \N$.
+Thus $f^n(\unit) \le x$. Thus $f^n(\unit)$ is the least fixed point of $f$.
+
+\paragraph{}
+We will only need this lemma on semilattices.
+
+%% \paragraph{Lemma 1: Existence of fixed points in posets of finite height.}
+%% Any monotone map $f : A \to A$ on a nonempty poset $A$ of finite height has at
+%% least one fixed point.
+
+%% \paragraph{Lemma 2: Finding least fixed points in pointed posets.}
+%% For any poset $A$ with a least element $\unit$, for any monotone map $f : A \to
+%% A$, if $f$ has a fixed point $x$ of finite height\footnote{The height of an
+%%   element $x$ in a poset $A$ is the height of the sub-poset $\{y \in A ~|~ y \le
+%%   x\}$.}, then $f$ has a least fixed point of the form $f^n(\unit)$ for some $n
+%% \in \N$.
+
+
+\subsection{Metatheory of Datafun}
+
+\todo{TODO: Proof formatting}
+
+We have proven the following theorems:
+
+\paragraph{Syntactic substitution} \todo{state syntactic substitution theorem}
+\paragraph{Semantic substitution} \todo{state semantic substitution theorem}
+
+\paragraph{}
+\todo{TODO: future work reference? on operational semantics \& compatibility theorem?}
