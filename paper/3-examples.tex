@@ -481,10 +481,10 @@ expressions or not.
 %% reaching definitions analysis
 \[\begin{array}{l}
 \ms{reachingDefinitions} ~:~ \ms{program} \uto \ms{flow}
-\uto \Set{\ms{label} \x (\ms{label} \x \ms{var})}\\
+\uto \Set{(\ms{label} \x \ms{var}) \x \ms{label}}\\
 \ms{reachingDefinitions} \;\mi{code} \;\mi{flow} =\\
 \hspace{2em}\fixle{\m{RD}}{%
-  \ms{labels}\;(\ms{labels}\;\mi{code} \x \ms{vars}\;\mi{code}) \x \mi{code} }\\
+  (\ms{labels}\;\mi{code} \x \ms{vars}\;\mi{code}) \x \ms{labels}\;\mi{code} }\\
 \hspace{2em}\forin{(i,\mi{stmt}) \in \mi{code}}\\
 \hspace{2.875em} (
 \phantom{\vee~}\setfor{((i,v), i)}{v \in \ms{defines}\;\mi{stmt}}\\
