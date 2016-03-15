@@ -67,6 +67,7 @@ A morphism $f \in \cSL(L, M)$ is a function from $\U{L}$ to $\U{M}$ satisfying:
 since $a \le b \iff a \vee b = b$, and so from $a \le b$ we know $f(a) \vee f(b)
 = f(a \vee b) = f(b)$, thus $f(a) \le f(b)$.
 
+
 \subsection{Denotation of Datafun types}
 \begin{figure}
   \[\begin{array}{rcl}
@@ -96,9 +97,16 @@ Datafun's semilattice types denote posets which are also semilattices---and
 moreover, semilattices where the least-upper-bound operator $\bigvee$ is
 \emph{computable}. \todo{should this have a proof?}
 
+
 \subsection{Denotation of Datafun terms}
+\begin{figure}
+  \TODO
+  \caption{Denotations of Datafun typing derivations}
+  \label{fig:sem-terms}
+\end{figure}
 
-We give a denotation for typing derivations with the following signature:
+In Figure \ref{fig:sem-terms} we give a denotation for typing derivations with
+the following signature:
 \begin{eqnarray*}
   \den{\J{\GD}{\GG}{e}{A}} &\in&
   \cSet(\U{\den{\GD}}, \cPoset(\den{\GG}, \den{A}))
