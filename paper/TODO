@@ -14,9 +14,6 @@ WHAT ARE THE THEOREMS. Put the statements into Section 5.
 - Examples
   - is-in, intersection, composition
 
-- Typing rules
-  - fixed point rules
-
 - Semantics
   - explain diagram, comonads & monads
   - state theorems

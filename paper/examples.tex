@@ -338,11 +338,12 @@ the fixed point iteration.
 s = \fname{substring} \;\mi{text} \;i \;(i+\ms{length}\;s)\}
 \end{array}\]
 This function works by taking a string $\mi{text}$ and a grammar $\m{G}$, and
-then taking a set of facts $\m{chart}$, and taking a union. The first clause
-is a set comprehension, saying that we return $(a, i, k)$ if $(b, i, j)$ and $(c, j, k)$
-are in $\m{chart}$ -- this corresponds to applications of the first rule. The
-second clause corresponds to the second rule above, saying that $(a, i, i + length(s))$
-is a generated fact if $s$ is a substring of $\mi{text}$ at position $i$.
+then taking a set of facts $\m{chart}$, and taking a union. The first clause is
+a set comprehension, saying that we return $(a, i, k)$ if $(b, i, j)$ and $(c,
+j, k)$ are in $\m{chart}$ -- this corresponds to applications of the first rule.
+The second clause corresponds to the second rule above, saying that $(a, i, i +
+\ms{length}\;s)$ is a generated fact if $s$ is a substring of $\mi{text}$ at
+position $i$.
 
 We can then use $\fname{iter}$ to implement the $\fname{parse}$ function.
 %% parse
@@ -407,13 +408,13 @@ atom), there is simply no way in Datalog to express a \emph{generic}
 parser taking a grammar as an input. This demonstrates one of the key
 benefits of moving to a functional language like Datafun.
 
-Moreover, Datalog's strategy for proving termination involves a
-constructor restriction to ensure all relations are finite. Primitives such as
-\ms{range} and \ms{substring} violate this restriction (as relations, they are
-infinite); it is not immediately obvious that Datalog programs extended with
-these primitives remain terminating. Our use of bounded fixed-points to
-guarantee termination is robust under such extensions; as long as all primitive
-functions are total, Datafun programs always terminate.
+Moreover, Datalog programs must be \emph{constructor-free}, to ensure all
+relations are finite. Primitives such as \ms{range} and \ms{substring} violate
+this restriction (as relations, they are infinite); it is not immediately
+obvious that Datalog programs extended with these primitives remain terminating.
+Our use of bounded fixed-points to guarantee termination is robust under such
+extensions; as long as all primitive functions are total, Datafun programs
+always terminate.
 
 Finally, having computed a set via a fixed point, we can test whether
 or not an element is in that set \emph{or not} -- the ability to test

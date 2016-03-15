@@ -112,18 +112,9 @@ simply-typed $\lambda$-calculus extended in four major ways:
 
   In summary, \ms{fix} may only be used at \emph{finite semilattice eqtypes}.
 
-  \todo{TODO: connection to Datalog via finiteness of predicates}
+  %% \todo{TODO: connection to Datalog via finiteness of predicates}
 
-  \todo{explain $\fixle{\m{x}}{e_1}{e_2}$?}
-
-  %% \todo{Explain:
-  %%   \begin{itemize}
-  %%   \item compute fixpoint (at least conceptually) by iteration
-  %%   \item start from a least element
-  %%   \item to ensure termination, need finite height of lattice
-  %%   \item finiteness guarantees finite height!
-  %%   \item (\emph{only then} mention analogy to Datalog)
-  %% \end{itemize}}
+  %% \todo{explain $\fixle{\m{x}}{e_1}{e_2}$?}
 
 \item\label{item:semilattice-types} Generalizing the empty set $\emptyset$ and
   union $\cup$, we identify a subset of types that have a \emph{least element}
@@ -136,8 +127,8 @@ simply-typed $\lambda$-calculus extended in four major ways:
   Semilattice types serve two purposes. First, as already mentioned, they
   guarantee the presence of a least element, needed to compute \ms{fix} terms.
 
-  \todo{Explain how products of semilattice being semilattice + monotone
-    fixed-points account for mutual recursion.}
+  %% \todo{Explain how products of semilattice being semilattice + monotone
+  %%   fixed-points account for mutual recursion.}
 
   Second, they provide a natural eliminator for sets. Given $e : \Set{A}$, we
   write $\letin{x}{e'}{e_x}$ for the least upper bound, over all elements $x \in
@@ -145,9 +136,5 @@ simply-typed $\lambda$-calculus extended in four major ways:
   example, this provides the set type's monadic ``bind'' operation. For example,
   $\forin{x \in \setlit{1,2,3}} \{10 \cdot x, x^2\}$ denotes the set $\{1, 4, 9,
   10, 20, 30\}$.
-
-  \todo{example?}
-
-  \todo{explain testing for set membership?}
 
 \end{enumerate}
