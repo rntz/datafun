@@ -7,10 +7,10 @@
    \begin{tikzcd}
         \mathbf{\mathbf{Set}}     \arrow[bend left=35]{r}[name=F]{\mathsf{Disc}}
                                   \arrow[rr, bend left=60, "\mathsf{FS}"]
-      & \mathbf{\mathbf{Poset}}   \arrow[bend left=35]{l}[name=U]{|\mathit{-}|}
+      & \mathbf{\mathbf{Poset}}   \arrow[bend left=35]{l}[name=U]{\U{-}}
                                   \arrow[to path={(F) -- (U)\tikztonodes}, no line]{}{\bot}
-                                  \arrow[bend left=35]{r}[name=H]{\mathsf{Sups}}
-      & \mathbf{\mathbf{SemiLat}} \arrow[bend left=35]{l}[name=K]{\ms{U}}
+                                  \arrow[bend left=35]{r}[name=H]{\slF}
+      & \mathbf{\mathbf{SemiLat}} \arrow[bend left=35]{l}[name=K]{\slU}
                                   \arrow[to path={(H) -- (K)\tikztonodes}, no line]{}{\bot}
    \end{tikzcd}
 }
@@ -37,10 +37,10 @@
       $P \x Q$ & Pointwise poset on pairs of $P$s and $Q$s\\
       $P \arr Q$ & Pointwise poset on monotone maps $\cPoset(P, Q)$\\
       %% $L \lol M$ & Pointwise poset on $\cSL(L,M)$\\
+      $\slF\;P$ & Free semilattice on a poset $P$\\
+      $\slU\;{L}$ & Underlying poset of a semilattice $L$\\
       $\Disc{A}$ & Discrete poset on underlying set $A$\\
-      $\Sups{P}$ & Free semilattice on a poset $P$\\
-      $\FS{A}$ & Free semilattice on a set $A$; same as $\Sups{(\Disc{A})}$\\
-      $\ms{U}\;{L}$ & Underlying poset of a semilattice $L$\\
+      $\FS{A}$ & Free semilattice on a set $A$; same as $\slF\;(\Disc{A})$\\
       $\below{x}{P}$ &
       The sub-poset of $P$ below $x$: $\{y \in P ~|~ y \le x\}$
       %% \\ $\FM{A}{P}$ & Poset of finite maps from the set $A$ to the poset $P$
@@ -59,7 +59,7 @@
 \label{sec:semantics}
 
 \todo{Somewhere in this we should talk about the comonad $\Disc{\U{\cdot}}$, the
-  monad $\FS{\U{\cdot}}$, and adjoint logic.}
+  monad $\slU\;(\FS{\U{\cdot}})$, and adjoint logic.}
 
 We give a denotational semantics for Datafun in terms of three categories
 (\cSet{}, \cPoset{}, and \cSL{}) and two adjunctions between them (see Figure
