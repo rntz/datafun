@@ -9,14 +9,19 @@ WHAT ARE THE THEOREMS. Put the statements into Section 5.
 
 * Next to-dos
 ** Michael
-- Typing rules
-- Semantics
+- Finish typing rules
+- Semantics (explain diagram!)
 - related work: optimizing datalog
+- abstract
+- everything else necessary for submission
+- move "Comparing Datalog and Datafun" section before tradeoffs
+
+If have time:
 - think about where to put "Comparing Datalog & Datafun"
 
 ** Neel
-- Related Work
-- explain CYK parsing and/or dataflow analysis
+- another citation for modal logic / wiping context clean
+- implementation, related work
 
 * To cover during meeting 2016-03-14
 ** Who writes the abstract and when?
