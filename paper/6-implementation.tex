@@ -5,8 +5,33 @@ types, record types, dictionaries, subtyping, antitone functions, and unbounded
 (potentially nonterminating) fixed points. It performs no optimizations
 whatsoever.
 
+
+
 \todo{explain subtyping?}
 \todo{explain antitonicity?}
 \todo{explain ordering on dictionaries?}
+
+\paragraph{Polymorphism}
+\begin{itemize}
+\item \TODO quantification over different classes of type variable (ordinary,
+  equality, lattice); amounts to a typeclass system, so this is not new work.
+\item \TODO tone polymorphism and why you need it for principal types; e.g.
+  what is the type of $\fn\bind{f}\fn\bind{x} f\;x$?
+\end{itemize}
+
+\paragraph{Type inference} blah
+
+\TODO Ref Dunfield \& Krishnaswami, higher-order bidirectional type inference.
+
+\todo{REWRITE} We speculate that bidirectional inference could be replaced by a
+Damas-Milner \todo{CITE} style algorithm, which infers a principal type for any
+term without any annotation at all, \emph{if} we add polymorphism,
+tone-polymorphism, and subtyping---so that, for example, $\fn\bind{f}\fn\bind{x}
+f\;x$ can be assigned the principal type
+$\forall\bind{o\of\ms{tone}}\forall\bind{\alpha,\beta \of \ms{type}} (\alpha
+\overset{o}\to \beta) \mto (\alpha \overset{o}\to \beta)$, where
+$\overset{o}\to$ indicates a function of tone $o$; a tone may be empty (for an
+ordinary function) or ${+}$ for a monotone function.
+
 
 \todo{LINK}
