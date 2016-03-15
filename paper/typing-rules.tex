@@ -189,8 +189,9 @@ Finally, we come to $\bigvee$, the set-comprehension rule. This rule has the
 flavor of a monadic ``bind'' operation, but generalized to a result of any
 semilattice type. This operation is naturally monotone both in the set $e_1$
 being iterated over and in the expression $e_2$ which we are taking the least
-upper bound of. Moreover, $e_2$ is \emph{not} required to be monotone in the
-elements $x \in e_1$. \todo{Why not?}
+upper bound of. And since sets are ordered by inclusion, irrespective of the
+ordering on their elements, $e_2$ is not required to be monotone in the variable
+$x \of A$ standing for elements $x \in e_1$.
 
 %% \subsection{Maps}
 %% Finite maps are an abstract type, and most of their interface is exposed through
@@ -200,4 +201,11 @@ elements $x \in e_1$. \todo{Why not?}
 
 \subsection{Fixed points}
 
-\todo{explain \rt{fix}, $\rt{fix}_\le$}
+The reason Datafun tracks monotonicity is to permit taking fixed-points of
+monotone functions. \rt{fix} expresses exactly that. As mentioned in Section
+\ref{sec:informally}, however, it is limited to types of the form $\fineq{L}$:
+finite semilattice eqtypes.
+
+$\rt{fix}_\le$ loosens this restriction by letting us take fixed points at
+(not-necessarily-finite) semilattice eqtypes $\eq{L}$, as long as we provide an
+upper bound $e_1 : \eq{L}$ which we can check we do not exceed.

@@ -12,8 +12,7 @@ WHAT ARE THE THEOREMS. Put the statements into Section 5.
 - Abstract
 
 - Examples
-  - filter, map, cross product
-  - is-in
+  - is-in, intersection, composition
 
 - Typing rules
   - fixed point rules
