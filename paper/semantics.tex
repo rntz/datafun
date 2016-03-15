@@ -296,8 +296,8 @@ element $\unit$ has a least fixed point of the form $f^n(\unit)$.
 \paragraph{Proof:}
 Consider the sequence $\unit, f(\unit), f^2(\unit), f^3(\unit), ...$. Note that
 $\unit \le f(\unit)$, so by monotonicity of $f$ and induction $f^i(\unit) \le
-f^{i+1}(\unit)$. Thus this sequence forms an ascending chain. Since $A$ is
-finite-height, this chain must be finite; thus there exists $n$ such that
+f^{i+1}(\unit)$. Thus this sequence forms an ascending chain. Since $A$ has
+finite height, this chain cannot be infinite; thus there is an $n$ such that
 $f^n(\unit) = f^{n+1}(\unit)$, i.e. $f^n(\unit)$ is a fixed-point of $f$.
 
 Now consider any fixed-point $x$ of $f$. Since $\unit \le x$, by monotonicity of
@@ -305,8 +305,8 @@ $f$, induction, and $x = f(x)$, we have $f^i(\unit) \le x$. Thus $f^n(\unit) \le
 x$. Thus $f^n(\unit)$ is the least fixed point of $f$. \qed
 
 \paragraph{}
-We notate the least-fixed point of a monotone function $f$ on a semilattice $L$
-of finite height as $\lfpin{L}{f}$.
+We write $(\lfpin{L}{f})$ for the least fixed point of a monotone map $f$ on a
+semilattice $L$ of finite height.
 
 %% \paragraph{Lemma 1: Existence of fixed points in posets of finite height.}
 %% Any monotone map $f : A \to A$ on a nonempty poset $A$ of finite height has at
