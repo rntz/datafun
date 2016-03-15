@@ -43,23 +43,19 @@ the oldest such variants is Datalog~\cite{datalog}, a syntactic subset of Prolog
 satisfying three restrictions:
 
 \begin{enumerate}
-\item Composite terms are forbidden; only atomic terms and variables
-  are permitted to appear in predicates. This ensures that deduction
+\item Programs must be \emph{constructor-free}: only atomic terms and variables
+  are permitted to appear as arguments to predicates. This ensures that deduction
   will not introduce terms that do not occur in the source of the
   program.
-
-  \todo{Maybe name this ``constructor-function free'', ``constructor-free'',
-    ``constructor restriction''? It apparently doesn't have a name and needs
-    one.}
 
 \item Clauses are \emph{range-restricted}: all variables in the
   consequent (head) of a clause must also occur positively in its
   premises (body).
 
-\item The negation of a predicate may be used in a definition only if
-  it has already been fully defined. (That is, within the recursive
-  definition of a predicate, it cannot be used in negated form.) This
-  is called ``stratified negation''.
+\item Programs are limited to \emph{stratified negation}: the
+  negation of a predicate may be used in a definition only if it has
+  already been fully defined. That is, within the recursive
+  definition of a predicate, it cannot be used in negated form.
 \end{enumerate}
 
 These restrictions make Datalog Turing-\emph{in}complete: all queries are
