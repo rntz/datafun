@@ -1,4 +1,4 @@
-\usepackage{amssymb,amsmath}
+\usepackage{amssymb,amsmath,amsthm}
 \usepackage{latexsym}
 
 %% uses the AMS Euler math font.
@@ -121,10 +121,13 @@
 \newcommand{\Arr}{\rightarrowtriangle}
 \newcommand{\arr}{\shortrightarrow}
 \newcommand{\lol}{\multimap}
-\newcommand{\Disc}[1]{\ensuremath{\ms{Disc}\;#1}}
-\newcommand{\Sups}[1]{\ensuremath{\ms{Sups}\;#1}}
+\newcommand{\Disc}[1]{\ensuremath{\ms{Disc}\;{#1}}}
+\newcommand{\slF}{\ensuremath{\mathcal{F}}}
+\newcommand{\slU}{\ensuremath{\mathcal{U}}}
 \newcommand{\stringset}{\mathbb{S}}
 \newcommand{\natposet}{\N_\le}
+\newcommand{\below}[2]{\ensuremath{\downarrow\!({#1 : #2})}}
+\newcommand{\lfpin}[2]{\text{lfp}\,{#2} \in {#1}}
 
 \newcommand{\sff}{\ms{ff}}
 \newcommand{\stt}{\ms{tt}}

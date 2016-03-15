@@ -9,13 +9,24 @@ WHAT ARE THE THEOREMS. Put the statements into Section 5.
 
 * Next to-dos
 ** Michael
-- Finish examples
-- Finish typing rules
-- Semantics (explain diagram!)
-- related work: optimizing datalog
-- abstract
+- Abstract
+
+- Examples
+  - filter, map, cross product
+  - is-in
+
+- Typing rules
+  - fixed point rules
+
+- Semantics
+  - explain diagram, comonads & monads
+  - state theorems
+
+- Related work
+  - optimizing (datalog)
+
+- do a red-elimination pass
 - everything else necessary for submission
-- move "Comparing Datalog and Datafun" section before tradeoffs
 
 If have time:
 - think about where to put "Comparing Datalog & Datafun"

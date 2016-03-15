@@ -7,10 +7,10 @@
    \begin{tikzcd}
         \mathbf{\mathbf{Set}}     \arrow[bend left=35]{r}[name=F]{\mathsf{Disc}}
                                   \arrow[rr, bend left=60, "\mathsf{FS}"]
-      & \mathbf{\mathbf{Poset}}   \arrow[bend left=35]{l}[name=U]{|\mathit{-}|}
+      & \mathbf{\mathbf{Poset}}   \arrow[bend left=35]{l}[name=U]{\U{-}}
                                   \arrow[to path={(F) -- (U)\tikztonodes}, no line]{}{\bot}
-                                  \arrow[bend left=35]{r}[name=H]{\mathsf{Sups}}
-      & \mathbf{\mathbf{SemiLat}} \arrow[bend left=35]{l}[name=K]{\ms{U}}
+                                  \arrow[bend left=35]{r}[name=H]{\slF}
+      & \mathbf{\mathbf{SemiLat}} \arrow[bend left=35]{l}[name=K]{\slU}
                                   \arrow[to path={(H) -- (K)\tikztonodes}, no line]{}{\bot}
    \end{tikzcd}
 }
@@ -37,13 +37,17 @@
       $P \x Q$ & Pointwise poset on pairs of $P$s and $Q$s\\
       $P \arr Q$ & Pointwise poset on monotone maps $\cPoset(P, Q)$\\
       %% $L \lol M$ & Pointwise poset on $\cSL(L,M)$\\
+      $\slF\;P$ & Free semilattice on a poset $P$\\
+      $\slU\;{L}$ & Underlying poset of a semilattice $L$\\
       $\Disc{A}$ & Discrete poset on underlying set $A$\\
-      $\Sups{P}$ & Free semilattice on a poset $P$\\
-      $\FS{A}$ & Free semilattice on a set $A$; same as $\Sups{(\Disc{A})}$\\
-      $\ms{U}{L}$ & Underlying poset of a semilattice $L$
+      $\FS{A}$ & Free semilattice on a set $A$; same as $\slF\;(\Disc{A})$\\
+      $\below{x}{P}$ &
+      The sub-poset of $P$ below $x$: $\{y \in P ~|~ y \le x\}$
       %% \\ $\FM{A}{P}$ & Poset of finite maps from the set $A$ to the poset $P$
     \end{tabular}
   \end{center}
+
+  \todo{If  we don't end up using the weird Set notation, remove it.}
 
   \caption{Semantic notation}
   \label{fig:sem-notation}
@@ -53,8 +57,15 @@
 %%   example.}
 
 
-\section{Semantics}
+\section{Semantics and metatheory}
 \label{sec:semantics}
+
+\todo{Somewhere in this we should talk about the comonad $\Disc{\U{\cdot}}$, the
+  monad $\slU\;(\FS{\U{\cdot}})$, and adjoint logic.}
+
+\todo{Should we talk about how $\Disc{\U{A + B}} = \Disc{\U{A} \boxplus \U{B}} =
+  \Disc{\U{A}} + \Disc{\U{B}}$ and what this has to do with \ms{case}? Honestly
+  I don't remember that exactly myself.}
 
 We give a denotational semantics for Datafun in terms of three categories
 (\cSet{}, \cPoset{}, and \cSL{}) and two adjunctions between them (see Figure
@@ -111,9 +122,28 @@ semilattices to posets by forgetting the lattice structure.
 \end{figure}
 
 Datafun types and contexts denote posets as shown in Figure \ref{fig:sem-types}.
-Datafun's semilattice types denote posets which are also semilattices---and
-moreover, semilattices where the least-upper-bound operator $\bigvee$ is
-\emph{computable}. \todo{should this have a proof?}
+To complete our semantics, we will need a few simple lemmas about the
+denotations of Datafun types. First, we need to know that our semilattice types
+are semilattices, and that our finite types are finite:
+
+\todo{TODO: lemma/theorem formatting}
+
+\paragraph{Lemma:}
+The denotation $\den{L}$ of a semilattice type $L$ is a semilattice.
+
+\paragraph{Lemma:}
+The poset $\den{\fineq{A}}$ denoted by a finite eqtype $\fineq{A}$ is finite.
+
+\paragraph{}
+Second, to show that bounded fixed-points $(\fixle{\m{x}}{e_\top}{e})$
+terminate, we need any possible $e_\top$ to pick out a finite-height sub-poset:
+
+\paragraph{Lemma:}
+For any semilattice equality type $\eq{L}$, for any $x \in \den{\eq{L}}$, the
+height of $\below{x}{\den{\eq{L}}}$ is finite.
+
+\paragraph{}
+All of these are trivial to prove by induction over types.
 
 
 %% TERM DENOTATION FIGURE
@@ -213,8 +243,9 @@ moreover, semilattices where the least-upper-bound operator $\bigvee$ is
   \fux{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{L}}{
     \J{\GD}{\GG}{e_1}{\Set{A}} &
     \J{\GD,x\of A}{\GG}{e_2}{L}}\dg
-  &=& \displaystyle\bigvee_{x ~\in~ \den{e_1}\,\delta\,\gamma}
+  &=& \displaystyle\bigvee \left\{
   \den{e_2}\;\tuple{\delta,x}\;\gamma
+  ~|~ {x \in \den{e_1}\dg}\right\}
   \vspace{.8em}\\
 
   %% fix rules
@@ -222,12 +253,22 @@ moreover, semilattices where the least-upper-bound operator $\bigvee$ is
     \J{\GD}{\GG,\m{x}\of \fineq{L}}{e}{\fineq{L}}
   }\dg
   &=&
-  \ms{fix}_{\den{\fineq{L}}}\;(\fn\bind{x} \den{e}\;\pair{\delta}{x}\;\gamma)
+  \lfpin{\den{\fineq{L}}}{(x \mapsto \den{e}\;\delta\;\pair{\gamma}{x})}
   \vspace{0.8em}\\
-  \fux{\J{\GD}{\GG}{\fixle{\m{x}}{e_\top}{e}}{\eq{L}}}{
-    \J{\GD}{\GG}{e_\top}{\eq{L}} &
-    \J{\GD}{\GG,\m{x}\of \eq{L}}{e}{\eq{L}}}\dg
-  &=& \TODO
+  \fux{\J{\GD}{\GG}{\fixle{\m{x}}{e_1}{e_2}}{\eq{L}}}{
+    \J{\GD}{\GG}{e_1}{\eq{L}} &
+    \J{\GD}{\GG,\m{x}\of \eq{L}}{e_2}{\eq{L}}}\dg
+  &=&
+  \lfpin{\below{\den{e_1}\dg}{\den{\eq{L}}}}{
+    \left(x \mapsto
+    %% \ms{clamp}(\den{e_2}\;\delta\;\pair{\gamma}{x}, \den{e_1} \dg)
+    \begin{cases}
+      \den{e_2}\;\delta\;\pair{\gamma}{x}
+      %% & \text{if}~\den{e_2}\;\delta\;\pair{\gamma}{x} \le \den{e_1}\dg\\
+      & \text{if it's} \le \den{e_1}\dg\\
+      \den{e_1} \dg & \text{otherwise}
+    \end{cases}
+    \right)}
   \end{array}\]
 
   \caption{Denotations of Datafun typing derivations}
@@ -249,3 +290,49 @@ the following signature:
 Colloquially, $\J{\GD}{\GG}{e}{A}$ denotes a function from $\den{\GD} \x
 \den{\GG}$ to $\den{A}$ that must be monotone in $\den{\GG}$ (but not in
 $\den{\GD}$).
+
+Our semantics requires the following lemma regarding fixed-points of monotone
+functions:
+
+\paragraph{Lemma: Fixed points in finite-height pointed posets.}
+Any monotone map $f : P \to P$ on a poset $P$ of finite height with a least
+element $\unit$ has a least fixed point of the form $f^n(\unit)$.
+
+\paragraph{Proof:}
+Consider the sequence $\unit, f(\unit), f^2(\unit), f^3(\unit), ...$. Note that
+$\unit \le f(\unit)$, so by monotonicity of $f$ and induction $f^i(\unit) \le
+f^{i+1}(\unit)$. Thus this sequence forms an ascending chain. Since $P$ has
+finite height, this chain cannot be infinite; thus there is an $n$ such that
+$f^n(\unit) = f^{n+1}(\unit)$, i.e. $f^n(\unit)$ is a fixed-point of $f$.
+
+Now consider any fixed-point $x$ of $f$. Since $\unit \le x$, by monotonicity of
+$f$, induction, and $x = f(x)$, we have $f^n(\unit) \le x$. Thus $f^n(\unit)$ is
+the least fixed point of $f$. \qed
+
+\paragraph{}
+We write $(\lfpin{L}{f})$ for the least fixed point of a monotone map $f$ on a
+semilattice $L$ of finite height.
+
+%% \paragraph{Lemma 1: Existence of fixed points in posets of finite height.}
+%% Any monotone map $f : A \to A$ on a nonempty poset $A$ of finite height has
+%% at least one fixed point.
+
+%% \paragraph{Lemma 2: Finding least fixed points in pointed posets.} For any
+%% poset $A$ with a least element $\unit$, for any monotone map $f : A \to A$,
+%% if $f$ has a fixed point $x$ of finite height\footnote{The height of an
+%% element $x$ in a poset $A$ is the height of the sub-poset $\{y \in A ~|~ y
+%% \le x\}$.}, then $f$ has a least fixed point of the form $f^n(\unit)$ for
+%% some $n \in \N$.
+
+
+\subsection{Metatheory of Datafun}
+
+\todo{TODO: Proof formatting}
+
+We have proven the following theorems:
+
+\paragraph{Syntactic substitution} \todo{state syntactic substitution theorem}
+\paragraph{Semantic substitution} \todo{state semantic substitution theorem}
+
+\paragraph{}
+\todo{TODO: future work reference? on operational semantics \& compatibility theorem?}
