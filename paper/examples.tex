@@ -59,24 +59,22 @@ For clarity, we set the names of top-level variables in \textsf{sans-serif};
 ordinary variables in $script$ or \mi{italic} (for long variable names); and
 monotone variables in \m{bold}.
 
+Although Datafun as presented does not have polymorphism, we give our examples
+their most general possible type schemes.
+
 \todo{TODO: Explain nonlinear variable usage means equality.}
 
 \todo{\begin{itemize}
-\item composition of relations?
 \item \texttt{make}-style topological sort?
-\item SQL-style examples?
+\item SQL-style examples? SQL vs Datalog vs Datafun?
 \item translating relational algebra into datafun?
 \end{itemize}}
 
 
 \subsection{Filtering, mapping, and cross products}
 
-Although Datafun as presented does not have polymorphism, we give our examples
-their most general possible type schemes. \todo{why?}
-
-\todo{these examples are perhaps a good place to point out subtleties of
-  monotonicity typing}
-
+Armed with the syntactic sugar given in Figure \ref{fig:sugar}, basic set
+operations such as map, filter, and cross-product are easy first examples:
 \[\begin{array}{l}
 \fname{map} ~:~ (A \uto B) \uto \Set{A} \mto \Set{B}\\
 \fname{map}\;f\;\m{A} = \setfor{f\;x}{x \in \m{A}}\\
@@ -87,6 +85,28 @@ their most general possible type schemes. \todo{why?}
 (\times) ~:~ \Set{A} \mto \Set{B} \mto \Set{A \x B}\\
 \m{A} \times \m{B} = \setfor{(a,b)}{a \in \m{A}, b \in \m{B}}
 \end{array}\]
+
+Worth noting here are the subtleties of monotonicity typing. For example,
+\ms{map} is not monotone in its function argument, while \fname{filter} is.
+Recalling that sets are ordered by inclusion, this is straightforward enough ---
+observe, for example, that:
+\begin{eqnarray*}
+ \fname{map}\;(+1)\;\setlit{0} &\not\subseteq& \fname{map}\;(+2)\;\setlit{0}\\
+ \fname{filter}\;(\le 0)\;\setlit{0,1}
+ &\subseteq& \fname{filter}\;(\le 1)\;\setlit{0,1}
+\end{eqnarray*}
+
+However, it is perhaps unclear how Datafun's type system ``knows''
+\fname{filter} is monotone. Consider the desugaring of \ms{filter}:
+\[\begin{array}{l}
+\fname{filter}\;\m{f}\;\m{A} = \forin{x \in \m{A}}
+\ifthen{\m{f}\;x}{\singleset{x}}{\unit}
+\end{array}\]
+\fname{filter}'s type asserts that it uses \m{f} monotonically. This in turn
+depends on
+
+\todo{these examples are perhaps a good place to point out subtleties of
+  monotonicity typing}
 
 \TODO
 
@@ -114,7 +134,7 @@ their most general possible type schemes. \todo{why?}
 \end{figure}
 
 
-\subsection{Testing for membership}
+\subsection{Equality, membership, and intersection}
 
 \todo{Use this as example of $\bigvee$ at non-set (here, boolean) type.}
 
@@ -125,9 +145,22 @@ x \isin \m{A} = \forin{y \in \m{A}} x = y
 
 \todo{TODO: discuss nonlinear pattern-matching}
 
-An equivalent definition, making use of nonlinear pattern-matching, would be:
+%% An equivalent definition, making use of nonlinear pattern-matching, would be:
+%% \[\begin{array}{l}
+%% x \isin \m{A} = \forin{x \in \m{A}} \ms{true}
+%% \end{array}\]
+
+Along a similar line, we can define set intersection by testing for equality:
 \[\begin{array}{l}
-x \isin \m{A} = \forin{x \in \m{A}} \ms{true}
+(\cap) ~:~ \Set{\eq{A}} \mto \Set{\eq{A}} \mto \Set{\eq{A}}\\
+\m{A} \cap \m{B} = \setfor{x}{x \in \m{A}, y \in \m{B}, x = y}
+\end{array}\]
+
+However, \todo{blah blah explicitly checking equality is tedious}, so we usually
+use nonlinear pattern-matching to hide the equality test:
+\[\begin{array}{l}
+(\cap) ~:~ \Set{\eq{A}} \mto \Set{\eq{A}} \mto \Set{\eq{A}}\\
+\m{A} \cap \m{B} = \setfor{x}{x \in \m{A}, x \in \m{B}}
 \end{array}\]
 
 \todo{Nonlinear pattern matching makes implicit the equality test and attendant
@@ -274,13 +307,13 @@ few basic types.
 \mathbf{type}~\ms{fact} = \ms{sym} \x \N \x \N\\
 \end{array}\]
 The $\ms{sym}$ type is a type synonym representing nonterminal names
-with strings.  The $\ms{rule}$ type is the type of the
-right-hand-sides of productions Chomsky normal form -- either a
-string, or a pair of nonterminals. A $\ms{grammar}$ is just a set of
-productions -- a set of pairs of nonterminals paired with their rules.
-The type $\ms{fact}$ is the type representing the atomic facts derived
-by the CYK inference system -- they are triples of the rulename, the
-start position, and the end position.
+with strings. The $\ms{rule}$ type is the type of the right-hand-sides
+of productions in Chomsky normal form -- either a string, or a pair of
+nonterminals. A $\ms{grammar}$ is just a set of productions -- a set
+of pairs of nonterminals paired with their rules. The type $\ms{fact}$
+is the type representing the atomic facts derived by the CYK inference
+system -- they are triples of the rulename, the start position, and
+the end position.
 
 With these types in hand, we can write the CYK algorithm as a fixed
 point computation. In fact, it is convenient to break it into two
