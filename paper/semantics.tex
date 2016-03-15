@@ -224,12 +224,22 @@ moreover, semilattices where the least-upper-bound operator $\bigvee$ is
     \J{\GD}{\GG,\m{x}\of \fineq{L}}{e}{\fineq{L}}
   }\dg
   &=&
-  \ms{lfp\ in}~{\den{\fineq{L}}} ~\ms{of}~ (\fn\bind{x} \den{e}\;\pair{\delta}{x}\;\gamma)
+  \lfpin{\den{\fineq{L}}}{(x \mapsto \den{e}\;\delta\;\pair{\gamma}{x})}
   \vspace{0.8em}\\
   \fux{\J{\GD}{\GG}{\fixle{\m{x}}{e_1}{e_2}}{\eq{L}}}{
     \J{\GD}{\GG}{e_1}{\eq{L}} &
     \J{\GD}{\GG,\m{x}\of \eq{L}}{e_2}{\eq{L}}}\dg
-  &=& \TODO
+  &=&
+  \lfpin{\below{\den{e_1}\dg}{\den{\eq{L}}}}{
+    \left(x \mapsto
+    %% \ms{clamp}(\den{e_2}\;\delta\;\pair{\gamma}{x}, \den{e_1} \dg)
+    \begin{cases}
+      \den{e_2}\;\delta\;\pair{\gamma}{x}
+      %% & \text{if}~\den{e_2}\;\delta\;\pair{\gamma}{x} \le \den{e_1}\dg\\
+      & \text{if it's} \le \den{e_1}\dg\\
+      \den{e_1} \dg & \text{otherwise}
+    \end{cases}
+    \right)}
   \end{array}\]
 
   \caption{Denotations of Datafun typing derivations}
@@ -270,17 +280,22 @@ $f^n(\unit) = f^{n+1}(\unit)$, i.e. $f^n(\unit)$ is a fixed-point of $f$.
 
 Now consider any fixed-point $x$ of $f$. Since $\unit \le x$, by monotonicity of
 $f$, induction, and $x = f(x)$, we have $f^i(\unit) \le x$. Thus $f^n(\unit) \le
-x$. Thus $f^n(\unit)$ is the least fixed point of $f$.
+x$. Thus $f^n(\unit)$ is the least fixed point of $f$. \qed
 
 \paragraph{}
-We will only need this lemma on semilattices.
-
-Moreover, for bounded fixed-points $(\fixle{\m{x}}{e_1}{e_2})$, we need this
-lemma:
+For the case of bounded fixed-points $(\fixle{\m{x}}{e_1}{e_2})$, we need a
+further lemma:
 
 \paragraph{Lemma:}
-The denotation $\den{L}$ of any semilattice type $L$ is an \emph{all-finite}
-poset: that is, any element $x \in \den{L}$ is finite-height.
+The denotation $\den{L}$ of any semilattice equality type $\eq{L}$ is
+\emph{all-finite-height}: that is, for any $x \in \den{\eq{L}}$, the height of
+$\below{x}{\den{\eq{L}}}$ is finite.
+
+\paragraph{Proof:} By induction over semilattice equality types $\eq{L}$. \qed
+
+\paragraph{}
+We notate the least-fixed point of a monotone function $f$ on a semilattice $L$
+of finite height as $\lfpin{L}{f}$.
 
 %% \paragraph{Lemma 1: Existence of fixed points in posets of finite height.}
 %% Any monotone map $f : A \to A$ on a nonempty poset $A$ of finite height has at
