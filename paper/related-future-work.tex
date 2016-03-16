@@ -126,14 +126,13 @@ type-theoretic integration of partial functions into Datafun .
 
 \paragraph{User-Defined Posets and Semilattices}
 The two fundamental semilattice types Datafun provides are booleans and sets;
-products and functions merely preserve semilattice structure where they find
-it. One might contemplate allowing the programmer to define their own
-semilattice structures using something like Haskell's
-\texttt{newtype}/\texttt{instance}. In general, this is a difficult
-problem, because we may need to do serious mathematical
-reasoning to prove that a datatype has a partial ordering, or can be
-equipped with a semilattice structure which is commutative, associative
-and idempotent.
+products and functions merely preserve semilattice structure where they find it.
+One might contemplate allowing the programmer to define their own semilattice
+structures using something like Haskell's \texttt{newtype}/\texttt{instance}. In
+general, this is a difficult problem, because we may need to do serious
+mathematical reasoning to prove that a comparison function implements a partial
+ordering, or that a datatype can be equipped with a semilattice structure
+obeying this partial ordering which is commutative, associative and idempotent.
 
 One example of such a family of types are the \emph{lexicographic sum
   types}. Given two posets $P$ and $Q$, their disjoint union $P + Q$
