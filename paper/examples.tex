@@ -531,11 +531,11 @@ function.
 \hspace{7.45em}\pipe\pwild \cto \setfor{(i,i+1)}{i+1 \isin \ms{labels}\;c}
 \end{array}
 \]
-It says that if $(i, s)$ is a node of the program, then if $s$ is a
-conditional jump $\ctor{If} \;\pwild \;j \;k$, then control can flow from $i$
-to $j$, and from $i$ to $k$ -- i.e., we add both $(i, j)$ and $(i, k)$ to the
-set of edges. Otherwise, it's an assignment, and there is just a control flows
-to the next statement (i.e., we add $(i, i+1)$ to the set of edges).
+It says that if $(i, s)$ is a node of the program, then if $s$ is a conditional
+jump $\ctor{If} \;\pwild \;j \;k$, then control can flow from $i$ to $j$, and
+from $i$ to $k$ -- i.e., we add both $(i, j)$ and $(i, k)$ to the set of edges.
+Otherwise, it's an assignment, and control flows to the next statement (i.e., we
+add $(i, i+1)$ to the set of edges).
 
 Now, we can define liveness analysis, one of the classic ``backwards'' dataflow
 analyses. The type of $\ms{live}$ say that given a program and its flow graph,
