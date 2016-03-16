@@ -3,9 +3,10 @@
   \[\begin{array}{lccl}
   %% expressions
   \textsf{terms} &
-  e &\bnfeq& ... \pipe e \isin e \pipe \setfor{e}{\mc{L}}
+  e &\bnfeq& ... \pipe e \isin e \pipe \setlit{\vec{e}}
+             \pipe \setfor{e}{\mc{L}}
              \pipe \forin{\mc{L}}{e}\\
-  &&& \mathcal{C}[\;e]^* \pipe \rawcase{e}{[{p} \cto {e}]^*}
+  &&& \mathcal{C}\;\vec{e} \pipe \rawcase{e}{[{p} \cto {e}]^*}
   \vspace{0.5em}\\
   %% patterns
   %%
@@ -14,7 +15,7 @@
   %% translate, why do we include only pattern-matching here?
   \textsf{patterns} &
   p &\bnfeq& \pwild \pipe x \pipe (p,p)
-             \pipe \ms{true} \pipe \ms{false} \pipe \mathcal{C}[\;p]^*
+             \pipe \ms{true} \pipe \ms{false} \pipe \mathcal{C}\;\vec{p}
   \vspace{0.5em}\\
   \textsf{constructors} & \mathcal{C} && \text{are abstract identifiers}
   \vspace{0.5em}\\
@@ -25,15 +26,14 @@
 
   %% the desugaring syntax-expansion itself
   \begin{eqnarray*}
-    %% e_1 \isin e_2            &\expandsto& \forin{x \in e_2} e_1 = x\\
+    \setlit{} &\expandsto& \unit\\
+    \setlit{e,\vec{e_i}} &\expandsto& \setlit{e} \vee \setlit{\vec{e_i}}\\
     \setfor{e}{\mc{L}}       &\expandsto& \forin{\mc{L}}{\{e\}}\\
     \forin{\mc{L}_1,\mc{L}_2}{e}
     &\expandsto& \forin{\mc{L}_1}{\forin{\mc{L}_2}{e}}\\
     \forin{p\in e_1}{e_2} &\expandsto&
     \letin{x}{e_1}{\rawcase{x}{p \cto e_2;\,\pwild \cto \unit}}\\
     \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}
-    %% e_1 \x e_2 &\expandsto& \setfor{(a,b)}{a \in e_1, b \in e_2}\\
-    %% e_1 \bullet e_2 &\expandsto& \setfor{(a,c)}{(a,b) \in e_1, (b,c) \in e_2}
     %% \ms{let}~x = e_1 ~\ms{in}~ e_2
     %% &\expandsto& (\fn\bind{x} e_2)\; e_1\\
     %% \ms{let}~[x_i = e_i]^* ~\ms{in}~ e
@@ -89,7 +89,8 @@ Worth noting here are the subtleties of monotonicity typing. For example,
 Recalling that sets are ordered by inclusion, this is straightforward enough ---
 observe, for example, that:
 \begin{eqnarray*}
- \fname{map}\;(+1)\;\setlit{0} &\not\subseteq& \fname{map}\;(+2)\;\setlit{0}\\
+ \fname{map}\;(\le 0)\;\setlit{0,1}
+ &\not\subseteq& \fname{map}\;(\le 1)\;\setlit{0,1}\\
  \fname{filter}\;(\le 0)\;\setlit{0,1}
  &\subseteq& \fname{filter}\;(\le 1)\;\setlit{0,1}
 \end{eqnarray*}
@@ -141,8 +142,8 @@ is monotone in the guard expression. A fuller explanation is given in Section
 
 \subsection{Membership, intersection, and composition}
 
-Given a set, it's natural to ask whether it contains a value $x$. As long as the
-type of the set's elements supports equality, we can do this:
+So long as the type of a set's elements supports equality, we can test whether
+the set contains a value $x$ as follows:
 \[\begin{array}{l}
 (\isin) ~:~ \eq{A} \uto \Set{\eq{A}} \mto \bool\\
 x \isin \m{A} = \forin{y \in \m{A}} x = y
