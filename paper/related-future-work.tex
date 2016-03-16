@@ -44,19 +44,26 @@ we might linear types to model features like deletion. There are many
 nontrivial semantic issues (e.g., how to define monotonicity), but
 it seems a promising question for future work.
 
-\paragraph{Termination} \TODO nontermination and declarativeness.
+\paragraph{Termination}
 
-For example, one powerful optimization technique is \emph{loop reordering} (in
-SQL terminology, \emph{join reordering}), that is, taking advantage of the
-equation
+Datafun as presented is Turing-incomplete. This is advantageous for
+optimization; for example, one powerful optimization technique is \emph{loop
+  reordering} (in SQL terminology, \emph{join reordering}), that is, taking
+advantage of the equation
 \begin{eqnarray*}
   \forin{x \in e_1} \forin{y \in e_2} e
   &=& \forin{y \in e_2} \forin{x \in e_1} e
 \end{eqnarray*}
-when $x,y \notin \ms{FV}(e_1) \cup \ms{FV}(e_2)$. (\TODO Explain why join
-reordering is powerful). But this equation does not always hold in the presence
-of nontermination; for example, if $e_1 = \unit$ and $e_2$ diverges. \TODO
-finish up
+when $x,y \notin \ms{FV}(e_1) \cup \ms{FV}(e_2)$. But this equation does not
+always hold in the presence of nontermination; for example, if $e_1 = \unit$ and
+$e_2$ diverges.
+
+Nonetheless, without a particularly powerful type system \todo{CITE?}, there
+remain many functions it is difficult to implement without use of general
+recursion. So one faces a trilemma: first, keep Datafun nonterminating, at the
+expensive of making some functions inexpressible; second, allow nontermination,
+at the expense of optimization; or, third, use the type system to delineate
+between terminating and nonterminating fragments.
 
 \paragraph{Polymorphism}
 \todo{
