@@ -3,16 +3,16 @@
 * Next to-dos
 - Abstract
 
-- Implementation: Type inference
-
 - Related work: optimizing (datalog literature)
 
+- necessary citations
 - do a red-elimination pass
 - everything else necessary for submission
 
 If have time:
 - moar citations
 - reformat proofs
+- implementation: either more info, or reformat type inference para.
 - another citation for modal logic / wiping context clean
 - Semantics: explain diagram, comonads & monads
 - think about where to put "Comparing Datalog & Datafun"
