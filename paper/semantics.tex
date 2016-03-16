@@ -22,14 +22,14 @@
 \begin{figure}
   \begin{center}
     \begin{tabular}{cl}
-      \multicolumn{2}{c}{\textbf{Set notation}}\\
+      %% \multicolumn{2}{c}{\textbf{Set notation}}\\
       $\U{P}$ & Underlying set of the poset $P$\\
       $\stringset$ & Set of strings\\
-      $A \boxtimes B$ & Cartesian product of sets $A$, $B$\\
-      $A \boxplus B$ & Disjoint union of sets $A$, $B$\\
-      $A \Arr B$ & Functions from set $A$ to set $B$
-      \vspace{0.5em}\\
-      \multicolumn{2}{c}{\textbf{Poset and semilattice notation}}\\
+      %% $A \boxtimes B$ & Cartesian product of sets $A$, $B$\\
+      %% $A \boxplus B$ & Disjoint union of sets $A$, $B$\\
+      %% $A \Arr B$ & Functions from set $A$ to set $B$
+      %% \vspace{0.5em}\\
+      %% \multicolumn{2}{c}{\textbf{Poset and semilattice notation}}\\
       \one & One-element poset $\{\triv\}$\\
       \two & Two-element poset $\{\sff,\stt\}$, with $\sff < \stt$\\
       $\N_\le$ & The naturals $\N$, as a (totally ordered) poset\\
@@ -47,8 +47,6 @@
     \end{tabular}
   \end{center}
 
-  \todo{If  we don't end up using the weird Set notation, remove it.}
-
   \caption{Semantic notation}
   \label{fig:sem-notation}
 \end{figure}
@@ -60,19 +58,21 @@
 \section{Semantics and metatheory}
 \label{sec:semantics}
 
-\todo{Somewhere in this we should talk about the comonad $\Disc{\U{\cdot}}$, the
-  monad $\slU\;(\FS{\U{\cdot}})$, and adjoint logic.}
+%% \todo{Somewhere in this we should talk about the comonad $\Disc{\U{\cdot}}$, the
+%%   monad $\slU\;(\FS{\U{\cdot}})$, and adjoint logic.}
 
-\todo{Should we talk about how $\Disc{\U{A + B}} = \Disc{\U{A} \boxplus \U{B}} =
-  \Disc{\U{A}} + \Disc{\U{B}}$ and what this has to do with \ms{case}? Honestly
-  I don't remember that exactly myself.}
+%% \todo{Should we talk about how $\Disc{\U{A + B}} = \Disc{\U{A} \boxplus \U{B}} =
+%%   \Disc{\U{A}} + \Disc{\U{B}}$ and what this has to do with \ms{case}? Honestly
+%%   I don't remember that exactly myself.}
 
 We give a denotational semantics for Datafun in terms of three categories
 (\cSet{}, \cPoset{}, and \cSL{}) and two adjunctions between them (see Figure
-\ref{fig:sem-cats}). We use nonstandard notation to avoid confusion between sets
-and posets (see Figure \ref{fig:sem-notation}). We take less care to distinguish
-posets and semilattices, since while a set can be partially ordered in many
-ways, a poset either \emph{is} or \emph{is not} a semilattice.
+\ref{fig:sem-cats}). We present the notation we use in Figure
+\ref{fig:sem-notation}; we take care to distinguish between sets and posets, and
+since posets are more central to our semantics, most of our notation concerns
+them. We take less care to distinguish posets and semilattices, since while a
+set can be partially ordered in many ways, a poset either \emph{is} or \emph{is
+  not} a semilattice.
 
 \subsection{The category \cSL{}}
 
@@ -126,21 +126,21 @@ To complete our semantics, we will need a few simple lemmas about the
 denotations of Datafun types. First, we need to know that our semilattice types
 are semilattices, and that our finite types are finite:
 
-\todo{TODO: lemma/theorem formatting}
+\begin{lemma}
+  The denotation $\den{L}$ of a semilattice type $L$ is a semilattice.
+\end{lemma}
 
-\paragraph{Lemma:}
-The denotation $\den{L}$ of a semilattice type $L$ is a semilattice.
+\begin{lemma}
+  The poset $\den{\fineq{A}}$ denoted by a finite eqtype $\fineq{A}$ is finite.
+\end{lemma}
 
-\paragraph{Lemma:}
-The poset $\den{\fineq{A}}$ denoted by a finite eqtype $\fineq{A}$ is finite.
-
-\paragraph{}
 Second, to show that bounded fixed-points $(\fixle{\m{x}}{e_\top}{e})$
 terminate, we need any possible $e_\top$ to pick out a finite-height sub-poset:
 
-\paragraph{Lemma:}
-For any semilattice equality type $\eq{L}$, for any $x \in \den{\eq{L}}$, the
-height of $\below{x}{\den{\eq{L}}}$ is finite.
+\begin{lemma}
+  For any semilattice equality type $\eq{L}$, for any $x \in \den{\eq{L}}$, the
+  height of $\below{x}{\den{\eq{L}}}$ is finite.
+\end{lemma}
 
 \paragraph{}
 All of these are trivial to prove by induction over types.
@@ -153,10 +153,11 @@ All of these are trivial to prove by induction over types.
 
 \begin{figure*}
   \[\begin{array}{rcll}
-  %% \textbf{Derivation}\;\phantom{\dg} && \textbf{Denotation}
-  %% \vspace{.8em}\\
+  \textbf{Derivation}\;\phantom{\dg} && \textbf{Denotation}
+  \vspace{.8em}\\
   \den{\J{\GD}{\GG}{e}{A}}\;\phantom{\dg} &\in&
-  \U{\den{\GD}} \Arr \U{\den{\GG} \arr \den{A}}
+  \cSet(\U{\den{\GD}},\,\cPoset(\den{\GG}, \den{A}))
+  %% \U{\den{\GD}} \Arr \U{\den{\GG} \arr \den{A}}
   \vspace{.8em}\\
   \fux{\J{x_1\of A_1, ..., x_n\of A_N}{\GG}{x_i}{A_i}}{
     \phantom{.}}\dg
@@ -321,22 +322,23 @@ $\den{\GD}$).
 Our semantics requires the following lemma regarding fixed-points of monotone
 functions:
 
-\paragraph{Lemma: Fixed points in finite-height pointed posets.}
-Any monotone map $f : P \to P$ on a poset $P$ of finite height with a least
-element $\unit$ has a least fixed point of the form $f^n(\unit)$.
+\begin{lemma}[Fixed points in finite-height pointed posets]
+  Any monotone map $f : P \to P$ on a poset $P$ of finite height with a least
+  element $\unit$ has a least fixed point of the form $f^n(\unit)$.
+\end{lemma}
 
-\paragraph{Proof:}
-Consider the sequence $\unit, f(\unit), f^2(\unit), f^3(\unit), ...$. Note that
-$\unit \le f(\unit)$, so by monotonicity of $f$ and induction $f^i(\unit) \le
-f^{i+1}(\unit)$. Thus this sequence forms an ascending chain. Since $P$ has
-finite height, this chain cannot be infinite; thus there is an $n$ such that
-$f^n(\unit) = f^{n+1}(\unit)$, i.e. $f^n(\unit)$ is a fixed-point of $f$.
+\begin{proof}
+  Consider the sequence $\unit, f(\unit), f^2(\unit), f^3(\unit), ...$. Note that
+  $\unit \le f(\unit)$, so by monotonicity of $f$ and induction $f^i(\unit) \le
+  f^{i+1}(\unit)$. Thus this sequence forms an ascending chain. Since $P$ has
+  finite height, this chain cannot be infinite; thus there is an $n$ such that
+  $f^n(\unit) = f^{n+1}(\unit)$, i.e. $f^n(\unit)$ is a fixed-point of $f$.
 
-Now consider any fixed-point $x$ of $f$. Since $\unit \le x$, by monotonicity of
-$f$, induction, and $x = f(x)$, we have $f^n(\unit) \le x$. Thus $f^n(\unit)$ is
-the least fixed point of $f$. \qed
+  Now consider any fixed-point $x$ of $f$. Since $\unit \le x$, by monotonicity of
+  $f$, induction, and $x = f(x)$, we have $f^n(\unit) \le x$. Thus $f^n(\unit)$ is
+  the least fixed point of $f$.
+\end{proof}
 
-\paragraph{}
 We write $(\lfpin{L}{f})$ for the least fixed point of a monotone map $f$ on a
 semilattice $L$ of finite height.
 
@@ -385,51 +387,53 @@ metavariables $v,u$ to stand for any variable (ordinary or monotone) and define
 $\sub{e_1/v} e$. Terms are taken up to $\alpha$-equivalence, and by convention,
 whenever two variables are given distinct names $v,u$ it is assumed $v \ne u$.
 
-\todo{TODO: Proof formatting}
-
 We have proven the following theorems:
 
-\paragraph{Weakening and exchange}
-The rules \begin{mathpar}
-  \infer[\rn{\rt{weak}}]{
-    \J{\GD,\GD'}{\GG,\GG'}{e}{A}
-  }{
-    \J{\GD}{\GG}{e}{A}}
-  \and
-  \infer[\rn{\rt{xchg}}]{
-    \J{\GD_1,\GD_2}{\GG_1,\GG_2}{e}{A}
-  }{
-    \J{\GD_2,\GD_1}{\GG_2,\GG_1}{e}{A}
-  }
-\end{mathpar}
-are admissible.
+\begin{theorem}[Weakening and exchange]
+  The rules \begin{mathpar}
+    \infer[\rn{\rt{weak}}]{
+      \J{\GD,\GD'}{\GG,\GG'}{e}{A}
+    }{
+      \J{\GD}{\GG}{e}{A}}
+    \and
+    \infer[\rn{\rt{xchg}}]{
+      \J{\GD_1,\GD_2}{\GG_1,\GG_2}{e}{A}
+    }{
+      \J{\GD_2,\GD_1}{\GG_2,\GG_1}{e}{A}
+    }
+  \end{mathpar}
+  are admissible.
+\end{theorem}
 
-\paragraph{Substitution, ordinary}
-From
-\begin{itemize}
-\item $\J{\GD}{\cdot}{e_1}{A}$,
-\item and $\J{\GD,x \of A}{\GG}{e_2}{B}$,
-\end{itemize}
-it follows that
-\begin{itemize}
-\item $\J{\GD}{\GG}{\sub{e_1/x}e_2}{B}$,
-\item and $\den{\sub{e_1/x} e_2} \dg = \den{e_2} \;\pair{\delta}{\den{e_1}\dg}
-  \;\gamma$.
-\end{itemize}
+\begin{theorem}[Substitution, ordinary]
+  From
+  \begin{itemize}
+  \item $\J{\GD}{\cdot}{e_1}{A}$,
+  \item and $\J{\GD,x \of A}{\GG}{e_2}{B}$,
+  \end{itemize}
+  it follows that
+  \begin{itemize}
+  \item $\J{\GD}{\GG}{\sub{e_1/x}e_2}{B}$,
+  \item and $\den{\sub{e_1/x} e_2} \dg = \den{e_2} \;\pair{\delta}{\den{e_1}\dg}
+    \;\gamma$.
+  \end{itemize}
+\end{theorem}
 
-\paragraph{Substitution, monotone}
-From
-\begin{itemize}
-\item $\J{\GD}{\GG}{e_1}{A}$,
-\item and $\J{\GD}{\GG,\m{x}\of A}{e_2}{B}$
-\end{itemize}
-it follows that
-\begin{itemize}
-\item $\J{\GD}{\GG}{\sub{e_1/\m{x}}e_2}{B}$,
-\item and $\den{\sub{e_1/\m{x}} e_2} \dg = \den{e_2} \;\delta
-\;\pair{\gamma}{\den{e_1} \dg}$.
-\end{itemize}
+\begin{theorem}[Substitution, monotone]
+  From
+  \begin{itemize}
+  \item $\J{\GD}{\GG}{e_1}{A}$,
+  \item and $\J{\GD}{\GG,\m{x}\of A}{e_2}{B}$
+  \end{itemize}
+  it follows that
+  \begin{itemize}
+  \item $\J{\GD}{\GG}{\sub{e_1/\m{x}}e_2}{B}$,
+  \item and $\den{\sub{e_1/\m{x}} e_2} \dg = \den{e_2} \;\delta
+    \;\pair{\gamma}{\den{e_1} \dg}$.
+  \end{itemize}
+\end{theorem}
 
 \todo{\paragraph{} More yik-yak here?}
+
 %% \paragraph{}
 %% \todo{TODO: future work reference? on operational semantics \& compatibility theorem?}

@@ -50,10 +50,11 @@
 For purposes of these examples, we use a simple Haskell-like syntax for
 top-level type and function definitions. We also permit ourselves infix
 notation, \ms{let}-binding, $n$-ary tuples, $n$-ary sum types with named
-constructors, pattern-matching\todo{(CITE)} (including non-linear patterns), and
-additional syntax sugar given in Figure \ref{fig:sugar} \todo{(TODO: mention \&
-  cite monadic query syntax)}. All of these conveniences are supported (with
-slightly different concrete syntax) in our implementation.
+constructors, pattern-matching (including non-linear patterns), and additional
+syntax sugar given in Figure \ref{fig:sugar}. All of these conveniences are
+supported (with slightly different concrete syntax) in our implementation.
+
+%% \todo{(TODO: mention \& cite monadic query syntax)}
 
 For clarity, we set the names of top-level variables in \textsf{sans-serif};
 ordinary variables in $script$ or \mi{italic} (for long variable names); and
@@ -62,11 +63,13 @@ monotone variables in \m{bold}.
 Although Datafun as presented does not have polymorphism, we give our examples
 their most general possible type schemes.
 
-\todo{\begin{itemize}
-\item \texttt{make}-style topological sort?
-\item SQL-style examples? SQL vs Datalog vs Datafun?
-\item translating relational algebra into datafun?
-\end{itemize}}
+%% IDEAS FOR MORE EXAMPLES:
+%%
+%% \begin{itemize}
+%% \item \texttt{make}-style topological sort?
+%% \item SQL-style examples? SQL vs Datalog vs Datafun?
+%% \item translating relational algebra into datafun?
+%% \end{itemize}
 
 
 \subsection{Filtering, mapping, and cross products}
@@ -110,11 +113,6 @@ is monotone in the guard expression. A fuller explanation is given in Section
 %% \fname{filter}'s type asserts that it uses \m{f} monotonically. This in turn
 %% requires that $(\ifthen{\m{f}\;x}{\setlit{x}}{\unit})$ increases monotonically
 %% as the value of \m{f} increases.
-
-%% \todo{these examples are perhaps a good place to point out subtleties of
-%%   monotonicity typing}
-
-%% \TODO
 
 
 %% FIGURE: PRIMITIVES
@@ -171,9 +169,9 @@ occurrence:
 \end{array}\]
 
 This is merely syntax sugar for an equality test, so the condition that the
-set's element type support equality remains in force. \todo{CITE}
+set's element type support equality remains in force.
 
-\todo{TODO: mention you can extend to all relational algebra? give example?}
+%% \todo{TODO: mention you can extend to all relational algebra? give example?}
 
 
 \subsection{Composition of relations}
