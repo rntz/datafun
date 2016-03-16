@@ -99,7 +99,6 @@ $\GG$''.
 The context $\GD$ types ordinary variables; $\GG$, monotone variables. Both
 admit the usual structural rules of exchange, weakening, and contraction.
 Variables from either context may be used freely (rules \rt{var}, $\rt{var}^+$).
-\todo{explain?}
 
 \subsection{Functions and application}
 Two function types require two function introduction rules: the ordinary
@@ -126,9 +125,7 @@ familiar with judgmental formulations of modal logics of necessity such as
 hidden comonad at work here. But we are getting ahead of ourselves. For more on
 that, turn to Section \ref{sec:semantics}.
 
-\todo{Get Neel to provide more citations here?}
-
-\todo{Mention comonads and modal logic?}
+\todo{Get Neel to provide more citations here? Linear logic's {!} operator?}
 
 \subsection{Products and sums}
 The pairing and projection rules, \rt{pair} and $\pi$, are completely standard,
@@ -138,7 +135,9 @@ to be monotone in the variable $\m{x}$ it introduces, and consequently its
 subject $e$ is permitted access to the monotone context $\GG$. \rt{case},
 however, analyses its subject $e$ as a constant --- wiping clean its monotone
 context --- and thus is allowed to introduce the variable $x$ into the ordinary
-context $\GD$. \todo{rewrite for clarity}
+context $\GD$.
+
+%% \todo{rewrite for clarity}
 
 \subsection{Booleans}
 \label{sec:typing-rules-booleans}

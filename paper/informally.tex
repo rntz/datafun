@@ -62,7 +62,7 @@ simply-typed $\lambda$-calculus extended in four major ways:
 \begin{enumerate}
 \item We add a type of finite sets, $\Set{A}$.
 
-  \todo{Describe why sets are useful?}
+  %% \todo{Describe why sets are useful?}
 
   %% We use finite sets to represent Datalog predicates; one might also think of
   %% them as tables or views in a database setting.
@@ -77,11 +77,10 @@ simply-typed $\lambda$-calculus extended in four major ways:
   \item Booleans $\bool$ are ordered $\ms{false} < \ms{true}$.
   \item Natural numbers $\N$ have the usual order: $0 < 1 < 2 < ...$.
   \item We have no particular use-case for comparing strings $\str$ in
-    this paper, so we order them discretely; $a \le b$ iff $a = b$. \todo{Better
-      explanation?}
+    this paper, so we order them discretely; $a \le b$ iff $a = b$.
+    %% \todo{Better explanation?}
   \item Pairs and functions are ordered pointwise:
     \begin{itemize}
-    %% \item $(a_1, b_1) \le (a_2, b_2)$ iff $a_1 \le a_2 \wedge b_1 \le b_2$
     \item $(a, x) \le (b, y)$ iff $a \le b \wedge x \le y$
     \item $f \le g$ iff $\forall \bind{x} f(x) \le g(x)$
     \end{itemize}
@@ -91,11 +90,12 @@ simply-typed $\lambda$-calculus extended in four major ways:
   \item Sets are ordered by inclusion: $a \le b$ iff $a \subseteq b$.
   \end{itemize}
 
+  %% TODO: explain why fixed points are useful?
 \item We add a term $(\fix{\m{x}}{e})$ denoting the least fixed point of the
-  monotone function $(\fn\bind{\m{x}} e)$. \todo{Explain why this is useful?}
-  This is computed (modulo optimizations) by iteration, starting from the
-  smallest value of the desired type and halting once a fixed point is found.
-  This strategy constrains the types of \ms{fix} terms in several ways:
+  monotone function $(\fn\bind{\m{x}} e)$. This is computed (modulo
+  optimizations) by iteration, starting from the smallest value of the desired
+  type and halting once a fixed point is found. This strategy constrains the
+  types of \ms{fix} terms in several ways:
   \begin{itemize}
   \item The type must have a smallest value. We enforce this using semilattice
     types (see item \ref{item:semilattice-types}, below).
