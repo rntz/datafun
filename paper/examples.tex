@@ -50,10 +50,10 @@
 For purposes of these examples, we use a simple Haskell-like syntax for
 top-level type and function definitions. We also permit ourselves infix
 notation, \ms{let}-binding, $n$-ary tuples, $n$-ary sum types with named
-constructors, pattern-matching\todo{(CITE)}, and additional syntax sugar given
-in Figure \ref{fig:sugar} \todo{(TODO: mention \& cite monadic query syntax)}.
-All of these conveniences are supported (with slightly different concrete
-syntax) in our implementation.
+constructors, pattern-matching\todo{(CITE)} (including non-linear patterns), and
+additional syntax sugar given in Figure \ref{fig:sugar} \todo{(TODO: mention \&
+  cite monadic query syntax)}. All of these conveniences are supported (with
+slightly different concrete syntax) in our implementation.
 
 For clarity, we set the names of top-level variables in \textsf{sans-serif};
 ordinary variables in $script$ or \mi{italic} (for long variable names); and
@@ -61,8 +61,6 @@ monotone variables in \m{bold}.
 
 Although Datafun as presented does not have polymorphism, we give our examples
 their most general possible type schemes.
-
-\todo{TODO: Explain nonlinear variable usage means equality.}
 
 \todo{\begin{itemize}
 \item \texttt{make}-style topological sort?
@@ -141,7 +139,7 @@ is monotone in the guard expression. A fuller explanation is given in Section
 \end{figure}
 
 
-\subsection{Equality, membership, and intersection}
+\subsection{Membership, intersection, and composition}
 
 Given a set, it's natural to ask whether it contains a value $x$. As long as the
 type of the set's elements supports equality, we can do this:
@@ -150,45 +148,64 @@ type of the set's elements supports equality, we can do this:
 x \isin \m{A} = \forin{y \in \m{A}} x = y
 \end{array}\]
 
-The expression $\forin{y \in \m{A}} x = y$ takes the \emph{least upper bound at
-  boolean type} of the values of $x = y$ for every $y \in \m{A}$. As booleans
+The expression $\forin{y \in \m{A}} x = y$ takes the least upper bound, at
+boolean type, for every $y \in \m{A}$, of the value of $x = y$. Since booleans
 are ordered $\ms{false} < \ms{true}$, ``least upper bound'' is simply logical
-disjunction! In plain English, this code says ``a set \m{A} contains an element
-$x$ if some element $y \in \m{A}$ tests equal to $x$''.
+disjunction! %% In plain English, this code says ``a set \m{A} contains an element
+%% $x$ if some element $y \in \m{A}$ tests equal to $x$''.
 
-Likewise, we can define set intersection by testing for equality:
+Similarly, we can define set intersection by testing for equality:
 \[\begin{array}{l}
 (\cap) ~:~ \Set{\eq{A}} \mto \Set{\eq{A}} \mto \Set{\eq{A}}\\
 \m{A} \cap \m{B} = \setfor{x}{x \in \m{A}, y \in \m{B}, x = y}
 \end{array}\]
 
-However, \todo{blah blah explicitly checking equality is tedious}, so we usually
-use nonlinear pattern-matching to hide the equality test:
+However, explicitly testing for equality can become tedious, so we usually use
+\emph{nonlinear pattern-matching} instead --- that is, we bind the same-named
+variable multiple times, which indicates it must have an equal value at each
+occurrence:
 \[\begin{array}{l}
 (\cap) ~:~ \Set{\eq{A}} \mto \Set{\eq{A}} \mto \Set{\eq{A}}\\
 \m{A} \cap \m{B} = \setfor{x}{x \in \m{A}, x \in \m{B}}
 \end{array}\]
 
-\todo{Nonlinear pattern matching makes implicit the equality test and attendant
-  restriction to equality types, but is often extremely convenient.}
+This is merely syntax sugar for an equality test, so the condition that the
+set's element type support equality remains in force. \todo{CITE}
+
+\todo{TODO: mention you can extend to all relational algebra? give example?}
 
 
 \subsection{Composition of relations}
 
-\todo{work phrase ``higher-order'' in here somewhere?}
-
-\noindent As an example of a function over relations, consider:
+One extremely useful operator it is convenient to define using nonlinear pattern
+matching is composition of finite relations (that is, sets of pairs):
 \[\begin{array}{l}
 (\bullet) : \Set{A \x \eq{B}} \mto \Set{\eq{B} \x C} \mto \Set{A \x C}\\
 \m{R} \bullet \m{S} = \setfor{(a,c)}{(a,b) \in \m{R}, (b,c) \in \m{S}}
 \end{array}\]
 
-\todo{TODO: mention you can extend to all relational algebra? give example?}
+This already demonstrates a capability Datafun has that Datalog does not:
+defining operators over relations. A Datalog program defining binary predicates
+\texttt{r} and \texttt{s} which wished to compose those predicates would have to
+define a new top-level predicate:
+
+\begin{verbatim}
+r(X,Y) :- (...).
+s(X,Y) :- (...).
+rs(A,C) :- r(A,B), s(B,C).
+\end{verbatim}
+
+In Datafun, we simply define $(\bullet)$ and use it inline as needed. We shall
+see the use of this in later examples.
+
+%% \todo{work phrase ``higher-order'' in here somewhere?}
 
 
 \subsection{Transitive closure}
 
-Consider the following Datalog program:
+Consider the following Datalog program, authored perhaps by a J.R.R. Tolkien
+aficionado wishing to trace the geneologies of their favorite work, \textit{The
+  Silmarillion}:
 \begin{verbatim}
 parent(earendil, elrond).
 parent(elrond, arwen).
@@ -196,15 +213,16 @@ ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).
 \end{verbatim}
 
-\todo{Discuss how this works in Datalog, but not in Prolog, b/c Prolog is
-  defined by operational semantics of unification while Datalog is denotational,
-  least-model semantics. It also works in Datafun!}
+This defines a binary \texttt{parent} relation, along with its transitive
+closure, \texttt{ancestor}. The Datafun equivalent is:
 
-\todo{Neel suggests using distinction b/w backward \& forward chaining here,
-  rather than operational/denotational. see Logical Algorithms paper by
-  McAllister \& co for phrasing?}
+%% \todo{Discuss how this works in Datalog, but not in Prolog, b/c Prolog is
+%%   defined by operational semantics of unification while Datalog is denotational,
+%%   least-model semantics. It also works in Datafun!}
 
-In Datafun, we may write this as:
+%% \todo{Neel suggests using distinction b/w backward \& forward chaining here,
+%%   rather than operational/denotational. see Logical Algorithms paper by
+%%   McAllister \& co for phrasing?}
 
 \[\begin{array}{l}
 \mathbf{data}~\ms{person} =
