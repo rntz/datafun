@@ -10,11 +10,8 @@ WHAT ARE THE THEOREMS. Put the statements into Section 5.
 * Next to-dos
 - Abstract
 
-- Examples: transitive closure
-
 - Implementation: Type inference
 
-- Semantics: state theorems
 - Related work: optimizing (datalog literature)
 
 - do a red-elimination pass
