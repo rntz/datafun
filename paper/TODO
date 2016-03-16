@@ -8,12 +8,8 @@ WHAT ARE THE THEOREMS. Put the statements into Section 5.
 - Lemmas for fixed-point theorems
 
 * Next to-dos
-- check icfp submission requirements on formatting
-
 - Abstract
 
-- Examples: intersection: nonlinear pattern matching
-- Examples: composition
 - Examples: transitive closure
 
 - Implementation: Type inference
