@@ -378,7 +378,7 @@ semilattice $L$ of finite height.
 \end{figure*}
 
 
-\subsection{Metatheory of substitution}
+\subsection{Metatheory}
 
 We define substitution of Datafun terms in Figure \ref{fig:substitution}. We
 could define separate forms of ordinary $\sub{e_1/x} e$ and monotone
@@ -432,6 +432,19 @@ We have proven the following theorems:
     \;\pair{\gamma}{\den{e_1} \dg}$.
   \end{itemize}
 \end{theorem}
+
+\subsection{Discussion}
+It has been known for a very long time that database queries have a
+monadic structure arising from the adjunction between \cSet and \cSL
+--- indeed, the very name of the Kleisli~\cite{kleisli} database
+system was chosen to reflect this fact! 
+
+However, our decomposition of this adjunction into two smaller
+adjunction, with an intermediate way-station in \cPoset is new. By
+interpreting our types in \cPoset, we gain access to the comonad
+$\Disc{|A|}$, which lets us distinguish between monotone and
+non-monotone computations, which is the critical property letting us
+interpret fixed points in a sensible way. 
 
 % \todo{\paragraph{} More yik-yak here?}
 
