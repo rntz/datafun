@@ -300,9 +300,9 @@ expect, that value is at least predictable.
 
 \subsubsection{Generic transitive closure}
 
-Thus far we have only considered definitions
-
-For any finite eqtype $\fineq{A}$, we may write:
+Thus far we have only considered taking the transitive closure of a relation we
+have already defined. But consider: for any finite eqtype $\fineq{A}$, we may
+write:
 \[\begin{array}{l}
 \ms{trans} ~:~ \Set{\fineq{A} \x \fineq{A}} \mto \Set{\fineq{A} \x \fineq{A}}
 \vspace{0.3em}\\
@@ -311,8 +311,7 @@ For any finite eqtype $\fineq{A}$, we may write:
 %% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
 \ms{trans}\ \m{E} = \fix{\m{X}} \m{E} \vee (\m{X} \bullet \m{X})
 \end{array}\]
-
-\noindent Similarly, for any eqtype $\eq{A}$, we may write:
+Similarly, for any eqtype $\eq{A}$, we may write:
 \[\begin{array}{l}
 \ms{trans} ~:~
 \Set{\eq{A}} \mto \Set{\eq{A} \x \eq{A}} \mto \Set{\eq{A} \x \eq{A}}
@@ -325,7 +324,10 @@ For any finite eqtype $\fineq{A}$, we may write:
 \fixle{\m{S}}{(\m{V} \x \m{V})} \m{E} \vee (\m{S} \bullet \m{S})
 \end{array}\]
 
-\TODO This already shows how we go beyond Datalog's .
+In this way, we can abstract away from choice of underlying relation and define
+transitive closure generically. Using functions as a means of abstraction is of
+course familiar and unremarkable to functional programmers, but it is simply not
+possible in Datalog.
 
 
 \subsection{CYK parsing}
