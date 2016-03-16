@@ -271,6 +271,8 @@ All of these are trivial to prove by induction over types.
     \right)}
   \end{array}\]
 
+  \todo{NEED SEMANTICS OF TRUE, FALSE, IF, $\rt{IF}^+$}
+
   \caption{Denotations of Datafun typing derivations}
   \label{fig:sem-terms}
 \end{figure*}
@@ -325,14 +327,87 @@ semilattice $L$ of finite height.
 %% some $n \in \N$.
 
 
-\subsection{Metatheory of Datafun}
+%% FIGURE: SUBSTITUTIONS
+\begin{figure*}
+  \[\begin{array}{rcll}
+    \sub{e/v} v &=& e\\
+    \sub{e/v} x &=& x\\
+    \sub{e/v} (\fn\bind{u} e') &=& \fn\bind{u} \sub{e/v} e'\\
+    \sub{e/v} (e_1 \;e_2) &=& (\sub{e/v} e_1)\;(\sub{e/v} e_2)\\
+    \sub{e/v} (e_1, e_2) &=& (\sub{e/v} e_1, \sub{e/v} e_2)\\
+    \sub{e/v} (\pi_i\;e') &=& \pi_i\;(\sub{e/v}e')\\
+    \sub{e/v} (\ms{in}_i\;e') &=& \ms{in}_i \;(\sub{e/v} e')\\
+    \sub{e/v} (\case{e'}{u}{e_1}{u}{e_2})
+    &=& \case{\sub{e/v} e'}{u}{\sub{e/v} e_1}{u}{\sub{e/v} e_2}\\
+    \sub{e/v} \unit &=& \unit\\
+    \sub{e/v} (e_1 \vee e_2) &=& \sub{e/v} e_1 \vee \sub{e/v} e_2\\
+    \sub{e/v} (\forin{x \in e_1} e_2)
+    &=& \forin{x \in \sub{e/v} e_1} \sub{e/v} e_2\\
+    \sub{e/v} (\fix{\m{x}} e') &=& \fix{\m{x}} \sub{e/v} e'\\
+    \sub{e/v} (\fixle{\m{x}}{e_1}{e_2}) &=& \fixle{\m{x}}{\sub{e/v}{e_1}} e_2
+  \end{array}\]
+  \caption{Substitution}
+  \label{fig:substitution}
+\end{figure*}
+
+
+\subsection{Metatheory of substitution}
+
+We define substitution of Datafun terms in Figure \ref{fig:substitution}. We
+could define separate forms of ordinary $\sub{e_1/x} e$ and monotone
+$\sub{e_1/\m{x}} e$ substitution, but to avoid repetition we instead use the
+metavariables $v,u$ to stand for any variable (ordinary or monotone) and define
+$\sub{e_1/v} e$. Terms are taken up to $\alpha$-equivalence, and by convention,
+whenever two variables are given distinct names $v,u$ it is assumed $v \ne u$.
 
 \todo{TODO: Proof formatting}
 
+\todo{figure defining substitution}
+
 We have proven the following theorems:
 
-\paragraph{Syntactic substitution} \todo{state syntactic substitution theorem}
-\paragraph{Semantic substitution} \todo{state semantic substitution theorem}
+\paragraph{Weakening and exchange}
+The rules \begin{mathpar}
+  \infer[\rn{\rt{weak}}]{
+    \J{\GD,\GD'}{\GG,\GG'}{e}{A}
+  }{
+    \J{\GD}{\GG}{e}{A}}
+  \and
+  \infer[\rn{\rt{xchg}}]{
+    \J{\GD_1,\GD_2}{\GG_1,\GG_2}{e}{A}
+  }{
+    \J{\GD_2,\GD_1}{\GG_2,\GG_1}{e}{A}
+  }
+\end{mathpar}
+are admissible.
+
+\paragraph{Substitution, ordinary}
+From
+\begin{itemize}
+\item $\J{\GD}{\cdot}{e_1}{A}$,
+\item and $\J{\GD,x \of A}{\GG}{e_2}{B}$,
+\end{itemize}
+it follows that
+\begin{itemize}
+\item $\J{\GD}{\GG}{\sub{e_1/x}e_2}{B}$,
+\item and $\den{\sub{e_1/x} e_2} \dg = \den{e_2} \;\pair{\delta}{\den{e_1}\dg}
+  \;\gamma$.
+\end{itemize}
+
+\paragraph{Substitution, monotone}
+From
+\begin{itemize}
+\item $\J{\GD}{\GG}{e_1}{A}$,
+\item and $\J{\GD}{\GG,\m{x}\of A}{e_2}{B}$
+\end{itemize}
+it follows that
+\begin{itemize}
+\item $\J{\GD}{\GG}{\sub{e_1/\m{x}}e_2}{B}$,
+\item and $\den{\sub{e_1/\m{x}} e_2} \dg = \den{e_2} \;\delta
+\;\pair{\gamma}{\den{e_1} \dg}$.
+\end{itemize}
+
+\todo{state semantic substitution theorem}
 
 \paragraph{}
 \todo{TODO: future work reference? on operational semantics \& compatibility theorem?}
