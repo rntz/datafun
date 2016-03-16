@@ -8,28 +8,27 @@ WHAT ARE THE THEOREMS. Put the statements into Section 5.
 - Lemmas for fixed-point theorems
 
 * Next to-dos
-** Michael
+- check icfp submission requirements on formatting
+
 - Abstract
 
-- Examples
-  - is-in, intersection, composition
+- Examples: intersection: nonlinear pattern matching
+- Examples: composition
+- Examples: transitive closure
 
-- Semantics
-  - explain diagram, comonads & monads
-  - state theorems
+- Implementation: Type inference
 
-- Related work
-  - optimizing (datalog)
+- Semantics: state theorems
+- Related work: optimizing (datalog literature)
 
 - do a red-elimination pass
 - everything else necessary for submission
 
 If have time:
-- think about where to put "Comparing Datalog & Datafun"
-
-** Neel
+- reformat proofs
 - another citation for modal logic / wiping context clean
-- implementation, related work
+- Semantics: explain diagram, comonads & monads
+- think about where to put "Comparing Datalog & Datafun"
 
 * To cover during meeting 2016-03-14
 ** Who writes the abstract and when?
