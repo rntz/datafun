@@ -1,6 +1,28 @@
 \section{Other Related and Future Work}
 \label{sec:futurework}
 
+\paragraph{Aggregation}
+Aggregation of values --- for example, taking the sum $\sum_{x \in A} f \;x$ of
+a function $f$ across a set $A$ --- is a common and ubiquitous database
+operation. Datafun naturally supports \emph{semilattice} aggregation via
+$\bigvee$, but many natural operations such as summation do not form
+semilattices on their underlying type. There are several potential ways to add
+support for aggregations to Datafun:
+\begin{itemize}
+\item Common aggregations can be provided as primitive functions, for example
+  $\ms{size} : \Set{\eq{A}} \mto \N$ or $\ms{sum} : (\eq{A} \to \N) \uto \Set{A}
+  \mto \N$.
+
+\item In the style of Machiavelli~\cite{machiavelli}, one could add a general
+  operator $\ms{hom} : B \to (\eq{A} \uto B \uto B) \uto \Set{\eq{A}} \uto B$,
+  which effectively linearizes a set in an unspecified order. The semantics of
+  \ms{hom} are, alas, necessarily nondeterministic.
+
+\item One could augment Datafun with a type of bags (multisets) $\Bag{A}$; bags
+  naturally support a much broader class of aggregation --- commutative monoids
+  --- than sets. See, for example, \citet{multilinear-bigdata}.
+\end{itemize}
+
 \paragraph{Deletion} \citet{logical-algorithms} showed how
 forward-chaining logic programming permits concise and elegant
 expression of a wide variety of algorithms, including a natural cost
@@ -16,6 +38,31 @@ This naturally raises the question of whether we could identify a
 we might linear types to model features like deletion. There are many
 nontrivial semantic issues (e.g., how to define monotonicity), but
 it seems a promising question for future work.
+
+\paragraph{Termination} \TODO nontermination and declarativeness.
+
+For example, one powerful optimization technique is \emph{loop reordering} (in
+SQL terminology, \emph{join reordering}), that is, taking advantage of the
+equation
+\begin{eqnarray*}
+  \forin{x \in e_1} \forin{y \in e_2} e
+  &=& \forin{y \in e_2} \forin{x \in e_1} e
+\end{eqnarray*}
+when $x,y \notin \ms{FV}(e_1) \cup \ms{FV}(e_2)$. (\TODO Explain why join
+reordering is powerful). But this equation does not always hold in the presence
+of nontermination; for example, if $e_1 = \unit$ and $e_2$ diverges. \TODO
+finish up
+
+\paragraph{Polymorphism}
+\todo{
+  \begin{itemize}
+  \item ref Dunfield \& Krishnaswami, higher-order bidirectional type inference.
+  \item \TODO quantification over different classes of type variable (ordinary,
+    equality, lattice); amounts to a typeclass system, so this is not new work
+  \item \TODO tone polymorphism and why you need it for principal types; e.g.
+    what is the type of $\fn\bind{f}\fn\bind{x} f\;x$?
+  \end{itemize}
+}
 
 \paragraph{User-Defined Posets and Semilattices}
 The two fundamental semilattice types Datafun provides are booleans and sets;
@@ -59,8 +106,6 @@ generalizes Datalog, so too does it generalize relational algebra.
 However, one of the benefits of having a denotational semantics is
 that it lets offer precise comparisons.
 
-In particular
-
 
 \paragraph{Optimization} Given 
 
@@ -70,4 +115,5 @@ In particular
 \begin{itemize}
 \item \TODO the datalog literature
 \end{itemize}
+
 

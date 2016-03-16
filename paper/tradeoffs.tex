@@ -1,42 +1,13 @@
 %% not sure how many sections to split this up into.
-\section{Tradeoffs, limitations, and design decisions}
+% \section{Tradeoffs, limitations, and design decisions}
 
-\paragraph{Finite and bounded fixed-points} \TODO Discuss
-Datalog's constructor-free restriction, not being sure how to encode it in a
-type theory, its disadvantages, and the disadvantages of our approaches ---
-finite \& bounded fixed-points.
+%% \paragraph{Finite and bounded fixed-points} \TODO Discuss
+%% Datalog's constructor-free restriction, not being sure how to encode it in a
+%% type theory, its disadvantages, and the disadvantages of our approaches ---
+%% finite \& bounded fixed-points.
 
-bounded fixed-points strictly more general than finitary-type fixed-points, but
-at possible runtime cost, but finite types very restrictive in practice
+%% bounded fixed-points strictly more general than finitary-type fixed-points, but
+%% at possible runtime cost, but finite types very restrictive in practice
 
-\TODO In particular, could bounded fix-points have adverse performance
-implications?
-
-\paragraph{Termination} \TODO nontermination and declarativeness.
-
-For example, one powerful optimization technique is \emph{loop reordering} (in
-SQL terminology, \emph{join reordering}), that is, taking advantage of the
-equation
-\begin{eqnarray*}
-  \forin{x \in e_1} \forin{y \in e_2} e
-  &=& \forin{y \in e_2} \forin{x \in e_1} e
-\end{eqnarray*}
-when $x,y \notin \ms{FV}(e_1) \cup \ms{FV}(e_2)$. (\TODO Explain why join
-reordering is powerful). But this equation does not always hold in the presence
-of nontermination; for example, if $e_1 = \unit$ and $e_2$ diverges. \TODO
-finish up
-
-\paragraph{Type inference} Typechecking needs to distinguish between ordinary
-and monotone $\lambda$, application, \ms{case}, \ms{let}, and \ms{if}. In our
-implementation we solve this in two ways:
-\begin{enumerate}
-\item Bidirectional type inference \todo{CITE} determines whether $\fn$s and
-  applications are ordinary or monotone.
-\item For $\ms{if}$, $\ms{case}$, and $\ms{let}$, the programmer annotates which
-  form is intended; for example, $(\ifthen{e}{e_1}{\unit})$ is written
-  (\texttt{when e then e1}) to indicate the rule $\ms{if}^+$ applies.
-\end{enumerate}
-
-It remains an open question how much annotation is necessary. See
-Section \ref{sec:futurework}, \emph{Related and future work}.
-
+%% \TODO In particular, could bounded fix-points have adverse performance
+%% implications?
