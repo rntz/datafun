@@ -434,22 +434,21 @@ We have proven the following theorems:
 \end{theorem}
 
 \subsection{Discussion}
-It has been known for a very long time that database queries have a
-monadic structure arising from the adjunction between \cSet and \cSL
---- indeed, the very name of the Kleisli~\cite{kleisli} database
-system was chosen to reflect this fact!
+It has been known for a very long time that database queries have a monadic
+structure arising from the adjunction between \cSet{} and \cSL{} --- indeed, the
+very name of the Kleisli~\cite{kleisli} database system was chosen to reflect
+this fact!
 
-However, our decomposition of this adjunction into two smaller
-adjunction, with an intermediate way-station in \cPoset is new. By
-interpreting our types in the intermediate category \cPoset, we gain
-access to the comonad $\Disc{|A|}$. This lets us distinguish between
-monotone and non-monotone computations, which is the critical property
-letting us interpret fixed points in a sensible way. Indeed, it would
-also have been possible to directly reflect the adjunctions in the
-syntax (in the style of \citet{lnl}), but we chose not to because the
-explicit coercions were somewhat noisy in practice. However, the ghost
-of this logic persists, as can be seen in the context-clearing actions
-in our typing rules.
+However, our decomposition of this adjunction into two smaller adjunction, with
+an intermediate way-station in \cPoset{} is new. By interpreting our types in
+the intermediate category \cPoset{}, we gain access to the comonad $\Disc{|A|}$.
+This lets us distinguish between monotone and non-monotone computations, which
+is the critical property letting us interpret fixed points in a sensible way.
+Indeed, it would also have been possible to directly reflect the adjunctions in
+the syntax (in the style of \citet{lnl}), but we chose not to because the
+explicit coercions were somewhat noisy in practice. However, the ghost of this
+logic persists, as can be seen in the context-clearing actions in our typing
+rules.
 
 % \todo{\paragraph{} More yik-yak here?}
 
