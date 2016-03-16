@@ -153,8 +153,8 @@ All of these are trivial to prove by induction over types.
 
 \begin{figure*}
   \[\begin{array}{rcll}
-  \textbf{Derivation}\;\phantom{\dg} && \textbf{Denotation}
-  \vspace{.8em}\\
+  %% \textbf{Derivation}\;\phantom{\dg} && \textbf{Denotation}
+  %% \vspace{.8em}\\
   \den{\J{\GD}{\GG}{e}{A}}\;\phantom{\dg} &\in&
   \U{\den{\GD}} \Arr \U{\den{\GG} \arr \den{A}}
   \vspace{.8em}\\
@@ -227,6 +227,33 @@ All of these are trivial to prove by induction over types.
   \end{cases}
   \vspace{.8em}\\
 
+  %% boolean rules
+  \fux{\J{\GD}{\GG}{\ms{true}}{\bool}}{\phantom{.}}\dg
+  &=& \stt
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\ms{false}}{\bool}}{\phantom{.}}\dg
+  &=& \sff
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\ifthen{e}{e_1}{e_2}}{A}}{
+    \J{\GD}{\cdot}{e}{\bool} &
+    \J{\GD}{\GG}{e_i}{A}} \dg
+  &=&
+  \begin{cases}
+    \den{e_1}\dg & \text{if}~ \den{e}\;\delta\;\triv = \stt\\
+    \den{e_2}\dg & \text{if}~ \den{e}\;\delta\;\triv = \sff
+  \end{cases}
+  \vspace{.8em}\\
+
+  \fux{\J{\GD}{\GG}{\ifthen{e}{e_1}{\unit}}{L}}{
+    \J{\GD}{\GG}{e}{\bool} &
+    \J{\GD}{\GG}{e_1}{L}} \dg
+  &=&
+  \begin{cases}
+    \den{e_1}\dg & \text{if}~ \den{e}\dg = \stt\\
+    \unit_{\den{L}} & \text{if}~ \den{e}\dg = \sff
+  \end{cases}
+  \vspace{.8em}\\
+
   %% semilattice rules
   \fux{\J{\GD}{\GG}{\unit}{L}}{\phantom{.}}\dg
   &=& \unit_{\den{L}}
@@ -270,8 +297,6 @@ All of these are trivial to prove by induction over types.
     \end{cases}
     \right)}
   \end{array}\]
-
-  \todo{NEED SEMANTICS OF TRUE, FALSE, IF, $\rt{IF}^+$}
 
   \caption{Denotations of Datafun typing derivations}
   \label{fig:sem-terms}
@@ -362,8 +387,6 @@ whenever two variables are given distinct names $v,u$ it is assumed $v \ne u$.
 
 \todo{TODO: Proof formatting}
 
-\todo{figure defining substitution}
-
 We have proven the following theorems:
 
 \paragraph{Weakening and exchange}
@@ -407,7 +430,6 @@ it follows that
 \;\pair{\gamma}{\den{e_1} \dg}$.
 \end{itemize}
 
-\todo{state semantic substitution theorem}
-
-\paragraph{}
-\todo{TODO: future work reference? on operational semantics \& compatibility theorem?}
+\todo{\paragraph{} More yik-yak here?}
+%% \paragraph{}
+%% \todo{TODO: future work reference? on operational semantics \& compatibility theorem?}
