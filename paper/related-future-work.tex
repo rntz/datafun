@@ -23,6 +23,50 @@ support for aggregations to Datafun:
   --- than sets. See, for example, \citet{multilinear-bigdata}.
 \end{itemize}
 
+\paragraph{Optimization} Because Datalog is so strongly constrained,
+there has been a lot of very successful work on optimizing it, ranging
+from compilation into binary decision diagrams~\cite{bdd} by
+\citet{whaley-lam}, to the famous ``magic sets''~\cite{magicsets}
+algorithm.
+
+From our perspective, magic sets are a natural next step for
+investigation into how to optimize Datafun. Intuitively, the magic
+sets algorithm exploits the fact that Datalog (as a total logic
+language) has both a top-down and bottom-up reading, and rewrites the
+program so that it does bottom-up search, while using top-down
+reasoning to strategically avoid adding useless facts to the
+database. Transplanting this analysis to Datafun would essentially
+give us optimized implementations of fixed points, but extending the
+magic sets algorithm is likely to be very subtle, since Datafun has
+higher-order functions and Datalog does not. As a result, our goal is
+to first see if magic sets can be applied to first-order Datafun programs,
+and then use defunctionalization~\cite{defunctionalization} to
+extend it to full Datafun.
+
+\paragraph{Databases} Datalog has sometimes been described
+as ``relational algebra plus fixed points'', and there is a long line
+of work on embedding database query languages into general-purpose
+languages, including pioneering efforts such as
+Machiavelli~\cite{machiavelli} and Kleisli~\cite{kleisli}, as well as
+more recent systems such as Ferry~\cite{ferry} and LINQ in C\#~\cite{linq-wadler}.
+%
+The focus of this work has been on embedding query languages based
+on relational algebra into general purpose languages, with an emphasis
+on statically compiling higher-order queries into the first-order
+queries supported by existing database systems (\citet{query-shredding} is a
+representative example).
+
+Our approach is a little bit different. Instead of embedding Datalog
+into a general purpose language, Datafun is \emph{also} a ``little
+language'', albeit one that happens to be a higher-order
+functional language. We very deliberately did not try to embed Datafun
+into an existing language, because that would have greatly complicated
+the context-management operations needed to ensure monotonicity.
+
+In fact, from a language designer's perspective, Datafun can be seen
+as an argument in favor of extending functional languages to support
+programming with user-defined, non-strong comonads.
+
 \paragraph{Deletion} \citet{logical-algorithms} showed how
 forward-chaining logic programming permits concise and elegant
 expression of a wide variety of algorithms, including a natural cost
@@ -82,14 +126,13 @@ type-theoretic integration of partial functions into Datafun .
 
 \paragraph{User-Defined Posets and Semilattices}
 The two fundamental semilattice types Datafun provides are booleans and sets;
-products and functions merely preserve semilattice structure where they find
-it. One might contemplate allowing the programmer to define their own
-semilattice structures using something like Haskell's
-\texttt{newtype}/\texttt{instance}. In general, this is a difficult
-problem, because we may need to do serious mathematical
-reasoning to prove that a datatype has a partial ordering, or can be
-equipped with a semilattice structure which is commutative, associative
-and idempotent.
+products and functions merely preserve semilattice structure where they find it.
+One might contemplate allowing the programmer to define their own semilattice
+structures using something like Haskell's \texttt{newtype}/\texttt{instance}. In
+general, this is a difficult problem, because we may need to do serious
+mathematical reasoning to prove that a comparison function implements a partial
+ordering, or that a datatype can be equipped with a semilattice structure
+obeying this partial ordering which is commutative, associative and idempotent.
 
 One example of such a family of types are the \emph{lexicographic sum
   types}. Given two posets $P$ and $Q$, their disjoint union $P + Q$
@@ -115,50 +158,3 @@ guaranteed it, but in general it requires proof.
 One natural direction for future work is to extend the syntax of
 Datafun with support for these kinds of proofs, perhaps taking
 inspiration from dependent type theory.
-
-\paragraph{Databases} Datalog has sometimes been described
-as ``relational algebra plus fixed points'', and there is a long line
-of work on embedding database query languages into general-purpose
-languages, including pioneering efforts such as
-Machiavelli~\cite{machiavelli} and Kleisli~\cite{kleisli}, as well as
-more recent systems such as Ferry~\cite{ferry} and LINQ in C\#~\cite{linq-wadler}.
-%
-The focus of this work has been on embedding query languages based
-on relational algebra into general purpose languages, with an emphasis
-on statically compiling higher-order queries into the first-order
-queries supported by existing database systems (\citet{query-shredding} is a
-representative example).
-
-Our approach is a little bit different. Instead of embedding Datalog
-into a general purpose language, Datafun is \emph{also} a ``little
-language'', albeit one that happens to be a higher-order
-functional language. We very deliberately did not try to embed Datafun
-into an existing language, because that would have greatly complicated
-the context-management operations needed to ensure monotonicity.
-
-In fact, from a language designer's perspective, Datafun can be seen
-as an argument in favor of extending functional languages to support
-programming with user-defined, non-strong comonads. 
-
-
-\paragraph{Optimization} Because Datalog is so strongly constrained,
-there has been a lot of very successful work on optimizing it, ranging
-from compilation into binary decision diagrams~\cite{bdd} by
-\citet{whaley-lam}, to the famous ``magic sets''~\cite{magicsets}
-algorithm.
-
-From our perspective, magic sets are a natural next step for
-investigation into how to optimize Datafun. Intuitively, the magic
-sets algorithm exploits the fact that Datalog (as a total logic
-language) has both a top-down and bottom-up reading, and rewrites the
-program so that it does bottom-up search, while using top-down
-reasoning to strategically avoid adding useless facts to the
-database. Transplanting this analysis to Datafun would essentially
-give us optimized implementations of fixed points, but extending the
-magic sets algorithm is likely to be very subtle, since Datafun has
-higher-order functions and Datalog does not. As a result, our goal is
-to first see if magic sets can be applied to first-order Datafun programs,
-and then use defunctionalization~\cite{defunctionalization} to
-extend it to full Datafun.
-
-
