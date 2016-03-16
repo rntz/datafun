@@ -214,9 +214,6 @@ ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).
 \end{verbatim}
 
-This defines a binary \texttt{parent} relation, along with its transitive
-closure, \texttt{ancestor}. The Datafun equivalent is:
-
 %% \todo{Discuss how this works in Datalog, but not in Prolog, b/c Prolog is
 %%   defined by operational semantics of unification while Datalog is denotational,
 %%   least-model semantics. It also works in Datafun!}
@@ -225,6 +222,8 @@ closure, \texttt{ancestor}. The Datafun equivalent is:
 %%   rather than operational/denotational. see Logical Algorithms paper by
 %%   McAllister \& co for phrasing?}
 
+This defines a binary \texttt{parent} relation, along with its transitive
+closure, \texttt{ancestor}. The Datafun equivalent is:
 \[\begin{array}{l}
 \mathbf{data}~\ms{person} =
 \ctor{E\"arendil} ~|~ \ctor{Elrond} ~|~ \ctor{Arwen}\\
@@ -271,7 +270,6 @@ $(\fixle{\m{x}}{e_\top} e)$, where $e_\top$ is our upper bound.
 Suppose, for example, we wish to represent our \textit{dramatis personae} as
 strings $\str$ rather than defining a \ms{person} type. Then, making use of
 bounded fixed points, we could write:
-
 \[\begin{array}{l}
 \ms{person} ~:~ \Set{\str}\\
 \ms{person} = \{\texttt{"e\"arendil"}, \texttt{"elrond"}, \texttt{"arwen"}\}\\
@@ -508,12 +506,11 @@ In what follows, we use a few trivial functions whose definitions are omitted
 for space reasons.
 \[\begin{array}{l}
 %% omitted functions
-\ms{labels} ~:~ \ms{program} \uto \Set{\ms{label}}\quad\textsf{-{}- omitted}\\
-\ms{vars} ~:~ \ms{program} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}\\
-\ms{uses} ~:~ \ms{stmt} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}\\
-\ms{defines} ~:~ \ms{stmt} \uto \Set{\ms{var}} \quad\textsf{-{}- omitted}
-\end{array}
-\]
+\ms{labels} ~:~ \ms{program} \uto \Set{\ms{label}}\\
+\ms{vars} ~:~ \ms{program} \uto \Set{\ms{var}}\\
+\ms{uses} ~:~ \ms{stmt} \uto \Set{\ms{var}}\\
+\ms{defines} ~:~ \ms{stmt} \uto \Set{\ms{var}}
+\end{array}\]
 The $\ms{labels}$ function returns the set of labels in a program. The
 $\ms{vars}$ function returns the set of variables used in a program (both in
 expressions and as targets for assignments). The $\ms{uses}$ function
