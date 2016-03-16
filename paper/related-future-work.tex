@@ -1,6 +1,13 @@
 \section{Other Related and Future Work}
 \label{sec:futurework}
 
+\paragraph{Optimization}
+\begin{itemize}
+\item \TODO the datalog literature
+\end{itemize}
+
+\paragraph{Relational Algebra}
+
 \paragraph{Deletion} \citet{logical-algorithms} showed how
 forward-chaining logic programming permits concise and elegant
 expression of a wide variety of algorithms, including a natural cost
@@ -16,6 +23,31 @@ This naturally raises the question of whether we could identify a
 we might linear types to model features like deletion. There are many
 nontrivial semantic issues (e.g., how to define monotonicity), but
 it seems a promising question for future work.
+
+\paragraph{Termination} \TODO nontermination and declarativeness.
+
+For example, one powerful optimization technique is \emph{loop reordering} (in
+SQL terminology, \emph{join reordering}), that is, taking advantage of the
+equation
+\begin{eqnarray*}
+  \forin{x \in e_1} \forin{y \in e_2} e
+  &=& \forin{y \in e_2} \forin{x \in e_1} e
+\end{eqnarray*}
+when $x,y \notin \ms{FV}(e_1) \cup \ms{FV}(e_2)$. (\TODO Explain why join
+reordering is powerful). But this equation does not always hold in the presence
+of nontermination; for example, if $e_1 = \unit$ and $e_2$ diverges. \TODO
+finish up
+
+\paragraph{Polymorphism}
+\todo{
+  \begin{itemize}
+  \item ref Dunfield \& Krishnaswami, higher-order bidirectional type inference.
+  \item \TODO quantification over different classes of type variable (ordinary,
+    equality, lattice); amounts to a typeclass system, so this is not new work
+  \item \TODO tone polymorphism and why you need it for principal types; e.g.
+    what is the type of $\fn\bind{f}\fn\bind{x} f\;x$?
+  \end{itemize}
+}
 
 \paragraph{User-Defined Posets and Semilattices}
 The two fundamental semilattice types Datafun provides are booleans and sets;
@@ -52,11 +84,3 @@ guaranteed it, but in general it requires proof.
 One natural direction for future work is to extend the syntax of
 Datafun with support for these kinds of proofs, perhaps taking
 inspiration from dependent type theory.
-
-\paragraph{Relational Algebra}
-
-\paragraph{Optimization}
-\begin{itemize}
-\item \TODO the datalog literature
-\end{itemize}
-
