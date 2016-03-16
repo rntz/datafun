@@ -1,4 +1,4 @@
-\section{Other Related and Future Work}
+\section{Related and Future Work}
 \label{sec:futurework}
 
 \paragraph{Aggregation}
@@ -62,16 +62,13 @@ orders with directed joins, there are likely many interesting
 categorical structures connecting the category of domains to the
 category of posets, some of which will hopefully lead to a principled
 type-theoretic integration of partial functions into Datafun .
-% 
-% 
-% 
-% 
+
 % So one faces a trilemma: first, keep
 % Datafun nonterminating, at the expensive of making some functions
 % inexpressible; second, allow nontermination, at the expense of
 % optimization; or, third, use the type system to delineate between
 % terminating and nonterminating fragments.
-% 
+%
 % \paragraph{Polymorphism}
 % \todo{
 %   \begin{itemize}
@@ -130,7 +127,7 @@ The focus of this work has been on embedding query languages based
 on relational algebra into general purpose languages, with an emphasis
 on statically compiling higher-order queries into the first-order
 queries supported by existing database systems (\citet{query-shredding} is a
-representative example). 
+representative example).
 
 Our approach is a little bit different. Instead of embedding Datalog
 into a general purpose language, Datafun is \emph{also} a ``little
@@ -138,6 +135,7 @@ language'', albeit one that happens to be a higher-order
 functional language. We very deliberately did not try to embed Datafun
 into an existing language, because that would have greatly complicated
 the context-management operations needed to ensure monotonicity.
+
 In fact, from a language designer's perspective, Datafun can be seen
 as an argument in favor of extending functional languages to support
 programming with user-defined, non-strong comonads. 
@@ -162,6 +160,5 @@ higher-order functions and Datalog doesn't. As a result, we hope to
 first see if magic sets applies to first-order Datafun programs, and
 then apply defunctionalization~\cite{defunctionalization} to extend it
 to full Datafun.
-
 
 
