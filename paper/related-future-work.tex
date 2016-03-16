@@ -119,7 +119,7 @@ One natural direction for future work is to extend the syntax of
 Datafun with support for these kinds of proofs, perhaps taking
 inspiration from dependent type theory.
 
-\paragraph{Relational Algebra} Datalog has sometimes been described
+\paragraph{Databases} Datalog has sometimes been described
 as ``relational algebra plus fixed points'', and there is a long line
 of work on embedding database query languages into general-purpose
 languages, including pioneering efforts such as
@@ -134,23 +134,34 @@ representative example).
 
 Our approach is a little bit different. Instead of embedding Datalog
 into a general purpose language, Datafun is \emph{also} a ``little
-language'', albeit one that happens also to be a higher-order
+language'', albeit one that happens to be a higher-order
 functional language. We very deliberately did not try to embed Datafun
 into an existing language, because that would have greatly complicated
-the context-management operations needed to ensure monotonicity. 
+the context-management operations needed to ensure monotonicity.
+In fact, from a language designer's perspective, Datafun can be seen
+as an argument in favor of extending functional languages to support
+programming with user-defined, non-strong comonads. 
 
 
+\paragraph{Optimization} Because Datalog is so strongly constrained,
+there has been a lot of very successful work on optimizing it, ranging
+from compilation into binary decision diagrams~\cite{bdd} by
+\citet{whaley-lam}, to the famous ``magic sets''~\cite{magicsets}
+algorithm.
 
+From our perspective, magic sets are a natural next step for
+investigation into how to optimize Datafun. Intuitively, the magic
+sets algorithm exploits the fact that Datalog (as a total logic
+language) has both a top-down and bottom-up reading, and rewrites the
+program so that it does bottom-up search, while using top-down
+reasoning to strategically avoid adding useless facts to the
+database. Transplanting this analysis to Datafun would essentially
+give us optimized implementations of fixed points, but extending the
+magic sets algorithm is likely to be very subtle, since Datafun has
+higher-order functions and Datalog doesn't. As a result, we hope to
+first see if magic sets applies to first-order Datafun programs, and
+then apply defunctionalization~\cite{defunctionalization} to extend it
+to full Datafun.
 
-\paragraph{Optimization} Given
-
-\cite{magicsets}
-
-
-
-
-\begin{itemize}
-\item \TODO the datalog literature
-\end{itemize}
 
 
