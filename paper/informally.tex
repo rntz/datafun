@@ -82,7 +82,7 @@ simply-typed $\lambda$-calculus extended in four major ways:
   \item Pairs and functions are ordered pointwise:
     \begin{itemize}
     \item $(a, x) \le (b, y)$ iff $a \le b \wedge x \le y$
-    \item $f \le g$ iff $\forall \bind{x} f(x) \le g(x)$
+    \item $f \le g$ iff $\forall \bind{x} f\;x \le g\;x$
     \end{itemize}
   \item Sum types are ordered disjointly: $\ms{in}_i\; a \le
     \ms{in}_i\; b$ iff $a \le b$, but $\ms{in}_1\; a$ and $\ms{in}_2\; b$ are
