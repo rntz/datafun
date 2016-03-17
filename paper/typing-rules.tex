@@ -14,8 +14,8 @@
       \J{\GD}{\GG}{e_1}{A \uto B} &
       \J{\GD}{\cdot}{e_2}{A}}
     \and
-    \infer[\rn{\monofn}]{\J{\GD}{\GG}{\fn\bind{x} e}{A \mto B}}{
-      \J{\GD}{\GG,x \of A}{e}{B}}
+    \infer[\rn{\monofn}]{\J{\GD}{\GG}{\fn\bind{\m{x}} e}{A \mto B}}{
+      \J{\GD}{\GG,\m{x} \of A}{e}{B}}
     \and
     \infer[\rn{\rt{app}^+}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
       \J{\GD}{\GG}{e_1}{A \mto B} &
