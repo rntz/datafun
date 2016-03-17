@@ -290,7 +290,7 @@ programmer should mistakenly include a person in \ms{parent} not present in
 e)$ is trying to compute exceeds $e_\top$? (Or indeed, no such fixed point
 exists?)
 
-In that case, the value of $(\fix{\m{x}}{e_\top} e)$ is \emph{clamped} to the
+In that case, the value of $(\fixle{\m{x}}{e_\top} e)$ is \emph{clamped} to the
 upper bound $e_\top$. This ensures Datafun programs terminate even in the
 presence of sloppy programmers, and although they may not have the value you
 expect, that value is at least predictable.
