@@ -1,3 +1,8 @@
+* deletion via added-removed sets?
+many logical algorithms use deletion for efficiency. as long as a deleted fact
+can never get re-added, this is still monotone in a sense! and this sense of
+monotonicity is captured by added-removed sets!
+
 * thoughts on polymorphism and type inference
 
 currently the implementation has subtyping, but the only non-trivial subtypings
