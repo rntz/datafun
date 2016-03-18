@@ -1,0 +1,54 @@
+\section{Comparing Datalog and Datafun}
+\label{sec:datalog-vs-datafun}
+
+At this point, we have
+demonstrated by example that Datafun programs are rather similar to
+Datalog programs, and we have given the typing and denotational
+semantics of Datafun. However, we still need to explain \emph{why} our
+semantics lets us express Datalog-style programs.
+
+To understand this, recall that Datalog is a bottom-up logic
+programming language. A program consists of a primitive database of
+facts, along with a set of rules the rules the programmer wrote. A
+Datalog program executes by using the rules to derive new conclusions
+from the database, and extending the database with them, until no
+additional conclusions can be drawn. Then the query can be checked
+simply by seeing if it occurs in the final database.
+
+This is, essentially, a fixed point computation -- each stage of
+execution of a Datalog program takes a database and returns an
+extended database, until a fixed point is reached. The stratified
+negation restriction essentially ensures that the database transformer
+defined by a Datalog program is a monotone function on the set of
+facts. This is why the type system of Datafun tracks the monotonicity
+of functions --- since we permit both higher-order definitions and
+taking fixed points, we need to ensure that the body of a fixed point
+definition is monotone in order to guarantee that the recursion is
+well-founded.
+
+This ensures that the recursive definition is well-defined, but is not
+sufficient by itself to guarantee termination. To manage this, Datalog
+depends upon the other two restrictions described in the
+introduction.By restricting terms occuring in predicates to consist of
+either atoms or variables, Datalog ensures that quantifiers need only
+be instantiated with the atoms used in a program. By requiring every
+variable in the consequent of rules to also occur in the premise of a
+rule, it ensures that every consequent will also only feature atoms
+occuring in the original program.
+
+Then, since there can only be finitely many atoms in a finite program,
+this means that the set of possible arguments to a predicate is itself
+finite. Then the lattice of sets of atomic predicates ordered by
+inclusion will be finite, and so fixed point iteration is guaranteed
+to terminate.
+
+Instead of this (rather indirect) scheme, Datafun directly tracks the
+finiteness of types, permitting recursion only if it is over a finite
+type, or is bounded explicitly. These two approaches achieve the same
+effect, albeit in different ways. Datalog's approach has the benefit
+that no type discipline is needed to ensure finiteness. One advantage
+of our choice is that we permit recursion over any semilattice, not
+just the semilattice of sets. A much more serious advantage of our
+approach is that it makes it much easier to write fixed-point
+computations which actually \emph{compute} with the data they see (for
+example, the CYK parser we wrote computed lengths of substrings). 

@@ -1,0 +1,139 @@
+%% FIGURE: CORE SYNTAX
+\begin{figure}
+  \[\begin{array}{ccl}
+    %% types
+    A, B     &\bnfeq& \bool \pipe \N \pipe \str \pipe \Set{A}
+    \pipe A + B \pipe A \x B\\
+    \textsf{types} && A \uto B \pipe A \mto B
+    \vspace{0.5em}\\
+    %% semilattice types
+    L, M         &\bnfeq& \bool \pipe \N \pipe \Set{A}
+    \pipe L \x M \pipe A \uto L \pipe A \mto L\\
+    \textsf{semilattice types}
+    \vspace{0.5em}\\
+    %% equality types
+    \eq{A}, \eq{B} &\bnfeq& \bool \pipe \N \pipe \str \pipe \Set{\eq{A}}
+    \pipe \eq{A} + \eq{B} \pipe \eq{A} \x \eq{B}\\
+    \textsf{eqtypes} &&
+    \vspace{0.5em}\\
+    %% finite equality types
+    \fineq{A},\fineq{B}
+    &\bnfeq& \bool \pipe \Set{\fineq{A}}
+             \pipe \fineq{A} + \fineq{B} \pipe \fineq{A} \x \fineq{B}\\
+    \textsf{finite eqtypes}
+    \vspace{0.5em}\\
+    %% contexts
+    \GD &\bnfeq& \cdot \pipe \GD, x\of A\\
+    \GG &\bnfeq& \cdot \pipe \GG{},\m{x}\of A\\
+    \textsf{contexts}
+    \vspace{0.5em}\\
+    %% expressions
+    e &\bnfeq& x \pipe \m{x} %% \pipe n \pipe s
+    \pipe \fn\bind{x} e \pipe \fn\bind{\m{x}} e
+    \pipe e\;e\\
+    \textsf{terms}
+    && (e,e) \pipe \pi_1\;e \pipe \pi_2\;e
+    \pipe \ms{in}_1\;e \pipe \ms{in}_2\;e\\
+    && \case{e}{x}{e}{x}{e}\\
+    && \case{e}{\m{x}}{e}{\m{x}}{e}\\
+    && \ms{true} \pipe \ms{false} \pipe \ifthen{e}{e}{e}\\
+    && \singleset{e} \pipe \unit \pipe e \vee e \pipe \letin{x}{e}{e}\\
+    && \fix{\m{x}}{e} \pipe \fixle{\m{x}}{e}{e}
+    %% \vspace{0.5em}\\
+    %% x, \m{x} && \text{variables}\\
+    %% n && \text{numerals}\\
+    %% s && \text{string literals}
+  \end{array}\]
+
+  %% \todo{Remove $\N$ from semilattice types \& give it the discrete order? We
+  %%   never use it as a semilattice type.}
+
+  \caption{Syntax of core Datafun}
+  \label{fig:syntax}
+\end{figure}
+
+
+\section{Datafun, informally}
+\label{sec:informally}
+
+We give the core syntax of Datafun in Figure \ref{fig:syntax}. Datafun is a
+simply-typed $\lambda$-calculus extended in four major ways:
+
+\begin{enumerate}
+\item We add a type of finite sets, $\Set{A}$.
+
+  %% \todo{Describe why sets are useful?}
+
+  %% We use finite sets to represent Datalog predicates; one might also think of
+  %% them as tables or views in a database setting.
+
+\item We add a type of \emph{monotone functions}, $A \mto B$. Consequently
+  Datafun has two flavors of variable, \emph{ordinary} and \emph{monotone}. We
+  write ordinary variables in $script$ and monotone variables in \m{bold}.
+
+  In order for ``monotone'' to have meaning, our types are implicitly partially
+  ordered:
+  \begin{itemize}
+  \item Booleans $\bool$ are ordered $\ms{false} < \ms{true}$.
+  \item Natural numbers $\N$ have the usual order: $0 < 1 < 2 < ...$.
+  \item We have no particular use-case for comparing strings $\str$ in
+    this paper, so we order them discretely; $a \le b$ iff $a = b$.
+    %% \todo{Better explanation?}
+  \item Pairs and functions are ordered pointwise:
+    \begin{itemize}
+    \item $(a, x) \le (b, y)$ iff $a \le b \wedge x \le y$
+    \item $f \le g$ iff $\forall \bind{x} f\;x \le g\;x$
+    \end{itemize}
+  \item Sum types are ordered disjointly: $\ms{in}_i\; a \le
+    \ms{in}_i\; b$ iff $a \le b$, but $\ms{in}_1\; a$ and $\ms{in}_2\; b$ are
+    never comparable.
+  \item Sets are ordered by inclusion: $a \le b$ iff $a \subseteq b$.
+  \end{itemize}
+
+  %% TODO: explain why fixed points are useful?
+\item We add a term $(\fix{\m{x}}{e})$ denoting the least fixed point of the
+  monotone function $(\fn\bind{\m{x}} e)$. This is computed (modulo
+  optimizations) by iteration, starting from the smallest value of the desired
+  type and halting once a fixed point is found. This strategy constrains the
+  types of \ms{fix} terms in several ways:
+  \begin{itemize}
+  \item The type must have a smallest value. We enforce this using semilattice
+    types (see item \ref{item:semilattice-types}, below).
+
+  \item The type must support equality tests, to determine when a fixed point
+    has been reached. We call a type supporting equality tests an \emph{eqtype}.
+
+  \item To ensure termination, the type must have finite height.\footnote{The
+    height of a poset is the cardinality of its largest chain (totally-ordered
+    subset).} We conservatively approximate this property by limiting \ms{fix}
+    to finite types.
+  \end{itemize}
+
+  In summary, \ms{fix} may only be used at \emph{finite semilattice eqtypes}.
+
+  %% \todo{TODO: connection to Datalog via finiteness of predicates}
+
+  %% \todo{explain $\fixle{\m{x}}{e_1}{e_2}$?}
+
+\item\label{item:semilattice-types} Generalizing the empty set $\emptyset$ and
+  union $\cup$, we identify a subset of types that have a \emph{least element}
+  $\unit$ and a \emph{least upper bound} operator $\vee$. We call these
+  \emph{semilattice types}\footnote{Technically, the partial orderings on these
+    types form \emph{join-semilattices with a least element}. For brevity's
+    sake, we call these structures simply ``semilattices.''}, and denote them by
+  the metavariables $L,M$.
+
+  Semilattice types serve two purposes. First, as already mentioned, they
+  guarantee the presence of a least element, needed to compute \ms{fix} terms.
+
+  %% \todo{Explain how products of semilattice being semilattice + monotone
+  %%   fixed-points account for mutual recursion.}
+
+  Second, they provide a natural eliminator for sets. Given $e : \Set{A}$, we
+  write $\letin{x}{e'}{e_x}$ for the least upper bound, over all elements $x \in
+  e'$, of $e_x$, for $e_x$ of some semilattice type $L$. If $e_x$ is a set, for
+  example, this provides the set type's monadic ``bind'' operation. For example,
+  $\forin{x \in \setlit{1,2,3}} \{10 \cdot x, x^2\}$ denotes the set $\{1, 4, 9,
+  10, 20, 30\}$.
+
+\end{enumerate}

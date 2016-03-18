@@ -1,0 +1,76 @@
+# -*- mode: org -*-
+
+What fixed-point theorem do we need for (fix x <= e_top in e : L)?
+
+Consider the sub-semilattice of L: {a | a <= e_top}. Call this P. Since L is
+all-finite-height, P has finite height.
+
+Let (f x = if e <= e_top then e else e_top).
+Then f is a monotone map P -> P!
+
+So by Theorem 1, f has a fixed point, and by theorem 3, we can find it by
+iteration.
+
+* Definitions
+Definition: All-finite-height
+A poset A is all-finite-height if every element x : A has finite height.
+
+Definition: Height of an element of a poset
+The height of an element x : A is the height of the subposet {y : A | y <= x}.
+
+Definition: Height of a poset
+The height of a poset is the cardinality of its largest chain.
+
+Definition: chain of a poset
+A chain is a totally ordered subset of a poset.
+
+Definition: pointed poset
+A poset is pointed iff it has a least element (written 0).
+
+* 1. Fixed points on posets of finite height
+Any monotone f : A -> A on a nonempty poset A of finite height has a fixed
+point.
+
+Proof: Consider a minimal element x : A. (To find minimal element, order all
+elements by their height.) Consider the set:
+
+    x, f(x), f^2(x), f^3(x), ...
+
+Either:
+- x = f(x), in which case we are done
+- f(x) < x, which is impossible, since x is minimal
+- or x < f(x).
+
+Given x < f(x) and f monotone, we have f(x) < f^2(x), f^2(x) < f^3(x), etc. Thus
+this sequence forms an ascending chain. A is finite-height, so all chains of A
+are finite, so this chain must have a greatest element or supremum of the form
+f^n(x) such that f^n(x) = f^{n+1}(x). QED.
+
+* 2. Fixed points on all-finite-height pointed posets
+For any monotone f : A -> A on an all-finite-height pointed poset A,if f has a
+fixed point, it has a least fixed point of the form f^n(0).
+
+Proof: From theorem 3, below.
+
+* 3. Finite height fixed point implies least fixed point in pointed poset
+For any pointed poset A and monotone f : A -> A, if f has a finite-height fixed
+point, it has a least fixed point of the form f^n(0).
+
+Proof: Consider the sequence S:
+
+    0, f(0), f^2(0), f^3(0), ...
+
+By the same argument as in Theorem 1, S is an ascending chain.
+
+Consider any fixed point X of f. We have 0 <= X. Thus f(0) <= X, f^2(0) <= X,
+etc. Thus S contains only elements <= X. Thus, any fixed point in S is smaller
+than X.
+
+Thus, if S contains a fixed point, it is a least fixed point.
+
+Now, let X be a finite-height fixed point of f. (We know one exists by
+assumption.) By the same argument, S contains only elements <= X. Thus S is a
+chain of the poset {y : A | y <= X}. Thus S is finite (since X has finite
+height). Thus it contains at least one fixed-point of f.
+
+Thus, by previous argument, that fixed-point is a least fixed point.

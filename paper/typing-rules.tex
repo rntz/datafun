@@ -1,0 +1,208 @@
+%% FIGURE: Typing rules
+\begin{figure*}
+  %% \boxed{\ensuremath{\mathsz{10pt}{\J{\Delta}{\Gamma}{e}{A}}}}
+  \begin{mathpar}
+    \infer[\rn{\rt{var}}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD}
+    \and
+    \infer[\rn{\rt{var}^+}]{\J{\GD}{\GG}{\m{x}}{A}}{\m{x}\of A \in \GG}
+    %% function rules
+    \and
+    \infer[\rn{\fn}]{\J{\GD}{\GG}{\fn\bind{x} e}{A \uto B}}{
+      \J{\GD,x\of A}{\GG}{e}{B}}
+    \and
+    \infer[\rn{\rt{app}}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
+      \J{\GD}{\GG}{e_1}{A \uto B} &
+      \J{\GD}{\cdot}{e_2}{A}}
+    \and
+    \infer[\rn{\monofn}]{\J{\GD}{\GG}{\fn\bind{\m{x}} e}{A \mto B}}{
+      \J{\GD}{\GG,\m{x} \of A}{e}{B}}
+    \and
+    \infer[\rn{\rt{app}^+}]{\J{\GD}{\GG}{e_1\;e_2}{B}}{
+      \J{\GD}{\GG}{e_1}{A \mto B} &
+      \J{\GD}{\GG}{e_2}{A}}
+    %% product & sum rules
+    \and
+    \infer[\rn{\rt{pair}}]{\J{\GD}{\GG}{(e_1,e_2)}{A_1 \x A_2}}{
+      \J{\GD}{\GG}{e_i}{A_i}}
+    \and
+    \infer[\rn{\pi}]{\J{\GD}{\GG}{\pi_i\;e}{A_i}}{\J{\GD}{\GG}{e}{A_1 \x A_2}}
+    \and
+    \infer[\rn{\rt{in}}]{\J{\GD}{\GG}{\ms{in}_i\;e}{A_1 + A_2}}{
+      \J{\GD}{\GG}{e}{A_i}
+    }
+    \and
+    \infer[\rn{\rt{case}}]{\J{\GD}{\GG}{\case{e}{x}{e_1}{x}{e_2}}{C}}{
+      \J{\GD}{\cdot}{e}{A_1 + A_2} &
+      \J{\GD,x\of A_i}{\GG}{e_i}{C}}
+    \and
+    \infer[\rn{\rt{case}^+}]{
+      \J{\GD}{\GG}{\case{e}{\m{x}}{e_1}{\m{x}}{e_2}}{C}
+    }{
+      \J{\GD}{\GG}{e}{A_1 + A_2} &
+      \J{\GD}{\GG,\m{x}\of A_i}{e_i}{C}
+    }
+    %% boolean rules
+    %% \and
+    %% \infer[\rn{=}]{\J{\GD}{\GG}{e_1 = e_2}{\bool}}{\J{\GD}{\GG}{e_i}{\eq{A}}}
+    \and
+    \infer[\rn{\rt{true}}]{\J{\GD}{\GG}{\ms{true}}{\bool}}{}
+    \and
+    \infer[\rn{\rt{false}}]{\J{\GD}{\GG}{\ms{false}}{\bool}}{}
+    \and
+    \infer[\rn{\rt{if}}]{\J{\GD}{\GG}{\ifthen{e}{e_1}{e_2}}{A}}{
+      \J{\GD}{\cdot}{e}{\bool} &
+      \J{\GD}{\GG}{e_i}{A}}
+    \and
+    \infer[\rn{\rt{if}^+}]{\J{\GD}{\GG}{\ifthen{e}{e_1}{\unit}}{L}}{
+      \J{\GD}{\GG}{e}{\bool} &
+      \J{\GD}{\GG}{e_1}{L}}
+    %% set & semilattice rules
+    \and
+    \infer[\unit]{\J{\GD}{\GG}{\unit}{L}}{}
+    \and
+    \infer[\rn{\vee}]{\J{\GD}{\GG}{e_1 \vee e_2}{L}}{\J{\GD}{\GG}{e_i}{L}}
+    \and
+    \infer[\rn{\{\}}]{\J{\GD}{\GG}{\{e\}}{\Set{A}}}{\J{\GD}{\cdot}{e}{A}}
+    \and
+    \infer[\rn{\bigvee}]{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{L}}{
+      \J{\GD}{\GG}{e_1}{\Set{A}} &
+      \J{\GD,x\of A}{\GG}{e_2}{L}}
+    %% \and
+    %% \infer[\rn{\{:\}}]{\J{\GD}{\GG}{\singlemap{e_1}{e_2}}{\Map{A}{B}}}{
+    %%   \J{\GD}{\cdot}{e_1}{A} &
+    %%   \J{\GD}{\GG}{e_2}{B}}
+    \and
+    \infer[\rn{\rt{fix}}]{\J{\GD}{\GG}{\fix{\m{x}}{e}}{\fineq{L}}}{
+      \J{\GD}{\GG,\m{x}\of L}{e}{\fineq{L}}}
+    \and
+    \infer[\rn{\rt{fix}_{\le}}]{
+      \J{\GD}{\GG}{\fixle{\m{x}}{e_1}{e_2}}{\eq{L}}
+    }{
+      \J{\GD}{\GG}{e_1}{\eq{L}} &
+      \J{\GD}{\GG,\m{x} \of \eq{L}}{e_2}{\eq{L}}}
+  \end{mathpar}
+
+  \caption{Typing rules for core Datafun}
+  \label{fig:typing-rules}
+\end{figure*}
+
+
+\section{Typing rules}
+\label{sec:typing-rules}
+
+Datafun's typing judgment $\J{\GD}{\GG}{e}{A}$ is defined by the inference rules
+given in Figure \ref{fig:typing-rules}. We gloss $\J{\GD}{\GG}{e}{A}$ as
+follows: ``expression $e$ has type $A$ using variables from $\GD \cup \GG$, and
+moreover the value of $e$ is \emph{monotone} with respect to the variables in
+$\GG$''.
+
+The context $\GD$ types ordinary variables; $\GG$, monotone variables. Both
+admit the usual structural rules of exchange, weakening, and contraction.
+Variables from either context may be used freely (rules \rt{var}, $\rt{var}^+$).
+
+\subsection{Functions and application}
+Two function types require two function introduction rules: the ordinary
+$\lambda$ and the monotone $\lambda^+$. These simply introduce variables into
+their respective contexts. Monotone function application $\rt{app}^+$ is
+perfectly standard, but ordinary function application \rt{app} has a pecularity:
+the argument $e_2$ gets an \emph{empty} monotone context.
+
+To understand why, recall our gloss: the application $e_1\;e_2$ must be monotone
+in $\GG$. But $e_1$ is an ordinary, and in general \emph{non-monotone}, function
+$A \uto B$: there is no guarantee that it respect any order on its argument.
+(Suppose, for example, $e_2$ were some monotone variable $\m{x} : A \in \GG$.)
+We work around this scoff-law behavior on $e_1$'s part by ensuring its argument
+$e_2$ is \emph{constant} with respect to $\GG$---which we accomplish by simply
+prohibiting $e_2$ from using any of $\GG$'s variables.
+
+This technique of \emph{wiping clean} the monotone context to guarantee
+constancy\footnote{Wherever we write ``constant'' in this section, substitute
+  ``constant with respect to the monotone context''. The ordinary context is
+  never ``wiped clean'', and behaves entirely as it would in a simply-typed
+  $\lambda$-calculus.} of a subterm recurs in several other rules. Readers
+familiar with linear logic's $!$ comonad~\cite{linearlogic} or with judgmental
+formulations of modal logics of necessity~\cite{jrml} may notice a feeling of
+\textit{d\'ej\`a vu}; indeed, there is a hidden comonad at work here. But we are
+getting ahead of ourselves. For more on that, turn to Section
+\ref{sec:semantics}.
+
+\subsection{Products and sums}
+The pairing and projection rules, \rt{pair} and $\pi$, are completely standard,
+as is the \rt{in} rule for sum introduction. Sum elimination, however, splits
+into two rules, \rt{case} and $\rt{case}^+$. $\rt{case}^+$ requires its branches
+to be monotone in the variable $\m{x}$ it introduces, and consequently its
+subject $e$ is permitted access to the monotone context $\GG$. \rt{case},
+however, analyses its subject $e$ as a constant --- wiping clean its monotone
+context --- and thus is allowed to introduce the variable $x$ into the ordinary
+context $\GD$.
+
+%% \todo{rewrite for clarity}
+
+\subsection{Booleans}
+\label{sec:typing-rules-booleans}
+
+While \rt{true} and \rt{false} are straightforward, there are two rules for
+boolean elimination, \rt{if} and $\rt{if}^+$. This is because in Datafun, $1$
+plus $1$ does not equal $\bool$: booleans are \emph{not} a sum of
+units.\footnote{For simplicity, we have omitted the unit type 1 from our
+  presentation of Datafun, but it is easy enough to imagine including it.} At
+the type $1 + 1$, $\ms{in}_1 \triv$ and $\ms{in}_2 \triv$ are incomparable. But
+in Datafun, $\ms{true} > \ms{false}$. Therefore, to eliminate a boolean in a
+monotone fashion, one must ensure one's \emph{then}-branch is always greater
+than one's \emph{else}-branch.
+
+Thus Datafun has two \ms{if} rules. First, \rt{if}, where the boolean $e$ being
+analysed is constant (has an empty monotone context), and so the branches $e_1$,
+$e_2$ may be arbitrary expressions.
+
+Second, $\rt{if}^+$, where the subject $e$ has full access to $\GG$, but the
+\ms{if}-expression must have \emph{semilattice type}, and the \emph{else}-branch
+is constrained to be $\unit$ --- the least value, thus smaller than $e_1$.
+
+This is a conservative approach: there are many semantically monotone, but
+untypeable, \ms{if}-terms. However, it is complete for semilattice types, for in
+that case $(\ifthen{e}{e_1}{e_2})$ may be rewritten $(e_2 \vee
+\ifthen{e}{e_1}{\unit})$; as long as $e_1 \ge e_2$ and so $e_2 \vee e_1 = e_1$,
+this will not change the meaning of the expression, only (potentially) its
+execution efficiency.
+
+Thus the only meaningful restriction here is to semilattice types. In practice,
+we have yet to find a case where this is problematic.
+
+% \todo{Mention that $e_1 \ge e_2$ is in general statically undecidable (Rice's
+%  theorem), and that a typesystem to check it would amount to dependent typing?}
+
+\subsection{Semilattices and sets}
+The semilattice $\unit$ and $\vee$ operations are typed by the rules of the same
+name. As $\vee$ is monotone, its arguments have full access to the monotone
+context $\GG$.
+
+Recall that sets are ordered by inclusion: although $2 \le 3$, nonetheless
+$\singleset{2} \not\le \singleset{3}$. For this reason the rule $\{\}$ for
+constructing a singleton set $\singleset{e}$ wipes clean its element $e$'s
+monotone context. Datafun does not need empty-set or union operators, since
+$\unit$ and $\vee$ generalize them.
+
+Finally, we come to $\bigvee$, the set-comprehension rule. This rule has the
+flavor of a monadic ``bind'' operation, but generalized to a result of any
+semilattice type. This operation is naturally monotone both in the set $e_1$
+being iterated over and in the expression $e_2$ which we are taking the least
+upper bound of. Since sets are ordered by inclusion regardless of the ordering
+on their elements, $e_2$ is not required to be monotone in the variable $x$.
+
+%% \subsection{Maps}
+%% Finite maps are an abstract type, and most of their interface is exposed through
+%% primitive functions (see Figure \ref{fig:primitives}). The only typing rule is
+%% $\{:\}$, the introduction rule for singleton maps. By analogy with the
+%% introduction rule for singleton sets $\{\}$,
+
+\subsection{Fixed points}
+
+The reason Datafun tracks monotonicity is to permit taking fixed-points of
+monotone functions. \rt{fix} expresses exactly that. As mentioned in Section
+\ref{sec:informally}, however, it is limited to types of the form $\fineq{L}$:
+finite semilattice eqtypes.
+
+$\rt{fix}_\le$ loosens this restriction by letting us take fixed points at
+(not-necessarily-finite) semilattice eqtypes $\eq{L}$, as long as we provide an
+upper bound $e_1 : \eq{L}$ which we can check we do not exceed.

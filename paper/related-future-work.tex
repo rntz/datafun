@@ -1,0 +1,160 @@
+\section{Related and Future Work}
+\label{sec:futurework}
+
+\paragraph{Aggregation}
+Aggregation of values --- for example, taking the sum $\sum_{x \in A} f \;x$ of
+a function $f$ across a set $A$ --- is a useful and ubiquitous database
+operation. Datafun naturally supports \emph{semilattice} aggregation via
+$\bigvee$, but many natural operations such as summation do not form
+semilattices on their underlying type. There are several potential ways to add
+support for aggregations to Datafun:
+\begin{itemize}
+\item Common aggregations can be provided as primitive functions, for example
+  $\ms{size} : \Set{\eq{A}} \mto \N$ or $\ms{sum} : (\eq{A} \to \N) \uto
+  \Set{\eq{A}} \mto \N$.
+
+\item In the style of Machiavelli~\cite{machiavelli}, one could add a general
+  operator $\ms{hom} : B \to (\eq{A} \uto B \uto B) \uto \Set{\eq{A}} \uto B$,
+  which effectively linearizes a set in an unspecified order. The semantics of
+  \ms{hom} are, alas, necessarily nondeterministic.
+
+\item One could augment Datafun with a type of bags (multisets) $\Bag{A}$; bags
+  naturally support a much broader class of aggregation --- commutative monoids
+  --- than sets. See, for example, \citet{multilinear-bigdata} and \citet{reladj}.
+\end{itemize}
+
+\paragraph{Optimization} Because Datalog is so strongly constrained,
+there has been a lot of very successful work on optimizing it, ranging
+from compilation into binary decision diagrams~\cite{bdd} by
+\citet{whaley-lam}, to the famous ``magic sets''~\cite{magicsets}
+algorithm.
+
+From our perspective, magic sets are a natural next step for
+investigation into how to optimize Datafun. Intuitively, the magic
+sets algorithm exploits the fact that Datalog (as a total logic
+language) has both a top-down and bottom-up reading, and rewrites the
+program so that it does bottom-up search, while using top-down
+reasoning to strategically avoid adding useless facts to the
+database. Transplanting this analysis to Datafun would essentially
+give us optimized implementations of fixed points, but extending the
+magic sets algorithm is likely to be very subtle, since Datafun has
+higher-order functions and Datalog does not. As a result, our goal is
+to first see if magic sets can be applied to first-order Datafun programs,
+and then use defunctionalization~\cite{defunctionalization} to
+extend it to full Datafun.
+
+\paragraph{Databases} Datalog has sometimes been described
+as ``relational algebra plus fixed points'', and there is a long line
+of work on embedding database query languages into general-purpose
+languages, including pioneering efforts such as
+Machiavelli~\cite{machiavelli} and Kleisli~\cite{kleisli}, as well as
+more recent systems such as Ferry~\cite{ferry} and LINQ in C\#~\cite{linq-wadler}.
+%
+The focus of this work has been on embedding query languages based
+on relational algebra into general purpose languages, with an emphasis
+on statically compiling higher-order queries into the first-order
+queries supported by existing database systems (\citet{query-shredding} is a
+representative example).
+
+Our approach is a little bit different. Instead of embedding Datalog
+into a general purpose language, Datafun is \emph{also} a ``little
+language'', albeit one that happens to be a higher-order
+functional language. We very deliberately did not try to embed Datafun
+into an existing language, because that would have greatly complicated
+the context-management operations needed to ensure monotonicity.
+
+In fact, from a language designer's perspective, Datafun can be seen
+as an argument in favor of extending functional languages to support
+programming with user-defined, non-strong comonads.
+
+\paragraph{Deletion} \citet{logical-algorithms} showed how
+forward-chaining logic programming permits concise and elegant
+expression of a wide variety of algorithms, including a natural cost
+semantics. However, they noted that there were some algorithms (such
+as union-find and greedy algorithms) which could be formulated in this
+style, \emph{if} there were additionally support for deleting facts
+from a database. Later, \citet{linear-logical-algorithms} went on to
+show how deletion could be given a logical interpretation by
+formulating in terms of linear logic programming.
+
+This naturally raises the question of whether we could identify a
+``linear Datafun'' corresponding to this style of programming, where
+we might linear types to model features like deletion. There are many
+nontrivial semantic issues (e.g., how to define monotonicity), but
+it seems a promising question for future work.
+
+\paragraph{Termination}
+
+Datafun as presented is Turing-incomplete. This is advantageous for
+optimization; for example, one powerful optimization technique is \emph{loop
+  reordering} (in SQL terminology, \emph{join reordering}), that is, taking
+advantage of the equation
+\begin{eqnarray*}
+  \forin{x \in e_1} \forin{y \in e_2} e
+  &=& \forin{y \in e_2} \forin{x \in e_1} e
+\end{eqnarray*}
+when $x,y \notin \ms{FV}(e_1) \cup \ms{FV}(e_2)$. But this equation does not
+always hold in the presence of nontermination; for example, if $e_1 = \unit$ and
+$e_2$ diverges.
+
+Nonetheless, without adding advanced facilities for termination
+checking, there are many functions it is difficult to implement
+without use of general recursion. So a natural direction for future
+work is to study how to add support for general recursion to Datafun.
+Because domains~\cite{domain-theory} can be understood as partial
+orders with directed joins, there are likely many interesting
+categorical structures connecting the category of domains to the
+category of posets, some of which will hopefully lead to a principled
+type-theoretic integration of partial functions into Datafun.
+
+% So one faces a trilemma: first, keep
+% Datafun nonterminating, at the expensive of making some functions
+% inexpressible; second, allow nontermination, at the expense of
+% optimization; or, third, use the type system to delineate between
+% terminating and nonterminating fragments.
+%
+% \paragraph{Polymorphism}
+% \todo{
+%   \begin{itemize}
+%   \item ref Dunfield \& Krishnaswami, higher-order bidirectional type inference.
+%   \item \TODO quantification over different classes of type variable (ordinary,
+%     equality, lattice); amounts to a typeclass system, so this is not new work
+%   \item \TODO tone polymorphism and why you need it for principal types; e.g.
+%     what is the type of $\fn\bind{f}\fn\bind{x} f\;x$?
+%   \end{itemize}
+% }
+
+\paragraph{User-Defined Posets and Semilattices}
+The two fundamental semilattice types Datafun provides are booleans and sets;
+products and functions merely preserve semilattice structure where they find it.
+One might contemplate allowing the programmer to define their own semilattice
+structures using something like Haskell's \texttt{newtype}/\texttt{instance}. In
+general, this is a difficult problem, because we may need to do serious
+mathematical reasoning to prove that a comparison function implements a partial
+ordering, or that a datatype can be equipped with a semilattice structure
+obeying this partial ordering which is commutative, associative and idempotent.
+
+One example of such a family of types are the \emph{lexicographic sum
+  types}. Given two posets $P$ and $Q$, their disjoint union $P + Q$
+is also a poset, with left values compared by the $P$-ordering, and
+right values compared by the $Q$-ordering, and no ordering between
+left and right values. However, this is not the only way that the
+disjoint union could be equipped with an order structure.
+
+For example, we could define the \emph{lexicographic} sum $P \lhd Q$,
+which has the same elements as the sum, but extending the coproduct order
+relation with the additional
+facts that $\ms{in}_1(p) \leq \ms{in}_2(q)$. Indeed, we already have a
+special case of this: as we noted earlier, our boolean type is not $1
++ 1$, but it \emph{is} $1 \lhd 1$.
+
+But as our Booleans already show, giving good syntax for their
+eliminators is difficult, because we have to show that not just a term
+is monotone, but that the different branches of a lexicographic case
+expression are ordered with respect to \emph{each other}. For the case
+of ordered Booleans, we were able to give a special eliminator which
+guaranteed it, but in general it requires proof.
+
+One natural direction for future work is to extend the syntax of
+Datafun with support for these kinds of proofs, perhaps taking
+inspiration from dependent type theory.

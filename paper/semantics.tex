@@ -1,0 +1,457 @@
+\begin{figure}
+   \tikzset{
+   no line/.style={draw=none,
+     commutative diagrams/every label/.append style={/tikz/auto=false}}}
+\begin{center}
+{\large
+   \begin{tikzcd}
+        \mathbf{\mathbf{Set}}     \arrow[bend left=35]{r}[name=F]{\mathsf{Disc}}
+                                  \arrow[rr, bend left=60, "\mathsf{FS}"]
+      & \mathbf{\mathbf{Poset}}   \arrow[bend left=35]{l}[name=U]{\U{-}}
+                                  \arrow[to path={(F) -- (U)\tikztonodes}, no line]{}{\bot}
+                                  \arrow[bend left=35]{r}[name=H]{\slF}
+      & \mathbf{\mathbf{SemiLat}} \arrow[bend left=35]{l}[name=K]{\slU}
+                                  \arrow[to path={(H) -- (K)\tikztonodes}, no line]{}{\bot}
+   \end{tikzcd}
+}
+\end{center}
+  \caption{Semantic categories of Datafun}
+  \label{fig:sem-cats}
+\end{figure}
+
+\begin{figure}
+  \begin{center}
+    \begin{tabular}{cl}
+      %% \multicolumn{2}{c}{\textbf{Set notation}}\\
+      $\U{P}$ & Underlying set of the poset $P$\\
+      $\stringset$ & Set of strings\\
+      %% $A \boxtimes B$ & Cartesian product of sets $A$, $B$\\
+      %% $A \boxplus B$ & Disjoint union of sets $A$, $B$\\
+      %% $A \Arr B$ & Functions from set $A$ to set $B$
+      %% \vspace{0.5em}\\
+      %% \multicolumn{2}{c}{\textbf{Poset and semilattice notation}}\\
+      \one & One-element poset $\{\triv\}$\\
+      \two & Two-element poset $\{\sff,\stt\}$, with $\sff < \stt$\\
+      $\N_\le$ & The naturals $\N$, as a (totally ordered) poset\\
+      $P + Q$ & Disjointly-ordered poset on disjoint union of $P,Q$\\
+      $P \x Q$ & Pointwise poset on pairs of $P$s and $Q$s\\
+      $P \arr Q$ & Pointwise poset on monotone maps $\cPoset(P, Q)$\\
+      %% $L \lol M$ & Pointwise poset on $\cSL(L,M)$\\
+      $\slF\;P$ & Free semilattice on a poset $P$\\
+      $\slU\;{L}$ & Underlying poset of a semilattice $L$\\
+      $\Disc{A}$ & Discrete poset on underlying set $A$\\
+      $\FS{A}$ & Free semilattice on a set $A$; same as $\slF\;(\Disc{A})$\\
+      $\below{x}{P}$ &
+      The sub-poset of $P$ below $x$: $\{y \in P ~|~ y \le x\}$
+      %% \\ $\FM{A}{P}$ & Poset of finite maps from the set $A$ to the poset $P$
+    \end{tabular}
+  \end{center}
+
+  \caption{Semantic notation}
+  \label{fig:sem-notation}
+\end{figure}
+
+%% \todo{``Finite maps'' ambiguous terminology? Gibbons uses it differently, for
+%%   example.}
+
+
+\section{Semantics and metatheory}
+\label{sec:semantics}
+
+%% \todo{Somewhere in this we should talk about the comonad $\Disc{\U{\cdot}}$, the
+%%   monad $\slU\;(\FS{\U{\cdot}})$, and adjoint logic.}
+
+%% \todo{Should we talk about how $\Disc{\U{A + B}} = \Disc{\U{A} \boxplus \U{B}} =
+%%   \Disc{\U{A}} + \Disc{\U{B}}$ and what this has to do with \ms{case}? Honestly
+%%   I don't remember that exactly myself.}
+
+We give a denotational semantics for Datafun in terms of three categories
+(\cSet{}, \cPoset{}, and \cSL{}) and two adjunctions between them (see Figure
+\ref{fig:sem-cats}). We present the notation we use in Figure
+\ref{fig:sem-notation}; we take care to distinguish between sets and posets, and
+since posets are more central to our semantics, most of our notation concerns
+them. We take less care to distinguish posets and semilattices, since while a
+set can be partially ordered in many ways, a poset either \emph{is} or \emph{is
+  not} a semilattice.
+
+\subsection{The category \cSL{}}
+
+\cSL{} is the category of join-semilattices with least elements, which we call
+simply ``semilattices''.
+
+Directly, a semilattice is a poset $L$, with a least element $\unit$, in which
+any two elements $a,b$ have a least-upper-bound $a \vee b$. From $\unit$ and
+$\vee$ it follows that any finite subset $X \subseteq_{\ms{fin}} \U{L}$ has a
+least upper bound, written $\bigvee X$.
+
+A morphism $f \in \cSL(L, M)$ is a function from $\U{L}$ to $\U{M}$ satisfying:
+\begin{eqnarray*}
+  f(a \vee_A b) &=& f(a) \vee_B f(b)\\
+  f(\unit_A) &=& \unit_B
+\end{eqnarray*}
+
+\cSL{} is a subcategory of \ms{Poset}; every \cSL{}-morphism $f$ is monotone,
+since $a \le b \iff a \vee b = b$, and so from $a \le b$ we know $f(a) \vee f(b)
+= f(a \vee b) = f(b)$, thus $f(a) \le f(b)$. Since it is a subcategory, we will
+typically not explicitly write the forgetful functor $\mathsf{U}(L)$ which sends
+semilattices to posets by forgetting the lattice structure.
+
+
+\subsection{Denotation of Datafun types}
+\begin{figure}
+  \[\begin{array}{rcl}
+  \den{A} &\in& \cPoset_0\\
+  \den{\bool} &=& \two\\
+  \den{\N} &=& \N_\le\\
+  \den{\str} &=& \Disc{\mathbb{S}}\\
+  \den{A \x B} &=& \den{A} \x \den{B}\\
+  \den{A + B} &=& \den{A} + \den{B}\\
+  \den{A \mto B} &=& \den{A} \arr \den{B}\\
+  \den{A \uto B} &=& \Disc{\U{\den{A}}} \arr \den{B}\\
+  \den{\Set{A}} &=& \FS{\U{\den{A}}}%% \\
+  %% \den{\Map{A}{B}} &=& \FM{\U{\den{A}}}{\den{B}}
+  %% \end{array}\]\[\begin{array}{rcl}
+  \\\\
+  \den{\GD}, \den{\GG} &\in& \cPoset_0\\
+  \den{\cdot} &=& \one\\
+  \den{\GD, x\of A} &=& \den{\GD} \x \den{A}\\
+  \den{\GG{}, \m{x}\of A} &=& \den{\GG} \x \den{A}
+  \end{array}\]
+  \caption{Denotations of Datafun types and contexts}
+  \label{fig:sem-types}
+\end{figure}
+
+Datafun types and contexts denote posets as shown in Figure \ref{fig:sem-types}.
+To complete our semantics, we will need a few simple lemmas about the
+denotations of Datafun types. First, we need to know that our semilattice types
+are semilattices, and that our finite types are finite:
+
+\begin{lemma}
+  The denotation $\den{L}$ of a semilattice type $L$ is a semilattice.
+\end{lemma}
+
+\begin{lemma}
+  The poset $\den{\fineq{A}}$ denoted by a finite eqtype $\fineq{A}$ is finite.
+\end{lemma}
+
+Second, to show that bounded fixed-points $(\fixle{\m{x}}{e_\top}{e})$
+terminate, we need any possible $e_\top$ to pick out a finite-height sub-poset:
+
+\begin{lemma}
+  For any semilattice equality type $\eq{L}$, for any $x \in \den{\eq{L}}$, the
+  height of $\below{x}{\den{\eq{L}}}$ is finite.
+\end{lemma}
+
+\paragraph{}
+All of these are trivial to prove by induction over types and the definition of
+$\den{-}$.
+
+
+%% TERM DENOTATION FIGURE
+\newcommand{\fux}[2]{\Den{\vcenter{\infer{#1}{#2}}}}
+%% \newcommand{\fuxn}[3]{\Den{\vcenter{\infer[\rn{#1}]{#2}{#3}}}}
+\newcommand{\dg}{\;\delta\;\gamma}
+
+\begin{figure*}
+  \[\begin{array}{rcll}
+  \textbf{Derivation}\;\phantom{\dg} && \textbf{Denotation}
+  \vspace{.8em}\\
+  \den{\J{\GD}{\GG}{e}{A}}\;\phantom{\dg} &\in&
+  \cSet(\U{\den{\GD}},\,\cPoset(\den{\GG}, \den{A}))
+  %% \U{\den{\GD}} \Arr \U{\den{\GG} \arr \den{A}}
+  \vspace{.8em}\\
+  \fux{\J{x_1\of A_1, ..., x_n\of A_N}{\GG}{x_i}{A_i}}{
+    \phantom{.}}\dg
+  &=& \pi_i\;\delta
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\m{x}_1\of L_1, ..., \m{x}_n\of L_n}{\m{x}_i}{L_i}}{
+    \phantom{.}}\dg
+  &=& \pi_i\;\gamma
+  \vspace{.8em}\\
+
+  %% function rules
+  \fux{\J{\GD}{\GG}{\fn\bind{x} e}{A \uto B}}{
+    \J{\GD,x\of A}{\GG}{e}{B}}\dg
+  &=& x \mapsto \den{e}\;\tuple{\delta,x}\;\gamma
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\fn\bind{\m{x}} e}{A \mto B}}{
+    \J{\GD}{\GG,\m{x}\of A}{e}{B}}\dg
+  &=& x \mapsto \den{e} \;\delta \;\tuple{\gamma,x}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{e_1\;e_2}{B}}{
+    \J{\GD}{\GG}{e_1}{A \uto B} &
+    \J{\GD}{\cdot}{e_2}{A}} \dg
+  &=& \den{e_1}\dg\;(\den{e_2}\;\delta\;\triv)
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{e_1\;e_2}{B}}{
+    \J{\GD}{\GG}{e_1}{A \mto B} &
+    \J{\GD}{\GG}{e_2}{B}} \dg
+  &=& \den{e_1}\dg\;(\den{e_2}\dg)
+  \vspace{.8em}\\
+
+  %% product types
+  \fux{\J{\GD}{\GG}{(e_1, e_2)}{A_1 \x A_2}}{
+    \J{\GD}{\GG}{e_i}{A_i}}\dg
+  &=& \pair{\den{e_1}\dg}{\den{e_2}\dg}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\pi_i\;e}{A_i}}{
+    \J{\GD}{\GG}{e}{A_1 + A_2}}\dg
+  &=& \pi_i\;(\den{e}\dg)
+  \vspace{.8em}\\
+
+  %% sum type rules
+  \fux{\J{\GD}{\GG}{\ms{in}_i\;e}{A_1 + A_2}}{
+    \J{\GD}{\GG}{e}{A_i}}\dg
+  &=& \ms{in}_i\;(\den{e}\dg)
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\case{e}{x}{e_1}{x}{e_2}}{B}}{
+    \J{\GD}{\cdot}{e}{A_1 + A_2} &
+    \J{\GD,x\of A_i}{\GG}{e_i}{B}}
+  \dg
+  &=&
+  \begin{cases}
+    \den{e_1}\;\pair{\delta}{x}\;\gamma
+    &\text{if }\den{e}\;\delta\;\triv = \ms{in}_1\;x\\
+    \den{e_2}\;\pair{\delta}{x}\;\gamma
+    &\text{if }\den{e}\;\delta\;\triv = \ms{in}_2\;x\\
+  \end{cases}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\case{e}{\m{x}}{e_1}{\m{x}}{e_2}}{B}}{
+    \J{\GD}{\GG}{e}{A_1 + A_2} &
+    \J{\GD}{\GG,\m{x}\of A_i}{e_i}{B}
+  }\dg
+  &=&
+  \begin{cases}
+    \den{e_1}\;\delta\;\pair{\gamma}{x}
+    &\text{if }\den{e} \dg = \ms{in}_1\;x\\
+    \den{e_2}\;\delta\;\pair{\gamma}{x}
+    &\text{if }\den{e} \dg = \ms{in}_2\;x\\
+  \end{cases}
+  \vspace{.8em}\\
+
+  %% boolean rules
+  \fux{\J{\GD}{\GG}{\ms{true}}{\bool}}{\phantom{.}}\dg
+  &=& \stt
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\ms{false}}{\bool}}{\phantom{.}}\dg
+  &=& \sff
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\ifthen{e}{e_1}{e_2}}{A}}{
+    \J{\GD}{\cdot}{e}{\bool} &
+    \J{\GD}{\GG}{e_i}{A}} \dg
+  &=&
+  \begin{cases}
+    \den{e_1}\dg & \text{if}~ \den{e}\;\delta\;\triv = \stt\\
+    \den{e_2}\dg & \text{if}~ \den{e}\;\delta\;\triv = \sff
+  \end{cases}
+  \vspace{.8em}\\
+
+  \fux{\J{\GD}{\GG}{\ifthen{e}{e_1}{\unit}}{L}}{
+    \J{\GD}{\GG}{e}{\bool} &
+    \J{\GD}{\GG}{e_1}{L}} \dg
+  &=&
+  \begin{cases}
+    \den{e_1}\dg & \text{if}~ \den{e}\dg = \stt\\
+    \unit_{\den{L}} & \text{if}~ \den{e}\dg = \sff
+  \end{cases}
+  \vspace{.8em}\\
+
+  %% semilattice rules
+  \fux{\J{\GD}{\GG}{\unit}{L}}{\phantom{.}}\dg
+  &=& \unit_{\den{L}}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{e_1 \vee e_2}{L}}{
+    \J{\GD}{\GG}{e_i}{L}}\dg
+  &=& \den{e_1}\dg \vee_{\den{L}} \den{e_2}\dg
+  \vspace{.8em}\\
+
+  %% set intro/elim rules
+  \fux{\J{\GD}{\GG}{\singleset{e}}{\Set{A}}}{\J{\GD}{\cdot}{e}{A}}\dg
+  &=& \{\den{e}\;\delta\;\triv\}
+  \vspace{.8em}\\
+  \fux{\J{\GD}{\GG}{\letin{x}{e_1}{e_2}}{L}}{
+    \J{\GD}{\GG}{e_1}{\Set{A}} &
+    \J{\GD,x\of A}{\GG}{e_2}{L}}\dg
+  &=& \displaystyle\bigvee \left\{
+  \den{e_2}\;\tuple{\delta,x}\;\gamma
+  ~|~ {x \in \den{e_1}\dg}\right\}
+  \vspace{.8em}\\
+
+  %% fix rules
+  \fux{\J{\GD}{\GG}{\fix{\m{x}}{e}}{\fineq{L}}}{
+    \J{\GD}{\GG,\m{x}\of \fineq{L}}{e}{\fineq{L}}
+  }\dg
+  &=&
+  \lfpin{\den{\fineq{L}}}{(x \mapsto \den{e}\;\delta\;\pair{\gamma}{x})}
+  \vspace{0.8em}\\
+  \fux{\J{\GD}{\GG}{\fixle{\m{x}}{e_1}{e_2}}{\eq{L}}}{
+    \J{\GD}{\GG}{e_1}{\eq{L}} &
+    \J{\GD}{\GG,\m{x}\of \eq{L}}{e_2}{\eq{L}}}\dg
+  &=&
+  \lfpin{\below{\den{e_1}\dg}{\den{\eq{L}}}}{
+    \left(x \mapsto
+    %% \ms{clamp}(\den{e_2}\;\delta\;\pair{\gamma}{x}, \den{e_1} \dg)
+    \begin{cases}
+      \den{e_2}\;\delta\;\pair{\gamma}{x}
+      %% & \text{if}~\den{e_2}\;\delta\;\pair{\gamma}{x} \le \den{e_1}\dg\\
+      & \text{if it's} \le \den{e_1}\dg\\
+      \den{e_1} \dg & \text{otherwise}
+    \end{cases}
+    \right)}
+  \end{array}\]
+
+  \caption{Denotations of Datafun typing derivations}
+  \label{fig:sem-terms}
+\end{figure*}
+
+
+\subsection{Denotation of Datafun terms}
+
+In Figure \ref{fig:sem-terms} we give a denotation for typing derivations with
+the following signature:
+\begin{eqnarray*}
+  \den{\J{\GD}{\GG}{e}{A}} &\in&
+  \cSet(\U{\den{\GD}}, \cPoset(\den{\GG}, \den{A}))
+  %% \\ &\in&
+  %% \U{\den{\GD}} \Arr \U{\den{\GG} \arr \den{A}}
+\end{eqnarray*}
+
+Colloquially, $\J{\GD}{\GG}{e}{A}$ denotes a function from $\den{\GD} \x
+\den{\GG}$ to $\den{A}$ that must be monotone in $\den{\GG}$ (but not in
+$\den{\GD}$).
+
+Our semantics requires the following lemma regarding fixed-points of monotone
+functions:
+
+\begin{lemma}[Fixed points in finite-height pointed posets]
+  Any monotone map $f : P \to P$ on a poset $P$ of finite height with a least
+  element $\unit$ has a least fixed point of the form $f^n(\unit)$.
+\end{lemma}
+
+\begin{proof}
+  Consider the sequence $\unit, f(\unit), f^2(\unit), f^3(\unit), ...$. Note that
+  $\unit \le f(\unit)$, so by monotonicity of $f$ and induction $f^i(\unit) \le
+  f^{i+1}(\unit)$. Thus this sequence forms an ascending chain. Since $P$ has
+  finite height, this chain cannot be infinite; thus there is an $n$ such that
+  $f^n(\unit) = f^{n+1}(\unit)$, i.e. $f^n(\unit)$ is a fixed-point of $f$.
+
+  Now consider any fixed-point $x$ of $f$. Since $\unit \le x$, by monotonicity of
+  $f$, induction, and $x = f(x)$, we have $f^n(\unit) \le x$. Thus $f^n(\unit)$ is
+  the least fixed point of $f$.
+\end{proof}
+
+We write $(\lfpin{L}{f})$ for the least fixed point of a monotone map $f$ on a
+semilattice $L$ of finite height.
+
+%% \paragraph{Lemma 1: Existence of fixed points in posets of finite height.}
+%% Any monotone map $f : A \to A$ on a nonempty poset $A$ of finite height has
+%% at least one fixed point.
+
+%% \paragraph{Lemma 2: Finding least fixed points in pointed posets.} For any
+%% poset $A$ with a least element $\unit$, for any monotone map $f : A \to A$,
+%% if $f$ has a fixed point $x$ of finite height\footnote{The height of an
+%% element $x$ in a poset $A$ is the height of the sub-poset $\{y \in A ~|~ y
+%% \le x\}$.}, then $f$ has a least fixed point of the form $f^n(\unit)$ for
+%% some $n \in \N$.
+
+
+%% FIGURE: SUBSTITUTIONS
+\begin{figure*}
+  \[\begin{array}{rcll}
+    \sub{e/v} v &=& e\\
+    \sub{e/v} x &=& x\\
+    \sub{e/v} (\fn\bind{u} e') &=& \fn\bind{u} \sub{e/v} e'\\
+    \sub{e/v} (e_1 \;e_2) &=& (\sub{e/v} e_1)\;(\sub{e/v} e_2)\\
+    \sub{e/v} (e_1, e_2) &=& (\sub{e/v} e_1, \sub{e/v} e_2)\\
+    \sub{e/v} (\pi_i\;e') &=& \pi_i\;(\sub{e/v}e')\\
+    \sub{e/v} (\ms{in}_i\;e') &=& \ms{in}_i \;(\sub{e/v} e')\\
+    \sub{e/v} (\case{e'}{u}{e_1}{u}{e_2})
+    &=& \case{\sub{e/v} e'}{u}{\sub{e/v} e_1}{u}{\sub{e/v} e_2}\\
+    \sub{e/v} \unit &=& \unit\\
+    \sub{e/v} (e_1 \vee e_2) &=& \sub{e/v} e_1 \vee \sub{e/v} e_2\\
+    \sub{e/v} (\forin{x \in e_1} e_2)
+    &=& \forin{x \in \sub{e/v} e_1} \sub{e/v} e_2\\
+    \sub{e/v} (\fix{\m{x}} e') &=& \fix{\m{x}} \sub{e/v} e'\\
+    \sub{e/v} (\fixle{\m{x}}{e_1}{e_2}) &=& \fixle{\m{x}}{\sub{e/v}{e_1}} e_2
+  \end{array}\]
+  \caption{Substitution}
+  \label{fig:substitution}
+\end{figure*}
+
+
+\subsection{Metatheory}
+
+We define substitution of Datafun terms in Figure \ref{fig:substitution}. We
+could define separate forms of ordinary $\sub{e_1/x} e$ and monotone
+$\sub{e_1/\m{x}} e$ substitution, but to avoid repetition we instead use the
+metavariables $v,u$ to stand for any variable (ordinary or monotone) and define
+$\sub{e_1/v} e$. Terms are taken up to $\alpha$-equivalence, and by convention,
+whenever two variables are given distinct names $v,u$ it is assumed $v \ne u$.
+
+We have proven the following theorems:
+
+\begin{theorem}[Weakening and exchange]
+  The rules \begin{mathpar}
+    \infer[\rn{\rt{weak}}]{
+      \J{\GD,\GD'}{\GG,\GG'}{e}{A}
+    }{
+      \J{\GD}{\GG}{e}{A}}
+    \and
+    \infer[\rn{\rt{xchg}}]{
+      \J{\GD_1,\GD_2}{\GG_1,\GG_2}{e}{A}
+    }{
+      \J{\GD_2,\GD_1}{\GG_2,\GG_1}{e}{A}
+    }
+  \end{mathpar}
+  are admissible.
+\end{theorem}
+
+\begin{theorem}[Substitution, ordinary]
+  From
+  \begin{itemize}
+  \item $\J{\GD}{\cdot}{e_1}{A}$,
+  \item and $\J{\GD,x \of A}{\GG}{e_2}{B}$,
+  \end{itemize}
+  it follows that
+  \begin{itemize}
+  \item $\J{\GD}{\GG}{\sub{e_1/x}e_2}{B}$,
+  \item and $\den{\sub{e_1/x} e_2} \dg = \den{e_2} \;\pair{\delta}{\den{e_1}\dg}
+    \;\gamma$.
+  \end{itemize}
+\end{theorem}
+
+\begin{theorem}[Substitution, monotone]
+  From
+  \begin{itemize}
+  \item $\J{\GD}{\GG}{e_1}{A}$,
+  \item and $\J{\GD}{\GG,\m{x}\of A}{e_2}{B}$
+  \end{itemize}
+  it follows that
+  \begin{itemize}
+  \item $\J{\GD}{\GG}{\sub{e_1/\m{x}}e_2}{B}$,
+  \item and $\den{\sub{e_1/\m{x}} e_2} \dg = \den{e_2} \;\delta
+    \;\pair{\gamma}{\den{e_1} \dg}$.
+  \end{itemize}
+\end{theorem}
+
+\subsection{Discussion}
+It has been known for a very long time that database queries have a monadic
+structure arising from the adjunction between \cSet{} and \cSL{} --- indeed, the
+very name of the Kleisli~\cite{kleisli} database system was chosen to reflect
+this fact!
+
+However, our decomposition of this adjunction into two smaller adjunction, with
+an intermediate way-station in \cPoset{} is new. By interpreting our types in
+the intermediate category \cPoset{}, we gain access to the comonad $\Disc{|A|}$.
+This lets us distinguish between monotone and non-monotone computations, which
+is the critical property letting us interpret fixed points in a sensible way.
+Indeed, it would also have been possible to directly reflect the adjunctions in
+the syntax (in the style of \citet{lnl}), but we chose not to because the
+explicit coercions were somewhat noisy in practice. However, the ghost of this
+logic persists, as can be seen in the context-clearing actions in our typing
+rules.
+
+% \todo{\paragraph{} More yik-yak here?}
+
+%% \paragraph{}
+%% \todo{TODO: future work reference? on operational semantics \& compatibility theorem?}

@@ -1,0 +1,596 @@
+%% FIGURE: SYNTAX SUGAR
+\begin{figure}
+  \[\begin{array}{lccl}
+  %% expressions
+  \textsf{terms} &
+  e &\bnfeq& ... \pipe e \isin e \pipe \setlit{\vec{e}}
+             \pipe \setfor{e}{\mc{L}}
+             \pipe \forin{\mc{L}}{e}\\
+  &&& \mathcal{C}\;\vec{e} \pipe \rawcase{e}{[{p} \cto {e}]^*}
+  \vspace{0.5em}\\
+  %% patterns
+  %%
+  %% TODO: maybe remove the pattern-matching stuff? since we don't explain how
+  %% to translate it & we also use various other sugar we don't explain how to
+  %% translate, why do we include only pattern-matching here?
+  \textsf{patterns} &
+  p &\bnfeq& \pwild \pipe x \pipe (p,p)
+             \pipe \ms{true} \pipe \ms{false} \pipe \mathcal{C}\;\vec{p}
+  \vspace{0.5em}\\
+  \textsf{constructors} & \mathcal{C} && \text{are abstract identifiers}
+  \vspace{0.5em}\\
+  %% loop clauses
+  \textsf{loops} &
+  \mc{L} &\bnfeq& \mc{L}, \mc{L} \pipe p \in e \pipe e
+  \end{array}\]
+
+  %% the desugaring syntax-expansion itself
+  \begin{eqnarray*}
+    \setlit{} &\expandsto& \unit\\
+    \setlit{e,\vec{e_i}} &\expandsto& \setlit{e} \vee \setlit{\vec{e_i}}\\
+    \setfor{e}{\mc{L}}       &\expandsto& \forin{\mc{L}}{\{e\}}\\
+    \forin{\mc{L}_1,\mc{L}_2}{e}
+    &\expandsto& \forin{\mc{L}_1}{\forin{\mc{L}_2}{e}}\\
+    \forin{p\in e_1}{e_2} &\expandsto&
+    \letin{x}{e_1}{\rawcase{x}{p \cto e_2;\,\pwild \cto \unit}}\\
+    \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}
+    %% \ms{let}~x = e_1 ~\ms{in}~ e_2
+    %% &\expandsto& (\fn\bind{x} e_2)\; e_1\\
+    %% \ms{let}~[x_i = e_i]^* ~\ms{in}~ e
+    %% &\expandsto& [\ms{let}~x_i = e_i~\ms{in}]^* e\\
+    %% \rawcase{e}{[p \cto e]^*} &\expandsto& \text{(omitted, see \todo{CITE})}
+  \end{eqnarray*}
+  \caption{Syntax sugar}
+  \label{fig:sugar}
+\end{figure}
+
+
+\section{Examples}
+
+For purposes of these examples, we use a simple Haskell-like syntax for
+top-level type and function definitions. We also permit ourselves infix
+notation, \ms{let}-binding, $n$-ary tuples, $n$-ary sum types with named
+constructors, pattern-matching (including non-linear patterns), and additional
+syntax sugar given in Figure \ref{fig:sugar}. All of these conveniences are
+supported (with slightly different concrete syntax) in our implementation.
+
+%% \todo{(TODO: mention \& cite monadic query syntax)}
+
+For clarity, we set the names of top-level variables in \textsf{sans-serif};
+ordinary variables in $script$ or \mi{italic} (for long variable names); and
+monotone variables in \m{bold}.
+
+Although Datafun as presented does not have polymorphism, we give our examples
+their most general possible type schemes.
+
+%% IDEAS FOR MORE EXAMPLES:
+%%
+%% \begin{itemize}
+%% \item \texttt{make}-style topological sort?
+%% \item SQL-style examples? SQL vs Datalog vs Datafun?
+%% \item translating relational algebra into datafun?
+%% \end{itemize}
+
+
+\subsection{Filtering, mapping, and cross products}
+
+Armed with the syntactic sugar given in Figure \ref{fig:sugar}, basic set
+operations such as map, filter, and cross-product are easy first examples:
+\[\begin{array}{l}
+\fname{map} ~:~ (A \uto B) \uto \Set{A} \mto \Set{B}\\
+\fname{map}\;f\;\m{A} = \setfor{f\;x}{x \in \m{A}}\\
+\\
+\fname{filter} ~:~ (A \uto \bool) \mto \Set{A} \mto \Set{A}\\
+\fname{filter}\;\m{f}\;\m{A} = \setfor{x}{x \in \m{A}, \m{f}\; x}\\
+\\
+(\times) ~:~ \Set{A} \mto \Set{B} \mto \Set{A \x B}\\
+\m{A} \times \m{B} = \setfor{(a,b)}{a \in \m{A}, b \in \m{B}}
+\end{array}\]
+
+Worth noting here are the subtleties of monotonicity typing. For example,
+\ms{map} is not monotone in its function argument, while \fname{filter} is.
+Recalling that sets are ordered by inclusion, this is straightforward enough ---
+observe, for example, that:
+\begin{eqnarray*}
+ \fname{map}\;(\le 0)\;\setlit{0,1}
+ &\not\subseteq& \fname{map}\;(\le 1)\;\setlit{0,1}\\
+ \fname{filter}\;(\le 0)\;\setlit{0,1}
+ &\subseteq& \fname{filter}\;(\le 1)\;\setlit{0,1}
+\end{eqnarray*}
+
+However, it is perhaps unclear how Datafun's type system ``knows''
+\fname{filter} is monotone in \m{f}. In brief, Datafun knows that application
+$(\m{f}\;x)$ is monotone in the function, and moreover, testing a boolean guard
+$(\m{f}\;x)$ in a set-comprehension such as $\setfor{x}{x \in \m{A}, \m{f}\;x}$
+is monotone in the guard expression. A fuller explanation is given in Section
+\ref{sec:typing-rules}.
+
+%% Consider the desugaring of \ms{filter}:
+%% \[\begin{array}{l}
+%% \fname{filter}\;\m{f}\;\m{A} = \forin{x \in \m{A}}
+%% \ifthen{\m{f}\;x}{\singleset{x}}{\unit}
+%% \end{array}\]
+%% \fname{filter}'s type asserts that it uses \m{f} monotonically. This in turn
+%% requires that $(\ifthen{\m{f}\;x}{\setlit{x}}{\unit})$ increases monotonically
+%% as the value of \m{f} increases.
+
+
+%% FIGURE: PRIMITIVES
+\begin{figure}
+  %% TODO: remove unused primitives.
+  \[\begin{array}{cll}
+  \neg &\of& \bool \uto \bool\\
+  =   &\of& \eq{A} \uto \eq{A} \uto \bool\\
+  \le &\of& \eq{A} \uto \eq{A} \mto \bool\\
+  %% \fname{keys}     &:& \Map{A}{B} \mto \Set{A}\\
+  %% \fname{entries}  &:& \Map{A}{B} \uto \Set{A \x B}\\
+  %% \fname{tabulate} &:& \Set{A} \mto (A \uto B) \mto \Map{A}{B}\\
+  %% \fname{getWith}  &:& \Map{\eq{A}}{B} \mto \eq{A} \uto (B \mto L) \mto L\\
+  %% \fname{get}      &:& \Map{\eq{A}}{L} \mto \eq{A} \uto L\\
+  %% \fname{substrings} &\of& \ms{Str} \uto \Set{\ms{Str}}\\
+  %% \fname{size}     &:& \Set{\eq{A}} \mto \N\\
+  \fname{range}    &:& \N \uto \N \mto \Set{\N}\\
+  \fname{length}   &:& \str \uto \N\\
+  \fname{substring} &:& \str \uto \N \uto \N \uto \str
+  \end{array}\]
+  \caption{Primitive functions and their type schemes}
+  \label{fig:primitives}
+\end{figure}
+
+
+\subsection{Equality, membership, and intersection}
+
+So long as the type of a set's elements supports equality, we can test whether
+the set contains a value $x$ as follows:
+\[\begin{array}{l}
+(\isin) ~:~ \eq{A} \uto \Set{\eq{A}} \mto \bool\\
+x \isin \m{A} = \forin{y \in \m{A}} x = y
+\end{array}\]
+
+The expression $\forin{y \in \m{A}} x = y$ takes the least upper bound, at
+boolean type, for every $y \in \m{A}$, of the value of $x = y$. Since booleans
+are ordered $\ms{false} < \ms{true}$, ``least upper bound'' is simply logical
+disjunction! %% In plain English, this code says ``a set \m{A} contains an element
+%% $x$ if some element $y \in \m{A}$ tests equal to $x$''.
+
+Similarly, we can define set intersection by testing for equality:
+\[\begin{array}{l}
+(\cap) ~:~ \Set{\eq{A}} \mto \Set{\eq{A}} \mto \Set{\eq{A}}\\
+\m{A} \cap \m{B} = \setfor{x}{x \in \m{A}, y \in \m{B}, x = y}
+\end{array}\]
+
+However, explicitly testing for equality can become tedious, so we usually use
+\emph{nonlinear pattern-matching} instead --- that is, we bind the same-named
+variable multiple times, which indicates it must have an equal value at each
+occurrence:
+\[\begin{array}{l}
+(\cap) ~:~ \Set{\eq{A}} \mto \Set{\eq{A}} \mto \Set{\eq{A}}\\
+\m{A} \cap \m{B} = \setfor{x}{x \in \m{A}, x \in \m{B}}
+\end{array}\]
+
+This is merely syntax sugar for an equality test, so the condition that the
+set's element type support equality remains in force.
+
+%% \todo{TODO: mention you can extend to all relational algebra? give example?}
+
+
+\subsection{Composition of relations}
+
+One extremely useful operator it is convenient to define using nonlinear pattern
+matching is composition of finite relations (that is, sets of pairs):
+\[\begin{array}{l}
+(\bullet) : \Set{A \x \eq{B}} \mto \Set{\eq{B} \x C} \mto \Set{A \x C}\\
+\m{R} \bullet \m{S} = \setfor{(a,c)}{(a,b) \in \m{R}, (b,c) \in \m{S}}
+\end{array}\]
+
+This already demonstrates a capability Datafun has that Datalog does not:
+defining operators over relations. A Datalog program defining binary predicates
+\texttt{r} and \texttt{s} which wished to compose those predicates would have to
+define a new top-level predicate:
+
+\begin{verbatim}
+r(X,Y) :- (...).
+s(X,Y) :- (...).
+rs(A,C) :- r(A,B), s(B,C).
+\end{verbatim}
+
+In Datafun, we simply define $(\bullet)$ and use it inline as needed. We shall
+see the use of this in later examples.
+
+%% \todo{work phrase ``higher-order'' in here somewhere?}
+
+
+\subsection{Transitive closure}
+
+Consider the following Datalog program, authored perhaps by a J.R.R. Tolkien
+aficionado wishing to trace the geneologies of their favorite work, \textit{The
+  Silmarillion}:
+\begin{verbatim}
+parent(earendil, elrond).
+parent(elrond, arwen).
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).
+\end{verbatim}
+
+%% \todo{Discuss how this works in Datalog, but not in Prolog, b/c Prolog is
+%%   defined by operational semantics of unification while Datalog is denotational,
+%%   least-model semantics. It also works in Datafun!}
+
+%% \todo{Neel suggests using distinction b/w backward \& forward chaining here,
+%%   rather than operational/denotational. see Logical Algorithms paper by
+%%   McAllister \& co for phrasing?}
+
+This defines a binary \texttt{parent} relation, along with its transitive
+closure, \texttt{ancestor}. The Datafun equivalent is:
+\[\begin{array}{l}
+\mathbf{data}~\ms{person} =
+\ctor{E\"arendil} ~|~ \ctor{Elrond} ~|~ \ctor{Arwen}\\
+\fname{parent},~\ms{ancestor} ~:~ \Set{\ms{person} \x \ms{person}}\\
+\ms{parent} =
+\{(\ctor{E\"arendil}, \ctor{Elrond}), (\ctor{Elrond}, \ctor{Arwen})\}\\
+\ms{ancestor} = \fix{\m{X}} \ms{parent} \vee (\m{X} \bullet \m{X})
+%% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
+\end{array}\]
+
+The type \ms{person} represents the domain of our \ms{parent} and \ms{ancestor}
+relations. \ms{parent} is simply a list of parent-child pairs. \ms{ancestor} is
+where the action is at: since the Datalog predicate \texttt{ancestor} is defined
+recursively, \ms{ancestor} is defined as a least fixed point --- in this case,
+of the the equation
+\begin{equation*}
+  \m{X} = \ms{parent} \vee (\m{X} \bullet \m{X})
+\end{equation*}
+Informally, we may read this as stating that a pair is in \m{X} if it is in
+either \ms{parent} or the composition of \m{X} with itself. This requires that
+\m{X} contain the transitive closure of \ms{parent}. And since we take the
+\emph{least} fixed point of this equation, \ms{ancestor} contains \emph{exactly}
+the transitive closure of \ms{parent}. Voil\`a!
+
+
+\subsubsection{Transitive closure with an upper bound}
+
+The above explanation glosses over one critical requirement: \ms{fix} requires
+that the type at which the fixed-point is taken be a \emph{finite semilattice
+  eqtype}.
+
+The type of \ms{ancestor} is $\Set{\ms{person} \x \ms{person}}$. Does this
+suffice? It's certainly a semilattice, since it's a set type. Since \ms{person}
+is effectively a sum of units, it supports equality, and sets and products of
+eqtypes are themselves eqtypes. Likewise, \ms{person} is finite, and products
+and sets of finite types are themselves finite.
+
+So! We find ourselves in the clear, for now. However, in practice, the
+restriction of \ms{fix} to finite types can be quite limiting. So Datafun
+provides an more general way to take a fixed-point: provide an \emph{upper
+  bound} which the desired fixed point will not exceed. For this we write
+$(\fixle{\m{x}}{e_\top} e)$, where $e_\top$ is our upper bound.
+
+Suppose, for example, we wish to represent our \textit{dramatis personae} as
+strings $\str$ rather than defining a \ms{person} type. Then, making use of
+bounded fixed points, we could write:
+\[\begin{array}{l}
+\ms{person} ~:~ \Set{\str}\\
+\ms{person} = \{\texttt{"e\"arendil"}, \texttt{"elrond"}, \texttt{"arwen"}\}\\
+\ms{parent}, \ms{ancestor} ~:~ \Set{\str \x \str}\\
+\ms{parent} = \{(\texttt{"e\"arendil"}, \texttt{"elrond"}),
+(\texttt{"elrond"}, \texttt{"arwen"})\}\\
+\ms{ancestor} = \fixle{\m{X}}{(\ms{person} \x \ms{person})}
+\ms{parent} \vee (\m{X} \bullet \m{X})
+\end{array}\]
+
+Instead of a \ms{person} type, we have \ms{person} \emph{set}, which we use to
+construct an upper bound on our fixed-point: $(\ms{person} \x \ms{person})$, the
+complete binary relation. Since every string in \ms{parent} is also in
+\ms{person}, the transitive closure of \ms{parent} cannot exceed this upper
+bound.
+
+However, this invariant is left to the programmer to check. What if a sloppy
+programmer should mistakenly include a person in \ms{parent} not present in
+\ms{person}? More generally, what if the ``fixed point'' $(\fixle{\m{x}}{e_\top}
+e)$ is trying to compute exceeds $e_\top$? (Or indeed, no such fixed point
+exists?)
+
+In that case, the value of $(\fixle{\m{x}}{e_\top} e)$ is \emph{clamped} to the
+upper bound $e_\top$. This ensures Datafun programs terminate even in the
+presence of sloppy programmers, and although they may not have the value you
+expect, that value is at least predictable.
+
+
+\subsubsection{Generic transitive closure}
+
+Thus far we have only considered taking the transitive closure of a relation we
+have already defined. But consider: for any finite eqtype $\fineq{A}$, we may
+write:
+\[\begin{array}{l}
+\ms{trans} ~:~ \Set{\fineq{A} \x \fineq{A}} \mto \Set{\fineq{A} \x \fineq{A}}
+\vspace{0.3em}\\
+%% \ms{trans}\ E = \fix{X} E \vee \setfor{(a,c)}{(a,b) \in E, (b,c) \in X}
+%% \ms{trans}\ \m{E} = \fix{\m{X}} \m{E} \vee %
+%% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
+\ms{trans}\ \m{E} = \fix{\m{X}} \m{E} \vee (\m{X} \bullet \m{X})
+\end{array}\]
+Similarly, for any eqtype $\eq{A}$, we may write:
+\[\begin{array}{l}
+\ms{trans} ~:~
+\Set{\eq{A}} \mto \Set{\eq{A} \x \eq{A}} \mto \Set{\eq{A} \x \eq{A}}
+\vspace{0.3em}\\
+%% \ms{trans}\ \m{V}\ \m{E} = %
+%% \ms{fix}~ \m{S} \le \setfor{(a,b)}{a\in \m{V}, b \in \m{V}}\\
+%% \hspace{5.35em}\ms{is}~ \m{E} \vee %
+%% \setfor{(a,c)}{(a,b) \in \m{S}, (b,c) \in \m{S}}\\
+\ms{trans}\ \m{V}\ \m{E} = %
+\fixle{\m{S}}{(\m{V} \x \m{V})} \m{E} \vee (\m{S} \bullet \m{S})
+\end{array}\]
+
+In this way, we can abstract away from choice of underlying relation and define
+transitive closure generically. Using functions as a means of abstraction is of
+course familiar and unremarkable to functional programmers, but it is simply not
+possible in Datalog.
+
+
+\subsection{CYK parsing}
+Parsing can be understood logically, with a parse tree representing a
+proof that a certain string belongs to a language described by a
+context-free grammar. As a result, it is possible to formulate parsing
+in terms of proof search~\cite{deductive-parsing}. One of the
+simplest algorithms for parsing context free grammars is the
+Cocke-Younger-Kasami (CYK) algorithm for parsing with grammars in
+Chomsky normal form.\footnote{In Chomsky normal form, each production
+  is of the form $A \to B \cdot C$ or $A \to \vec{a}$, with $A,B,C$
+  ranging over nonterminals, and $\vec{a}$ over nonempty strings of
+  terminals.}  Given a grammar $G$, we begin by introducing a family
+of predicates (sometimes called \emph{facts} or \emph{items}) $A(i,j)$,
+with one $A$ for each nonterminal, and $i$ and $j$ representing
+indices into a string. Given a word $w$, we write $w[i,n]$ for the
+$n$-element substring of $w$ beginning at position $i$. Then, we can
+specify the CYK algorithm with the following two inference rules:
+\begin{mathpar}
+  \inferrule*{B(i, j) \\ C(j, k) \\ (A \to B\; C) \in G}
+             {A(i, k)}
+  \and
+  \inferrule*{ (A \to \vec{a}) \in G \\ w[i,n] = \vec{a} }
+             {A(i,i+n)}
+\end{mathpar}
+Then, the predicate $A(i,j)$ means that $A$ is derivable from the
+substring of $w$ running from $i$ to $j$, and so the whole word $w$ is
+derivable from the start symbol $S$ if $S(0, \mathit{length}\;w)$ is
+derivable.
+
+In Datafun, this rule-based description of the algorithm can be
+transliterated almost directly into code. We begin by introducing a
+few basic types.
+\[\begin{array}{l}
+\mathbf{type}~\ms{sym} = \str\\
+\mathbf{data}~\ms{rule} = \ctor{String}~\str ~|~ \ctor{Concat}~\ms{sym}~\ms{sym}\\
+\mathbf{type}~\ms{grammar} = \Set{\ms{sym} \x \ms{rule}}\\
+\mathbf{type}~\ms{fact} = \ms{sym} \x \N \x \N\\
+\end{array}\]
+The $\ms{sym}$ type is a type synonym representing nonterminal names
+with strings. The $\ms{rule}$ type is the type of the right-hand-sides
+of productions in Chomsky normal form -- either a string, or a pair of
+nonterminals. A $\ms{grammar}$ is just a set of productions -- a set
+of pairs of nonterminals paired with their rules. The type $\ms{fact}$
+is the type representing the atomic facts derived by the CYK inference
+system -- they are triples of the rulename, the start position, and
+the end position.
+
+With these types in hand, we can write the CYK algorithm as a fixed
+point computation. In fact, it is convenient to break it into two
+pieces, by first defining the function whose fixed point we take. So
+we can write down the $\fname{iter}$ function, which represents one step of
+the fixed point iteration.
+\[\begin{array}{l}
+\fname{iter} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{fact}} \mto \Set{\ms{fact}}\\
+\fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
+\hspace{1em}\phantom{\vee~}
+\{(a,i,k) ~|~ (a, \ctor{Concat}~b~c) \in \m{G},\\
+\hspace{6.25em} (b,i,j) \in \m{chart}, (c,j,k) \in \m{chart}\}\\
+\hspace{1em}\vee~ \{(a,i,i+\fname{length}\;s)\\
+\hspace{2.1em}|~ (a, \ctor{String}~s) \in \m{G},\\
+\hspace{2.2em}\phantom{|~} i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
+\hspace{2.2em}\phantom{|~}
+s = \fname{substring} \;\mi{text} \;i \;(i+\ms{length}\;s)\}
+\end{array}\]
+This function works by taking a string $\mi{text}$ and a grammar $\m{G}$, and
+then taking a set of facts $\m{chart}$, and taking a union. The first clause is
+a set comprehension, saying that we return $(a, i, k)$ if $(b, i, j)$ and $(c,
+j, k)$ are in $\m{chart}$ -- this corresponds to applications of the first rule.
+The second clause corresponds to the second rule above, saying that $(a, i, i +
+\ms{length}\;s)$ is a generated fact if $s$ is a substring of $\mi{text}$ at
+position $i$.
+
+We can then use $\fname{iter}$ to implement the $\fname{parse}$ function.
+%% parse
+\[\begin{array}{l}
+\fname{parse} ~:~ \str \uto \ms{grammar} \mto \Set{\ms{sym}}\\
+\fname{parse} \;\mi{text} \;\m{G} =\\
+\hspace{1em} \ms{let}~ n = \ms{length} \;\mi{text}\\
+\hspace{2.375em}\m{bound} =
+  \{(a,i,j) ~|~ (a,\pwild) \in \m{G},\\
+\hspace{10.5em}i \in \ms{range}\;0\;n, \\
+\hspace{10.5em}j\in\fname{range}\;i\;n\}\\
+\hspace{2.375em} \m{chart} = \fixle{\m{C}}{\m{bound}}
+  \ms{iter} \;\mi{text} \;\m{G} \;\m{C}\\
+\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in \m{chart}}\\
+%% %% iter with \forin
+%% \\
+%% \fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
+%% \hspace{1em}\phantom{\vee~}
+%% (\bigvee((a, \ctor{Concat} \;b \;c) \in \m{G},\\
+%% \hspace{1.25em}\phantom{\vee~ \bigvee(}
+%% (b,i,j) \in \m{chart}, (c,j,k) \in \m{chart})\\
+%% \hspace{1.25em}\phantom{\vee~}\, \setlit{(a,i,k)})\\
+%% \hspace{1em}\vee~ (\bigvee((a, \ctor{String} \;s) \in \m{G},\\
+%% \hspace{1.25em}\phantom{\vee~\bigvee(}
+%% i \in \ms{range} \;0 \;(n - \ms{length} \; s),\\
+%% \hspace{1.25em}\phantom{\vee~\bigvee(}
+%% s = \ms{substring} \;\mi{text} \;i \;(i+\ms{length}\;s))\\
+%% \hspace{1.25em}\phantom{\vee~}\, \setlit{(a,i,i+ \ms{length}\;s)})
+%% \\
+%% %% iter with case. I like this version best.
+%% \\
+%% \fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
+%% \hspace{1em}\forin{(a,r) \in \m{G}}\\
+%% \hspace{1.875em}\ms{case}~ r\\
+%% \hspace{2.4em}\ms{of}~
+%% %% \hspace{3.05em}\pipe
+%% \ctor{Concat} \;b \;c \cto \{(a,i,k) ~|~ (b,i,j) \in \m{chart},\\
+%% \hspace{14.42em}(c,j,k) \in \m{chart}\}\\
+%% \hspace{3.05em}\pipe \ctor{String} \;s \cto
+%% \{\,(a, i, i+\ms{length}\;s)\\
+%% \hspace{9em}|~ i \in \ms{range} \;0 \;(n-\ms{length}\;s),\\
+%% \hspace{9em}\phantom{|~}
+%% s = \ms{substring} \;\mi{text} \;i \;(i+\ms{length}\;s)\}
+%% \\
+%% iter. Neel prefers this. People know set-comprehension.
+\end{array}\]
+This function just takes the fixed point of $\fname{iter}$ --
+almost. Because facts are triples $\ms{sym} \x \N \x \N$, sets of
+facts may in general grow unboundedly.  To ensure termination, we
+construct a set $\m{bound}$ to bound the sets of facts we consider in
+our fixed point computation, by bounding the symbols to names found in
+the grammar $\m{G}$, and the indices to positions of the string. Since
+all of these are finite, we know that the computation of $\m{chart}$
+as a bounded fixed point will terminate. Then, having computed the
+fixed point, we can check chart to see if $(a, 0, \ms{length}\;\mi{text})$
+is derivable.
+
+There are three things worth noting about this program. First, it is
+not expressible in Datalog. Because Datalog provides no way to
+represent a \emph{grammar} as a piece of data (it's compound, not an
+atom), there is simply no way in Datalog to express a \emph{generic}
+parser taking a grammar as an input. This demonstrates one of the key
+benefits of moving to a functional language like Datafun.
+
+Moreover, Datalog programs must be \emph{constructor-free}, to ensure all
+relations are finite. Primitives such as \ms{range} and \ms{substring} violate
+this restriction (as relations, they are infinite); it is not immediately
+obvious that Datalog programs extended with these primitives remain terminating.
+Our use of bounded fixed-points to guarantee termination is robust under such
+extensions; as long as all primitive functions are total, Datafun programs
+always terminate.
+
+Finally, having computed a set via a fixed point, we can test whether
+or not an element is in that set \emph{or not} -- the ability to test
+for negative information after the fixed point computation completes
+corresponds to a use of stratified negation in Datalog.
+
+
+\subsection{Dataflow analysis}
+In this section, we show how some simple dataflow analyses can be expressed in
+Datafun. We begin with the types in these programs.
+\[\begin{array}{l}
+\textbf{type}~\ms{var} = \str\\
+\textbf{type}~\ms{label} = \N\\
+\textbf{data}~\ms{oper} = \ctor{Eq} \pipe \ctor{Le}
+\pipe \ctor{Add} \pipe \ctor{Sub} \pipe\ctor{Mul}\pipe\ctor{Div}\\
+\textbf{data}~\ms{atom} = \ctor{Var}\;\ms{var} \pipe \ctor{Num}\;\N\\
+\textbf{data}~\ms{expr} = \ctor{Atom}\;\ms{atom}
+\pipe \ctor{Apply}\;\ms{oper}\;\ms{atom}\;\ms{atom}\\
+\textbf{data}~\ms{stmt} =
+\ctor{Assign} \;\ms{var} \;\ms{expr}
+\pipe \ctor{If} \;\ms{expr} \;\ms{label}\;\ms{label} \\
+\textbf{type}~\ms{program} = \Set{\ms{label} \x \ms{stmt}}
+
+\end{array}\]
+The basic idea is that we represent a program as a kind of control
+flow graph. Each node of this graph has a $\ms{label}$, which is a
+natural number, and contains a statement of type $\ms{stmt}$, which is
+either an assignment of an expression (of type $\ms{expr}$) to a
+variable (of type $\ms{var}$), or a conditional jump.  A program is
+then just the set of nodes -- i.e., a set of label, statement pairs --
+with the invariant that the relation is functional (i.e., if $(l, s)$
+and $(l,s')$ are both in a program, then $s = s'$).
+
+In what follows, we use a few trivial functions whose definitions are omitted
+for space reasons.
+\[\begin{array}{l}
+%% omitted functions
+\ms{labels} ~:~ \ms{program} \uto \Set{\ms{label}}\\
+\ms{vars} ~:~ \ms{program} \uto \Set{\ms{var}}\\
+\ms{uses} ~:~ \ms{stmt} \uto \Set{\ms{var}}\\
+\ms{defines} ~:~ \ms{stmt} \uto \Set{\ms{var}}
+\end{array}\]
+The $\ms{labels}$ function returns the set of labels in a program. The
+$\ms{vars}$ function returns the set of variables used in a program (both in
+expressions and as targets for assignments). The $\ms{uses}$ function
+returns the set of variables used by the expressions in a statement. The
+$\ms{defines}$ function returns the set of variables defined by a statement
+(i.e., at most one variable -- the target of the assignment).
+
+Given a program, we define the 1-step control flow graph with the $\ms{flow}$
+function.
+\[\begin{array}{l}
+%% control flow
+%% TODO: use long variable name for argument.
+\textbf{type}~\ms{flow} = \Set{\ms{label} \x \ms{label}}\\
+\fname{flow} ~:~ \ms{program} \uto \ms{flow}\\
+\fname{flow}\;c = \forin{(i,s) \in c}\\
+\hspace{4em}\ms{case}~ s ~\ms{of}~
+\ctor{If} \;\pwild \;j \;k \cto \setlit{(i,j),(i,k)}\\
+\hspace{7.45em}\pipe\pwild \cto \setfor{(i,i+1)}{i+1 \isin \ms{labels}\;c}
+\end{array}
+\]
+It says that if $(i, s)$ is a node of the program, then if $s$ is a conditional
+jump $\ctor{If} \;\pwild \;j \;k$, then control can flow from $i$ to $j$, and
+from $i$ to $k$ -- i.e., we add both $(i, j)$ and $(i, k)$ to the set of edges.
+Otherwise, it's an assignment, and control flows to the next statement (i.e., we
+add $(i, i+1)$ to the set of edges).
+
+Now, we can define liveness analysis, one of the classic ``backwards'' dataflow
+analyses. The type of $\ms{live}$ say that given a program and its flow graph,
+it returns a set of label/variable pairs, which determine a relation saying
+for each label which variables are live.
+%% live code analysis
+\[\begin{array}{l}
+\ms{live} ~:~ \ms{program} \uto \ms{flow} \uto \Set{\ms{label} \x \ms{var}}\\
+\ms{live} \;\mi{code} \;\mi{flow} =\\
+\hspace{2em} \fixle{\m{Live}}{ %
+  \ms{labels}\;\mi{code} \x \ms{vars}\;\mi{code}}\\
+\hspace{2em}\forin{(i,\mi{stmt}) \in \mi{code}}\\
+\hspace{2.875em} (\phantom{\vee~}\setfor{(i,v)}{v \in \ms{uses}\;\mi{stmt}}\\
+\hspace{3.2em} \vee~ \{(i,v) ~|~ (i,j) \in \mi{flow},\\
+\hspace{7.4em}(j,v) \in \m{Live},\\
+\hspace{7.4em}\neg (v \isin \ms{defines}\; \mi{stmt})\})
+\end{array}\]
+For a statement $\mi{stmt}$ at label $i$, we say that the variable
+$v$ is live at $i$ if $v$ is used by $\mi{stmt}$. The variable $v$
+is also live at $i$ if control flows from $i$ to $j$, and and $v$
+is live at $j$, assuming that $\mi{stmt}$ isn't a definition site for $v$.
+
+When computing this analysis, we again need to use a bounded fixed
+point, which we do by taking the Cartesian product of the labels and
+variables occuring in the program.
+
+
+Next, we give one of the classic forwards dataflow analyses,
+reaching definitions. This analysis is used to figure out whether
+an assignment (a ``definition'') can influence the value of later
+expressions or not.
+%% reaching definitions analysis
+\[\begin{array}{l}
+\ms{reachingDefinitions} ~:~ \ms{program} \uto \ms{flow}
+\uto \Set{(\ms{label} \x \ms{var}) \x \ms{label}}\\
+\ms{reachingDefinitions} \;\mi{code} \;\mi{flow} =\\
+\hspace{2em}\fixle{\m{RD}}{%
+  (\ms{labels}\;\mi{code} \x \ms{vars}\;\mi{code}) \x \ms{labels}\;\mi{code} }\\
+\hspace{2em}\forin{(i,\mi{stmt}) \in \mi{code}}\\
+\hspace{2.875em} (
+\phantom{\vee~}\setfor{((i,v), i)}{v \in \ms{defines}\;\mi{stmt}}\\
+\hspace{3.2em} \vee~ \{((l,v), i) ~|~ (j,i) \in \mi{flow},\\
+\hspace{8.95em}((l,v), j) \in \m{RD},\\
+\hspace{8.95em}\neg(v \isin \ms{defines}\;\mi{stmt})\})
+\end{array}\]
+We define a function $\fname{reachingDefinitions}$ which takes a
+program and a set of flows as arguments, and returns a relation of
+type $\Set{(\ms{label} \x \ms{var}) \x \ms{label}}$. An entry $((l,v),
+i)$ in this relation means the definition of $v$ at $l$ reaches program
+point $i$.
+
+This is then computed as a fixed point of two clauses. First, if there
+is a definition $v$ at program point $i$, then $i$ is reached by that
+definition. Second, if $(l,v)$ reaches $j$, and $j$ flows to $i$, then
+$(l,v)$ reaches $i$ as long as $v$ is not re-defined at $i$.
+
+As \citet{whaley-lam} observed, Datalog makes it very easy to express
+dataflow analyses, and it is similarly easy in Datafun.

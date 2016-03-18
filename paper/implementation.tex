@@ -1,0 +1,39 @@
+\section{Implementation}
+We have built a proof-of-concept implementation of Datafun in Racket, available
+at \texttt{[link omitted for double-blind review]}. In addition to core Datafun,
+it supports pattern-matching, variant types, record types, dictionaries,
+subtyping, antitone functions, and unbounded (potentially nonterminating) fixed
+points. We implement everything in a naive style, and perform no optimizations.
+
+\paragraph{Type inference}
+As a practical matter, type-checking needs to distinguish between ordinary and
+monotone $\lambda$, application, \ms{case}, \ms{let}, and \ms{if}. In our
+implementation we solve this in two ways:
+\begin{enumerate}
+\item Bidirectional type inference\cite{bidirectional} determines whether $\fn$s and
+  applications are ordinary or monotone.
+\item For $\ms{if}$, $\ms{case}$, and $\ms{let}$, the programmer annotates which
+  form is intended; for example, $(\ifthen{e}{e_1}{\unit})$ is written
+  (\texttt{when e then e1}) to indicate the rule $\ms{if}^+$ applies.
+\end{enumerate}
+
+We believe that this scheme could be extended to support polymorphism
+in the style of \citet{dunfield-bidir}. However, it would not be an
+entirely off-the-shelf affair, since we would want to add support for
+polymorphism over the tones of function, so that, for example,
+$\fn\bind{f}\fn\bind{x} f\;x$ can be assigned the principal type
+$\forall\bind{o\of\ms{tone}}\forall\bind{\alpha,\beta \of \ms{type}}
+(\alpha \overset{o}\to \beta) \mto (\alpha \overset{o}\to \beta)$,
+where $\overset{o}\to$ indicates a function of tone $o$; a tone may be
+empty (for an ordinary function) or ${+}$ for a monotone function.
+
+% 
+% We speculate that
+% bidirectional inference could be replaced by a Damas-Milner \todo{CITE} style
+% algorithm, which infers a principal type for any term without any annotation at
+% all, \emph{if} we add polymorphism, tone-polymorphism, and subtyping---so that,
+% 
+
+%% \todo{explain subtyping?}
+%% \todo{explain antitonicity?}
+%% \todo{explain ordering on dictionaries?}

@@ -1,0 +1,168 @@
+\section{Introduction}
+
+The phrase ``declarative programming'' is as popular as it is ambiguous, with
+seemingly hundreds of disparate senses in which it is used. However, two of
+those usages stand out for popularity: both \emph{functional} and \emph{logic}
+programming languages are generally deemed declarative languages. Despite this
+shared epithet, the logic and functional programming traditions have largely
+evolved independently of one another (with a few honorable exceptions such as
+Mercury~\cite{mercury}, Curry~\cite{curry} and Kanren~\cite{kanren}). This could
+be seen as an occasion for sorrow, but we prefer to view it as an opportunity:
+as functional language designers, we can look to logic languages to discover new
+ideas to steal.
+
+A Prolog program can be understood as a collection of logical axioms formulated
+as Horn clauses (i.e., first-order formulas of the form $\forall \vec{x}.\;P_1
+\land \ldots \land P_n \to Q$, where $P_i$ and $Q$ are atomic formulas).
+Execution of a Prolog program can be understood as running a proof search
+algorithm on these clauses to figure out whether a particular formula is
+derivable or not.
+
+In other words, functional and logic programming languages embody the
+Curry-Howard correspondence in two different ways. In a functional language,
+types are propositions, terms are proofs, and program evaluation corresponds to
+proof normalization. On the other hand, for logic programming languages,
+\emph{terms} are propositions, and program evaluation corresponds to \emph{proof
+  search}.
+
+Since proof search is in general undecidable, designers of logic programming
+languages must be careful both about the kinds of formulas they admit as
+programs, and about the proof search algorithm they implement. Prolog offers a
+very expressive language --- full Horn clauses --- and so faces an undecidable
+proof search problem. Therefore, Prolog specifies its proof search strategy:
+depth-first goal-directed/top-down search. This lets Prolog programmers reason
+about the behaviour of their programs; however, it also means many logically
+natural programs fail to terminate. Notoriously, transitive closure calculations
+are much less elegant in Prolog than one might hope, since their most natural
+specification is best computed with a bottom-up (aka ``forwards chaining'')
+proof search strategy.
+
+This view of Prolog suggests considering other possible design choices, such as
+restricting the logical language so as to make proof search decidable. One of
+the oldest such variants is Datalog~\cite{datalog}, a syntactic subset of Prolog
+satisfying three restrictions:
+
+\begin{enumerate}
+\item Programs must be \emph{constructor-free}: only atomic terms and variables
+  are permitted to appear as arguments to predicates. This ensures that deduction
+  will not introduce terms that do not occur in the source of the
+  program.
+
+\item Clauses are \emph{range-restricted}: all variables in the
+  consequent (head) of a clause must also occur positively in its
+  premises (body).
+
+\item Programs are limited to \emph{stratified negation}: the
+  negation of a predicate may be used in a definition only if it has
+  already been fully defined. That is, within the recursive
+  definition of a predicate, it cannot be used in negated form.
+\end{enumerate}
+
+These restrictions make Datalog Turing-\emph{in}complete: all queries are
+decidable. As functional programmers are well aware, though, there is power in
+restraint: for example, in a total functional language, the compiler may switch
+between strict and lazy evaluation at will. Similarly, in Datalog decidability
+means that implementations are free to use forwards chaining, and so can easily
+support queries (like reachability and transitive closure) which are difficult
+to implement in ordinary Prolog.
+
+%% PREVIOUS PARAGRAPH:
+%
+% Thanks to this decidability, Datalog implementations are free to
+% tailor their proof search strategy to the program being executed.
+% Consequently Datalog programs can be both concise and efficient. For
+% example, \citet{whaley-lam} implemented pointer analysis algorithms in
+% Datalog, and found that they could reduce their analyses from
+% \emph{thousands} to \emph{tens} of lines of code while retaining
+% competitive performance.
+
+Over the last decade or so, this freedom has been put to good use, with Datalog
+appearing at the heart of a a wild variety of applications in both research and
+industry. For example, Whaley and Lam \cite{whaley-lam,whaley-phd} implemented
+pointer analysis algorithms in Datalog, and found that they could reduce their
+analyses from thousands of lines of C code to \emph{tens} of lines of Datalog
+code, while retaining competitive performance. Semmle has developed the .QL
+language~\cite{semmlecode,ql-inference} based on Datalog for analysing source
+code (which was used to analyze the code for NASA's Curiosity Mars rover), and
+LogicBlox has developed the LogiQL~\cite{logicblox} language for business
+analytics. The Boom project at Berkeley has developed the Bloom language for
+distributed programming~\cite{bloom}, and the Datomic cloud
+database~\cite{datomic} uses Datalog (embedded in Clojure) as its query
+language. Microsoft's SecPAL language~\cite{secpal} uses Datalog as the
+foundation of its decentralised authorization specification language.
+
+In all of these cases, the use of Datalog permits giving specifications and
+implementations which are dramatically shorter and clearer than alternatives
+implemented in more conventional languages. However, while all of these
+applications are built on a foundation of Datalog, they all also extend it
+significantly. For example, it is impossible even to implement arithmetic in
+Datalog, since adding 2 and 3 produces 5, which is a new term not equal to
+either 2 or 3! As a result, even though Datalog has a very clean semantics, its
+metatheory needs to be re-established once again for each application-specific
+extension to it.
+
+As a result, it would be very desirable to understand what makes Datalog tick,
+so that we can embed it into a more expressive language \emph{without}
+sacrificing the properties that make it so powerful within its domain. In this
+way, extensions can become ``a small matter of programming'', without having to
+do a custom redesign of the language for each application.
+
+%% TODO: cite the jargon file for SMOP?
+
+In this paper, we present Datafun, a typed functional language which permits
+programming in the style of Datalog, while still supporting the full power of
+higher-order functional programming.
+
+\paragraph{Contributions}
+\begin{itemize}
+\item We describe Datafun, a typed language capturing the expressive power of
+  Datalog and extending it to support higher-order functional programming.
+  Datafun's key feature is to \emph{track monotonicity with types}. This permits
+  us to use typing to analyze fixed point computations in a way ensuring their
+  termination.
+
+\item We present examples illustrating the expressive power of Datafun,
+  including relational-algebra-style operations, transitive closure, CYK
+  parsing, and dataflow analysis. Some of these examples are familiar from
+  Datalog, but many of them go well beyond what can be expressed in it,
+  illustrating the benefits of our approach.
+
+\item We identify the semantic structures underpinning Datalog, and
+  use this to give a denotational semantics for Datafun in terms of a
+  pair of adjunctions between \cSet{}, \cPoset{}, \cSL{}.
+
+\item We have a prototype implementation of Datafun in Racket, which
+  has been used to implement all of the examples in this paper, and is
+  available at \texttt{[link omitted for double-blind review]}. 
+\end{itemize}
+
+%% Contributions (as summarized by Michael):
+% - Datafun, like Datalog but functional
+% - examples, incl. both datalog examples & things datalog can’t do
+% - key ingredient is monotonicity; ``found'' semantics by analyzing
+%   datalog: two adjunctions, three categories
+% - prototype implementation
+
+%% Contributions (as written by Neel):
+
+% - We describe Datafun, a type theory for a language capturing the expressive
+%   power of Datalog and extends it to both relax the constructor term
+%   restriction and to support higher-order functional programming.
+
+% - We give a variety of examples that illustrate the expressive power of
+%   Datafun, such as CYK parsing, dataflow analysis, and transitive closure on
+%   graphs, etc. Many of these examples are traditional examples of Datalog,
+%   but we are also able to support things like first-class relations (eg,
+%   generic transitive closure) and higher-order functions (example using
+%   monotonicity and HO?). (doing a fix-point code analysis / parsing something
+%   & dispatching on result?)
+
+% - We identify the semantic structures underpinning Datalog, and use this to
+%   give a denotational semantics for Datafun in terms of a pair of adjunctions
+%   between Set, Poset, and the category of semilattices with finitary joins.
+
+% - We have a prototype implementation of Datafun in Racket.
+
+% Local Variables:
+% TeX-master: "datafun"
+% End:

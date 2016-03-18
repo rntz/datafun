@@ -1,5 +1,7 @@
-\usepackage{amssymb,amsmath}
+\usepackage{amssymb,amsmath,amsthm}
 \usepackage{latexsym}
+
+\usepackage{url,hyperref}
 
 %% uses the AMS Euler math font.
 \usepackage{euler}
@@ -31,12 +33,8 @@
 \newcommand{\todo}[1]{{\color{red}#1}}
 \newcommand{\TODO}{\todo{TODO} }
 
-\newcommand{\bnfeq}{\dblcolon=}
-\newcommand{\defeq}{\overset{\ms{def}}{=}}
-%% \newcommand{\expandsto}{\Longrightarrow}
-\newcommand{\expandsto}{\xrightarrow{\text{expand}}}
-
 \newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\mi}[1]{\ensuremath{\mathit{#1}}}
 \newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}
 \newcommand{\fname}{\ms}
 \newcommand{\ent}{\vdash}
@@ -45,6 +43,11 @@
 \newcommand{\bind}[1]{#1\binder}
 \newcommand{\pipe}{\hspace{0.5em}|\hspace{0.5em}}
 \newcommand{\of}{\,{:}\,}
+
+\newcommand{\bnfeq}{\dblcolon=}
+\newcommand{\defeq}{\overset{\ms{def}}{=}}
+%% \newcommand{\expandsto}{\Longrightarrow}
+\newcommand{\expandsto}{\xrightarrow{\text{expand}}}
 
 
 %% judgments & rules
@@ -64,12 +67,11 @@
 \newcommand{\tunit}{\mathbb{1}}
 \newcommand{\x}{\times}
 %% ``monotone \to''
-%% \newcommand{\mto}{\xrightarrow{+}}
 \newcommand{\mto}{\overset{+\:}{\to}}
-%% \newcommand{\mto}{\to^+}
 \newcommand{\FS}{\ms{Set}}
 \newcommand{\Set}[1]{\ensuremath{\ms{set}~{#1}}}
 \newcommand{\Map}[2]{\ensuremath{\ms{map}~{#1}~{#2}}}
+\newcommand{\Bag}[1]{{#1}^*}
 \renewcommand{\Set}[1]{\{#1\}}
 \renewcommand{\Map}[2]{\ensuremath{\{{#1}\!: {#2}\}}}
 \newcommand{\eq}[1]{\underaccent{\ms{eq}}{#1}}
@@ -77,9 +79,10 @@
 
 
 %% expressions
+%% \renewcommand{\v}[1]{\mi{#1}}                %ordinary variables
 \newcommand{\m}[1]{\ensuremath{\mathbf{#1}}}  %monotone variable
 \newcommand{\sub}[1]{[#1]\,}                   % substitution
-\newcommand{\fix}[1]{\ms{fix}~{#1} = }
+\newcommand{\fix}[1]{\ms{fix}~{#1}~\ms{is}~}
 \newcommand{\fixle}[2]{\fix{#1 \le #2}}
 \newcommand{\tuple}[1]{\langle{#1}\rangle}
 \newcommand{\pair}[2]{\tuple{#1,\,#2}}
@@ -89,8 +92,9 @@
 \newcommand{\forin}[1]{\textstyle\bigvee({#1})\ }
 \newcommand{\letin}[3]{\forin{#1 \in #2}{#3}}
 \newcommand{\rawcase}[2]{\ms{case}~{#1}~\ms{of}~{#2}}
+\newcommand{\cto}{\arr}         % "case to"
 \newcommand{\case}[5]{%
-\rawcase{#1}{\ms{in}_1\,{#2}\to{#3};\,\ms{in}_2\,{#4}\to{#5}}}
+\rawcase{#1}{\ms{in}_1\,{#2}\cto{#3};\,\ms{in}_2\,{#4}\cto{#5}}}
 \newcommand{\ifthen}[3]{\ms{if}~{#1}~\ms{then}~{#2}~\ms{else}~{#3}}
 
 \newcommand{\setlit}[1]{\{#1\}}
@@ -107,7 +111,7 @@
 %% patterns
 \newcommand{\pwild}{\underline{\phantom{a}}}
 
-\newcommand{\ctor}[1]{\textit{#1}}
+\newcommand{\ctor}[1]{\textsc{#1}}
 
 
 %% semantics
@@ -120,8 +124,22 @@
 \newcommand{\Arr}{\rightarrowtriangle}
 \newcommand{\arr}{\shortrightarrow}
 \newcommand{\lol}{\multimap}
-\newcommand{\Disc}[1]{\ensuremath{\ms{Disc}\;#1}}
-\newcommand{\Sups}[1]{\ensuremath{\ms{Sups}\;#1}}
-\newcommand{\U}[1]{|#1|}
+\newcommand{\Disc}[1]{\ensuremath{\ms{Disc}\;{#1}}}
+\newcommand{\slF}{\ensuremath{\mathcal{F}}}
+\newcommand{\slU}{\ensuremath{\mathcal{U}}}
 \newcommand{\stringset}{\mathbb{S}}
 \newcommand{\natposet}{\N_\le}
+\newcommand{\below}[2]{\ensuremath{\downarrow\!({#1 : #2})}}
+\newcommand{\lfpin}[2]{\text{lfp}\,{#2} \in {#1}}
+
+\newcommand{\sff}{\ms{ff}}
+\newcommand{\stt}{\ms{tt}}
+
+%% categories
+\newcommand{\cSet}{\ms{Set}}
+\newcommand{\cPoset}{\ms{Poset}}
+\newcommand{\cSL}{\ms{SemiLat}}
+
+%% theorem environments
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
