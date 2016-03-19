@@ -8,7 +8,7 @@
 % numbers       To obtain numeric citation style instead of author/year.
 
 \usepackage{datafun}
-\renewcommand{\todo}[1]{}
+%% \renewcommand{\todo}[1]{}
 
 
 %% ---------- Setup ----------
@@ -37,20 +37,10 @@
 \title{Datafun: a Functional Datalog}
 \subtitle{}
 
-%% \title{Datafun}
-%% \subtitle{A Functional Datalog}
-
-%% \title{Datafun}
-%% \subtitle{or, Datalog with datatypes}
-
-%% \title{Datalog with Datatypes}
-%% \subtitle{Toward a functional language of finite sets}
-
-\authorinfo{}{}{}
-
-%% \authorinfo{Michael Arntzenius\and Neelakantan R. Krishnaswami}
-%%            {University of Birmingham}
-%%            {daekharel@gmail.com, N.Krishnaswami@cs.bham.ac.uk}
+%% TODO: get my bham email to work?
+\authorinfo{Michael Arntzenius\and Neelakantan R. Krishnaswami}
+           {University of Birmingham}
+           {daekharel@gmail.com, N.Krishnaswami@cs.bham.ac.uk}
 
 \maketitle
 
@@ -65,8 +55,11 @@
   analogue of Datalog supporting higher-order functional programming. The key
   idea is to \emph{track monotonicity via types}.
 
-  %% \todo{Get Neel to suggest more stuff to put in abstract.}
+  \todo{Explain why functional language may not need application-specific
+    extensions?}
 \end{abstract}
+
+\todo{categories? keywords?}
 
 % \category{CR-number}{subcategory}{third-level}
 %
@@ -95,16 +88,16 @@
 %% Section 5: Semantics
 \input{semantics}
 
-%% Section ?: Datafun vs Datalog
+%% Section 6: Datafun vs Datalog
 \input{datalog-comparison}
 
 %% Section 7: Implementation
 \input{implementation}
 
-%% Section 8: Tradeoffs, etc.
+%% Section (omitted): Tradeoffs, etc.
 \input{tradeoffs}
 
-%% Section 9: Related & future work
+%% Section 8: Related & future work
 \input{related-future-work}
 
 
