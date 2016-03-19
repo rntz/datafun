@@ -344,6 +344,7 @@ with one $A$ for each nonterminal, and $i$ and $j$ representing
 indices into a string. Given a word $w$, we write $w[i,n]$ for the
 $n$-element substring of $w$ beginning at position $i$. Then, we can
 specify the CYK algorithm with the following two inference rules:
+
 \begin{mathpar}
   \inferrule*{B(i, j) \\ C(j, k) \\ (A \to B\; C) \in G}
              {A(i, k)}
