@@ -141,12 +141,11 @@ right values compared by the $Q$-ordering, and no ordering between
 left and right values. However, this is not the only way that the
 disjoint union could be equipped with an order structure.
 
-For example, we could define the \emph{lexicographic} sum $P \lhd Q$,
+For example, we could define the \emph{lexicographic} sum $P \lsum Q$,
 which has the same elements as the sum, but extending the coproduct order
-relation with the additional
-facts that $\ms{in}_1(p) \leq \ms{in}_2(q)$. Indeed, we already have a
-special case of this: as we noted earlier, our boolean type is not $1
-+ 1$, but it \emph{is} $1 \lhd 1$.
+relation with the additional facts that $\ms{in}_1(p) \leq \ms{in}_2(q)$.
+Indeed, we already have a special case of this: as we noted earlier, our boolean
+type is not $1 + 1$, but it \emph{is} $1 \lsum 1$.
 
 But as our Booleans already show, giving good syntax for their
 eliminators is difficult, because we have to show that not just a term
