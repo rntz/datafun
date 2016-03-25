@@ -27,14 +27,13 @@ definition is monotone in order to guarantee that the recursion is
 well-founded.
 
 This ensures that the recursive definition is well-defined, but is not
-sufficient by itself to guarantee termination. To manage this, Datalog
-depends upon the other two restrictions described in the
-introduction.By restricting terms occuring in predicates to consist of
-either atoms or variables, Datalog ensures that quantifiers need only
-be instantiated with the atoms used in a program. By requiring every
-variable in the consequent of rules to also occur in the premise of a
-rule, it ensures that every consequent will also only feature atoms
-occuring in the original program.
+sufficient by itself to guarantee termination. To manage this, Datalog depends
+upon the other two restrictions described in the introduction. By restricting
+terms occuring in predicates to consist of either atoms or variables, Datalog
+ensures that quantifiers need only be instantiated with the atoms used in a
+program. By requiring every variable in the consequent of rules to also occur in
+the premise of a rule, it ensures that every consequent will also only feature
+atoms occuring in the original program.
 
 Then, since there can only be finitely many atoms in a finite program,
 this means that the set of possible arguments to a predicate is itself
