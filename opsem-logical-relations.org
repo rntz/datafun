@@ -1,0 +1,104 @@
+We use the variables a,b,c,d,e,f,g,h for closed terms.
+
+* Operational semantics
+
+We write (a → b) the transitive closure of ↦.
+
+We write (a ↔ b) for the equivalence closure of ↦.
+
+(What about η laws? Do we want to validate those?)
+
+* Logical relations
+
+We define the following type-indexed sets:
+
+    [A]≤ ⊆ Term × Term
+    [A]= ⊆ Term × Term
+    [A]  ⊆ Term
+
+As an abuse of notation, we write
+
+    A(a ≤ b)   for (a,b) ∈ [A]≤
+    A(a = b)   for (a,b) ∈ [A]=
+    A(a)       for a ∈ [A]
+
+We first define [A]= and [A] in terms of [A]≤:
+
+    A(a = b)    iff    A(a ≤ b) ∧ A(b ≤ a)
+    A(a)        iff    ∃ b. A(a ≤ b)
+
+We define [A]≤ by induction on A:
+
+    1(a ≤ b)        =  a → () ∧ b → ()
+    2(a ≤ b)        =  a → v₁ ∧ b → v₂ ∧ v₁ ≤ v₂    (for v₁,v₂ ∈ {false,true})
+
+    A × B (a ≤ b)   = a → (a₁, a₂) ∧ b → (b₁, b₂) ∧ A(a₁ ≤ b₁) ∧ B(a₂ ≤ b₂)
+    A₁ + A₂ (a ≤ b) = a → inᵢ a' ∧ b → inᵢ b' ∧ Aᵢ(a' ≤ b')
+
+    A →⁺ B (f ≤ g)  = f → λx.b₁ ∧ g → λx.b₂
+                    ∧ ∀(a₁,a₂ st. A(a₁ ≤ a₂))
+                      B([a₁/x]b₁ ≤ [a₂/x]b₁)  ∧  B([a₁/x]b₂ ≤ [a₂/x]b₂)
+                    ∧ B([a₁/x]b₁ ≤ [a₁/x]b₂)  ∧  B([a₂/x]b₁ ≤ [a₂/x]b₂)
+                    NB. this is just a commuting square!
+
+    more concisely, B(f a₁ ≤ f a₂); B(g a₁ ≤ g a₂); B(f aᵢ ≤ g aᵢ)
+
+    A → B (f ≤ g)   = f → λx.b₁ ∧ g → λx.b₂
+                    ∧ ∀(a₁,a₂ st. A(a₁ = a₂))
+                      (repeat the commuting square above)
+
+    {A} (a ≤ b)     = a → {aᵢ ...} ∧ b → {bᵢ ...}
+                    ∧ ∀(aᵢ) ∃(bⱼ) A(aᵢ = bⱼ)
+
+* Proof: [A]≤ is partially reflexive
+
+To show: If A(a ≤ b) then A(a ≤ a).
+By induction on A.
+
+Case 1(a ≤ b): Trivial.
+Case 2(a ≤ b): By reflexivity of ≤ on booleans.
+
+Case A × B(a ≤ b):
+  We have a → (a₁, a₂), b → (b₁, b₂), A(a₁ ≤ b₁) and B(a₂ ≤ b₂)
+  by IH we have A(a₁ ≤ a₁) and B(a₂ ≤ a₂)
+  thus A × B (a ≤ a)
+
+Case A₁ + A₂(a ≤ b):
+  We have a → inᵢ a' and b → inᵢ b' and Aᵢ(a' ≤ b').
+  By IH applied to Aᵢ(a' ≤ b'), we have Aᵢ(a' ≤ a').
+
+Case A →⁺ B (f ≤ g):
+  We have f → λx.b₁, so that's ok.
+  Consider any a₁, a₂ st. A(a₁ ≤ a₂).
+  We need to show: B(f a₁ ≤ f a₂) and B(f a₁ ≤ f a₁)
+    B(f a₁ ≤ f a₂) is direct from A →⁺ B (f ≤ g)
+    B(f a₁ ≤ f a₁) is by applying our IH to B(f a₁ ≤ f a₂)
+
+Case A → B (f ≤ g):
+  We have f → λx.b₁, so that's ok.
+  Consider any a₁, a₂ st. A(a₁ = a₂).
+  We need to show: B(f a₁ ≤ f a₂) and B(f a₁ ≤ f a₁)
+    B(f a₁ ≤ f a₂) is direct from A → B (f ≤ g)
+    B(f a₁ ≤ f a₁) is by applying our IH to B(f a₁ ≤ f a₂)
+
+Case {A} (a ≤ b):
+  We have a → {aᵢ ...} and b → {bᵢ ...}
+      and ∀(aᵢ) ∃(bⱼ) A(aᵢ = bⱼ)
+  To show: ∀(aᵢ) ∃(aⱼ) A(aᵢ = aⱼ)
+  Let j = i! Since A(aᵢ = bⱼ), we have A(aᵢ ≤ bⱼ), so by
+  our IH we have A(aᵢ ≤ aᵢ). Thus A(aᵢ = aᵢ). Done!
+
+* Proof: [A]≤ is transitive
+
+To show: If A(a ≤ b) and A(b ≤ c) then A(a ≤ c).
+By induction on A.
+
+* Proof: [A]= is a partial equivalence relation
+
+* Proof: If A(a) and a ↔ b then A(a = b).
+
+(What about η laws? ↔ doesn't cover them! Do we want to validate those?)
+
+* Proof: If a ∈ [A] then a terminates.
+
+* Proof: Fundamental theorem
