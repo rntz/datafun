@@ -93,12 +93,117 @@ Case {A} (a ≤ b):
 To show: If A(a ≤ b) and A(b ≤ c) then A(a ≤ c).
 By induction on A.
 
+Case 1(a ≤ b ≤ c): Trivial.
+Case 2(a ≤ b ≤ c): Trivial by transitivity of ≤ on booleans.
+
+Case A × B(a ≤ b ≤ c):
+  We have a → (a₁, a₂); b → (b₁, b₂); c → (c₁, c₂).
+          A(a₁ ≤ b₁ ≤ c₁) so by IH A(a₁ ≤ c₁)
+          B(a₂ ≤ b₂ ≤ c₂) so by IH A(a₂ ≤ c₂)
+  Done.
+
+Case A + B(a ≤ b ≤ c): omitted
+
+Case A →⁺ B(f ≤ g ≤ h):
+  Consider any a₁, a₂ st. A(a₁ ≤ a₂)
+  To show: B(f a₁ ≤ f a₂); B(h a₁ ≤ h a₂); B(f aᵢ ≤ h aᵢ)
+  By assumption, B(f a₁ ≤ f a₂) and B(h a₁ ≤ h a₂).
+  By assumption, B(f aᵢ ≤ g aᵢ ≤ h aᵢ); so by IH B(f aᵢ ≤ h aᵢ).
+  Done.
+
+Case A → B(f ≤ g ≤ h):
+  Consider any a₁, a₂ st A(a₁ = a₂)
+  To show: B(f a₁ ≤ f a₂); B(h a₁ ≤ h a₂); B(f aᵢ ≤ h aᵢ)
+  By assumption, B(f a₁ ≤ f a₂) and B(h a₁ ≤ h a₂).
+  By assumption, B(f aᵢ ≤ g aᵢ ≤ h aᵢ); so by IH B(f aᵢ ≤ h aᵢ).
+  Done.
+
+Case {A}(a ≤ b ≤ c):
+  We have a → {aᵢ ...} and b → {bᵢ ...} and c → {cᵢ ...}
+  To show: ∀(aᵢ) ∃(cₖ) A(aᵢ = cₖ)
+  Consider any aᵢ. Then ∃(bⱼ) A(aᵢ = bⱼ). Then ∃(cₖ) A(bⱼ = cₖ).
+  By transitivity of [A]= (which follows from IH), we have A(aᵢ = cₖ).
+
 * Proof: [A]= is a partial equivalence relation
+
+To show [A]= is a PER, we need that it is symmetric and transitive.
+The symmetry of [A]= follows immediately from its definition.
+The transitivity of [A]= follows immediately from transitivity of [A]≤.
 
 * Proof: If A(a) and a ↔ b then A(a = b).
 
 (What about η laws? ↔ doesn't cover them! Do we want to validate those?)
 
+Suffices to show that if A(a) and a → b then A(a = b).
+We prove this by induction on A:
+
+Case 1: Since a → b and a → ()... I think I need confluence here. Hm.
+        If a ↦ b is a reduction *partial function*, we're good.
+
+Case 2: Confluence again.
+
+Case A × B:
+
 * Proof: If a ∈ [A] then a terminates.
 
+By induction on A, noting that in each case the definition of A(a ≤ b) requires
+`a' can reduce to WHNF.
+
 * Proof: Fundamental theorem
+
+Thm: If Γ ⊢ e : A and Γ(γ₁ ≤ γ₂) then A([γ₁]e ≤ [γ₂]e).
+By induction on Γ ⊢ e : A.
+
+** Case Γ ⊢ x : A. By definition of Γ(γ₁ ≤ γ₂).
+** Case Γ ⊢ true : A. 2(true ≤ true).
+** Case Γ ⊢ false : A. 2(false ≤ false).
+** Case: monotone lambda
+  Γ,x:A ⊢ e : B
+------------------
+Γ ⊢ λx.e : A →⁺ B
+
+TS: For any A(a₁ ≤ a₂):
+    [γ₁,a₁/x]e   ≤  [γ₁,a₂/x]e
+        ≤               ≤
+    [γ₂,a₁/x]e  ≤   [γ₂,a₂/x]e
+
+Consider any A(a₁ ≤ a₂).
+By partial reflexivity Γ(γᵢ ≤ γᵢ).
+So Γ,x:A(γᵢ,a₁/x ≤ γᵢ,a₂/x).
+So by IH [γᵢ,a₁/x]e ≤ [γᵢ,a₂/x]e.
+
+By partial reflexivity A(aᵢ ≤ aᵢ).
+So Γ,x:A(γ₁,aᵢ/x ≤ γ₂,aᵢ/x).
+So by IH [γ₁,aᵢ/x]e ≤ [γ₂,aᵢ/x]e.
+Done.
+
+** Case: discrete lambda
+ Γ,x::A ⊢ e : B
+----------------
+Γ ⊢ λx.e : A → B
+
+  TODO, expected to be similar to A →⁺ B.
+
+** TODO Case: monotone application
+Γ ⊢ e₁ : A →⁺ B  Γ ⊢ e₂ : A
+----------------------------
+      Γ ⊢ e₁ e₂ : B
+
+** TODO Case: ordinary application
+
+** Case Γ ⊢ ε : L.
+By induction on L (this is kind of funky):
+
+  Case 2. ε → false. Thus 2(ε ≤ ε).
+  Case {A}. ε → {}. Thus {A}(ε ≤ ε).
+  Case L × M. ε → (ε, ε). By IH L(ε ≤ ε) and M(ε ≤ ε). Done.
+  Case A →⁺ L. ε → λx.ε. The commuting square becomes trivial. By IH L(ε ≤ ε). Done.
+  Case A → L. ε → λx.ε. The commuting square becomes trivial. By IH L(ε ≤ ε). Done.
+
+** TODO Case ∨
+
+** TODO Case ⋁
+
+** TODO Case fix
+
+** TODO Case fix≤
