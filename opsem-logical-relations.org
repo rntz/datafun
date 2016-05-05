@@ -2,7 +2,7 @@ We use the variables a,b,c,d,e,f,g,h for closed terms.
 
 * Operational semantics
 
-We write (a → b) the transitive closure of ↦.
+We write (a → b) for the transitive closure of ↦.
 
 We write (a ↔ b) for the equivalence closure of ↦.
 
