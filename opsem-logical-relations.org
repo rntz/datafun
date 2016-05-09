@@ -1,4 +1,4 @@
-We use the variables a,b,c,d,e,f,g,h for closed terms.
+We use the variables a,b,c,f,g,h for closed terms.
 
 * Operational semantics
 
@@ -184,10 +184,25 @@ Done.
 
   TODO, expected to be similar to A →⁺ B.
 
-** TODO Case: monotone application
+** Case: monotone application
 Γ ⊢ e₁ : A →⁺ B  Γ ⊢ e₂ : A
 ----------------------------
       Γ ⊢ e₁ e₂ : B
+
+WTS: If Γ(γ₁ ≤ γ₂) then B([γ₁](e₁ e₂) ≤ [γ₂](e₁ e₂)).
+
+Let f = [γ₁]e₁ and g = [γ₂]e₁.
+Let a = [γ₁]e₂ and b = [γ₂]e₂.
+By IH, A →⁺ B(f ≤ g).
+By IH, A(a ≤ b).
+Thus we have f a  ≤  g a
+              ≤       ≤
+             f b  ≤  g b
+
+Note that f a = [γ₁]e₁ [γ₁]e₂ = [γ₁](e₁ e₂).
+Note that g b = [γ₂]e₁ [γ₂]e₂ = [γ₂](e₁ e₂).
+
+By transitivity, B(f a ≤ g b). Done.
 
 ** TODO Case: ordinary application
 
@@ -201,6 +216,11 @@ By induction on L (this is kind of funky):
   Case A → L. ε → λx.ε. The commuting square becomes trivial. By IH L(ε ≤ ε). Done.
 
 ** TODO Case ∨
+  Γ ⊢ eᵢ : L
+---------------
+Γ ⊢ e₁ ∨ e₂ : L
+
+  Case 2. By IH γⱼ[eᵢ] → vᵢⱼ for vᵢⱼ ∈ {true,false}. Hm, this is complicated.
 
 ** TODO Case ⋁
 
