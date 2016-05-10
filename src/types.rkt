@@ -62,12 +62,12 @@
   (-> type-wf? boolean?)
   (match t
     [(t-base 'bool) #t]
-    [(t-set a) (finite-type? a)]
-    [(t-map k v) (and (finite-type? k) (finite-type? v))]
-    [(t-tuple as)  (andmap finite-type? as)]
-    [(t-record as) (andmap finite-type? (hash-values as))]
-    [(t-sum as)    (andmap finite-type? (append* (hash-values as)))]
-    [(t-fun _ a b) (andmap finite-type? (list a b))]
+    [(t-set a)      (finite-type? a)]
+    [(t-map k v)    (and (finite-type? k) (finite-type? v))]
+    [(t-tuple as)   (andmap finite-type? as)]
+    [(t-record as)  (andmap finite-type? (hash-values as))]
+    [(t-sum as)     (andmap finite-type? (append* (hash-values as)))]
+    [(t-fun _ a b)  (andmap finite-type? (list a b))]
     [_ #f]))
 
 (define (fixpoint-type? t)

@@ -4,7 +4,7 @@
 
 `src/`: Implementation of datafun in Racket. `src/repl.rkt` is most useful.
 
-`paper/`: ICFP paper work in progress. Not much here yet.
+`paper/`: ICFP paper work in progress.
 
 # Datafun
 

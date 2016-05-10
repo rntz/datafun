@@ -249,25 +249,22 @@ the transitive closure of \ms{parent}. Voil\`a!
 
 \subsubsection{Transitive closure with an upper bound}
 
-The above explanation glosses over one critical requirement: \ms{fix} requires
-that the type at which the fixed-point is taken be a \emph{finite semilattice
-  eqtype}.
+The preceding explanation glosses over a critical requirement: \ms{fix} may only
+be used at \emph{finite semilattice eqtypes}. \ms{ancestor} has type
+$\Set{\ms{person} \x \ms{person}}$. Does this suffice? It's certainly a
+semilattice, since it's a set type. Since \ms{person} is effectively a sum of
+units, it supports equality, and sets and products of eqtypes are themselves
+eqtypes. Likewise, \ms{person} is finite, and products and sets of finite types
+are themselves finite.
 
-The type of \ms{ancestor} is $\Set{\ms{person} \x \ms{person}}$. Does this
-suffice? It's certainly a semilattice, since it's a set type. Since \ms{person}
-is effectively a sum of units, it supports equality, and sets and products of
-eqtypes are themselves eqtypes. Likewise, \ms{person} is finite, and products
-and sets of finite types are themselves finite.
+So! We find ourselves in the clear, for now. However, the restriction of
+\ms{fix} to finite types can be quite limiting in practice. So Datafun provides
+a more general way to take a fixed-point: specify an \emph{upper bound} which
+the fixed point may not exceed. For this we write $(\fixle{\m{x}}{e_\top} e)$,
+where $e_\top$ is our upper bound.
 
-So! We find ourselves in the clear, for now. However, in practice, the
-restriction of \ms{fix} to finite types can be quite limiting. So Datafun
-provides an more general way to take a fixed-point: provide an \emph{upper
-  bound} which the desired fixed point will not exceed. For this we write
-$(\fixle{\m{x}}{e_\top} e)$, where $e_\top$ is our upper bound.
-
-Suppose, for example, we wish to represent our \textit{dramatis personae} as
-strings $\str$ rather than defining a \ms{person} type. Then, making use of
-bounded fixed points, we could write:
+Suppose, for example, we represent our \textit{dramatis personae} as strings (an
+infinite type). We may write:
 \[\begin{array}{l}
 \ms{person} ~:~ \Set{\str}\\
 \ms{person} = \{\texttt{"e\"arendil"}, \texttt{"elrond"}, \texttt{"arwen"}\}\\
@@ -286,9 +283,8 @@ bound.
 
 However, this invariant is left to the programmer to check. What if a sloppy
 programmer should mistakenly include a person in \ms{parent} not present in
-\ms{person}? More generally, what if the ``fixed point'' $(\fixle{\m{x}}{e_\top}
-e)$ is trying to compute exceeds $e_\top$? (Or indeed, no such fixed point
-exists?)
+\ms{person}? More generally, what if the fixed point $(\fixle{\m{x}}{e_\top} e)$
+is trying to compute exceeds $e_\top$? (Or indeed, no such fixed point exists?)
 
 In that case, the value of $(\fixle{\m{x}}{e_\top} e)$ is \emph{clamped} to the
 upper bound $e_\top$. This ensures Datafun programs terminate even in the
@@ -344,6 +340,7 @@ with one $A$ for each nonterminal, and $i$ and $j$ representing
 indices into a string. Given a word $w$, we write $w[i,n]$ for the
 $n$-element substring of $w$ beginning at position $i$. Then, we can
 specify the CYK algorithm with the following two inference rules:
+
 \begin{mathpar}
   \inferrule*{B(i, j) \\ C(j, k) \\ (A \to B\; C) \in G}
              {A(i, k)}

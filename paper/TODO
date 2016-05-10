@@ -1,130 +1,38 @@
 -*- mode: org -*-
 
-* Next to-dos
-If have time:
-- moar citations
-- reformat proofs
+* Immediate future work
+- Operational semantics & adequacy theorem
+- Implement polymorphism a la Dunfield + Neel
+- Finally kill off s-expression syntax
+
+* Goals for final version
+- Situate Datafun better wrt other database languages (besides Datalog)
+  Rel.Alg., SQL, Nested Relational Calculus, Kleisli, Machiavelli
+
+- Get "contributions" onto the first page - should be accessible "at a glance".
+  Shorten or split up introduction?
+
+* To-dos
+- appendix with proofs!
 - implementation: either more info, or reformat type inference para.
-- another citation for modal logic / wiping context clean
 - Semantics: explain diagram, comonads & monads
-- think about where to put "Comparing Datalog & Datafun"
+- can we integrate "Comparing Datalog & Datafun" into another section?
+- future work: types for enforcing datalog's constructor restriction?
 
-* To cover during meeting 2016-03-14
-** Who writes the abstract and when?
-Me, at the last minute.
+** Nice-to-haves
+- SQL (vs Datalog) vs Datafun example?
+- Explanation of relation to adjoint logic
+- An example that uses the Flat lattice?
+- More related/future work:
+  - LVARs
+  - dataflow / propagators
+  - transitive closures via matrix math
+  - adjoint version which decomposes Set into Sups(Disc(P))
+  - Bloom/L?
+  - on-line monotone computation ("increasing over time" functor/monad)
 
-** Another example: SQL vs Datalog vs Datafun for simple data manipulation
-
-** Where should the comparison b/w Datalog & Datafun go?
-Can it be condensed? Put in intro?
-1. integrate into introduction? this would be nice if we could manage it without
-   confusing audience.
-
-2. after informally, or after examples
-   or integrate into "informally" section?
-
-3. after semantics
-
-Between examples and typing rules?
-after semantics?
-3. examples
-4. datalog and datafun
-
-** Rename "maps" to "dictionaries" to avoid Gibbons confusion?
-"Dictionaries" phrase more common among practitioners.
-
-** ALTERNATIVE: remove Map entirely, use {label x stmt} for that one example.
-Mention in implementation section.
-
-Seems like a good idea, simplifies everything.
-
-** Remove singleton typing rule for maps?
-No examples use it. We don't have a rule for empty maps (which we need if
-they're not of semilattice type; or we could introduce a primitive). We likewise
-have no rules for strings.
-
-** Which version of `iter' in CYK parsing?
-
-A: Use the compact version, it uses set-comprehensions, which people are
-familiar with.
-
-Should we use `case' or pattern-comprehension?
-If `case', put the first \bigvee on same line as = or below it?
-
-* To cover during meeting 2016-03-07
-** 1. Replace naturals by integers?
-We never use the fact that N is a semilattice type! Should we replace naturals N
-with integers Z?
-
-DOESN'T MUCH MATTER, WHICHEVER WE LIKE
-
-** 2. Monotone variable marking
-I've marked monotone vars in bold face to help reader. Should we *also* mark
-monotone variables in formal syntax, or no?
-
-IF IT'S EASY.
-
-** 3. how to divide up work on paper:
-Neel:
-- abstract, introduction
-- check semantics section once done, and rest of paper if have time
-- related work?
-
-Michael:
-- examples, typing rules, semantics, implementation
-- tradeoffs & limitations & related work?
-- edit/check what Neel adds
-- anonymize paper for blind reviewing
-- edit to stay within page limit (refs do NOT count against page limit)
-
-** 4. Does appendix w/ proofs need to be ready for icfp deadline?
-YES, NEEDS TO BE READY FOR THE DEADLINE
-
-** 5. What should go in "Typing rules" section?
-Explain in english the judgment and each of the typing rules. Explain all rules,
-but can say "this is standard" for ordinary rules (like products).
-
-- explain variable rule: two ordinary intuitionistic contexts, can use variables
-  from either
-
-- explain why they are two application rules app, and why regular application
-  can't use monotone variables in the argument.
-
-- explain sums (why 1 intro but 2 elims)
-
-- explain if (why 2 elims, weirdness of if^+)
-
-- explain {}, why e gets a wiped monotone context
-- explain {:} by analogy
-
-- epsilon & vee are straightforward.
-- bigvee?
-
-- fix, notation L_{fin}.
-
-** 6. What else should go in "Implementation" section?
-- we built a PoC in racket
-- we added these additional features
-- ?? ML-like surface syntax?
-- call-by-value, naive implementation
-- bidirectional typechecking (move the tradeoff stuff there?)
-- all examples in paper have been implemented
-  you can download it at the following github repository
-
-* Syntax
-  - 1-level syntax (ie, one grammar of types)
-
-  - Look at examples of using flow analyses to optimize
-    to study forgetting the order - eg:
-
-    case U([[p]]) of
-      top   -> p
-      mid x -> x
-      bot   -> skip
-
-   where [[_]] : program → Flat(bool)
-
-* Semantics
+* OLD STUFF
+** Semantics
 
   - two level
     - Set/Poset adjunction
@@ -134,7 +42,7 @@ but can say "this is standard" for ordinary rules (like products).
     - fixed points - we need finite equality lattices to ensure
       termination
 
-* Examples
+** Examples
   o Graph reachability/ancestry as running example
   o SQL-style examples:
     - do some fairly hair concrete SQL thing?
@@ -151,8 +59,8 @@ but can say "this is standard" for ordinary rules (like products).
     - ie, no infinite descending chains, but may nonterminate
       (lattice with top element)
 
-* Comparisons, tradeoffs & limitations
-** general tradeoffs & design decisions
+** Comparisons, tradeoffs & limitations
+*** general tradeoffs & design decisions
 - we don't allow general recursion, even in functions. could easily lift this
   restriction, at cost of guaranteed termination.
 
@@ -168,7 +76,7 @@ but can say "this is standard" for ordinary rules (like products).
 - we allow sets of non-equality types, which have no efficient deduplication
   strategy. only a problem if you use them. not hard to restrict if you want.
 
-** vs datalog
+*** vs datalog
 - we don't enforce constructor restriction.
   PRO: can call functional code from sets-code nicely
   CON: termination gets hairy (choose 1: finite types, bounded fixpoint, or possible nontermination)
@@ -179,7 +87,7 @@ but can say "this is standard" for ordinary rules (like products).
   PRO: sets are just another type!
   CON: optimization gets harder. how much harder? FUTURE WORK!
 
-** vs SQL
+*** vs SQL
 PRO: we are heaps more expressive, mostly
 CON: optimization??? FUTURE WORK
 CON: no (non-semilattice) aggregates yet (counting, summing, etc.)
@@ -187,7 +95,7 @@ CON: no (non-semilattice) aggregates yet (counting, summing, etc.)
      or just a Machiavelli-style hom() approach. maybe add that?
 CON: no persistence story (don't replace your databases just yet, folks)
 
-* Future work
+** Future work
 
 - optimization
   * datalog literature (magic sets?)
