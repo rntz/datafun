@@ -88,12 +88,15 @@
      (() '())
      ((decl decls) (append $1 $2)))
     (decl
+     ;; TODO: refactor this mess
      ((TYPE name = type)            (list (decl-type $2 $4)))
      ((VAL name-list1 : type)       (for/list ([n $2]) (decl-val-type n $4)))
      ((tone name-list1)             (for/list ([n $2]) (decl-val-tone n $1)))
      ((tone name-list1 : type)      (for/append ([n $2])
                                       (list (decl-val-type n $4)
                                             (decl-val-tone n $1))))
+     ((tone VAL name = expr)        (list (decl-val-tone $3 $1)
+                                          (decl-val $3 $5)))
      ((VAL name = expr)             (list (decl-val $2 $4)))
      ((FIX name = expr)             (list (decl-val $2 (e-fix $2 $4))))
      ((FUN name names1 = expr)      (list (decl-val $2 (e-lam* $3 $5))))
@@ -280,7 +283,8 @@
   (e-case cnd `(,(case-branch (p-lit #t) thn)
                 ,(case-branch (p-lit #f) els))))
 
-(define (e-let-decls decls body) (e-let-defns (decls->defns decls) body))
+(define (e-let-decls decls body)
+  (e-let-defns (decls->defns decls #:default-tone 'mono) body))
 (define (e-let-defns defns body)
   (for/fold ([body body]) ([d (reverse defns)])
     (match d

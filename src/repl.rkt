@@ -64,17 +64,11 @@
                   exprs ...))])
        expr))))
 
-;;; FIXME TODO: use (parse #:as 'decls-or-expr)!
 (define (eval-decl-or-expr line)
-  (define (on-err e1 e2)
-    (error (format "could not parse declaration: ~a
-could not parse expression: ~a" (exn-message e1) (exn-message e2))))
-  ((with-handlers-each ([exn:fail? on-err])
-     (let ([x (generate/list (parse-defns! (parse-string line #:as 'decls)
-                                           #:default-tone 'disc))])
-       (lambda () (eval-defns! x)))
-     (let ([x (parse-string line #:as 'expr)])
-       (lambda () (eval-expr x))))))
+  (match (parse-string line #:as 'decls-or-expr)
+    [`(expr ,e) (eval-expr e)]
+    [`(decls ,ds)
+     (eval-defns! (generate/list (parse-defns! ds #:default-tone 'disc)))]))
 
 (define (eval-file! filename)
   (eval-defns! (decls->defns (parse-file filename #:as 'decls)

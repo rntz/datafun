@@ -150,8 +150,7 @@ val ancestor3 = dagToPreorder person advisor
 
 (* reachability *)
 val reachable : {str, str} ~> str -> str -> bool
-fun reachable r a b = let mono domain
-                          val domain = {x | (x,_) in r}
+fun reachable r a b = let val domain = {x | (x,_) in r}
                       in (a,b) in? dagToPreorder domain r
 
 val reachableFrom : {str,str} ~> str -> {str}
@@ -169,12 +168,12 @@ type item = sym × nat × nat
 
 val parse : str -> grammar ~> {sym}
 fun parse w g =
-  let val len = strlen w
-      mono state : {item}
+  let disc val len = strlen w
+      val state : {item}
       fix state = {(a,i,k) | (a, Cat(b,c)) ∈ g
                            , (=b,i,j) ∈ state, (=c,=j,k) ∈ state}
                 ∨ (⋁((a, String(s)) ∈ g)
-                   let val n = strlen s
+                   let disc val n = strlen s
                    in {(a,i,i+n) | i ∈ range 0 (len-n), s = substr w i (i+n)})
   in {a | (a,0,=len) ∈ state}
 
