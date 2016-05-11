@@ -5,9 +5,9 @@
 (require "util.rkt")
 (provide (all-defined-out))
 
-;; Whether a variable/hypothesis, function, etc. is unrestricted, monotone, or
+;; Whether a variable/hypothesis, function, etc. is discrete, monotone, or
 ;; antitone.
-(define tone? (or/c 'any 'mono 'anti))
+(define tone? (or/c 'disc 'mono 'anti))
 (define base-type? (or/c 'bool 'nat 'str))
 
 ;; TODO?: make types, exprs, pats print better under ~a?

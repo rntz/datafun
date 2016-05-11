@@ -1,5 +1,7 @@
 #lang racket
 
+(require "util.rkt" "syntax.rkt")
+
 ;;; ========== Module with identifiers for representing Datafun ==========
 (define-syntax-rule (declare id ...)
   (begin
@@ -16,12 +18,20 @@
 
 
 ;; tones
-(declare any mono anti)
+(declare disc mono anti)
 
 ;; declaration forms
-(declare define-type value-has-type define-value)
+;; (define NAME EXPR)
+;; (has-type NAME TYPE)
+;; (has-tone NAME TONE)
+;; (type NAME TYPE)
+(declare define has-type has-tone type)
 
 ;; type forms
+;; (Name name)
+;; (Fun tone type type)
+;; (Set type)
+;; (Map type type)
 (declare Name Sum Tuple Record Fun Set Map)
 
 ;; pattern forms (that aren't also expression forms)
@@ -46,13 +56,14 @@
  ;; (lit literal)
  ;; (prim name)
  ;; (var name)
- ;; (trustme expr), moves all mono/antitone variables into unrestricted context
+ ;; (trustme expr), moves all mono/antitone variables into discrete context
  isa lit prim var trustme
 
  ;; ---------- binding ----------
- ;; (let tone name expr expr)
+ ;; (let decls expr)
+ ;; (let-value tone name expr expr)
  ;; (let-type name type expr)
- let let-type
+ let let-value let-type
 
  ;; ---------- functions ----------
  ;; (fn name expr)
@@ -64,7 +75,7 @@
  if
 
  ;; -- Notes on typechecking `if':
- ;; (if e1 empty empty) checks e1 with all vars unrestricted (a la `trustme')
+ ;; (if e1 empty empty) checks e1 with all vars discrete (a la `trustme')
  ;; (if e1 e2 empty)    is monotone in e1
  ;; (if e1 empty e2)    is antitone in e1
  ;; (if e1 e2 e3)       otherwise requires e1 to be constant
