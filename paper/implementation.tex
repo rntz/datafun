@@ -10,8 +10,9 @@ As a practical matter, type-checking needs to distinguish between ordinary and
 monotone $\lambda$, application, \ms{case}, \ms{let}, and \ms{if}. In our
 implementation we solve this in two ways:
 \begin{enumerate}
-\item Bidirectional type inference\cite{bidirectional} determines whether $\fn$s and
-  applications are ordinary or monotone.
+\item Bidirectional type inference~\cite{bidirectional} determines whether
+  $\fn$s and applications are ordinary or monotone.
+
 \item For $\ms{if}$, $\ms{case}$, and $\ms{let}$, the programmer annotates which
   form is intended; for example, $(\ifthen{e}{e_1}{\unit})$ is written
   (\texttt{when e then e1}) to indicate the rule $\ms{if}^+$ applies.

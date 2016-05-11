@@ -1,3 +1,18 @@
+* implementation via dataflow / propagators
+
+There is a natural interpretation of fixed point as creating a dataflow graph
+and then running it until quiescence (until fixed point is reached). This might
+also account for various forms of "chaotic iteration" optimization! And also for
+"iterative join" algorithms. (see also: "on-line monotone computation", further
+down)
+
+eg. (fix x is (e1, e2)) creates two dataflow nodes, one for e1, one for e2,
+which get to refer to one another!
+
+Or, (fix x = tabulate keys func) creates one dataflow node per key in `keys'.
+
+where tabulate : {K} -> (K -> V) -> {K: V}
+
 * deletion via added-removed sets?
 many logical algorithms use deletion for efficiency. as long as a deleted fact
 can never get re-added, this is still monotone in a sense! and this sense of
@@ -18,7 +33,6 @@ determine whether a function is intended to be ordinary or monotone?
 also, have to incorporate typeclass-like constraint for quantification over
 lattice types.
 
-* implementation: maybe use PLT redex?
 * Future work: generalize to {some,many,all} Eilenberg-Moore categories?
 * Future work: exploring lists, bags, and sets
 counting things, for example, is naturally a commutative-monoid-style
