@@ -7,6 +7,7 @@
 
 ;; Whether a variable/hypothesis, function, etc. is unrestricted, monotone, or
 ;; antitone.
+;; TODO: rename 'any to 'disc.
 (define tone? (or/c 'any 'mono 'anti))
 (define base-type? (or/c 'bool 'nat 'str))
 
@@ -59,6 +60,9 @@
   ;; e-cond is the mono/antitone eliminator for booleans. tone is 'mono or
   ;; 'anti. if 'mono, acts as (when arg body). if 'anti, acts as (unless arg
   ;; body).
+  ;;
+  ;; TODO: replace e-cond by e-if and special-case on having branches that are
+  ;; (e-lub).
   (e-cond tone arg body)   ;; monotone eliminator for booleans
 
   ;; ---------- sets ----------
