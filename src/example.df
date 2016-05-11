@@ -63,21 +63,21 @@ fun negate x = unless set2bool x then tt
 
 
 (* operations on sets of naturals & strings *)
-val nat_member : nat -> set nat ~> bool
+val nat_member : nat -> {nat} ~> bool
 fun nat_member a s = (a = x | x in s)
 
 (* or, using equality patterns *)
-val str_member : str -> set str ~> bool
+val str_member : str -> {str} ~> bool
 fun str_member a s = (true | =a in s)
 
-val nat_setminus : set nat ~> set nat ->- set nat
+val nat_setminus : {nat} ~> {nat} ->- {nat}
 fun nat_setminus a b = {x | x in a, not (nat_member x b)}
 
 (* set comprehension demos *)
-val some_nats : set nat
+val some_nats : {nat}
 val some_nats = ⋁(x ∈ {1,2,3}) {x, x + 10}
 
-val powers_upto : nat -> nat ~> set nat
+val powers_upto : nat -> nat ~> {nat}
 fun powers_upto b n = fix s = {1} ∨ {b*x | x in s, (b*x) <= n}
 
 (* map & filter *)
@@ -170,7 +170,7 @@ type item = sym × nat × nat
 val parse : str -> grammar ~> {sym}
 fun parse w g =
   let val len = strlen w
-      mono state : set item
+      mono state : {item}
       fix state = {(a,i,k) | (a, Cat(b,c)) ∈ g
                            , (=b,i,j) ∈ state, (=c,=j,k) ∈ state}
                 ∨ (⋁((a, String(s)) ∈ g)

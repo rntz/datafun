@@ -119,9 +119,7 @@
     (t-factor ((t-factor-) (annotate! $1)))
     (t-factor-
      ((t-atom)                      $1)
-     ((t-sum)                       (t-sum $1))
-     ((SET t-atom)                  (t-set $2))
-     ((MAP t-atom t-atom)           (t-map $2 $3)))
+     ((t-sum)                       (t-sum $1)))
 
     (t-sum
      ((t-ctor) $1)
