@@ -2,145 +2,45 @@
 
 (provide parse-port parse-string parse-file)
 
-(require "util.rkt" "ast.rkt" "debug.rkt" "source-info.rkt" "defns.rkt")
+(require "util.rkt" "ast.rkt" "defns.rkt" "source-info.rkt" "lex.rkt")
 (require parser-tools/lex parser-tools/yacc)
-(require (prefix-in : parser-tools/lex-sre))
+
+;; ========== Parameters ==========
+(define current-source-name (make-parameter #f))
 
 
 ;; ========== Public functions ==========
-(define (parse-port port #:as how)
-  ((parse-func how) (lambda () (datafun-lex port))))
+(define (parse-port port
+                    #:as how
+                    #:source-name [source-name #f])
+  (parameterize ([current-source-name source-name])
+   ((parser-for how) (lambda () (datafun-lex port)))))
 
-(define (parse-string s #:as [how 'expr])
+(define (parse-string s
+                      #:as [how 'expr]
+                      #:source-name [source-name "<string>"])
   (define port (open-input-string s))
   (port-count-lines! port)
-  (parse-port port #:as how))
+  (parse-port port #:as how #:source-name source-name))
 
-(define (parse-file filename #:as [how 'decls])
+(define (parse-file filename
+                    #:as [how 'decls]
+                    #:source-name [source-name filename])
   (call-with-input-file filename
     (lambda (port)
       (port-count-lines! port)
-      (parse-port port #:as how))))
+      (parse-port port #:as how #:source-name source-name))))
 
-
-;; ========== SYNTAX SUGAR ==========
-(define (e-lam* ids body) (foldr e-lam body ids))
-
-(define (e-if cnd thn els)
-  (e-case cnd `(,(case-branch (p-lit #t) thn)
-                ,(case-branch (p-lit #f) els))))
-
-(define (e-let-decls decls body) (e-let-defns (decls->defns decls) body))
-(define (e-let-defns defns body)
-  (for/fold ([body body]) ([d (reverse defns)])
-    (match d
-      [(d-type name type) (e-let-type name type body)]
-      [(d-val name tone type expr)
-       (e-let tone name (if type (e-ann type expr) expr) body)])))
-
-(enum loop
-  (l-in pat expr)
-  (l-cond tone expr))
-
-(define (e-loop loops body)
-  (match loops
-    ['() body]
-    [(cons (l-in p e) ls)      (e-set-bind p e (e-loop ls body))]
-    [(cons (l-cond tone e) ls) (e-cond tone e (e-loop ls body))]))
-
-(define (e-in? elt-exp set-exp)
-  (e-loop (list (l-in (p-eq elt-exp) set-exp))
-          (e-lit #t)))
-
-
-;; ========== TOKENS ==========
-(define-tokens datafun-tokens (number string id Id))
-(define-empty-tokens datafun-empty-tokens
-  (eof
-   ;; punctuation
-   LP RP LSQUARE RSQUARE LCURLY RCURLY
-   DOT COMMA : SEMI _ BAR & BARBAR &&
-   = <= < >= >
-   -> ~> ->- ->+ =>
-   + * - / ++ **
-   ∨ ∈ ⋁ • ×
-   ;; declarations
-   TYPE FUN VAL CONST MONO ANTI
-   ;; types
-   SET MAP
-   ;; expressions
-   LAMBDA LET FIX CASE IF THEN ELSE WHEN UNLESS
-   IN IN? FOR LUB
-   TRUE FALSE EMPTY))
-
-
-;; ========== LEXER ==========
-(define datafun-lex
-  (lexer-src-pos
-   ;; whitespace & comments
-   [(:+ whitespace) (return-without-pos (datafun-lex input-port))]
-   ;; we don't support nested comments yet, alas.
-   [(:: "(*" (complement (:: any-string "*)" any-string)) "*)")
-     (return-without-pos (datafun-lex input-port))]
-
-   ;; literals
-   [(:+ numeric) (token-number (string->number lexeme))]
-   [(:: "\"" (:* (:or (:~ "\"") (:: "\\" any-char))) "\"")
-    (token-string (with-input-from-string lexeme read))]
-
-   ;; punctuation and symbols
-   ["(" 'LP]      [")" 'RP]
-   ["{" 'LCURLY]  ["}" 'RCURLY]
-   ["[" 'LSQUARE] ["]" 'RSQUARE]
-   ["." 'DOT] ["," 'COMMA] [":" ':] [";" 'SEMI] ["_" '_]
-   ["|" 'BAR] ["&" '&] ["||" 'BARBAR] ["&&" '&&]
-   ["=" '=] ["<=" '<=] ["<" '<] [">=" '>=] [">" '>]
-   ["=>" '=>] ["->" '->] ["~>"  '~>] ["->+" '->+] ["->-" '->-]
-   ["→" '->] ["→⁺" '->+]
-   ["+" '+] ["-" '-] ["*" '*] ["/" '/] ["++" '++] ["**" '**]
-   ["∨" '∨] ["⋁" '⋁] ["∈" '∈] ["•" '•] ["×" '×]
-
-   ;; declaration keywords
-   ["type" 'TYPE]   ["val" 'VAL]   ["fun" 'FUN]
-   ["const" 'CONST] ["mono" 'MONO] ["anti" 'ANTI]
-
-   ;; type keywords
-   ["set" 'SET] ["map" 'MAP]
-
-   ;; expression keywords
-   [(:or "fn" "λ") 'LAMBDA] ["let" 'LET] ["fix" 'FIX] ["in" 'IN] ["case" 'CASE]
-   ["if" 'IF] ["then" 'THEN] ["else" 'ELSE]
-   ["when" 'WHEN] ["unless" 'UNLESS]
-   ["for"   'FOR]
-   [(:or "in?" "∈?") 'IN?]
-   [(:or "empty" "ε") 'EMPTY]
-   ["lub"   'LUB]
-   ["true"  'TRUE] ["false" 'FALSE]
-
-   ;; identifiers. this must come last so that we prefer to lex things as
-   ;; keywords than as identifiers.
-   [(:: (:& alphabetic lower-case)
-        (:* (:or alphabetic numeric (char-set "_"))))
-    (token-id (string->symbol lexeme))]
-   [(:: (:& alphabetic upper-case)
-        (:* (:or alphabetic numeric (char-set "_"))))
-    (token-Id (string->symbol lexeme))]))
-
-
-;; ========== GRAMMAR / PARSER ==========
-(define/match (parse-func how)
+;; Helper
+(define/match (parser-for how)
   [('expr)  expr-parse]
   [('type)  type-parse]
   [('pat)   pat-parse]
-  [('decls) decls-parse])
+  [('decls) decls-parse]
+  [((? procedure?)) how])
 
-;; magic variable-capturing macro to be used inside grammar rules.
-(define-syntax-parser annotate!
-  [(_ e ctx) (with-syntax ([start-pos (datum->syntax #'ctx '$1-start-pos)]
-                           [end-pos   (datum->syntax #'ctx '$n-end-pos)])
-               #'(with-source-info! e start-pos end-pos))]
-  [(_ e) #'(annotate! e e)]
-  [self:id #'(lambda (e) (annotate! e self))])
+
+;; ========== GRAMMAR / PARSER ==========
 
 ;; TODO: more useful error handling / error messages
 ;; TODO: print out positions better
@@ -338,6 +238,60 @@
      ((e-op)         (l-cond 'mono $1))
      ((pat IN e-op)  (l-in $1 $3))
      ((pat ∈ e-op)   (l-in $1 $3))))))
+
+
+
+;; ========== SOURCE INFO MAGIC ==========
+;; Takes (current-source-name) and the start/end position given by
+;; parser-tools/yacc, and produces a srcloc.
+(define (make-source start-pos end-pos)
+  (match-define (position start line column) start-pos)
+  (define span (- (position-offset end-pos) start))
+  (srcloc (current-source-name) line column start span))
+
+;; Magic variable-capturing macro that produces the current source info when
+;; used inside of a grammar production rule.
+(define-syntax-parser current-source-info
+  [(self) #'(current-source-info self)]
+  [(_ ctx) (with-syntax ([start-pos (datum->syntax #'ctx '$1-start-pos)]
+                         [end-pos   (datum->syntax #'ctx '$n-end-pos)])
+             #'(make-source start-pos end-pos))])
+
+;; Annotates a value with the current source info.
+(define-syntax-parser annotate!
+  [(_ e ctx) #'(with-source! e (current-source-info ctx))]
+  [(_ e) #'(annotate! e e)]
+  [self:id #'(lambda (e) (annotate! e self))])
+
+
+;; ========== SYNTAX SUGAR ==========
+(define (e-lam* ids body) (foldr e-lam body ids))
+
+(define (e-if cnd thn els)
+  (e-case cnd `(,(case-branch (p-lit #t) thn)
+                ,(case-branch (p-lit #f) els))))
+
+(define (e-let-decls decls body) (e-let-defns (decls->defns decls) body))
+(define (e-let-defns defns body)
+  (for/fold ([body body]) ([d (reverse defns)])
+    (match d
+      [(d-type name type) (e-let-type name type body)]
+      [(d-val name tone type expr)
+       (e-let tone name (if type (e-ann type expr) expr) body)])))
+
+(enum loop
+  (l-in pat expr)
+  (l-cond tone expr))
+
+(define (e-loop loops body)
+  (match loops
+    ['() body]
+    [(cons (l-in p e) ls)      (e-set-bind p e (e-loop ls body))]
+    [(cons (l-cond tone e) ls) (e-cond tone e (e-loop ls body))]))
+
+(define (e-in? elt-exp set-exp)
+  (e-loop (list (l-in (p-eq elt-exp) set-exp))
+          (e-lit #t)))
 
 
 ;; ;; TESTING
