@@ -1,6 +1,6 @@
 #lang racket
 
-(require "util.rkt" "ast.rkt" "parse.rkt" "types.rkt" "env.rkt")
+(require "util.rkt" "ast.rkt" "to-sexp.rkt" "types.rkt" "env.rkt")
 (provide elab (struct-out hyp))
 
 ;; TODO: report source-info on type error
@@ -44,50 +44,40 @@ sub-expression: ~s
 
 ;; ========== Primitives and their types ==========
 (define (prim-type-infer p)
-  ((lambda (x) (and x (parse-type x)))
-   (match p
-     [(or '+ '*) '(nat nat ~> nat)]
-     ['- '(nat ~> nat ->- nat)]
-     ['++ '(str str -> str)]
-     ['puts '(str -> (*))]
-     ['strlen '(str -> nat)]
-     ['substr '(str nat nat -> str)]
-     [_ #:when (prim? p) #f])))
+  (match p
+    [(or '+ '*) (T (~> nat nat nat))]
+    ['- (T (~> nat (->- nat nat)))]
+    ['++ (T (-> str str str))]
+    ['puts (T (-> str (*)))]
+    ['strlen (T (-> str nat))]
+    ['substr (T (-> str nat nat str))]
+    [_ #:when (prim? p) #f]))
 
 (define (prim-has-type? p t)
   (define pt (prim-type-infer p))
   (if pt
       (subtype? pt t)
       (match* (p t)
-        [('= (t-fun 'any a (t-fun 'any b (t-base 'bool)))) (eqtype=? a b)]
-        [('<= (t-fun (or 'anti 'any) a
-                     (t-fun (or 'mono 'any) b (t-base 'bool))))
+        [('= (T (-> a b bool))) (eqtype=? a b)]
+        [('<= (T (fun (or 'anti 'any) a (fun (or 'mono 'any) b bool))))
          (eqtype=? a b)]
-        [('size (t-fun (or 'mono 'any) (t-set a) (t-base 'nat))) (eqtype? a)]
-        [('keys (t-fun (or 'mono 'any) (t-map a _) (t-set b))) (eqtype=? a b)]
-        [('entries (t-fun 'any (t-map k1 v1) (t-set (t-tuple (list k2 v2)))))
+        [('size (T (fun (or 'mono 'any) (set a) nat))) (eqtype? a)]
+        [('keys (T (fun (or 'mono 'any) (map a _) (set b)))) (eqtype=? a b)]
+        [('entries (T (-> (map k1 v1) (set (* k2 v2)))))
          (and (eqtype=? k1 k2) (subtype? v1 v2))]
-        [('cross (t-fun (or 'mono 'any) (t-set a)
-                        (t-fun (or 'mono 'any)
-                               (t-set b)
-                               (t-tuple (list a1 b1)))))
+        [('cross (T (fun (or 'mono 'any) (set a) (set b) (* a1 b1))))
          (and (subtype? a a1) (subtype? b b1))]
-        [('compose (t-fun (or 'mono 'any)
-                          (t-set (t-tuple (list a b1)))
-                          (t-fun (or 'mono 'any)
-                                 (t-set (t-tuple (list b2 c)))
-                                 (t-set (t-tuple (list a1 c1))))))
+        [('compose (T (fun (or 'mono 'any)
+                           (set (* a b1)) (set (* b2 c)) (set (* a1 c1)))))
          (and (eqtype=? b1 b2) (subtype? a a1) (subtype? c c1))]
-        [('lookup (t-fun (or 'mono 'any)
-                         (t-map k v1)
-                         (t-fun 'any k (t-sum (hash-table ['none (list)]
-                                                          ['just (list v2)]
-                                                          [_ _] ...)))))
+        [('lookup (T (fun (or 'mono 'any)
+                          (map k v1)
+                          (-> k (+ [none] [just v2] ...)))))
          ;; as long as v1 & v2 are type-compatible we're ok.
          (type-compatible? v1 v2)]
         ;; print is actually *bitonic*, since it's constant, but we don't have a
         ;; way to represent that in its type.
-        [('print (t-fun _ _ (t-tuple '()))) #t]
+        [('print (T (fun _ _ (*)))) #t]
         [(_ _) #f])))
 
 
@@ -490,7 +480,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      ;; TODO: better error message
      (elab-error "constructor length mismatch"))
    (union-pat-envs (map pat-check pats types))]
-  [((p-tag _ _) _) (elab-error "not a sum")]
+  [((p-tag _ _) _) (elab-error "not a sum type: ~s" (type->sexp t))]
   [((and pat (p-and ps)) t)
    (union-pat-envs (map (lambda (p) (pat-check p t)) ps))]
   [((and pat (p-or ps)) t)

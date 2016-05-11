@@ -1,8 +1,9 @@
 #lang racket
 
-(require "util.rkt" "ast.rkt" "types.rkt" "parse.rkt" "env.rkt" "elab.rkt"
-         "runtime.rkt" "compile.rkt" "debug.rkt")
 (provide (all-defined-out))
+
+(require "util.rkt" "debug.rkt" "ast.rkt" "types.rkt" "env.rkt" "elab.rkt"
+         "defns.rkt" "parser.rkt" "runtime.rkt" "compile.rkt" "to-sexp.rkt")
 
 (define (show-err e)
   (displayln "* ERROR")
@@ -25,21 +26,22 @@
 ;; the repl
 (define (repl)
   (let/ec quit
-    (with-decl-parser
+    (with-defn-parser
       (let loop ()
         (display "- DF> ")
-        (define line (read))
+        ;; PROBLEM: can't deal with source info properly since a single defn can
+        ;; be formed from multiple different lines collated together! :(
+        (define line (read-line))
         (with-handlers ([exn:fail? show-err])
           (do-line line quit))
         (loop)))))
 
 (define (do-line line quit)
   (match line
-    [(or #:quit (? eof-object?)) (quit)]
-    [`(#:load ,filename)
-     (unless (string? filename) (error "filename must be a string"))
+    [(or (? eof-object?) (app string-trim ":quit")) (quit)]
+    [(pregexp #px"^:load\\s*(\\S+)\\s*$" (list _ filename))
      (eval-file! filename)]
-    [#:env
+    [(app string-trim ":env")
      (match-define (env vars types) (global-env))
      (for ([(name type) types])
        (printf "type ~a = ~s\n" name (type->sexp type)))
@@ -48,21 +50,32 @@
        (printf "~a : ~s = ~v\n" name (type->sexp type) value))]
     [_ (eval-decl-or-expr line)]))
 
+;; would like a better name. tries multiple things in order, returning the value
+;; of the first one that doesn't throw a given error. if all error, calls
+;; the given handler with all errors.
+(define-syntax with-handlers-each
+  (syntax-rules ()
+    ((_ ([exn-test? proc] ...) expr)
+     (with-handlers ([exn-test? proc] ...) expr))
+    ((_ ([exn-test? proc]) expr exprs ...)
+     (with-handlers
+       ([exn-test?
+         (lambda (e) (with-handlers-each ([exn-test? (curry proc e)])
+                  exprs ...))])
+       expr))))
+
 (define (eval-decl-or-expr line)
   (define (on-err e1 e2)
     (error (format "could not parse declaration: ~a
 could not parse expression: ~a" (exn-message e1) (exn-message e2))))
-  ((with-handlers ([exn:fail?
-                    (lambda (e1)
-                      (define expr
-                        (with-handlers ([exn:fail? (curry on-err e1)])
-                          (parse-expr line)))
-                      (lambda () (eval-expr expr)))])
-     (define defns (generate/list (parse-decl! line)))
-     (lambda () (eval-defns! defns)))))
+  ((with-handlers-each ([exn:fail? on-err])
+     (let ([x (generate/list (parse-defns! (parse-string line #:as 'decls)))])
+       (lambda () (eval-defns! x)))
+     (let ([x (parse-string line #:as 'expr)])
+       (lambda () (eval-expr x))))))
 
 (define (eval-file! filename)
-  (eval-defns! (parse-decls (read-file filename))))
+  (eval-defns! (decls->defns (parse-file filename #:as 'decls))))
 
 ;; performs a list of defns within a given environment.
 ;; for d-types, just binds the type name.

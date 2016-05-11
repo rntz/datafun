@@ -7,6 +7,7 @@
 
 ;; Whether a variable/hypothesis, function, etc. is unrestricted, monotone, or
 ;; antitone.
+;; TODO: rename 'any to 'disc.
 (define tone? (or/c 'any 'mono 'anti))
 (define base-type? (or/c 'bool 'nat 'str))
 
@@ -59,6 +60,9 @@
   ;; e-cond is the mono/antitone eliminator for booleans. tone is 'mono or
   ;; 'anti. if 'mono, acts as (when arg body). if 'anti, acts as (unless arg
   ;; body).
+  ;;
+  ;; TODO: replace e-cond by e-if and special-case on having branches that are
+  ;; (e-lub).
   (e-cond tone arg body)   ;; monotone eliminator for booleans
 
   ;; ---------- sets ----------
@@ -116,6 +120,38 @@
   (p-and pats)
   (p-or pats)
   (p-eq expr))
+
+
+;; Syntax sugar for types
+(define-match-expander T
+  (syntax-parser
+    #:datum-literals (bool nat str set map + * fun -> ~> ->-)
+    [(_ (~and base (~or bool nat str))) #'(t-base 'base)]
+    [(_ x:id) #'x]
+    [(_ (set t))    #'(t-set (T t))]
+    [(_ (map k v))  #'(t-map (T k) (T v))]
+    [(_ (* t ...))  #'(t-tuple (list (T t) ...))]
+    [(_ (+ (n t ...) ...)) #'(t-sum (hash-table ['n (list (T t) ...)] ...))]
+    [(_ (+ (n t ...) ... (~literal ...)))
+     #'(t-sum (hash-table ['n (list (T t) ...)] ... [_ _] (... ...)))]
+    [(_ (fun o a))       #'(T a)]
+    [(_ (fun o a r ...)) #'(t-fun o (T a) (T (fun o r ...)))]
+    [(_ (-> a ...))      #'(T (fun 'any a ...))]
+    [(_ (~> a ...))      #'(T (fun 'mono a ...))]
+    [(_ (->- a ...))     #'(T (fun 'anti a ...))])
+  (syntax-parser
+    #:datum-literals (bool nat str set map + * fun -> ~> ->-)
+    [(_ (~and base (~or bool nat str))) #'(t-base 'base)]
+    [(_ (set t))    #'(t-set (T t))]
+    [(_ (map k v))  #'(t-map (T k) (T v))]
+    [(_ (* t ...))  #'(t-tuple (list (T t) ...))]
+    [(_ (+ (n t ...) ...))
+     #'(t-sum (make-immutable-hash `((n ,(T t) ...) ...)))]
+    [(_ (fun o a))       #'(T a)]
+    [(_ (fun o a r ...)) #'(t-fun o (T a) (T (fun o r ...)))]
+    [(_ (-> a ...))      #'(T (fun 'any a ...))]
+    [(_ (~> a ...))      #'(T (fun 'mono a ...))]
+    [(_ (->- a ...))     #'(T (fun 'anti a ...))]))
 
 
 ;;; Expression & pattern stuff

@@ -1,286 +1,135 @@
-;; -*- mode: scheme -*-
-(two : nat)
-(two = 2)
+(* -*- mode: sml -*- *)
 
-
-;; subtyping tests
-(add3 : nat -> nat)
-(add3 = (+ 3))
+(* ---------- Helper functions (Figure 3 in the paper) ---------- *)
+val not : bool → bool
+fun not x = unless x then true
 
-(somefns : (set (nat -> nat)))
-(somefns = (set (+ 3) (- 4) (fn x x)))
+val range : nat → nat →⁺ {nat}
+fun range i j = fix s is {i} lub {x+1 | x ∈ s, x+1 <= j}
 
-;; this should be type-inferrable
-(mapfns1 = (map ["add3" (+ 3)] ["minus4" (- 4)]))
-(mapfns2 : (map str (nat -> nat)))
-(mapfns2 = mapfns1)
-(mapfns3 : (map str (nat -> nat)))
-(mapfns3 = (lub mapfns1 (map ["zero" (fn x 0)])))
+val length = strlen
+val substring = substr
 
-
-;; negation.
-(not : bool ->- bool)
-(not x = (unless x #t))
 
-;; any two of `not', `when', and `unless' would let us derive the third
-;; (although polymorphism might be an issue for typechecking it).
-;; for example:
-(unless-bool : bool ->- bool ~> bool)
-(unless-bool c X = (when (not c) X))
+(* ---------- 3.1 Filtering, mapping, and cross products ---------- *)
+val map: (nat → nat) → {nat} →⁺ {nat}
+fun map f a = {f x | x ∈ a}
 
-;; disjunction, eagerly
-;; this is easy because disjunction *is* the lub operator on bools.
-(or : bool bool ~> bool)
-(or x y = (lub x y))
+val filter: (nat → bool) →⁺ {nat} →⁺ {nat}
+fun filter f a = {x | x ∈ a, f x}
 
-;; conjunction, eagerly
-(and : bool bool ~> bool)
-(and x y = (when x y))
+val cross: {nat} →⁺ {nat} →⁺ {nat × nat}
+fun cross x y = {(a,b) | a ∈ x, b ∈ y}
 
-
-;; now that we have antitone negation, we can write < properly!
-(< : nat ->- nat ~> bool)
-(< x y = (not (<= y x)))
 
-;; previously, we used this hack:
-;; (< x y = (<= (+ x 1) y))
+(* ---------- 3.2 Equality, membership, and intersection ---------- *)
+val mem: nat → {nat} →⁺ bool
+fun mem x a = for (y ∈ a) x = y
 
-
-;; representing booleans as sets of units
-(triv : (*))
-(triv = (cons))
+(* unlike the paper, which uses nonlinear pattern-matching to imply tests for
+ * equality, we have to explicitly annotate patterns that test for equality. *)
+val intersect: {nat} →⁺ {nat} →⁺ {nat}
+fun intersect a b = {x | x ∈ a, =x ∈ b}
 
-(tt ff : (set (*)))
-(tt = (set triv))
-(ff = (set))
 
-(conj : (set (*)) (set (*)) ~> (set (*)))
-(conj X Y = (tt for _ in X
-                for _ in Y))
+(* ---------- 3.3 Composition of relations ---------- *)
+val compose: {nat × str} →⁺ {str × nat} →⁺ {nat × nat}
+fun compose r s = {(a,c) | (a,b) ∈ r, (=b,c) ∈ s}
 
-;; Neel calls this "guard"
-(bool->set : bool ~> (set (*)))
-(bool->set x = (when x tt))
 
-(set->bool : (set (*)) ~> bool)
-(set->bool x = (#t for _ in x))
+(* ---------- 3.4 Transitive closure ---------- *)
+type person = Earendil | Elrond | Arwen
+val parent, ancestor: {person × person}
+val parent = {(Earendil, Elrond), (Elrond, Arwen)}
+(* for convenience there is a built-in polymorphic composition operator, • *)
+val ancestor = fix x is parent ∨ (x • x)
 
-;; kind of a hack.
-(negate : (set (*)) ->- (set (*)))
-(negate X = (unless (set->bool X) tt))
+(* 3.4.1 Transitive closure with an upper bound
+ *
+ * The implementation doesn't support checking upper bounds; it just iterates
+ * until a fixed-point is reached, possibly failing to terminate.
+ *)
+val persons: {str}
+val persons = {"eärendil", "elrond", "arwen"}
+val str_parent, str_ancestor: {str × str}
+val str_parent = {("eärendil", "elrond"), ("elrond", "arwen")}
+val str_ancestor = fix x is str_parent ∨ (x • x)
 
-
-;; operations on sets of naturals
-(nat-member : nat -> (set nat) ~> bool)
-(nat-member a X = ((= a x) for x in X))
+(* 3.4.2 Generic transitive closure *)
+val trans : {str × str} →⁺ {str × str}
+fun trans e = fix x is e ∨ (x • x)
 
-;; an alternative way, using equality patterns
-(str-member : str -> (set str) ~> bool)
-(str-member a X = (#t for (= a) in X))
 
-(nat-setminus : (set nat) ~> (set nat) ->- (set nat))
-(nat-setminus X Y = (set x
-                     for x in X
-                     unless (nat-member x Y)))
+(* ---------- 3.5 CYK parsing ---------- *)
+type sym = str
+type rule = String(str) | Concat(sym, sym)
+type grammar = {sym × rule}
+type fact = sym × nat × nat
 
-;; map & filter
-(str-map : (str -> str) -> (set str) ~> (set str))
-(str-map f a = (set (f x) for x in a))
+val iter : str → grammar →⁺ {fact} →⁺ {fact}
+fun iter text g chart =
+    { (a,i,k) | (a, Concat(b,c)) ∈ g, (=b,i,j) ∈ chart, (=c,=j,k) ∈ chart }
+  ∨ { (a, i, i + strlen s)
+    | (a, String(s)) ∈ g
+    , i ∈ range 0 (length text - length s)
+    , s = substring text i (i + length s) }
 
-(str-filter : (str -> bool) (set str) ~> (set str))
-(str-filter p a = (set x for x in a when (p x)))
+val parse : str → grammar →⁺ {sym}
+fun parse text g =
+  let mono chart : {fact}
+      val chart = fix c is iter text g c
+  in {a | (a, 0, =(length text)) ∈ chart}
 
-;; set comprehensions
-(some-nats : (set nat))
-(some-nats = (for x in (set 1 2 3)
-              set x (+ 10 x)))
 
-(powers-upto : nat -> nat ~> (set nat))
-(powers-upto b n =
-  (fix P (set 1)
-         (set (* b x)
-          for x in P
-          when (<= (* b x) n))))
+(* TODO: an example grammar *)
 
-;; some things I originally didn't think Datafun could express, but it can!
-;; but only with an unrestricted fixed-point.
-(nat-subsets : (set nat) ~> (set (set nat)))
-(nat-subsets n = (fix P (set (set))
-                        (set (set x) for x in n)
-                        (set (lub x y) for x in P for y in P)))
 
-;; upto n = {x | x <= n}; includes upper bound.
-;; below n = {x | x < n}; excludes upper bound.
-(upto below : nat ~> (set nat))
-(upto n = (fix P (set 0) (set (+ x 1) for x in P when (< x n))))
-(below n = (set x for x in (upto n) when (< x n)))
+(* ---------- 3.6 Dataflow analysis ---------- *)
+type var = str
+type label = nat
+type oper = Eq | Le | Add | Sub | Mul | Div
+type atom = Var(var) | Num(nat)
+type expr = Atom(atom) | Apply(oper, atom, atom)
+type stmt = Assign(var, expr) | If(expr, label, label)
+type program = {label × stmt}
 
-;; range i j = {x | i <= x <= j}; inclusive.
-(range : nat ->- nat ~> (set nat))
-(range m n = (nat-setminus (upto n) (below m)))
+val labels : program → {label}
+fun labels p = {l | (l,_) ∈ p}
 
-
-;; ancestors example
-(person = (set "constable" "harper" "arbob"
-               "aldrich" "reynolds" "neel" "rntz"))
+val defines : stmt → {var}
+fun defines stmt = case stmt | Assign(x,_) => {x} | _ => {}
 
-(advisor = (set (cons "constable" "harper")
-                (cons "harper" "arbob")
-                (cons "reynolds" "neel")
-                (cons "aldrich" "neel")
-                (cons "neel" "rntz")))
+val atom_vars : atom -> {var}
+val expr_vars : expr -> {var}
+val uses : stmt -> {var}
+fun atom_vars x = case x | Var(x) => {x} | _ => {}
+fun expr_vars x = case x | Atom(a) => atom_vars a
+                         | Apply(_,a,b) => atom_vars a ∨ atom_vars b
+fun uses stmt = case stmt | Assign(_,e) | If (e,_,_) => expr_vars e
 
-(ancestor : (rel str str))
-(fix ancestor = (lub advisor (compose ancestor ancestor)))
+val vars : program → {var}
+fun vars p = for ((_,stmt) ∈ p) uses stmt ∨ defines stmt
 
-
-;; relation composition (also available as the "compose" primitive)
-(str-compose : (rel str str) (rel str str) ~> (rel str str))
-(str-compose X Y = (set (cons a c)
-                    for (cons a b) in X
-                    for (cons (= b) c) in Y))
+type flow = {label × label}
+val flow : program → flow
+fun flow c = for ((i,s) ∈ c)
+             case s | If(_, j, k) => {(i,j), (i,k)}
+                    | _ => {(i, i+1) | i+1 ∈? labels c}
 
-;; reflexivity
-(refl : (set str) ~> (rel str str))
-(refl X = (set (cons x x) for x in X))
+val live : program → flow →⁺ {label × var}
+fun live code flow =
+  fix live is
+  for ((i,stmt) ∈ code)
+    {(i,v) | v ∈ uses stmt}
+  ∨ {(i,v) | (=i,j) ∈ flow
+           , (=j,v) ∈ live
+           , not (v ∈? defines stmt)}
 
-;; making a relation symmetric
-(symm : (rel str str) ~> (rel str str))
-(symm X = (for (cons a b) in X
-           set (cons a b) (cons b a)))
-
-;; transitive closure, more generically
-(transitive-closure : (rel str str) ~> (rel str str))
-(transitive-closure R = (fix T R (compose R T)))
-
-(ancestor-2 = (transitive-closure advisor))
-
-;; reflexive transitive closure
-(dag->preorder : (set str) (rel str str) ~> (rel str str))
-(dag->preorder V E = (fix self (refl V) (compose self E)))
-
-(ancestor-3 = (dag->preorder person advisor))
-
-;; reachability
-(reachable : (rel str str) ~> str str -> bool)
-(reachable R a b = ((cons a b) in? (dag->preorder domain R))
-  where (mono domain = (set x for (cons x _) in R)))
-
-(ancestor? : str str -> bool)
-(ancestor? = (reachable ancestor))
-
-;; reachability, again
-(reachable-from : (rel str str) ~> str -> (set str))
-(reachable-from R start = (fix S
-    (set start)
-    (set b for (cons a b) in R
-           when (str-member a S))))
-
-
-;; CYK parsing(!)
-(type sym = str)
-(type rule = (+ (string str) (cat sym sym)))
-(type grammar = (rel sym rule))
-
-;; (cons A i j) represents that symbol A produces the substring w[i..j].
-(type item = (* sym nat nat))
-
-(parse-cat : str -> grammar ~> (set item) ~> (set item))
-(parse-cat w g prev = (set (cons sym i k)
-                       for (cons sym ('cat a b)) in g
-                       for (cons a i j) in prev
-                       for (cons b (= j) k) in prev))
-
-(parse-init : str -> grammar ~> (set item))
-(parse-init w g = (set (cons sym i (+ i (strlen s)))
-                   for (cons sym ('string s)) in g
-                   for i in (range 0 (- len (strlen s)))
-                   when (= s (substr w i (+ i (strlen s)))))
-  where (len = (strlen w)))
-
-(parse : str -> grammar ~> (set sym))
-(parse w g = (let [(mono state : (set item))
-                   (fix state = (lub (parse-init w g) (parse-cat w g state)))]
-               (set sym for (cons sym 0 (= (strlen w))) in state)))
-
-;; a grammar to test on
-(G-hello : grammar)
-(G-hello = (set (cons "S" ('cat "H" "W"))
-                (cons "H" ('string "hello"))
-                (cons "W" ('string "world"))))
-
-(test-string = "helloworld")
-
-
-;; the WHILE language & static analysis
-(type label = nat)
-(type var = str)
-
-(type bool-op  = (+ eq le))
-(type arith-op = (+ add sub mul div))
-(type imm      = (+ (var var) (num nat)))
-(type expr     = (+ (imm imm)
-                    (arith arith-op imm imm)
-                    (test bool-op imm imm)))
-(type stmt     = (+ skip
-                    (assn var expr)
-                    (if expr label label)))
-
-;; some basic helper functions
-(imm-vars : imm -> (set var))
-(imm-vars i = (case i [('var x) (set x)] [_ (set)]))
-
-(expr-vars : expr -> (set var))
-(expr-vars e = (case e
-                 [('imm i) (imm-vars i)]
-                 [(or ('arith _ a b) ('test _ a b))
-                  (union (imm-vars a) (imm-vars b))]))
-
-(stmt-uses : stmt -> (set var))
-(stmt-uses s = (case s
-                 [(or ('assn _ e) ('if e _ _)) (expr-vars e)]
-                 [_ (set)]))
-
-(stmt-defines : stmt -> (set var))
-(stmt-defines s = (case s
-                    [('assn x _) (set x)]
-                    [_ (set)]))
-
-;; code flow
-(type code = (map label stmt))
-(type flow = (rel label label))
-
-(flow : code -> flow)
-(flow C = (for (cons i s) in (entries C)
-           lub (case s
-                 [('if _ j k) (set (cons i j) (cons i k))]
-                 [_ (set (cons i (+ 1 i))
-                     when ((+ 1 i) in? (keys C)))])))
-
-;; reaching definitions analysis
-(rd : code flow -> (rel label label var))
-(rd code flow =
-    (fix RD
-     (set (cons i i v)
-        for (cons i s) in (entries code)
-        for v in (stmt-defines s))
-     (set (cons j l v)
-        for (cons j s) in (entries code)
-        ;; for any statement that flows to us
-        for (cons i (= j)) in flow
-        ;; we inherit its defined variables
-        for (cons i l v) in RD
-        ;; unless we redefine them
-        unless (v in? (stmt-defines s)))))
-
-(rd-2 : code flow -> (map label (map var (set label))))
-(rd-2 code flow = (fix RD
-  ((map [l (lub (make-map v (stmt-defines s) (set l))
-                ((map [var labels])
-                 for (cons m (= l)) in flow
-                 for var : labels in (get RD m)
-                 unless (str-member var (stmt-defines s))))])
-   for (cons l s) in (entries code))))
-
-;; ;; live variable analysis
-;; (live : code flow -> (set (* label var)))
+val reachingDefinitions : program → flow → {(label × var) × label}
+fun reachingDefinitions code flow =
+  fix rd is
+  for ((i,stmt) ∈ code)
+    {((i,v),i) | v ∈ defines stmt}
+  ∨ {((l,v),i) | (j,=i) ∈ flow
+               , ((l,v),=j) ∈ rd
+               , not (v ∈? defines stmt) }
