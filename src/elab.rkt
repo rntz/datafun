@@ -59,18 +59,18 @@ sub-expression: ~s
       (subtype? pt t)
       (match* (p t)
         [('= (T (-> a b bool))) (eqtype=? a b)]
-        [('<= (T (fun (or 'anti 'any) a (fun (or 'mono 'any) b bool))))
+        [('<= (T (fun (or 'anti 'disc) a (fun (or 'mono 'disc) b bool))))
          (eqtype=? a b)]
-        [('size (T (fun (or 'mono 'any) (set a) nat))) (eqtype? a)]
-        [('keys (T (fun (or 'mono 'any) (map a _) (set b)))) (eqtype=? a b)]
+        [('size (T (fun (or 'mono 'disc) (set a) nat))) (eqtype? a)]
+        [('keys (T (fun (or 'mono 'disc) (map a _) (set b)))) (eqtype=? a b)]
         [('entries (T (-> (map k1 v1) (set (* k2 v2)))))
          (and (eqtype=? k1 k2) (subtype? v1 v2))]
-        [('cross (T (fun (or 'mono 'any) (set a) (set b) (* a1 b1))))
+        [('cross (T (fun (or 'mono 'disc) (set a) (set b) (* a1 b1))))
          (and (subtype? a a1) (subtype? b b1))]
-        [('compose (T (fun (or 'mono 'any)
+        [('compose (T (fun (or 'mono 'disc)
                            (set (* a b1)) (set (* b2 c)) (set (* a1 c1)))))
          (and (eqtype=? b1 b2) (subtype? a a1) (subtype? c c1))]
-        [('lookup (T (fun (or 'mono 'any)
+        [('lookup (T (fun (or 'mono 'disc)
                           (map k v1)
                           (-> k (+ [none] [just v2] ...)))))
          ;; as long as v1 & v2 are type-compatible we're ok.
@@ -107,12 +107,13 @@ sub-expression: ~s
 ;; Elaboration uses envs (see env.rkt) mapping bound variables to hyp(othese)s.
 ;; Hypotheses are annotated with their tones & their types. tones can be:
 ;;
-;; - 'any, for ordinary unrestricted variables
+;; - 'disc, for discrete (unrestricted) variables
 ;; - 'mono, for monotone variables
 ;; - 'anti, for antitone variables
-;; - #f, for previously-monotone variables hidden by entry into a constant
-;;   expression
+;; - #f, for variables hidden by entry into a discrete expression
 (struct hyp (tone type) #:transparent)
+
+(define (hyp-modify-tone f h) (hyp (f (hyp-tone h)) (hyp-type h)))
 
 ;; elab-env is the parameter holding the current env.
 (define/contract elab-env (parameter/c env?) (make-parameter #f))
@@ -127,14 +128,14 @@ sub-expression: ~s
   (parameterize ([elab-env (env-bind-type name type (elab-env))]) body ...))
 
 (define (env-for-tone tone Γ)
-  (match tone
-    ['mono Γ]
-    ;; reverse the polarity!
-    ['anti (env-map-vars (match-lambda [(hyp o t) (hyp (tone-inverse o) t)]) Γ)]
-    ['any (env-map-vars (match-lambda [(hyp (not 'any) t) (hyp #f t)] [x x]) Γ)]
-    ;; hilarious hack
-    ['trustme
-     (env-map-vars (match-lambda [(hyp (not #f) t) (hyp 'any t)] [x x]) Γ)]))
+  (define update-tone
+    (match tone
+      ['mono identity]
+      ['anti tone-inverse]
+      ['disc (match-lambda ['disc 'disc] [_ #f])]
+      ;; hilarious hack
+      ['trustme (match-lambda [#f #f] [_ 'disc])]))
+  (env-map-vars (lambda (x) (hyp-modify-tone update-tone x)) Γ))
 
 
 ;;; ========== Expression elaboration ==========
@@ -202,14 +203,14 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
     ;; it would be nice if somehow we didn't need this *and* prim-has-type?
     [(e-app (and prim-expr (e-prim (and p (or '= '<= 'size 'print)))) arg)
      (define tone (match p
-                    ['= 'any]
+                    ['= 'disc]
                     ['<= 'anti]
                     [(or 'size 'print 'get) 'mono]))
      (define arg-type (with-tone tone (expr-check arg)))
      (define result-type (match p
                            ['print (t-tuple '())]
                            ['size (t-base 'nat)]
-                           ['= (t-fun 'any arg-type (t-base 'bool))]
+                           ['= (t-fun 'disc arg-type (t-base 'bool))]
                            ['<= (t-fun 'mono arg-type (t-base 'bool))]))
      (expr-check prim-expr (t-fun tone arg-type result-type))
      result-type]
@@ -220,13 +221,13 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
        [t (fail "argument to `keys' of non-map type ~s" (type->sexp t))])]
 
     [(e-app (e-prim 'entries) arg)
-     (match (with-tone 'any (expr-check arg))
+     (match (with-tone 'disc (expr-check arg))
        [(t-map k v) (t-set (t-tuple (list k v)))]
        [t (fail "argument to `entries' of non-map type ~s" (type->sexp t))])]
 
     [(e-app (e-prim 'lookup) arg)
      (match (expr-check arg)
-       [(t-map k v) (t-fun 'any k (t-sum (hash 'none '() 'just (list v))))]
+       [(t-map k v) (t-fun 'disc k (t-sum (hash 'none '() 'just (list v))))]
        [t (fail "argument to `lookup' of non-map type ~s" (type->sexp t))])]
 
     [(e-app (e-app (e-prim 'cross) arg1) arg2)
@@ -264,7 +265,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (match (expr-check arg)
        [(t-set elem-type)
         (ensure-lattice-type
-         (with-env (pat-hyps 'any pat elem-type)
+         (with-env (pat-hyps 'disc pat elem-type)
            (expr-check body type)))]
        ;; TODO: better error message
        [t (fail "iteratee has non-set type ~s" (type->sexp t))])]
@@ -275,7 +276,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
         (ensure-lattice-type
          ;; We need not be monotone in the keys, since increasing keys does not
          ;; increase the map, only adding more keys does.
-         (with-env (pat-hyps 'any key-pat key-type)
+         (with-env (pat-hyps 'disc key-pat key-type)
            ;; But we must be monotone in the value, since maps increase as their
            ;; values increase.
            (with-var value-var (hyp 'mono value-type)
@@ -292,7 +293,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (match (env-ref-var (elab-env) n (lambda () (fail "~a is not bound" n)))
        ;; TODO: better error message.
        [(hyp #f _) (fail "variable ~a is hidden due to tonicity" n)]
-       ;; [(hyp (or 'any 'mono) t) t]
+       ;; [(hyp (or 'disc 'mono) t) t]
        ;; [(hyp 'anti t) (fail "~a is an antitone variable" n)]
        ;; alternative way to phrase this:
        [(hyp o t) #:when (subtone? o 'mono) t]
@@ -334,7 +335,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      (match (expr-check keys)
        [(t-set key-type)
         (t-map key-type
-               (with-var x (hyp 'any key-type) (expr-check body)))]
+               (with-var x (hyp 'disc key-type) (expr-check body)))]
        [t (fail "iterating over non-set type ~s" (type->sexp t))])]
 
     ;; ===== ANALYSIS-ONLY TERMS ====
@@ -403,7 +404,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
 
     [(e-set '()) #:when (not type) (fail "can't infer type of empty set")]
     [(e-set elems)
-     (with-tone 'any
+     (with-tone 'disc
        (match type
          [#f (t-set (foldl1 type-lub (map expr-check elems)))]
          [(t-set a) (for ([elem elems]) (expr-check elem a)) type]
@@ -414,10 +415,10 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      ;; NB. we don't need to check the key type is an equality type; expr-check
      ;; will do that for us.
      (match type
-       [#f (t-map (foldl1 type-lub (with-tone 'any (map expr-check keys)))
+       [#f (t-map (foldl1 type-lub (with-tone 'disc (map expr-check keys)))
                   (foldl1 type-lub (map expr-check values)))]
        [(t-map kt vt)
-        (with-tone 'any (for ([k keys]) (expr-check k kt)))
+        (with-tone 'disc (for ([k keys]) (expr-check k kt)))
         (for ([v values]) (expr-check v vt))
         type]
        [_ (fail "map expression must have map type")])]
@@ -430,13 +431,13 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
      ;; TODO: think about when it might be ok not to hide the monotone
      ;; environment when typechecking the case-subject. I think only for
      ;; irrefutable patterns, a la (let p = e in e)?
-     (define subj-t (with-tone 'any (expr-check subj #f)))
+     (define subj-t (with-tone 'disc (expr-check subj #f)))
 
      (define/match (visit-branch branch)
        [((case-branch pat body))
-        ;; it's okay to use 'any here ONLY because we hid the monotone
+        ;; it's okay to use 'disc here ONLY because we hid the monotone
         ;; environment when checking subj.
-        (with-env (pat-hyps 'any pat subj-t)
+        (with-env (pat-hyps 'disc pat subj-t)
           (expr-check body type))])
 
      (define branch-types (map visit-branch branches))

@@ -57,7 +57,6 @@
 
 
 ;;; Exceptions
-;;; TODO?: remove this, unused?
 (provide exception)
 
 (define-syntax-parser exception

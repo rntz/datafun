@@ -56,8 +56,7 @@
      [(e-cond 'anti subj body) `(unless ,(expr->sexp subj) ,(expr->sexp body))]
      [(e-fix var body) `(fix ,var ,(expr->sexp body))]
      [(e-let tone var expr body)
-      `(let ([,@(match tone ['any '()] ['mono '(mono)] ['anti '(anti)])
-              ,var = ,(expr->sexp expr)])
+      `(let ([,tone ,var = ,(expr->sexp expr)])
          ,(expr->sexp body))]
      [(e-let-type name type body)
       `(let ([type ,name = ,(type->sexp type)])
@@ -111,7 +110,7 @@
          [(t-fun tone2 a b) #:when (equal? tone tone2)
           (loop (cons a args) b)]
          [_ `(,@(map type->sexp (reverse args))
-              ,(match tone ['any '->] ['mono '~>] ['anti '->-])
+              ,(match tone ['disc '->] ['mono '~>] ['anti '->-])
               ,(type->sexp result))]))]))
 
 (define (arrow-type->sexp t)

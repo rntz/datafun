@@ -17,7 +17,7 @@
    + * - / ++ **
    ∨ ∈ ⋁ • ×
    ;; declarations
-   TYPE FUN VAL CONST MONO ANTI
+   TYPE FUN VAL DISC MONO ANTI
    ;; types
    SET MAP
    ;; expressions
@@ -54,7 +54,7 @@
 
    ;; declaration keywords
    ["type" 'TYPE]   ["val" 'VAL]   ["fun" 'FUN]
-   ["const" 'CONST] ["mono" 'MONO] ["anti" 'ANTI]
+   ["disc" 'DISC]   ["mono" 'MONO] ["anti" 'ANTI]
 
    ;; type keywords
    ;; ["set" 'SET] ["map" 'MAP]

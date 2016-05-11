@@ -73,9 +73,6 @@
 (define (fixpoint-type? t)
   ;; for now this is all it takes. if we ever introduce lattice types which have
   ;; infinite descending chains, this'll get more complicated.
-  ;;
-  ;; also, functions of finite type should perhaps be allowed, but that's really
-  ;; because they're secretly equality types. (TODO?)
   (and (lattice-type? t) (eqtype? t)))
 
 
@@ -136,18 +133,18 @@
 
 
 ;; ========== The tone lattice ==========
-;; any <: mono, any <: anti
+;; (disc <: mono) and (disc <: anti)
 (define (subtone? o1 o2) (equal? o2 (tone-unify #t o1 o2)))
 
 (define/match (tone-unify lub? o p)
   [(_ x x) x]
-  [(#f _ _) 'any]
-  [(#t 'any x) x]
-  [(#t x 'any) x]
+  [(#f _ _) 'disc]
+  [(#t 'disc x) x]
+  [(#t x 'disc) x]
   [(#t _ _) (type-error "tones have no lub: ~a, ~a" o p)])
 
 (define/match (tone-inverse o)
-  [('any) 'any]
+  [('disc) 'disc]
   [('mono) 'anti]
   [('anti) 'mono]
   [(#f) #f])

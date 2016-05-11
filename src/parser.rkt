@@ -37,6 +37,7 @@
   [('type)  type-parse]
   [('pat)   pat-parse]
   [('decls) decls-parse]
+  [('decls-or-expr) decls-or-expr-parse]
   [((? procedure?)) how])
 
 
@@ -55,15 +56,20 @@
     [(#f _) (error (format "invalid token (~v, ~v)" start-pos end-pos))]))
 
 ;; this still has some shift-reduce conflicts, but I don't care.
-(match-define (list decls-parse type-parse pat-parse expr-parse)
+(match-define (list decls-parse type-parse pat-parse expr-parse
+                    decls-or-expr-parse)
   (parser
-   (start decls type pat expr)
+   (start decls type pat expr decls-or-expr)
    (src-pos)
    (tokens datafun-tokens datafun-empty-tokens)
    (error parse-error)
    (end eof)
 
    (grammar
+    (decls-or-expr
+     ((decls) `(decls ,$1))
+     ((expr)  `(expr ,$1)))
+
     ;; names - like identifiers, but allowing binding of infix operators.
     (name ((id) $1) ((LP oper RP) $2))
     (names (() '()) ((name names) (cons $1 $2)))
@@ -95,7 +101,7 @@
       (list (decl-val $4 (e-lam $3 (e-lam $5 $8))))))
 
     (tone? (() '()) ((tone) (list $1)))
-    (tone ((CONST) 'any) ((MONO) 'mono) ((ANTI) 'anti))
+    (tone ((DISC) 'disc) ((MONO) 'mono) ((ANTI) 'anti))
 
     ;; ----- types -----
     ;; TODO: record types
@@ -103,7 +109,7 @@
     (t-fun ((t-fun-) (annotate! $1)))
     (t-fun-
      ((t-arg)           $1)
-     ((t-arg ->  t-fun) (t-fun 'any  $1 $3))
+     ((t-arg ->  t-fun) (t-fun 'disc $1 $3))
      ((t-arg ~>  t-fun) (t-fun 'mono $1 $3))
      ((t-arg ->+ t-fun) (t-fun 'mono $1 $3))
      ((t-arg ->- t-fun) (t-fun 'anti $1 $3)))
@@ -267,6 +273,7 @@
 
 
 ;; ========== SYNTAX SUGAR ==========
+;; TODO?: syntax sugar for projecting a set of fields from a record?
 (define (e-lam* ids body) (foldr e-lam body ids))
 
 (define (e-if cnd thn els)

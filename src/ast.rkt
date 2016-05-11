@@ -7,11 +7,9 @@
 
 ;; Whether a variable/hypothesis, function, etc. is unrestricted, monotone, or
 ;; antitone.
-;; TODO: rename 'any to 'disc.
-(define tone? (or/c 'any 'mono 'anti))
+(define tone? (or/c 'disc 'mono 'anti))
 (define base-type? (or/c 'bool 'nat 'str))
 
-;; TODO?: make types, exprs, pats print better under ~a?
 (enum type
   (t-name name) ;; types defined by a type decl
   (t-base name)
@@ -99,7 +97,6 @@
   (e-proj index expr)
   ;; fields is a hash from field names (as symbols) to exprs
   (e-record fields)
-  ;; TODO?: e-record-project (project a set of fields, like in rel.alg.)
   (e-record-merge left right) ;; merges two records, right-biased.
 
   ;; ---------- sums ----------
@@ -136,7 +133,7 @@
      #'(t-sum (hash-table ['n (list (T t) ...)] ... [_ _] (... ...)))]
     [(_ (fun o a))       #'(T a)]
     [(_ (fun o a r ...)) #'(t-fun o (T a) (T (fun o r ...)))]
-    [(_ (-> a ...))      #'(T (fun 'any a ...))]
+    [(_ (-> a ...))      #'(T (fun 'disc a ...))]
     [(_ (~> a ...))      #'(T (fun 'mono a ...))]
     [(_ (->- a ...))     #'(T (fun 'anti a ...))])
   (syntax-parser
@@ -149,7 +146,7 @@
      #'(t-sum (make-immutable-hash `((n ,(T t) ...) ...)))]
     [(_ (fun o a))       #'(T a)]
     [(_ (fun o a r ...)) #'(t-fun o (T a) (T (fun o r ...)))]
-    [(_ (-> a ...))      #'(T (fun 'any a ...))]
+    [(_ (-> a ...))      #'(T (fun 'disc a ...))]
     [(_ (~> a ...))      #'(T (fun 'mono a ...))]
     [(_ (->- a ...))     #'(T (fun 'anti a ...))]))
 

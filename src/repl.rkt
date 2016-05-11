@@ -15,7 +15,7 @@
 (define/contract global-env (parameter/c env?) (make-parameter empty-env))
 
 (define (global-elab-env [globals (global-env)])
-  (env-map-vars (lambda (g) (hyp 'any (global-type g))) globals))
+  (env-map-vars (lambda (g) (hyp 'disc (global-type g))) globals))
 
 (define (global-compile-env [globals (global-env)])
   ;; this is a terrible hack that only works because racket is amazing
@@ -64,25 +64,28 @@
                   exprs ...))])
        expr))))
 
+;;; FIXME TODO: use (parse #:as 'decls-or-expr)!
 (define (eval-decl-or-expr line)
   (define (on-err e1 e2)
     (error (format "could not parse declaration: ~a
 could not parse expression: ~a" (exn-message e1) (exn-message e2))))
   ((with-handlers-each ([exn:fail? on-err])
-     (let ([x (generate/list (parse-defns! (parse-string line #:as 'decls)))])
+     (let ([x (generate/list (parse-defns! (parse-string line #:as 'decls)
+                                           #:default-tone 'disc))])
        (lambda () (eval-defns! x)))
      (let ([x (parse-string line #:as 'expr)])
        (lambda () (eval-expr x))))))
 
 (define (eval-file! filename)
-  (eval-defns! (decls->defns (parse-file filename #:as 'decls))))
+  (eval-defns! (decls->defns (parse-file filename #:as 'decls)
+                             #:default-tone 'disc)))
 
 ;; performs a list of defns within a given environment.
 ;; for d-types, just binds the type name.
 ;; for d-vals, evaluates the code & binds the name.
 (define (eval-defns! defns)
   ;; we check ALL defns before evaluating ANY of them
-  (for ([d defns] #:when (match? d (d-val _ (not 'any) _ _)))
+  (for ([d defns] #:when (match? d (d-val _ (not 'disc) _ _)))
     (error "monotone/antitone definitions not allowed at top-level: " d))
   (for ([d defns])
     (eval-defn! d)))
@@ -91,7 +94,7 @@ could not parse expression: ~a" (exn-message e1) (exn-message e2))))
 (define/match (eval-defn! d)
   [((d-type name type))
    (global-env (env-bind-type name type (global-env)))]
-  [((d-val name 'any decl-type expr))
+  [((d-val name 'disc decl-type expr))
    (debug eval (printf "defn: ~a = ~s\n" name (expr->sexp expr)))
    ;; elaborate the expression.
    (define-values (elab-info type)
