@@ -266,12 +266,12 @@ where $e_\top$ is our upper bound.
 Suppose, for example, we represent our \textit{dramatis personae} as strings (an
 infinite type). We may write:
 \[\begin{array}{l}
-\ms{person} ~:~ \Set{\str}\\
-\ms{person} = \{\texttt{"e\"arendil"}, \texttt{"elrond"}, \texttt{"arwen"}\}\\
+\ms{persons} ~:~ \Set{\str}\\
+\ms{persons} = \{\texttt{"e\"arendil"}, \texttt{"elrond"}, \texttt{"arwen"}\}\\
 \ms{parent}, \ms{ancestor} ~:~ \Set{\str \x \str}\\
 \ms{parent} = \{(\texttt{"e\"arendil"}, \texttt{"elrond"}),
 (\texttt{"elrond"}, \texttt{"arwen"})\}\\
-\ms{ancestor} = \fixle{\m{X}}{(\ms{person} \x \ms{person})}
+\ms{ancestor} = \fixle{\m{X}}{(\ms{persons} \x \ms{persons})}
 \ms{parent} \vee (\m{X} \bullet \m{X})
 \end{array}\]
 
