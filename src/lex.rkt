@@ -21,7 +21,7 @@
    ;; types
    SET MAP
    ;; expressions
-   LAMBDA LET FIX CASE IF THEN ELSE WHEN UNLESS
+   LAMBDA LET CASE IF THEN ELSE WHEN UNLESS FIX IS
    IN IN? FOR LUB
    TRUE FALSE EMPTY))
 
@@ -60,7 +60,8 @@
    ["set" 'SET] ["map" 'MAP]
 
    ;; expression keywords
-   [(:or "fn" "λ") 'LAMBDA] ["let" 'LET] ["fix" 'FIX] ["in" 'IN] ["case" 'CASE]
+   [(:or "fn" "λ") 'LAMBDA] ["let" 'LET] ["in" 'IN] ["case" 'CASE]
+   ["fix" 'FIX] ["is" 'IS]
    ["if" 'IF] ["then" 'THEN] ["else" 'ELSE]
    ["when" 'WHEN] ["unless" 'UNLESS]
    ["for"   'FOR]

@@ -114,6 +114,7 @@
 
     (t-product
      ((t-factor)              (list $1))
+     ((t-factor × t-product)  (cons $1 $3))
      ((t-factor * t-product)  (cons $1 $3)))
     (t-factor ((t-factor-) (annotate! $1)))
     (t-factor-
@@ -159,6 +160,7 @@
      ((name)            (p-var $1))
      ((lit)             (p-lit $1))
      ((_)               (p-wild))
+     ;; TODO: .expr as a synonym for =expr
      ((= expr)          (p-eq $2))
      ;; TODO: precedence, associativity of `|', `&'
      ((pat BAR pat)     (p-or (list $1 $3)))
@@ -182,7 +184,9 @@
      ((WHEN e-op THEN expr)         (e-cond 'mono $2 $4))
      ((UNLESS e-op THEN expr)       (e-cond 'anti $2 $4))
      ((FIX name = expr)             (e-fix $2 $4))
+     ((FIX name IS expr)            (e-fix $2 $4))
      ((FIX name : type = expr)      (e-ann $4 (e-fix $2 $6)))
+     ((FIX name : type IS expr)     (e-ann $4 (e-fix $2 $6)))
      ((⋁ LP loops RP expr)          (e-loop $3 $5))
      ((FOR LP loops RP expr)        (e-loop $3 $5))
      ((e-op : type)                 (e-ann $3 $1))
