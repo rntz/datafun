@@ -167,8 +167,7 @@
      ((name)            (p-var $1))
      ((lit)             (p-lit $1))
      ((_)               (p-wild))
-     ;; TODO: .expr as a synonym for =expr
-     ((= expr)          (p-eq $2))
+     ((DOT expr)        (p-eq $2))
      ;; TODO: precedence, associativity of `|', `&'
      ((pat BAR pat)     (p-or (list $1 $3)))
      ((pat & pat)       (p-and (list $1 $3)))
