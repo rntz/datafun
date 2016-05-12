@@ -381,7 +381,7 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
         ;; has all the necessary fields.
         (t-record (for/hash ([(n e) fields])
                     (define (err) (fail "extra field: ~a" n))
-                    (values n (expr-check e (hash-ref field-types e err)))))]
+                    (values n (expr-check e (hash-ref field-types n err)))))]
        [_ (fail "record expression must have record type")])]
 
     [(e-tag name exprs)

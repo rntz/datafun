@@ -142,8 +142,11 @@
     (t-atom-
      ((id) (if (base-type? $1) (t-base $1) (t-name $1)))
      ((LP t-paren RP)                 $2)
+     ;; TODO: error on duplicate field names
+     ((LSQUARE t-fields RSQUARE)      (t-record (make-immutable-hash $2)))
      ((LCURLY t-paren RCURLY)         (t-set $2))
      ((LCURLY type : t-paren RCURLY)  (t-map $2 $4)))
+
     ;; `t-paren' is a type inside parentheses or similar.
     (t-paren ((t-paren-) (annotate! $1)))
     (t-paren-
@@ -154,6 +157,11 @@
      (()                   '())
      ((type)               (list $1))
      ((type COMMA t-list)  (cons $1 $3)))
+
+    (t-fields (() '())
+              ((t-field) (list $1))
+              ((t-field COMMA t-fields) (cons $1 $3)))
+    (t-field ((name : type) (cons $1 $3)))
 
     ;; ----- literals -----
     (lit ((number)      $1)
@@ -214,16 +222,27 @@
      ((e-atom)         $1))
     (e-atom ((e-atom-) (annotate! $1)))
     (e-atom-
+     ((e-atom DOT name)                 (e-proj $3 $1))
      ((name)                            (if (prim? $1) (e-prim $1) (e-var $1)))
      ((lit)                             (e-lit $1))
      ((EMPTY)                           (e-lub '()))
      ((LP expr RP)                      $2)
      ((LP expr BAR loops RP)            (e-loop $4 $2))
      ((LP e-list* RP)                   (e-tuple $2))
+     ;; records
+     ;; TODO: error on duplicate field identifiers.
+     ((LSQUARE e-fields RSQUARE)        (e-record (make-immutable-hash $2)))
+     ;; sets, set comprehensions
      ((LCURLY e-list RCURLY)            (e-set $2))
      ((LCURLY e-op BAR loops RCURLY)    (e-loop $4 (e-set (list $2))))
+     ;; maps
      ((LCURLY : RCURLY)                 (e-map '()))
      ((LCURLY e-kv-list1 RCURLY)        (e-map $2)))
+
+    (e-fields (() '())
+              ((e-field)                (list $1))
+              ((e-field COMMA e-fields) (cons $1 $3)))
+    (e-field  ((name : expr)            (cons $1 $3)))
 
     (e-kv ((e-op : e-op) (list $1 $3)))
     (e-kv-list1
