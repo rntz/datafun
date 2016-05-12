@@ -249,7 +249,7 @@
 (define (hash-intersection-with a b f)
   (for/hash ([k (in-dict-keys a)]
               #:when (dict-has-key? b k))
-    (f (dict-ref a k) (dict-ref b k))))
+    (values k (f (dict-ref a k) (dict-ref b k)))))
 
 
 ;;; Racket 6.2 to 6.3 compatibility shims
