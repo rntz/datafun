@@ -92,6 +92,22 @@ val nat_cross : {nat} ~> {nat} ~> {nat * nat}
 fun nat_cross a b = {(x,y) | x ∈ a, y ∈ b}
 
 
+(* record demos & SQL-like examples *)
+type person = [name: str, age: nat]
+val john, mary : person
+val john = [name: "John", age: 27]
+val mary = [name: "Mary", age: 40]
+
+val ages: {str: nat}
+val ages = {john.name: john.age, mary.name: mary.age}
+
+val salaries = { [person: "john", salary: 10], [person: "mary", salary: 10] }
+val employee_depts = { [person: "john", department: "sales"]
+                     , [person: "mary", department: "engineering"] }
+
+(* hm, can't do aggregation yet *)
+
+
 (* some things I originally thought datafun couldn't do, but it can!
  * only using unbounded fixed-points, though. *)
 val nat_subsets : {nat} ~> {{nat}}
