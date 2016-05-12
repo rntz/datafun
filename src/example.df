@@ -172,7 +172,7 @@ fun parse w g =
       val state : {item}
       fix state = {(a,i,k) | (a, Cat(b,c)) ∈ g
                            , (=b,i,j) ∈ state, (=c,=j,k) ∈ state}
-                ∨ (⋁((a, String(s)) ∈ g)
+                ∨ (for ((a, String(s)) ∈ g)
                    let disc val n = strlen s
                    in {(a,i,i+n) | i ∈ range 0 (len-n), s = substr w i (i+n)})
   in {a | (a,0,=len) ∈ state}
@@ -218,7 +218,7 @@ fun defines s = case s | Assign(v,_) => {v} | _ => {}
 type flow = {label, label}
 
 val flow : code -> flow
-fun flow code = ⋁((i,s) ∈ entries code)
+fun flow code = for ((i,s) ∈ entries code)
                 case s | If(_,j,k) => {(i,j), (i,k)}
                        | _ => {(i,i+1) | i+1 ∈? keys code}
 
@@ -228,9 +228,9 @@ fun flow code = ⋁((i,s) ∈ entries code)
  *)
 val live : code -> flow -> {label, var}
 fun live code flow =
-  fix self = ⋁((i,s) ∈ entries code)
-              {(i,v) | v ∈ uses s}
-              ∨ {(i,v) | (=i,j) ∈ flow, (=j,v) ∈ self, not (v ∈? defines s)}
+  fix self = for ((i,s) ∈ entries code)
+               {(i,v) | v ∈ uses s}
+             ∨ {(i,v) | (=i,j) ∈ flow, (=j,v) ∈ self, not (v ∈? defines s)}
 
 (* reaching definitions analysis
  * produces a set of tuples (i, l, v)
@@ -240,10 +240,10 @@ fun live code flow =
  *)
 val rd : code -> flow -> {label, label, var}
 fun rd code flow =
-  fix self = ⋁((i,s) ∈ entries code)
-              {(i, i, v) | v ∈ defines s}
-              ∨ {(i, l, v) | (j, =i) ∈ flow, (=j, l, v) ∈ self
-                           , not (v ∈? defines s)}
+  fix self = for ((i,s) ∈ entries code)
+               {(i, i, v) | v ∈ defines s}
+             ∨ {(i, l, v) | (j, =i) ∈ flow, (=j, l, v) ∈ self
+                          , not (v ∈? defines s)}
 
 (* possible value analysis *)
 (* type values = {label * var: flat nat} *)
