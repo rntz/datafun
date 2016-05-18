@@ -70,6 +70,9 @@ sub-expression: ~s
         [('compose (T (fun (or 'mono 'disc)
                            (set (* a b1)) (set (* b2 c)) (set (* a1 c1)))))
          (and (eqtype=? b1 b2) (subtype? a a1) (subtype? c c1))]
+        ;; TODO: type for 'aggregate is not as general as possible
+        [('aggregate (T (-> (fun _ a b) c (fun _ b c c) (set a) c)))
+         (eqtype? a)]
         [('lookup (T (fun (or 'mono 'disc)
                           (map k v1)
                           (-> k (+ [none] [just v2] ...)))))
@@ -243,6 +246,13 @@ but key type ~s is not an equality type" (type->sexp expr-type) (type->sexp k))]
           (fail "arguments to `compose' have incompatible types"))
         (t-set (t-tuple (list a c)))]
        [(_ _) (fail "argument to `compose' of non-set-of-pairs type")])]
+
+    [(e-app (e-app (e-prim 'aggregate) proj-func) init)
+     (match* ((expr-check proj-func) (expr-check init))
+       [((t-fun _ a b) c)
+        (unless (eqtype? a)
+          (fail "cannot aggregate at non-eqtype ~s" (type->sexp a)))
+        (T (-> (-> b c c) (set a) c))])]
 
     ;; ===== TRANSPARENT / BOTH SYNTHESIS AND ANALYSIS EXPRESSIONS =====
     [(e-trustme e) (with-tone 'trustme (expr-check e type))]

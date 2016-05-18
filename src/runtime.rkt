@@ -32,6 +32,11 @@
   (for*/set ([x a] [y b] #:when (equal? (second x) (first y)))
     (list (first x) (second y))))
 
+;; aggregate: (a -> b) -> c -> (b -> c -> c) -> {a} -> c
+(define ((((df-aggregate proj) init) combine) elems)
+  (for/fold ([accum init]) ([e elems])
+    ((combine (proj e)) accum)))
+
 ;; dynamic diiiiiiiispaaaaaaaaatch b/c why not
 (define/match (df<= a)
   [(#f) (const #t)]

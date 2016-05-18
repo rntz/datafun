@@ -125,4 +125,5 @@
     ['substr  #'df-substr]
     ['lookup  #'df-lookup]
     ['cross   #'df-cross]
-    ['compose #'df-compose]))
+    ['compose #'df-compose]
+    ['aggregate #'df-aggregate]))

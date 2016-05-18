@@ -92,6 +92,14 @@ val nat_cross : {nat} ~> {nat} ~> {nat * nat}
 fun nat_cross a b = {(x,y) | x ∈ a, y ∈ b}
 
 
+(* aggregation demo
+ * aggregate : (a -> b) -> c -> (b -> c -> c) -> {a} -> c
+ * for a an eqtype
+ *)
+val sum_lengths: {str} -> nat
+fun sum_lengths s = aggregate strlen 0 (+) s
+
+
 (* record demos & SQL-like examples *)
 type person = [name: str, age: nat]
 val john, mary: person
@@ -105,7 +113,17 @@ val salaries = { [person: "john", salary: 10], [person: "mary", salary: 10] }
 val employee_depts = { [person: "john", department: "sales"]
                      , [person: "mary", department: "engineering"] }
 
-(* hm, can't do aggregation yet *)
+(* wow, this is awkward. *)
+val get_salary: [person: str, salary: nat] -> nat
+fun get_salary x = x.salary
+
+val salary_total: nat
+val salary_total = aggregate get_salary 0 (+) salaries
+(* maybe syntax like:
+ * for (x in salaries) aggregate (0, accum => accum + x.salary) *)
+
+(* val salary_total_per_department: {str, nat}
+ * val salary_total_per_department = ??? *)
 
 
 (* some things I originally thought datafun couldn't do, but it can!
