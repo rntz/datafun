@@ -136,6 +136,7 @@
   (syntax-parser
     #:datum-literals (bool nat str set map + * fun -> ~> ->-)
     [(_ (~and base (~or bool nat str))) #'(t-base 'base)]
+    [(_ x:id) #'x]
     [(_ (set t))    #'(t-set (T t))]
     [(_ (map k v))  #'(t-map (T k) (T v))]
     [(_ (* t ...))  #'(t-tuple (list (T t) ...))]

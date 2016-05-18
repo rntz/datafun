@@ -94,7 +94,7 @@ fun nat_cross a b = {(x,y) | x ∈ a, y ∈ b}
 
 (* record demos & SQL-like examples *)
 type person = [name: str, age: nat]
-val john, mary : person
+val john, mary: person
 val john = [name: "John", age: 27]
 val mary = [name: "Mary", age: 40]
 
