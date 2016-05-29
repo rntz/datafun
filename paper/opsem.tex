@@ -1,0 +1,186 @@
+\documentclass{article}
+
+\usepackage[margin=1in]{geometry}
+
+\usepackage{datafun}
+
+%% ---------- New commands
+\newcommand{\hole}{[\,]}
+
+%% type-annotated semilattice operatoins
+\newcommand{\tforin}[2]{\bigvee_{#1}(#2)\ }
+\newcommand{\tfix}[2]{\ms{fix}_{#1}~{#2}~\ms{is}~}
+\newcommand{\tfixle}[3]{\tfix{#1}{#2 \le #3}}
+
+%% iteration forms, used in evalution of fix
+\newcommand{\iter}[3]{\ms{iter}({#1}; \bind{#2}#3)}
+\newcommand{\iterstep}[4]{\ms{iter}({#1}; {#2}; {\bind{#3}#4})}
+\newcommand{\iterle}[4]{\ms{iter}_\le({#1}; {#2}; \bind{#3}{#4})}
+\newcommand{\iterlestep}[5]{\ms{iter}_\le({#1}; {#2}; {#3}; \bind{#4}{#5})}
+
+\newcommand{\step}{\mapsto}
+
+%% ---------- End new commands
+
+
+\begin{document}
+
+\section{Structural operational semantics}
+
+In our operational semantics we:
+\begin{enumerate}
+\item Assume an elaboration step which subscripts all semilattice operations
+($\unit$, $\vee$, $\bigvee$, $\ms{fix}$) with their type.
+\item Do not distinguish discrete from monotone variables, and write $x,y$ for
+  arbitrary variables.
+\item Ignore the types $\N$ and $\str$ and their corresponding expression forms.
+\item Add \ms{iter}
+expressions as intermediate forms ocurring in the evaluation of \ms{fix}.
+\item Classify some expressions $e$ as values $v$, and add a value-form
+  $\setlit{\vec{v}}$ for finite sets.
+\end{enumerate}
+
+\[\begin{array}{rccl}
+  %% expressions
+  \textsf{expressions} & e
+  &\bnfeq& ... \pipe \unit_L \pipe e \vee_L e \pipe \tforin{L}{x \in e} e
+  \pipe \tfix{L}{x}{e} \pipe \tfixle{L}{x}{e}{e}\\
+  &&& \ms{iter}_{\eq{A}}(e; \bind{x} e) \pipe \iterstep{e}{e}{x}{e}
+  \pipe \iterle{e}{e}{x}{e} \pipe \iterlestep{e}{e}{e}{x}{e}\\
+  &&& \setlit{\vec{v}}
+  \vspace{0.5em}\\
+  %% values
+  \textsf{values} & v,u
+  &\bnfeq& \fn\bind{x} e \pipe (v, v) \pipe \ms{in}_i\; v
+  \pipe \ms{true} \pipe \ms{false} \pipe \setlit{\vec{v}}
+  \vspace{0.5em}\\
+  %% contexts
+  \textsf{contexts} & C
+  &\bnfeq& \hole \pipe C\;e \pipe v\;C \pipe (C, e) \pipe (v, C) \pipe \ms{in}_i\;C
+  \pipe \pi_i \; C\\
+  &&& C \vee_L e \pipe v \vee_L C \pipe \tforin{L}{x \in C} e\\
+  &&& \ifthen{C}{e}{e} \pipe \case{C}{a}{e}{a}{e}\\
+  &&& \iter{C}{x}{e} \pipe \iterstep{v}{C}{x}{e}\\
+  &&& \iterle{C}{e}{x}{e} \pipe \iterle{v}{C}{x}{e}
+  \pipe \iterlestep{v}{v}{C}{x}{e}
+\end{array}\]
+
+
+\subsection{Equality and inequality}
+
+First, we give rules for the judgments $v \le v : \eq{A}$ and $v = v : \eq{A}$:
+\begin{mathpar}
+  \infer{\ms{false} \le \ms{false} : 2}{}
+  \and
+  \infer{\ms{false} \le \ms{true} : 2}{}
+  \and
+  \infer{\ms{true} \le \ms{true} : 2}{}
+  \and
+  \infer{(v_1, u_1) \le (v_2, u_2) : \eq{A} \x \eq{B}}{
+    v_1 \le v_2 : \eq{A} & u_1 \le u_2 : \eq{B}}
+  \and
+  \infer{\ms{in}_i\; v \le \ms{in}_i\; u : \eq{A}_1 + \eq{A}_2}{v \le u : \eq{A}_i}
+  \and
+  %% rules for set inequality
+  \infer[\rn{\subseteq}]{\setlit{\vec{v_i}} \le \setlit{\vec{u_i}} : \Set{\eq{A}}}{
+    \forall{v_i}\,\exists{u_j}\; (v_i = u_j : \eq{A})}
+  \and
+  \infer{v = u : \eq{A}}{v \le u : \eq{A} & u \le v : \eq{A}}
+\end{mathpar}
+
+To see these judgments are decidable, induct on the structure of the type
+$\eq{A}$. The quantifiers in the premise of the rule $\rn{\subseteq}$ range over
+finite domains, and thus pose no issue.
+%% Since they are decidable we use their negations $v \not\le v : \eq{A}$, $v
+%% \ne v : \eq{A}$ freely.
+
+It is easy to see by induction on $\eq{A}$ that $v_1 \le v_2 : \eq{A}$ is
+transitive in $v_i$. By construction it is also antisymmetric with respect to
+$v_1 = v_2 : \eq{A}$.
+
+%% It is also easy to show by induction on the typing judgment that for any
+%% well-typed value $\vdash v : \eq{A}$, we can derive $v \le v : \eq{A}$.
+
+%% From these it follows that $v_1 \le v_2 : \eq{A}$ forms a preorder on well-typed
+%% values, and that $v_1 = v_2 : \eq{A}$ forms an equivalence relation on them.
+
+\todo{We would like to say it is also reflexive on all well-typed values, but we
+  don't have a typing judgment on values! We threw that away when we added new
+  expressions to our language! Hm... but on \emph{equality types}, it should
+  still work! If we need this property, should revisit this.}
+
+
+\subsection{Evaluation rules}
+We phrase our evaluation rules in terms of one-holed contexts $C$ and a
+hole-filling operation $C[e]$ (omitted for brevity). \todo{(Who do we cite for
+  this style of operational semantics?)} Only some one-holed contexts are
+allowed, enforcing a call-by-value evaluation order.
+
+%\pagebreak
+\begin{mathpar}
+\infer{C[e] \step C[e']}{e \step e'}
+\end{mathpar}
+
+\[
+\begin{array}{ccl}
+  \multicolumn{3}{c}{\textbf{$\beta$-reductions}}\\
+  (\fn\bind{x}e_1) \; e_2 &\step& \sub{e_2/x} e_1\\
+  \pi_i \; (v_1, v_2) &\step& v_i\\
+  \case{\ms{in}_i\; v}{x}{e_1}{x}{e_2} &\step& \sub{v/x} e_i\\
+  \ifthen{\ms{true}}{e_1}{e_2} &\step& e_1\\
+  \ifthen{\ms{false}}{e_1}{e_2} &\step& e_2
+
+  %% rules for unit
+  \vspace{0.5em}\\
+  \multicolumn{3}{c}{\textbf{Rules for }\unit}\\
+  \unit_2 &\step& \ms{false}\\
+  \unit_{L \x M} &\step& (\unit_L, \unit_M)\\
+  \unit_{A \to L} &\step& \fn\bind{x} \unit_L\\
+  \unit_{A \mto L} &\step& \fn\bind{x} \unit_L\\
+  \unit_{\Set{A}} &\step& \{\}
+
+  %% rules for \vee
+  \vspace{0.5em}\\
+  \multicolumn{3}{c}{\textbf{Rules for }\vee}\\
+  \ms{false} \vee_2 v &\step& v\\
+  \ms{true} \vee_2 v &\step& \ms{true}\\
+  (v_1, v_2) \vee_{L \x M} (u_1, u_2) &\step& (v_1 \vee_L u_1, v_2 \vee_M u_2)\\
+  v \vee_{A \to L} u &\step& \fn\bind{x} v\;x \vee_L u\;x\\
+  v \vee_{A \mto L} u &\step& \fn\bind{x} v\;x \vee_L u\;x\\
+  %% the rule we've all been waiting for
+  \setlit{\vec{v}} \vee_{\Set{A}} \setlit{\vec{u}} &\step& \setlit{\vec{v}, \vec{u}}
+
+  %% rules for \bigvee
+  \vspace{0.5em}\\
+  \multicolumn{3}{c}{\textbf{Rules for }\bigvee}\\
+  \tforin{L}{x \in \{\}} e &\step& \unit_L\\
+  \tforin{L}{x \in \setlit{v, \vec{u}}} e
+  &\step& \sub{v/x} e \vee_L \tforin{L}{x \in \setlit{\vec{u}}} e
+
+  %% rules for \ms{fix}
+  \vspace{0.5em}\\
+  \multicolumn{3}{c}{\textbf{Rules for \ms{fix} and \ms{iter}}}\\
+  \tfix{L}{x}{e} &\step& \iter{\unit_L}{x}{e}\\
+  \iter{v}{x}{e} &\step& \iterstep{v}{\sub{v/x} e}{x}{e}\\
+  \iterstep{v_1}{v_2}{x}{e}
+  &\step& \begin{cases}
+    v_1 & \text{if}~{v_1 = v_2 : \eq{A}}\\
+    \iter{v_2}{x}{e} & \text{otherwise}
+  \end{cases}\\
+  %% rules for fixle, iterle
+  \tfixle{L}{x}{e_\top}{e} &\step& \iterle{e_\top}{\unit_L}{x}{e}\\
+  \iterle{v_\top}{v}{x}{e}
+  &\step& \begin{cases}
+    \iterlestep{v_\top}{v}{\sub{v/x} e}{x}{e} & \text{if}~{v \le v_\top : \eq{A}}\\
+    v_\top & \text{otherwise}
+  \end{cases}\\
+  \iterlestep{v_\top}{v_1}{v_2}{x}{e}
+  &\step& \begin{cases}
+    v_1 &\text{if}~{v_1 = v_2 : \eq{A}}\\
+    \iterle{v_\top}{v_2}{x}{e} & \text{otherwise}
+  \end{cases}
+\end{array}
+\]
+
+
+\end{document}
