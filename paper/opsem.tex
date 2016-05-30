@@ -19,10 +19,15 @@
 \newcommand{\iterlestep}[6]{\ms{iter}_{{\le}#1}({#2}; {#3}; {#4}; \bind{#5}{#6})}
 
 \newcommand{\step}{\mapsto}
+\newcommand{\steps}{\step^*}
+%% \newcommand{\betaeq}{\equiv_\beta}
+\newcommand{\betaeq}{\leftrightarrow}
 
 %% \newcommand{\lr}[2]{#1 \models #2}
-\newcommand{\lr}[2]{#1\mathrel{|}#2}
-\newcommand{\steps}{\step^*}
+%% \newcommand{\lr}[2]{#1\mathrel{|}#2}
+%% \newcommand{\lr}[2]{#2\mathrel{|}#1}
+\newcommand{\lr}[2]{#2\mathrel{|}#1}
+\newcommand{\lrcx}[3]{#1 \ent \lr{#2}{#3}}
 \renewcommand{\land}{~\text{and}~}
 \newcommand{\disc}[1]{\square{#1}}
 
@@ -193,9 +198,9 @@ allowed, enforcing a call-by-value evaluation order.
 
 Let $a,b,c,f,g,h$ range over closed expressions%% , and let $\ms{Term}$ be the set
 %% of all closed expressions
-. Let $\gamma, \sigma$ range over substitutions
-containing only closed expressions, and let $\ms{Ctx}(\GG)$ be the set of all
-substitutions of closed expressions for the variables in $\GG$.
+. Let $\gamma, \sigma, \chi$ range over substitutions containing only closed
+expressions, and let $\ms{Ctx}(\GG)$ be the set of all substitutions of closed
+expressions for the variables in $\GG$.
 
 \todo{PROBLEM: discrete variables in contexts! Solution??: add a new ``type''
   $\disc{A}$ and replace discrete variables by variables of type $\disc{A}$?}
@@ -206,20 +211,21 @@ We define the following relations:
     \lr{\GG}{\gamma \le \sigma}
     &\iff& \forall(x\of A \in \GG)\ \lr{A}{\gamma(x) \le \sigma(x)}
     & (\text{for}~\gamma,\sigma \in \ms{Ctx}(\GG))\\
-    \lr{\GG\ent A}{e_1 \le e_2}
-    &\iff& \forall(\gamma_1, \gamma_2 \in \ms{Ctx}(\GG).\ \lr{\GG}{\gamma_1 \le \gamma_2})
+    \lrcx{\GG}{A}{e_1 \le e_2}
+    &\iff& \forall(%% \gamma_1, \gamma_2 \in \ms{Ctx}(\GG).\ 
+    \lr{\GG}{\gamma_1 \le \gamma_2})
     \ \forall(i = 1,2)\\
     &&
     \lr{A}{\gamma_i(e_1) \le \gamma_i(e_2)} \land \lr{A}{\gamma_1(e_i) \le \gamma_2(e_i)}
 \end{array}\]
-Note that the definition of $\lr{\GG\ent A}{e_1 \le e_2}$ has the form of a
+Note that the definition of $\lrcx{\GG}{A}{e_1 \le e_2}$ has the form of a
 commuting square (although we have not yet shown that these relations are
 transitive and therefore commute): \todo{insert diagram}
 
 For any relation $\lr{X}{Y \le Z}$, we write:
 \[\begin{array}{ccl}
   \lr{X}{Y = Z} &\iff& \lr{X}{Y \le Z} \land \lr{X}{Z \le Y}\\
-  \lr{X}{Y}     &\iff& \lr{X}{Y = Y}
+  \lr{X}{Y}     &\iff& \lr{X}{Y \le Y}
 \end{array}\]
 
 We now give the definition of $\lr{A}{a \le b}$ by induction on $A$:
@@ -244,7 +250,7 @@ We now give the definition of $\lr{A}{a \le b}$ by induction on $A$:
   %% monotone functions
   \lr{A \mto B}{f \le g} &\iff&
   f \steps \fn\bind{x} e_1 \land g \steps \fn\bind{x} e_2
-  \land (\lr{x\of A \ent B}{e_1 \le e_2})
+  \land (\lrcx{x\of A}{B}{e_1 \le e_2})
 \end{array}\]
 
 
@@ -273,15 +279,15 @@ We now give the definition of $\lr{A}{a \le b}$ by induction on $A$:
     \item[Case $A \x B$] By IH, applied pointwise. \todo{flesh out}
     \item[Case $A + B$] By IH. \todo{flesh out}
     \item[Case $\Set{A}$] We have $a \steps \setlit{\vec{u_i}}$, $b \steps
-      \setlit{\vec{v_i}}$, and $c \steps \setlit{\vec{w_i}}$. We wish to show:
-      $\forall(u_i)\, \exists(w_k)\, \lr{A}(u_i = w_k)$. Consider any $u_i$.
-      Then $\exists(v_j)\, \lr{A}(u_i = v_j)$. Then $\exists(w_k)\, \lr{A}(v_j =
-      w_k)$. Thus by IH $\lr{A}{u_i = w_k}$.
+      \setlit{\vec{v_i}}$, and $c \steps \setlit{\vec{w_i}}$. We wish to show
+      $\forall u_i\, \exists w_k\, (\lr{A}{u_i = w_k})$. Consider any $u_i$.
+      Then $\exists v_j\, (\lr{A}{u_i = v_j})$. Then $\exists w_k\, (\lr{A}{v_j
+        = w_k})$. Thus by IH $\lr{A}{u_i = w_k}$.
     \item[Case $A \to B$] Case ignored because we translate away $A \to B$.
     \item[Case $A \mto B$] We have $a \steps \fn\bind{x}e_1$, $b \steps
-      \fn\bind{x}e_2$, and $c \steps\bind{x}e_3$. We have $\lr{x \of A}{e_1 \le
-        e_2}$ and $\lr{x \of A}{e_2 \le e_3}$ and we wish to show that $\lr{x\of
-        A \ent B}{e_1 \le e_3}$.
+      \fn\bind{x}e_2$, and $c \steps \fn\bind{x}e_3$. We have $\lrcx{x \of
+        A}{B}{e_1 \le e_2}$ and $\lrcx{x \of A}{B}{e_2 \le e_3}$, and we wish to
+      show that $\lrcx{x\of A}{B}{e_1 \le e_3}$.
 
       Consider any $\gamma_1, \gamma_2 \in \ms{Ctx}(x \of A)$ such that $\lr{x
         \of A}{\gamma_1 \le \gamma_2}$. Then the following diagram commutes by
@@ -323,11 +329,32 @@ We now give the definition of $\lr{A}{a \le b}$ by induction on $A$:
 
 \subsection{Congruence over $\step$}
 
+Let $a \betaeq b$ be the equivalence closure of $\step$.
+
 \begin{theorem}
-  If $\lr{A}{a}$ and $a \step b$ then $\lr{A}{a = b}$.
+  If $\lr{A}{a}$ and $a \betaeq b$ then $\lr{A}{a = b}$.
 \end{theorem}
 
-\todo{TODO: proof}
+This follows from the following two lemmas:
+
+\begin{lemma}
+  If $\lr{A}{b}$ and $a \step b$ then $\lr{A}{a = b}$.
+\end{lemma}
+
+\begin{proof}
+  By induction on $A$, precomposing $a \step b$ with $\steps$ in each case of
+  the definition of $\lr{A}{b \le b}$.
+\end{proof}
+
+\begin{lemma}
+  If $\lr{A}{a}$ and $a \step b$ then $\lr{A}{a = b}$.
+\end{lemma}
+
+\begin{proof}
+  By induction on $A$ and the definition of $\lr{A}{a = b}$, noting that $a
+  \step b$ is (1) a partial function of $a$ and (2) values never step; and that
+  therefore if $a \step b$ and $a \steps v$ then $b \steps v$.
+\end{proof}
 
 
 \subsection{Fundamental theorem}
@@ -338,7 +365,7 @@ Nb. $\cxdisc{\Delta}$ is the operation which replaces each $x \of A \in \Delta$
 with $x \of \disc{A}$.
 
 \begin{theorem}
-  If $\GD;\GG \vdash e : A$ then $\lr{\cxdisc{\GD},\GG \ent A}{e}$.
+  If $\GD;\GG \vdash e : A$ then $\lrcx{\cxdisc{\GD},\GG}{A}{e}$.
 \end{theorem}
 
 \begin{proof}
@@ -349,9 +376,9 @@ with $x \of \disc{A}$.
 
     By definition of $\lr{\cxdisc{\GD},\GG}{\gamma_1 \le \gamma_2}$.
 
-  \item[Case] $\infer[\ms{true}]{\GD;\GG\ent \ms{true} : 2}{}$
+  %% \item[Case] $\infer[\ms{true}]{\GD;\GG\ent \ms{true} : 2}{}$
 
-    $\lr{2}{\ms{true}}$, indeed.
+  %%   $\lr{2}{\ms{true}}$, indeed.
 
   %% \item[Case] $\infer[\ms{false}]{\GD;\GG\ent \ms{false} : 2}{}$
 
@@ -360,7 +387,33 @@ with $x \of \disc{A}$.
   \item[Case] $\infer[\fn^+]{\GD;\GG \ent \fn\bind{\m{x}} e : A \mto B}{
     \GD; \GG{},\m{x}\of A \ent e : B}$
 
-    TS: $\lr{\cxdisc{\GD},\GG \ent A \mto B}{\fn\bind{\m{x}} e}$
+    TS: $\lrcx{\cxdisc{\GD},\GG}{A \mto B}{
+      \fn\bind{\m{x}} e \le \fn\bind{\m{x}}e}$.
+
+    Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \le \gamma_2}$ and any $i =
+    1,2$.
+
+    STS: $\lr{A \mto B}{\fn\bind{\m{x}} \gamma_i(e) \le \fn\bind{\m{x}}
+      \gamma_i(e)}$ and $\lr{A \mto B}{\fn\bind{\m{x}} \gamma_1(e) \le
+      \fn\bind{\m{x}} \gamma_2(e)}$.
+
+    Consider any $\lr{x \of A}{\sigma_1 \le \sigma_2}$ and any $j = 1,2$.
+
+    Expanding definitions, it STS:
+    \begin{itemize}
+    \item $\lr{B}{\sigma_j(\gamma_i(e)) \le \sigma_j(\gamma_i(e))}$
+      and $\lr{B}{\sigma_1(\gamma_i(e)) \le \sigma_2(\gamma_i(e))}$
+    \item $\lr{B}{\sigma_j(\gamma_1(e)) \le \sigma_j(\gamma_2(e))}$
+      and $\lr{B}{\sigma_1(\gamma_j(e)) \le \sigma_2(\gamma_j(e))}$
+    \end{itemize}
+
+    Simplifying, what this requires is a commutative square: \todo{diagram}
+
+    All of these follow directly from our IH, $\lrcx{\cxdisc{\GD},\GG,x\of
+      A}{B}{e}$??? Not quite, need partial reflexivity! otherwise mostly
+
+    Need that if $\gamma_1 \le \gamma_2$ and $\sigma_1 \le \sigma_2$ then
+    $\sigma_1 \circ \gamma_1 \le \sigma_2\circ\gamma_2$.
   \end{description}
 \end{proof}
 
