@@ -13,12 +13,18 @@
 \newcommand{\tfixle}[3]{\tfix{#1}{#2 \le #3}}
 
 %% iteration forms, used in evalution of fix
-\newcommand{\iter}[3]{\ms{iter}({#1}; \bind{#2}#3)}
-\newcommand{\iterstep}[4]{\ms{iter}({#1}; {#2}; {\bind{#3}#4})}
-\newcommand{\iterle}[4]{\ms{iter}_\le({#1}; {#2}; \bind{#3}{#4})}
-\newcommand{\iterlestep}[5]{\ms{iter}_\le({#1}; {#2}; {#3}; \bind{#4}{#5})}
+\newcommand{\iter}[4]{\ms{iter}_{#1}({#2}; \bind{#3}#4)}
+\newcommand{\iterstep}[5]{\ms{iter}_{#1}({#2}; {#3}; {\bind{#4}#5})}
+\newcommand{\iterle}[5]{\ms{iter}_{{\le}#1}({#2}; {#3}; \bind{#4}{#5})}
+\newcommand{\iterlestep}[6]{\ms{iter}_{{\le}#1}({#2}; {#3}; {#4}; \bind{#5}{#6})}
 
 \newcommand{\step}{\mapsto}
+
+%% \newcommand{\lr}[2]{#1 \models #2}
+\newcommand{\lr}[2]{#1\mathrel{|}#2}
+\newcommand{\steps}{\step^*}
+\renewcommand{\land}{~\text{and}~}
+\newcommand{\disc}[1]{\square{#1}}
 
 %% ---------- End new commands
 
@@ -44,13 +50,13 @@ expressions as intermediate forms ocurring in the evaluation of \ms{fix}.
   %% expressions
   \textsf{expressions} & e
   &\bnfeq& ... \pipe \unit_L \pipe e \vee_L e \pipe \tforin{L}{x \in e} e
-  \pipe \tfix{L}{x}{e} \pipe \tfixle{L}{x}{e}{e}\\
-  &&& \ms{iter}_{\eq{A}}(e; \bind{x} e) \pipe \iterstep{e}{e}{x}{e}
-  \pipe \iterle{e}{e}{x}{e} \pipe \iterlestep{e}{e}{e}{x}{e}\\
+  \pipe \tfix{\fineq{L}}{x}{e} \pipe \tfixle{\eq{L}}{x}{e}{e}\\
+  &&& \iter{\eq{A}}{e}{x}{e} \pipe \iterstep{\eq{A}}{e}{e}{x}{e}
+  \pipe \iterle{\eq{A}}{e}{e}{x}{e} \pipe \iterlestep{\eq{A}}{e}{e}{e}{x}{e}\\
   &&& \setlit{\vec{v}}
   \vspace{0.5em}\\
   %% values
-  \textsf{values} & v,u
+  \textsf{values} & v,u,w
   &\bnfeq& \fn\bind{x} e \pipe (v, v) \pipe \ms{in}_i\; v
   \pipe \ms{true} \pipe \ms{false} \pipe \setlit{\vec{v}}
   \vspace{0.5em}\\
@@ -60,9 +66,9 @@ expressions as intermediate forms ocurring in the evaluation of \ms{fix}.
   \pipe \pi_i \; C\\
   &&& C \vee_L e \pipe v \vee_L C \pipe \tforin{L}{x \in C} e\\
   &&& \ifthen{C}{e}{e} \pipe \case{C}{a}{e}{a}{e}\\
-  &&& \iter{C}{x}{e} \pipe \iterstep{v}{C}{x}{e}\\
-  &&& \iterle{C}{e}{x}{e} \pipe \iterle{v}{C}{x}{e}
-  \pipe \iterlestep{v}{v}{C}{x}{e}
+  &&& \iter{\eq{A}}{C}{x}{e} \pipe \iterstep{\eq{A}}{v}{C}{x}{e}\\
+  &&& \iterle{\eq{A}}{C}{e}{x}{e} \pipe \iterle{\eq{A}}{v}{C}{x}{e}
+  \pipe \iterlestep{\eq{A}}{v}{v}{C}{x}{e}
 \end{array}\]
 
 
@@ -160,27 +166,202 @@ allowed, enforcing a call-by-value evaluation order.
   %% rules for \ms{fix}
   \vspace{0.5em}\\
   \multicolumn{3}{c}{\textbf{Rules for \ms{fix} and \ms{iter}}}\\
-  \tfix{L}{x}{e} &\step& \iter{\unit_L}{x}{e}\\
-  \iter{v}{x}{e} &\step& \iterstep{v}{\sub{v/x} e}{x}{e}\\
-  \iterstep{v_1}{v_2}{x}{e}
+  \tfix{\fineq{L}}{x}{e} &\step& \iter{\fineq{L}}{\unit_{\fineq{L}}}{x}{e}\\
+  \iter{\eq{A}}{v}{x}{e} &\step& \iterstep{\eq{A}}{v}{\sub{v/x} e}{x}{e}\\
+  \iterstep{\eq{A}}{v_1}{v_2}{x}{e}
   &\step& \begin{cases}
     v_1 & \text{if}~{v_1 = v_2 : \eq{A}}\\
-    \iter{v_2}{x}{e} & \text{otherwise}
+    \iter{\eq{A}}{v_2}{x}{e} & \text{otherwise}
   \end{cases}\\
   %% rules for fixle, iterle
-  \tfixle{L}{x}{e_\top}{e} &\step& \iterle{e_\top}{\unit_L}{x}{e}\\
-  \iterle{v_\top}{v}{x}{e}
+  \tfixle{\eq{L}}{x}{e_\top}{e} &\step& \iterle{\eq{L}}{e_\top}{\unit_{\eq{L}}}{x}{e}\\
+  \iterle{\eq{A}}{v_\top}{v}{x}{e}
   &\step& \begin{cases}
-    \iterlestep{v_\top}{v}{\sub{v/x} e}{x}{e} & \text{if}~{v \le v_\top : \eq{A}}\\
+    \iterlestep{\eq{A}}{v_\top}{v}{\sub{v/x} e}{x}{e} & \text{if}~{v \le v_\top : \eq{A}}\\
     v_\top & \text{otherwise}
   \end{cases}\\
-  \iterlestep{v_\top}{v_1}{v_2}{x}{e}
+  \iterlestep{\eq{A}}{v_\top}{v_1}{v_2}{x}{e}
   &\step& \begin{cases}
     v_1 &\text{if}~{v_1 = v_2 : \eq{A}}\\
-    \iterle{v_\top}{v_2}{x}{e} & \text{otherwise}
+    \iterle{\eq{A}}{v_\top}{v_2}{x}{e} & \text{otherwise}
   \end{cases}
 \end{array}
 \]
 
+
+\section{Logical relations}
+
+Let $a,b,c,f,g,h$ range over closed expressions%% , and let $\ms{Term}$ be the set
+%% of all closed expressions
+. Let $\gamma, \sigma$ range over substitutions
+containing only closed expressions, and let $\ms{Ctx}(\GG)$ be the set of all
+substitutions of closed expressions for the variables in $\GG$.
+
+\todo{PROBLEM: discrete variables in contexts! Solution??: add a new ``type''
+  $\disc{A}$ and replace discrete variables by variables of type $\disc{A}$?}
+
+We define the following relations:
+\[\begin{array}{ccll}
+    \lr{A}{a \le b}  && \text{definition given below}\\
+    \lr{\GG}{\gamma \le \sigma}
+    &\iff& \forall(x\of A \in \GG)\ \lr{A}{\gamma(x) \le \sigma(x)}
+    & (\text{for}~\gamma,\sigma \in \ms{Ctx}(\GG))\\
+    \lr{\GG\ent A}{e_1 \le e_2}
+    &\iff& \forall(\gamma_1, \gamma_2 \in \ms{Ctx}(\GG).\ \lr{\GG}{\gamma_1 \le \gamma_2})
+    \ \forall(i = 1,2)\\
+    &&
+    \lr{A}{\gamma_i(e_1) \le \gamma_i(e_2)} \land \lr{A}{\gamma_1(e_i) \le \gamma_2(e_i)}
+\end{array}\]
+Note that the definition of $\lr{\GG\ent A}{e_1 \le e_2}$ has the form of a
+commuting square (although we have not yet shown that these relations are
+transitive and therefore commute): \todo{insert diagram}
+
+For any relation $\lr{X}{Y \le Z}$, we write:
+\[\begin{array}{ccl}
+  \lr{X}{Y = Z} &\iff& \lr{X}{Y \le Z} \land \lr{X}{Z \le Y}\\
+  \lr{X}{Y}     &\iff& \lr{X}{Y = Y}
+\end{array}\]
+
+We now give the definition of $\lr{A}{a \le b}$ by induction on $A$:
+\[\begin{array}{ccl}
+  %% discreteness comonad
+  \lr{\disc{A}}{a \le b} &\iff& \lr{A}{a = b}\\
+  %% booleans
+  \lr{2}{a \le b} &\iff&
+  a \steps v \land b \steps u \land v \le u : 2\\
+  %% sums
+  \lr{A_1 + A_2}{a \le b} &\iff&
+  a \steps \ms{in}_i\;v \land b \steps \ms{in}_i\;u \land \lr{A_i}{v \le u}\\
+  %% products
+  \lr{A_1 \x A_2}{a \le b} &\iff&
+  a \steps (v_1, v_2) \land b \steps (u_1, u_2) \land \forall(i)\ \lr{A_i}{v_i \le u_i}\\
+  %% sets
+  \lr{\Set{A}}{a \le b} &\iff&
+  a \steps \setlit{\vec{v_i}} \land b \steps \setlit{\vec{u_i}}
+  \land \forall(v_i)\;\exists(u_j)\ \lr{A}{v_i = u_j}\\
+  %% discrete functions
+  \lr{A \to B}{a \le b} &\iff& \lr{\disc{A} \mto B}{a \le b}\\
+  %% monotone functions
+  \lr{A \mto B}{f \le g} &\iff&
+  f \steps \fn\bind{x} e_1 \land g \steps \fn\bind{x} e_2
+  \land (\lr{x\of A \ent B}{e_1 \le e_2})
+\end{array}\]
+
+
+\subsection{Termination of terms in the logical relation}
+
+\begin{theorem}
+  If $\lr{A}{a}$ then $a \steps v$.
+\end{theorem}
+
+\begin{proof}
+  By induction on $A$ and the definition of $\lr{A}{a \le a}$.
+\end{proof}
+
+
+\subsection{Transitivity}
+\begin{theorem}[Transitivity]
+  If $\lr{A}{a \le b}$ and $\lr{A}{b \le c}$ then $\lr{A}{a \le c}$.
+\end{theorem}
+
+\begin{proof}
+  By induction on $A$.
+  \begin{description}
+    \item[Case $2$] Trivial by transitivity of $v \le u : 2$.
+    \item[Case $\disc A$] By IH, noting that if $\lr{A}{a \le b}$ is transitive
+      so is $\lr{A}{a = b}$.
+    \item[Case $A \x B$] By IH, applied pointwise. \todo{flesh out}
+    \item[Case $A + B$] By IH. \todo{flesh out}
+    \item[Case $\Set{A}$] We have $a \steps \setlit{\vec{u_i}}$, $b \steps
+      \setlit{\vec{v_i}}$, and $c \steps \setlit{\vec{w_i}}$. We wish to show:
+      $\forall(u_i)\, \exists(w_k)\, \lr{A}(u_i = w_k)$. Consider any $u_i$.
+      Then $\exists(v_j)\, \lr{A}(u_i = v_j)$. Then $\exists(w_k)\, \lr{A}(v_j =
+      w_k)$. Thus by IH $\lr{A}{u_i = w_k}$.
+    \item[Case $A \to B$] Case ignored because we translate away $A \to B$.
+    \item[Case $A \mto B$] We have $a \steps \fn\bind{x}e_1$, $b \steps
+      \fn\bind{x}e_2$, and $c \steps\bind{x}e_3$. We have $\lr{x \of A}{e_1 \le
+        e_2}$ and $\lr{x \of A}{e_2 \le e_3}$ and we wish to show that $\lr{x\of
+        A \ent B}{e_1 \le e_3}$.
+
+      Consider any $\gamma_1, \gamma_2 \in \ms{Ctx}(x \of A)$ such that $\lr{x
+        \of A}{\gamma_1 \le \gamma_2}$. Then the following diagram commutes by
+      the transitivity of $\lr{B}{a \le b}$ (which follows from IH):
+      \todo{insert diagram}
+  \end{description}
+\end{proof}
+
+
+\subsection{Partial reflexivity}
+\begin{theorem}[Partial reflexivity]
+  If $\lr{A}{a \le b}$ then $\lr{A}{a \le a}$ (and therefore $\lr{A}{a}$).
+\end{theorem}
+
+\begin{proof}
+  By induction on $A$.
+  \begin{description}
+  \item[Case $\disc{A}$] From $\lr{\disc{A}}{a \le b}$ we have $\lr{A}{a = b}$
+    and thus $\lr{A}{a \le b}$. By IH $\lr{A}{a \le a}$, and so $\lr{A}{a = a}$.
+    Thus $\lr{\disc{A}}{a \le a}$.
+  \item[Case $2$] By reflexivity of $v \le u : 2$ on $\{\ms{true},\ms{false}\}$.
+  \item[Case $A \x B$] By IH, applied pointwise. \todo{flesh out}
+  \item[Case $A + B$] By IH. \todo{flesh out}
+  \item[Case $A \uto B$] Ignored; we translate $A \uto B$ into $\disc{A} \mto B$.
+  \item[Case $A \mto B$] From $\lr{A \mto B}{a \le b}$ we have $a \steps
+    \fn\bind{x} e$ and $b \steps \fn\bind{x} e'$. Consider any $\gamma_1,
+    \gamma_2 \in \ms{Ctx}(x \of A)$ such that $\lr{x\of A}{\gamma_1 \le
+      \gamma_2}$. Then applying $\lr{A \mto B}{a \le b}$ we have:
+    \begin{itemize}
+    \item $\lr{B}{\gamma_1(e) \le \gamma_2(e)}$;
+    \item $\lr{B}{\gamma_i(e) \le \gamma_i(e')}$, and so by our IH at $B$ we
+      have $\lr{B}{\gamma_i(e) \le \gamma_i(e)}$
+    \end{itemize}
+    which form the commuting square we need.
+
+  \end{description}
+\end{proof}
+
+
+\subsection{Congruence over $\step$}
+
+\begin{theorem}
+  If $\lr{A}{a}$ and $a \step b$ then $\lr{A}{a = b}$.
+\end{theorem}
+
+\todo{TODO: proof}
+
+
+\subsection{Fundamental theorem}
+
+\newcommand{\cxdisc}[1]{\disc{#1}}
+
+Nb. $\cxdisc{\Delta}$ is the operation which replaces each $x \of A \in \Delta$
+with $x \of \disc{A}$.
+
+\begin{theorem}
+  If $\GD;\GG \vdash e : A$ then $\lr{\cxdisc{\GD},\GG \ent A}{e}$.
+\end{theorem}
+
+\begin{proof}
+  By induction on $\GD;\GG \vdash e : A$.
+  \begin{description}
+  \item[Cases] $\infer[\rt{var}]{\GD;\GG \vdash x \of A}{x \of A \in \GD}$,
+    $\infer[\rt{var}^+]{\GD;\GG \vdash \m{x} \of A}{\m{x} \of A \in \GG}$
+
+    By definition of $\lr{\cxdisc{\GD},\GG}{\gamma_1 \le \gamma_2}$.
+
+  \item[Case] $\infer[\ms{true}]{\GD;\GG\ent \ms{true} : 2}{}$
+
+    $\lr{2}{\ms{true}}$, indeed.
+
+  %% \item[Case] $\infer[\ms{false}]{\GD;\GG\ent \ms{false} : 2}{}$
+
+  %%   \TODO
+
+  \item[Case] $\infer[\fn^+]{\GD;\GG \ent \fn\bind{\m{x}} e : A \mto B}{
+    \GD; \GG{},\m{x}\of A \ent e : B}$
+
+    TS: $\lr{\cxdisc{\GD},\GG \ent A \mto B}{\fn\bind{\m{x}} e}$
+  \end{description}
+\end{proof}
 
 \end{document}

@@ -70,9 +70,10 @@ Case A₁ + A₂(a ≤ b):
 Case A →⁺ B (f ≤ g):
   We have f → λx.b₁, so that's ok.
   Consider any a₁, a₂ st. A(a₁ ≤ a₂).
-  We need to show: B(f a₁ ≤ f a₂) and B(f a₁ ≤ f a₁)
+  We need to show: B(f a₁ ≤ f a₂) and B(f a₁ ≤ f a₁) and B(f a₂ ≤ f a₂)
     B(f a₁ ≤ f a₂) is direct from A →⁺ B (f ≤ g)
-    B(f a₁ ≤ f a₁) is by applying our IH to B(f a₁ ≤ f a₂)
+    B(f a₁ ≤ f a₁) is by applying our IH to B(f a₁ ≤ g a₁) from A →⁺ B (f ≤ g)
+    B(f a₂ ≤ f a₂) is by applying our IH to B(f a₂ ≤ g a₂) from A →⁺ B (f ≤ g)
 
 Case A → B (f ≤ g):
   We have f → λx.b₁, so that's ok.
