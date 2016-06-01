@@ -6,8 +6,13 @@
 - Finally kill off s-expression syntax
 
 * Goals for final version
+- rename "ordinary" to "discrete"
+
 - Situate Datafun better wrt other database languages (besides Datalog)
   Rel.Alg., SQL, Nested Relational Calculus, Kleisli, Machiavelli
+
+- Situate Datafun better wrt other logic languages
+  Curry, Mercury
 
 - Get "contributions" onto the first page - should be accessible "at a glance".
   Shorten or split up introduction?

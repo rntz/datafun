@@ -23,13 +23,15 @@
 %% \newcommand{\betaeq}{\equiv_\beta}
 \newcommand{\betaeq}{\leftrightarrow}
 
+\newcommand{\disc}[1]{\square{#1}}
+
 %% \newcommand{\lr}[2]{#1 \models #2}
 %% \newcommand{\lr}[2]{#1\mathrel{|}#2}
 %% \newcommand{\lr}[2]{#2\mathrel{|}#1}
 \newcommand{\lr}[2]{#2\mathrel{|}#1}
 \newcommand{\lrcx}[3]{#1 \ent \lr{#2}{#3}}
+\newcommand{\commsq}[5]{\lr{#1}{{#2}, {#4} \le {#3}, {#5}}}
 \renewcommand{\land}{~\text{and}~}
-\newcommand{\disc}[1]{\square{#1}}
 
 %% ---------- End new commands
 
@@ -79,29 +81,36 @@ expressions as intermediate forms ocurring in the evaluation of \ms{fix}.
 
 \subsection{Equality and inequality}
 
+\todo{Okay, I think a better way of doing this is: define a $v \le u : A$
+  judgment for all types, then note that it is decidable for equality types.
+  Then, define $\lr{A}{a \le b}$ as $a \steps v, b \step u, v \le u : A$.}
+
 First, we give rules for the judgments $v \le v : \eq{A}$ and $v = v : \eq{A}$:
 \begin{mathpar}
-  \infer{\ms{false} \le \ms{false} : 2}{}
+  \infer{\ms{false} \le \ms{false} : \bool}{}
   \and
-  \infer{\ms{false} \le \ms{true} : 2}{}
+  \infer{\ms{false} \le \ms{true} : \bool}{}
   \and
-  \infer{\ms{true} \le \ms{true} : 2}{}
+  \infer{\ms{true} \le \ms{true} : \bool}{}
   \and
-  \infer{(v_1, u_1) \le (v_2, u_2) : \eq{A} \x \eq{B}}{
+  \infer[\rn{\le_{\x}}]{(v_1, u_1) \le (v_2, u_2) : \eq{A} \x \eq{B}}{
     v_1 \le v_2 : \eq{A} & u_1 \le u_2 : \eq{B}}
   \and
-  \infer{\ms{in}_i\; v \le \ms{in}_i\; u : \eq{A}_1 + \eq{A}_2}{v \le u : \eq{A}_i}
+  \infer[\rn{\le_{+}}]
+        { \ms{in}_i\; v \le \ms{in}_i\; u : \eq{A}_1 + \eq{A}_2 }
+        { v \le u : \eq{A}_i }
   \and
   %% rules for set inequality
-  \infer[\rn{\subseteq}]{\setlit{\vec{v_i}} \le \setlit{\vec{u_i}} : \Set{\eq{A}}}{
-    \forall{v_i}\,\exists{u_j}\; (v_i = u_j : \eq{A})}
+  \infer[\rn{\le_{\subseteq}}]
+        { \setlit{\vec{v_i}} \le \setlit{\vec{u_i}} : \Set{\eq{A}} }
+        { \forall{v_i}\,\exists{u_j}\; (v_i = u_j : \eq{A}) }
   \and
-  \infer{v = u : \eq{A}}{v \le u : \eq{A} & u \le v : \eq{A}}
+  \infer[\rn{{=}}]{v = u : \eq{A}}{v \le u : \eq{A} & u \le v : \eq{A}}
 \end{mathpar}
 
 To see these judgments are decidable, induct on the structure of the type
-$\eq{A}$. The quantifiers in the premise of the rule $\rn{\subseteq}$ range over
-finite domains, and thus pose no issue.
+$\eq{A}$. The quantifiers in the premise of the rule $\rn{\le_{\subseteq}}$
+range over finite domains, and thus pose no issue.
 %% Since they are decidable we use their negations $v \not\le v : \eq{A}$, $v
 %% \ne v : \eq{A}$ freely.
 
@@ -193,10 +202,22 @@ allowed, enforcing a call-by-value evaluation order.
 \end{array}
 \]
 
+\subsection{Properties of evaluation}
+
+\begin{theorem}
+  Evaluation is deterministic: if $a \step b$ and $a \step c$ then $b = c$.
+\end{theorem}
+
+\begin{theorem}
+  Values don't step: $\forall v\, \nexists u\; (v \step u)$.
+\end{theorem}
+
+\todo{Do these need proof? They're really obvious, tedious inductions.}
+
 
 \section{Logical relations}
 
-Let $a,b,c,f,g,h$ range over closed expressions%% , and let $\ms{Term}$ be the set
+Let $a,b,c$ range over closed expressions%% , and let $\ms{Term}$ be the set
 %% of all closed expressions
 . Let $\gamma, \sigma, \chi$ range over substitutions containing only closed
 expressions, and let $\ms{Ctx}(\GG)$ be the set of all substitutions of closed
@@ -212,15 +233,15 @@ We define the following relations:
     &\iff& \forall(x\of A \in \GG)\ \lr{A}{\gamma(x) \le \sigma(x)}
     & (\text{for}~\gamma,\sigma \in \ms{Ctx}(\GG))\\
     \lrcx{\GG}{A}{e_1 \le e_2}
-    &\iff& \forall(%% \gamma_1, \gamma_2 \in \ms{Ctx}(\GG).\ 
-    \lr{\GG}{\gamma_1 \le \gamma_2})
-    \ \forall(i = 1,2)\\
-    &&
-    \lr{A}{\gamma_i(e_1) \le \gamma_i(e_2)} \land \lr{A}{\gamma_1(e_i) \le \gamma_2(e_i)}
+    &\iff& \forall(\lr{\GG}{\gamma_1 \le \gamma_2})\
+    \commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}\\
+    \commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}
+    &\iff& \forall(i = 1,2)\ \lr{A}{\gamma_i(e_1) \le \gamma_i(e_2)}
+    \land \lr{A}{\gamma_1(e_i) \le \gamma_2(e_i)}
 \end{array}\]
-Note that the definition of $\lrcx{\GG}{A}{e_1 \le e_2}$ has the form of a
-commuting square (although we have not yet shown that these relations are
-transitive and therefore commute): \todo{insert diagram}
+Note that $\commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}$ can be seen as a commuting
+square (although we have not yet shown that these relations are transitive and
+therefore commute): \todo{insert diagram}
 
 For any relation $\lr{X}{Y \le Z}$, we write:
 \[\begin{array}{ccl}
@@ -233,23 +254,24 @@ We now give the definition of $\lr{A}{a \le b}$ by induction on $A$:
   %% discreteness comonad
   \lr{\disc{A}}{a \le b} &\iff& \lr{A}{a = b}\\
   %% booleans
-  \lr{2}{a \le b} &\iff&
-  a \steps v \land b \steps u \land v \le u : 2\\
+  \lr{\bool}{a \le b} &\iff&
+  a \steps v \land b \steps u \land v \le u : \bool\\
   %% sums
   \lr{A_1 + A_2}{a \le b} &\iff&
   a \steps \ms{in}_i\;v \land b \steps \ms{in}_i\;u \land \lr{A_i}{v \le u}\\
   %% products
   \lr{A_1 \x A_2}{a \le b} &\iff&
-  a \steps (v_1, v_2) \land b \steps (u_1, u_2) \land \forall(i)\ \lr{A_i}{v_i \le u_i}\\
+  a \steps (v_1, v_2) \land b \steps (u_1, u_2)
+  \land \forall i\; (\lr{A_i}{v_i \le u_i})\\
   %% sets
   \lr{\Set{A}}{a \le b} &\iff&
   a \steps \setlit{\vec{v_i}} \land b \steps \setlit{\vec{u_i}}
-  \land \forall(v_i)\;\exists(u_j)\ \lr{A}{v_i = u_j}\\
+  \land \forall v_i\,\exists u_j\; (\lr{A}{v_i = u_j})\\
   %% discrete functions
   \lr{A \to B}{a \le b} &\iff& \lr{\disc{A} \mto B}{a \le b}\\
   %% monotone functions
-  \lr{A \mto B}{f \le g} &\iff&
-  f \steps \fn\bind{x} e_1 \land g \steps \fn\bind{x} e_2
+  \lr{A \mto B}{a \le b} &\iff&
+  a \steps \fn\bind{x} e_1 \land b \steps \fn\bind{x} e_2
   \land (\lrcx{x\of A}{B}{e_1 \le e_2})
 \end{array}\]
 
@@ -266,14 +288,14 @@ We now give the definition of $\lr{A}{a \le b}$ by induction on $A$:
 
 
 \subsection{Transitivity}
-\begin{theorem}[Transitivity]
+\begin{theorem}[Transitivity]\label{thm:trans}
   If $\lr{A}{a \le b}$ and $\lr{A}{b \le c}$ then $\lr{A}{a \le c}$.
 \end{theorem}
 
 \begin{proof}
   By induction on $A$.
   \begin{description}
-    \item[Case $2$] Trivial by transitivity of $v \le u : 2$.
+    \item[Case $\bool$] Trivial by transitivity of $v \le u : \bool$.
     \item[Case $\disc A$] By IH, noting that if $\lr{A}{a \le b}$ is transitive
       so is $\lr{A}{a = b}$.
     \item[Case $A \x B$] By IH, applied pointwise. \todo{flesh out}
@@ -298,7 +320,7 @@ We now give the definition of $\lr{A}{a \le b}$ by induction on $A$:
 
 
 \subsection{Partial reflexivity}
-\begin{theorem}[Partial reflexivity]
+\begin{theorem}[Partial reflexivity]\label{thm:prefl}
   If $\lr{A}{a \le b}$ then $\lr{A}{a \le a}$ (and therefore $\lr{A}{a}$).
 \end{theorem}
 
@@ -308,7 +330,7 @@ We now give the definition of $\lr{A}{a \le b}$ by induction on $A$:
   \item[Case $\disc{A}$] From $\lr{\disc{A}}{a \le b}$ we have $\lr{A}{a = b}$
     and thus $\lr{A}{a \le b}$. By IH $\lr{A}{a \le a}$, and so $\lr{A}{a = a}$.
     Thus $\lr{\disc{A}}{a \le a}$.
-  \item[Case $2$] By reflexivity of $v \le u : 2$ on $\{\ms{true},\ms{false}\}$.
+  \item[Case $\bool$] By reflexivity of $v \le u : \bool$ on $\{\ms{true},\ms{false}\}$.
   \item[Case $A \x B$] By IH, applied pointwise. \todo{flesh out}
   \item[Case $A + B$] By IH. \todo{flesh out}
   \item[Case $A \uto B$] Ignored; we translate $A \uto B$ into $\disc{A} \mto B$.
@@ -321,7 +343,8 @@ We now give the definition of $\lr{A}{a \le b}$ by induction on $A$:
     \item $\lr{B}{\gamma_i(e) \le \gamma_i(e')}$, and so by our IH at $B$ we
       have $\lr{B}{\gamma_i(e) \le \gamma_i(e)}$
     \end{itemize}
-    which form the commuting square we need.
+    which form the commuting square $\commsq{B}{\gamma_1}{\gamma_2}{e}{e}$ we
+    need.
 
   \end{description}
 \end{proof}
@@ -331,7 +354,7 @@ We now give the definition of $\lr{A}{a \le b}$ by induction on $A$:
 
 Let $a \betaeq b$ be the equivalence closure of $\step$.
 
-\begin{theorem}
+\begin{theorem}\label{thm:congbeta}
   If $\lr{A}{a}$ and $a \betaeq b$ then $\lr{A}{a = b}$.
 \end{theorem}
 
@@ -357,6 +380,102 @@ This follows from the following two lemmas:
 \end{proof}
 
 
+\subsection{Coincidence of inequality on values of equality types}
+
+\todo{Do we need this?}
+
+\begin{theorem}\label{thm:coincide}
+  $v \le u : \eq{A}$ if and only if $\lr{\eq{A}}{v \le u}$.
+\end{theorem}
+
+\begin{proof}
+  \todo{Can't we just observe that their definitions coincide aside from the $a
+    \steps v$ conditions, and since values don't step this is irrelevant?}
+
+  By induction on $\eq{A}$.
+  \begin{description}
+  \item[Case $\bool$] If $v \le u : \bool$ then $v \steps v$ and $u \steps u$
+    and thus $\lr{\bool}{v \le u}$.
+
+    If $\lr{\bool}{v \le u}$ then $v \steps v'$ and $u \steps u'$ such that $v'
+    \le u' : \bool$. Since values do not step, $v = v'$ and $u = u'$ and so $v
+    \le u : \bool$.
+
+  \item[Case $\eq{A}_1 \x \eq{A}_2$] If $v \le u : \eq{A}_1 \x \eq{A}_2$ then by
+    inversion of $\rn{\le_{\x}}$, $v = (v_1, v_2)$ and $u = (u_1, u_2)$ such
+    that $v_i \le u_i : \eq{A}_i$.
+
+  \item[Case $\eq{A} + \eq{B}$] By inductive hypothesis.
+
+  \item[Case $\Set{\eq{A}}$] \TODO
+  \end{description}
+\end{proof}
+
+
+\subsection{Preorder properties}
+
+\begin{definition}
+  A \emph{chain} is a totally ordered subset of a preorder.
+\end{definition}
+
+\begin{definition}
+  The \emph{height} of a preorder is the cardinality of its largest chain.
+\end{definition}
+
+\newcommand{\down}[1]{{\mathop{\downarrow}{#1}}}
+
+\begin{definition}
+  The \emph{down-set} $\down{x}$ of an element $x$ of a preorder $P$ is the
+  induced preorder on $\setfor{y \in P}{y \le x}$.
+\end{definition}
+
+\newcommand{\Val}[1]{\ms{Val}(#1)}
+
+\begin{definition}
+  Let $\Val{A}$ be the preorder of values $v$ such that $\lr{A}{v}$, ordered by
+  $\lr{A}{v \le u}$. This is reflexive and transitive (and thus a preorder) by
+  theorems \ref{thm:prefl} and \ref{thm:trans} respectively. By theorem
+  \ref{thm:coincide}, for equality types $\eq{A}$ this coincides with values $v$
+  such that $v \le v : \eq{A}$ ordered by $v \le u : \eq{A}$, which we will make
+  use of frequently.
+\end{definition}
+
+\begin{theorem}
+  $\Val{\fineq{A}}$ has finite height for any $\fineq{A}$.
+\end{theorem}
+
+\begin{proof} By induction on $\fineq{A}$:
+  \begin{description}
+  \item[Case $\bool$] $\Val{2} = \{\ms{false} < \ms{true}\}$ has finite
+    cardinality and thus finite height.
+
+  \item[Case $\Set{\fineq{A}}$] All values $\lr{\Set{\fineq{A}}}{v}$ have the
+    form $\setlit{\vec{v_i}}$ where $\lr{\fineq{A}}{v_i}$ (which can be seen by
+    inverting the rule $\rn{\le_\subseteq}$).
+
+    \todo{Do we need to prove the height of a preorder is equal to the height of
+      the poset of its equivalence classes?}
+
+    $\lr{\fineq{A}}{\setlit{\vec{v_i}} = \setlit{\vec{u_i}}}$
+
+    \todo{Either we observe that these are just lists quotiented by order and
+      therefore are sets which have finite height, or we explicitly define a
+      ``size'' function and show it must increase for $a \lt b$}
+
+  \item[Case $\fineq{A} \x \fineq{B}$] \TODO
+  \item[Case $\fineq{A} + \fineq{B}$] \TODO
+  \end{description}
+\end{proof}
+
+\begin{theorem}
+  For any $\eq{A}$, for any $v \in \Val{\eq{A}}$, $\down{v}$ has finite height.
+\end{theorem}
+
+\begin{proof}
+  \TODO
+\end{proof}
+
+
 \subsection{Fundamental theorem}
 
 \newcommand{\cxdisc}[1]{\disc{#1}}
@@ -365,25 +484,26 @@ Nb. $\cxdisc{\Delta}$ is the operation which replaces each $x \of A \in \Delta$
 with $x \of \disc{A}$.
 
 \begin{theorem}
-  If $\GD;\GG \vdash e : A$ then $\lrcx{\cxdisc{\GD},\GG}{A}{e}$.
+  If $\J{\GD}{\GG}{e}{A}$ then $\lrcx{\cxdisc{\GD},\GG}{A}{e}$.
 \end{theorem}
 
 \begin{proof}
-  By induction on $\GD;\GG \vdash e : A$.
+  By induction on $\J{\GD}{\GG}{e}{A}$.
   \begin{description}
-  \item[Cases] $\infer[\rt{var}]{\GD;\GG \vdash x \of A}{x \of A \in \GD}$,
-    $\infer[\rt{var}^+]{\GD;\GG \vdash \m{x} \of A}{\m{x} \of A \in \GG}$
+  \item[Cases] $\infer[\rt{var}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD}$,
+    $\infer[\rt{var}^+]{\J{\GD}{\GG}{\m{x}}{A}}{\m{x} \of A \in \GG}$
 
     By definition of $\lr{\cxdisc{\GD},\GG}{\gamma_1 \le \gamma_2}$.
 
-  %% \item[Case] $\infer[\ms{true}]{\GD;\GG\ent \ms{true} : 2}{}$
+    %% Boolean true, false
+    \vspace{1em}
+  \item[Cases] $\infer[\ms{true}]{\GD;\GG\ent \ms{true} : \bool}{}$,
+    $\infer[\ms{false}]{\GD;\GG\ent \ms{false} : \bool}{}$
 
-  %%   $\lr{2}{\ms{true}}$, indeed.
+    Trivial.
 
-  %% \item[Case] $\infer[\ms{false}]{\GD;\GG\ent \ms{false} : 2}{}$
-
-  %%   \TODO
-
+    %% Monotone lambda
+    \vspace{1em}
   \item[Case] $\infer[\fn^+]{\GD;\GG \ent \fn\bind{\m{x}} e : A \mto B}{
     \GD; \GG{},\m{x}\of A \ent e : B}$
 
@@ -393,7 +513,7 @@ with $x \of \disc{A}$.
     Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \le \gamma_2}$ and any $i =
     1,2$.
 
-    STS: $\lr{A \mto B}{\fn\bind{\m{x}} \gamma_i(e) \le \fn\bind{\m{x}}
+    STS $\lr{A \mto B}{\fn\bind{\m{x}} \gamma_i(e) \le \fn\bind{\m{x}}
       \gamma_i(e)}$ and $\lr{A \mto B}{\fn\bind{\m{x}} \gamma_1(e) \le
       \fn\bind{\m{x}} \gamma_2(e)}$.
 
@@ -407,13 +527,39 @@ with $x \of \disc{A}$.
       and $\lr{B}{\sigma_1(\gamma_j(e)) \le \sigma_2(\gamma_j(e))}$
     \end{itemize}
 
-    Simplifying, what this requires is a commutative square: \todo{diagram}
+    All of these follow from our IH, $\lrcx{\cxdisc{\GD},\GG,x\of A}{B}{e}$,
+    from partial reflexivity of $\lr{\GG}{\gamma \le \sigma}$, and from the fact
+    that if $\gamma_1 \le \gamma_2$ and $\sigma_1 \le \sigma_2$ then $\sigma_1
+    \circ \gamma_1 \le \sigma_2\circ\gamma_2$.
 
-    All of these follow directly from our IH, $\lrcx{\cxdisc{\GD},\GG,x\of
-      A}{B}{e}$??? Not quite, need partial reflexivity! otherwise mostly
+    %% TODO: discrete lambda
 
-    Need that if $\gamma_1 \le \gamma_2$ and $\sigma_1 \le \sigma_2$ then
-    $\sigma_1 \circ \gamma_1 \le \sigma_2\circ\gamma_2$.
+    \vspace{1em}
+  \item[Case] $\infer[\ms{fix}]{\J{\GD}{\GG}{\fix{\m{x}} e}{\fineq{L}}}{
+    \J{\GD}{\GG,\m{x}\of \fineq{L}}{e}{\fineq{L}}}$
+
+    IH: $\lrcx{\cxdisc{\GD}, \GG, x \of \fineq{L}}{\fineq{L}}{e}$.
+
+    TS: $\lrcx{\cxdisc{\GD}, \GG}{\fineq{L}}{\tfix{\fineq{L}}{x} e}$.
+
+    Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \le \gamma_2}$.
+
+    By Theorem \ref{thm:congbeta} it STS $\exists v_1,v_2$ such that
+    $\lr{\fineq{L}}{v_1 \le v_2}$ and $\tfix{\fineq{L}}{x} \gamma_i(e) \steps
+    v_i$.
+
+    Strategy:
+    \begin{enumerate}
+    \item Find sequences $a^i_j$ with elements of the form \[ a^i_j =
+      \iter{\fineq{L}}{u^i_j}{x}{\gamma_i(e)}
+      \]
+      such that $\tfix{\fineq{L}}{x} \gamma_i(e) \steps a^i_0$ and $a^i_j \steps
+      a^i_{j+1}$ and $u^i_j < u^i_{j+1} : \fineq{L}$.
+
+    \item Prove these sequences are finite, with the final elements $a^i_n$
+    \end{enumerate}
+
+    \TODO
   \end{description}
 \end{proof}
 
