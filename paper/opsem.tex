@@ -5,12 +5,21 @@
 \usepackage{datafun}
 
 %% ---------- New commands
-\newcommand{\hole}{[\,]}
+%% ``approximate'' \le, < and =, for preorders
+\newcommand{\ale}{\sqsubseteq}
+\newcommand{\alt}{\sqsubset}
+\newcommand{\aeq}{\equiv}
+
+\newcommand{\down}[1]{{\mathop{\downarrow}{#1}}}
+\newcommand{\eqposet}[1]{\ms{Eq}(#1)}
+\newcommand{\eqclass}[1]{[#1]}
 
 %% type-annotated semilattice operatoins
 \newcommand{\tforin}[2]{\bigvee_{#1}(#2)\ }
 \newcommand{\tfix}[2]{\ms{fix}_{#1}~{#2}~\ms{is}~}
 \newcommand{\tfixle}[3]{\tfix{#1}{#2 \le #3}}
+
+\newcommand{\hole}{[\,]}
 
 %% iteration forms, used in evalution of fix
 \newcommand{\iter}[4]{\ms{iter}_{#1}({#2}; \bind{#3}#4)}
@@ -27,31 +36,19 @@
 
 %% \newcommand{\lr}[2]{#1 \models #2}
 %% \newcommand{\lr}[2]{#1\mathrel{|}#2}
-%% \newcommand{\lr}[2]{#2\mathrel{|}#1}
 \newcommand{\lr}[2]{#2\mathrel{|}#1}
 \newcommand{\lrcx}[3]{#1 \ent \lr{#2}{#3}}
-\newcommand{\commsq}[5]{\lr{#1}{{#2}, {#4} \le {#3}, {#5}}}
+\newcommand{\commsq}[5]{\lr{#1}{{#2}, {#4} \ale {#3}, {#5}}}
 \renewcommand{\land}{~\text{and}~}
+\renewcommand{\lor}{~\text{or}~}
 
 %% ---------- End new commands
 
 
 \begin{document}
 
+
 \section{Structural operational semantics}
-
-In our operational semantics we:
-\begin{enumerate}
-\item Assume an elaboration step which subscripts all semilattice operations
-($\unit$, $\vee$, $\bigvee$, $\ms{fix}$) with their type.
-\item Do not distinguish discrete from monotone variables, and write $x,y$ for
-  arbitrary variables.
-\item Ignore the types $\N$ and $\str$ and their corresponding expression forms.
-\item Add \ms{iter}
-expressions as intermediate forms ocurring in the evaluation of \ms{fix}.
-\item Classify some expressions $e$ as values $v$, and add a value-form
-  $\setlit{\vec{v}}$ for finite sets.
-\end{enumerate}
 
 \[\begin{array}{rccl}
   %% expressions
@@ -78,56 +75,56 @@ expressions as intermediate forms ocurring in the evaluation of \ms{fix}.
   \pipe \iterlestep{\eq{A}}{v}{v}{C}{x}{e}
 \end{array}\]
 
+\noindent In our operational semantics we:
+\begin{enumerate}
+\item Assume an elaboration step which subscripts all semilattice operations
+($\unit$, $\vee$, $\bigvee$, $\ms{fix}$) with their type.
+\item Do not distinguish discrete from monotone variables, and write $x,y$ for
+  arbitrary variables.
+\item Ignore the types $\N$ and $\str$ and their corresponding expression forms.
+\item Add \ms{iter}
+expressions as intermediate forms ocurring in the evaluation of \ms{fix}.
+\item Classify some expressions $e$ as values $v$, and add a value-form
+  $\setlit{\vec{v}}$ for finite sets.
+\end{enumerate}
+
 
 \subsection{Equality and inequality}
 
-\todo{Okay, I think a better way of doing this is: define a $v \le u : A$
-  judgment for all types, then note that it is decidable for equality types.
-  Then, define $\lr{A}{a \le b}$ as $a \steps v, b \step u, v \le u : A$.}
-
-First, we give rules for the judgments $v \le v : \eq{A}$ and $v = v : \eq{A}$:
+First, we define judgments $v \ale v : \eq{A}$ and $v \aeq v : \eq{A}$ for use
+in our operational semantics:
 \begin{mathpar}
-  \infer{\ms{false} \le \ms{false} : \bool}{}
+  \infer{\ms{false} \ale \ms{false} : \bool}{}
   \and
-  \infer{\ms{false} \le \ms{true} : \bool}{}
+  \infer{\ms{false} \ale \ms{true} : \bool}{}
   \and
-  \infer{\ms{true} \le \ms{true} : \bool}{}
-  \and
-  \infer[\rn{\le_{\x}}]{(v_1, u_1) \le (v_2, u_2) : \eq{A} \x \eq{B}}{
-    v_1 \le v_2 : \eq{A} & u_1 \le u_2 : \eq{B}}
-  \and
-  \infer[\rn{\le_{+}}]
-        { \ms{in}_i\; v \le \ms{in}_i\; u : \eq{A}_1 + \eq{A}_2 }
-        { v \le u : \eq{A}_i }
+  \infer{\ms{true} \ale \ms{true} : \bool}{}
   \and
   %% rules for set inequality
-  \infer[\rn{\le_{\subseteq}}]
-        { \setlit{\vec{v_i}} \le \setlit{\vec{u_i}} : \Set{\eq{A}} }
-        { \forall{v_i}\,\exists{u_j}\; (v_i = u_j : \eq{A}) }
+  \infer[\rn{\subseteq}]
+        { \setlit{\vec{v_i}} \ale \setlit{\vec{u_i}} : \Set{\eq{A}} }
+        { \forall{v_i}\,\exists{u_j}\; (v_i \aeq u_j : \eq{A}) }
   \and
-  \infer[\rn{{=}}]{v = u : \eq{A}}{v \le u : \eq{A} & u \le v : \eq{A}}
+  \infer%% [\rn{\ale_{\x}}]
+        { (v_1, u_1) \ale (v_2, u_2) : \eq{A} \x \eq{B} }
+        { v_1 \ale v_2 : \eq{A} & u_1 \ale u_2 : \eq{B} }
+  \and
+  \infer%% [\rn{\ale_{+}}]
+        { \ms{in}_i\; v \ale \ms{in}_i\; u : \eq{A}_1 + \eq{A}_2 }
+        { v \ale u : \eq{A}_i }
+  \and
+  \infer[\rn{{\aeq}}]{v \aeq u : \eq{A}}{v \ale u : \eq{A} & u \ale v : \eq{A}}
 \end{mathpar}
 
-To see these judgments are decidable, induct on the structure of the type
-$\eq{A}$. The quantifiers in the premise of the rule $\rn{\le_{\subseteq}}$
-range over finite domains, and thus pose no issue.
-%% Since they are decidable we use their negations $v \not\le v : \eq{A}$, $v
+Since we use these judgments in our operational semantics, they are decidable,
+which may be seen by induction on $\eq{A}$. The quantifiers in the premise of
+the rule $\rn{\subseteq}$ range over finite domains, and thus pose no issue.
+%% Since they are decidable we use their negations $v \not\ale v : \eq{A}$, $v
 %% \ne v : \eq{A}$ freely.
 
-It is easy to see by induction on $\eq{A}$ that $v_1 \le v_2 : \eq{A}$ is
-transitive in $v_i$. By construction it is also antisymmetric with respect to
-$v_1 = v_2 : \eq{A}$.
-
-%% It is also easy to show by induction on the typing judgment that for any
-%% well-typed value $\vdash v : \eq{A}$, we can derive $v \le v : \eq{A}$.
-
-%% From these it follows that $v_1 \le v_2 : \eq{A}$ forms a preorder on well-typed
-%% values, and that $v_1 = v_2 : \eq{A}$ forms an equivalence relation on them.
-
-\todo{We would like to say it is also reflexive on all well-typed values, but we
-  don't have a typing judgment on values! We threw that away when we added new
-  expressions to our language! Hm... but on \emph{equality types}, it should
-  still work! If we need this property, should revisit this.}
+%% It is easy to see by induction on $\eq{A}$ that $v_1 \ale v_2 : \eq{A}$ is
+%% transitive in $v_i$. By construction it is also antisymmetric with respect to
+%% $v_1 \aeq v_2 : \eq{A}$.
 
 
 \subsection{Evaluation rules}
@@ -154,21 +151,21 @@ allowed, enforcing a call-by-value evaluation order.
   \vspace{0.5em}\\
   \multicolumn{3}{c}{\textbf{Rules for }\unit}\\
   \unit_2 &\step& \ms{false}\\
+  \unit_{\Set{A}} &\step& \{\}\\
   \unit_{L \x M} &\step& (\unit_L, \unit_M)\\
   \unit_{A \to L} &\step& \fn\bind{x} \unit_L\\
-  \unit_{A \mto L} &\step& \fn\bind{x} \unit_L\\
-  \unit_{\Set{A}} &\step& \{\}
+  \unit_{A \mto L} &\step& \fn\bind{x} \unit_L
 
   %% rules for \vee
   \vspace{0.5em}\\
   \multicolumn{3}{c}{\textbf{Rules for }\vee}\\
   \ms{false} \vee_2 v &\step& v\\
   \ms{true} \vee_2 v &\step& \ms{true}\\
+  %% the rule we've all been waiting for
+  \setlit{\vec{v}} \vee_{\Set{A}} \setlit{\vec{u}} &\step& \setlit{\vec{v}, \vec{u}}\\
   (v_1, v_2) \vee_{L \x M} (u_1, u_2) &\step& (v_1 \vee_L u_1, v_2 \vee_M u_2)\\
   v \vee_{A \to L} u &\step& \fn\bind{x} v\;x \vee_L u\;x\\
-  v \vee_{A \mto L} u &\step& \fn\bind{x} v\;x \vee_L u\;x\\
-  %% the rule we've all been waiting for
-  \setlit{\vec{v}} \vee_{\Set{A}} \setlit{\vec{u}} &\step& \setlit{\vec{v}, \vec{u}}
+  v \vee_{A \mto L} u &\step& \fn\bind{x} v\;x \vee_L u\;x
 
   %% rules for \bigvee
   \vspace{0.5em}\\
@@ -184,19 +181,19 @@ allowed, enforcing a call-by-value evaluation order.
   \iter{\eq{A}}{v}{x}{e} &\step& \iterstep{\eq{A}}{v}{\sub{v/x} e}{x}{e}\\
   \iterstep{\eq{A}}{v_1}{v_2}{x}{e}
   &\step& \begin{cases}
-    v_1 & \text{if}~{v_1 = v_2 : \eq{A}}\\
+    v_1 & \text{if}~{v_1 \aeq v_2 : \eq{A}}\\
     \iter{\eq{A}}{v_2}{x}{e} & \text{otherwise}
   \end{cases}\\
   %% rules for fixle, iterle
   \tfixle{\eq{L}}{x}{e_\top}{e} &\step& \iterle{\eq{L}}{e_\top}{\unit_{\eq{L}}}{x}{e}\\
   \iterle{\eq{A}}{v_\top}{v}{x}{e}
   &\step& \begin{cases}
-    \iterlestep{\eq{A}}{v_\top}{v}{\sub{v/x} e}{x}{e} & \text{if}~{v \le v_\top : \eq{A}}\\
+    \iterlestep{\eq{A}}{v_\top}{v}{\sub{v/x} e}{x}{e} & \text{if}~{v \ale v_\top : \eq{A}}\\
     v_\top & \text{otherwise}
   \end{cases}\\
   \iterlestep{\eq{A}}{v_\top}{v_1}{v_2}{x}{e}
   &\step& \begin{cases}
-    v_1 &\text{if}~{v_1 = v_2 : \eq{A}}\\
+    v_1 &\text{if}~{v_1 \aeq v_2 : \eq{A}}\\
     \iterle{\eq{A}}{v_\top}{v_2}{x}{e} & \text{otherwise}
   \end{cases}
 \end{array}
@@ -215,6 +212,45 @@ allowed, enforcing a call-by-value evaluation order.
 \todo{Do these need proof? They're really obvious, tedious inductions.}
 
 
+\section{Preorders}
+
+\begin{definition}
+  A \emph{preorder} is a set equipped with a reflexive, transitive relation,
+  written $\ale$. We define additional notation $\alt$, $\aeq$ as follows:
+  \begin{eqnarray*}
+    x \alt y &\iff& x \ale y \land y \not\ale x\\
+    x \aeq y &\iff& x \ale y \land y \ale x
+  \end{eqnarray*}
+\end{definition}
+
+\begin{definition}
+  A \emph{chain} is a totally ordered subset of a preorder, i.e. a subset
+  obeying \[\forall(a, b)\ a \alt b \lor b \alt a \lor a = b \]
+\end{definition}
+
+\begin{definition}
+  The \emph{height} of a preorder is the cardinality of its largest chain.
+\end{definition}
+
+\begin{definition}
+  The \emph{equivalence poset} $\eqposet{P}$ of a preorder $P$ is the poset of
+  its equivalence classes $\eqclass{x} = \setfor{y}{x \aeq y}$, ordered by
+  $\eqclass{x} \le \eqclass{y} \iff x \ale y$.
+\end{definition}
+
+For a preorder which is already a poset, $\eqposet{{-}}$ is effectively the
+identity. In particular, for a chain $C \subseteq P$, we have $\eqposet{C}
+\subseteq \eqposet{P}$ and the cardinalities of $C$ and $\eqposet{C}$ are equal.
+Since any chain in $\eqposet{P}$ also has a corresponding chain(s) in $P$ (found
+by picking a representative of each equivalence class), this implies that the
+height of $P$ and the height of $\eqposet{P}$ are equal for any preorder $P$.
+
+\begin{definition}
+  The \emph{down-set} $\down{x}$ of an element $x$ of a preorder $P$ is the
+  induced preorder on $\setfor{y}{y \ale x}$.
+\end{definition}
+
+
 \section{Logical relations}
 
 Let $a,b,c$ range over closed expressions%% , and let $\ms{Term}$ be the set
@@ -228,124 +264,164 @@ expressions for the variables in $\GG$.
 
 We define the following relations:
 \[\begin{array}{ccll}
-    \lr{A}{a \le b}  && \text{definition given below}\\
-    \lr{\GG}{\gamma \le \sigma}
-    &\iff& \forall(x\of A \in \GG)\ \lr{A}{\gamma(x) \le \sigma(x)}
+    \lr{A}{a \ale b}  && \text{definition given below}\\
+    \lr{\GG}{\gamma \ale \sigma}
+    &\iff& \forall(x \of A \in \GG)\ \lr{A}{\gamma(x) \ale \sigma(x)}
     & (\text{for}~\gamma,\sigma \in \ms{Ctx}(\GG))\\
-    \lrcx{\GG}{A}{e_1 \le e_2}
-    &\iff& \forall(\lr{\GG}{\gamma_1 \le \gamma_2})\
+    \lrcx{\GG}{A}{e_1 \ale e_2}
+    &\iff& \forall(\lr{\GG}{\gamma_1 \ale \gamma_2})\
     \commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}\\
     \commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}
-    &\iff& \forall(i = 1,2)\ \lr{A}{\gamma_i(e_1) \le \gamma_i(e_2)}
-    \land \lr{A}{\gamma_1(e_i) \le \gamma_2(e_i)}
+    &\iff& \forall(i = 1,2)\ \lr{A}{\gamma_i(e_1) \ale \gamma_i(e_2)}
+    \land \lr{A}{\gamma_1(e_i) \ale \gamma_2(e_i)}
 \end{array}\]
 Note that $\commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}$ can be seen as a commuting
 square (although we have not yet shown that these relations are transitive and
 therefore commute): \todo{insert diagram}
 
-For any relation $\lr{X}{Y \le Z}$, we write:
+For any relation $\lr{X}{Y \ale Z}$, we write:
 \[\begin{array}{ccl}
-  \lr{X}{Y = Z} &\iff& \lr{X}{Y \le Z} \land \lr{X}{Z \le Y}\\
-  \lr{X}{Y}     &\iff& \lr{X}{Y \le Y}
+  \lr{X}{Y \aeq Z} &\iff& \lr{X}{Y \ale Z} \land \lr{X}{Z \ale Y}\\
+  \lr{X}{Y}     &\iff& \lr{X}{Y \ale Y}
 \end{array}\]
 
-We now give the definition of $\lr{A}{a \le b}$ by induction on $A$:
+We now give the definition of $\lr{A}{a \ale b}$ by induction on $A$:
 \[\begin{array}{ccl}
   %% discreteness comonad
-  \lr{\disc{A}}{a \le b} &\iff& \lr{A}{a = b}\\
+  \lr{\disc{A}}{a \ale b} &\iff& \lr{A}{a \aeq b}\\
   %% booleans
-  \lr{\bool}{a \le b} &\iff&
-  a \steps v \land b \steps u \land v \le u : \bool\\
-  %% sums
-  \lr{A_1 + A_2}{a \le b} &\iff&
-  a \steps \ms{in}_i\;v \land b \steps \ms{in}_i\;u \land \lr{A_i}{v \le u}\\
-  %% products
-  \lr{A_1 \x A_2}{a \le b} &\iff&
-  a \steps (v_1, v_2) \land b \steps (u_1, u_2)
-  \land \forall i\; (\lr{A_i}{v_i \le u_i})\\
+  \lr{\bool}{a \ale b} &\iff&
+  a \steps v \land b \steps u \land v \ale u : \bool\\
   %% sets
-  \lr{\Set{A}}{a \le b} &\iff&
+  \lr{\Set{A}}{a \ale b} &\iff&
   a \steps \setlit{\vec{v_i}} \land b \steps \setlit{\vec{u_i}}
-  \land \forall v_i\,\exists u_j\; (\lr{A}{v_i = u_j})\\
+  \land \forall v_i\,\exists u_j\; (\lr{A}{v_i \aeq u_j})\\
+  %% sums
+  \lr{A_1 + A_2}{a \ale b} &\iff&
+  a \steps \ms{in}_i\;v \land b \steps \ms{in}_i\;u \land \lr{A_i}{v \ale u}\\
+  %% products
+  \lr{A_1 \x A_2}{a \ale b} &\iff&
+  a \steps (v_1, v_2) \land b \steps (u_1, u_2)
+  \land \forall i\; (\lr{A_i}{v_i \ale u_i})\\
   %% discrete functions
-  \lr{A \to B}{a \le b} &\iff& \lr{\disc{A} \mto B}{a \le b}\\
+  \lr{A \to B}{a \ale b} &\iff& \lr{\disc{A} \mto B}{a \ale b}\\
   %% monotone functions
-  \lr{A \mto B}{a \le b} &\iff&
+  \lr{A \mto B}{a \ale b} &\iff&
   a \steps \fn\bind{x} e_1 \land b \steps \fn\bind{x} e_2
-  \land (\lrcx{x\of A}{B}{e_1 \le e_2})
+  \land (\lrcx{x\of A}{B}{e_1 \ale e_2})
 \end{array}\]
 
 
-\subsection{Termination of terms in the logical relation}
+\subsection{Immediate properties}
 
-\begin{theorem}
+\begin{theorem}[Termination]
   If $\lr{A}{a}$ then $a \steps v$.
 \end{theorem}
 
 \begin{proof}
-  By induction on $A$ and the definition of $\lr{A}{a \le a}$.
+  By induction on $A$ and the definition of $\lr{A}{a \ale a}$.
+\end{proof}
+
+\begin{theorem}[Agreement on values of equality types]
+  \label{thm:agree-ineq}
+  $v \ale u : \eq{A}$ if and only if $\lr{\eq{A}}{v \ale u}$.
+\end{theorem}
+
+\begin{proof}
+  Observe that their definitions coincide aside from the $v \steps v'$, $u
+  \steps u'$ conditions in $\lr{\eq{A}}{v \ale u}$; since values don't step, $v
+  \steps v' \iff v = v'$, and these conditions are trivial.
+\end{proof}
+
+%% \begin{proof}
+%%   By induction on $\eq{A}$.
+%%   \begin{description}
+%%   \item[Case $\bool$] If $v \ale u : \bool$ then $v \steps v$ and $u \steps u$
+%%     and thus $\lr{\bool}{v \ale u}$.
+    
+%%     If $\lr{\bool}{v \ale u}$ then $v \steps v'$ and $u \steps u'$ such that $v'
+%%     \ale u' : \bool$. Since values do not step, $v = v'$ and $u = u'$ and so $v
+%%     \ale u : \bool$.
+    
+%%   \item[Case $\eq{A}_1 \x \eq{A}_2$] If $v \ale u : \eq{A}_1 \x \eq{A}_2$ then by
+%%     inversion of $\rn{\ale_{\x}}$, $v = (v_1, v_2)$ and $u = (u_1, u_2)$ such
+%%     that $v_i \ale u_i : \eq{A}_i$.
+    
+%%   \item[Case $\eq{A} + \eq{B}$] By inductive hypothesis.
+    
+%%   \item[Case $\Set{\eq{A}}$] \TODO
+%%   \end{description}
+%% \end{proof}
+
+
+\subsection{Partial reflexivity}
+\begin{theorem}[Partial reflexivity]\label{thm:prefl}
+  If $\lr{A}{a \ale b}$ then $\lr{A}{a \ale a}$ (and therefore $\lr{A}{a}$).
+\end{theorem}
+
+\begin{proof}
+  By induction on $A$.
+  \begin{description}
+  \item[Case $\disc{A}$] From $\lr{\disc{A}}{a \ale b}$ we have $\lr{A}{a \aeq
+    b}$ and thus $\lr{A}{a \ale b}$. By IH $\lr{A}{a \ale a}$, and so $\lr{A}{a
+    \aeq a}$. Thus $\lr{\disc{A}}{a \ale a}$.
+
+  \item[Case $\bool$] By reflexivity of $v \ale u : \bool$ on
+    $\{\ms{true},\ms{false}\}$.
+
+  \item[Case $\Set{A}$] From $\lr{A}{a \ale b}$ we have $a \steps
+    \setlit{\vec{v_i}}$. It STS that $\forall v_i\, \exists v_j\; (\lr{A}{v_i \aeq
+      v_j})$. By the IH, let $v_j = v_i$.
+
+  \item[Case $A \x B$] By IH, applied pointwise. \todo{flesh out}
+  \item[Case $A + B$] By IH. \todo{flesh out}
+  \item[Case $A \uto B$] Ignored; we translate $A \uto B$ into $\disc{A} \mto
+    B$.
+
+  \item[Case $A \mto B$] From $\lr{A \mto B}{a \ale b}$ we have $a \steps
+    \fn\bind{x} e$ and $b \steps \fn\bind{x} e'$. Consider any $\gamma_1,
+    \gamma_2 \in \ms{Ctx}(x \of A)$ such that $\lr{x\of A}{\gamma_1 \ale
+      \gamma_2}$. Then applying $\lr{A \mto B}{a \ale b}$ we have:
+    \begin{itemize}
+    \item $\lr{B}{\gamma_1(e) \ale \gamma_2(e)}$;
+    \item $\lr{B}{\gamma_i(e) \ale \gamma_i(e')}$, and so by our IH at $B$ we
+      have $\lr{B}{\gamma_i(e) \ale \gamma_i(e)}$
+    \end{itemize}
+    which form the commuting square $\commsq{B}{\gamma_1}{\gamma_2}{e}{e}$ we
+    need.
+
+  \end{description}
 \end{proof}
 
 
 \subsection{Transitivity}
 \begin{theorem}[Transitivity]\label{thm:trans}
-  If $\lr{A}{a \le b}$ and $\lr{A}{b \le c}$ then $\lr{A}{a \le c}$.
+  If $\lr{A}{a \ale b}$ and $\lr{A}{b \ale c}$ then $\lr{A}{a \ale c}$.
 \end{theorem}
 
 \begin{proof}
   By induction on $A$.
   \begin{description}
-    \item[Case $\bool$] Trivial by transitivity of $v \le u : \bool$.
-    \item[Case $\disc A$] By IH, noting that if $\lr{A}{a \le b}$ is transitive
-      so is $\lr{A}{a = b}$.
-    \item[Case $A \x B$] By IH, applied pointwise. \todo{flesh out}
-    \item[Case $A + B$] By IH. \todo{flesh out}
+    \item[Case $\disc A$] By IH, noting that if $\lr{A}{a \ale b}$ is transitive
+      so is $\lr{A}{a \aeq b}$.
+    \item[Case $\bool$] Trivial by transitivity of $v \ale u : \bool$.
     \item[Case $\Set{A}$] We have $a \steps \setlit{\vec{u_i}}$, $b \steps
       \setlit{\vec{v_i}}$, and $c \steps \setlit{\vec{w_i}}$. We wish to show
-      $\forall u_i\, \exists w_k\, (\lr{A}{u_i = w_k})$. Consider any $u_i$.
-      Then $\exists v_j\, (\lr{A}{u_i = v_j})$. Then $\exists w_k\, (\lr{A}{v_j
-        = w_k})$. Thus by IH $\lr{A}{u_i = w_k}$.
+      $\forall u_i\, \exists w_k\, (\lr{A}{u_i \aeq w_k})$. Consider any $u_i$.
+      Then $\exists v_j\, (\lr{A}{u_i \aeq v_j})$. Then $\exists w_k\,
+      (\lr{A}{v_j \aeq w_k})$. Thus by IH $\lr{A}{u_i \aeq w_k}$.
+    \item[Case $A \x B$] By IH, applied pointwise. \todo{flesh out}
+    \item[Case $A + B$] By IH. \todo{flesh out}
     \item[Case $A \to B$] Case ignored because we translate away $A \to B$.
     \item[Case $A \mto B$] We have $a \steps \fn\bind{x}e_1$, $b \steps
       \fn\bind{x}e_2$, and $c \steps \fn\bind{x}e_3$. We have $\lrcx{x \of
-        A}{B}{e_1 \le e_2}$ and $\lrcx{x \of A}{B}{e_2 \le e_3}$, and we wish to
-      show that $\lrcx{x\of A}{B}{e_1 \le e_3}$.
+        A}{B}{e_1 \ale e_2}$ and $\lrcx{x \of A}{B}{e_2 \ale e_3}$, and we wish to
+      show that $\lrcx{x\of A}{B}{e_1 \ale e_3}$.
 
       Consider any $\gamma_1, \gamma_2 \in \ms{Ctx}(x \of A)$ such that $\lr{x
-        \of A}{\gamma_1 \le \gamma_2}$. Then the following diagram commutes by
-      the transitivity of $\lr{B}{a \le b}$ (which follows from IH):
+        \of A}{\gamma_1 \ale \gamma_2}$. Then the following diagram commutes by
+      the transitivity of $\lr{B}{a \ale b}$ (which follows from IH):
       \todo{insert diagram}
-  \end{description}
-\end{proof}
-
-
-\subsection{Partial reflexivity}
-\begin{theorem}[Partial reflexivity]\label{thm:prefl}
-  If $\lr{A}{a \le b}$ then $\lr{A}{a \le a}$ (and therefore $\lr{A}{a}$).
-\end{theorem}
-
-\begin{proof}
-  By induction on $A$.
-  \begin{description}
-  \item[Case $\disc{A}$] From $\lr{\disc{A}}{a \le b}$ we have $\lr{A}{a = b}$
-    and thus $\lr{A}{a \le b}$. By IH $\lr{A}{a \le a}$, and so $\lr{A}{a = a}$.
-    Thus $\lr{\disc{A}}{a \le a}$.
-  \item[Case $\bool$] By reflexivity of $v \le u : \bool$ on $\{\ms{true},\ms{false}\}$.
-  \item[Case $A \x B$] By IH, applied pointwise. \todo{flesh out}
-  \item[Case $A + B$] By IH. \todo{flesh out}
-  \item[Case $A \uto B$] Ignored; we translate $A \uto B$ into $\disc{A} \mto B$.
-  \item[Case $A \mto B$] From $\lr{A \mto B}{a \le b}$ we have $a \steps
-    \fn\bind{x} e$ and $b \steps \fn\bind{x} e'$. Consider any $\gamma_1,
-    \gamma_2 \in \ms{Ctx}(x \of A)$ such that $\lr{x\of A}{\gamma_1 \le
-      \gamma_2}$. Then applying $\lr{A \mto B}{a \le b}$ we have:
-    \begin{itemize}
-    \item $\lr{B}{\gamma_1(e) \le \gamma_2(e)}$;
-    \item $\lr{B}{\gamma_i(e) \le \gamma_i(e')}$, and so by our IH at $B$ we
-      have $\lr{B}{\gamma_i(e) \le \gamma_i(e)}$
-    \end{itemize}
-    which form the commuting square $\commsq{B}{\gamma_1}{\gamma_2}{e}{e}$ we
-    need.
-
   \end{description}
 \end{proof}
 
@@ -355,89 +431,42 @@ We now give the definition of $\lr{A}{a \le b}$ by induction on $A$:
 Let $a \betaeq b$ be the equivalence closure of $\step$.
 
 \begin{theorem}\label{thm:congbeta}
-  If $\lr{A}{a}$ and $a \betaeq b$ then $\lr{A}{a = b}$.
+  If $\lr{A}{a}$ and $a \betaeq b$ then $\lr{A}{a \aeq b}$.
 \end{theorem}
 
 This follows from the following two lemmas:
 
 \begin{lemma}
-  If $\lr{A}{b}$ and $a \step b$ then $\lr{A}{a = b}$.
+  If $\lr{A}{b}$ and $a \step b$ then $\lr{A}{a \aeq b}$.
 \end{lemma}
 
 \begin{proof}
   By induction on $A$, precomposing $a \step b$ with $\steps$ in each case of
-  the definition of $\lr{A}{b \le b}$.
+  the definition of $\lr{A}{b \ale b}$.
 \end{proof}
 
 \begin{lemma}
-  If $\lr{A}{a}$ and $a \step b$ then $\lr{A}{a = b}$.
+  If $\lr{A}{a}$ and $a \step b$ then $\lr{A}{a \aeq b}$.
 \end{lemma}
 
 \begin{proof}
-  By induction on $A$ and the definition of $\lr{A}{a = b}$, noting that $a
+  By induction on $A$ and the definition of $\lr{A}{a \aeq b}$, noting that $a
   \step b$ is (1) a partial function of $a$ and (2) values never step; and that
   therefore if $a \step b$ and $a \steps v$ then $b \steps v$.
 \end{proof}
 
 
-\subsection{Coincidence of inequality on values of equality types}
-
-\todo{Do we need this?}
-
-\begin{theorem}\label{thm:coincide}
-  $v \le u : \eq{A}$ if and only if $\lr{\eq{A}}{v \le u}$.
-\end{theorem}
-
-\begin{proof}
-  \todo{Can't we just observe that their definitions coincide aside from the $a
-    \steps v$ conditions, and since values don't step this is irrelevant?}
-
-  By induction on $\eq{A}$.
-  \begin{description}
-  \item[Case $\bool$] If $v \le u : \bool$ then $v \steps v$ and $u \steps u$
-    and thus $\lr{\bool}{v \le u}$.
-
-    If $\lr{\bool}{v \le u}$ then $v \steps v'$ and $u \steps u'$ such that $v'
-    \le u' : \bool$. Since values do not step, $v = v'$ and $u = u'$ and so $v
-    \le u : \bool$.
-
-  \item[Case $\eq{A}_1 \x \eq{A}_2$] If $v \le u : \eq{A}_1 \x \eq{A}_2$ then by
-    inversion of $\rn{\le_{\x}}$, $v = (v_1, v_2)$ and $u = (u_1, u_2)$ such
-    that $v_i \le u_i : \eq{A}_i$.
-
-  \item[Case $\eq{A} + \eq{B}$] By inductive hypothesis.
-
-  \item[Case $\Set{\eq{A}}$] \TODO
-  \end{description}
-\end{proof}
-
-
 \subsection{Preorder properties}
-
-\begin{definition}
-  A \emph{chain} is a totally ordered subset of a preorder.
-\end{definition}
-
-\begin{definition}
-  The \emph{height} of a preorder is the cardinality of its largest chain.
-\end{definition}
-
-\newcommand{\down}[1]{{\mathop{\downarrow}{#1}}}
-
-\begin{definition}
-  The \emph{down-set} $\down{x}$ of an element $x$ of a preorder $P$ is the
-  induced preorder on $\setfor{y \in P}{y \le x}$.
-\end{definition}
 
 \newcommand{\Val}[1]{\ms{Val}(#1)}
 
 \begin{definition}
   Let $\Val{A}$ be the preorder of values $v$ such that $\lr{A}{v}$, ordered by
-  $\lr{A}{v \le u}$. This is reflexive and transitive (and thus a preorder) by
-  theorems \ref{thm:prefl} and \ref{thm:trans} respectively. By theorem
-  \ref{thm:coincide}, for equality types $\eq{A}$ this coincides with values $v$
-  such that $v \le v : \eq{A}$ ordered by $v \le u : \eq{A}$, which we will make
-  use of frequently.
+  $\lr{A}{v \ale u}$. This is reflexive and transitive by theorems
+  \ref{thm:prefl} and \ref{thm:trans} respectively. By theorem
+  \ref{thm:agree-ineq}, for equality types $\eq{A}$ this coincides with values
+  $v$ such that $v \ale v : \eq{A}$ ordered by $v \ale u : \eq{A}$, which we
+  will make use of frequently.
 \end{definition}
 
 \begin{theorem}
@@ -451,16 +480,20 @@ This follows from the following two lemmas:
 
   \item[Case $\Set{\fineq{A}}$] All values $\lr{\Set{\fineq{A}}}{v}$ have the
     form $\setlit{\vec{v_i}}$ where $\lr{\fineq{A}}{v_i}$ (which can be seen by
-    inverting the rule $\rn{\le_\subseteq}$).
+    inverting the rule $\rn{\subseteq}$).
+
+    Since any chain in a preorder $P$ may be extended to a chain in the
+    partially ordered set of equivalence-classes of $P$ (taking $[x] = [y]$ iff
+    $x \le y \wedge y \le x$) \TODO
 
     \todo{Do we need to prove the height of a preorder is equal to the height of
       the poset of its equivalence classes?}
 
-    $\lr{\fineq{A}}{\setlit{\vec{v_i}} = \setlit{\vec{u_i}}}$
+    $\lr{\fineq{A}}{\setlit{\vec{v_i}} \aeq \setlit{\vec{u_i}}}$
 
     \todo{Either we observe that these are just lists quotiented by order and
       therefore are sets which have finite height, or we explicitly define a
-      ``size'' function and show it must increase for $a \lt b$}
+      ``size'' function and show it must increase for $a < b$}
 
   \item[Case $\fineq{A} \x \fineq{B}$] \TODO
   \item[Case $\fineq{A} + \fineq{B}$] \TODO
@@ -493,7 +526,7 @@ with $x \of \disc{A}$.
   \item[Cases] $\infer[\rt{var}]{\J{\GD}{\GG}{x}{A}}{x\of A \in \GD}$,
     $\infer[\rt{var}^+]{\J{\GD}{\GG}{\m{x}}{A}}{\m{x} \of A \in \GG}$
 
-    By definition of $\lr{\cxdisc{\GD},\GG}{\gamma_1 \le \gamma_2}$.
+    By definition of $\lr{\cxdisc{\GD},\GG}{\gamma_1 \ale \gamma_2}$.
 
     %% Boolean true, false
     \vspace{1em}
@@ -508,29 +541,31 @@ with $x \of \disc{A}$.
     \GD; \GG{},\m{x}\of A \ent e : B}$
 
     TS: $\lrcx{\cxdisc{\GD},\GG}{A \mto B}{
-      \fn\bind{\m{x}} e \le \fn\bind{\m{x}}e}$.
+      \fn\bind{\m{x}} e \ale \fn\bind{\m{x}}e}$.
 
-    Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \le \gamma_2}$ and any $i =
+    Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \ale \gamma_2}$ and any $i =
     1,2$.
 
-    STS $\lr{A \mto B}{\fn\bind{\m{x}} \gamma_i(e) \le \fn\bind{\m{x}}
-      \gamma_i(e)}$ and $\lr{A \mto B}{\fn\bind{\m{x}} \gamma_1(e) \le
+    STS $\lr{A \mto B}{\fn\bind{\m{x}} \gamma_i(e) \ale \fn\bind{\m{x}}
+      \gamma_i(e)}$ and $\lr{A \mto B}{\fn\bind{\m{x}} \gamma_1(e) \ale
       \fn\bind{\m{x}} \gamma_2(e)}$.
 
-    Consider any $\lr{x \of A}{\sigma_1 \le \sigma_2}$ and any $j = 1,2$.
+    Consider any $\lr{x \of A}{\sigma_1 \ale \sigma_2}$ and any $j = 1,2$.
 
     Expanding definitions, it STS:
     \begin{itemize}
-    \item $\lr{B}{\sigma_j(\gamma_i(e)) \le \sigma_j(\gamma_i(e))}$
-      and $\lr{B}{\sigma_1(\gamma_i(e)) \le \sigma_2(\gamma_i(e))}$
-    \item $\lr{B}{\sigma_j(\gamma_1(e)) \le \sigma_j(\gamma_2(e))}$
-      and $\lr{B}{\sigma_1(\gamma_j(e)) \le \sigma_2(\gamma_j(e))}$
+    \item $\lr{B}{\sigma_j(\gamma_i(e)) \ale \sigma_j(\gamma_i(e))}$
+      and $\lr{B}{\sigma_1(\gamma_i(e)) \ale \sigma_2(\gamma_i(e))}$
+    \item $\lr{B}{\sigma_j(\gamma_1(e)) \ale \sigma_j(\gamma_2(e))}$
+      and $\lr{B}{\sigma_1(\gamma_j(e)) \ale \sigma_2(\gamma_j(e))}$
     \end{itemize}
 
     All of these follow from our IH, $\lrcx{\cxdisc{\GD},\GG,x\of A}{B}{e}$,
-    from partial reflexivity of $\lr{\GG}{\gamma \le \sigma}$, and from the fact
+    from partial reflexivity of $\lr{\GG}{\gamma \ale \sigma}$, and from the fact
     that if $\gamma_1 \le \gamma_2$ and $\sigma_1 \le \sigma_2$ then $\sigma_1
     \circ \gamma_1 \le \sigma_2\circ\gamma_2$.
+
+    \todo{wrong notation above}
 
     %% TODO: discrete lambda
 
@@ -542,10 +577,10 @@ with $x \of \disc{A}$.
 
     TS: $\lrcx{\cxdisc{\GD}, \GG}{\fineq{L}}{\tfix{\fineq{L}}{x} e}$.
 
-    Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \le \gamma_2}$.
+    Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \ale \gamma_2}$.
 
     By Theorem \ref{thm:congbeta} it STS $\exists v_1,v_2$ such that
-    $\lr{\fineq{L}}{v_1 \le v_2}$ and $\tfix{\fineq{L}}{x} \gamma_i(e) \steps
+    $\lr{\fineq{L}}{v_1 \ale v_2}$ and $\tfix{\fineq{L}}{x} \gamma_i(e) \steps
     v_i$.
 
     Strategy:
