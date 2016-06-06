@@ -228,8 +228,10 @@ allowed, enforcing a call-by-value evaluation order.
   obeying \[\forall(a, b)\ a \alt b \lor b \alt a \lor a = b \]
 \end{definition}
 
+\newcommand{\height}[1]{\ms{height}(#1)}
+
 \begin{definition}
-  The \emph{height} of a preorder is the cardinality of its largest chain.
+  The \emph{height} $\height{P}$ of a preorder $P$ is the cardinality of its largest chain.
 \end{definition}
 
 \begin{definition}
@@ -242,8 +244,8 @@ For a preorder which is already a poset, $\eqposet{{-}}$ is effectively the
 identity. In particular, for a chain $C \subseteq P$, we have $\eqposet{C}
 \subseteq \eqposet{P}$ and the cardinalities of $C$ and $\eqposet{C}$ are equal.
 Since any chain in $\eqposet{P}$ also has a corresponding chain(s) in $P$ (found
-by picking a representative of each equivalence class), this implies that the
-height of $P$ and the height of $\eqposet{P}$ are equal for any preorder $P$.
+by picking a representative of each equivalence class), this implies that
+$\height{P} = \height{\eqposet{P}}$ for any preorder $P$.
 
 \begin{definition}
   The \emph{down-set} $\down{x}$ of an element $x$ of a preorder $P$ is the
@@ -482,12 +484,11 @@ This follows from the following two lemmas:
     form $\setlit{\vec{v_i}}$ where $\lr{\fineq{A}}{v_i}$ (which can be seen by
     inverting the rule $\rn{\subseteq}$).
 
-    Since any chain in a preorder $P$ may be extended to a chain in the
-    partially ordered set of equivalence-classes of $P$ (taking $[x] = [y]$ iff
-    $x \le y \wedge y \le x$) \TODO
+    Since $\height{P} = \height{\eqposet{P}}$, it suffices to show that
+    $\eqposet{\Val{\Set{\fineq{A}}}}$ has finite height.
 
-    \todo{Do we need to prove the height of a preorder is equal to the height of
-      the poset of its equivalence classes?}
+    \TODO{} Observe that $\eqposet{\Val{\Set{\fineq{A}}}} \cong
+    \FS{\eqposet{\Val{\fineq{A}}}}$
 
     $\lr{\fineq{A}}{\setlit{\vec{v_i}} \aeq \setlit{\vec{u_i}}}$
 
@@ -501,7 +502,8 @@ This follows from the following two lemmas:
 \end{proof}
 
 \begin{theorem}
-  For any $\eq{A}$, for any $v \in \Val{\eq{A}}$, $\down{v}$ has finite height.
+  For any $\eq{A}$, for any $v \in \Val{\eq{A}}$, $\down{v} \subseteq
+  \Val{\eq{A}}$ has finite height.
 \end{theorem}
 
 \begin{proof}
