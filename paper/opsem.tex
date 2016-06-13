@@ -5,14 +5,21 @@
 \usepackage{datafun}
 
 %% ---------- New commands
-%% ``approximate'' \le, < and =, for preorders
+\renewcommand{\land}{~\text{and}~}
+\renewcommand{\lor}{~\text{or}~}
+
+\newcommand{\widevec}[1]{\overrightarrow{#1}}
+
+%% preorder notation
 \newcommand{\ale}{\sqsubseteq}
 \newcommand{\alt}{\sqsubset}
 \newcommand{\aeq}{\equiv}
 
-\newcommand{\down}[1]{{\mathop{\downarrow}{#1}}}
 \newcommand{\eqposet}[1]{\ms{Eq}(#1)}
+\renewcommand{\eqposet}[1]{\|{#1}\|}
 \newcommand{\eqclass}[1]{[#1]}
+\newcommand{\height}{\ms{height}}
+\newcommand{\down}[1]{{\mathop{\downarrow}{#1}}}
 
 %% type-annotated semilattice operatoins
 \newcommand{\tforin}[2]{\bigvee_{#1}(#2)\ }
@@ -39,8 +46,6 @@
 \newcommand{\lr}[2]{#2\mathrel{|}#1}
 \newcommand{\lrcx}[3]{#1 \ent \lr{#2}{#3}}
 \newcommand{\commsq}[5]{\lr{#1}{{#2}, {#4} \ale {#3}, {#5}}}
-\renewcommand{\land}{~\text{and}~}
-\renewcommand{\lor}{~\text{or}~}
 
 %% ---------- End new commands
 
@@ -48,6 +53,20 @@
 \begin{document}
 
 
+\todo{NOTE: It is \emph{not} the case that ``partial preorders'' (sets equipped
+  with a partially-reflexive transitive relation) are isomorphic to PERs
+  equipped with partial orders respecting the equivalence relation,
+  \textbf{because} partial reflexivity (as I've defined it) only means $a \ale b
+  \implies a \ale a$, and not also $a \ale b \implies b \ale b$.
+
+  In other words, in a ``partial preorder'', an $a$ that is ``in'' the preorder
+  ($a \ale a$) can be below a $b$ that is not ``in'' the preorder ($b \not\ale
+  b$).
+
+  Now, I believe all the partial preorders I consider here have this additional
+  property, and therefore (I think) correspond to partially-ordered PERs, but
+  none of the proofs depend on this fact.}
+
 \section{Structural operational semantics}
 
 \[\begin{array}{rccl}
@@ -201,12 +220,12 @@ allowed, enforcing a call-by-value evaluation order.
 
 \subsection{Properties of evaluation}
 
-\begin{theorem}
+\begin{theorem}\label{thm:determinism}
   Evaluation is deterministic: if $a \step b$ and $a \step c$ then $b = c$.
 \end{theorem}
 
-\begin{theorem}
-  Values don't step: $\forall v\, \nexists u\; (v \step u)$.
+\begin{theorem}\label{thm:valuesdontstep}
+  Values don't step: $\forall v\, \nexists a\; (v \step a)$.
 \end{theorem}
 
 \todo{Do these need proof? They're really obvious, tedious inductions.}
@@ -221,48 +240,112 @@ allowed, enforcing a call-by-value evaluation order.
     x \alt y &\iff& x \ale y \land y \not\ale x\\
     x \aeq y &\iff& x \ale y \land y \ale x
   \end{eqnarray*}
+
+  Note that every poset is a preorder.
 \end{definition}
+
+%% \newcommand{\ordereq}{\simeq}
+%% \begin{definition}
+%%   Two preorders $P, Q$ are \emph{order-equivalent}, written $P \ordereq Q$, iff
+%%   there exist functions $f : P \to Q$, $g : Q \to P$ such that
+%%   \begin{eqnarray*}
+%%     x \ale y &\implies& f(x) \ale f(y)\\
+%%     x \ale y &\implies& g(x) \ale g(y)\\
+%%     x &\equiv& f(g(x))\\
+%%     x &\equiv& g(f(x))\\
+%%   \end{eqnarray*}
+
+%%   Note that two posets are order equivalent iff they are order isomorphic in the
+%%   usual sense.
+
+%%   We show that $f(x) \ale f(y) \implies x \le y$:
+%%   \begin{eqnarray*}
+%%     f(x) \ale f(y) &\implies& g(f(x)) \ale g(f(y))\\
+%%     &\implies& x \ale y
+%%   \end{eqnarray*}
+
+%%   \todo{wait, isn't being order-equivalent just saying their equivalence posets
+%%     are order-isomorphic?}
+%% \end{definition}
 
 \begin{definition}
   A \emph{chain} is a totally ordered subset of a preorder, i.e. a subset
   obeying \[\forall(a, b)\ a \alt b \lor b \alt a \lor a = b \]
 \end{definition}
 
-\newcommand{\height}[1]{\ms{height}(#1)}
-
 \begin{definition}
-  The \emph{height} $\height{P}$ of a preorder $P$ is the cardinality of its largest chain.
+  The \emph{height} $\height(P)$ of a preorder $P$ is the cardinality of its largest chain.
 \end{definition}
 
-\begin{definition}
-  The \emph{equivalence poset} $\eqposet{P}$ of a preorder $P$ is the poset of
-  its equivalence classes $\eqclass{x} = \setfor{y}{x \aeq y}$, ordered by
-  $\eqclass{x} \le \eqclass{y} \iff x \ale y$.
-\end{definition}
-
-For a preorder which is already a poset, $\eqposet{{-}}$ is effectively the
-identity. In particular, for a chain $C \subseteq P$, we have $\eqposet{C}
-\subseteq \eqposet{P}$ and the cardinalities of $C$ and $\eqposet{C}$ are equal.
-Since any chain in $\eqposet{P}$ also has a corresponding chain(s) in $P$ (found
-by picking a representative of each equivalence class), this implies that
-$\height{P} = \height{\eqposet{P}}$ for any preorder $P$.
+%% For a preorder $P$ which is already a poset (where $\ale$ is antisymmetric),
+%% $[x] = \{x\}$ and $\eqposet{P} \cong P$.
 
 \begin{definition}
   The \emph{down-set} $\down{x}$ of an element $x$ of a preorder $P$ is the
   induced preorder on $\setfor{y}{y \ale x}$.
 \end{definition}
 
+\begin{definition}
+  The \emph{height of an element $x$ of a preorder $P$}, $\height_P(x)$, is the
+  height of its down-set $\down{x}$.
+\end{definition}
+
+\begin{definition}
+  The \emph{equivalence poset} $\eqposet{P}$ of a preorder $P$ is the poset of
+  its equivalence classes $\eqclass{x} \defeq \setfor{y \in P}{x \aeq y}$,
+  ordered $\eqclass{x} \le \eqclass{y} \iff x \ale y$.
+\end{definition}
+
+\begin{theorem}[Heights of equivalence posets]\label{thm:height}
+  For any preorder $P$, $\height(P) = \height(\eqposet{P})$.
+\end{theorem}
+\begin{proof}
+  For any chain $C$ of a preorder $P$, $\setfor{\eqclass{x}}{x \in C}$ forms a
+  chain in $\eqposet{P}$ of equal cardinality (since for no two distinct $x,y
+  \in C$ does $x \aeq y$); likewise, for any chain in $\eqposet{P}$ there is a
+  chain in $P$ of equal cardinality formed by choosing a representative of each
+  equivalence class.
+\end{proof}
+
+\begin{theorem}[Heights of elements of equivalence posets]\label{thm:height-elem}
+  For any preorder $P$, $\height_P(x) = \height_{\eqposet{P}}([x])$.
+\end{theorem}
+\begin{proof}
+  For any chain $C$ of $\down{x}$, $\setfor{\eqclass{x}}{x \in C}$ forms a chain
+  in $\down{[x]}$ of equal cardinality (since for no two distinct $a,b \in C$
+  does $a \equiv b$). Likewise, for any chain $C$ in $\down{\eqclass{x}}$ there
+  is (at least one) chain $C'$ in $\down{x}$ of equal cardinality formed by
+  choosing a representative of each equivalence class: $C' = \setfor{a}{[a] \in
+    C}$. (We are guaranteed that if $\eqclass{a} \in \down{\eqclass{x}}$ then $a
+  \ale x$ and therefore $a \in \down{x}$.)
+\end{proof}
+
+While the proofs of theorems \ref{thm:height} and \ref{thm:height-elem} use the
+axiom of choice (to choose representatives of each of a set of equivalence
+classes) in the general case, in what follows we care only whether given
+preorders or their elements have \emph{finite} height. It is left as an exercise
+for the reader to show that the axiom of choice is unnecessary in this case.
+
 
 \section{Logical relations}
+
+Because it simplifies our logical relations and proofs, we will introduce an
+additional pseudo-type $\disc{A}$, representing the poset $A$ with its ordering
+replaced by the \emph{discrete} partial order, $x \le y \iff x = y$.
+\[\begin{array}{rccl}
+  \text{types} &
+  A &\bnfeq& ... \pipe \disc{A}
+\end{array}\]
+
+Observe that under this interpretation $A \uto B$ is effectively $\disc{A} \mto
+B$. In particular, if we let $\den{\disc{A}} = \Disc{|\den{A}|}$ then $\den{A
+  \uto B} = \Disc{|\den{A}|} \arr \den{B} = \den{\disc{A} \mto B}$.
 
 Let $a,b,c$ range over closed expressions%% , and let $\ms{Term}$ be the set
 %% of all closed expressions
 . Let $\gamma, \sigma, \chi$ range over substitutions containing only closed
 expressions, and let $\ms{Ctx}(\GG)$ be the set of all substitutions of closed
 expressions for the variables in $\GG$.
-
-\todo{PROBLEM: discrete variables in contexts! Solution??: add a new ``type''
-  $\disc{A}$ and replace discrete variables by variables of type $\disc{A}$?}
 
 We define the following relations:
 \[\begin{array}{ccll}
@@ -277,11 +360,25 @@ We define the following relations:
     &\iff& \forall(i = 1,2)\ \lr{A}{\gamma_i(e_1) \ale \gamma_i(e_2)}
     \land \lr{A}{\gamma_1(e_i) \ale \gamma_2(e_i)}
 \end{array}\]
+
 Note that $\commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}$ can be seen as a commuting
 square (although we have not yet shown that these relations are transitive and
-therefore commute): \todo{insert diagram}
+therefore commute):
+\begin{center}
+  \tikzset{
+    no line/.style={draw=none,
+      commutative diagrams/every label/.append style={/tikz/auto=false}}}
+  {\large
+    \begin{tikzcd}
+      \gamma_1(e_1) \arrow{r}{\ale} \arrow{d}{\ale}
+      & \gamma_1(e_2) \arrow{d}{\ale}\\
+      \gamma_2(e_1) \arrow{r}{\ale}
+      & \gamma_2(e_2)
+    \end{tikzcd}
+  }
+\end{center}
 
-For any relation $\lr{X}{Y \ale Z}$, we write:
+As a matter of notation, for any relation $\lr{X}{Y \ale Z}$, we write:
 \[\begin{array}{ccl}
   \lr{X}{Y \aeq Z} &\iff& \lr{X}{Y \ale Z} \land \lr{X}{Z \ale Y}\\
   \lr{X}{Y}     &\iff& \lr{X}{Y \ale Y}
@@ -313,6 +410,10 @@ We now give the definition of $\lr{A}{a \ale b}$ by induction on $A$:
   \land (\lrcx{x\of A}{B}{e_1 \ale e_2})
 \end{array}\]
 
+By definition, $\lr{A \uto B}{a \ale b} \iff \lr{\disc{A} \mto B}{a \ale b}$;
+because of this, in the proofs to follow we usually omit the case for $A \uto B$
+and consider only $\disc{A}$ and $A \mto B$.
+
 
 \subsection{Immediate properties}
 
@@ -324,7 +425,7 @@ We now give the definition of $\lr{A}{a \ale b}$ by induction on $A$:
   By induction on $A$ and the definition of $\lr{A}{a \ale a}$.
 \end{proof}
 
-\begin{theorem}[Agreement on values of equality types]
+\begin{theorem}[Agreement on values of eqtypes]
   \label{thm:agree-ineq}
   $v \ale u : \eq{A}$ if and only if $\lr{\eq{A}}{v \ale u}$.
 \end{theorem}
@@ -358,40 +459,43 @@ We now give the definition of $\lr{A}{a \ale b}$ by induction on $A$:
 
 \subsection{Partial reflexivity}
 \begin{theorem}[Partial reflexivity]\label{thm:prefl}
-  If $\lr{A}{a \ale b}$ then $\lr{A}{a \ale a}$ (and therefore $\lr{A}{a}$).
+  If $\lr{A}{a \ale b}$ then $\lr{A}{a \ale a}$ and $\lr{A}{b \ale b}$.
+  (Equivalently, $\lr{A}{a}$ and $\lr{A}{b}$.)
 \end{theorem}
 
 \begin{proof}
   By induction on $A$.
   \begin{description}
   \item[Case $\disc{A}$] From $\lr{\disc{A}}{a \ale b}$ we have $\lr{A}{a \aeq
-    b}$ and thus $\lr{A}{a \ale b}$. By IH $\lr{A}{a \ale a}$, and so $\lr{A}{a
-    \aeq a}$. Thus $\lr{\disc{A}}{a \ale a}$.
+    b}$ and so $\lr{A}{a \ale b}$. By IH $\lr{A}{a \ale a}$, so $\lr{A}{a \aeq
+    a}$, so $\lr{\disc{A}}{a}$. Argument for $\lr{\disc{A}}{b \ale b}$ is
+    symmetric.
 
   \item[Case $\bool$] By reflexivity of $v \ale u : \bool$ on
     $\{\ms{true},\ms{false}\}$.
 
   \item[Case $\Set{A}$] From $\lr{A}{a \ale b}$ we have $a \steps
-    \setlit{\vec{v_i}}$. It STS that $\forall v_i\, \exists v_j\; (\lr{A}{v_i \aeq
-      v_j})$. By the IH, let $v_j = v_i$.
+    \setlit{\vec{v_i}}$. It STS that $\forall v_i\, \exists v_j\; (\lr{A}{v_i
+      \aeq v_j})$. By the IH, let $v_j = v_i$ and we are done. Argument for
+    $\lr{\Set{A}}{b \ale b}$ is symmetric.
 
   \item[Case $A \x B$] By IH, applied pointwise. \todo{flesh out}
   \item[Case $A + B$] By IH. \todo{flesh out}
-  \item[Case $A \uto B$] Ignored; we translate $A \uto B$ into $\disc{A} \mto
-    B$.
+  \item[Case $A \uto B$] Follows from cases for $\disc{A}$ and $A \mto B$.
 
   \item[Case $A \mto B$] From $\lr{A \mto B}{a \ale b}$ we have $a \steps
     \fn\bind{x} e$ and $b \steps \fn\bind{x} e'$. Consider any $\gamma_1,
     \gamma_2 \in \ms{Ctx}(x \of A)$ such that $\lr{x\of A}{\gamma_1 \ale
       \gamma_2}$. Then applying $\lr{A \mto B}{a \ale b}$ we have:
     \begin{itemize}
-    \item $\lr{B}{\gamma_1(e) \ale \gamma_2(e)}$;
+    \item $\lr{B}{\gamma_1(e) \ale \gamma_2(e)}$ and $\lr{B}{\gamma_1(e') \ale
+      \gamma_2(e')}$;
     \item $\lr{B}{\gamma_i(e) \ale \gamma_i(e')}$, and so by our IH at $B$ we
-      have $\lr{B}{\gamma_i(e) \ale \gamma_i(e)}$
+      have $\lr{B}{\gamma_i(e) \ale \gamma_i(e)}$ and $\lr{B}{\gamma_i(e') \ale
+        \gamma_i(e')}$
     \end{itemize}
-    which form the commuting square $\commsq{B}{\gamma_1}{\gamma_2}{e}{e}$ we
-    need.
-
+    which form the commuting squares $\commsq{B}{\gamma_1}{\gamma_2}{e}{e}$ and
+    $\commsq{B}{\gamma_1}{\gamma_2}{e'}{e'}$ we needed.
   \end{description}
 \end{proof}
 
@@ -414,7 +518,8 @@ We now give the definition of $\lr{A}{a \ale b}$ by induction on $A$:
       (\lr{A}{v_j \aeq w_k})$. Thus by IH $\lr{A}{u_i \aeq w_k}$.
     \item[Case $A \x B$] By IH, applied pointwise. \todo{flesh out}
     \item[Case $A + B$] By IH. \todo{flesh out}
-    \item[Case $A \to B$] Case ignored because we translate away $A \to B$.
+    \item[Case $A \to B$] Follows from cases for $\disc{A}$ and $A \mto B$.
+
     \item[Case $A \mto B$] We have $a \steps \fn\bind{x}e_1$, $b \steps
       \fn\bind{x}e_2$, and $c \steps \fn\bind{x}e_3$. We have $\lrcx{x \of
         A}{B}{e_1 \ale e_2}$ and $\lrcx{x \of A}{B}{e_2 \ale e_3}$, and we wish to
@@ -436,7 +541,8 @@ Let $a \betaeq b$ be the equivalence closure of $\step$.
   If $\lr{A}{a}$ and $a \betaeq b$ then $\lr{A}{a \aeq b}$.
 \end{theorem}
 
-This follows from the following two lemmas:
+This follows from transitivity and the following two
+lemmas:
 
 \begin{lemma}
   If $\lr{A}{b}$ and $a \step b$ then $\lr{A}{a \aeq b}$.
@@ -452,75 +558,177 @@ This follows from the following two lemmas:
 \end{lemma}
 
 \begin{proof}
-  By induction on $A$ and the definition of $\lr{A}{a \aeq b}$, noting that $a
-  \step b$ is (1) a partial function of $a$ and (2) values never step; and that
-  therefore if $a \step b$ and $a \steps v$ then $b \steps v$.
+  By induction on $A$ and the definition of $\lr{A}{a \aeq b}$, noting by
+  theorems \ref{thm:determinism} and \ref{thm:valuesdontstep} that $a \step b$
+  is (1) deterministic in $a$ and (2) values never step; and that therefore if
+  $a \step b$ and $a \steps v$ then $b \steps v$.
 \end{proof}
 
 
 \subsection{Preorder properties}
 
-\newcommand{\Val}[1]{\ms{Val}(#1)}
+\newcommand{\Val}[1]{\ms{Val}\:#1}
 
 \begin{definition}
   Let $\Val{A}$ be the preorder of values $v$ such that $\lr{A}{v}$, ordered by
   $\lr{A}{v \ale u}$. This is reflexive and transitive by theorems
   \ref{thm:prefl} and \ref{thm:trans} respectively. By theorem
-  \ref{thm:agree-ineq}, for equality types $\eq{A}$ this coincides with values
-  $v$ such that $v \ale v : \eq{A}$ ordered by $v \ale u : \eq{A}$, which we
-  will make use of frequently.
+  \ref{thm:agree-ineq}, for eqtypes $\eq{A}$ this coincides with values $v$ such
+  that $v \ale v : \eq{A}$ ordered by $v \ale u : \eq{A}$, which we will make
+  use of frequently.
 \end{definition}
 
-\begin{theorem}
+\begin{theorem}[Finite eqtypes are finite-height]\label{thm:finite-height}
   $\Val{\fineq{A}}$ has finite height for any $\fineq{A}$.
 \end{theorem}
 
-\begin{proof} By induction on $\fineq{A}$:
+\begin{proof}
+  Since by theorem \ref{thm:height} $\height(P) = \height(\eqposet{P})$ for any
+  preorder $P$, it suffices to show that $\eqposet{\Val{\fineq{A}}}$ has finite
+  cardinality (and thus finite height). We show this by induction on
+  $\fineq{A}$:
   \begin{description}
-  \item[Case $\bool$] $\Val{2} = \{\ms{false} < \ms{true}\}$ has finite
-    cardinality and thus finite height.
+  \item[Case $\bool$] $\Val{\bool} = \{\ms{false} < \ms{true}\}$ has finite
+    cardinality (and thus so does $\eqposet{\Val{\bool}}$).
 
   \item[Case $\Set{\fineq{A}}$] All values $\lr{\Set{\fineq{A}}}{v}$ have the
     form $\setlit{\vec{v_i}}$ where $\lr{\fineq{A}}{v_i}$ (which can be seen by
     inverting the rule $\rn{\subseteq}$).
 
-    Since $\height{P} = \height{\eqposet{P}}$, it suffices to show that
-    $\eqposet{\Val{\Set{\fineq{A}}}}$ has finite height.
+    Observe that
+    \begin{eqnarray*}
+      \eqclass{\setlit{\vec{v_i}}} \le_{\eqposet{\Val{\Set{\fineq{A}}}}}
+      \eqclass{\setlit{\vec{u_i}}}
+      &\text{iff}&
+      \setlit{\vec{v_i}} \ale_{\Val{\Set{\fineq{A}}}} \setlit{\vec{u_i}}\\
+      &\text{iff}&
+      \setlit{\vec{v_i}} \ale \setlit{\vec{u_i}} : \Set{\fineq{A}}\\
+      &\text{iff}&
+      \forall v_i\, \exists u_j\, (v_i \equiv u_j : \Set{\fineq{A}})\\
+      &\text{iff}&
+      \forall v_i\, \exists u_j\, ([v_i] = [u_j])\\
+      &\text{iff}&
+      \{\widevec{[v_i]}\} \subseteq \{\widevec{[u_i]}\}
+    \end{eqnarray*}
+    (where the braces in $\setlit{\vec{v_i}}$, $\setlit{\vec{u_i}}$ are mere
+    syntax, but $\{\widevec{[v_i]}\}$, $\{\widevec{[u_i]}\}$ are set of
+    equivalence classes in $\Val{\Set{\fineq{A}}}$), and therefore
+    $\eqposet{\Val{\Set{\fineq{A}}}}$ is isomorphic to
+    $\Pfin(\eqposet{\Val{\fineq{A}}})$, ordered by inclusion $\subseteq$.
 
-    \TODO{} Observe that $\eqposet{\Val{\Set{\fineq{A}}}} \cong
-    \FS{\eqposet{\Val{\fineq{A}}}}$
-
-    $\lr{\fineq{A}}{\setlit{\vec{v_i}} \aeq \setlit{\vec{u_i}}}$
-
-    \todo{Either we observe that these are just lists quotiented by order and
-      therefore are sets which have finite height, or we explicitly define a
-      ``size'' function and show it must increase for $a < b$}
+    By IH, $\eqposet{\Val{\fineq{A}}}$ has finite cardinality, and thus so does
+    $\Pfin(\eqposet{\Val{\fineq{A}}})$.
 
   \item[Case $\fineq{A} \x \fineq{B}$] \TODO
   \item[Case $\fineq{A} + \fineq{B}$] \TODO
   \end{description}
 \end{proof}
 
-\begin{theorem}
-  For any $\eq{A}$, for any $v \in \Val{\eq{A}}$, $\down{v} \subseteq
-  \Val{\eq{A}}$ has finite height.
+\begin{theorem}[Eqtype downsets are finite]
+  For any $\eq{A}$, for any $v \in \Val{\eq{A}}$, $\down{v}$ has finite height.
 \end{theorem}
 
 \begin{proof}
-  \TODO
+  Note that, having excluded $\N$ and $\str$, every eqtype $\eq{A}$ remaining is
+  also a \emph{finite} eqtype, and therefore this theorem follows immediately
+  from theorem \ref{thm:finite-height}.
+
+  However, this is pedantry and, moreover, a swindle: what we really wish to
+  show is, you may add whatever base eqtypes to Datafun you like as long as they
+  satisfy the property that all their downsets are finite-height. To do this it
+  suffices to prove the theorem directly, by induction on $\eq{A}$:
+  \begin{description}
+  \item[Case $\bool$] $\Val{\bool}$ has finite cardinality, and therefore any
+    subpreorder of it has finite height.
+  %% \item[Case $\N$] $\down{n} = \{0..n\}$
+  %% \item[Case $\str$] Since $\str$ has the discrete ordering, $\down{v} = \{v\}$.
+
+  \item[Case $\Set{\eq{A}}$] By theorem \ref{thm:height-elem} it suffices to
+    show $\height_{\eqposet{\Val{\eq{A}}}}(\down{\eqclass{v}})$ is finite for
+    any $\lr{\Set{\eq{A}}}{v}$.
+
+    As in the corresponding case in theorem \ref{thm:finite-height}, we note
+    that $\eqposet{\Val{\Set{\eq{A}}}}$ is isomorphic to
+    $\Pfin(\eqposet{\Val{\eq{A}}})$, ordered by inclusion. Since any element of
+    the latter has finite height, we are done.
+
+    %% Consider any $\lr{\Set{\eq{A}}}{\setlit{\vec{u_i}}}$. Consider any chain $C
+    %% \subseteq \down{\setlit{\vec{u_i}}}$. It suffices to show that $C$ is
+    %% finite.
+
+    %% Consider the set $C' \defeq
+    %% \setfor{\{\widevec{\eqclass{v_i}}\}}{\setlit{\vec{v_i}} \in C}$. By
+    %% (\ref{iff:subset}), if ordered by inclusion $\subseteq$, this forms a chain
+    %% in $\mc{P}(\{\widevec{\eqclass{u_i}}\})$. By (\ref{iff:subset}) and the fact
+    %% that $C$ is totally ordered, no two distinct elements of $C$ can have the
+    %% same equivalence classes, and so $C'$ has cardinality no smaller than $C$.
+    %% Therefore, since $C'$ is finite (being a subset of
+    %% $\{\widevec{\eqclass{u_i}}\}$), so is $C$.
+
+  \item[Case $\eq{A} \x \eq{B}$] \TODO
+  \item[Case $\eq{A} + \eq{B}$] \TODO
+  \end{description}
 \end{proof}
 
 
 \subsection{Fundamental theorem}
 
-\newcommand{\cxdisc}[1]{\disc{#1}}
+Now, we aim to show that every well-typed term is in the corresponding logical
+relation. The most interesting case here are the \ms{fix} expressions; before we
+prove this, we will need a few lemmas to help establish those cases.
 
-Nb. $\cxdisc{\Delta}$ is the operation which replaces each $x \of A \in \Delta$
-with $x \of \disc{A}$.
+\begin{lemma}
+  For any $L$, $\lr{L}{\unit_L}$.
+\end{lemma}
+\begin{proof}
+  \TODO
+\end{proof}
+
+\begin{lemma}\label{thm:iterstep}
+  For any closed term $a = \iter{\fineq{L}}{v}{x}{e}$ such that $\lrcx{x \of
+    \fineq{L}}{\fineq{L}}{e}$ and $\lr{\fineq{L}}{v}$, either:
+  \begin{itemize}
+  \item $a \step v$, or
+  \item $a \steps \iter{\fineq{L}}{v'}{x}{e}$ for some $v'$ such that
+    $\lr{\fineq{L}}{v \ale v'}$.
+  \end{itemize}
+\end{lemma}
+\begin{proof}
+  \TODO
+\end{proof}
+
+As a consequence of Lemma \ref{thm:iterstep}, for any such term $a =
+\iter{\fineq{L}}{v_1}{x}{e}$ there is a sequence
+
+\[ \iter{\fineq{L}}{v_1}{x}{e} \steps
+\iter{\fineq{L}}{v_2}{x}{e} \steps
+\iter{\fineq{L}}{v_3}{x}{e} \steps ... \]
+
+such that either:
+\begin{itemize}
+\item This sequence is finite with length $n$ and $a \steps v_n$ for some
+  $\lr{\fineq{L}}{v_n}$
+\item This sequence is infinite; and since $\lr{\fineq{L}}{v_i \ale v_{i+1}}$,
+  it forms an infinite chain in $\Val{\fineq{L}}$.
+\end{itemize}
+
+However, by Theorem \ref{thm:finite-height} the second case is impossible
+($\Val{\fineq{L}}$ has finite height). Therefore:
+\begin{theorem}
+  If $\lrcx{x \of \fineq{L}}{\fineq{L}}{e}$ and $\lr{\fineq{L}}{v}$ then
+  $\iter{\fineq{L}}{v}{x}{e} \steps v'$ where $\lr{\fineq{L}}{v'}$.
+\end{theorem}
+
+
+%% THE FUNDAMENTAL THEOREM
+\newcommand{\cxdisc}[1]{\disc{#1}}
 
 \begin{theorem}
   If $\J{\GD}{\GG}{e}{A}$ then $\lrcx{\cxdisc{\GD},\GG}{A}{e}$.
 \end{theorem}
+
+NB. $\cxdisc{\Delta}$ signifies the replacement of each $x \of A \in \Delta$
+with $x \of \disc{A}$.
 
 \begin{proof}
   By induction on $\J{\GD}{\GG}{e}{A}$.
@@ -536,6 +744,13 @@ with $x \of \disc{A}$.
     $\infer[\ms{false}]{\GD;\GG\ent \ms{false} : \bool}{}$
 
     Trivial.
+
+    %% Ordinary application.
+    \vspace{1em}
+    \item[Case] $\infer[\rt{app}]{\J{\GD}{\GG}{e_1\;e_2}{B}}
+      {\J{\GD}{\GG}{e_1}{A \uto B} & \J{\GD}{\cdot}{e_2}{A}}$
+
+      \TODO
 
     %% Monotone lambda
     \vspace{1em}
@@ -579,9 +794,13 @@ with $x \of \disc{A}$.
 
     TS: $\lrcx{\cxdisc{\GD}, \GG}{\fineq{L}}{\tfix{\fineq{L}}{x} e}$.
 
+    %% By definition, $\tfix{\fineq{L}}{x}{e} \step
+    %% \iter{\fineq{L}}{\unit_{\fineq{L}}}{x}{e}$. \todo{use lemma about $\unit$
+    %%   evaluating}
+
     Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \ale \gamma_2}$.
 
-    By Theorem \ref{thm:congbeta} it STS $\exists v_1,v_2$ such that
+    By Theorem \ref{thm:congbeta} it suffices to find $v_1,v_2$ such that
     $\lr{\fineq{L}}{v_1 \ale v_2}$ and $\tfix{\fineq{L}}{x} \gamma_i(e) \steps
     v_i$.
 
