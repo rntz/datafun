@@ -10,16 +10,23 @@
 
 \newcommand{\widevec}[1]{\overrightarrow{#1}}
 
+
 %% preorder notation
 \newcommand{\ale}{\sqsubseteq}
 \newcommand{\alt}{\sqsubset}
 \newcommand{\aeq}{\equiv}
 
+\newcommand{\ordle}{\ale}
+\newcommand{\ordeq}{\simeq}
 \newcommand{\eqposet}[1]{\ms{Eq}(#1)}
 \renewcommand{\eqposet}[1]{\|{#1}\|}
 \newcommand{\eqclass}[1]{[#1]}
 \newcommand{\height}{\ms{height}}
-\newcommand{\down}[1]{{\mathop{\downarrow}{#1}}}
+\newcommand{\elemheight}[2]{\height(#2 : #1)}
+%% \newcommand{\down}[1]{{\mathop{\downarrow}{#1}}}
+\newcommand{\down}[2]{\mathop{\downarrow}(#2 : #1)}
+
+\newcommand{\dom}[1]{\text{dom}(#1)}
 
 %% type-annotated semilattice operatoins
 \newcommand{\tforin}[2]{\bigvee_{#1}(#2)\ }
@@ -51,21 +58,6 @@
 
 
 \begin{document}
-
-
-\todo{NOTE: It is \emph{not} the case that ``partial preorders'' (sets equipped
-  with a partially-reflexive transitive relation) are isomorphic to PERs
-  equipped with partial orders respecting the equivalence relation,
-  \textbf{because} partial reflexivity (as I've defined it) only means $a \ale b
-  \implies a \ale a$, and not also $a \ale b \implies b \ale b$.
-
-  In other words, in a ``partial preorder'', an $a$ that is ``in'' the preorder
-  ($a \ale a$) can be below a $b$ that is not ``in'' the preorder ($b \not\ale
-  b$).
-
-  Now, I believe all the partial preorders I consider here have this additional
-  property, and therefore (I think) correspond to partially-ordered PERs, but
-  none of the proofs depend on this fact.}
 
 \section{Structural operational semantics}
 
@@ -135,9 +127,11 @@ in our operational semantics:
   \infer[\rn{{\aeq}}]{v \aeq u : \eq{A}}{v \ale u : \eq{A} & u \ale v : \eq{A}}
 \end{mathpar}
 
-Since we use these judgments in our operational semantics, they are decidable,
-which may be seen by induction on $\eq{A}$. The quantifiers in the premise of
-the rule $\rn{\subseteq}$ range over finite domains, and thus pose no issue.
+To use these judgments in our operational semantics, they need to be decidable;
+that they are may be seen by induction on $\eq{A}$. The quantifiers in the
+premise of the rule $\rn{\subseteq}$ range over finite domains, and thus pose no
+issue.
+
 %% Since they are decidable we use their negations $v \not\ale v : \eq{A}$, $v
 %% \ne v : \eq{A}$ freely.
 
@@ -147,8 +141,8 @@ the rule $\rn{\subseteq}$ range over finite domains, and thus pose no issue.
 
 
 \subsection{Evaluation rules}
-We phrase our evaluation rules in terms of one-holed contexts $C$ and a
-hole-filling operation $C[e]$ (omitted for brevity). \todo{(Who do we cite for
+We phrase our evaluation rules in terms of one-holed evaluation contexts $C$ and
+a hole-filling operation $C[e]$ (omitted for brevity). \todo{(Who do we cite for
   this style of operational semantics?)} Only some one-holed contexts are
 allowed, enforcing a call-by-value evaluation order.
 
@@ -235,7 +229,10 @@ allowed, enforcing a call-by-value evaluation order.
 
 \begin{definition}
   A \emph{preorder} is a set equipped with a reflexive, transitive relation,
-  written $\ale$. We define additional notation $\alt$, $\aeq$ as follows:
+  conventionally written $\ale$.\footnote{Sometimes the name \emph{preorder} is
+    reserved for the relation, while a preordered set is called a ``proset''. As
+    a matter of convenience, we take the preorder to include the set.} We define
+  additional notation $\alt$, $\aeq$ as follows:
   \begin{eqnarray*}
     x \alt y &\iff& x \ale y \land y \not\ale x\\
     x \aeq y &\iff& x \ale y \land y \ale x
@@ -243,30 +240,6 @@ allowed, enforcing a call-by-value evaluation order.
 
   Note that every poset is a preorder.
 \end{definition}
-
-%% \newcommand{\ordereq}{\simeq}
-%% \begin{definition}
-%%   Two preorders $P, Q$ are \emph{order-equivalent}, written $P \ordereq Q$, iff
-%%   there exist functions $f : P \to Q$, $g : Q \to P$ such that
-%%   \begin{eqnarray*}
-%%     x \ale y &\implies& f(x) \ale f(y)\\
-%%     x \ale y &\implies& g(x) \ale g(y)\\
-%%     x &\equiv& f(g(x))\\
-%%     x &\equiv& g(f(x))\\
-%%   \end{eqnarray*}
-
-%%   Note that two posets are order equivalent iff they are order isomorphic in the
-%%   usual sense.
-
-%%   We show that $f(x) \ale f(y) \implies x \le y$:
-%%   \begin{eqnarray*}
-%%     f(x) \ale f(y) &\implies& g(f(x)) \ale g(f(y))\\
-%%     &\implies& x \ale y
-%%   \end{eqnarray*}
-
-%%   \todo{wait, isn't being order-equivalent just saying their equivalence posets
-%%     are order-isomorphic?}
-%% \end{definition}
 
 \begin{definition}
   A \emph{chain} is a totally ordered subset of a preorder, i.e. a subset
@@ -281,50 +254,177 @@ allowed, enforcing a call-by-value evaluation order.
 %% $[x] = \{x\}$ and $\eqposet{P} \cong P$.
 
 \begin{definition}
-  The \emph{down-set} $\down{x}$ of an element $x$ of a preorder $P$ is the
+  The \emph{down-set} $\down{P}{x}$ of an element $x$ of a preorder $P$ is the
   induced preorder on $\setfor{y}{y \ale x}$.
 \end{definition}
 
 \begin{definition}
-  The \emph{height of an element $x$ of a preorder $P$}, $\height_P(x)$, is the
-  height of its down-set $\down{x}$.
+  The \emph{height} of an element $x$ of a preorder $P$ is the height of $x$'s
+  down-set: \[\elemheight{P}{x} \defeq \height(\down{P}{x})\]
 \end{definition}
+
+\begin{definition}\label{def:ordinj}
+  A map $f : P \to Q$ between preorders $P,Q$ is a \emph{order embedding} $f
+  : P \ordle Q$ iff:
+  \begin{eqnarray*}
+    x \ale_P y &\iff& f(x) \ale_Q f(y)
+  \end{eqnarray*}
+\end{definition}
+
+\begin{definition}\label{def:ordeq}
+  Two preorders $P,Q$ are \emph{equivalent} $P \ordeq Q$ iff there exist
+  order embeddings $f : P \ordle Q$ and $g : Q \ordle P$, written $f,g : P
+  \ordeq Q$.
+\end{definition}
+
+%% \begin{definition}\label{def:subpre}
+%%   $P$ is a subpreorder of $Q$ iff the identity map ${id}(x) = x$ serves as a
+%%   order embedding ${id} : P \ale Q$.
+%% \end{definition}
+
+%% \begin{theorem}
+%%   A preorder $P$ is equivalent to a subpreorder of $Q$ (definition
+%%   \ref{def:eqsubpre}) iff $P$ is equivalent (definition \ref{def:ordeq}) to a
+%%   subpreorder of (definition \ref{def:subpre}) the preorder $Q$.
+%% \end{theorem}
+%% \begin{proof}
+%%   Left as an exercise to the reader. We do not make use of this theorem.
+%% \end{proof}
+
+\begin{theorem}[Height is monotone in order embedding]\label{thm:height-le}
+  If $f : P \ale Q$ then $\height(P) \le \height(Q)$.
+\end{theorem}
+\begin{proof}
+  For any chain $C$ of $P$, $\setfor{f(x)}{x \in C}$ forms a chain in $Q$ of
+  equal cardinality, as is verified easily by the definitions of order
+  embeddings and chains.
+\end{proof}
+
+\begin{theorem}[Element height is monotone in order embedding]
+  \label{thm:elemheight-le}
+  If $f : P \ordle Q$, then $\elemheight{P}{x} \le \elemheight{Q}{f(x)}$.
+\end{theorem}
+\begin{proof}
+  For any chain $C$ of $\down{P}{x}$, $\setfor{f(y)}{y \in C}$ forms a chain in
+  $\down{Q}{f(x)}$ of equal cardinality.
+\end{proof}
+
+\begin{theorem}
+  If $f,g : P \ordeq Q$, then $\elemheight{P}{x} = \elemheight{Q}{f(x)}$.
+\end{theorem}
+\begin{proof}
+  By theorem \ref{thm:elemheight-le}, $\elemheight{P}{x} \le
+  \elemheight{Q}{f(x)}$. Likewise:
+  \[
+  \begin{array}{rcll}
+    \elemheight{Q}{f(x)}
+    &\le& \elemheight{P}{g(f(x))} & \text{by theorem \ref{thm:elemheight-le}}\\
+    &=& \height(\down{P}{g(f(x))}) & \text{by definition}\\
+    &=& \height(\down{P}{x})
+    & \text{since}~x \equiv g(f(x))~\text{by definition of}~f,g : P \ordeq Q\\
+    &=& \elemheight{P}{x} & \text{by definition}
+  \end{array}
+  \]
+\end{proof}
+
+\todo{TODO: find and fix all references to thm:height and thm:height-elem}
 
 \begin{definition}
   The \emph{equivalence poset} $\eqposet{P}$ of a preorder $P$ is the poset of
-  its equivalence classes $\eqclass{x} \defeq \setfor{y \in P}{x \aeq y}$,
-  ordered $\eqclass{x} \le \eqclass{y} \iff x \ale y$.
+  its equivalence classes $\eqclass{x}$:
+  \begin{eqnarray*}
+    \eqclass{x}  &\defeq&  \setfor{y \in P}{x \aeq y}\\
+    \eqclass{x} \le \eqclass{y} &\iff& x \ale y
+  \end{eqnarray*}
 \end{definition}
 
-\begin{theorem}[Heights of equivalence posets]\label{thm:height}
-  For any preorder $P$, $\height(P) = \height(\eqposet{P})$.
+\begin{theorem}[Equivalence of equivalence posets]
+  For any preorder $P$, $P \ordeq \eqposet{P}$.
 \end{theorem}
 \begin{proof}
-  For any chain $C$ of a preorder $P$, $\setfor{\eqclass{x}}{x \in C}$ forms a
-  chain in $\eqposet{P}$ of equal cardinality (since for no two distinct $x,y
-  \in C$ does $x \aeq y$); likewise, for any chain in $\eqposet{P}$ there is a
-  chain in $P$ of equal cardinality formed by choosing a representative of each
-  equivalence class.
+  We pick $f,g : P \ordeq \eqposet{P}$ as follows. Let $f(x) = \eqclass{x}$.
+  Then (using the axiom of choice) pick a representative $x$ of each equivalence
+  class $\eqclass{x}$ and let $g(\eqclass{x}) = x$. Then clearly:
+  \begin{eqnarray*}
+    x \ale y &\iff& \eqclass{x} \le \eqclass{y}
+  \end{eqnarray*}
+  which establishes that $f,g : P \ordeq \eqposet{P}$ as desired.
 \end{proof}
 
-\begin{theorem}[Heights of elements of equivalence posets]\label{thm:height-elem}
-  For any preorder $P$, $\height_P(x) = \height_{\eqposet{P}}([x])$.
-\end{theorem}
-\begin{proof}
-  For any chain $C$ of $\down{x}$, $\setfor{\eqclass{x}}{x \in C}$ forms a chain
-  in $\down{[x]}$ of equal cardinality (since for no two distinct $a,b \in C$
-  does $a \equiv b$). Likewise, for any chain $C$ in $\down{\eqclass{x}}$ there
-  is (at least one) chain $C'$ in $\down{x}$ of equal cardinality formed by
-  choosing a representative of each equivalence class: $C' = \setfor{a}{[a] \in
-    C}$. (We are guaranteed that if $\eqclass{a} \in \down{\eqclass{x}}$ then $a
-  \ale x$ and therefore $a \in \down{x}$.)
-\end{proof}
+%% \begin{theorem}[Heights of equivalence posets]\label{thm:height}
+%%   For any preorder $P$, $\height(P) = \height(\eqposet{P})$.
+%% \end{theorem}
+%% \begin{proof}
+%%   For any chain $C$ of a preorder $P$, $\setfor{\eqclass{x}}{x \in C}$ forms a
+%%   chain in $\eqposet{P}$ of equal cardinality (since for no two distinct $x,y
+%%   \in C$ does $x \aeq y$); likewise, for any chain in $\eqposet{P}$ there is a
+%%   chain in $P$ of equal cardinality formed by choosing a representative of each
+%%   equivalence class.
+%% \end{proof}
 
-While the proofs of theorems \ref{thm:height} and \ref{thm:height-elem} use the
-axiom of choice (to choose representatives of each of a set of equivalence
-classes) in the general case, in what follows we care only whether given
-preorders or their elements have \emph{finite} height. It is left as an exercise
-for the reader to show that the axiom of choice is unnecessary in this case.
+%% \begin{theorem}[Heights of elements of equivalence posets]\label{thm:height-elem}
+%%   For any preorder $P$, $\elemheight{P}{x} =
+%%   \elemheight{\eqposet{P}}{\eqclass{x}}$.
+%% \end{theorem}
+%% \begin{proof}
+%%   For any chain $C$ of $\down{P}{x}$, $\setfor{\eqclass{x}}{x \in C}$ forms a
+%%   chain in $\down{\eqposet{P}}{\eqclass{x}}$ of equal cardinality (since for no
+%%   two distinct $a,b \in C$ does $a \equiv b$). Likewise, for any chain $C$ in
+%%   $\down{\eqposet{P}}{\eqclass{x}}$ there is (at least one) chain $C'$ in
+%%   $\down{P}{x}$ of equal cardinality formed by choosing a representative of each
+%%   equivalence class: $C' = \setfor{a}{\eqclass{a} \in C}$. (We are guaranteed
+%%   that if $\eqclass{a} \in \down{\eqposet{P}}{\eqclass{x}}$ then $a \ale x$ and
+%%   therefore $a \in \down{P}{x}$.)
+%% \end{proof}
+
+%% While the proofs of theorems \ref{thm:height-le} and \ref{thm:elemheight-le}
+%% use the axiom of choice (to choose representatives of each of a set of
+%% equivalence classes) in the general case, in what follows we care only whether
+%% given preorders or their elements have \emph{finite} height. It is left as an
+%% exercise for the reader to show that the axiom of choice is unnecessary in this
+%% case.
+
+
+\section{POPEs}
+
+\begin{definition}
+  A set of pairs $A$ is \emph{partially reflexive} iff
+  \[ (a,b) \in A \implies (a,a) \in A \wedge (b,b) \in A \]
+\end{definition}
+
+\begin{definition}
+  A set of pairs $A$ is \emph{transitive} iff
+  \[ (a,b) \in A \wedge (b,c) \in A \implies (a,c) \in A\]
+\end{definition}
+
+We use the term ``set of pairs'' rather than ``relation'' to emphasize that
+these properties hold of the set itself, rather than the set in relation to some
+underlying domain. By contrast, whether a relation is \emph{reflexive} depends
+on the domain the quantifier ranges over in the proposition $\forall a.\; (a,a)
+\in A$. For example, the set $\{(0,0)\}$ is partially reflexive, but the
+relation $\{(0,0)\}$ is reflexive only with respect to the domain $\{0\}$, and
+not on the domain $\N$.
+
+\begin{definition}
+  A \emph{partially ordered partial equivalence}, or POPE, is a partially
+  reflexive and transitive set of pairs.
+\end{definition}
+
+The name ``partially ordered partial equivalence'' is meant to suggest a
+connection to partial equivalence relations (PERs). Indeed, a POPE may be seen
+precisely as a PER equipped with a partial order over its equivalence classes,
+but we will not prove this here.
+
+\begin{definition}
+  The \emph{domain} $\dom{A}$ of a POPE is defined by:
+  \begin{equation*}
+    \dom{A} \defeq \setfor{a}{(a,a) \in A}
+  \end{equation*}
+\end{definition}
+
+Now, note that POPEs correspond exactly to preorders: to a POPE $A$ corresponds
+the set $\dom{A}$ ordered by $a \ale b \iff (a,b) \in A$. Likewise, to a
+preorder $\tuple{A,\ale}$ corresponds the set $\setfor{(a,b)}{a \ale b}$.
 
 
 \section{Logical relations}
@@ -412,12 +512,12 @@ We now give the definition of $\lr{A}{a \ale b}$ by induction on $A$:
 
 By definition, $\lr{A \uto B}{a \ale b} \iff \lr{\disc{A} \mto B}{a \ale b}$;
 because of this, in the proofs to follow we usually omit the case for $A \uto B$
-and consider only $\disc{A}$ and $A \mto B$.
+and consider only $\disc{A}$ and $A \mto B$ separately.
 
 
 \subsection{Immediate properties}
 
-\begin{theorem}[Termination]
+\begin{theorem}[Termination]\label{thm:termination}
   If $\lr{A}{a}$ then $a \steps v$.
 \end{theorem}
 
@@ -567,15 +667,16 @@ lemmas:
 
 \subsection{Preorder properties}
 
-\newcommand{\Val}[1]{\ms{Val}\:#1}
+\todo{Do I really want to only consider values?}
+
+\newcommand{\Val}[1]{\ms{V}[#1]}
 
 \begin{definition}
   Let $\Val{A}$ be the preorder of values $v$ such that $\lr{A}{v}$, ordered by
   $\lr{A}{v \ale u}$. This is reflexive and transitive by theorems
   \ref{thm:prefl} and \ref{thm:trans} respectively. By theorem
   \ref{thm:agree-ineq}, for eqtypes $\eq{A}$ this coincides with values $v$ such
-  that $v \ale v : \eq{A}$ ordered by $v \ale u : \eq{A}$, which we will make
-  use of frequently.
+  that $v \ale v : \eq{A}$ ordered by $v \ale u : \eq{A}$.
 \end{definition}
 
 \begin{theorem}[Finite eqtypes are finite-height]\label{thm:finite-height}
@@ -625,7 +726,8 @@ lemmas:
 \end{proof}
 
 \begin{theorem}[Eqtype downsets are finite]
-  For any $\eq{A}$, for any $v \in \Val{\eq{A}}$, $\down{v}$ has finite height.
+  For any $\eq{A}$, for any $v \in \Val{\eq{A}}$, $\down{\Val{\eq{A}}}{v}$ has
+  finite height.
 \end{theorem}
 
 \begin{proof}
@@ -640,12 +742,14 @@ lemmas:
   \begin{description}
   \item[Case $\bool$] $\Val{\bool}$ has finite cardinality, and therefore any
     subpreorder of it has finite height.
-  %% \item[Case $\N$] $\down{n} = \{0..n\}$
-  %% \item[Case $\str$] Since $\str$ has the discrete ordering, $\down{v} = \{v\}$.
+
+  %% \item[Case $\N$] $\down{\Val{\N}}{n} = \{0..n\}$
+  %% \item[Case $\str$] Since $\str$ has the discrete ordering,
+  %% $\down{\Val{\str}}{v} = \{v\}$.
 
   \item[Case $\Set{\eq{A}}$] By theorem \ref{thm:height-elem} it suffices to
-    show $\height_{\eqposet{\Val{\eq{A}}}}(\down{\eqclass{v}})$ is finite for
-    any $\lr{\Set{\eq{A}}}{v}$.
+    show $\elemheight{\eqposet{\Val{\eq{A}}}}{\eqclass{v}}$ is finite for any
+    $\lr{\Set{\eq{A}}}{v}$.
 
     As in the corresponding case in theorem \ref{thm:finite-height}, we note
     that $\eqposet{\Val{\Set{\eq{A}}}}$ is isomorphic to
@@ -669,6 +773,32 @@ lemmas:
   \item[Case $\eq{A} + \eq{B}$] \TODO
   \end{description}
 \end{proof}
+
+
+%%
+\subsection{Interpretation into preorders and monotone functions}
+
+%% \newcommand{\I}[1]{\ms{I}(#1)}
+\newcommand{\I}[1]{\llparenthesis{#1}\rrparenthesis}
+%% \newcommand{\I}[1]{[#1]}
+
+Let $\Val{\GG}$ be the pointwise preorder over substitutions of values
+$\lr{A}{v}$ for the variables $x \of A \in \GG$.
+
+Given $\lrcx{\Gamma}{A}{e_1 \ale e_2}$, we define $\I{e_i} \in \Val{\GG} \arr
+\Val{A}$, that is, $\I{e_i}$ is a monotone map between the preorders $\Val{\GG}$
+into $\Val{A}$, by:
+\[\begin{array}{rcll}
+  \I{e_i}(\gamma) = v &\iff& \gamma(e_i) \steps v
+\end{array}\]
+
+This is justified because $\lrcx{\GG}{A}{e_1 \ale e_2}$ and theorem
+\ref{thm:termination} together show such a $v$ exists and theorems
+\ref{thm:determinism} and \ref{thm:valuesdontstep} together show it is unique if
+it exists.
+
+Note that monotone maps between preorders themselves form a preorder in the
+usual way, and $\I{e_1} \ale \I{e_2}$ by 
 
 
 \subsection{Fundamental theorem}
