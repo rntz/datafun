@@ -10,7 +10,6 @@
 
 \newcommand{\widevec}[1]{\overrightarrow{#1}}
 
-
 %% preorder notation
 \newcommand{\ale}{\sqsubseteq}
 \newcommand{\alt}{\sqsubset}
@@ -20,6 +19,7 @@
 \newcommand{\ordeq}{\simeq}
 \newcommand{\eqposet}[1]{\ms{Eq}(#1)}
 \renewcommand{\eqposet}[1]{\|{#1}\|}
+
 \newcommand{\eqclass}[1]{[#1]}
 \newcommand{\height}{\ms{height}}
 \newcommand{\elemheight}[2]{\height(#2 : #1)}
@@ -27,6 +27,11 @@
 \newcommand{\down}[2]{\mathop{\downarrow}(#2 : #1)}
 
 \newcommand{\dom}[1]{\text{dom}(#1)}
+\newcommand{\expope}[2]{#1 \Rightarrow #2}
+
+%% commands used in commutative/transitive diagrams
+\newcommand{\ALER}{\arrow[no line]{r}{\rotatebox[origin=c]{0}{\scalebox{1.33}{$\ale$}}}}
+\newcommand{\ALED}{\arrow[no line]{d}{\rotatebox[origin=c]{-90}{\scalebox{1.33}{$\ale$}}}}
 
 %% type-annotated semilattice operatoins
 \newcommand{\tforin}[2]{\bigvee_{#1}(#2)\ }
@@ -53,6 +58,9 @@
 \newcommand{\lr}[2]{#2\mathrel{|}#1}
 \newcommand{\lrcx}[3]{#1 \ent \lr{#2}{#3}}
 \newcommand{\commsq}[5]{\lr{#1}{{#2}, {#4} \ale {#3}, {#5}}}
+
+\newcommand{\lrof}[1]{\ms{T}[#1]}
+\newcommand{\Val}[1]{\ms{V}[#1]}
 
 %% ---------- End new commands
 
@@ -222,6 +230,17 @@ allowed, enforcing a call-by-value evaluation order.
   Values don't step: $\forall v\, \nexists a\; (v \step a)$.
 \end{theorem}
 
+\newcommand{\evalfn}{\ms{eval}}
+\begin{corollary}
+  \label{cor:evalfn}
+  There exists a (partial) function $\evalfn$ satisfying
+  \begin{eqnarray*}
+    \evalfn(a) = v &\iff& a \steps v
+  \end{eqnarray*}
+\end{corollary}
+
+We will later show that $\evalfn$ is in fact total.
+
 \todo{Do these need proof? They're really obvious, tedious inductions.}
 
 
@@ -239,6 +258,11 @@ allowed, enforcing a call-by-value evaluation order.
   \end{eqnarray*}
 
   Note that every poset is a preorder.
+\end{definition}
+
+\begin{definition}
+  A function $f : P \to Q$ between preorders $P,Q$ is \emph{monotone} iff
+  \[ x \ale_P y \implies f(x) \ale_Q f(y) \]
 \end{definition}
 
 \begin{definition}
@@ -264,11 +288,12 @@ allowed, enforcing a call-by-value evaluation order.
 \end{definition}
 
 \begin{definition}\label{def:ordinj}
-  A map $f : P \to Q$ between preorders $P,Q$ is a \emph{order embedding} $f
-  : P \ordle Q$ iff:
+  A map $f : P \to Q$ between preorders $P,Q$ is an \emph{order embedding} $f :
+  P \ordle Q$ iff:
   \begin{eqnarray*}
     x \ale_P y &\iff& f(x) \ale_Q f(y)
   \end{eqnarray*}
+  By definition, every order embedding is monotone.
 \end{definition}
 
 \begin{definition}\label{def:ordeq}
@@ -339,6 +364,7 @@ allowed, enforcing a call-by-value evaluation order.
 \end{definition}
 
 \begin{theorem}[Equivalence of equivalence posets]
+  \label{thm:eqposet}
   For any preorder $P$, $P \ordeq \eqposet{P}$.
 \end{theorem}
 \begin{proof}
@@ -424,10 +450,49 @@ but we will not prove this here.
 
 Now, note that POPEs correspond exactly to preorders: to a POPE $A$ corresponds
 the set $\dom{A}$ ordered by $a \ale b \iff (a,b) \in A$. Likewise, to a
-preorder $\tuple{A,\ale}$ corresponds the set $\setfor{(a,b)}{a \ale b}$.
+preorder $\tuple{A,\ale}$ corresponds the POPE $\setfor{(a,b)}{a \ale b}$.
+
+\begin{definition}
+  Given preorders/POPEs $A$, $B$, the \emph{exponential} preorder/POPE
+  $\expope{A}{B}$ consists of monotone maps from $A$ to $B$, ordered pointwise.
+  In preorder notation, this is:
+  \begin{eqnarray*}
+    \dom{\expope{A}{B}} &=& \setfor{f : A \to B}
+        {x \ale_A y \implies f(x) \ale_B f(y)}\\
+    f \ale_{\expope{A}{B}} g &\iff& \forall(x : A)\ f(x) \ale_B g(x)
+  \end{eqnarray*}
+  This can be expressed directly as a POPE in several ways; here is one:
+  \begin{equation*}
+    \expope{A}{B} \defeq
+    \setfor{(f_1,f_2)}
+           {(x_1, x_2) \in A \wedge i \le i' \wedge j \le j'
+             \implies (f_i(x_j), f_{i'}(x_{j'})) \in B}
+  \end{equation*}
+  This condition on $f_i$ can be seen as a transitive square for any $x_1 \ale
+  x_2$:
+  \begin{center}
+    \tikzset{
+      no line/.style={draw=none,
+        commutative diagrams/every label/.append style={/tikz/auto=false}}}
+            {\begin{tikzcd}
+                f_1(x_1) \ALER \ALED & f_2(x_1) \ALED\\
+                f_1(x_2) \ALER & f_2(x_2)
+            \end{tikzcd}}
+  \end{center}
+\end{definition}
 
 
 \section{Logical relations}
+
+Let $a,b,c$ range over closed expressions. Let $\gamma, \sigma$ range over
+substitutions containing only closed expressions, and let $\ms{Ctx}(\GG)$ be the
+set of all substitutions of closed expressions for the variables in $\GG$.
+
+Our intent in what follows is to interpret Datafun types as POPEs over closed
+expressions, and show that a closed expression $a : A$ is an element of the
+preorder corresponding to $A$. To that end, we will first define relations over
+closed expressions corresponding to each type, then show they are
+partially-reflexive and transitive.
 
 Because it simplifies our logical relations and proofs, we will introduce an
 additional pseudo-type $\disc{A}$, representing the poset $A$ with its ordering
@@ -439,43 +504,36 @@ replaced by the \emph{discrete} partial order, $x \le y \iff x = y$.
 
 Observe that under this interpretation $A \uto B$ is effectively $\disc{A} \mto
 B$. In particular, if we let $\den{\disc{A}} = \Disc{|\den{A}|}$ then $\den{A
-  \uto B} = \Disc{|\den{A}|} \arr \den{B} = \den{\disc{A} \mto B}$.
-
-Let $a,b,c$ range over closed expressions%% , and let $\ms{Term}$ be the set
-%% of all closed expressions
-. Let $\gamma, \sigma, \chi$ range over substitutions containing only closed
-expressions, and let $\ms{Ctx}(\GG)$ be the set of all substitutions of closed
-expressions for the variables in $\GG$.
+  \uto B} = \den{\disc{A} \mto B} = \Disc{|\den{A}|} \arr \den{B}$.
 
 We define the following relations:
 \[\begin{array}{ccll}
-    \lr{A}{a \ale b}  && \text{definition given below}\\
-    \lr{\GG}{\gamma \ale \sigma}
-    &\iff& \forall(x \of A \in \GG)\ \lr{A}{\gamma(x) \ale \sigma(x)}
-    & (\text{for}~\gamma,\sigma \in \ms{Ctx}(\GG))\\
-    \lrcx{\GG}{A}{e_1 \ale e_2}
-    &\iff& \forall(\lr{\GG}{\gamma_1 \ale \gamma_2})\
-    \commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}\\
-    \commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}
-    &\iff& \forall(i = 1,2)\ \lr{A}{\gamma_i(e_1) \ale \gamma_i(e_2)}
-    \land \lr{A}{\gamma_1(e_i) \ale \gamma_2(e_i)}
+  \lr{A}{a \ale b}  && \text{definition given below}\\
+  \lr{\GG}{\gamma \ale \sigma}
+  &\iff& \forall(x \of A \in \GG)\ \lr{A}{\gamma(x) \ale \sigma(x)}
+  & (\text{for}~\gamma,\sigma \in \ms{Ctx}(\GG))\\
+  \lrcx{\GG}{A}{e_1 \ale e_2}
+  &\iff& \forall(\lr{\GG}{\gamma_1 \ale \gamma_2})\
+  \commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}\\
+  \commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}
+  &\iff& \forall(i = 1,2)\ \lr{A}{\gamma_i(e_1) \ale \gamma_i(e_2)}
+  \land \lr{A}{\gamma_1(e_i) \ale \gamma_2(e_i)}
 \end{array}\]
 
-Note that $\commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}$ can be seen as a commuting
-square (although we have not yet shown that these relations are transitive and
-therefore commute):
+Observe that our definition of $\lrcx{\GG}{A}{e_1 \ale e_2}$ looks like an
+exponential $\expope{\GG}{A}$, interpreting (and ordering) open expressions as
+if they were monotone maps between contexts and closed expressions. As in the
+definition of an exponential POPE, $\commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}$
+can be seen as a transitive square (although we have not yet shown that these
+relations are transitive):
 \begin{center}
   \tikzset{
     no line/.style={draw=none,
       commutative diagrams/every label/.append style={/tikz/auto=false}}}
-  {\large
-    \begin{tikzcd}
-      \gamma_1(e_1) \arrow{r}{\ale} \arrow{d}{\ale}
-      & \gamma_1(e_2) \arrow{d}{\ale}\\
-      \gamma_2(e_1) \arrow{r}{\ale}
-      & \gamma_2(e_2)
-    \end{tikzcd}
-  }
+  {\begin{tikzcd}
+      \gamma_1(e_1) \ALER \ALED & \gamma_1(e_2) \ALED\\
+      \gamma_2(e_1) \ALER & \gamma_2(e_2)
+    \end{tikzcd}}
 \end{center}
 
 As a matter of notation, for any relation $\lr{X}{Y \ale Z}$, we write:
@@ -667,27 +725,38 @@ lemmas:
 
 \subsection{Preorder properties}
 
-\todo{Do I really want to only consider values?}
-
-\newcommand{\Val}[1]{\ms{V}[#1]}
+Having shown shown that $\lr{A}{a \ale b}$ is partially reflexive and
+transitive, we know it is a POPE.
+\begin{definition}
+  Let $\lrof{A}$ be the POPE $\setfor{(a,b)}{\lr{A}{a \ale b}}$.
+\end{definition}
 
 \begin{definition}
-  Let $\Val{A}$ be the preorder of values $v$ such that $\lr{A}{v}$, ordered by
-  $\lr{A}{v \ale u}$. This is reflexive and transitive by theorems
-  \ref{thm:prefl} and \ref{thm:trans} respectively. By theorem
-  \ref{thm:agree-ineq}, for eqtypes $\eq{A}$ this coincides with values $v$ such
-  that $v \ale v : \eq{A}$ ordered by $v \ale u : \eq{A}$.
+  Let $\Val{A}$ be the restriction of $\lrof{A}$ to values,
+  $\setfor{(v,u)}{\lr{A}{v \ale u}}$. By theorem \ref{thm:agree-ineq}, for
+  eqtypes $\Val{\eq{A}}$ coincides with values $v$ such that $v \ale v : \eq{A}$
+  ordered by $v \ale u : \eq{A}$.
 \end{definition}
+
+\begin{theorem}
+  $\lrof{A} \ordeq \Val{A}$
+\end{theorem}
+\begin{proof}
+  $\Val{A}$ order-embeds into $\lrof{A}$ via the identity. And since $\lr{A}{a
+    \equiv b}$ transits over $\steps$ by theorem \ref{thm:congbeta} and every
+  $\lr{A}{a}$ terminates by theorem \ref{thm:termination}, $\evalfn$
+  order-embeds $\lrof{A}$ into $\Val{A}$.
+\end{proof}
 
 \begin{theorem}[Finite eqtypes are finite-height]\label{thm:finite-height}
   $\Val{\fineq{A}}$ has finite height for any $\fineq{A}$.
 \end{theorem}
 
 \begin{proof}
-  Since by theorem \ref{thm:height} $\height(P) = \height(\eqposet{P})$ for any
-  preorder $P$, it suffices to show that $\eqposet{\Val{\fineq{A}}}$ has finite
-  cardinality (and thus finite height). We show this by induction on
-  $\fineq{A}$:
+  Since by theorems \ref{thm:height-le} and \ref{thm:eqposet} $\height(P) =
+  \height(\eqposet{P})$ for any preorder $P$, it suffices to show that
+  $\eqposet{\Val{\fineq{A}}}$ has finite cardinality (and thus finite height).
+  We show this by induction on $\fineq{A}$:
   \begin{description}
   \item[Case $\bool$] $\Val{\bool} = \{\ms{false} < \ms{true}\}$ has finite
     cardinality (and thus so does $\eqposet{\Val{\bool}}$).
@@ -747,8 +816,8 @@ lemmas:
   %% \item[Case $\str$] Since $\str$ has the discrete ordering,
   %% $\down{\Val{\str}}{v} = \{v\}$.
 
-  \item[Case $\Set{\eq{A}}$] By theorem \ref{thm:height-elem} it suffices to
-    show $\elemheight{\eqposet{\Val{\eq{A}}}}{\eqclass{v}}$ is finite for any
+  \item[Case $\Set{\eq{A}}$] By theorems \ref{thm:elemheight-le} and it suffices
+    to show $\elemheight{\eqposet{\Val{\eq{A}}}}{\eqclass{v}}$ is finite for any
     $\lr{\Set{\eq{A}}}{v}$.
 
     As in the corresponding case in theorem \ref{thm:finite-height}, we note
