@@ -26,7 +26,7 @@
 %% \newcommand{\down}[1]{{\mathop{\downarrow}{#1}}}
 \newcommand{\down}[2]{\mathop{\downarrow}(#2 : #1)}
 
-\newcommand{\dom}[1]{\text{dom}(#1)}
+\newcommand{\dom}[1]{\mathrm{dom}(#1)}
 \newcommand{\expope}[2]{#1 \Rightarrow #2}
 
 %% commands used in commutative/transitive diagrams
@@ -410,6 +410,38 @@ We will later show that $\evalfn$ is in fact total.
 %% exercise for the reader to show that the axiom of choice is unnecessary in this
 %% case.
 
+\begin{definition}
+  A \emph{monotone sequence} on a preorder $P$ is a monotone map $a : \N \to P$,
+  or equivalently, a sequence of $a_i$s satisfying:
+  \[ a_0 \ale a_1 \ale a_2 \ale ... \]
+\end{definition}
+
+\begin{definition}
+  A \emph{stopping point} of a sequence in a preorder $P$ is an $a_i$ such that
+  \(\forall j \ge i.\ a_i \equiv a_j\).
+\end{definition}
+
+\begin{definition}
+  A \emph{quasi-fixed point} of a function $f : P \to P$ on a preorder $P$ is a
+  value $x \in P$ such that $x \equiv f(x)$. (If $f$ is monotone, and thus
+  respects equivalence, then it follows that $x \equiv f^i(x)$ for any $i$.)
+\end{definition}
+
+\begin{theorem}\label{thm:finiteheight-quasifixed}
+  Given a monotone map $f : P \to P$ and an initial value $x \in P$ in a
+  preorder $P$ of finite height, the monotone sequence $f^i(x)$ has a stopping
+  point, which is also a quasi-fixed point of $f$.
+\end{theorem}
+
+\begin{proof}
+  Assume for the sake of contradiction that $\forall i.\ f^i(x) \not\equiv
+  f^{i+1}(x)$. Then we have: \( f^0(x) \alt f^1(x) \alt f^2(x) \alt ... \),
+  which forms an infinite chain. This contradicts that $P$ has finite height.
+  Thus there exists some $i$ such that $f^i(x) \equiv f^{i+1}(x)$ are
+  quasi-fixed points of f. Since $f$ is monotone, it follows by induction that
+  for any $j \ge i$, $f^i(x) \equiv f^j(x)$.
+\end{proof}
+
 
 \section{POPEs}
 
@@ -723,12 +755,14 @@ lemmas:
 \end{proof}
 
 
-\subsection{Preorder properties}
+\subsection{Preorder/POPE interpretation}
 
 Having shown shown that $\lr{A}{a \ale b}$ is partially reflexive and
-transitive, we know it is a POPE.
+transitive, it may be viewed as a type-indexed family of POPEs:
+
 \begin{definition}
-  Let $\lrof{A}$ be the POPE $\setfor{(a,b)}{\lr{A}{a \ale b}}$.
+  Let $\lrof{A}$ be the POPE $\setfor{(a,b)}{\lr{A}{a \ale b}}$. Likewise, let
+  $\lrof{\GG} \defeq \setfor{(\gamma,\sigma)}{\lr{\GG}{\gamma \ale \sigma}}$.
 \end{definition}
 
 \begin{definition}
@@ -748,6 +782,30 @@ transitive, we know it is a POPE.
   order-embeds $\lrof{A}$ into $\Val{A}$.
 \end{proof}
 
+%% \newcommand{\lrcxof}[2]{\ms{E}[{#1}\ent{#2}]}
+%% \begin{definition}
+%%   Let $\lrcxof{\GG}{A}$ be the POPE $\setfor{(e_1,e_2)}{\lrcx{\GG}{A}{e_1 \ale
+%%       e_2}}$.
+%% \end{definition}
+
+%% \todo{HOW DO WE KNOW THIS IS A POPE?}
+
+%% \newcommand{\openeval}[1]{\llparenthesis{#1}\rrparenthesis}
+
+%% %% \begin{theorem}
+%% %%   $\lrcxof{\GG}{A}$ order-embeds into $\expope{\lrof{\GG}}{\lrof{A}}$.
+%% %% \end{theorem}
+
+%% \begin{definition}
+%%   Given $\lrcx{\Gamma}{A}{e_1 \ale e_2}$, we define
+%%   $\openeval{e_i} \in \expope{\lrof{\GG}}{\Val{A}}$ by:
+%%   \[\openeval{e_i}(\gamma) = \evalfn(\gamma(e_i))\]
+%% \end{definition}
+
+%% Note that $\openeval{e_1} \ale \openeval{e_2}$ by
+
+
+\subsubsection{Height theorems}
 \begin{theorem}[Finite eqtypes are finite-height]\label{thm:finite-height}
   $\Val{\fineq{A}}$ has finite height for any $\fineq{A}$.
 \end{theorem}
@@ -758,7 +816,7 @@ transitive, we know it is a POPE.
   $\eqposet{\Val{\fineq{A}}}$ has finite cardinality (and thus finite height).
   We show this by induction on $\fineq{A}$:
   \begin{description}
-  \item[Case $\bool$] $\Val{\bool} = \{\ms{false} < \ms{true}\}$ has finite
+  \item[Case $\bool$] $\dom{\Val{\bool}} = \{\ms{false}, \ms{true}\}$ has finite
     cardinality (and thus so does $\eqposet{\Val{\bool}}$).
 
   \item[Case $\Set{\fineq{A}}$] All values $\lr{\Set{\fineq{A}}}{v}$ have the
@@ -844,30 +902,37 @@ transitive, we know it is a POPE.
 \end{proof}
 
 
-%%
-\subsection{Interpretation into preorders and monotone functions}
+\subsection{Iteration}
 
-%% \newcommand{\I}[1]{\ms{I}(#1)}
-\newcommand{\I}[1]{\llparenthesis{#1}\rrparenthesis}
-%% \newcommand{\I}[1]{[#1]}
+\newcommand{\stepfn}{\ms{step}}
 
-Let $\Val{\GG}$ be the pointwise preorder over substitutions of values
-$\lr{A}{v}$ for the variables $x \of A \in \GG$.
+\begin{definition}
+  Given $\lrcx{x:A}{A}{e}$, define $\stepfn(x.e) : \lrof{A} \to \Val{A}$
+  by: \[\stepfn(x.e)(a) \defeq \evalfn(\sub{a/x} e)\]
+\end{definition}
 
-Given $\lrcx{\Gamma}{A}{e_1 \ale e_2}$, we define $\I{e_i} \in \Val{\GG} \arr
-\Val{A}$, that is, $\I{e_i}$ is a monotone map between the preorders $\Val{\GG}$
-into $\Val{A}$, by:
-\[\begin{array}{rcll}
-  \I{e_i}(\gamma) = v &\iff& \gamma(e_i) \steps v
-\end{array}\]
+\begin{theorem}\label{thm:stepfn-monotone}
+  If $\lrcx{x:A}{A}{e_1 \ale e_2}$, then $\lrcx{y:A}{A}{\stepfn(x.e_1)(y) \ale
+    \stepfn(x.e_2)(y)}$.
+\end{theorem}
+This may be glossed as saying that $\stepfn(x.e)(a)$ is monotone in both $a$ and
+$x.e$.
 
-This is justified because $\lrcx{\GG}{A}{e_1 \ale e_2}$ and theorem
-\ref{thm:termination} together show such a $v$ exists and theorems
-\ref{thm:determinism} and \ref{thm:valuesdontstep} together show it is unique if
-it exists.
+\begin{proof}
+  Follows from $\lrcx{x\of A}{A}{e_1 \ale e_2}$, the definition of
+  $\stepfn(x.e)(a)$, and the fact that $a \equiv \evalfn(a)$ by theorem
+  \ref{thm:congbeta}.
+\end{proof}
 
-Note that monotone maps between preorders themselves form a preorder in the
-usual way, and $\I{e_1} \ale \I{e_2}$ by 
+\begin{corollary}\label{cor:fineq-stops}
+  Given $\lrcx{x:\fineq{L}}{\fineq{L}}{e}$ and $\lr{\fineq{L}}{a}$, the monotone
+  sequence $\stepfn(x.e)^i(a)$ has a stopping point $j$ such that $\forall k \ge
+  j.\ \lr{\fineq{L}}{\stepfn(x.e)^j(a) \equiv \stepfn(x.e)^{k}(a)}$.
+\end{corollary}
+\begin{proof}
+  Follows from theorems \ref{thm:stepfn-monotone}, \ref{thm:finite-height} and
+  \ref{thm:finiteheight-quasifixed}.
+\end{proof}
 
 
 \subsection{Fundamental theorem}
@@ -883,40 +948,78 @@ prove this, we will need a few lemmas to help establish those cases.
   \TODO
 \end{proof}
 
-\begin{lemma}\label{thm:iterstep}
-  For any closed term $a = \iter{\fineq{L}}{v}{x}{e}$ such that $\lrcx{x \of
-    \fineq{L}}{\fineq{L}}{e}$ and $\lr{\fineq{L}}{v}$, either:
-  \begin{itemize}
-  \item $a \step v$, or
-  \item $a \steps \iter{\fineq{L}}{v'}{x}{e}$ for some $v'$ such that
-    $\lr{\fineq{L}}{v \ale v'}$.
-  \end{itemize}
+\begin{lemma}\label{lem:iter-stops}
+  Given $\lr{\fineq{L}}{v}$ and $\lrcx{x\of\fineq{L}}{\fineq{L}}{e}$, for $i$ a
+  stopping point of $\stepfn(x.e)^i(v)$ (guaranteed to exist by theorem
+  \ref{thm:fineq-stops}), then
+  \[ \iter{\fineq{L}}{v}{x}{e} \equiv \stepfn(x.e)^i(v) \]
 \end{lemma}
 \begin{proof}
+  Since any two stopping points are equivalent, it suffices to show this for the
+  \emph{least} $i$ such that $\stepfn(x.e)^i(v)$ is a stopping point.
+
   \TODO
+
+  %% We do this by induction on $i$:
+  %%
+  %% \begin{description}
+  %% \item[Case $0$:] From $\stepfn(x.e)^0(v) \equiv \stepfn(x.e)^1(v)$ we have $v
+  %%   \equiv \evalfn(\sub{v/x}e)$, thus by theorem \ref{thm:agree-ineq} $v \equiv
+  %%   \evalfn(\sub{v/x}e) : \fineq{L}$. Thus:
+  %%   \[\begin{array}{rlll}
+  %%     \iter{\fineq{L}}{v}{x}{e}
+  %%     &\step& \iterstep{\fineq{L}}{v}{\sub{v/x}e}{x}{e}\\
+  %%     &\steps& \iterstep{\fineq{L}}{v}{\evalfn(\sub{v/x}e)}{x}{e}\\
+  %%     &\step& v & \text{because}~v \equiv \evalfn(\sub{v/x}e) : \fineq{L}\\
+  %%     &\equiv& \stepfn(x.e)^0(v)
+  %%   \end{array}\]
+  %% \item[Case $i+1$:] We know $\stepfn(x.e)^0(v) \not\equiv \stepfn(x.e)^1(v)$.
+  %%   Therefore:
+  %%   \[\begin{array}{rlll}
+  %%     \iter{\fineq{L}}{v}{x}{e}
+  %%     &\step& \iterstep{\fineq{L}}{v}{\sub{v/x}e}{x}{e}\\
+  %%     &\step*& \iterstep{\fineq{L}}{v}{\evalfn(\sub{v/x}e)}{x}{e}\\
+  %%     &\step& \iter{\fineq{L}}{\evalfn(\sub{v/x}e)}{x}{e}
+  %%   \end{array}\]
+  %%   By induction we have
+  %% \end{description}
+
 \end{proof}
 
-As a consequence of Lemma \ref{thm:iterstep}, for any such term $a =
-\iter{\fineq{L}}{v_1}{x}{e}$ there is a sequence
+%% \begin{lemma}\label{thm:iterstep}
+%%   For any closed term $a = \iter{\fineq{L}}{v}{x}{e}$ such that $\lrcx{x \of
+%%     \fineq{L}}{\fineq{L}}{e}$ and $\lr{\fineq{L}}{v}$, either:
+%%   \begin{itemize}
+%%   \item $a \step v$, or
+%%   \item $a \steps \iter{\fineq{L}}{v'}{x}{e}$ for some $v'$ such that
+%%     $\lr{\fineq{L}}{v \ale v'}$.
+%%   \end{itemize}
+%% \end{lemma}
+%% \begin{proof}
+%%   \TODO
+%% \end{proof}
 
-\[ \iter{\fineq{L}}{v_1}{x}{e} \steps
-\iter{\fineq{L}}{v_2}{x}{e} \steps
-\iter{\fineq{L}}{v_3}{x}{e} \steps ... \]
+%% As a consequence of Lemma \ref{thm:iterstep}, for any such term $a =
+%% \iter{\fineq{L}}{v_1}{x}{e}$ there is a sequence
 
-such that either:
-\begin{itemize}
-\item This sequence is finite with length $n$ and $a \steps v_n$ for some
-  $\lr{\fineq{L}}{v_n}$
-\item This sequence is infinite; and since $\lr{\fineq{L}}{v_i \ale v_{i+1}}$,
-  it forms an infinite chain in $\Val{\fineq{L}}$.
-\end{itemize}
+%% \[ \iter{\fineq{L}}{v_1}{x}{e} \steps
+%% \iter{\fineq{L}}{v_2}{x}{e} \steps
+%% \iter{\fineq{L}}{v_3}{x}{e} \steps ... \]
 
-However, by Theorem \ref{thm:finite-height} the second case is impossible
-($\Val{\fineq{L}}$ has finite height). Therefore:
-\begin{theorem}
-  If $\lrcx{x \of \fineq{L}}{\fineq{L}}{e}$ and $\lr{\fineq{L}}{v}$ then
-  $\iter{\fineq{L}}{v}{x}{e} \steps v'$ where $\lr{\fineq{L}}{v'}$.
-\end{theorem}
+%% such that either:
+%% \begin{itemize}
+%% \item This sequence is finite with length $n$ and $a \steps v_n$ for some
+%%   $\lr{\fineq{L}}{v_n}$
+%% \item This sequence is infinite; and since $\lr{\fineq{L}}{v_i \ale v_{i+1}}$,
+%%   it forms an infinite chain in $\Val{\fineq{L}}$.
+%% \end{itemize}
+
+%% However, by Theorem \ref{thm:finite-height} the second case is impossible
+%% ($\Val{\fineq{L}}$ has finite height). Therefore:
+%% \begin{theorem}
+%%   If $\lrcx{x \of \fineq{L}}{\fineq{L}}{e}$ and $\lr{\fineq{L}}{v}$ then
+%%   $\iter{\fineq{L}}{v}{x}{e} \steps v'$ where $\lr{\fineq{L}}{v'}$.
+%% \end{theorem}
 
 
 %% THE FUNDAMENTAL THEOREM
@@ -999,20 +1102,20 @@ with $x \of \disc{A}$.
 
     Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \ale \gamma_2}$.
 
-    By Theorem \ref{thm:congbeta} it suffices to find $v_1,v_2$ such that
-    $\lr{\fineq{L}}{v_1 \ale v_2}$ and $\tfix{\fineq{L}}{x} \gamma_i(e) \steps
-    v_i$.
+    %% By Theorem \ref{thm:congbeta} it suffices to find $v_1,v_2$ such that
+    %% $\lr{\fineq{L}}{v_1 \ale v_2}$ and $\tfix{\fineq{L}}{x} \gamma_i(e) \steps
+    %% v_i$.
 
-    Strategy:
-    \begin{enumerate}
-    \item Find sequences $a^i_j$ with elements of the form \[ a^i_j =
-      \iter{\fineq{L}}{u^i_j}{x}{\gamma_i(e)}
-      \]
-      such that $\tfix{\fineq{L}}{x} \gamma_i(e) \steps a^i_0$ and $a^i_j \steps
-      a^i_{j+1}$ and $u^i_j < u^i_{j+1} : \fineq{L}$.
+    Consider the sequences $S^j_i = \stepfn(x.\gamma_j(e))^i(\unit_{\fineq{L}})$
+    where $i$ is the sequence index and $j \in \{1,2\}$. By corollary
+    \ref{cor:fineq-stops} these sequences each have stopping points; call them
+    $i_1, i_2$ respectively.
 
-    \item Prove these sequences are finite, with the final elements $a^i_n$
-    \end{enumerate}
+    \todo{show $\lr{\fineq{L}}{S^1_{i_1} \ale S^2_{i_2}}$; need a simple lemma
+      here}
+
+    \todo{show $\tfix{\fineq{L}}{x}{\gamma_j(e)} \equiv S^j_{i_1}$ - this is
+      easy, step the \ms{fix} and then apply lemma \ref{lem:iter-stops}.}
 
     \TODO
   \end{description}
