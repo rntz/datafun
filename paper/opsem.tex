@@ -417,8 +417,8 @@ We will later show that $\evalfn$ is in fact total.
 \end{definition}
 
 \begin{definition}
-  A \emph{stopping point} of a sequence in a preorder $P$ is an $a_i$ such that
-  \(\forall j \ge i.\ a_i \equiv a_j\).
+  A \emph{stopping point} of a sequence $a$ on a preorder $P$ is an $i$ such
+  that \(\forall j \ge i.\ a_i \equiv a_j\).
 \end{definition}
 
 \begin{definition}
@@ -934,29 +934,21 @@ $x.e$.
   \ref{thm:finiteheight-quasifixed}.
 \end{proof}
 
-
-\subsection{Fundamental theorem}
-
-Now, we aim to show that every well-typed term is in the corresponding logical
-relation. The most interesting case here are the \ms{fix} expressions; before we
-prove this, we will need a few lemmas to help establish those cases.
-
-\begin{lemma}
-  For any $L$, $\lr{L}{\unit_L}$.
-\end{lemma}
-\begin{proof}
-  \TODO
-\end{proof}
-
-\begin{lemma}\label{lem:iter-stops}
+\begin{theorem}\label{thm:iter-stops}
   Given $\lr{\fineq{L}}{v}$ and $\lrcx{x\of\fineq{L}}{\fineq{L}}{e}$, for $i$ a
-  stopping point of $\stepfn(x.e)^i(v)$ (guaranteed to exist by theorem
-  \ref{thm:fineq-stops}), then
+  stopping point of $\stepfn(x.e)^i(v)$ (guaranteed to exist by corollary
+  \ref{cor:fineq-stops}),
   \[ \iter{\fineq{L}}{v}{x}{e} \equiv \stepfn(x.e)^i(v) \]
-\end{lemma}
+\end{theorem}
 \begin{proof}
   Since any two stopping points are equivalent, it suffices to show this for the
   \emph{least} $i$ such that $\stepfn(x.e)^i(v)$ is a stopping point.
+
+  We will show by induction that
+
+  \[
+  \iter{\fineq{L}}{v}{x}{e}
+  \]
 
   \TODO
 
@@ -984,6 +976,20 @@ prove this, we will need a few lemmas to help establish those cases.
   %%   By induction we have
   %% \end{description}
 
+\end{proof}
+
+
+\subsection{Fundamental theorem}
+
+Now, we aim to show that every well-typed term is in the corresponding logical
+relation. The most interesting case here are the \ms{fix} expressions; before we
+prove this, we will need a few lemmas to help establish those cases.
+
+\begin{lemma}
+  For any $L$, $\lr{L}{\unit_L}$.
+\end{lemma}
+\begin{proof}
+  \TODO
 \end{proof}
 
 %% \begin{lemma}\label{thm:iterstep}
@@ -1115,7 +1121,7 @@ with $x \of \disc{A}$.
       here}
 
     \todo{show $\tfix{\fineq{L}}{x}{\gamma_j(e)} \equiv S^j_{i_1}$ - this is
-      easy, step the \ms{fix} and then apply lemma \ref{lem:iter-stops}.}
+      easy, step the \ms{fix} and then apply theorem \ref{thm:iter-stops}.}
 
     \TODO
   \end{description}
