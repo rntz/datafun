@@ -952,30 +952,6 @@ $x.e$.
 
   \TODO
 
-  %% We do this by induction on $i$:
-  %%
-  %% \begin{description}
-  %% \item[Case $0$:] From $\stepfn(x.e)^0(v) \equiv \stepfn(x.e)^1(v)$ we have $v
-  %%   \equiv \evalfn(\sub{v/x}e)$, thus by theorem \ref{thm:agree-ineq} $v \equiv
-  %%   \evalfn(\sub{v/x}e) : \fineq{L}$. Thus:
-  %%   \[\begin{array}{rlll}
-  %%     \iter{\fineq{L}}{v}{x}{e}
-  %%     &\step& \iterstep{\fineq{L}}{v}{\sub{v/x}e}{x}{e}\\
-  %%     &\steps& \iterstep{\fineq{L}}{v}{\evalfn(\sub{v/x}e)}{x}{e}\\
-  %%     &\step& v & \text{because}~v \equiv \evalfn(\sub{v/x}e) : \fineq{L}\\
-  %%     &\equiv& \stepfn(x.e)^0(v)
-  %%   \end{array}\]
-  %% \item[Case $i+1$:] We know $\stepfn(x.e)^0(v) \not\equiv \stepfn(x.e)^1(v)$.
-  %%   Therefore:
-  %%   \[\begin{array}{rlll}
-  %%     \iter{\fineq{L}}{v}{x}{e}
-  %%     &\step& \iterstep{\fineq{L}}{v}{\sub{v/x}e}{x}{e}\\
-  %%     &\step*& \iterstep{\fineq{L}}{v}{\evalfn(\sub{v/x}e)}{x}{e}\\
-  %%     &\step& \iter{\fineq{L}}{\evalfn(\sub{v/x}e)}{x}{e}
-  %%   \end{array}\]
-  %%   By induction we have
-  %% \end{description}
-
 \end{proof}
 
 
@@ -991,41 +967,6 @@ prove this, we will need a few lemmas to help establish those cases.
 \begin{proof}
   \TODO
 \end{proof}
-
-%% \begin{lemma}\label{thm:iterstep}
-%%   For any closed term $a = \iter{\fineq{L}}{v}{x}{e}$ such that $\lrcx{x \of
-%%     \fineq{L}}{\fineq{L}}{e}$ and $\lr{\fineq{L}}{v}$, either:
-%%   \begin{itemize}
-%%   \item $a \step v$, or
-%%   \item $a \steps \iter{\fineq{L}}{v'}{x}{e}$ for some $v'$ such that
-%%     $\lr{\fineq{L}}{v \ale v'}$.
-%%   \end{itemize}
-%% \end{lemma}
-%% \begin{proof}
-%%   \TODO
-%% \end{proof}
-
-%% As a consequence of Lemma \ref{thm:iterstep}, for any such term $a =
-%% \iter{\fineq{L}}{v_1}{x}{e}$ there is a sequence
-
-%% \[ \iter{\fineq{L}}{v_1}{x}{e} \steps
-%% \iter{\fineq{L}}{v_2}{x}{e} \steps
-%% \iter{\fineq{L}}{v_3}{x}{e} \steps ... \]
-
-%% such that either:
-%% \begin{itemize}
-%% \item This sequence is finite with length $n$ and $a \steps v_n$ for some
-%%   $\lr{\fineq{L}}{v_n}$
-%% \item This sequence is infinite; and since $\lr{\fineq{L}}{v_i \ale v_{i+1}}$,
-%%   it forms an infinite chain in $\Val{\fineq{L}}$.
-%% \end{itemize}
-
-%% However, by Theorem \ref{thm:finite-height} the second case is impossible
-%% ($\Val{\fineq{L}}$ has finite height). Therefore:
-%% \begin{theorem}
-%%   If $\lrcx{x \of \fineq{L}}{\fineq{L}}{e}$ and $\lr{\fineq{L}}{v}$ then
-%%   $\iter{\fineq{L}}{v}{x}{e} \steps v'$ where $\lr{\fineq{L}}{v'}$.
-%% \end{theorem}
 
 
 %% THE FUNDAMENTAL THEOREM
