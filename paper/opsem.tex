@@ -934,6 +934,22 @@ $x.e$.
   \ref{thm:finiteheight-quasifixed}.
 \end{proof}
 
+\begin{lemma}\label{lem:iter-onestep}
+  Given $\lr{\fineq{L}}{v}$ and $\lrcx{x\of\fineq{L}}{\fineq{L}}{e}$,
+  \[
+  \iter{\fineq{L}}{v}{x}{e} \steps
+  \begin{cases}
+    \iter{\fineq{L}}{\stepfn(x.e)(v)}{x}{e}
+    & \text{if}~v \not\equiv \stepfn(x.e)(v)~\text{in}~\Val{\fineq{L}}\\
+    v & \text{otherwise}
+  \end{cases}
+  \]
+\end{lemma}
+\begin{proof}
+  By theorem \ref{thm:agree-ineq}, the rules for $\step$, and the definition of
+  $\stepfn(x.e)(v)$.
+\end{proof}
+
 \begin{theorem}\label{thm:iter-stops}
   Given $\lr{\fineq{L}}{v}$ and $\lrcx{x\of\fineq{L}}{\fineq{L}}{e}$, for $i$ a
   stopping point of $\stepfn(x.e)^i(v)$ (guaranteed to exist by corollary
@@ -944,13 +960,22 @@ $x.e$.
   Since any two stopping points are equivalent, it suffices to show this for the
   \emph{least} $i$ such that $\stepfn(x.e)^i(v)$ is a stopping point.
 
-  We will show by induction that
-
+  For any $j \le i$ we have $\stepfn(x.e)^j(v) \not\equiv \stepfn(x.e)^{j+1}(v)$
+  and so by induction, applying lemma \ref{lem:iter-onestep}, we have:
   \[
-  \iter{\fineq{L}}{v}{x}{e}
+  \iter{\fineq{L}}{v}{x}{e} \steps \iter{\fineq{L}}{\stepfn(x.e)^i(v)}{x}{e}
   \]
 
-  \TODO
+  Therefore:
+  \[
+  \begin{array}{rlll}
+    \iter{\fineq{L}}{v}{x}{e}
+    &\steps& \iter{\fineq{L}}{\stepfn(x.e)^i(v)}{x}{e}\\
+    &\steps& \stepfn(x.e)^i(v)
+    & \text{by lemma \ref{lem:iter-onestep}, and $i$ being a stopping-point}
+  \end{array}
+  \]
+  Which was what we wished to show.
 
 \end{proof}
 
