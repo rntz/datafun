@@ -1,3 +1,28 @@
+* parallel choice in iteration and pattern matching
+
+Suppose I want to define
+
+    fun dom s = {x | (x,_) in s} ∪ {x | (_,x) in s}
+
+We have or-patterns, so why can't I do:
+
+    fun dom s = {x | (x,_)|(_,x) in s}
+
+The syntax is kind of awkward (the "|" character is overloaded), but the meaning
+is obvious. Problem is, it doesn't work. Only the *first* pattern to match
+counts (in this case, (x,_), since it's an irrefutable pattern). Possible
+solution: interpret patterns differently between "case" and looping constructs;
+"case" chooses the first pattern match (prioritized choice), while looping does
+*all* matches (parallel choice).
+
+Alternatively, we could add a "parallel choice" construct over iteration loops,
+written "or":
+
+    fun dom s = {x | (x,_) in s or (_,x) in s}
+
+Again, there'd be funny syntax issues if you wanted to mix parallel (union)
+"or" loops and nested (cross product) "," loops. But the idea is sound.
+
 * implementation via dataflow / propagators
 
 There is a natural interpretation of fixed point as creating a dataflow graph
