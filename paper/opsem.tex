@@ -513,6 +513,18 @@ preorder $\tuple{A,\ale}$ corresponds the POPE $\setfor{(a,b)}{a \ale b}$.
   \end{center}
 \end{definition}
 
+Note that monotone sequences can be seen as elements of the exponential POPE
+$\expope{\N}{P}$, which orders them $a \ale b$ iff $\forall i.\ a_i \ale_P b_i$.
+
+\begin{theorem}\label{thm:stopping-points-le}
+  Given monotone sequences $a \ale_{\expope{\N}{P}} b$, if $a,b$ have stopping
+  points $i,j$ respectively, then $a_i \ale b_j$.
+\end{theorem}
+\begin{proof}
+  WLOG, let $i \le j$. By $i \le j$ a stopping point of $a$, we have
+  $a_i \equiv a_j$. So by $a_j \ale b_j$ and transitivity $a_i \ale b_j$.
+\end{proof}
+
 
 \section{Logical relations}
 
@@ -926,8 +938,9 @@ $x.e$.
 
 \begin{corollary}\label{cor:fineq-stops}
   Given $\lrcx{x:\fineq{L}}{\fineq{L}}{e}$ and $\lr{\fineq{L}}{a}$, the monotone
-  sequence $\stepfn(x.e)^i(a)$ has a stopping point $j$ such that $\forall k \ge
-  j.\ \lr{\fineq{L}}{\stepfn(x.e)^j(a) \equiv \stepfn(x.e)^{k}(a)}$.
+  sequence $\stepfn(x.e)^i(a)$ has a stopping point, i.e. there is some $j$ such
+  that $\forall k \ge j.\ \lr{\fineq{L}}{\stepfn(x.e)^j(a) \equiv
+    \stepfn(x.e)^{k}(a)}$.
 \end{corollary}
 \begin{proof}
   Follows from theorems \ref{thm:stepfn-monotone}, \ref{thm:finite-height} and
@@ -976,7 +989,6 @@ $x.e$.
   \end{array}
   \]
   Which was what we wished to show.
-
 \end{proof}
 
 
@@ -986,7 +998,7 @@ Now, we aim to show that every well-typed term is in the corresponding logical
 relation. The most interesting case here are the \ms{fix} expressions; before we
 prove this, we will need a few lemmas to help establish those cases.
 
-\begin{lemma}
+\begin{lemma}\label{lem:lr-unit}
   For any $L$, $\lr{L}{\unit_L}$.
 \end{lemma}
 \begin{proof}
@@ -1078,16 +1090,23 @@ with $x \of \disc{A}$.
     %% $\lr{\fineq{L}}{v_1 \ale v_2}$ and $\tfix{\fineq{L}}{x} \gamma_i(e) \steps
     %% v_i$.
 
-    Consider the sequences $S^j_i = \stepfn(x.\gamma_j(e))^i(\unit_{\fineq{L}})$
-    where $i$ is the sequence index and $j \in \{1,2\}$. By corollary
-    \ref{cor:fineq-stops} these sequences each have stopping points; call them
-    $i_1, i_2$ respectively.
+    Consider the monotone sequences $S^j_i =
+    \stepfn(x.\gamma_j(e))^i(\evalfn(\unit_{\fineq{L}}))$ where $i$ is the
+    sequence index and $j \in \{1,2\}$. By corollary \ref{cor:fineq-stops} these
+    sequences each have stopping points; call them $i_1, i_2$ respectively. By
+    lemma \ref{lem:lr-unit} $\unit_{\fineq{L}} \ale \unit_{\fineq{L}}$ and by
+    theorem \ref{thm:stepfn-monotone}
+    $\lrcx{y\of\fineq{L}}{\fineq{L}}{\stepfn(x.\gamma_1(e))(y) \ale
+      \stepfn(x.\gamma_2(e))(y)}$, so by induction $S_i^1 \ale S_i^2$. Thus by
+    theorem \ref{thm:stopping-points-le}, $S^1_{i_1} \ale S^2_{i_2}$.
 
-    \todo{show $\lr{\fineq{L}}{S^1_{i_1} \ale S^2_{i_2}}$; need a simple lemma
-      here}
-
-    \todo{show $\tfix{\fineq{L}}{x}{\gamma_j(e)} \equiv S^j_{i_1}$ - this is
-      easy, step the \ms{fix} and then apply theorem \ref{thm:iter-stops}.}
+    Now, observe that
+    \[\begin{array}{rlll}
+      \tfix{\fineq{L}}{x}{\gamma_j(e)}
+      &\steps& \iter{\fineq{L}}{\unit_{\fineq{L}}}{x}{\gamma_j(e)}\\
+      &\steps& \iter{\fineq{L}}{\evalfn(\unit_{\fineq{L}})}{x}{\gamma_j(e)}\\
+      &\equiv& S_i^j & \text{by theorem \ref{thm:iter-stops}}
+    \end{array}\]
 
     \TODO
   \end{description}
