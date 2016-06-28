@@ -250,8 +250,8 @@ We will later show that $\evalfn$ is in fact total.
   A \emph{preorder} is a set equipped with a reflexive, transitive relation,
   conventionally written $\ale$.\footnote{Sometimes the name \emph{preorder} is
     reserved for the relation, while a preordered set is called a ``proset''. As
-    a matter of convenience, we take the preorder to include the set.} We define
-  additional notation $\alt$, $\aeq$ as follows:
+    a matter of convenience, we take the preorder to include the underlying
+    set.} We define additional notation $\alt$, $\aeq$ as follows:
   \begin{eqnarray*}
     x \alt y &\iff& x \ale y \land y \not\ale x\\
     x \aeq y &\iff& x \ale y \land y \ale x
@@ -351,8 +351,6 @@ We will later show that $\evalfn$ is in fact total.
   \end{array}
   \]
 \end{proof}
-
-\todo{TODO: find and fix all references to thm:height and thm:height-elem}
 
 \begin{definition}
   The \emph{equivalence poset} $\eqposet{P}$ of a preorder $P$ is the poset of
@@ -528,9 +526,10 @@ $\expope{\N}{P}$, which orders them $a \ale b$ iff $\forall i.\ a_i \ale_P b_i$.
 
 \section{Logical relations}
 
-Let $a,b,c$ range over closed expressions. Let $\gamma, \sigma$ range over
-substitutions containing only closed expressions, and let $\ms{Ctx}(\GG)$ be the
-set of all substitutions of closed expressions for the variables in $\GG$.
+Let $a,b,c$ range over closed expressions. Let $e,f,g$ range over open
+expressions. Let $\gamma, \sigma$ range over substitutions containing only
+closed expressions, and let $\ms{Ctx}(\GG)$ be the set of all substitutions of
+closed expressions for the variables in $\GG$.
 
 Our intent in what follows is to interpret Datafun types as POPEs over closed
 expressions, and show that a closed expression $a : A$ is an element of the
@@ -784,7 +783,7 @@ transitive, it may be viewed as a type-indexed family of POPEs:
   ordered by $v \ale u : \eq{A}$.
 \end{definition}
 
-\begin{theorem}
+\begin{theorem}\label{thm:terms-values-ordeq}
   $\lrof{A} \ordeq \Val{A}$
 \end{theorem}
 \begin{proof}
@@ -916,35 +915,41 @@ transitive, it may be viewed as a type-indexed family of POPEs:
 
 \subsection{Iteration}
 
-\newcommand{\stepfn}{\ms{step}}
+\newcommand{\appfn}[2]{\ms{app}(\bind{#1}{#2})}
+\newcommand{\nthapp}[4]{\appfn{#1}{#2}^{#3}(#4)}
 
 \begin{definition}
-  Given $\lrcx{x:A}{A}{e}$, define $\stepfn(x.e) : \lrof{A} \to \Val{A}$
-  by: \[\stepfn(x.e)(a) \defeq \evalfn(\sub{a/x} e)\]
+  Given $\lrcx{x:A}{A}{e}$, define $\appfn{x}{e} : \lrof{A} \to \Val{A}$
+  by: \[\appfn{x}{e}(a) \defeq \evalfn(\sub{a/x} e)\]
 \end{definition}
 
-\begin{theorem}\label{thm:stepfn-monotone}
-  If $\lrcx{x:A}{A}{e_1 \ale e_2}$, then $\lrcx{y:A}{A}{\stepfn(x.e_1)(y) \ale
-    \stepfn(x.e_2)(y)}$.
+\begin{theorem}\label{thm:appfn-monotone}
+  If $\lrcx{x:A}{A}{e_1 \ale e_2}$, then $\appfn{x}{e_1} \ale \appfn{x}{e_2}$
+  (in $\expope{\lrof{A}}{\Val{A}}$).
 \end{theorem}
-This may be glossed as saying that $\stepfn(x.e)(a)$ is monotone in both $a$ and
-$x.e$.
 
 \begin{proof}
-  Follows from $\lrcx{x\of A}{A}{e_1 \ale e_2}$, the definition of
-  $\stepfn(x.e)(a)$, and the fact that $a \equiv \evalfn(a)$ by theorem
-  \ref{thm:congbeta}.
+  \todo{TODO: make this explicit!}
+
+  It suffices to show that, if $\lrcx{x\of A}{A}{e_1 \ale e_2}$ and $\lr{A}{a
+    \ale b}$, then $\lr{A}{\appfn{x}{e_1}(a) \ale \appfn{x}{e_2}(b)}$. This
+  follows from $\lrcx{x\of A}{A}{e_1 \ale e_2}$ and the fact that $a \equiv
+  \evalfn(a)$ by theorem \ref{thm:congbeta}.
 \end{proof}
 
 \begin{corollary}\label{cor:fineq-stops}
   Given $\lrcx{x:\fineq{L}}{\fineq{L}}{e}$ and $\lr{\fineq{L}}{a}$, the monotone
-  sequence $\stepfn(x.e)^i(a)$ has a stopping point, i.e. there is some $j$ such
-  that $\forall k \ge j.\ \lr{\fineq{L}}{\stepfn(x.e)^j(a) \equiv
-    \stepfn(x.e)^{k}(a)}$.
+  sequence $\nthapp{x}{e}{i}{a}$ has a stopping point, i.e. there is some $j$
+  such that $\forall k \ge j.\ \lr{\fineq{L}}{\nthapp{x}{e}{j}{a} \equiv
+    \nthapp{x}{e}{k}{a}}$.
 \end{corollary}
 \begin{proof}
-  Follows from theorems \ref{thm:stepfn-monotone}, \ref{thm:finite-height} and
-  \ref{thm:finiteheight-quasifixed}.
+  Follows from theorems \ref{thm:appfn-monotone}, showing this is a monotone
+  sequence; \ref{thm:finite-height}, showing that $\Val{\fineq{L}}$ (and thus
+  $\lrof{\fineq{L}}$, which is order-equivalent by theorem
+  \ref{thm:terms-values-ordeq}) is finite-height; and
+  \ref{thm:finiteheight-quasifixed}, showing that monotone sequences in
+  finite-height preorders have stopping points.
 \end{proof}
 
 \begin{lemma}\label{lem:iter-onestep}
@@ -952,39 +957,43 @@ $x.e$.
   \[
   \iter{\fineq{L}}{v}{x}{e} \steps
   \begin{cases}
-    \iter{\fineq{L}}{\stepfn(x.e)(v)}{x}{e}
-    & \text{if}~v \not\equiv \stepfn(x.e)(v)~\text{in}~\Val{\fineq{L}}\\
+    \iter{\fineq{L}}{\appfn{x}{e}(v)}{x}{e}
+    & \text{if}~v \not\equiv \appfn{x}{e}(v)\\
     v & \text{otherwise}
   \end{cases}
   \]
 \end{lemma}
 \begin{proof}
-  By theorem \ref{thm:agree-ineq}, the rules for $\step$, and the definition of
-  $\stepfn(x.e)(v)$.
+  By the rules for $\step$ and theorem \ref{thm:agree-ineq} showing $v \equiv u
+  : \eq{A} \iff \lr{\eq{A}}{v \equiv u}$.
+  %% and theorem \ref{thm:congbeta} showing that $\equiv_{\lrof{\eq{A}}}$
+  %% transits over $\evalfn$.
 \end{proof}
 
 \begin{theorem}\label{thm:iter-stops}
   Given $\lr{\fineq{L}}{v}$ and $\lrcx{x\of\fineq{L}}{\fineq{L}}{e}$, for $i$ a
-  stopping point of $\stepfn(x.e)^i(v)$ (guaranteed to exist by corollary
+  stopping point of $\nthapp{x}{e}{i}{v}$ (guaranteed to exist by corollary
   \ref{cor:fineq-stops}),
-  \[ \iter{\fineq{L}}{v}{x}{e} \equiv \stepfn(x.e)^i(v) \]
+  \[ \iter{\fineq{L}}{v}{x}{e} \equiv \nthapp{x}{e}{i}{v} \]
 \end{theorem}
 \begin{proof}
   Since any two stopping points are equivalent, it suffices to show this for the
-  \emph{least} $i$ such that $\stepfn(x.e)^i(v)$ is a stopping point.
+  \emph{least} stopping point $i$.
 
-  For any $j \le i$ we have $\stepfn(x.e)^j(v) \not\equiv \stepfn(x.e)^{j+1}(v)$
-  and so by induction, applying lemma \ref{lem:iter-onestep}, we have:
+  For any $j \le i$ we have $\nthapp{x}{e}{j}{v} \not\equiv
+  \nthapp{x}{e}{j+1}{v}$ and so by induction, applying lemma
+  \ref{lem:iter-onestep}, we have:
   \[
-  \iter{\fineq{L}}{v}{x}{e} \steps \iter{\fineq{L}}{\stepfn(x.e)^i(v)}{x}{e}
+  \iter{\fineq{L}}{v}{x}{e} \steps
+  \iter{\fineq{L}}{\nthapp{x}{e}{i}{v}}{x}{e}
   \]
 
   Therefore:
   \[
   \begin{array}{rlll}
     \iter{\fineq{L}}{v}{x}{e}
-    &\steps& \iter{\fineq{L}}{\stepfn(x.e)^i(v)}{x}{e}\\
-    &\steps& \stepfn(x.e)^i(v)
+    &\steps& \iter{\fineq{L}}{\nthapp{x}{e}{i}{v}}{x}{e}\\
+    &\steps& \nthapp{x}{e}{i}{v}
     & \text{by lemma \ref{lem:iter-onestep}, and $i$ being a stopping-point}
   \end{array}
   \]
@@ -996,13 +1005,32 @@ $x.e$.
 
 Now, we aim to show that every well-typed term is in the corresponding logical
 relation. The most interesting case here are the \ms{fix} expressions; before we
-prove this, we will need a few lemmas to help establish those cases.
+prove this, we will need a small lemma.
 
 \begin{lemma}\label{lem:lr-unit}
   For any $L$, $\lr{L}{\unit_L}$.
 \end{lemma}
 \begin{proof}
-  \TODO
+  By induction on $L$:
+  \begin{description}
+  \item[Case $\unit_\bool \step \ms{false}$:] It STS $\lr{\bool}{\ms{false}}$,
+    which is trivial.
+  \item[Case $\unit_{\Set{A}} \step \{\}$:] It STS $\lr{\Set{A}}{\setlit{}}$,
+    which is trivial.
+  \item[Case $\unit_{L \x M} \step (\unit_L, \unit_M)$:] It STS $\lr{L \x
+    M}{(\unit_L, \unit_M)}$ given $\lr{L}{\unit_L}$ and $\lr{M}{\unit_M}$. This
+    is trivial by the definition of $\lr{L}{(\unit_L, \unit_M)}$.
+  \item[Case $\unit_{A \mto L} \step \fn\bind{x} \unit_L$:] Reflexively,
+    $\fn\bind{x}\unit_L \steps \fn\bind{x} \unit_L$. Since $x$ is not free in
+    $\unit_L$ we have for any $\lr{x\of A}{\gamma_1 \ale \gamma_2}$ that
+    $\gamma_i(\unit_L) = \unit_L$ and so by our IH we have
+    $\lr{L}{\gamma_1(\unit_L) \ale \gamma_2(\unit_L)}$ and we are done.
+
+  \item[Case $\unit_{A \uto L} \step \fn\bind{x} \unit_L$:] By the same argument
+    as in the previous case, only repeated symmetrically to show
+    $\lr{L}{\gamma_2(\unit_L) \ale \gamma_1(\unit_L)}$ and therefore
+    $\lr{L}{\gamma_1(\unit_L) \aeq \gamma_2(\unit_L)}$ as well.
+  \end{description}
 \end{proof}
 
 
@@ -1031,84 +1059,149 @@ with $x \of \disc{A}$.
 
     Trivial.
 
+
+    %% Monotone application
+    \vspace{1em}
+  \item[Case] $\infer[\rt{app}^+]{\J{\GD}{\GG}{e_1\;e_2}{B}}
+    {\J{\GD}{\GG}{e_1}{A \mto B} & \J{\GD}{\GG}{e_2}{A}}$
+
+    %% TS: $\lrcx{\cxdisc{\GD},\GG}{B}{e_1\;e_2}$
+
+    Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \ale \gamma_2}$. It suffices to
+    show that $\lr{B}{\gamma_1(e_1)\;\gamma_1(e_2) \ale
+      \gamma_2(e_1)\;\gamma_2(e_2)}$ given that $\lr{A \mto B}{\gamma_1(e_1)
+      \ale \gamma_2(e_1)}$ and $\lr{A}{\gamma_1(e_2) \ale \gamma_2(e_2)}$.
+
+    From these assumptions we know $\gamma_i(e_1) \steps \fn\bind{x}{f_i}$ such
+    that $\lrcx{x\of A}{B}{f_1 \ale f_2}$.
+
+    Applying theorems \ref{thm:termination} and \ref{thm:congbeta} we also have
+    $\gamma_i(e_2) \steps v_i$ such that $\lr{A}{v_1 \ale v_2}$.
+    
+    Therefore, $\gamma_i(e_1)\;\gamma_i(e_2) \steps (\fn\bind{x} f_i)\;v_i \step
+    \sub{v_i/x} f_i$. So it STS that $\lr{B}{\sub{v_1/x} f_1 \ale \sub{v_2/x}
+      f_2}$. This follows from $\lrcx{x \of A}{f_1 \ale f_2}{B}$.
+
+
     %% Ordinary application.
     \vspace{1em}
-    \item[Case] $\infer[\rt{app}]{\J{\GD}{\GG}{e_1\;e_2}{B}}
-      {\J{\GD}{\GG}{e_1}{A \uto B} & \J{\GD}{\cdot}{e_2}{A}}$
+  \item[Case] $\infer[\rt{app}]{\J{\GD}{\GG}{e_1\;e_2}{B}}
+    {\J{\GD}{\GG}{e_1}{A \uto B} & \J{\GD}{\cdot}{e_2}{A}}$
 
-      \TODO
+    Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \ale \gamma_2}$. It suffices to
+    show that $\lr{B}{\gamma_1(e_1)\;\gamma_1(e_2) \ale
+      \gamma_2(e_1)\;\gamma_2(e_2)}$ given that $\lr{\disc{A} \mto
+      B}{\gamma_1(e_1) \ale \gamma_2(e_1)}$ and $\lr{A}{\gamma_1(e_2) \ale
+      \gamma_2(e_2)}$.
 
+    \todo{need some argument that shows $e_2$ only has free variables of type
+      $\disc{C}$ or something? and therefore $\gamma_i(e_2) = \delta_i(e_2)$
+      where $\delta_i$ is the restriction of $\gamma_i$ to $\cxdisc{\GD}$?} 
+
+    \TODO
+
+
     %% Monotone lambda
     \vspace{1em}
   \item[Case] $\infer[\fn^+]{\GD;\GG \ent \fn\bind{\m{x}} e : A \mto B}{
     \GD; \GG{},\m{x}\of A \ent e : B}$
 
-    TS: $\lrcx{\cxdisc{\GD},\GG}{A \mto B}{
-      \fn\bind{\m{x}} e \ale \fn\bind{\m{x}}e}$.
+    %% TS: $\lrcx{\cxdisc{\GD},\GG}{A \mto B}{
+    %%   \fn\bind{\m{x}} e \ale \fn\bind{\m{x}}e}$.
 
-    Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \ale \gamma_2}$ and any $i =
-    1,2$.
+    Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \ale \gamma_2}$. By partial
+    reflexivity, it STS $\lr{A \mto B}{\fn\bind{\m{x}} \gamma_1(e) \ale
+      \fn\bind{\m{x}} \gamma_2(e)}$. Expanding this, it suffices to show for any
+    $\lr{x \of A}{\sigma_1 \ale \sigma_2}$ that
+    $\commsq{B}{\sigma_1}{\sigma_2}{\gamma_1(e)}{\gamma_2(e)}$, which may be
+    diagrammed as:
+    \begin{center}
+      \tikzset{
+        no line/.style={draw=none,
+          commutative diagrams/every label/.append style={/tikz/auto=false}}}
+              {\begin{tikzcd}
+                  \sigma_1(\gamma_1(e)) \ALER \ALED
+                  & \sigma_1(\gamma_2(e)) \ALED\\
+                  \sigma_2(\gamma_1(e)) \ALER & \sigma_2(\gamma_2(e))
+              \end{tikzcd}}
+    \end{center}
 
-    STS $\lr{A \mto B}{\fn\bind{\m{x}} \gamma_i(e) \ale \fn\bind{\m{x}}
-      \gamma_i(e)}$ and $\lr{A \mto B}{\fn\bind{\m{x}} \gamma_1(e) \ale
-      \fn\bind{\m{x}} \gamma_2(e)}$.
+    Note that the domains of $\gamma_i$ and $\sigma_j$ are disjoint; therefore,
+    $\sigma_j(\gamma_i(e)) = (\gamma_i,\sigma_j)(e)$ (for any $i,j$). Note
+    further that if $\lr{\cxdisc{\GD},\GG}{\gamma_i \ale \gamma_j}$ and
+    $\lr{x\of A}{\sigma_k \ale \sigma_l}$ then $\lr{\cxdisc{\GD},\GG,x\of
+      A}{(\gamma_i,\sigma_k) \ale (\gamma_j,\sigma_l)}$.
 
-    Consider any $\lr{x \of A}{\sigma_1 \ale \sigma_2}$ and any $j = 1,2$.
+    Given this, all four sides of this diagram follow directly from our IH.
 
-    Expanding definitions, it STS:
-    \begin{itemize}
-    \item $\lr{B}{\sigma_j(\gamma_i(e)) \ale \sigma_j(\gamma_i(e))}$
-      and $\lr{B}{\sigma_1(\gamma_i(e)) \ale \sigma_2(\gamma_i(e))}$
-    \item $\lr{B}{\sigma_j(\gamma_1(e)) \ale \sigma_j(\gamma_2(e))}$
-      and $\lr{B}{\sigma_1(\gamma_j(e)) \ale \sigma_2(\gamma_j(e))}$
-    \end{itemize}
+
+    %% Discrete
+    \vspace{1em}
+  \item[Case] $\infer[\fn]{\J{\GD}{\GG}{\fn\bind{x} e}{A \uto B}}{
+    \J{\GD,x\of A}{\GG}{e}{B}}$
 
-    All of these follow from our IH, $\lrcx{\cxdisc{\GD},\GG,x\of A}{B}{e}$,
-    from partial reflexivity of $\lr{\GG}{\gamma \ale \sigma}$, and from the fact
-    that if $\gamma_1 \le \gamma_2$ and $\sigma_1 \le \sigma_2$ then $\sigma_1
-    \circ \gamma_1 \le \sigma_2\circ\gamma_2$.
+    This case is exactly the same as that for $\fn^+$, but with $\disc{A}$
+    substituted for $A$:
 
-    \todo{wrong notation above}
+    Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \ale \gamma_2}$. By partial
+    reflexivity, it STS $\lr{\disc{A} \mto B}{\fn\bind{x} \gamma_1(e) \ale
+      \fn\bind{x} \gamma_2(e)}$. Expanding this, it suffices to show for any
+    $\lr{x \of \disc{A}}{\sigma_1 \ale \sigma_2}$ that
+    $\commsq{B}{\sigma_1}{\sigma_2}{\gamma_1(e)}{\gamma_2(e)}$, which may be
+    diagrammed as:
+    \begin{center}
+      \tikzset{
+        no line/.style={draw=none,
+          commutative diagrams/every label/.append style={/tikz/auto=false}}}
+              {\begin{tikzcd}
+                  \sigma_1(\gamma_1(e)) \ALER \ALED
+                  & \sigma_1(\gamma_2(e)) \ALED\\
+                  \sigma_2(\gamma_1(e)) \ALER & \sigma_2(\gamma_2(e))
+              \end{tikzcd}}
+    \end{center}
 
-    %% TODO: discrete lambda
+    Note that the domains of $\gamma_i$ and $\sigma_j$ are disjoint; therefore,
+    $\sigma_j(\gamma_i(e)) = (\gamma_i,\sigma_j)(e)$ (for any $i,j$). Note
+    further that if $\lr{\cxdisc{\GD},\GG}{\gamma_i \ale \gamma_j}$ and
+    $\lr{x\of\disc{A}}{\sigma_k \ale \sigma_l}$ then
+    $\lr{\cxdisc{\GD},\GG,x\of\disc{A}}{(\gamma_i,\sigma_k) \ale
+      (\gamma_j,\sigma_l)}$.
 
+    Given this, all four sides of this diagram follow directly from our IH.
+
+
+    %% Fix
     \vspace{1em}
   \item[Case] $\infer[\ms{fix}]{\J{\GD}{\GG}{\fix{\m{x}} e}{\fineq{L}}}{
     \J{\GD}{\GG,\m{x}\of \fineq{L}}{e}{\fineq{L}}}$
 
-    IH: $\lrcx{\cxdisc{\GD}, \GG, x \of \fineq{L}}{\fineq{L}}{e}$.
-
-    TS: $\lrcx{\cxdisc{\GD}, \GG}{\fineq{L}}{\tfix{\fineq{L}}{x} e}$.
-
-    %% By definition, $\tfix{\fineq{L}}{x}{e} \step
-    %% \iter{\fineq{L}}{\unit_{\fineq{L}}}{x}{e}$. \todo{use lemma about $\unit$
-    %%   evaluating}
-
-    Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \ale \gamma_2}$.
-
-    %% By Theorem \ref{thm:congbeta} it suffices to find $v_1,v_2$ such that
-    %% $\lr{\fineq{L}}{v_1 \ale v_2}$ and $\tfix{\fineq{L}}{x} \gamma_i(e) \steps
-    %% v_i$.
+    Consider any $\lr{\cxdisc{\GD},\GG}{\gamma_1 \ale \gamma_2}$. It suffices to
+    show $\lr{\fineq{L}}{\tfix{\fineq{L}}{x}{\gamma_1(e)} \ale
+      \tfix{\fineq{L}}{x}{\gamma_2(e)}}$.
 
     Consider the monotone sequences $S^j_i =
-    \stepfn(x.\gamma_j(e))^i(\evalfn(\unit_{\fineq{L}}))$ where $i$ is the
-    sequence index and $j \in \{1,2\}$. By corollary \ref{cor:fineq-stops} these
-    sequences each have stopping points; call them $i_1, i_2$ respectively. By
-    lemma \ref{lem:lr-unit} $\unit_{\fineq{L}} \ale \unit_{\fineq{L}}$ and by
-    theorem \ref{thm:stepfn-monotone}
-    $\lrcx{y\of\fineq{L}}{\fineq{L}}{\stepfn(x.\gamma_1(e))(y) \ale
-      \stepfn(x.\gamma_2(e))(y)}$, so by induction $S_i^1 \ale S_i^2$. Thus by
-    theorem \ref{thm:stopping-points-le}, $S^1_{i_1} \ale S^2_{i_2}$.
+    \nthapp{x}{\gamma_j(e)}{i}{\evalfn(\unit_{\fineq{L}})}$ where $i$ is the
+    sequence index and $j \in \{1,2\}$. By lemma \ref{lem:lr-unit} and theorem
+    \ref{thm:congbeta} $\evalfn(\unit_{\fineq{L}}) \ale
+    \evalfn(\unit_{\fineq{L}})$; from our IH we have that
+    $\lrcx{x\of\fineq{L}}{\fineq{L}}{\gamma_1(e) \ale \gamma_2(e)}$ and so by
+    theorem \ref{thm:appfn-monotone} $\appfn{x}{\gamma_1(e)} \ale
+    \appfn{x}{\gamma_2(e)}$; so by induction $S_i^1 \ale S_i^2$.
+
+    By corollary \ref{cor:fineq-stops} these sequences each have stopping
+    points; call them $i_1, i_2$ respectively. Then by theorem
+    \ref{thm:stopping-points-le}, $S^1_{i_1} \ale S^2_{i_2}$.
 
     Now, observe that
     \[\begin{array}{rlll}
       \tfix{\fineq{L}}{x}{\gamma_j(e)}
-      &\steps& \iter{\fineq{L}}{\unit_{\fineq{L}}}{x}{\gamma_j(e)}\\
+      &\step& \iter{\fineq{L}}{\unit_{\fineq{L}}}{x}{\gamma_j(e)}\\
       &\steps& \iter{\fineq{L}}{\evalfn(\unit_{\fineq{L}})}{x}{\gamma_j(e)}\\
-      &\equiv& S_i^j & \text{by theorem \ref{thm:iter-stops}}
+      &\equiv& S_{i_j}^j & \text{by theorem \ref{thm:iter-stops}}
     \end{array}\]
 
-    \TODO
+    Therefore $\lr{\fineq{L}}{\tfix{\fineq{L}}{x}{\gamma_1(e)} \ale
+      \tfix{\fineq{L}}{x}{\gamma_2(e)}}$, which is what we wished to show.
   \end{description}
 \end{proof}
 
