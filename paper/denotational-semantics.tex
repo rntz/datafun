@@ -354,6 +354,7 @@ semilattice $L$ of finite height.
 
 
 %% FIGURE: SUBSTITUTIONS
+%% TODO: we could omit this.
 \begin{figure*}
   \[\begin{array}{rcll}
     \sub{e/v} v &=& e\\
@@ -363,8 +364,10 @@ semilattice $L$ of finite height.
     \sub{e/v} (e_1, e_2) &=& (\sub{e/v} e_1, \sub{e/v} e_2)\\
     \sub{e/v} (\pi_i\;e') &=& \pi_i\;(\sub{e/v}e')\\
     \sub{e/v} (\ms{in}_i\;e') &=& \ms{in}_i \;(\sub{e/v} e')\\
-    \sub{e/v} (\case{e'}{u}{e_1}{u}{e_2})
-    &=& \case{\sub{e/v} e'}{u}{\sub{e/v} e_1}{u}{\sub{e/v} e_2}\\
+    %% \sub{e/v} (\ms{case}~e'~\ms{of}~\widevec{\ms{in}_i\,u_i \cto e_i})
+    %% &=& \ms{case}~\sub{e/v} e'~\ms{of}~\widevec{\ms{in}_i\,u_i \cto \sub{e/v} e_i}\\
+    \sub{e/v} (\case{e'}{u_1}{e_1}{u_2}{e_2})
+    &=& \case{\sub{e/v} e'}{u_1}{\sub{e/v} e_1}{u_2}{\sub{e/v} e_2}\\
     \sub{e/v} \unit &=& \unit\\
     \sub{e/v} (e_1 \vee e_2) &=& \sub{e/v} e_1 \vee \sub{e/v} e_2\\
     \sub{e/v} (\forin{x \in e_1} e_2)
