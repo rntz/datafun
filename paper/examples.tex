@@ -54,22 +54,22 @@
       \\[1em]
       \rawcase{e_1}{}       &            & \\
       \;\;!e_2 \cto e_3;    & \expandsto & \ifthen{e_1 = e_2}{e_3}{e_4} \\
-      \;\;\pwild \cto e_4   &            & 
+      \;\;\pwild \cto e_4   &            &
       \\[1em]
       \rawcase{e_1}{}       &            & \\
       \;\;\pwild \cto e_3;  & \expandsto & e_3 \\
-      \;\;\pwild \cto e_4   &            & 
+      \;\;\pwild \cto e_4   &            &
       \\[1em]
       \rawcase{e_1}{}           &            & \rawcase{e_1}{} \\
-      \;\;\ms{in}_1 p \cto e_3; & \expandsto & \;\;\ms{in}_1 x \to (\casep{x}{p}{e_3}{e_4}); \\
-      \;\;\pwild \cto e_4       &            & \;\;\ms{in}_2 y \to e_4 
+      \;\;\ms{in}_1\, p \cto e_3; & \expandsto & \;\;\ms{in}_1\, x \to (\casep{x}{p}{e_3}{e_4}); \\
+      \;\;\pwild \cto e_4       &            & \;\;\ms{in}_2\, y \to e_4
       \\[1em]
       \rawcase{e_1}{}           &            & \rawcase{e_1}{} \\
-      \;\;\ms{in}_2\, p \cto e_3; & \expandsto & \;\;\ms{in}_1 x \to e_4; \\
-      \;\;\pwild \cto e_4       &            & \;\;\ms{in}_2 y \to (\casep{y}{p}{e_3}{e_4})
+      \;\;\ms{in}_2\, p \cto e_3; & \expandsto & \;\;\ms{in}_1\, x \to e_4; \\
+      \;\;\pwild \cto e_4       &            & \;\;\ms{in}_2\, y \to (\casep{y}{p}{e_3}{e_4})
     \end{array}
   \end{displaymath}
-  \caption{Pattern Match Expansion}
+  \caption{Pattern matching syntax sugar}
   \label{fig:pattern-expand}
 \end{figure}
 
@@ -188,7 +188,7 @@ Similarly, we can define set intersection by testing for equality:
 \m{A} \cap \m{B} = \setfor{x}{x \in \m{A}, y \in \m{B}, x = y}
 \end{array}\]
 
-\todo{FIXME: rewrite to talk about dot-patterns instead of nonlinear
+\todo{FIXME: rewrite to talk about bang-patterns instead of nonlinear
   pattern-matching}
 
 However, explicitly testing for equality can become tedious, so we usually use
