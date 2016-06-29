@@ -32,7 +32,70 @@
 \end{figure}
 
 \begin{figure}
-  
+  \begin{displaymath}
+    \begin{array}{ccl}
+      \multicolumn{3}{c}{\textbf{$\beta$-reductions}}\\
+      (\fn\bind{x}e_1) \; e_2 &\step& \sub{e_2/x} e_1\\
+      \pi_i \; (v_1, v_2) &\step& v_i\\
+      \rawcase{\ms{in}_i\,v}{\widevec{\ms{in_j}\,x_j \cto e_j}}
+      &\step& \sub{v/x_i} e_i\\
+      \ifthen{\ms{true}}{e_1}{e_2} &\step& e_1\\
+      \ifthen{\ms{false}}{e_1}{e_2} &\step& e_2
+
+      %% rules for unit
+      \vspace{0.5em}\\
+      \multicolumn{3}{c}{\textbf{Rules for }\unit}\\
+      \unit_2 &\step& \ms{false}\\
+      \unit_{\Set{A}} &\step& \{\}\\
+      \unit_{L \x M} &\step& (\unit_L, \unit_M)\\
+      \unit_{A \to L} &\step& \fn\bind{x} \unit_L\\
+      \unit_{A \mto L} &\step& \fn\bind{x} \unit_L
+
+      %% rules for \vee
+      \vspace{0.5em}\\
+      \multicolumn{3}{c}{\textbf{Rules for }\vee}\\
+      \ms{false} \vee_2 v &\step& v\\
+      \ms{true} \vee_2 v &\step& \ms{true}\\
+      %% the rule we've all been waiting for
+      \setlit{\vec{v}} \vee_{\Set{A}} \setlit{\vec{u}} &\step& \setlit{\vec{v}, \vec{u}}\\
+      (v_1, v_2) \vee_{L \x M} (u_1, u_2) &\step& (v_1 \vee_L u_1, v_2 \vee_M u_2)\\
+      v \vee_{A \to L} u &\step& \fn\bind{x} v\;x \vee_L u\;x\\
+      v \vee_{A \mto L} u &\step& \fn\bind{x} v\;x \vee_L u\;x
+
+      %% rules for \bigvee
+      \vspace{0.5em}\\
+      \multicolumn{3}{c}{\textbf{Rules for }\bigvee}\\
+      \tforin{L}{x \in \{\}} e &\step& \unit_L\\
+      \tforin{L}{x \in \setlit{v, \vec{u}}} e
+      &\step& \sub{v/x} e \vee_L \tforin{L}{x \in \setlit{\vec{u}}} e
+  %%   \end{array}
+  %% \end{displaymath}
+  %% \begin{displaymath}
+  %%   \begin{array}{ccl}
+      %% rules for \ms{fix}
+      \vspace{0.5em}\\
+      \multicolumn{3}{c}{\textbf{Rules for \ms{fix} and \ms{iter}}}\\
+      \tfix{\fineq{L}}{x}{e} &\step& \iter{\fineq{L}}{\unit_{\fineq{L}}}{x}{e}\\
+      \iter{\eq{A}}{v}{x}{e} &\step& \iterstep{\eq{A}}{v}{\sub{v/x} e}{x}{e}\\
+      \iterstep{\eq{A}}{v_1}{v_2}{x}{e}
+      &\step& \begin{cases}
+        v_1 & \text{if}~{v_1 \aeq v_2 : \eq{A}}\\
+        \iter{\eq{A}}{v_2}{x}{e} & \text{otherwise}
+      \end{cases}\\
+      %% rules for fixle, iterle
+      \tfixle{\eq{L}}{x}{e_\top}{e} &\step& \iterle{\eq{L}}{e_\top}{\unit_{\eq{L}}}{x}{e}\\
+      \iterle{\eq{A}}{v_\top}{v}{x}{e}
+      &\step& \begin{cases}
+        \iterlestep{\eq{A}}{v_\top}{v}{\sub{v/x} e}{x}{e} & \text{if}~{v \ale v_\top : \eq{A}}\\
+        v_\top & \text{otherwise}
+      \end{cases}\\
+      \iterlestep{\eq{A}}{v_\top}{v_1}{v_2}{x}{e}
+      &\step& \begin{cases}
+        v_1 &\text{if}~{v_1 \aeq v_2 : \eq{A}}\\
+        \iterle{\eq{A}}{v_\top}{v_2}{x}{e} & \text{otherwise}
+      \end{cases}
+    \end{array}
+  \end{displaymath}
   \caption{Rules for $\step$}
   \label{fig:opsem-rules}
 \end{figure}
@@ -67,9 +130,9 @@ evaluated (if it is not a value already). To fill the hole $\hole$ in an
 evaluation context $E$ with the expression $e$, we write $E[e]$.
 
 Figure \ref{fig:opsem-rules} defines a relation $e \step e'$ for expressions $e$
-whose outermost structure is immediately $\beta$-reducible; we extend this
-relation to all expressions with the rule
-\[\infer{e \step e'}{E[e] \step E[e']}\]
+whose outermost structure is immediately reducible; we extend this relation to
+all expressions with the rule
+\[\infer{E[e] \step E[e']}{e \step e'}\]
 
 %% FIXME
 In our rules for $e \step e'$ we make use of a \emph{decidable inequality test
