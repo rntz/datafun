@@ -62,11 +62,11 @@
       \\[1em]
       \rawcase{e_1}{}           &            & \rawcase{e_1}{} \\
       \;\;\ms{in}_1 p \cto e_3; & \expandsto & \;\;\ms{in}_1 x \to (\casep{x}{p}{e_3}{e_4}); \\
-      \;\;\pwild \cto e_4       &            & \;\;\ms{in}_2 x \to e_4 
+      \;\;\pwild \cto e_4       &            & \;\;\ms{in}_2 y \to e_4 
       \\[1em]
       \rawcase{e_1}{}           &            & \rawcase{e_1}{} \\
-      \;\;\ms{in}_2 p \cto e_3; & \expandsto & \;\;\ms{in}_1 x \to e_4; \\
-      \;\;\pwild \cto e_4       &            & \;\;\ms{in}_2 x \to (\casep{x}{p}{e_3}{e_4})
+      \;\;\ms{in}_2\, p \cto e_3; & \expandsto & \;\;\ms{in}_1 x \to e_4; \\
+      \;\;\pwild \cto e_4       &            & \;\;\ms{in}_2 y \to (\casep{y}{p}{e_3}{e_4})
     \end{array}
   \end{displaymath}
   \caption{Pattern Match Expansion}
