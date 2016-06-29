@@ -14,7 +14,7 @@
   %% to translate it & we also use various other sugar we don't explain how to
   %% translate, why do we include only pattern-matching here?
   \textsf{patterns} &
-  p &\bnfeq& \pwild \pipe x \pipe (p,p)
+  p &\bnfeq& \pwild \pipe x \pipe \bound{e} \pipe (p,p)
              \pipe \ms{true} \pipe \ms{false} \pipe \mathcal{C}\;\vec{p}
   \vspace{0.5em}\\
   \textsf{constructors} & \mathcal{C} && \text{are abstract identifiers}
@@ -159,13 +159,16 @@ Similarly, we can define set intersection by testing for equality:
 \m{A} \cap \m{B} = \setfor{x}{x \in \m{A}, y \in \m{B}, x = y}
 \end{array}\]
 
+\todo{FIXME: rewrite to talk about dot-patterns instead of nonlinear
+  pattern-matching}
+
 However, explicitly testing for equality can become tedious, so we usually use
 \emph{nonlinear pattern-matching} instead --- that is, we bind the same-named
 variable multiple times, which indicates it must have an equal value at each
 occurrence:
 \[\begin{array}{l}
 (\cap) ~:~ \Set{\eq{A}} \mto \Set{\eq{A}} \mto \Set{\eq{A}}\\
-\m{A} \cap \m{B} = \setfor{x}{x \in \m{A}, x \in \m{B}}
+\m{A} \cap \m{B} = \setfor{x}{x \in \m{A}, \bound{x} \in \m{B}}
 \end{array}\]
 
 This is merely syntax sugar for an equality test, so the condition that the
@@ -180,7 +183,7 @@ One extremely useful operator it is convenient to define using nonlinear pattern
 matching is composition of finite relations (that is, sets of pairs):
 \[\begin{array}{l}
 (\bullet) : \Set{A \x \eq{B}} \mto \Set{\eq{B} \x C} \mto \Set{A \x C}\\
-\m{R} \bullet \m{S} = \setfor{(a,c)}{(a,b) \in \m{R}, (b,c) \in \m{S}}
+\m{R} \bullet \m{S} = \setfor{(a,c)}{(a,b) \in \m{R}, (\bound{b},c) \in \m{S}}
 \end{array}\]
 
 This already demonstrates a capability Datafun has that Datalog does not:
@@ -381,7 +384,8 @@ the fixed point iteration.
 \fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
 \hspace{1em}\phantom{\vee~}
 \{(a,i,k) ~|~ (a, \ctor{Concat}~b~c) \in \m{G},\\
-\hspace{6.25em} (b,i,j) \in \m{chart}, (c,j,k) \in \m{chart}\}\\
+\hspace{6.25em} (\bound{b},i,j) \in \m{chart},\\
+\hspace{6.25em} (\bound{c},\bound{j},k) \in \m{chart}\}\\
 \hspace{1em}\vee~ \{(a,i,i+\fname{length}\;s)\\
 \hspace{2.1em}|~ (a, \ctor{String}~s) \in \m{G},\\
 \hspace{2.2em}\phantom{|~} i \in \fname{range}\;0\;(n-\fname{length}\;s),\\
@@ -408,7 +412,7 @@ We can then use $\fname{iter}$ to implement the $\fname{parse}$ function.
 \hspace{10.5em}j\in\fname{range}\;i\;n\}\\
 \hspace{2.375em} \m{chart} = \fixle{\m{C}}{\m{bound}}
   \ms{iter} \;\mi{text} \;\m{G} \;\m{C}\\
-\hspace{1em}\ms{in}~\setfor{a}{(a, 0, n) \in \m{chart}}\\
+\hspace{1em}\ms{in}~\setfor{a}{(a, 0, \bound{n}) \in \m{chart}}\\
 %% %% iter with \forin
 %% \\
 %% \fname{iter} \;\mi{text} \;\m{G} \;\m{chart} =\\
@@ -488,7 +492,6 @@ Datafun. We begin with the types in these programs.
 \ctor{Assign} \;\ms{var} \;\ms{expr}
 \pipe \ctor{If} \;\ms{expr} \;\ms{label}\;\ms{label} \\
 \textbf{type}~\ms{program} = \Set{\ms{label} \x \ms{stmt}}
-
 \end{array}\]
 The basic idea is that we represent a program as a kind of control
 flow graph. Each node of this graph has a $\ms{label}$, which is a
@@ -546,8 +549,8 @@ for each label which variables are live.
   \ms{labels}\;\mi{code} \x \ms{vars}\;\mi{code}}\\
 \hspace{2em}\forin{(i,\mi{stmt}) \in \mi{code}}\\
 \hspace{2.875em} (\phantom{\vee~}\setfor{(i,v)}{v \in \ms{uses}\;\mi{stmt}}\\
-\hspace{3.2em} \vee~ \{(i,v) ~|~ (i,j) \in \mi{flow},\\
-\hspace{7.4em}(j,v) \in \m{Live},\\
+\hspace{3.2em} \vee~ \{(i,v) ~|~ (\bound{i},j) \in \mi{flow},\\
+\hspace{7.4em}(\bound{j},v) \in \m{Live},\\
 \hspace{7.4em}\neg (v \isin \ms{defines}\; \mi{stmt})\})
 \end{array}\]
 For a statement $\mi{stmt}$ at label $i$, we say that the variable
@@ -574,8 +577,8 @@ expressions or not.
 \hspace{2em}\forin{(i,\mi{stmt}) \in \mi{code}}\\
 \hspace{2.875em} (
 \phantom{\vee~}\setfor{((i,v), i)}{v \in \ms{defines}\;\mi{stmt}}\\
-\hspace{3.2em} \vee~ \{((l,v), i) ~|~ (j,i) \in \mi{flow},\\
-\hspace{8.95em}((l,v), j) \in \m{RD},\\
+\hspace{3.2em} \vee~ \{((l,v), i) ~|~ (j,\bound{i}) \in \mi{flow},\\
+\hspace{8.95em}((l,v), \bound{j}) \in \m{RD},\\
 \hspace{8.95em}\neg(v \isin \ms{defines}\;\mi{stmt})\})
 \end{array}\]
 We define a function $\fname{reachingDefinitions}$ which takes a

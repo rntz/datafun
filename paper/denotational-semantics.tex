@@ -55,7 +55,7 @@
 %%   example.}
 
 
-\section{Semantics and metatheory}
+\section{Denotational semantics}
 \label{sec:semantics}
 
 %% \todo{Somewhere in this we should talk about the comonad $\Disc{\U{\cdot}}$, the
@@ -93,7 +93,7 @@ A morphism $f \in \cSL(L, M)$ is a function from $\U{L}$ to $\U{M}$ satisfying:
 \cSL{} is a subcategory of \ms{Poset}; every \cSL{}-morphism $f$ is monotone,
 since $a \le b \iff a \vee b = b$, and so from $a \le b$ we know $f(a) \vee f(b)
 = f(a \vee b) = f(b)$, thus $f(a) \le f(b)$. Since it is a subcategory, we will
-typically not explicitly write the forgetful functor $\mathsf{U}(L)$ which sends
+typically not explicitly write the forgetful functor $\slU\,L$ which sends
 semilattices to posets by forgetting the lattice structure.
 
 

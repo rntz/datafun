@@ -43,6 +43,9 @@
 \newcommand{\bind}[1]{#1\binder}
 \newcommand{\pipe}{\hspace{0.5em}|\hspace{0.5em}}
 \newcommand{\of}{\,{:}\,}
+\newcommand{\widevec}[1]{\overrightarrow{#1}}
+%% equality pattern testing
+\newcommand{\bound}[1]{!{#1}}
 
 \newcommand{\bnfeq}{\dblcolon=}
 \newcommand{\defeq}{\overset{\ms{def}}{=}}
@@ -148,3 +151,52 @@
 
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
+
+%% operational semantics & logical relations
+
+%% preorder notation
+\newcommand{\ale}{\sqsubseteq}
+\newcommand{\alt}{\sqsubset}
+\newcommand{\aeq}{\equiv}
+
+%% \newcommand{\ordle}{\ale}
+%% \newcommand{\ordeq}{\simeq}
+%% \newcommand{\eqposet}[1]{\ms{Eq}(#1)}
+%% \renewcommand{\eqposet}[1]{\|{#1}\|}
+
+%% \newcommand{\eqclass}[1]{[#1]}
+%% \newcommand{\height}{\ms{height}}
+%% \newcommand{\elemheight}[2]{\height(#2 : #1)}
+
+%% \newcommand{\dom}[1]{\mathrm{dom}(#1)}
+%% \newcommand{\expope}[2]{#1 \Rightarrow #2}
+
+%% commands used in commutative/transitive diagrams
+\newcommand{\ALER}{\arrow[no line]{r}{\rotatebox[origin=c]{0}{\scalebox{1.33}{$\ale$}}}}
+\newcommand{\ALED}{\arrow[no line]{d}{\rotatebox[origin=c]{-90}{\scalebox{1.33}{$\ale$}}}}
+
+%% type-annotated semilattice operatoins
+\newcommand{\tforin}[2]{\bigvee_{#1}(#2)\ }
+\newcommand{\tfix}[2]{\ms{fix}_{#1}~{#2}~\ms{is}~}
+\newcommand{\tfixle}[3]{\tfix{#1}{#2 \le #3}}
+
+\newcommand{\hole}{[\,]}
+
+%% iteration forms, used in evalution of fix
+\newcommand{\iter}[4]{\ms{iter}_{#1}({#2}; \bind{#3}#4)}
+\newcommand{\iterstep}[5]{\ms{iter}_{#1}({#2}; {#3}; {\bind{#4}#5})}
+\newcommand{\iterle}[5]{\ms{iter}_{{\le}#1}({#2}; {#3}; \bind{#4}{#5})}
+\newcommand{\iterlestep}[6]{\ms{iter}_{{\le}#1}({#2}; {#3}; {#4}; \bind{#5}{#6})}
+
+\newcommand{\step}{\mapsto}
+\newcommand{\steps}{\step^*}
+%% \newcommand{\betaeq}{\leftrightarrow}
+
+\newcommand{\disc}[1]{\square{#1}}
+
+\newcommand{\lr}[2]{#2\mathrel{|}#1}
+\newcommand{\lrcx}[3]{#1 \ent \lr{#2}{#3}}
+\newcommand{\commsq}[5]{\lr{#1}{{#2}, {#4} \ale {#3}, {#5}}}
+
+%% \newcommand{\lrof}[1]{\ms{T}[#1]}
+%% \newcommand{\Val}[1]{\ms{V}[#1]}

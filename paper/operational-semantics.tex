@@ -1,0 +1,52 @@
+\begin{figure}
+  \[\begin{array}{ccl}
+    %% expressions
+    e,f,g
+    &\bnfeq& ... \pipe \setlit{\vec{v}} \pipe \unit_L \pipe e \vee_L e \pipe \tforin{L}{x \in e} e\\
+    \textsf{expressions}
+    && \tfix{\fineq{L}}{x}{e} \pipe \tfixle{\eq{L}}{x}{e}{e}\\
+    && \iter{\eq{A}}{e}{x}{e} \pipe \iterstep{\eq{A}}{e}{e}{x}{e}\\
+    && \iterle{\eq{A}}{e}{e}{x}{e} \pipe \iterlestep{\eq{A}}{e}{e}{e}{x}{e}
+    \vspace{0.5em}\\
+    %% values
+    v,u,w
+    &\bnfeq& \fn\bind{x} e \pipe (v, v) \pipe \ms{in}_i\; v
+    \pipe \ms{true} \pipe \ms{false} \pipe \setlit{\vec{v}}\\
+    \textsf{values}
+    \vspace{0.5em}\\
+    %% contexts
+    C
+    &\bnfeq& \hole \pipe C\;e \pipe v\;C \pipe (C, e) \pipe (v, C) \pipe \ms{in}_i\;C
+    \pipe \pi_i \; C\\
+    \textsf{contexts}
+    && C \vee_L e \pipe v \vee_L C \pipe \tforin{L}{x \in C} e\\
+    && \ifthen{C}{e}{e}\\
+    && \case{C}{x}{e}{x}{e}\\
+    && \iter{\eq{A}}{C}{x}{e} \pipe \iterstep{\eq{A}}{v}{C}{x}{e}\\
+    && \iterle{\eq{A}}{C}{e}{x}{e} \pipe \iterle{\eq{A}}{v}{C}{x}{e}\\
+    && \iterlestep{\eq{A}}{v}{v}{C}{x}{e}
+  \end{array}\]
+  \caption{Operational semantics syntax}
+  \label{fig:opsem-syntax}
+\end{figure}
+
+
+\section{Example operational semantics}
+
+We consider the denotational semantics to be primary in Datafun; as with
+Datalog, any implementation technique is valid so long as it lines up with these
+semantics. As a proof of concept, however, we present a simple call-by-value operational semantics and show that it terminates.
+
+In our operational semantics we:
+\begin{enumerate}
+\item Assume an elaboration step which subscripts all semilattice operations
+  ($\unit$, $\vee$, $\bigvee$, and $\ms{fix}$) with their type.
+\item Drop the distinction between discrete from monotone variables, and write
+  $x,y$ for arbitrary variables.
+\item Ignore the types $\N$ and $\str$. \todo{TODO: justify?}
+\item Add new \ms{iter} expressions, which occur as intermediate forms in the
+  evaluation of \ms{fix}.
+\item Classify some expressions $e$ as values $v$, and add a value-form
+  $\setlit{\vec{v}}$ for finite sets.
+\end{enumerate}
+We demonstrate the additional syntax in Figure \ref{fig:opsem-syntax}.
