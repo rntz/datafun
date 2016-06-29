@@ -3,7 +3,8 @@ We have built a proof-of-concept implementation of Datafun in Racket, available
 at \texttt{[link omitted for double-blind review]}. In addition to core Datafun,
 it supports pattern-matching, variant types, record types, dictionaries,
 subtyping, antitone functions, and unbounded (potentially nonterminating) fixed
-points. We implement everything in a naive style, and perform no optimizations.
+points. We implement everything in a na\"ive style, and perform no
+optimizations.
 
 \paragraph{Type inference}
 As a practical matter, type-checking needs to distinguish between ordinary and
@@ -15,7 +16,7 @@ implementation we solve this in two ways:
 
 \item For $\ms{if}$, $\ms{case}$, and $\ms{let}$, the programmer annotates which
   form is intended; for example, $(\ifthen{e}{e_1}{\unit})$ is written
-  (\texttt{when e then e1}) to indicate the rule $\ms{if}^+$ applies.
+  (\texttt{when e then e1}) to indicate the rule $\rt{if}^+$ applies.
 \end{enumerate}
 
 We believe that this scheme could be extended to support polymorphism
