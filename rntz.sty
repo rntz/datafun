@@ -57,7 +57,7 @@
 \newcommand{\GD}{\Delta}
 \newcommand{\GG}{\Gamma}
 \newcommand{\J}[4]{{#1};\,{#2}\ent {#3}:{#4}}
-\newcommand{\Jp}[5]{{#1};\,{#2}\ent {#3}:{#4} \dashv {#5}}
+\newcommand{\Jp}[5]{{#1};\,{#2}\ent {#3}:{#4} \Rightarrow {#5}}
 \newcommand{\isfinite}[1]{#1\ \ms{finite}}
 
 \newcommand{\monofn}{\lambda^+}
@@ -102,7 +102,7 @@
 \newcommand{\case}[5]{%
 \rawcase{#1}{\ms{in}_1\,{#2}\cto{#3};\,\ms{in}_2\,{#4}\cto{#5}}}
 \newcommand{\casep}[4]{%
-\rawcase{#1}{{#2}\cto{#3};\,\_\cto{#4}}}
+\rawcase{#1}{{#2}\cto{#3};\,\pwild\cto{#4}}}
 
 \newcommand{\ifthen}[3]{\ms{if}~{#1}~\ms{then}~{#2}~\ms{else}~{#3}}
 
@@ -131,7 +131,7 @@
 \newcommand{\two}{\ensuremath{\mathbf{2}}}
 %% \newcommand{\Arr}{\supset}
 \newcommand{\Arr}{\rightarrowtriangle}
-\newcommand{\arr}{\shortrightarrow}
+\newcommand{\arr}{\Rightarrow}
 \newcommand{\lol}{\multimap}
 \newcommand{\Disc}[1]{\ensuremath{\ms{Disc}\;{#1}}}
 \newcommand{\slF}{\ensuremath{\mathcal{F}}}
