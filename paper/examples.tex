@@ -44,6 +44,35 @@
   \label{fig:sugar}
 \end{figure}
 
+\begin{figure}
+  \begin{displaymath}
+    \begin{array}{lcl}
+      \rawcase{e}{}         & \expandsto & \letv{(x,y)}{e}{} \\
+      \;\;(p,p') \cto e_1;  &            & \rawcase{x}{} \\
+      \;\;\pwild \cto e_2   &            & \;\;p \cto (\casep{y}{p'}{e_1}{e_2}); \\
+                            &            & \;\;\pwild \cto e_2
+      \\
+      \rawcase{e_1}{}       & \expandsto & \ifthen{e_1 = e_2}{e_3}{e_4} \\
+      \;\;!e2 \cto e_3;     &            & \\
+      \;\;\pwild \cto e_4   &            & 
+      \\
+      \rawcase{e_1}{}       & \expandsto & e_3 \\
+      \;\;\pwild \cto e_3;  &            & \\
+      \;\;\pwild \cto e_4   &            & 
+      \\
+      \rawcase{e_1}{}           & \expandsto & \rawcase{e_1}{} \\
+      \;\;\ms{in}_1 p \cto e_3; &            & \;\;\ms{in}_1 x \to (\casep{x}{p}{e_3}{e_4}); \\
+      \;\;\pwild \cto e_4       &            & \;\;\ms{in}_2 x \to e_4 
+      \\
+      \rawcase{e_1}{}           & \expandsto & \rawcase{e_1}{} \\
+      \;\;\ms{in}_2 p \cto e_3; &            & \;\;\ms{in}_1 x \to e_4; \\
+      \;\;\pwild \cto e_4       &            & \;\;\ms{in}_2 x \to (\casep{x}{p}{e_3}{e_4})
+    \end{array}
+  \end{displaymath}
+  \caption{Pattern Match Expansion}
+  \label{fig:pattern-expand}
+\end{figure}
+
 
 \section{Examples}
 
