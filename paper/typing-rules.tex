@@ -86,6 +86,38 @@
   \label{fig:typing-rules}
 \end{figure*}
 
+\begin{figure}
+  \begin{mathpar}
+    \infer{\J{\GD}{\GG}{\casep{e}{p}{e_1}{e_2}}{C}}
+          { \J{\GD}{\cdot}{e}{A} &
+            \Jp{\GD}{\GG}{p}{A}{\GD'} &
+            \J{\GD,\GD'}{\GG}{e_1}{C} &
+            \J{\GD}{\GG}{e_2}{C} }
+          \\
+          \\
+    \infer{\Jp{\GD}{\GG}{\m{x}}{A}{\m{x} \of A} }
+          { }
+    \and
+    \infer{\Jp{\GD}{\GG}{\_}{A}{\cdot} }
+          { }
+    \and
+    \infer{\Jp{\GD}{\GG}{(p',p'')}{A' \times A''}{\GD', \GD''}}
+          { \Jp{\GD}{\GG}{p'}{A'}{\GD'} &
+            \Jp{\GD}{\GG}{p''}{A''}{\GD''} }
+    \and
+    \infer{ \Jp{\GD}{\GG}{!e}{A}{\cdot} }
+          { \J{\GD}{\GG}{e}{A} }
+    \and
+    \infer{ \Jp{\GD}{\GG}{\ms{in}_i\;p}{A_1 + A_2}{\GD'} }
+          { \Jp{\GD}{\GG}{p}{A_i}{\GD'} }
+
+
+  \end{mathpar}
+  
+  \caption{Typing for pattern matching}
+  \label{fig:pattern-typing}
+\end{figure}
+
 
 \section{Typing rules}
 \label{sec:typing-rules}
@@ -206,3 +238,7 @@ finite semilattice eqtypes.
 $\rt{fix}_\le$ loosens this restriction by letting us take fixed points at
 (not-necessarily-finite) semilattice eqtypes $\eq{L}$, as long as we provide an
 upper bound $e_1 : \eq{L}$ which we can check we do not exceed.
+
+% Local Variables:
+% TeX-master: "datafun.tex"
+% End:
