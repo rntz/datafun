@@ -86,35 +86,39 @@
   \label{fig:typing-rules}
 \end{figure*}
 
+%% Pattern typing rules
 \begin{figure}
   \begin{mathpar}
+    %% \infer{\J{\GD}{\GG}{\casep{e}{p}{e_1}{e_2}}{C}}
+    %%       { \J{\GD}{\cdot}{e}{A} &
+    %%           \Jp{\GD}{\GG}{p}{A}{\GD'} &
+    %%           \J{\GD,\GD'}{\GG}{e_1}{C} &
+    %%           \J{\GD}{\GG}{e_2}{C} }
+    %% \and
     \infer{\J{\GD}{\GG}{\casep{e}{p}{e_1}{e_2}}{C}}
-          { \J{\GD}{\cdot}{e}{A} &
-            \Jp{\GD}{\GG}{p}{A}{\GD'} &
-            \J{\GD,\GD'}{\GG}{e_1}{C} &
-            \J{\GD}{\GG}{e_2}{C} }
-          \\
-          \\
-    \infer{\Jp{\GD}{\GG}{\m{x}}{A}{\m{x} \of A} }
+          {   { \J{\GD}{\cdot}{e}{A} }
+            & { \Jp{\GD}{\GG}{p}{A}{\GD'} }
+            & { \J{\GD,\GD'}{\GG}{e_1}{C} }
+            & { \J{\GD}{\GG}{e_2}{C} } }
+    \\
+    \infer{\Jp{\GD}{\GG}{x}{A}{x \of A} }
           { }
     \and
-    \infer{\Jp{\GD}{\GG}{\_}{A}{\cdot} }
+    \infer{\Jp{\GD}{\GG}{\pwild}{A}{\cdot} }
           { }
     \and
-    \infer{\Jp{\GD}{\GG}{(p',p'')}{A' \times A''}{\GD', \GD''}}
-          { \Jp{\GD}{\GG}{p'}{A'}{\GD'} &
-            \Jp{\GD}{\GG}{p''}{A''}{\GD''} }
+    \infer{\Jp{\GD}{\GG}{(p_1,p_2)}{A_1 \times A_2}{\GD_1, \GD_2}}
+          { \Jp{\GD}{\GG}{p_1}{A_1}{\GD_1} &
+            \Jp{\GD}{\GG}{p_1}{A_2}{\GD_2} }
     \and
-    \infer{ \Jp{\GD}{\GG}{!e}{A}{\cdot} }
-          { \J{\GD}{\GG}{e}{A} }
+    \infer{ \Jp{\GD}{\GG}{\bound{e}}{\eq{A}}{\cdot} }
+          { \J{\GD}{\GG}{e}{\eq{A}} }
     \and
     \infer{ \Jp{\GD}{\GG}{\ms{in}_i\;p}{A_1 + A_2}{\GD'} }
           { \Jp{\GD}{\GG}{p}{A_i}{\GD'} }
-
-
   \end{mathpar}
-  
-  \caption{Typing for pattern matching}
+
+  \caption{Typing for pattern matching syntax sugar}
   \label{fig:pattern-typing}
 \end{figure}
 
@@ -238,7 +242,3 @@ finite semilattice eqtypes.
 $\rt{fix}_\le$ loosens this restriction by letting us take fixed points at
 (not-necessarily-finite) semilattice eqtypes $\eq{L}$, as long as we provide an
 upper bound $e_1 : \eq{L}$ which we can check we do not exceed.
-
-% Local Variables:
-% TeX-master: "datafun.tex"
-% End:
