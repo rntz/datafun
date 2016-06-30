@@ -1,7 +1,6 @@
 -*- mode: org -*-
 
 * Goals for final version
-1. rename "ordinary" to "discrete"
 2. refer to the pattern matching expansion figure somewhere in body text
 3. refer to the syntax sugar typing rules somewhere in body text
 4. reference Flix in related work
@@ -10,6 +9,8 @@
 7. typo pass
 
 ** if we have enough time
+
+- in "Datafun, informally", item 4 breaks in an awkward position
 
 - find some way of shortening/compressing denotational semantics figure
 
