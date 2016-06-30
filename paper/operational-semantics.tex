@@ -176,22 +176,27 @@ they are easily seen to be decidable by induction on $\eq{A}$. The quantifiers
 in the premise of the rule $\rn{\subseteq}$ range over finite domains, and thus
 pose no issue.
 
-\subsection{Logical relations}
+\subsection{A Logical Relation for Termination}
 
 To prove that all well-typed terms terminate according to our operational
 semantics, we use a logical relations argument.
 
-As a matter of notation, $a,b,c$ range over closed expressions; $e,f,g$ over
-open expressions; $\gamma, \sigma$ over substitutions containing only closed
-expressions; and $\ms{Ctx}(\GG)$ is the set of all substitutions of closed
-expressions for the variables in $\GG$.
+In our case, the standard approach of interpreting each type via a
+partial equivalence relation (PER) on closed terms turns out to be not
+quite sufficient, and we need to extend it to prove termination. Just
+as posets are sets equipped with an order structure, we define our
+semantic types as PERs equipped with a preorder respecting the
+PER structure. The intuition is that since we needed the order
+structure in the denotational semantics to prove the definedness of
+fixed points, we will similarly need an order structure on the syntax
+to prove the termination of fixed points.
 
-Our logical relations mimic our semantics, with a slight twist. We interpret
-types as sets of closed terms, but instead of equipping these sets with partial
-orders, we equip them with preorders, since distinct closed expressions may have
-equal denotations. To accomplish this, we inductively define relations $\lr{A}{a
-  \ale b}$ for each type $A$, then show how to understand these relations as
-preordered sets.
+So we inductively define relations $\lr{A}{a \ale b}$ for each
+type $A$, then show how to understand these relations as preordered
+sets.  (As a matter of notation, $a,b,c$ range over closed expressions;
+$e,f,g$ over open expressions; $\gamma, \sigma$ over substitutions
+containing only closed expressions; and $\ms{Ctx}(\GG)$ is the set of
+all substitutions of closed expressions for the variables in $\GG$.)
 
 Because it simplifies our definitions and proofs, we introduce an additional
 pseudo-type $\disc{A}$, which represents $A$ ordered \emph{discretely}, $x \le y
@@ -279,9 +284,9 @@ theorems, proven by induction on $A$:
 
 Any partially reflexive, transitive relation $R$ can be viewed as the set
 $\setfor{a}{aRa}$ equipped with the preorder $a \le b \iff
-aRb$.\footnote{Interestingly, such an $R$ may also be viewed as a partial
+aRb$. Equivalently, $R$ may also be viewed as a partial
   equivalence relation (PER) equipped with a partial order over its equivalence
-  classes.}
+  classes.
 
 \begin{theorem}[Termination]
   If $\lr{A}{a}$ then $a \steps v$.
@@ -295,5 +300,6 @@ aRb$.\footnote{Interestingly, such an $R$ may also be viewed as a partial
 \end{theorem}
 \begin{proof}
   By induction on $\J{\GD}{\GG}{e}{A}$; full proof available in our github
-  repository.
+  repository. The key case is the fixed point rule, whose proof is a syntactic
+  version of the proof of definedness of fixed points in the denotational semantics. 
 \end{proof}
