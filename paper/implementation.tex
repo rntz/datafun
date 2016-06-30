@@ -7,12 +7,12 @@ points. We implement everything in a na\"ive style, and perform no
 optimizations.
 
 \paragraph{Type inference}
-As a practical matter, type-checking needs to distinguish between ordinary and
+As a practical matter, type-checking needs to distinguish between discrete and
 monotone $\lambda$, application, \ms{case}, \ms{let}, and \ms{if}. In our
 implementation we solve this in two ways:
 \begin{enumerate}
 \item Bidirectional type inference~\cite{bidirectional} determines whether
-  $\fn$s and applications are ordinary or monotone.
+  $\fn$s and applications are discrete or monotone.
 
 \item For $\ms{if}$, $\ms{case}$, and $\ms{let}$, the programmer annotates which
   form is intended; for example, $(\ifthen{e}{e_1}{\unit})$ is written
@@ -27,7 +27,7 @@ $\fn\bind{f}\fn\bind{x} f\;x$ can be assigned the principal type
 $\forall\bind{o\of\ms{tone}}\forall\bind{\alpha,\beta \of \ms{type}}
 (\alpha \overset{o}\to \beta) \mto (\alpha \overset{o}\to \beta)$,
 where $\overset{o}\to$ indicates a function of tone $o$; a tone may be
-empty (for an ordinary function) or ${+}$ for a monotone function.
+empty (for a discrete function) or ${+}$ for a monotone function.
 
 % 
 % We speculate that
