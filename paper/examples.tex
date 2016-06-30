@@ -77,24 +77,19 @@
 
 \section{Examples}
 
-For purposes of these examples, we use a simple Haskell-like syntax
-for top-level type and function definitions. We also permit ourselves
-infix notation, \ms{let}-binding, $n$-ary tuples, $n$-ary sum types
-with named constructors, and a restricted form of pattern-matching
-(including non-linear patterns), and additional syntax sugar given in
-Figures~\ref{fig:sugar} and~\ref{fig:pattern-expand}. These figures
-also show how to expand the sugar (including pattern matching) into
-our core language.
+For purposes of these examples, we use a simple Haskell-like syntax for
+top-level type and function definitions. We also permit ourselves infix
+notation, \ms{let}-binding, $n$-ary tuples, $n$-ary sum types with named
+constructors, and a restricted form of pattern-matching (including non-linear
+patterns), and additional syntax sugar given in Figures~\ref{fig:sugar} and
+\ref{fig:pattern-expand}. These figures also show how to expand the sugar into
+our core language. Full expansion for \ms{case}-analysis is complicated, so we
+include only the fragment for expressions of the form
+$\casep{e_1}{p}{e_2}{e_3}$, as that is all we use in this paper.
 
-All of these conveniences are supported (with slightly different
-concrete syntax) in our implementation. Our implementation also
-supports fully general pattern matching, as in ML and Haskell, but we
-left this out of the paper because we wanted to keep the desugaring as
-simple as possible and did not need it for our examples.
+All of these conveniences are supported (with slightly different concrete
+syntax) in our implementation.
 
-%
-%% \todo{(TODO: mention \& cite monadic query syntax)}
-%
 For clarity, we set the names of top-level variables in \textsf{sans-serif};
 discrete variables in $script$ or \mi{italic} (for long variable names); and
 monotone variables in \m{bold}.

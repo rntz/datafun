@@ -89,6 +89,14 @@
 %% Pattern typing rules
 \begin{figure}
   \begin{mathpar}
+    \infer{\J{\GD}{\GG}{\forin{\mc{L}} e}{L}}
+          {\Jl{\GD}{\GG}{\mc{L}}{\Delta'} &
+           \J{\GD,\GD'}{\GG}{e}{L}}
+    \and
+    \infer{\J{\GD}{\GG}{\setfor{e}{\mc{L}}}{\Set{A}}}
+          {\Jl{\GD}{\GG}{\mc{L}}{\Delta'} &
+           \J{\GD,\GD'}{\GG}{e}{A}}
+    \and
     %% \infer{\J{\GD}{\GG}{\casep{e}{p}{e_1}{e_2}}{C}}
     %%       { \J{\GD}{\cdot}{e}{A} &
     %%           \Jp{\GD}{\GG}{p}{A}{\GD'} &
@@ -101,6 +109,17 @@
             & { \J{\GD,\GD'}{\GG}{e_1}{C} }
             & { \J{\GD}{\GG}{e_2}{C} } }
     \\
+    \infer{\Jl{\GD}{\GG}{\mc{L}_1,\mc{L}_2}{\Delta_1,\Delta_2}}
+          {\Jl{\GD}{\GG}{\mc{L}_1}{\Delta_1} &
+          \Jl{\GD}{\GG}{\mc{L}_2}{\Delta_2}}
+    \and
+    \infer{\Jl{\GD}{\GG}{e}{\cdot}}
+          {\J{\GD}{\GG}{e}{\bool}}
+    \and
+    \infer{\Jl{\GD}{\GG}{p \in e}{\Delta'}}
+          {\J{\GD}{\GG}{e}{\Set{A}} &
+           \Jp{\GD}{\GG}{p}{A}{\Delta}}
+    \and
     \infer{\Jp{\GD}{\GG}{x}{A}{x \of A} }
           { }
     \and
@@ -118,7 +137,7 @@
           { \Jp{\GD}{\GG}{p}{A_i}{\GD'} }
   \end{mathpar}
 
-  \caption{Typing for pattern matching syntax sugar}
+  \caption{Typing rules for syntax sugar}
   \label{fig:pattern-typing}
 \end{figure}
 
@@ -136,11 +155,13 @@ The context $\GD$ types discrete variables; $\GG$, monotone variables. Both
 admit the usual structural rules of exchange, weakening, and contraction.
 Variables from either context may be used freely (rules \rt{var}, $\rt{var}^+$).
 
-For clarity, we also give typing rules for the pattern match form
-$\casep{e}{p}{e_0}{e_1}$ in Figure~\ref{fig:pattern-typing}. This uses
-the auxilliary judgment $\Jp{\GD}{\GG}{p}{A}{\GD'}$, which can be read
-as saying that ``in the contexts $\GD$ and $\GG$, the pattern $p$
-typechecks at type $A$, binding the variables in $\GD'$''.
+For clarity, we also give typing rules for our syntax sugar, in
+Figure~\ref{fig:pattern-typing}. These use the auxilliary judgments
+$\Jp{\GD}{\GG}{p}{A}{\GD'}$, which can be read as saying that ``in the contexts
+$\GD$ and $\GG$, the pattern $p$ typechecks at type $A$, binding the variables
+in $\GD'$''; and $\Jl{\GD}{\GG}{\mc{L}}{\GD'}$, which says that ``in the
+contexts $\GD$ and $\GG$, the comprehension clauses in $\mc{L}$ bind the
+variables in $\GD'$''.
 
 \subsection{Functions and application}
 Two function types require two function introduction rules: the discrete
