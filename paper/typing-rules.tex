@@ -132,7 +132,7 @@ follows: ``expression $e$ has type $A$ using variables from $\GD \cup \GG$, and
 moreover the value of $e$ is \emph{monotone} with respect to the variables in
 $\GG$''.
 
-The context $\GD$ types ordinary variables; $\GG$, monotone variables. Both
+The context $\GD$ types discrete variables; $\GG$, monotone variables. Both
 admit the usual structural rules of exchange, weakening, and contraction.
 Variables from either context may be used freely (rules \rt{var}, $\rt{var}^+$).
 
@@ -143,14 +143,14 @@ as saying that ``in the contexts $\GD$ and $\GG$, the pattern $p$
 typechecks at type $A$, binding the variables in $\GD'$''.
 
 \subsection{Functions and application}
-Two function types require two function introduction rules: the ordinary
+Two function types require two function introduction rules: the discrete
 $\lambda$ and the monotone $\lambda^+$. These simply introduce variables into
 their respective contexts. Monotone function application $\rt{app}^+$ is
-perfectly standard, but ordinary function application \rt{app} has a pecularity:
+perfectly standard, but discrete function application \rt{app} has a pecularity:
 the argument $e_2$ gets an \emph{empty} monotone context.
 
 To understand why, recall our gloss: the application $e_1\;e_2$ must be monotone
-in $\GG$. But $e_1$ is an ordinary, and in general \emph{non-monotone}, function
+in $\GG$. But $e_1$ is a discrete, and in general \emph{non-monotone}, function
 $A \uto B$: there is no guarantee that it respect any order on its argument.
 (Suppose, for example, $e_2$ were some monotone variable $\m{x} : A \in \GG$.)
 We work around this scoff-law behavior on $e_1$'s part by ensuring its argument
@@ -159,7 +159,7 @@ prohibiting $e_2$ from using any of $\GG$'s variables.
 
 This technique of \emph{wiping clean} the monotone context to guarantee
 constancy\footnote{Wherever we write ``constant'' in this section, substitute
-  ``constant with respect to the monotone context''. The ordinary context is
+  ``constant with respect to the monotone context''. The discrete context is
   never ``wiped clean'', and behaves entirely as it would in a simply-typed
   $\lambda$-calculus.} of a subterm recurs in several other rules. Readers
 familiar with linear logic's $!$ comonad~\cite{linearlogic} or with judgmental
@@ -175,10 +175,8 @@ into two rules, \rt{case} and $\rt{case}^+$. $\rt{case}^+$ requires its branches
 to be monotone in the variable $\m{x}$ it introduces, and consequently its
 subject $e$ is permitted access to the monotone context $\GG$. \rt{case},
 however, analyses its subject $e$ as a constant --- wiping clean its monotone
-context --- and thus is allowed to introduce the variable $x$ into the ordinary
+context --- and thus is allowed to introduce the variable $x$ into the discrete
 context $\GD$.
-
-%% \todo{rewrite for clarity}
 
 \subsection{Booleans}
 \label{sec:typing-rules-booleans}

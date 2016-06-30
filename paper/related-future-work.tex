@@ -108,23 +108,6 @@ categorical structures connecting the category of domains to the
 category of posets, some of which will hopefully lead to a principled
 type-theoretic integration of partial functions into Datafun.
 
-% So one faces a trilemma: first, keep
-% Datafun nonterminating, at the expensive of making some functions
-% inexpressible; second, allow nontermination, at the expense of
-% optimization; or, third, use the type system to delineate between
-% terminating and nonterminating fragments.
-%
-% \paragraph{Polymorphism}
-% \todo{
-%   \begin{itemize}
-%   \item ref Dunfield \& Krishnaswami, higher-order bidirectional type inference.
-%   \item \TODO quantification over different classes of type variable (ordinary,
-%     equality, lattice); amounts to a typeclass system, so this is not new work
-%   \item \TODO tone polymorphism and why you need it for principal types; e.g.
-%     what is the type of $\fn\bind{f}\fn\bind{x} f\;x$?
-%   \end{itemize}
-% }
-
 \paragraph{User-Defined Posets and Semilattices}
 The two fundamental semilattice types Datafun provides are booleans and sets;
 products and functions merely preserve semilattice structure where they find it.
