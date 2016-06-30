@@ -176,6 +176,25 @@ they are easily seen to be decidable by induction on $\eq{A}$. The quantifiers
 in the premise of the rule $\rn{\subseteq}$ range over finite domains, and thus
 pose no issue.
 
+
+\subsection{Computing \ms{fix}-ed points via \ms{iter}-ation}
+
+Our implementation strategy for $\fix{x}{e}$ is exactly that suggested by the
+proof of Lemma \ref{lem:fixed-points-finite-height-posets}: starting from
+$\unit$, iteratively apply $\fn\bind{x} e$ until a fixed point is
+reached.
+
+$\iter{\eq{A}}{e_1}{x}{e}$ does precisely that: starting from $e_1$, it
+repeatedly applies the function $\fn\bind{x}e$ until a fixed point is reached.
+$\iterstep{\eq{A}}{e_1}{e_2}{x}{e}$ tests $e_1$ against $e_2$ to determine
+whether we've reached a fixed point; and if not, continues to iterate from
+$e_2$.
+
+The $\ms{iter}_\le$ forms are similar, but additionally check that the iteration
+value never exceeds their first argument, to implement the clamping behavior of
+$\fixle{x}{e_\top}{e}$.
+
+
 \subsection{Logical relations}
 
 To prove that all well-typed terms terminate according to our operational
@@ -186,12 +205,12 @@ open expressions; $\gamma, \sigma$ over substitutions containing only closed
 expressions; and $\ms{Ctx}(\GG)$ is the set of all substitutions of closed
 expressions for the variables in $\GG$.
 
-Our logical relations mimic our semantics, with a slight twist. We interpret
-types as sets of closed terms, but instead of equipping these sets with partial
-orders, we equip them with preorders, since distinct closed expressions may have
-equal denotations. To accomplish this, we inductively define relations $\lr{A}{a
-  \ale b}$ for each type $A$, then show how to understand these relations as
-preordered sets.
+Our logical relations mimic our denotational semantics, with a slight twist. We
+interpret types as sets of closed terms, but instead of equipping these sets
+with partial orders, we equip them with preorders, since distinct closed
+expressions may have equal denotations. To accomplish this, we inductively
+define relations $\lr{A}{a \ale b}$ for each type $A$, then show how to
+understand these relations as preordered sets.
 
 Because it simplifies our definitions and proofs, we introduce an additional
 pseudo-type $\disc{A}$, which represents $A$ ordered \emph{discretely}, $x \le y
@@ -294,6 +313,6 @@ aRb$.\footnote{Interestingly, such an $R$ may also be viewed as a partial
   If $\J{\GD}{\GG}{e}{A}$ then $\lrcx{\disc{\GD},\GG}{A}{a}$.
 \end{theorem}
 \begin{proof}
-  By induction on $\J{\GD}{\GG}{e}{A}$; full proof available in our github
-  repository.
+  By induction on $\J{\GD}{\GG}{e}{A}$; full proof available at
+  \url{https://github.com/rntz/datafun/}.
 \end{proof}
