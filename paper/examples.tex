@@ -79,13 +79,13 @@ notation, \ms{let}-binding, $n$-ary tuples, $n$-ary sum types with named
 constructors, pattern-matching (including non-linear patterns), and additional
 syntax sugar given in Figure \ref{fig:sugar}. All of these conveniences are
 supported (with slightly different concrete syntax) in our implementation.
-
+%
 %% \todo{(TODO: mention \& cite monadic query syntax)}
-
+%
 For clarity, we set the names of top-level variables in \textsf{sans-serif};
 ordinary variables in $script$ or \mi{italic} (for long variable names); and
 monotone variables in \m{bold}.
-
+%
 Although Datafun as presented does not have polymorphism, we give our examples
 their most general possible type schemes.
 
@@ -123,12 +123,12 @@ observe, for example, that:
  \fname{filter}\;(\le 0)\;\setlit{0,1}
  &\subseteq& \fname{filter}\;(\le 1)\;\setlit{0,1}
 \end{eqnarray*}
-
+%
 However, it is perhaps unclear how Datafun's type system ``knows''
 \fname{filter} is monotone in \m{f}. In brief, Datafun knows that application
 $(\m{f}\;x)$ is monotone in the function, and moreover, testing a boolean guard
 $(\m{f}\;x)$ in a set-comprehension such as $\setfor{x}{x \in \m{A}, \m{f}\;x}$
-is monotone in the guard expression. A fuller explanation is given in Section
+is monotone in the guard expression. The full explanation is in Section
 \ref{sec:typing-rules}.
 
 %% Consider the desugaring of \ms{filter}:
@@ -185,19 +185,18 @@ Similarly, we can define set intersection by testing for equality:
 \m{A} \cap \m{B} = \setfor{x}{x \in \m{A}, y \in \m{B}, x = y}
 \end{array}\]
 
-\todo{FIXME: rewrite to talk about bang-patterns instead of nonlinear
-  pattern-matching}
-
-However, explicitly testing for equality can become tedious, so we usually use
-\emph{nonlinear pattern-matching} instead --- that is, we bind the same-named
-variable multiple times, which indicates it must have an equal value at each
-occurrence:
+However, explicitly binding multiple variables only to test for
+equality can become tedious, so we support a form
+of \emph{equality patterns}. The grammar of patterns includes the form
+$!e$, which means the term at that position equals
+the value of $e$. So we can indicate that a pattern must have an
+equal value at different positions by binding the first one to a
+variable $x$, and then marking later positions with a $!x$. Now, the intersection can be written as:
 \[\begin{array}{l}
 (\cap) ~:~ \Set{\eq{A}} \mto \Set{\eq{A}} \mto \Set{\eq{A}}\\
 \m{A} \cap \m{B} = \setfor{x}{x \in \m{A}, \bound{x} \in \m{B}}
 \end{array}\]
-
-This is merely syntax sugar for an equality test, so the condition that the
+Since $!x$ implies the use of an equality test, the condition that the
 set's element type support equality remains in force.
 
 %% \todo{TODO: mention you can extend to all relational algebra? give example?}
@@ -211,7 +210,7 @@ matching is composition of finite relations (that is, sets of pairs):
 (\bullet) : \Set{A \x \eq{B}} \mto \Set{\eq{B} \x C} \mto \Set{A \x C}\\
 \m{R} \bullet \m{S} = \setfor{(a,c)}{(a,b) \in \m{R}, (\bound{b},c) \in \m{S}}
 \end{array}\]
-
+%
 This already demonstrates a capability Datafun has that Datalog does not:
 defining operators over relations. A Datalog program defining binary predicates
 \texttt{r} and \texttt{s} which wished to compose those predicates would have to
@@ -222,7 +221,7 @@ r(X,Y) :- (...).
 s(X,Y) :- (...).
 rs(A,C) :- r(A,B), s(B,C).
 \end{verbatim}
-
+%
 In Datafun, we simply define $(\bullet)$ and use it inline as needed. We shall
 see the use of this in later examples.
 
@@ -240,15 +239,15 @@ parent(elrond, arwen).
 ancestor(X, Y) :- parent(X, Y).
 ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).
 \end{verbatim}
-
+%
 %% \todo{Discuss how this works in Datalog, but not in Prolog, b/c Prolog is
 %%   defined by operational semantics of unification while Datalog is denotational,
 %%   least-model semantics. It also works in Datafun!}
-
+%
 %% \todo{Neel suggests using distinction b/w backward \& forward chaining here,
 %%   rather than operational/denotational. see Logical Algorithms paper by
 %%   McAllister \& co for phrasing?}
-
+%
 This defines a binary \texttt{parent} relation, along with its transitive
 closure, \texttt{ancestor}. The Datafun equivalent is:
 \[\begin{array}{l}
@@ -260,7 +259,7 @@ closure, \texttt{ancestor}. The Datafun equivalent is:
 \ms{ancestor} = \fix{\m{X}} \ms{parent} \vee (\m{X} \bullet \m{X})
 %% \setfor{(a,c)}{(a,b) \in \m{X}, (b,c) \in \m{X}}
 \end{array}\]
-
+%
 The type \ms{person} represents the domain of our \ms{parent} and \ms{ancestor}
 relations. \ms{parent} is simply a list of parent-child pairs. \ms{ancestor} is
 where the action is at: since the Datalog predicate \texttt{ancestor} is defined
@@ -286,8 +285,8 @@ units, it supports equality, and sets and products of eqtypes are themselves
 eqtypes. Likewise, \ms{person} is finite, and products and sets of finite types
 are themselves finite.
 
-So! We find ourselves in the clear, for now. However, the restriction of
-\ms{fix} to finite types can be quite limiting in practice. So Datafun provides
+So we are in the clear, but in general the restriction of
+\ms{fix} to finite types can be quite limiting. So Datafun provides
 a more general way to take a fixed-point: specify an \emph{upper bound} which
 the fixed point may not exceed. For this we write $(\fixle{\m{x}}{e_\top} e)$,
 where $e_\top$ is our upper bound.
@@ -304,15 +303,15 @@ infinite type). We may write:
 \ms{parent} \vee (\m{X} \bullet \m{X})
 \end{array}\]
 
-Instead of a \ms{person} type, we have \ms{person} \emph{set}, which we use to
-construct an upper bound on our fixed-point: $(\ms{person} \x \ms{person})$, the
-complete binary relation. Since every string in \ms{parent} is also in
-\ms{person}, the transitive closure of \ms{parent} cannot exceed this upper
+Instead of a \ms{person} type, we have \ms{persons} \emph{set}, which we use to
+construct an upper bound on our fixed-point: $(\ms{persons} \x \ms{persons})$, the
+complete binary relation. Since all strings in \ms{parent} are in
+\ms{persons}, the transitive closure of \ms{parent} cannot exceed the
 bound.
 
 However, this invariant is left to the programmer to check. What if a sloppy
 programmer should mistakenly include a person in \ms{parent} not present in
-\ms{person}? More generally, what if the fixed point $(\fixle{\m{x}}{e_\top} e)$
+\ms{persons}? More generally, what if the fixed point $(\fixle{\m{x}}{e_\top} e)$
 is trying to compute exceeds $e_\top$? (Or indeed, no such fixed point exists?)
 
 In that case, the value of $(\fixle{\m{x}}{e_\top} e)$ is \emph{clamped} to the
@@ -362,7 +361,7 @@ simplest algorithms for parsing context free grammars is the
 Cocke-Younger-Kasami (CYK) algorithm for parsing with grammars in
 Chomsky normal form.\footnote{In Chomsky normal form, each production
   is of the form $A \to B \cdot C$ or $A \to \vec{a}$, with $A,B,C$
-  ranging over nonterminals, and $\vec{a}$ over nonempty strings of
+  ranging over nonterminals, and $\vec{a}$ over strings of
   terminals.}  Given a grammar $G$, we begin by introducing a family
 of predicates (sometimes called \emph{facts} or \emph{items}) $A(i,j)$,
 with one $A$ for each nonterminal, and $i$ and $j$ representing
