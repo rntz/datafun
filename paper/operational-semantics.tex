@@ -147,8 +147,8 @@ well-typed terms terminate.
 
 In our operational semantics we:
 \begin{enumerate}
-\item Assume we subscript all semilattice operations ($\unit$, $\vee$,
-  $\bigvee$, and $\ms{fix}$) with their type.
+\item Assume all semilattice operations ($\unit$, $\vee$, $\bigvee$, and
+  $\ms{fix}$) are subscripted with their type.
 \item Drop the distinction between discrete and monotone variables, and write
   $x,y$ for arbitrary variables.
 \item Add \ms{iter} expressions, which occur as intermediate forms in the
@@ -169,7 +169,131 @@ is immediately reducible; we extend this relation to all expressions with the
 rule
 \[\infer{E[e] \step E[e']}{e \step e'}\]
 
-%% FIXME
-In our rules for $e \step e'$ we make use of a decidable ordering test on
-values, $v \ale u : \eq{A}$, and a corresponding equality test $v \aeq u :
-\eq{A}$.
+In our rules for $e \step e'$ where $e$ is an \ms{iter} expression we make use
+of a decidable ordering test on values, $v \ale u : \eq{A}$, and a corresponding
+equality test $v \aeq u : \eq{A}$. We define these using inference rules, but
+they are easily seen to be decidable by induction on $\eq{A}$. The quantifiers
+in the premise of the rule $\rn{\subseteq}$ range over finite domains, and thus
+pose no issue.
+
+\subsection{Logical relations}
+
+To prove that all well-typed terms terminate according to our operational
+semantics, we use a logical relations argument.
+
+As a matter of notation, $a,b,c$ range over closed expressions; $e,f,g$ over
+open expressions; $\gamma, \sigma$ over substitutions containing only closed
+expressions; and $\ms{Ctx}(\GG)$ is the set of all substitutions of closed
+expressions for the variables in $\GG$.
+
+Our logical relations mimic our semantics, with a slight twist. We interpret
+types as sets of closed terms, but instead of equipping these sets with partial
+orders, we equip them with preorders, since distinct closed expressions may have
+equal denotations. To accomplish this, we inductively define relations $\lr{A}{a
+  \ale b}$ for each type $A$, then show how to understand these relations as
+preordered sets.
+
+Because it simplifies our definitions and proofs, we introduce an additional
+pseudo-type $\disc{A}$, which represents $A$ ordered \emph{discretely}, $x \le y
+\iff x = y$.
+\[\begin{array}{rccl}
+  \text{types} &
+  A &\bnfeq& ... \pipe \disc{A}
+\end{array}\]
+This mimics the $\Disc{\U{-}}$ comonad on \cPoset{} present in our denotational
+semantics. Observe that under this interpretation $A \uto B$ is just $\disc{A}
+\mto B$. In particular, if we let $\den{\disc{A}} = \Disc{|\den{A}|}$ then
+$\den{A \uto B} = \den{\disc{A} \mto B} = \Disc{|\den{A}|} \arr \den{B}$.
+
+\newcommand{\tiff}{\mathrm{iff}}
+
+We define the following relations:
+\[\begin{array}{ccl}
+  \lr{A}{a \ale b}  && \text{definition given below}\\
+  \lr{\GG}{\gamma \ale \sigma}
+  &\tiff& \forall(x \of A \in \GG)\ \lr{A}{\gamma(x) \ale \sigma(x)}\\
+  && (\text{for}~\gamma,\sigma \in \ms{Ctx}(\GG))\\
+  \lrcx{\GG}{A}{e_1 \ale e_2}
+  &\tiff& \forall(\lr{\GG}{\gamma_1 \ale \gamma_2})\
+  \commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}\\
+  \commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}
+  &\tiff& \forall(i = 1,2)\ \lr{A}{\gamma_i(e_1) \ale \gamma_i(e_2)}\\
+  && \hspace{3.7em}\mathrel{\land} \lr{A}{\gamma_1(e_i) \ale \gamma_2(e_i)}
+\end{array}\]
+
+Although we have not yet shown that these relations are transitive,
+$\commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}$ may be seen as a transitive square:
+\begin{center}
+  \tikzset{
+    no line/.style={draw=none,
+      commutative diagrams/every label/.append style={/tikz/auto=false}}}
+  {\begin{tikzcd}
+      \gamma_1(e_1) \ALER \ALED & \gamma_1(e_2) \ALED\\
+      \gamma_2(e_1) \ALER & \gamma_2(e_2)
+    \end{tikzcd}}
+\end{center}
+
+As a matter of notation, for any relation $\lr{X}{Y \ale Z}$, we write:
+\[\begin{array}{ccl}
+  \lr{X}{Y \aeq Z} &\tiff& \lr{X}{Y \ale Z} \land \lr{X}{Z \ale Y}\\
+  \lr{X}{Y}     &\tiff& \lr{X}{Y \ale Y}
+\end{array}\]
+
+We now give the definition of $\lr{A}{a \ale b}$ by induction on $A$:
+\[\begin{array}{ccl}
+  %% discreteness comonad
+  \lr{\disc{A}}{a \ale b} &\tiff& \lr{A}{a \aeq b}\\
+  %% booleans
+  \lr{\bool}{a \ale b} &\tiff&
+  a \steps v \land b \steps u \land v \ale u : \bool\\
+  %% sets
+  \lr{\Set{A}}{a \ale b} &\tiff&
+  a \steps \setlit{\vec{v_i}} \land b \steps \setlit{\vec{u_i}}\\
+  && \mathrel{\land} \forall v_i\,\exists u_j\; (\lr{A}{v_i \aeq u_j})\\
+  %% sums
+  \lr{A_1 + A_2}{a \ale b} &\tiff&
+  a \steps \ms{in}_i\;v \land b \steps \ms{in}_i\;u \land \lr{A_i}{v \ale u}\\
+  %% products
+  \lr{A_1 \x A_2}{a \ale b} &\tiff&
+  a \steps (v_1, v_2) \land b \steps (u_1, u_2)\\
+  && \mathrel{\land} \forall i\; (\lr{A_i}{v_i \ale u_i})\\
+  %% discrete functions
+  \lr{A \to B}{a \ale b} &\tiff& \lr{\disc{A} \mto B}{a \ale b}\\
+  %% monotone functions
+  \lr{A \mto B}{a \ale b} &\tiff&
+  a \steps \fn\bind{x} e_1 \land b \steps \fn\bind{x} e_2\\
+  && \mathrel{\land} (\lrcx{x\of A}{B}{e_1 \ale e_2})
+\end{array}\]
+
+It may not be immediately obvious that (for a given $A$) the relation $\lr{A}{a
+  \ale b}$ can be seen as a preordered set. This requires the following two
+theorems, proven by induction on $A$:
+
+\begin{theorem}[Partial reflexivity]
+  If $\lr{A}{a \ale b}$ then $\lr{A}{a \ale a}$ and $\lr{A}{b \ale b}$.
+\end{theorem}
+
+\begin{theorem}[Transitivity]
+  If $\lr{A}{a \ale b}$ and $\lr{A}{b \ale c}$, then $\lr{A}{a \ale c}$.
+\end{theorem}
+
+Any partially reflexive, transitive relation $R$ can be viewed as the set
+$\setfor{a}{aRa}$ equipped with the preorder $a \le b \iff
+aRb$.\footnote{Interestingly, such an $R$ may also be viewed as a partial
+  equivalence relation (PER) equipped with a partial order over its equivalence
+  classes.}
+
+\begin{theorem}[Termination]
+  If $\lr{A}{a}$ then $a \steps v$.
+\end{theorem}
+\begin{proof}
+  By cases on the definition of $\lr{A}{a \ale a}$.
+\end{proof}
+
+\begin{theorem}[Fundamental theorem]
+  If $\J{\GD}{\GG}{e}{A}$ then $\lrcx{\disc{\GD},\GG}{A}{a}$.
+\end{theorem}
+\begin{proof}
+  By induction on $\J{\GD}{\GG}{e}{A}$; full proof available in our github
+  repository.
+\end{proof}
