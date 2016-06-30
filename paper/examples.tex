@@ -6,13 +6,10 @@
   e &\bnfeq& ... \pipe \setlit{\vec{e}}
              \pipe \setfor{e}{\mc{L}}
              \pipe \forin{\mc{L}}{e}\\
+  %% FIXME: explain that we only use \pcase?
   &&& \mathcal{C}\;\vec{e} \pipe \rawcase{e}{[{p} \cto {e}]^*}
   \vspace{0.5em}\\
   %% patterns
-  %%
-  %% TODO: maybe remove the pattern-matching stuff? since we don't explain how
-  %% to translate it & we also use various other sugar we don't explain how to
-  %% translate, why do we include only pattern-matching here?
   \textsf{patterns} &
   p &\bnfeq& \pwild \pipe x \pipe \bound{e} \pipe (p,p)
              \pipe \ms{true} \pipe \ms{false} \pipe \mathcal{C}\;\vec{p}
@@ -69,7 +66,7 @@
       \;\;\pwild \cto e_4       &            & \;\;\ms{in}_2\, y \to (\casep{y}{p}{e_3}{e_4})
     \end{array}
   \end{displaymath}
-  \caption{Pattern matching syntax sugar}
+  \caption{Pattern matching expansion}
   \label{fig:pattern-expand}
 \end{figure}
 
