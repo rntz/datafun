@@ -147,11 +147,10 @@ well-typed terms terminate.
 
 In our operational semantics we:
 \begin{enumerate}
-\item Assume an elaboration step which subscripts all semilattice operations
-  ($\unit$, $\vee$, $\bigvee$, and $\ms{fix}$) with their type.
+\item Assume we subscript all semilattice operations ($\unit$, $\vee$,
+  $\bigvee$, and $\ms{fix}$) with their type.
 \item Drop the distinction between discrete and monotone variables, and write
   $x,y$ for arbitrary variables.
-\item Ignore the types $\N$ and $\str$. \todo{TODO: justify?}
 \item Add \ms{iter} expressions, which occur as intermediate forms in the
   evaluation of \ms{fix}.
 \item Classify some expressions $e$ as values $v$, and add a value-form
@@ -171,5 +170,6 @@ rule
 \[\infer{E[e] \step E[e']}{e \step e'}\]
 
 %% FIXME
-In our rules for $e \step e'$ we make use of a \emph{decidable inequality test
-  on values}, $v \ale u : \eq{A}$.
+In our rules for $e \step e'$ we make use of a decidable ordering test on
+values, $v \ale u : \eq{A}$, and a corresponding equality test $v \aeq u :
+\eq{A}$.
