@@ -14,13 +14,14 @@ support for aggregations to Datafun:
   \Set{\eq{A}} \mto \N$.
 
 \item In the style of Machiavelli~\cite{machiavelli}, one could add a general
-  operator $\ms{hom} : B \to (\eq{A} \uto B \uto B) \uto \Set{\eq{A}} \uto B$,
-  which effectively linearizes a set in an unspecified order. The semantics of
+  operator $\ms{hom} : B \to (A \uto B \uto B) \uto \Set{A} \uto B$, which
+  effectively linearizes a set in an unspecified order. The semantics of
   \ms{hom} are, alas, necessarily nondeterministic.
 
 \item One could augment Datafun with a type of bags (multisets) $\Bag{A}$; bags
   naturally support a much broader class of aggregation --- commutative monoids
-  --- than sets. See, for example, \citet{multilinear-bigdata} and \citet{reladj}.
+  --- than sets. See, for example, \citet{multilinear-bigdata} and
+  \citet{reladj}.
 \end{itemize}
 
 \paragraph{Optimization} Because Datalog is so strongly constrained,
