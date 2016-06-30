@@ -44,6 +44,17 @@ to first see if magic sets can be applied to first-order Datafun programs,
 and then use defunctionalization~\cite{defunctionalization} to
 extend it to full Datafun.
 
+Very recently, \citet{flix} have introduced the Flix language, which
+extends the semantics of Datalog to support defining relations valued
+in arbitrary lattices (rather than just the powerset of atoms). Like
+Datafun, this lets Flix support using monotone functions (on suitable
+lattices) in program expressions. Unlike Datafun, Flix does not yet
+have monotonicity checking for programmer-defined operators. However,
+because Flix does not extend Datalog to higher order, efficient
+Datalog implementation strategies (such as semi-naive evaluation)
+continue to apply.
+
+
 \paragraph{Databases} Datalog has sometimes been described
 as ``relational algebra plus fixed points'', and there is a long line
 of work on embedding database query languages into general-purpose
