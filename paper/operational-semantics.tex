@@ -137,7 +137,7 @@
 \end{figure*}
 
 
-\section{A na\"ive operational semantics}
+\section{An Operational Semantics}% {A na\"ive operational semantics}
 
 We consider the denotational semantics to be primary in Datafun; as with
 Datalog, any implementation technique is valid so long as it lines up with these
@@ -176,7 +176,7 @@ they are easily seen to be decidable by induction on $\eq{A}$. The quantifiers
 in the premise of the rule $\rn{\subseteq}$ range over finite domains, and thus
 pose no issue.
 
-\subsection{A Logical Relation for Termination}
+\subsection{A logical relation for termination}
 
 To prove that all well-typed terms terminate according to our operational
 semantics, we use a logical relations argument.
@@ -303,3 +303,6 @@ aRb$. Equivalently, $R$ may also be viewed as a partial
   repository. The key case is the fixed point rule, whose proof is a syntactic
   version of the proof of definedness of fixed points in the denotational semantics. 
 \end{proof}
+
+It follows as immediate corollary of termination and fundamental property that
+every closed, well-typed program terminates. 
