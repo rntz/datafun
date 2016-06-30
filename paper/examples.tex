@@ -31,11 +31,6 @@
     \forin{p\in e_1}{e_2} &\expandsto&
     \letin{x}{e_1}{\rawcase{x}{p \cto e_2;\,\pwild \cto \unit}}\\
     \forin{e_1}{e_2} &\expandsto& \ifthen{e_1}{e_2}{\unit}
-    %% \ms{let}~x = e_1 ~\ms{in}~ e_2
-    %% &\expandsto& (\fn\bind{x} e_2)\; e_1\\
-    %% \ms{let}~[x_i = e_i]^* ~\ms{in}~ e
-    %% &\expandsto& [\ms{let}~x_i = e_i~\ms{in}]^* e\\
-    %% \rawcase{e}{[p \cto e]^*} &\expandsto& \text{(omitted, see \todo{CITE})}
   \end{eqnarray*}
   \caption{Syntax sugar}
   \label{fig:sugar}
@@ -151,7 +146,6 @@ is monotone in the guard expression. The full explanation is in Section
 
 %% FIGURE: PRIMITIVES
 \begin{figure}
-  %% TODO: remove unused primitives.
   \[\begin{array}{cll}
   \neg &\of& \bool \uto \bool\\
   =   &\of& \eq{A} \uto \eq{A} \uto \bool\\
@@ -207,8 +201,6 @@ variable $x$, and then marking later positions with a $!x$. Now, the intersectio
 Since $!x$ implies the use of an equality test, the condition that the
 set's element type support equality remains in force.
 
-%% \todo{TODO: mention you can extend to all relational algebra? give example?}
-
 
 \subsection{Composition of relations}
 
@@ -233,8 +225,6 @@ rs(A,C) :- r(A,B), s(B,C).
 In Datafun, we simply define $(\bullet)$ and use it inline as needed. We shall
 see the use of this in later examples.
 
-%% \todo{work phrase ``higher-order'' in here somewhere?}
-
 
 \subsection{Transitive closure}
 
@@ -249,8 +239,8 @@ ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).
 \end{verbatim}
 %
 %% \todo{Discuss how this works in Datalog, but not in Prolog, b/c Prolog is
-%%   defined by operational semantics of unification while Datalog is denotational,
-%%   least-model semantics. It also works in Datafun!}
+%%   defined by operational semantics of unification while Datalog is
+%%   denotational, least-model semantics. It also works in Datafun!}
 %
 %% \todo{Neel suggests using distinction b/w backward \& forward chaining here,
 %%   rather than operational/denotational. see Logical Algorithms paper by
