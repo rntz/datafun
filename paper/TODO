@@ -1,8 +1,6 @@
 -*- mode: org -*-
 
 * Goals for final version
-- untitlecase sections titles
-
 - rename "ordinary" to "discrete"
 
 - Situate Datafun better wrt other database languages (besides Datalog)
