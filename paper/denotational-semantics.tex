@@ -353,41 +353,34 @@ semilattice $L$ of finite height.
 %% some $n \in \N$.
 
 
-%% FIGURE: SUBSTITUTIONS
-%% TODO: we could omit this.
-\begin{figure*}
-  \[\begin{array}{rcll}
-    \sub{e/v} v &=& e\\
-    \sub{e/v} x &=& x\\
-    \sub{e/v} (\fn\bind{u} e') &=& \fn\bind{u} \sub{e/v} e'\\
-    \sub{e/v} (e_1 \;e_2) &=& (\sub{e/v} e_1)\;(\sub{e/v} e_2)\\
-    \sub{e/v} (e_1, e_2) &=& (\sub{e/v} e_1, \sub{e/v} e_2)\\
-    \sub{e/v} (\pi_i\;e') &=& \pi_i\;(\sub{e/v}e')\\
-    \sub{e/v} (\ms{in}_i\;e') &=& \ms{in}_i \;(\sub{e/v} e')\\
-    %% \sub{e/v} (\ms{case}~e'~\ms{of}~\widevec{\ms{in}_i\,u_i \cto e_i})
-    %% &=& \ms{case}~\sub{e/v} e'~\ms{of}~\widevec{\ms{in}_i\,u_i \cto \sub{e/v} e_i}\\
-    \sub{e/v} (\case{e'}{u_1}{e_1}{u_2}{e_2})
-    &=& \case{\sub{e/v} e'}{u_1}{\sub{e/v} e_1}{u_2}{\sub{e/v} e_2}\\
-    \sub{e/v} \unit &=& \unit\\
-    \sub{e/v} (e_1 \vee e_2) &=& \sub{e/v} e_1 \vee \sub{e/v} e_2\\
-    \sub{e/v} (\forin{x \in e_1} e_2)
-    &=& \forin{x \in \sub{e/v} e_1} \sub{e/v} e_2\\
-    \sub{e/v} (\fix{\m{x}} e') &=& \fix{\m{x}} \sub{e/v} e'\\
-    \sub{e/v} (\fixle{\m{x}}{e_1}{e_2}) &=& \fixle{\m{x}}{\sub{e/v}{e_1}} e_2
-  \end{array}\]
-  \caption{Substitution}
-  \label{fig:substitution}
-\end{figure*}
+%% %% FIGURE: SUBSTITUTIONS
+%% %% TODO: we could omit this.
+%% \begin{figure*}
+%%   \[\begin{array}{rcll}
+%%     \sub{e/v} v &=& e\\
+%%     \sub{e/v} x &=& x\\
+%%     \sub{e/v} (\fn\bind{u} e') &=& \fn\bind{u} \sub{e/v} e'\\
+%%     \sub{e/v} (e_1 \;e_2) &=& (\sub{e/v} e_1)\;(\sub{e/v} e_2)\\
+%%     \sub{e/v} (e_1, e_2) &=& (\sub{e/v} e_1, \sub{e/v} e_2)\\
+%%     \sub{e/v} (\pi_i\;e') &=& \pi_i\;(\sub{e/v}e')\\
+%%     \sub{e/v} (\ms{in}_i\;e') &=& \ms{in}_i \;(\sub{e/v} e')\\
+%%     %% \sub{e/v} (\ms{case}~e'~\ms{of}~\widevec{\ms{in}_i\,u_i \cto e_i})
+%%     %% &=& \ms{case}~\sub{e/v} e'~\ms{of}~\widevec{\ms{in}_i\,u_i \cto \sub{e/v} e_i}\\
+%%     \sub{e/v} (\case{e'}{u_1}{e_1}{u_2}{e_2})
+%%     &=& \case{\sub{e/v} e'}{u_1}{\sub{e/v} e_1}{u_2}{\sub{e/v} e_2}\\
+%%     \sub{e/v} \unit &=& \unit\\
+%%     \sub{e/v} (e_1 \vee e_2) &=& \sub{e/v} e_1 \vee \sub{e/v} e_2\\
+%%     \sub{e/v} (\forin{x \in e_1} e_2)
+%%     &=& \forin{x \in \sub{e/v} e_1} \sub{e/v} e_2\\
+%%     \sub{e/v} (\fix{\m{x}} e') &=& \fix{\m{x}} \sub{e/v} e'\\
+%%     \sub{e/v} (\fixle{\m{x}}{e_1}{e_2}) &=& \fixle{\m{x}}{\sub{e/v}{e_1}} e_2
+%%   \end{array}\]
+%%   \caption{Substitution}
+%%   \label{fig:substitution}
+%% \end{figure*}
 
 
 \subsection{Metatheory}
-
-We define substitution of Datafun terms in Figure \ref{fig:substitution}. We
-could define separate forms of ordinary $\sub{e_1/x} e$ and monotone
-$\sub{e_1/\m{x}} e$ substitution, but to avoid repetition we instead use the
-metavariables $v,u$ to stand for any variable (ordinary or monotone) and define
-$\sub{e_1/v} e$. Terms are taken up to $\alpha$-equivalence, and by convention,
-whenever two variables are given distinct names $v,u$ it is assumed $v \ne u$.
 
 We have proven the following theorems:
 
