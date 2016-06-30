@@ -1,37 +1,73 @@
-\begin{figure}
-  \[\begin{array}{ccl}
-    %% expressions
-    e,f,g
-    &\bnfeq& ... \pipe \setlit{\vec{v}} \pipe \unit_L \pipe e \vee_L e \pipe \tforin{L}{x \in e} e\\
-    \textsf{expressions}
-    && \tfix{\fineq{L}}{x}{e} \pipe \tfixle{\eq{L}}{x}{e}{e}\\
-    && \iter{\eq{A}}{e}{x}{e} \pipe \iterstep{\eq{A}}{e}{e}{x}{e}\\
-    && \iterle{\eq{A}}{e}{e}{x}{e} \pipe \iterlestep{\eq{A}}{e}{e}{e}{x}{e}
-    \vspace{0.5em}\\
-    %% values
-    v,u,w
-    &\bnfeq& \fn\bind{x} e \pipe (v, v) \pipe \ms{in}_i\; v
-    \pipe \ms{true} \pipe \ms{false} \pipe \setlit{\vec{v}}\\
-    \textsf{values}
-    \vspace{0.5em}\\
-    %% contexts
-    E
-    &\bnfeq& \hole \pipe E\;e \pipe v\;E \pipe (E, e) \pipe (v, E) \pipe \ms{in}_i\;E
-    \pipe \pi_i \; E\\
-    \textsf{evaluation}
-    && E \vee_L e \pipe v \vee_L E \pipe \tforin{L}{x \in E} e\\
-    \textsf{contexts}
-    && \ifthen{E}{e}{e}\\
-    && \case{E}{x}{e}{x}{e}\\
-    && \iter{\eq{A}}{E}{x}{e} \pipe \iterstep{\eq{A}}{v}{E}{x}{e}\\
-    && \iterle{\eq{A}}{E}{e}{x}{e} \pipe \iterle{\eq{A}}{v}{E}{x}{e}\\
-    && \iterlestep{\eq{A}}{v}{v}{E}{x}{e}
-  \end{array}\]
-  \caption{Operational semantics syntax}
-  \label{fig:opsem-syntax}
-\end{figure}
+\begin{figure*}
+  \centering
 
-\begin{figure}
+  %% OPSEM: Additional syntax definitions
+  \begin{minipage}{0.5\textwidth}
+    \centering
+    %% TODO: format this nicer
+    \textbf{Additional syntax}
+    \begin{displaymath}
+      \begin{array}{ccl}
+        %% expressions
+        e,f,g
+        &\bnfeq& ... \pipe \setlit{\vec{v}} \pipe \unit_L \pipe e \vee_L e \pipe \tforin{L}{x \in e} e\\
+        \textsf{expressions}
+        && \tfix{\fineq{L}}{x}{e} \pipe \tfixle{\eq{L}}{x}{e}{e}\\
+        && \iter{\eq{A}}{e}{x}{e} \pipe \iterstep{\eq{A}}{e}{e}{x}{e}\\
+        && \iterle{\eq{A}}{e}{e}{x}{e} \pipe \iterlestep{\eq{A}}{e}{e}{e}{x}{e}
+        \vspace{0.5em}\\
+        %% values
+        v,u,w
+        &\bnfeq& \fn\bind{x} e \pipe (v, v) \pipe \ms{in}_i\; v
+        \pipe \ms{true} \pipe \ms{false} \pipe \setlit{\vec{v}}\\
+        \textsf{values}
+        \vspace{0.5em}\\
+        %% contexts
+        E
+        &\bnfeq& \hole \pipe E\;e \pipe v\;E \pipe (E, e) \pipe (v, E) \pipe \ms{in}_i\;E
+        \pipe \pi_i \; E\\
+        \textsf{evaluation}
+        && E \vee_L e \pipe v \vee_L E \pipe \tforin{L}{x \in E} e\\
+        \textsf{contexts}
+        && \ifthen{E}{e}{e}\\
+        && \case{E}{x}{e}{x}{e}\\
+        && \iter{\eq{A}}{E}{x}{e} \pipe \iterstep{\eq{A}}{v}{E}{x}{e}\\
+        && \iterle{\eq{A}}{E}{e}{x}{e} \pipe \iterle{\eq{A}}{v}{E}{x}{e}\\
+        && \iterlestep{\eq{A}}{v}{v}{E}{x}{e}
+      \end{array}
+    \end{displaymath}
+  \end{minipage}
+  ~
+  %% OPSEM: Rules for (v \ale u : A)
+  \begin{minipage}{0.45\textwidth}
+    \centering
+    \textbf{Rules for $v \ale u : \eq{A}$ and $v \aeq u : \eq{A}$}
+    \begin{mathpar}
+      \infer{\ms{false} \ale \ms{false} : \bool}{}
+      \and
+      \infer{\ms{false} \ale \ms{true} : \bool}{}
+      \and
+      \infer{\ms{true} \ale \ms{true} : \bool}{}
+      \and
+      %% rules for set inequality
+      \infer[\rn{\subseteq}]
+            { \setlit{\vec{v_i}} \ale \setlit{\vec{u_i}} : \Set{\eq{A}} }
+            { \forall{v_i}\,\exists{u_j}\; (v_i \aeq u_j : \eq{A}) }
+            \and
+            \infer%% [\rn{\ale_{\x}}]
+                { (v_1, u_1) \ale (v_2, u_2) : \eq{A} \x \eq{B} }
+                { v_1 \ale v_2 : \eq{A} & u_1 \ale u_2 : \eq{B} }
+                \and
+                \infer%% [\rn{\ale_{+}}]
+                    { \ms{in}_i\; v \ale \ms{in}_i\; u : \eq{A}_1 + \eq{A}_2 }
+                    { v \ale u : \eq{A}_i }
+                    \and
+                    \infer[\rn{{\aeq}}]{v \aeq u : \eq{A}}{v \ale u : \eq{A} & u \ale v : \eq{A}}
+    \end{mathpar}
+  \end{minipage}
+
+  %% OPSEM: Rules for \step
+  \vspace{1em}\\
   \begin{displaymath}
     \begin{array}{ccl}
       \multicolumn{3}{c}{\textbf{$\beta$-reductions}}\\
@@ -43,8 +79,8 @@
       \ifthen{\ms{false}}{e_1}{e_2} &\step& e_2
 
       %% rules for unit
-      \vspace{0.5em}\\
-      \multicolumn{3}{c}{\textbf{Rules for }\unit}\\
+      \vspace{1em}\\
+      \multicolumn{3}{c}{\textbf{Evaluating }\unit}\\
       \unit_2 &\step& \ms{false}\\
       \unit_{\Set{A}} &\step& \{\}\\
       \unit_{L \x M} &\step& (\unit_L, \unit_M)\\
@@ -52,8 +88,8 @@
       \unit_{A \mto L} &\step& \fn\bind{x} \unit_L
 
       %% rules for \vee
-      \vspace{0.5em}\\
-      \multicolumn{3}{c}{\textbf{Rules for }\vee}\\
+      \vspace{1em}\\
+      \multicolumn{3}{c}{\textbf{Evaluating }\vee}\\
       \ms{false} \vee_2 v &\step& v\\
       \ms{true} \vee_2 v &\step& \ms{true}\\
       %% the rule we've all been waiting for
@@ -62,19 +98,19 @@
       v \vee_{A \to L} u &\step& \fn\bind{x} v\;x \vee_L u\;x\\
       v \vee_{A \mto L} u &\step& \fn\bind{x} v\;x \vee_L u\;x
 
+    \end{array}
+    \begin{array}{ccl}
+
       %% rules for \bigvee
-      \vspace{0.5em}\\
-      \multicolumn{3}{c}{\textbf{Rules for }\bigvee}\\
+      %% \vspace{1em}\\
+      \multicolumn{3}{c}{\textbf{Evaluating }\bigvee}\\
       \tforin{L}{x \in \{\}} e &\step& \unit_L\\
       \tforin{L}{x \in \setlit{v, \vec{u}}} e
       &\step& \sub{v/x} e \vee_L \tforin{L}{x \in \setlit{\vec{u}}} e
-  %%   \end{array}
-  %% \end{displaymath}
-  %% \begin{displaymath}
-  %%   \begin{array}{ccl}
+
       %% rules for \ms{fix}
-      \vspace{0.5em}\\
-      \multicolumn{3}{c}{\textbf{Rules for \ms{fix} and \ms{iter}}}\\
+      \vspace{1em}\\
+      \multicolumn{3}{c}{\textbf{Evaluating \ms{fix} and \ms{iter}}}\\
       \tfix{\fineq{L}}{x}{e} &\step& \iter{\fineq{L}}{\unit_{\fineq{L}}}{x}{e}\\
       \iter{\eq{A}}{v}{x}{e} &\step& \iterstep{\eq{A}}{v}{\sub{v/x} e}{x}{e}\\
       \iterstep{\eq{A}}{v_1}{v_2}{x}{e}
@@ -96,9 +132,10 @@
       \end{cases}
     \end{array}
   \end{displaymath}
-  \caption{Rules for $\step$}
-  \label{fig:opsem-rules}
-\end{figure}
+
+  \caption{Operational semantics}
+  \label{fig:opsem}
+\end{figure*}
 
 
 \section{A na\"ive operational semantics}
@@ -106,7 +143,8 @@
 We consider the denotational semantics to be primary in Datafun; as with
 Datalog, any implementation technique is valid so long as it lines up with these
 semantics. As a proof of concept, however, we present a simple call-by-value
-operational semantics and show that it terminates.
+structural operational semantics in Figure \ref{fig:opsem} and show that all
+well-typed terms terminate.
 
 In our operational semantics we:
 \begin{enumerate}
@@ -120,7 +158,6 @@ In our operational semantics we:
 \item Classify some expressions $e$ as values $v$, and add a value-form
   $\setlit{\vec{v}}$ for finite sets.
 \end{enumerate}
-We list the additional syntax in Figure \ref{fig:opsem-syntax}.
 
 We use a small-step operational semantics using \emph{evaluation contexts} $E$
 after the style of \citet{reduction-contexts} to enforce a call-by-value
@@ -129,9 +166,9 @@ evaluation order; an evaluation context $E$ is an expression with a hole in it
 evaluated (if it is not a value already). To fill the hole $\hole$ in an
 evaluation context $E$ with the expression $e$, we write $E[e]$.
 
-Figure \ref{fig:opsem-rules} defines a relation $e \step e'$ for expressions $e$
-whose outermost structure is immediately reducible; we extend this relation to
-all expressions with the rule
+We define a relation $e \step e'$ for expressions $e$ whose outermost structure
+is immediately reducible; we extend this relation to all expressions with the
+rule
 \[\infer{E[e] \step E[e']}{e \step e'}\]
 
 %% FIXME
