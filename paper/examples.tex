@@ -44,10 +44,9 @@
 \begin{figure}
   \begin{displaymath}
     \begin{array}{lcl}
-      \rawcase{e_1}{}       &            & \letv{(x,y)}{e_1}{} \\
-      \;\;(p,p') \cto e_3;  & \expandsto & \rawcase{x}{} \\
-      \;\;\pwild \cto e_4   &            & \;\;p \cto (\casep{y}{p'}{e_3}{e_4}); \\
-                            &            & \;\;\pwild \cto e_4
+      \rawcase{e_1}{}       &            & \\
+      \;\;x \cto e_3;       & \expandsto & \letv{x}{e_1}{e_3} \\
+      \;\;\pwild \cto e_4   &            &
       \\[1em]
       \rawcase{e_1}{}       &            & \\
       \;\;!e_2 \cto e_3;    & \expandsto & \ifthen{e_1 = e_2}{e_3}{e_4} \\
@@ -56,6 +55,11 @@
       \rawcase{e_1}{}       &            & \\
       \;\;\pwild \cto e_3;  & \expandsto & e_3 \\
       \;\;\pwild \cto e_4   &            &
+      \\[1em]
+      \rawcase{e_1}{}       &            & \letv{(x,y)}{e_1}{} \\
+      \;\;(p,p') \cto e_3;  & \expandsto & \rawcase{x}{} \\
+      \;\;\pwild \cto e_4   &            & \;\;p \cto (\casep{y}{p'}{e_3}{e_4}); \\
+                            &            & \;\;\pwild \cto e_4
       \\[1em]
       \rawcase{e_1}{}           &            & \rawcase{e_1}{} \\
       \;\;\ms{in}_1\, p \cto e_3; & \expandsto & \;\;\ms{in}_1\, x \to (\casep{x}{p}{e_3}{e_4}); \\
