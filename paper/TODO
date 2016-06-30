@@ -1,11 +1,8 @@
 -*- mode: org -*-
 
-* Immediate future work
-- Operational semantics & adequacy theorem
-- Implement polymorphism a la Dunfield + Neel
-- Finally kill off s-expression syntax
-
 * Goals for final version
+- untitlecase sections titles
+
 - rename "ordinary" to "discrete"
 
 - Situate Datafun better wrt other database languages (besides Datalog)
@@ -16,6 +13,11 @@
 
 - Get "contributions" onto the first page - should be accessible "at a glance".
   Shorten or split up introduction?
+
+* Immediate future work
+- Operational semantics & adequacy theorem
+- Implement polymorphism a la Dunfield + Neel
+- Finally kill off s-expression syntax
 
 * To-dos
 - appendix with proofs!
