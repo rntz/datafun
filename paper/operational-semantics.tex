@@ -184,11 +184,19 @@ proof of Lemma \ref{lem:fixed-points-finite-height-posets}: starting from
 $\unit$, iteratively apply $\fn\bind{x} e$ until a fixed point is
 reached.
 
-$\iter{\eq{A}}{e_1}{x}{e}$ does precisely that: starting from $e_1$, it
-repeatedly applies the function $\fn\bind{x}e$ until a fixed point is reached.
-$\iterstep{\eq{A}}{e_1}{e_2}{x}{e}$ tests $e_1$ against $e_2$ to determine
+To model this iteration, we introduce $\ms{iter}$ forms into our
+syntax.  The fixed point expression $\tfix{\fineq{L}}{x}{e}$
+immediately steps to the form
+$\iter{\fineq{L}}{\unit_{\fineq{L}}}{x}{e}$, which can be thought of
+as an initial state of the iteration, starting with $\unit_{\fineq{L}}$.
+
+The intuition for iterating to the fixed point is that we apply the 
+body and then check to see if the result changed, which is why we also 
+introduce the two-place version $\iterstep{\eq{A}}{v_1}{e_2}{x}{e}$ 
+which remembers the old value so that we can test $v_1$ against $e_2$ (when it
+reaches a value $v_2$) to determine
 whether we've reached a fixed point; and if not, continues to iterate from
-$e_2$.
+$v_2$ with $\iter{\fineq{L}}{v_2}{x}{e}$. 
 
 The $\ms{iter}_\le$ forms are similar, but additionally check that the iteration
 value never exceeds their first argument, to implement the clamping behavior of
