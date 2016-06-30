@@ -136,6 +136,12 @@ The context $\GD$ types ordinary variables; $\GG$, monotone variables. Both
 admit the usual structural rules of exchange, weakening, and contraction.
 Variables from either context may be used freely (rules \rt{var}, $\rt{var}^+$).
 
+For clarity, we also give typing rules for the pattern match form
+$\casep{e}{p}{e_0}{e_1}$ in Figure~\ref{fig:pattern-typing}. This uses
+the auxilliary judgment $\Jp{\GD}{\GG}{p}{A}{\GD'}$, which can be read
+as saying that ``in the contexts $\GD$ and $\GG$, the pattern $p$
+typechecks at type $A$, binding the variables in $\GD'$''.
+
 \subsection{Functions and application}
 Two function types require two function introduction rules: the ordinary
 $\lambda$ and the monotone $\lambda^+$. These simply introduce variables into
