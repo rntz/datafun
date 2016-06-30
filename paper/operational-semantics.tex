@@ -208,34 +208,33 @@ $\fixle{x}{e_\top}{e}$.
 To prove that all well-typed terms terminate according to our operational
 semantics, we use a logical relations argument.
 
-In our case, the standard approach of interpreting each type via a
-partial equivalence relation (PER) on closed terms turns out to be not
-quite sufficient, and we need to extend it to prove termination. Just
-as posets are sets equipped with an order structure, we define our
-semantic types as PERs equipped with a preorder respecting the
-PER structure. The intuition is that since we needed the order
-structure in the denotational semantics to prove the definedness of
-fixed points, we will similarly need an order structure on the syntax
-to prove the termination of fixed points.
+The standard approach of interpreting each type as a partial equivalence
+relation (PER) on closed terms turns out not to be sufficient in our case, and
+we need to extend it to prove termination. Just as posets are sets equipped with
+an order structure, we define our semantic types as PERs equipped with a
+preorder respecting the PER structure. The intuition is that since we needed the
+order structure in the denotational semantics to prove the definedness of fixed
+points, we will similarly need an order structure on the syntax to prove the
+termination of fixed points. Therefore, we inductively define relations
+$\lr{A}{a \ale b}$ for each type $A$, then show how to understand these
+relations as preordered PERs.
 
-So we inductively define relations $\lr{A}{a \ale b}$ for each
-type $A$, then show how to understand these relations as preordered
-sets.  (As a matter of notation, $a,b,c$ range over closed expressions;
-$e,f,g$ over open expressions; $\gamma, \sigma$ over substitutions
-containing only closed expressions; and $\ms{Ctx}(\GG)$ is the set of
-all substitutions of closed expressions for the variables in $\GG$.)
+As a matter of notation, $a,b,c$ range over closed expressions; $\gamma, \sigma$
+over substitutions containing only closed expressions; and $\ms{Ctx}(\GG)$ is
+the set of all substitutions of closed expressions for the variables in $\GG$.
 
 Because it simplifies our definitions and proofs, we introduce an additional
-pseudo-type $\disc{A}$, which represents $A$ ordered \emph{discretely}, $x \le y
-\iff x = y$.
+pseudo-type $\disc{A}$, which orders $A$ \emph{discretely}, $x \le y \iff x =
+y$.
 \[\begin{array}{rccl}
   \text{types} &
   A &\bnfeq& ... \pipe \disc{A}
 \end{array}\]
-This mimics the $\Disc{\U{-}}$ comonad on \cPoset{} present in our denotational
-semantics. Observe that under this interpretation $A \uto B$ is just $\disc{A}
-\mto B$. In particular, if we let $\den{\disc{A}} = \Disc{|\den{A}|}$ then
-$\den{A \uto B} = \den{\disc{A} \mto B} = \Disc{|\den{A}|} \arr \den{B}$.
+This represents the $\Disc{\U{-}}$ comonad on \cPoset{} present in our
+denotational semantics. Observe that under this interpretation $A \uto B$ is
+just $\disc{A} \mto B$. In particular, if we let $\den{\disc{A}} =
+\Disc{|\den{A}|}$ then $\den{A \uto B} = \den{\disc{A} \mto B} =
+\Disc{|\den{A}|} \arr \den{B}$.
 
 \newcommand{\tiff}{\mathrm{iff}}
 
@@ -252,8 +251,6 @@ We define the following relations:
   &\tiff& \forall(i = 1,2)\ \lr{A}{\gamma_i(e_1) \ale \gamma_i(e_2)}\\
   && \hspace{3.7em}\mathrel{\land} \lr{A}{\gamma_1(e_i) \ale \gamma_2(e_i)}
 \end{array}\]
-
-Although we have not yet shown that these relations are transitive,
 $\commsq{A}{\gamma_1}{\gamma_2}{e_1}{e_2}$ may be seen as a transitive square:
 \begin{center}
   \tikzset{
@@ -298,7 +295,7 @@ We now give the definition of $\lr{A}{a \ale b}$ by induction on $A$:
 \end{array}\]
 
 It may not be immediately obvious that (for a given $A$) the relation $\lr{A}{a
-  \ale b}$ can be seen as a preordered set. This requires the following two
+  \ale b}$ can be seen as a preordered PER. This requires the following two
 theorems, proven by induction on $A$:
 
 \begin{theorem}[Partial reflexivity]
@@ -309,11 +306,8 @@ theorems, proven by induction on $A$:
   If $\lr{A}{a \ale b}$ and $\lr{A}{b \ale c}$, then $\lr{A}{a \ale c}$.
 \end{theorem}
 
-Any partially reflexive, transitive relation $R$ can be viewed as the set
-$\setfor{a}{aRa}$ equipped with the preorder $a \le b \iff
-aRb$. Equivalently, $R$ may also be viewed as a partial
-  equivalence relation (PER) equipped with a partial order over its equivalence
-  classes.
+From these it follows immediately that $\lr{A}{a \aeq b}$ is a PER, and
+$\lr{A}{a \ale b}$ forms a preorder over this PER which respects it.
 
 \begin{theorem}[Termination]
   If $\lr{A}{a}$ then $a \steps v$.
