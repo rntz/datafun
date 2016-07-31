@@ -13,16 +13,16 @@ val or : bool ~> bool ~> bool
 fun or x y = x lub y
 
 val and : bool ~> bool ~> bool
-fun and x y = when x then y
+fun and x y = when (x) y
 
 val not : bool ->- bool
-fun not x = unless x then true
+fun not x = unless (x) true
 
 (* any two of `not', `when', and `unless' would let us derive the third
  * (although polymorphism might be an issue for typechecking it).
  * for example: *)
 val unlessBool : bool ->- bool ~> bool
-fun unlessBool c x = when not c then x
+fun unlessBool c x = when (not c) x
 
 (* with antitone negation, we can write < properly!
  * previously, had to do:
@@ -51,7 +51,7 @@ fun conj x y = ⋁(_ ∈ x, _ ∈ y) tt
 
 (* Neel calls this "guard" *)
 val bool2set : bool ~> {()}
-fun bool2set x = when x then tt
+fun bool2set x = when (x) tt
 
 val set2bool : {()} ~> bool
 fun set2bool x = () in? x
@@ -59,7 +59,7 @@ fun set2bool x = () in? x
 
 (* kind of a hack *)
 val negate : {()} ->- {()}
-fun negate x = unless set2bool x then tt
+fun negate x = unless (set2bool x) tt
 
 
 (* operations on sets of naturals & strings *)
@@ -78,7 +78,7 @@ val some_nats : {nat}
 val some_nats = ⋁(x ∈ {1,2,3}) {x, x + 10}
 
 val powers_upto : nat -> nat ~> {nat}
-fun powers_upto b n = fix s = {1} ∨ {b*x | x in s, (b*x) <= n}
+fun powers_upto b n = fix s is {1} ∨ {b*x | x in s, (b*x) <= n}
 
 (* map & filter *)
 val nat_map : (nat -> nat) -> {nat} ~> {nat}

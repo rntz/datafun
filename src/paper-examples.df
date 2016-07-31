@@ -1,11 +1,12 @@
 (* -*- mode: sml -*- *)
 
 (* ---------- Helper functions (Figure 3 in the paper) ---------- *)
-val not : bool → bool
+val not: bool → bool
 fun not x = if x then false else true
 
-val range : nat → nat →⁺ {nat}
-fun range i j = when i <= j then fix s is {i} lub {x+1 | x ∈ s, x+1 <= j}
+val range: nat → nat →⁺ {nat}
+fun range i j = for (i <= j) fix (s)
+                {i} lub {x+1 | x in s, x+1 <= j}
 
 val length = strlen
 val substring = substr
