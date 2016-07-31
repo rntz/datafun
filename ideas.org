@@ -1,3 +1,8 @@
+* for-syntax for fixpoints
+
+    for (fix s) blah blah blah
+==> fix s is blah blah blah
+
 * parallel choice in iteration and pattern matching
 
 Suppose I want to define
