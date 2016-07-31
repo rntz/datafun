@@ -1,0 +1,16 @@
+(* -*- mode: sml -*- *)
+
+(* This is a collection of semantically monotone functions which fail to
+ * typecheck under Datafun, showing the limitations of its monotonicity
+ * checking. *)
+
+(* fails because `i' hidden due to antitonicity *)
+val range: nat →⁻ nat →⁺ {nat}
+fun range i j = fix s is {i | i <= j}
+               ∨ {x+1 | x in s, x <= j}
+
+(* fails because `univ' hidden *)
+val subsets: {nat} →⁺ {{nat}}
+fun subsets univ =
+  fix subs = {univ}
+           ∨ (for (s in subs, y in s) {{x | x in s, not(x = y)}})
