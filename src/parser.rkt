@@ -199,6 +199,8 @@
      ((UNLESS LP e-op RP expr)      (e-cond 'anti $3 $5))
      ((FIX name = expr)             (e-fix $2 $4))
      ((FIX name IS expr)            (e-fix $2 $4))
+     ((FIX LP name RP expr)         (e-fix $3 $5))
+     ((FIX LP name : type RP expr)  (e-ann $5 (e-fix $3 $7)))
      ((FIX name : type = expr)      (e-ann $4 (e-fix $2 $6)))
      ((FIX name : type IS expr)     (e-ann $4 (e-fix $2 $6)))
      ((⋁ LP loops RP expr)          (e-loop $3 $5))

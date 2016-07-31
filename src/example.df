@@ -134,6 +134,11 @@ fun nat_subsets n =
         ∨ {{x} | x in n}
         ∨ {x ∨ y | x in s, y in s}
 
+(* one-element-at-a-time version *)
+val nat_subsets2: {nat} →⁺ {{nat}}
+fun nat_subsets2 univ =
+  fix subs = {{}} ∨ {s ∨ {x} | s in subs, x in univ}
+
 (* upto n = {x | x <= n}; includes upper bound
  * below n = {x | x < n}; excludes upper bound
  *)
