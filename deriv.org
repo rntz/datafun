@@ -1,0 +1,119 @@
+# look at differential dataflow!
+
+* derivatives of types
+
+Δ⁺ : Type -> Type
+Δ⁺ 1 = 1
+Δ⁺ 2 = 2
+Δ⁺ ℕ = ℕ
+Δ⁺ {A} = {A}
+Δ⁺ (A x B) = Δ⁺A x Δ⁺B
+Δ⁺ (A + B) = Δ⁺A + Δ⁺B   -- a slight hack
+Δ⁺ (A →⁺ B) = A → Δ⁺A →⁺ Δ⁺B
+Δ⁺ (box A) = 1
+Δ⁺ (B[A]) = (Δ⁺B)[A]
+Δ⁺ (Maybe A) = Maybe Δ⁺A
+
+-- we have a choice of how to implement Δ⁺(A → B)
+-- if we let (A → B = box A →⁺ B), then
+Δ⁺ (A → B) = A → 1 →⁺ Δ⁺B
+
+-- or, if we're willing to trade this equality for an isomorphism:
+Δ⁺ (A → B) = A → Δ⁺B
+
+** Theorem: Δ⁺L is a semilattice type
+By induction:
+
+  Δ⁺1 = 1 ✔
+  Δ⁺2 = 2 ✔
+  Δ⁺ℕ = ℕ ✔
+  Δ⁺{A} = {A} ✔
+  Δ⁺(A x B) = Δ⁺A x Δ⁺B ✔
+  Δ⁺(A →⁺ L) = A → Δ⁺A →⁺ Δ⁺L ✔
+  Δ⁺(A → L) = by prev case
+
+* zeros of terms (incl built-in functions)
+0 b             := false        for boolean b
+0 n             := 0            for natural n
+0 (a,b)         := (0 a, 0 b)
+0 (inᵢ a)       := inᵢ (0 a)
+
+? 0 x           := ???        for discrete x
+? 0 x           := ???        for monotone x
+
+? 0 (\x. e)       := \x. d(e)     for discrete x
+? 0 (\x. e)       := \x dx. d(e)  for monotone x
+
+0 ∅             := ∅
+0 {a}           := ∅
+0 (a ∪ b)       := ∅
+
+? 0 (a ∨ b)       :=
+
+* derivatives of terms
+d(c)            := (0 c)
+d(x)            := dx
+d(ε)            := (0 ε)            (= ε?)
+
+-- discrete
+-- HYPOTHESIS: our context needs to be augmented with *zero changes*
+-- for each discrete variable? (rather than derivatives.)
+d(x)            := (0 x)
+d(\x.e)         := \x. d(e)
+d(a b)          := d(a) b
+d(case e of in₁ x -> e₁; in₂ x -> e₂)
+                := case 0_e of in₁ _ → d(e₁); in₂ _ -> d(e₂)
+
+-- monotone
+d(\x.e)         := \x dx. d(e)
+d(a b)          := d(a) b d(b)
+d(case e of in₁ x -> e₁; in₂ x -> e₂)
+                := case d(e) of in₁ x -> d(e₁); in₂ x -> d(e₂)
+
+** unions and vees
+d(a ∪ b)        := d(a) ∪ d(b)      ???
+# this can introduce false additions!
+# consider {1} ∪ x;  d({1} ∪ x) = {} ∪ dx = dx
+# for x = {}, dx = {1}
+# to fix this:
+d(a ∪ b)        := (d(a) \ b) ∪ (d(b) \ a)
+# this is expensive, though, especially if nested.
+# can this also just be plain wrong, though?
+
+? d(⋃(x ∈ e₁) e₂) := (⋃(x ∈ e₁) d(e₂))                ???
+                    ∪ (⋃(x ∈ d(e₁)) e₂ ∪ d(e₂))       ???
+
+d(⋁(x ∈ e₁) e₂) := ⋁(x ∈ e₁) d(e₂)
+                 ∨ ⋁(x ∈ d(e₁)) ???
+
+example: ⋁(x ∈ X) λy. (y = x)
+
+# does this work for functions?
+? d(a ∨ b)        := d(a) ∨ d(b)
+
+** fixed points
+d(fix_L f) = fix_{Δ⁺L} (\dx. df (fix_L f) dx)
+
+# more generally
+d(fix_L x is e) := let x = (fix x is e) in
+                   fix_{Δ⁺L} dx is d(e)
+
+# wait, really?
+then d(fix x is f x)
+   = let x = fix x is f x
+     in fix dx is df x dx
+
+d(fix f) = d(f (fix f)) = df (fix f) d(fix f)
+
+  d(fix S is init ∪ {x/2 | x ∈ S})
+= let S = fix S is init ∪ {x/2 | x ∈ S}
+  in fix dS is d(init ∪ {x/2 | x ∈ S})
+# applying some simplifications, see below
+= let S = fix S is init ∪ {x/2 | x ∈ S}
+  in fix dS is dinit ∪ {x/2 | x ∈ dS}
+
+  d(init ∪ {x/2 | x ∈ S})
+= d(init) ∪ d(⋃(x ∈ S) {x/2})
+= dinit ∪ (⋃(x ∈ S) d{x/2})
+        ∪ (⋃(x ∈ dS) {x/2} ∪ d{x/2})
+= dinit ∪ ⋃(x ∈ dS) {x/2}
