@@ -1,0 +1,93 @@
+(* -*- mode: sml -*- *)
+
+(* some utility functions *)
+val not: bool →⁻ bool
+fun not x = unless (x) true
+
+val (<) : nat ->- nat ~> bool
+fun (x < y) = not (y <= x)
+
+(* upto n = {x | x <= n}; includes upper bound
+ * below n = {x | x < n}; excludes upper bound
+ *)
+val upto, below: nat ~> {nat}
+fun upto n = fix s = {0} ∨ {x+1 | x in s, x < n}
+fun below n = {x | x ∈ upto n, x < n}
+
+(* range i j = {x | i <= x <= j}; inclusive. *)
+val range: nat →⁻ nat →⁺ {nat}
+fun range i j = {x | x in upto j, not (x in? below i)}
+
+val subsets: {nat} →⁺ {{nat}}
+fun subsets univ =
+  fix s = {{}}
+        ∨ {{x} | x in univ}
+        ∨ {x ∨ y | x in s, y in s}
+
+(* val natrec : str → (str → str) → nat → str
+ * fun natrec init succ n =
+ *   let val nats = upto n
+ *   in  *)
+
+
+(* we represent characters by strings of length one *)
+type char = str
+
+type sym = str
+type rule = Eps | Char(char) | Sym(sym) | Cat(sym, sym)
+type grammar = {sym × rule}
+
+val renameRule: (sym → sym) → rule → rule
+fun renameRule f r = case r | Eps => Eps
+                            | Char(c) => Char(c)
+                            | Sym(a) => Sym(f a)
+                            | Cat(a,b) => Cat(f a, f b)
+
+val rename: (sym → sym) → grammar →⁺ grammar
+fun rename f grammar = {(f sym, renameRule f rule) | (sym,rule) in grammar}
+
+(* produces the symbols in a grammar which are nullable *)
+val nullable: grammar →⁺ {sym}
+fun nullable g = fix n is
+                 for ((sym, rule) in g)
+                 case rule
+                    | Eps       => {sym}
+                    | Char(c)   => {}
+                    | Sym(a)    => {sym | a in? n}
+                    (* <= on sets is subset *)
+                    | Cat(a,b)  => {sym | {a,b} <= n}
+
+(* adds derivatives for every symbol in a grammar
+ * (d: sym → sym) tells us how to name derivatives
+ * c tells us what character to derive with respect to *)
+val deriv: (sym → sym) → char → grammar →⁺ grammar
+fun deriv d c g =
+  g ∨
+  (let val nulls = nullable g
+       val derivRule: rule → {rule}
+       fun derivRule r =
+         case r
+            | Eps => {}
+            | Char(c2) => when (c = c2) {Eps}
+            | Sym(a) => {Sym(d a)}
+            | Cat(a,b) => {Cat(d a, b)} ∨ {Sym(d b) | a ∈? nulls}
+   in for ((sym,rule) in g) ({d sym} × derivRule rule))
+
+(* TODO: compaction *)
+
+(* can we even define parsing using this?
+ * need to induct on string or its length!
+ * I guess if we add natrec. *)
+
+(* produces balanced parentheses *)
+val parens =
+    { (c, Char(c)) | c in {"(",")"}}
+    ∨ { ("start", Eps)
+      , ("start", Cat("start", "start"))
+      , ("start", Cat("(", "right"))
+      , ("right", Cat("start", ")")) }
+
+val dparens = deriv ((++) "δ ") "(" parens
+
+val dparens_new = {(sym,rule) | (sym,rule) in dparens
+                              , substr sym 0 2 = "δ "}
