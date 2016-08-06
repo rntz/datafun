@@ -101,7 +101,7 @@ their most general possible type schemes.
 %% \end{itemize}
 
 
-\subsection{Filtering, mapping, and cross products}
+\subsection{Filtering, Mapping, and Cross Products}
 
 Armed with the syntactic sugar given in Figure \ref{fig:sugar}, basic set
 operations such as map, filter, and cross-product are easy first examples:
@@ -166,7 +166,7 @@ is monotone in the guard expression. The full explanation is in Section
 \end{figure}
 
 
-\subsection{Equality, membership, and intersection}
+\subsection{Equality, Membership, and Intersection}
 
 So long as the type of a set's elements supports equality, we can test whether
 the set contains a value $x$ as follows:
@@ -202,7 +202,7 @@ Since $!x$ implies the use of an equality test, the condition that the
 set's element type support equality remains in force.
 
 
-\subsection{Composition of relations}
+\subsection{Composition of Relations}
 
 One extremely useful operator it is convenient to define using nonlinear pattern
 matching is composition of finite relations (that is, sets of pairs):
@@ -226,7 +226,7 @@ In Datafun, we simply define $(\bullet)$ and use it inline as needed. We shall
 see the use of this in later examples.
 
 
-\subsection{Transitive closure}
+\subsection{Transitive Closure}
 
 Consider the following Datalog program, authored perhaps by a J.R.R. Tolkien
 aficionado wishing to trace the geneologies of their favorite work, \textit{The
@@ -273,7 +273,7 @@ either \ms{parent} or the composition of \m{X} with itself. This requires that
 the transitive closure of \ms{parent}. Voil\`a!
 
 
-\subsubsection{Transitive closure with an upper bound}
+\subsubsection{Transitive Closure with an Upper Bound}
 
 The preceding explanation glosses over a critical requirement: \ms{fix} may only
 be used at \emph{finite semilattice eqtypes}. \ms{ancestor} has type
@@ -318,7 +318,7 @@ presence of sloppy programmers, and although they may not have the value you
 expect, that value is at least predictable.
 
 
-\subsubsection{Generic transitive closure}
+\subsubsection{Generic Transitive Closure}
 
 Thus far we have only considered taking the transitive closure of a relation we
 have already defined. But consider: for any finite eqtype $\fineq{A}$, we may
@@ -350,7 +350,7 @@ course familiar and unremarkable to functional programmers, but it is simply not
 possible in Datalog.
 
 
-\subsection{CYK parsing}
+\subsection{CYK Parsing}
 Parsing can be understood logically, with a parse tree representing a
 proof that a certain string belongs to a language described by a
 context-free grammar. As a result, it is possible to formulate parsing
@@ -500,7 +500,7 @@ for negative information after the fixed point computation completes
 corresponds to a use of stratified negation in Datalog.
 
 
-\subsection{Dataflow analysis}
+\subsection{Dataflow Analysis}
 In this section, we show how some simple dataflow analyses can be expressed in
 Datafun. We begin with the types in these programs.
 \[\begin{array}{l}

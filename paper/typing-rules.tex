@@ -142,7 +142,7 @@
 \end{figure}
 
 
-\section{Type system}
+\section{Type System}
 \label{sec:typing-rules}
 
 Datafun's typing judgment $\J{\GD}{\GG}{e}{A}$ is defined by the inference rules
@@ -163,7 +163,7 @@ in $\GD'$''; and $\Jl{\GD}{\GG}{\mc{L}}{\GD'}$, which says that ``in the
 contexts $\GD$ and $\GG$, the comprehension clauses in $\mc{L}$ bind the
 variables in $\GD'$''.
 
-\subsection{Functions and application}
+\subsection{Functions and Application}
 Two function types require two function introduction rules: the discrete
 $\lambda$ and the monotone $\lambda^+$. These simply introduce variables into
 their respective contexts. Monotone function application $\rt{app}^+$ is
@@ -189,7 +189,7 @@ formulations of modal logics of necessity~\cite{jrml} may notice a feeling of
 getting ahead of ourselves. For more on that, turn to Section
 \ref{sec:semantics}.
 
-\subsection{Products and sums}
+\subsection{Products and Sums}
 The pairing and projection rules, \rt{pair} and $\pi$, are completely standard,
 as is the \rt{in} rule for sum introduction. Sum elimination, however, splits
 into two rules, \rt{case} and $\rt{case}^+$. $\rt{case}^+$ requires its branches
@@ -233,7 +233,7 @@ we have yet to find a case where this is problematic.
 % \todo{Mention that $e_1 \ge e_2$ is in general statically undecidable (Rice's
 %  theorem), and that a typesystem to check it would amount to dependent typing?}
 
-\subsection{Semilattices and sets}
+\subsection{Semilattices and Sets}
 The semilattice $\unit$ and $\vee$ operations are typed by the rules of the same
 name. As $\vee$ is monotone, its arguments have full access to the monotone
 context $\GG$.
@@ -257,7 +257,7 @@ on their elements, $e_2$ is not required to be monotone in the variable $x$.
 %% $\{:\}$, the introduction rule for singleton maps. By analogy with the
 %% introduction rule for singleton sets $\{\}$,
 
-\subsection{Fixed points}
+\subsection{Fixed Points}
 
 The reason Datafun tracks monotonicity is to permit taking fixed-points of
 monotone functions. \rt{fix} expresses exactly that. As mentioned in Section
