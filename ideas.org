@@ -1,3 +1,9 @@
+* embedding into Haskell or OCaml
+tagless-final style: http://okmij.org/ftp/meta-programming/#QUEL
+http://okmij.org/ftp/meta-programming/quel.pdf
+
+quoted DSLs?
+
 * for-syntax for fixpoints
 
     for (fix s) blah blah blah
