@@ -152,15 +152,19 @@
 
     \begin{center}
       \begin{tikzpicture}[scale=1]
-        \node (top)  at ( 0, 1) {\phantom{\small(varying)} $\top$ {\small(varying)}};
-        \node (bot)  at ( 0,-1) {\phantom{\small(undefined)} $\bot$ {\small(undefined)}};
-        \node (-3)   at (-3, 0) {$\hdots$};
+        \node (top)  at ( 0, 1) {$\top$};
+        \node (bot)  at ( 0,-1) {$\bot$};
+        \node (-3)   at (-2.75, 0) {$\hdots$};
         \node (-2)   at (-2, 0) {-2};
         \node (-1)   at (-1, 0) {-1};
         \node (0)    at ( 0, 0) {0};
         \node (1)    at ( 1, 0) {1};
         \node (2)    at ( 2, 0) {2};
-        \node (3)    at ( 3, 0) {$\hdots$};
+        \node (3)    at ( 2.75, 0) {$\hdots$};
+        %% TODO: left-align these
+        \node (varying)   at (4.2, 1) {\footnotesize (varying)};
+        \node (constant)  at (4.2, 0) {\footnotesize (constants)};
+        \node (undefined) at (4.2,-1) {\footnotesize (undefined)};
         \draw (bot) -- (-2) -- (top) -- (-1) -- (bot) -- (0) -- (top)
         -- (1) -- (bot) -- (2) -- (top);
       \end{tikzpicture}
@@ -191,12 +195,12 @@
 
   To the simply-typed lambda calculus, add...\pause
 
-  {\huge\[ \alt<3->{\ms{fix}\;x\;\ms{is}\;[...]}
-                   {\ms{fix}\;(\lambda x.\; [...])} \]}\pause\pause
+  {\huge\[ \alt<3->{\ms{fix}\;\m{x}\;\ms{is}\;[...]}
+                   {\ms{fix}\;(\lambda \m{x}.\; [...])} \]}\pause\pause
 
   Need to check:
   \begin{enumerate}
-  \item That $(\lambda x.\; [...])$ is a \textbf{monotone} function
+  \item That $(\lambda \m{x}.\; [...])$ is a \textbf{monotone} function
   \item \color{gray} on a \textbf{semilattice} satisfying \textbf{ACC}.
   \end{enumerate}
 
@@ -217,21 +221,20 @@
       $2$ & booleans & $\ms{false} < \ms{true}$\\
       $A \times B$ & pairs & pointwise\\
       $\{A\}$      & finite sets & by inclusion: $x \le y \iff x \subseteq y$\\
-      $\ms{Flat}\;A$ &
-      %% an $A$ or $\bot$ or $\top$ &
-      \multicolumn{2}{m{4cm}}{\scriptsize
-        \begin{tikzpicture}[scale=0.5]
-        \node (top)  at ( 0, 1) {$\top$};
-        \node (bot)  at ( 0,-1) {$\bot$};
-        \node (-2)   at (-1.49, 0) {$\hdots$};
-        \node (-1)   at (-0.75, 0) {$\hdots$};
-        \node (0)    at ( 0, 0) {$A$};
-        \node (1)    at (0.75, 0) {$\hdots$};
-        \node (2)    at (1.49, 0) {$\hdots$};
-        \draw (bot) -- (-2) -- (top) -- (-1) -- (bot) -- (0) --
-              (top) -- (1) -- (bot) -- (2) -- (top);
-      \end{tikzpicture}
-}\\
+      %% $\ms{Flat}\;A$ &
+      %% %% an $A$ or $\bot$ or $\top$ &
+      %% \multicolumn{2}{m{4cm}}{\scriptsize
+      %%   \begin{tikzpicture}[scale=0.5]
+      %%   \node (top)  at ( 0, 1) {$\top$};
+      %%   \node (bot)  at ( 0,-1) {$\bot$};
+      %%   \node (-2)   at (-1.49, 0) {$\hdots$};
+      %%   \node (-1)   at (-0.75, 0) {$\hdots$};
+      %%   \node (0)    at ( 0, 0) {$A$};
+      %%   \node (1)    at (0.75, 0) {$\hdots$};
+      %%   \node (2)    at (1.49, 0) {$\hdots$};
+      %%   \draw (bot) -- (-2) -- (top) -- (-1) -- (bot) -- (0) --
+      %%         (top) -- (1) -- (bot) -- (2) -- (top);
+      %% \end{tikzpicture}}\\
       $A \to B$    & functions & pointwise\\
       $A \mto B$  & \textbf{monotone} functions & pointwise\\
     \end{tabular}
@@ -334,9 +337,16 @@
   \frametitle{Summary}
 
   \begin{itemize}
-  \item Monotone fixed points on semilattices are powerful
-  \item We can check monotonicity with types
+  \item Many algorithms are concisely expressed as \textbf{fixed points} of
+    \textbf{monotone maps} on \textbf{semilattices}
+  \item We can represent semilattices as types
+  \item We can track \textbf{monotonicity} with types, too!
   \end{itemize}
+
+  \vspace{1em}
+  \begin{center}
+    {\Large \url{github.com/rntz/datafun}}
+  \end{center}
 \end{frame}
 
 \end{document}
