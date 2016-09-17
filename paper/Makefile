@@ -2,7 +2,7 @@
 # $pdflatex = 'pdflatex -interaction=nonstopmode';
 # it makes latexmk quit on compilation failure.
 
-TEXS    := datafun.tex opsem.tex expansions.tex
+TEXS    := datafun.tex expansions.tex presentation.tex
 # other things which affect compilation result
 DEPENDS := Makefile datafun.bib sigplanconf.cls
 DEPENDS += $(wildcard *.sty) $(wildcard *.tex)
