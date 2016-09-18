@@ -27,7 +27,7 @@ fun subsets univ =
 (* val natrec : str → (str → str) → nat → str
  * fun natrec init succ n =
  *   let val nats = upto n
- *   in  *)
+ *   in *)
 
 
 (* we represent characters by strings of length one *)
