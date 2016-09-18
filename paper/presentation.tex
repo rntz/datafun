@@ -65,20 +65,15 @@
 \maketitle
 
 \begin{frame}
-  \frametitle{What is Datafun?}
+  \Large \textbf{Fixed points}\\of \textbf{monotone maps}\\on
+  \textbf{semilattices}\\ satisfying an \textbf{ascending chain condition}
 
-  Datafun is a \emph{pure}, \emph{total} functional language for expressing
-  \textbf{fixed points} of \textbf{monotone maps} on \textbf{semilattices}
-  satisfying an \textbf{ascending chain condition}.
-
-  \vspace{1.5em}
+  \pause\vspace{1.5em}
 
   Example: \textbf{Static analysis!}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Static analysis}
-
   \begin{tabular}{rl}
     1 & \texttt{\censor{x := 0}}\\
     2 & \texttt{\censor{t := 3}}\\
@@ -91,8 +86,6 @@
 
 
 \begin{frame}
-  \frametitle{Static analysis}
-
   \begin{tabular}{rll}
     1 & \texttt{x := 0} & x = 0\\
     2 & \texttt{\alt<2->{t := 3}{\censor{t := 3}}}
@@ -104,15 +97,13 @@
       & \uncover<4->{x = 0, t = 3, s = \alt<5->{7}{\color{red}{?}}}\\
     5 & \texttt{\quad \alt<6->{x $\leftarrow$ x + 1}
                               {\censor{x $\leftarrow$ x + 1}}}
-      & \uncover<6->{x = \alt<7->{1}{{\color{red}?}}, t = 3, s = 7}\\
+      & \uncover<6->{x = 1, t = 3, s = 7}\\
     6 & \texttt{\quad print s}
-      & \uncover<8->{x = 1, t = 3, s = 7}
+      & \uncover<7->{x = 1, t = 3, s = 7}
   \end{tabular}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Static analysis}
-
   \begin{tabular}{rll}
     1 & \texttt{x := 0} & x = 0\\
     2 & \texttt{t := 3} & x = 0, t = 3\\
@@ -138,17 +129,15 @@
 
 
 \begin{frame}
-  \frametitle{What about our definition?}
+  %% {\footnotesize\color{gray} Datafun is a \emph{pure}, \emph{total} functional
+  %%   language for expressing \textbf{\color{black} fixed points} of
+  %%   \textbf{\color{black} monotone maps} on \textbf{\color{black} semilattices}
+  %%   satisfying an \textbf{\color{black} ascending chain condition}.}
 
-  {\footnotesize\color{gray} Datafun is a \emph{pure}, \emph{total} functional
-    language for expressing \textbf{\color{black} fixed points} of
-    \textbf{\color{black} monotone maps} on \textbf{\color{black} semilattices}
-    satisfying an \textbf{\color{black} ascending chain condition}.}
-
-  \vspace{0.5em}
+  %% \vspace{0.5em}
 
   \begin{itemize}
-  \item \textbf{Semilattice}:\\
+  \item \textbf{Semilattices}:\\
 
     \begin{center}
       \begin{tikzpicture}[scale=1]
@@ -163,7 +152,7 @@
         \node (3)    at ( 2.75, 0) {$\hdots$};
         %% TODO: left-align these
         \node (varying)   at (4.2, 1) {\footnotesize (varying)};
-        \node (constant)  at (4.2, 0) {\footnotesize (constants)};
+        \node (constant)  at (4.2, 0) {\footnotesize (constants)};;
         \node (undefined) at (4.2,-1) {\footnotesize (undefined)};
         \draw (bot) -- (-2) -- (top) -- (-1) -- (bot) -- (0) -- (top)
         -- (1) -- (bot) -- (2) -- (top);
@@ -178,24 +167,37 @@
 \end{frame}
 
 
-\begin{frame}
-  \frametitle{What else fits this mold?}
+\begin{frame}%{What's expressible this way?}
 
+  \Large {What's expressible this way?}\vspace{0.5em}
+  \large
   \begin{itemize}
   \item Static analyses
   \item Graph reachability, connectedness, shortest path, \&c
   \item CYK algorithm for CFG parsing
   \item \textbf{Every Datalog program}
   \end{itemize}
+
+  %% Surprisingly general!
 \end{frame}
 
 
 \begin{frame}
-  \frametitle{How do we express semilattice fixed points?}
 
-  To the simply-typed lambda calculus, add...\pause
+  \Large \textbf{Datafun} is:
+  \begin{itemize}
+  \item a simply-typed lambda calculus
+  \item where types are posets \& some are semilattices
+  %% \item ... of which some are semilattices
+  \item that \textbf{tracks monotonicity via types}
+  \item so that you can take fixed points
+  \end{itemize}
+\end{frame}
 
-  {\huge\[ \alt<3->{\ms{fix}\;\m{x}\;\ms{is}\;[...]}
+\begin{frame}
+  \frametitle{How to express these fixed points?}
+
+  \pause{\huge\[ \alt<3->{\ms{fix}\;\m{x}\;\ms{is}\;[...]}
                    {\ms{fix}\;(\lambda \m{x}.\; [...])} \]}\pause\pause
 
   Need to check:
@@ -218,6 +220,7 @@
     \begin{tabular}{cll}
       \textbf{Type} & \textbf{Meaning} & \textbf{Ordering}
       \\\hline
+      $\mathbb{N}$ & naturals & $0 < 1 < 2 < \hdots$\\
       $2$ & booleans & $\ms{false} < \ms{true}$\\
       $A \times B$ & pairs & pointwise\\
       $\{A\}$      & finite sets & by inclusion: $x \le y \iff x \subseteq y$\\
@@ -317,6 +320,7 @@
 
   \vspace{0.2em}
 
+  \color<1>{gray}\color<2->{black}
   \textbf{Reachability:}\vspace{-0.8em}
   \[\begin{array}{l}
     path ~:~ \{\fin{A} \times \fin{A}\} \mto \{\fin{A} \times \fin{A}\}\\
@@ -332,15 +336,32 @@
 
 \end{frame}
 
+%% More examples?
 
+%% val subsets: {nat} →⁺ {{nat}}
+%% fun subsets univ =
+%%   fix s = {{}}
+%%         ∨ {{x} | x in univ}
+%%         ∨ {x ∨ y | x in s, y in s}
+
+%% val rd : code -> flow -> {label, label, var}
+%% fun rd code flow =
+%%   fix self = for ((i,s) ∈ entries code)
+%%                {(i, i, v) | v ∈ defines s}
+%%              ∨ {(i, l, v) | (j, .i) ∈ flow, (.j, l, v) ∈ self
+%%                           , not (v ∈? defines s)}
+
+
 \begin{frame}
   \frametitle{Summary}
 
   \begin{itemize}
   \item Many algorithms are concisely expressed as \textbf{fixed points} of
     \textbf{monotone maps} on \textbf{semilattices}
-  \item We can represent semilattices as types
-  \item We can track \textbf{monotonicity} with types, too!
+  \item We can track monotonicity with types!
+  \item Put it all together and you get a simple but powerful language.
+  \item \color{red} (This slide is weak please help)
+    %% TODO FIXME XXX
   \end{itemize}
 
   \vspace{1em}
@@ -348,5 +369,38 @@
     {\Large \url{github.com/rntz/datafun}}
   \end{center}
 \end{frame}
+
+
+%% Post-presentation matter
+\begin{frame}
+  \frametitle{Datafun vs Datalog}
+
+  \begin{center}
+    \begin{tabular}{l|l}
+      \textbf{Datafun pros} & \textbf{Datalog pros}\\\hline
+      Functional abstraction! & Finiteness/ACC is automatic\\
+      Semilattices other than $\mathcal{P}_{\ms{fin}}$ & Often more concise\\
+      Can do arithmetic & Existing optimization literature\\
+      Can nest sets
+    \end{tabular}
+  \end{center}
+
+  \vspace{2em}
+
+  \textbf{See also}: \textsc{Flix}, PLDI 2016, Madsen et al
+\end{frame}
+
+\begin{frame}
+  \frametitle{Datafun vs \textsc{Flix}}
+
+  \begin{center}
+    \begin{tabular}{l|l}
+      \textbf{Datafun pros} & \textsc{Flix}\textbf{ pros}\\\hline
+      Functions on relations & Programmer-defined semilattices\\
+      Types for monotonicity & No types for monotonicity
+    \end{tabular}
+  \end{center}
+\end{frame}
+
 
 \end{document}
