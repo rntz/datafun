@@ -31,12 +31,12 @@ fun mem x a = for (y ∈ a) x = y
  * equality, we have to explicitly annotate patterns that test for equality.
  * We do this by preceding them with a dot. *)
 val intersect: {nat} →⁺ {nat} →⁺ {nat}
-fun intersect a b = {x | x ∈ a, .x ∈ b}
+fun intersect a b = {x | x ∈ a, !x ∈ b}
 
 
 (* ---------- 3.3 Composition of relations ---------- *)
 val compose: {nat × str} →⁺ {str × nat} →⁺ {nat × nat}
-fun compose r s = {(a,c) | (a,b) ∈ r, (.b,c) ∈ s}
+fun compose r s = {(a,c) | (a,b) ∈ r, (!b,c) ∈ s}
 
 
 (* ---------- 3.4 Transitive closure ---------- *)
@@ -70,7 +70,7 @@ type fact = sym × nat × nat
 
 val iter : str → grammar →⁺ {fact} →⁺ {fact}
 fun iter text g chart =
-    { (a,i,k) | (a, Concat(b,c)) ∈ g, (.b,i,j) ∈ chart, (.c,.j,k) ∈ chart }
+    { (a,i,k) | (a, Concat(b,c)) ∈ g, (!b,i,j) ∈ chart, (!c,!j,k) ∈ chart }
   ∨ { (a, i, i + strlen s)
     | (a, String(s)) ∈ g
     , i ∈ range 0 (length text - length s)
@@ -81,7 +81,7 @@ fun parse text g =
   let val chart = fix c : {fact} is iter text g c
   (* we can test equality with arbitrary expressions (of equality type),
    * not just variables, by prefixing them with "." in a pattern. *)
-  in {a | (a, 0, .(length text)) ∈ chart}
+  in {a | (a, 0, !(length text)) ∈ chart}
 
 
 (* TODO: an example grammar *)
@@ -124,8 +124,8 @@ fun live code flow =
   fix live is
   for ((i,stmt) ∈ code)
     {(i,v) | v ∈ uses stmt}
-  ∨ {(i,v) | (.i,j) ∈ flow
-           , (.j,v) ∈ live
+  ∨ {(i,v) | (!i,j) ∈ flow
+           , (!j,v) ∈ live
            , not (v ∈? defines stmt)}
 
 val reachingDefinitions : program → flow → {(label × var) × label}
@@ -133,6 +133,6 @@ fun reachingDefinitions code flow =
   fix rd is
   for ((i,stmt) ∈ code)
     {((i,v),i) | v ∈ defines stmt}
-  ∨ {((l,v),i) | (j,.i) ∈ flow
-               , ((l,v),.j) ∈ rd
+  ∨ {((l,v),i) | (j,!i) ∈ flow
+               , ((l,v),!j) ∈ rd
                , not (v ∈? defines stmt) }

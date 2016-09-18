@@ -11,7 +11,7 @@
   (eof
    ;; punctuation
    LP RP LSQUARE RSQUARE LCURLY RCURLY
-   DOT COMMA : SEMI _ BAR & BARBAR &&
+   DOT BANG COMMA : SEMI _ BAR & BARBAR &&
    = <= < >= >
    -> ~> ->- ->+ =>
    + * - / ++ **
@@ -44,7 +44,7 @@
    ["(" 'LP]      [")" 'RP]
    ["{" 'LCURLY]  ["}" 'RCURLY]
    ["[" 'LSQUARE] ["]" 'RSQUARE]
-   ["." 'DOT] ["," 'COMMA] [":" ':] [";" 'SEMI] ["_" '_]
+   ["." 'DOT] ["!" 'BANG] ["," 'COMMA] [":" ':] [";" 'SEMI] ["_" '_]
    ["|" 'BAR] ["&" '&] ["||" 'BARBAR] ["&&" '&&]
    ["=" '=] ["<=" '<=] ["<" '<] [">=" '>=] [">" '>]
    ["=>" '=>] ["->" '->] ["~>"  '~>] ["->+" '->+] ["->-" '->-]
