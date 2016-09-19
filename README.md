@@ -1,10 +1,14 @@
 # FILES
 
-`system.md`: Current description of Datafun's type theory.
+`paper/`: ICFP 2016 paper.
 
-`src/`: Implementation of datafun in Racket. `src/repl.rkt` is most useful.
+`src/`: Implementation of Datafun in Racket. `src/repl.rkt` is most useful.
 
-`paper/`: ICFP paper work in progress.
+What follows is an *extremely* out-of-date description of Datafun's type theory.
+For more up-to-date information,
+[here's a paper preprint](http://www.rntz.net/files/datafun.pdf); or you can
+clone the repository and run `make` in the `paper/` directory to produce
+`datafun.pdf`.
 
 # Datafun
 
