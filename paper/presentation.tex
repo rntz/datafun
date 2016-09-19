@@ -66,70 +66,126 @@
 \maketitle
 
 
-\begin{frame}
-  \Large
+\begin{frame}\Large
   \begin{tabular}{rl}
-    1 & \texttt{\censor{x := 0}}\\
-    2 & \texttt{\censor{t := 3}}\\
-    3 & \texttt{\censor{while true do}}\\
-    4 & \texttt{\quad \censor{s := if x = 0}}\\
-      & \texttt{\quad \phantom{s := }\censor{then 7}}\\
-      & \texttt{\quad \phantom{s := }\censor{else 4 + t}}\\
-    5 & \texttt{\quad \censor{x $\leftarrow$ x + 1}}\\
-    6 & \texttt{\quad print s}
-        \qquad \texttt{\#} can be replaced by \texttt{print 7}
+    1 & \tt\censor{x := 0}\\
+    2 & \tt\censor{c := x}\\
+    3 & \tt\censor{while true do}\\
+    4 & {\tt\quad print c}
+        \qquad \texttt{\#} can be replaced by \texttt{print 0}\\
+    5 & {\tt\quad print x}
+    \qquad \texttt{\#} but this can't\\
+    6 & \tt\quad \censor{x += 1}
   \end{tabular}
 \end{frame}
 
-\begin{frame}
-  \Large
-  \begin{tabular}{rl>{\hspace{1em}}l}
-    1 & \texttt{x := 0} & x = 0\\
-    2 & \texttt{\alt<2->{t := 3}{\censor{t := 3}}}
-      & \uncover<2->{x = 0, t = 3}\\
-    3 & \texttt{\alt<3->{while true do}{\censor{while true do}}}
-      & \uncover<3->{x = 0, t = 3}\\
-    4 & \texttt{\quad \alt<4->{s := if x = 0}
-                              {\censor{s := if x = 0}}}
-      \\
-      & \tt \quad \phantom{s :=} \alt<4->{then 7}{\censor{then 7}}
-      & \uncover<4->{x = 0, t = 3, s = \alt<5->{7}{\color{red}{?}}}\\
-      & \texttt{\quad \phantom{s := }\alt<4->{else 4 + t}{\censor{else 4 + t}}}\\
-    5 & \texttt{\quad \alt<6->{x $\leftarrow$ x + 1}
-                              {\censor{x $\leftarrow$ x + 1}}}
-      & \uncover<6->{x = 1, t = 3, s = 7}\\
-    6 & \texttt{\quad print s}
-      & \uncover<7->{x = 1, t = 3, s = 7}
+\begin{frame}\Large
+  \begin{tabular}{rl>{\hspace{2em}}l}
+    1 & \tt x := 0 & x = 0\\
+    2 & \tt\alt<2->{c := x}{\censor{c := x}}
+      & \uncover<2->{x = 0, c = 0}\\
+    3 & \tt\alt<3->{while true do}{\censor{while true do}}
+      & \uncover<3->{x = 0, c = 0}\\
+    4 & {\tt\quad print c}
+      & \uncover<4->{x = 0, c = 0}\\
+    5 & {\tt\quad print x}
+      & \uncover<5->{{\color<7>{red}\textbf<7>{x = 0}}, c = 0}\\
+    6 & \tt\quad \alt<6->{x += 1}{\censor{x += 1}}
+      & \uncover<6->{x = 1, c = 0}
   \end{tabular}
 \end{frame}
 
-\begin{frame}
-  \Large
-  \begin{tabular}{rl>{\hspace{1em}}l}
-    1 & \texttt{x := 0} & x = 0\\
-    2 & \texttt{t := 3} & x = 0, t = 3\\
-    \color<1,7>{red}
-    3 & \texttt{\color<1,7>{red} while true do}
-      & {\color<1,7>{red} x = $\top$, t = 3}\\
-    \color<1>{gray}\color<2-4>{red}
-    4 & \color<1>{gray}\color<2-4>{red}
-        \tt\quad s := if x = 0\\
-      & \color<1>{gray}\color<2-4>{red} \tt\quad\phantom{s :=} then 7
-      & \color<1>{gray}\color<2-4>{red}
-        x = \alt<3->{$\top$}{{\color<2>{gray}0}}, t = 3, s = {\color<2-3>{gray}7}\\
-      & \color<1>{gray}\color<2-4>{red}
-        \tt\quad\phantom{s :=} else 4 + t\\
-    \color<1-4>{gray}\color<5>{red}
-    5 & \color<1-4>{gray}\color<5>{red}
-        \texttt{\quad x $\leftarrow$ x + 1}
-      & \color<1-4>{gray}\color<5>{red}
-        x = \alt<5->{$\top$}{1}, t = 3, s = 7\\
-    \color<1-5>{gray}\color<6>{red}\color<8>{blue}
-    6 & \color<1-5>{gray}\color<6>{red}\color<8>{blue} \texttt{\quad print s}
-      & \color<1-5>{gray}\color<6>{red}
-        x = \alt<6->{$\top$}{1}, t = 3, {\color<8>{blue} s = 7}
+\begin{frame}\Large
+  \begin{tabular}{rl>{\hspace{2em}}l}
+    1 & \tt x := 0 & x = 0\\
+    2 & \tt c := x
+      & x = 0, c = 0\\
+    \color<1>{red}
+    3 & \tt \color<1>{red} while true do
+      & \color<1>{red} x = $\top$, c = 0\\
+    \color<1>{gray}\color<2>{red}
+    4 & \color<1>{gray}\color<2>{red}
+        \tt\quad print c
+      & \color<1>{gray}\color<2>{red}
+        x = \alt<2->{$\top$}{0}, {\color<5>{blue}c = 0}\\
+    \color<1-2>{gray}\color<3>{red}
+    5 & \color<1-2>{gray}\color<3>{red}
+        \tt\quad print x
+      & \color<1-2>{gray}\color<3>{red}
+        {\color<5>{blue}x = \alt<3->{$\top$}{0}}, c = 0\\
+    \color<1-3>{gray}\color<4>{red}
+    6 & \color<1-3>{gray}\color<4>{red}
+        \tt\quad x += 1
+      & \color<1-3>{gray}\color<4>{red}
+        x = \alt<4->{$\top$}{1}, c = 0
   \end{tabular}
 \end{frame}
+
+
+%% \begin{frame}
+%%   \Large
+%%   \begin{tabular}{rl}
+%%     1 & \texttt{\censor{x := 0}}\\
+%%     2 & \texttt{\censor{t := 3}}\\
+%%     3 & \texttt{\censor{while true do}}\\
+%%     4 & \texttt{\quad \censor{s := if x = 0}}\\
+%%       & \texttt{\quad \phantom{s := }\censor{then 7}}\\
+%%       & \texttt{\quad \phantom{s := }\censor{else 4 + t}}\\
+%%     5 & \texttt{\quad \censor{x $\leftarrow$ x + 1}}\\
+%%     6 & \texttt{\quad print s}
+%%         \qquad \texttt{\#} can be replaced by \texttt{print 7}
+%%   \end{tabular}
+%% \end{frame}
+
+%% \begin{frame}
+%%   \Large
+%%   \begin{tabular}{rl>{\hspace{1em}}l}
+%%     1 & \texttt{x := 0} & x = 0\\
+%%     2 & \texttt{\alt<2->{t := 3}{\censor{t := 3}}}
+%%       & \uncover<2->{x = 0, t = 3}\\
+%%     3 & \texttt{\alt<3->{while true do}{\censor{while true do}}}
+%%       & \uncover<3->{x = 0, t = 3}\\
+%%     4 & \texttt{\quad \alt<4->{s := if x = 0}
+%%                               {\censor{s := if x = 0}}}
+%%       \\
+%%       & \tt \quad \phantom{s :=} \alt<4->{then 7}{\censor{then 7}}
+%%       & \uncover<4->{x = 0, t = 3, s = \alt<5->{7}{\color{red}{?}}}\\
+%%       & \texttt{\quad \phantom{s := }\alt<4->{else 4 + t}{\censor{else 4 + t}}}\\
+%%     5 & \texttt{\quad \alt<6->{x $\leftarrow$ x + 1}
+%%                               {\censor{x $\leftarrow$ x + 1}}}
+%%       & \uncover<6->{x = 1, t = 3, s = 7}\\
+%%     6 & \texttt{\quad print s}
+%%       & \uncover<7->{x = 1, t = 3, s = 7}
+%%   \end{tabular}
+%% \end{frame}
+
+%% \begin{frame}
+%%   \Large
+%%   \begin{tabular}{rl>{\hspace{1em}}l}
+%%     1 & \texttt{x := 0} & x = 0\\
+%%     2 & \texttt{t := 3} & x = 0, t = 3\\
+%%     \color<1,7>{red}
+%%     3 & \texttt{\color<1,7>{red} while true do}
+%%       & {\color<1,7>{red} x = $\top$, t = 3}\\
+%%     \color<1>{gray}\color<2-4>{red}
+%%     4 & \color<1>{gray}\color<2-4>{red}
+%%         \tt\quad s := if x = 0\\
+%%       & \color<1>{gray}\color<2-4>{red} \tt\quad\phantom{s :=} then 7
+%%       & \color<1>{gray}\color<2-4>{red}
+%%         x = \alt<3->{$\top$}{{\color<2>{gray}0}}, t = 3, s = {\color<2-3>{gray}7}\\
+%%       & \color<1>{gray}\color<2-4>{red}
+%%         \tt\quad\phantom{s :=} else 4 + t\\
+%%     \color<1-4>{gray}\color<5>{red}
+%%     5 & \color<1-4>{gray}\color<5>{red}
+%%         \texttt{\quad x $\leftarrow$ x + 1}
+%%       & \color<1-4>{gray}\color<5>{red}
+%%         x = \alt<5->{$\top$}{1}, t = 3, s = 7\\
+%%     \color<1-5>{gray}\color<6>{red}\color<8>{blue}
+%%     6 & \color<1-5>{gray}\color<6>{red}\color<8>{blue} \texttt{\quad print s}
+%%       & \color<1-5>{gray}\color<6>{red}
+%%         x = \alt<6->{$\top$}{1}, t = 3, {\color<8>{blue} s = 7}
+%%   \end{tabular}
+%% \end{frame}
 
 
 \begin{frame}
