@@ -133,7 +133,7 @@
 
 
 \begin{frame}
-  \Large Computing \textbf{fixed points}\\of \textbf{monotone maps}\\on
+  \Large Compute \textbf{fixed points}\\of \textbf{monotone maps}\\on
   \textbf{semilattices}\\ satisfying an \textbf{ascending chain condition}
 \end{frame}
 
@@ -205,31 +205,32 @@
   \item where types are posets \& some are semilattices
   %% \item ... of which some are semilattices
   \item that \textbf{tracks monotonicity via types}
-  \item to let you compute fixed points.
+  \item to let you compute fixed points
+  \item and know they terminate.
   \end{itemize}
 \end{frame}
 
-\begin{frame}
-  %% \frametitle{How to express these fixed points?}
+%% \begin{frame}
+%%   %% \frametitle{How to express these fixed points?}
 
-  %% \Large\vspace{-2em}
-  %% {\huge\[ \alt<2->{\ms{fix}\;\m{x}\;\ms{is}\;[...]}
-  %%   {\ms{fix}\;(\lambda \m{x}.\; [...])} \]}
+%%   %% \Large\vspace{-2em}
+%%   %% {\huge\[ \alt<2->{\ms{fix}\;\m{x}\;\ms{is}\;[...]}
+%%   %%   {\ms{fix}\;(\lambda \m{x}.\; [...])} \]}
 
-  \Large\vspace{-2em}
-  {\huge\[ {\ms{fix}\;(\lambda \m{x}.\; [...])} \]}
+%%   \Large\vspace{-2em}
+%%   {\huge\[ {\ms{fix}\;(\lambda \m{x}.\; [...])} \]}
 
-  Need to check:
-  \begin{enumerate}
-  \item $(\lambda \m{x}.\; [...])$ is \textbf{monotone}
-    \qquad \color[rgb]{0.5,0,1.0} $\leftarrow$ \emph{novel?}
-  \item \color{gray} on a \textbf{semilattice} 
-  \item satisfying \textbf{ACC}.
-  \end{enumerate}
+%%   Need to check:
+%%   \begin{enumerate}
+%%   \item $(\lambda \m{x}.\; [...])$ is \textbf{monotone}
+%%     \qquad \color[rgb]{0.5,0,1.0} $\leftarrow$ \emph{novel?}
+%%   \item \color{gray} on a \textbf{semilattice} 
+%%   \item satisfying \textbf{ACC}.
+%%   \end{enumerate}
 
-  %% NOTE: mention that monotonicity is NOVEL.
+%%   %% NOTE: mention that monotonicity is NOVEL.
 
-\end{frame}
+%% \end{frame}
 
 %% \begin{frame}
 %%   \begin{center}
@@ -237,33 +238,18 @@
 %%   \end{center}
 %% \end{frame}
 
-\begin{frame}
-  \frametitle{Types as posets}
-  \large
+\begin{frame}{Types as posets}\Large
+
   \begin{center}
     \begin{tabular}{cll}
       \textbf{Type} & \textbf{Meaning} & \textbf{Ordering}
       \\\hline
       $\mathbb{N}$ & naturals & $0 < 1 < 2 < \hdots$\\
       $2$ & booleans & $\ms{false} < \ms{true}$\\
-      $\{A\}$      & finite sets & ${\subseteq}$\\
-      $A \times B$ & pairs & pointwise\\
-      %% $\ms{Flat}\;A$ &
-      %% %% an $A$ or $\bot$ or $\top$ &
-      %% \multicolumn{2}{m{4cm}}{\scriptsize
-      %%   \begin{tikzpicture}[scale=0.5]
-      %%   \node (top)  at ( 0, 1) {$\top$};
-      %%   \node (bot)  at ( 0,-1) {$\bot$};
-      %%   \node (-2)   at (-1.49, 0) {$\hdots$};
-      %%   \node (-1)   at (-0.75, 0) {$\hdots$};
-      %%   \node (0)    at ( 0, 0) {$A$};
-      %%   \node (1)    at (0.75, 0) {$\hdots$};
-      %%   \node (2)    at (1.49, 0) {$\hdots$};
-      %%   \draw (bot) -- (-2) -- (top) -- (-1) -- (bot) -- (0) --
-      %%         (top) -- (1) -- (bot) -- (2) -- (top);
-      %% \end{tikzpicture}}\\
+      $\{A\}$      & finite subsets of $A$ & ${\subseteq}$\\
+      %% $A \times B$ & pairs & pointwise\\
       $A \to B$    & functions & pointwise\\
-      $A \mto B$  & \textbf{monotone} functions & pointwise\\
+      $A \mto B$  & \textbf{monotone} functions & pointwise
     \end{tabular}
   \end{center}
 
@@ -273,9 +259,6 @@
     member ~:~ \mathbb{N} \to \{\mathbb{N}\} \mto 2\\
     member\; x\; \mathbf{s} = \exists(y \in \mathbf{s})\; x = y
   \end{array}\]
-
-  \vspace{5em}
-
 \end{frame}
 
 %% monotone vs discrete
@@ -331,7 +314,7 @@
   \[
   \begin{array}{rcl}
     e &::=& ... ~|~ \{\} ~|~ e \cup e ~|~ \{e\} ~|~ \bigcup(x \in e)\, e\\
-      \pause&~|~& \{e ~|~ x \in e, ...\}
+      \uncover<3->{&~|~& \{e ~|~ x \in e, ...\}}
   \end{array}
   \]
 
@@ -418,25 +401,6 @@
   \end{array}\]
 \end{frame}
 
-%% \begin{frame}{Example: reaching definitions}
-%%   %% TODO: try to make this more legible (larger)
-%%   \vspace{-4em}
-%%   \[\begin{array}{l}
-%%     \textsf{// omitted for brevity}\\
-%%     \textbf{type}~\ms{stmt}, \ms{line}, \ms{var}\\
-%%     \ms{defines} ~:~ \ms{stmt} \to \{\ms{var}\}\\
-%%     \\
-%%     \ms{reachingDefs} ~:~ \{\ms{line} \x \ms{stmt}\} \to \{\ms{stmt} \x \ms{stmt}\}
-%%     \to \{\ms{line} \x \ms{line} \x \ms{var}\}\\
-%%     \ms{reachingDefs}\, code\, flow =\\
-%%     \quad \ms{fix}~\m{self}~\ms{is}\\
-%%     \quad\quad \bigcup ((i,s) \in code)\\
-%%     \quad\quad\quad \phantom{\cup~} \{(i,i,v) ~|~ v \in \ms{defines}\,s\}\\
-%%     \quad\quad\quad \cup~ \{(i,l,v) ~|~ (j, !i) \in flow, (!j,l,v) \in \m{self},
-%%     \neg (v \mathrel{{\in}?} \ms{defines}\,s)\}\\
-%%   \end{array}\]
-%% \end{frame}
-
 %% More examples?
 
 %% val subsets: {nat} →⁺ {{nat}}
@@ -460,15 +424,15 @@
     \textbf{monotone maps} on \textbf{semilattices}.
   \item Datafun is a simple, pure, and total language for computing these fixed
     points.
-  \item Key idea: \textbf{track monotonicity with types}!
+  \item Key idea: \textbf{track monotonicity with types!}
     %% something about ACC
-  \item In effect, generalizes Datalog to other semilattices.
-  %% \item plus, we get functional abstraction!
+  \item Has a simple denotational semantics (in paper) \& prototype
+    implementation (on github).
+  \item Generalizes Datalog to other semilattices.
   \end{itemize}
 
-  \vspace{1em}
   \begin{center}
-    {\Large \url{github.com/rntz/datafun}}
+    \huge \url{rntz.net/datafun}
   \end{center}
 \end{frame}
 
