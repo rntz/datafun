@@ -237,9 +237,8 @@
 
 \begin{frame}%{What's expressible this way?}
 
-  \large Computing \textbf{fixed points} of \textbf{monotone maps} on
-  \textbf{semilattices} satisfying an \textbf{ascending chain condition}\\
-  is very general:
+  \large Examples of computing \textbf{fixed points} of \textbf{monotone maps} on
+  \textbf{semilattices} satisfying an \textbf{ascending chain condition}:
 
   \Large %% {What's expressible this way?}\vspace{0.3em}
   \begin{itemize}
@@ -258,10 +257,10 @@
   \Large \textbf{Datafun} is:
   \begin{itemize}
   \item a simply-typed lambda calculus
-  \item where types are posets \& some are semilattices
+  \item where \textbf{types are posets}\\{\& some are semilattices}
   %% \item ... of which some are semilattices
   \item that \textbf{tracks monotonicity via types}
-  \item to let you compute fixed points
+  \item to let you compute \textbf{fixed points}
   \item and know they terminate.
   \end{itemize}
 \end{frame}
@@ -317,8 +316,10 @@
   \end{array}\]
 \end{frame}
 
+
 %% monotone vs discrete
 %% example: set membership
+%% ---------- TRACKING MONOTONICITY ----------
 \begin{frame}
   \frametitle{Tracking monotonicity}
 
@@ -338,9 +339,7 @@
   \end{quote}
 \end{frame}
 
-
-%% ---------- TYPING RULES ----------
-\begin{frame}{Function application}
+\begin{frame}{Tracking monotonicity: Function application}
   %% \frametitle{Typing rules: discrete vs monotone}
   \Large
 
@@ -366,10 +365,13 @@
   \end{array}\]
 \end{frame}
 
-\begin{frame}{Finite sets}\Large
+\begin{frame}{Tracking monotonicity: Finite sets}\Large
+  \huge\vspace{-1em}
   \[
   \begin{array}{rcl}
+    \hspace{-0.8em}
     e &::=& ... ~|~ \{\} ~|~ e \cup e ~|~ \{e\} ~|~ \bigcup(x \in e)\, e\\
+    \hspace{-0.8em}
       \uncover<3->{&~|~& \{e ~|~ x \in e, ...\}}
   \end{array}
   \]
@@ -390,13 +392,32 @@
   \end{mathpar}
 \end{frame}
 
-
-\begin{frame}{{\it Example:} Relational composition}\Large
+\begin{frame}{{\it Example:} Relational composition}\huge
   \[\begin{array}{l}
-    (\bullet) : \{A \times \eq{B}\} \mto \{\eq{B} \times C\} \mto \{A \times C\}\\
-    \m{s} \bullet \m{t} =
+    \hspace{-0.5em}(\bullet) : \{A \times \eq{B}\} \mto \{\eq{B} \times C\} \mto \{A \times C\}\\
+    \hspace{-0.5em}\m{s} \bullet \m{t} =
     \{(x,z) ~|~ (x,y) \in \m{s}, (!y,z) \in \m{t}\}
   \end{array}\]
+\end{frame}
+
+
+%% ---------- FIXED POINTS ----------
+
+\begin{frame}{Fixed points}\huge
+  \vspace{-1em}
+  {\huge\[ \ms{fix}~\m{x}~\ms{is}~e \]}
+
+  \vspace{-1.5em}\pause
+
+  \[
+    \infer{\Delta;\Gamma \vdash \ms{fix}~\m{\color<2>{red}x}~\ms{is}~e : \color<3>{red}\fin{L}}
+          {\Delta;{\color<2>{red}\Gamma,\m{x}\!:\!\color<3>{red}\fin{L}} \vdash e : \color<3>{red}\fin{L}}
+  \]
+
+  \vspace{1em}
+
+  \Large A \textbf{\color<2>{red}monotone map} on a \textbf{\color<3>{red}
+    finite semilattice with decidable equality}.
 \end{frame}
 
 \begin{frame}{{\it Example:} Reachability}\Large
