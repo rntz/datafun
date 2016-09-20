@@ -1,0 +1,158 @@
+* Example: constant propagation
+
+Consider this program
+
+    1   three := 3
+    2   x := 0
+    3   while true do
+    4       seven := if x = 1 then 7 else 4 + three
+    5       print seven
+    6       x := x + 1
+
+which is equivalent to
+
+    while true do
+        print 7
+
+let's start small: can we by static analysis determine that y = 7 at line 6?
+
+We'll do this by tracking variables at a given line as being either:
+- unassigned (⊥)
+- constant, with a given value
+- varying (⊤)
+
+** Running the static analysis
+
+    1   three := 3                      three = 3
+    2   x := 0                          x = 0, three = 3
+    3   while true do                   x = 0, three = 3
+    4       seven := if x = 1           x = 0, three = 3, seven = 7
+                     then 7
+                     else 4 + three
+    5       print seven                 (ditto)
+    6       x := x + 1                  x = 1, three = 3, seven = 7
+
+but wait, it loops! line 6 goes to line 3!
+
+    1   three := 3                      three = 3
+    2   x := 0                          x = 0, three = 3
+    3   while true do                   x = ⊤, three = 3                <- IN RED
+    4       seven := if x = 1           x = 1, three = 3, seven = 7     <- IN GREY
+                     then 7
+                     else 4 + three
+    5       print seven                 (ditto)                         <- IN GREY
+    6       x := x + 1                  x = 1, three = 3, seven = 7     <- IN GREY
+
+blah blah
+
+    1   three := 3                      three = 3
+    2   x := 0                          x = 0, three = 3
+    3   while true do                   x = ⊤, three = 3
+    4       seven := if x = 1           x = ⊤, three = 3, seven = 7
+                     then 7
+                     else 4 + three
+    5       print seven                 (ditto)
+    6       x := x + 1                  x = ⊤, three = 3, seven = 7
+
+now, we note that propagating information from line 6 to line 3 will not change
+anything! so we have reached a fixed point, and we are done.
+
+** Why a fixed point?
+
+(reason we need *fixed* point: x changes, which might change result of line 4! - and z could also have changed, if the program was different, eg if we added:
+
+7       z := z + 1
+
+)
+
+** Simpler example?
+
+1   z := 3
+2   x := 0
+3   while true do
+4       y := if x = 1 then 7 else 4 + z
+5       x := x + 1
+6       print y
+
+-- Point is that we need to learn that x is unchanging, which requires a fixed
+-- point! A-ha! This is simpler. How do we prove something is constant over a
+-- loop? Well, a simpler way would be to observe that it's not assigned inside
+-- the loop. Hm...
+
+x := 0
+t := x
+while true do
+    print t
+    x := x + 1
+
+1   x := 0
+2   while true do
+3       if x = 0 then
+4           print "yes"
+5       x := x + 1          # critical line, remove to make this trivial
+
+-- Not good, can reason w/out fixed-point that y = 7.
+1   x := 0
+2   while true do
+3       y := if x = 1 then x + 6 else 7
+4       x := x + 1
+5       print y
+
+
+* General case
+
+NOTE: Gah, how can I simplify this?
+
+To represent variable values: ⊥, ⊤, or an integer.
+
+When a program point could be reached in multiple ways, we "combined"
+information about variable values:
+
+    ⊥ + x = x + ⊥ = x
+    x + x = x
+    x + y = ⊤  (if x ≠ y)
+
+This operation forms a (join-)semilattice.
+
+Our technique of abstractly evaluating the code with variables taking values
+over this semilattice is an example of a general technique: finding the least
+fixed point of a monotone map on a semilattice. (from now on, "semilattice fixed
+point")
+
+# PROBLEM: what's the "monotone map" we're taking the fixed point of in this
+# example?
+
+Key ingredients:
+- monotonicity: "going in a particular direction"
+- ascending chain condition: "can't keep going that way forever"
+
+** Other uses
+This technique is very general: many, many static analyses are concisely
+expressed this way.
+
+Other algorithms expressible as semilattice fixed points:
+- reachability (transitive closure) in a graph (finite sets of edges)
+- shortest path
+- parsing arbitrary CFGs via the CYK algorithm
+- *every Datalog program* (the semilattice is finite sets of facts under union)
+  the standard semantics of Datalog are in fact *defined* this way
+
+* What is Datafun?
+A *pure & total* functional language for expressing *semilattice fixed points*.
+
+*Key idea*: Track monotonicity with types.
+
+# alternate version
+How to solve:
+
+- Ascending chain condition: type classes (ish)!
+- Monotonicity: comonads!
+
+** How?
+It's not immediately obvious that you *can* track monotonicity with types. (vs a
+separate theorem prover or "trust me")
+
+But, monotonicity is compositional: monotone functions compose to monotone
+functions. (for the category theorists: Poset is bi-CCC.)
+
+So if all our primitive functions... (<- seems long-winded, any other way to approach?)
