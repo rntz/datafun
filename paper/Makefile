@@ -9,6 +9,7 @@ DEPENDS += $(wildcard *.sty) $(wildcard *.tex)
 
 PDFS   := $(TEXS:.tex=.pdf)
 JUNK   := $(TEXS:.tex=.dvi) $(TEXS:.tex=.bbl)
+JUNK   += $(TEXS:.tex=.snm) $(TEXS:.tex=.nav)
 
 .PHONY: all watch view clean
 all: $(PDFS)
