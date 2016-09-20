@@ -256,7 +256,7 @@
 
   \Large \textbf{Datafun} is:
   \begin{itemize}
-  \item a simply-typed lambda calculus
+  \item a simply typed $\lambda$-calculus
   \item where \textbf{types are posets}\\{\& some are semilattices}
   %% \item ... of which some are semilattices
   \item that \textbf{tracks monotonicity via types}
@@ -421,6 +421,8 @@
 \end{frame}
 
 \begin{frame}{{\it Example:} Reachability}\Large
+  %% TODO: use this slide to emphasize that we can write *functions* over
+  %% relations, unlike Datalog. functional abstraction!
   \[\begin{array}{l}
     path ~:~ \{\fin{A} \times \fin{A}\} \mto \{\fin{A} \times \fin{A}\}\\
     path\;\m{E} = \ms{fix}~\m{P}~\ms{is}~ \m{E} \cup (\m{P} \bullet \m{P})
