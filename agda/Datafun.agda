@@ -1,9 +1,9 @@
 open import Data.List hiding ([_]; sum)
-open import Data.Product
-open import Data.Sum
+open import Data.Product hiding (map)
+open import Data.Sum hiding (map)
 open import Relation.Binary.PropositionalEquality hiding ([_])
-open import Function using (id)
-open import Data.Maybe
+open import Function using (id; _∘_)
+open import Data.Maybe hiding (map)
 open import Data.Bool
 open import Data.Unit
 open import Relation.Nullary using (¬_; Dec; yes; no)
@@ -119,11 +119,12 @@ extend-r R car = car
 extend-r R (cdr x) = cdr (extend-r R x)
 
 -- and so is map/∈
-map/∈ : ∀{a X f} → a ∈ X → f a ∈ Data.List.map f X
+map/∈ : ∀{a X f} → a ∈ X → f a ∈ map f X
 map/∈ car = car
 map/∈ (cdr e) = cdr (map/∈ e)
 
 -- Renamings between environments
+infix 4 _⊑_
 _⊑_ : Env → Env → Set
 X ⊑ Y = ∀ {a} (tone : Tone) → a ∈ X tone → a ∈ Y tone
 
@@ -214,6 +215,7 @@ weaken⇉ mono s disc x = s disc x
 weaken⇉ disc s disc x = weaken disc (s disc x)
 weaken⇉ tone s mono x = weaken tone (s mono x)
 
+infixr 5 _#_·_
 _#_·_ : ∀ {X Y a} → (tone : Tone)
       → (X ⊢ tone # a) → (X ⇉ Y) → (X ⇉ (tone # a ∷ Y))
 _#_·_ disc M s disc car = M
@@ -265,16 +267,38 @@ sub s (proj i M) = proj i (sub s M)
 Δ (a :→ b) = □ a :→ Δ a :→ Δ b
 Δ (a :× b) = Δ a :× Δ b
 Δ (a :+ b) = Δ a :+ Δ b
-Δ (□ a) = {!!}
+Δ (□ a) = □ (Δ a)
 
 Δ* : Env → Env
-Δ* X = untone (X mono ++ X disc ++ Data.List.map Δ (X disc)) (Data.List.map Δ (X mono))
+Δ* X = untone (X mono ++ X disc ++ map Δ (X disc)) (map Δ (X mono))
 
-δ-const : ∀{X a} → X ⊢ a → Δ* X ⊢ □ a
-δ-const {X} M = box (sub s M)
-  where s : wipe (Δ* X) ⇉ X
-        s disc x = var disc (extend-l (X mono) (extend-r _ x))
-        s mono x = var disc (extend-r _ x)
+-- And now we need lots of lemmas.
+unbox : ∀{X a} → X ⊢ □ a → X ⊢ a
+unbox M = letbox M (var disc car)
+
+Δ*-wipe-exchange : (X : _) → Δ* (wipe X) ⊑ wipe (Δ* X)
+Δ*-wipe-exchange X = untone (extend-l (X mono)) (λ ())
+
+Δ*-disc∷ : ∀{a} (X : _) → Δ* (disc # a ∷ X) ⊑ (disc # Δ a ∷ (disc # a ∷ Δ* X))
+Δ*-disc∷ X mono x = x
+Δ*-disc∷ X disc x = {!!}
+
+-- have: X mono ++ (a ∷ X disc) ++ (Δ a ∷ map Δ (X disc))
+-- goal: Δ a ∷ a ∷ (X mono ++ X disc ++ map Δ (X disc))
+
+wipeΔ*X⇉X : ∀{X} → wipe (Δ* X) ⇉ X
+wipeΔ*X⇉X {X} disc = var disc ∘ extend-l (X mono) ∘ extend-r _
+wipeΔ*X⇉X mono = var disc ∘ extend-r _
+
+Δ*X⇉X : ∀{X} → Δ* X ⇉ X
+Δ*X⇉X {X} disc = var disc ∘ extend-l (X mono) ∘ extend-r _
+Δ*X⇉X mono = var disc ∘ extend-r _
+
+static : ∀{X a} → X ⊢ a → Δ* X ⊢ a
+static = sub Δ*X⇉X
+
+static-box : ∀{X a} → X ⊢ a → Δ* X ⊢ □ a
+static-box M = box (sub wipeΔ*X⇉X M)
 
 lam□ : ∀ {X a b} → disc # a ∷ X ⊢ b → X ⊢ (□ a :→ b)
 lam□ M = lam (letbox (var mono car) (weaken mono M))
@@ -286,7 +310,7 @@ lam□ M = lam (letbox (var mono car) (weaken mono M))
 δ-unit (a :→ b) x = lam (lam (δ-unit b x))
 δ-unit (a :× b) (x , y) = pair (δ-unit a x) (δ-unit b y)
 δ-unit (_ :+ _) ()
-δ-unit (□ a) x = {!!}
+δ-unit (□ a) ()
 
 δ : ∀{X a} → X ⊢ a → Δ* X ⊢ Δ a
 -- What if I pass in a function as a discrete argument, f, to another function,
@@ -297,9 +321,11 @@ lam□ M = lam (letbox (var mono car) (weaken mono M))
 δ {X} (var disc x) = var disc (extend-l (X mono) (extend-l (X disc) (map/∈ x)))
 δ (var mono x) = var mono (map/∈ x)
 δ (lam M) = lam□ (lam (δ M))
-δ (app M N) = app (app (δ M) (δ-const N)) (δ N)
-δ (box M) = {!!}
-δ (letbox M M₁) = {!!}
+δ (app M N) = app (app (δ M) (static-box N)) (δ N)
+δ {X} (box M) = box (rename (Δ*-wipe-exchange X) (δ M))
+δ (letbox M M₁) = letbox (static M)
+                    (letbox (weaken disc (δ M))
+                      (rename {!!} (δ M₁)))
 δ {a = a} (unit x) = δ-unit a x
 δ (vee x M M₁) = {!!}
 δ (singleton _) = unit tt
