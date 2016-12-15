@@ -1,0 +1,11 @@
+Length: 20min preferred, but I am flexible; I can shrink it to 10min or grow to 30min if necessary.
+
+Title: Finding fixed points faster
+
+Abstract:
+
+Datalog is a forward-chaining logic programming language; a Datalog program may be run by repeatedly applying its inference rules until nothing further is deducible. This computes the fixed point of a function (applying the inference rules) over finite sets (of deduced facts).
+
+Datafun is a higher-order functional skin over a generalized version of Datalog's semantics. It generalizes Datalog in two ways: 1. it permits functional abstraction; 2. it can take fixed-points of functions over other semilattices, not just finite sets.
+
+Datalog has an extensive optimization literature. I and my advisor Neel Krishnaswami aim to generalize Datalog optimizations and apply them to Datafun. I will present our work in progress, which adapts Cai et al's work on incremental lambda-calculus to provide an analogue of Datalog's semi-naive evaluation, which avoids unnecessary re-computation when iterating towards a fixed-point.

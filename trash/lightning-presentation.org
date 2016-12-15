@@ -1,0 +1,32 @@
+* Functional query languages
+** "Like SQL, but functional"
+** Query lang: manipulate + answer Q's about data
+** Recipe: Pure, total FP plus sets + set comprehensions
+** ≈ relational algebra
+
+* Recursive queries (Datalog)
+** eg. given edges, determine reachability
+** Recursive, but total
+** Semantics: Fixed points of *monotone* maps on sets
+** Q: Types for monotonicity?
+** A: Poset is CCC → models simply typed λ-calculus!
+
+* Mixed tonicity
+** But want monotone *and* non-monotone functions!
+** Adjoint calculus
+*** Given: semantic categories w/ an adjunction
+*** Get: typing rules for a language expressing both
+*** Benton-Wadler "Linear logic, monads & the lambda calculus"
+** TWO variable contexts: unrestricted Δ & monotone Γ
+*** Δ;Γ ⊢ e : t
+*** AUDIENCE: Best way to do this as embedded DSL?
+
+* What can Datafun express?
+** relational algebra
+** static analyses
+** shortest path in a graph
+** parse arbitrary CFGs (CYK algorithm)
+** & we're not even Turing complete!
+
+* Monotonicity - functoriality connection?
+** Could this be useful for generic programming?
