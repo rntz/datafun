@@ -1,5 +1,10 @@
 (* -*- mode: sml -*- *)
 
+(* val eq : {str} -> {str} -> {str}
+ * fun eq a b =                    (\* ugh. *\) *)
+
+(* fun subset a b = a ∨ b = b *)
+
 val two : nat
 val two = 2
 
