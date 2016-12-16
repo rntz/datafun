@@ -12,7 +12,7 @@
 
 \[
 \begin{array}{rccl}
-  \textsf{types} & A,B
+  \textsf{types} & A,B,C
   &\bnfeq& A \to B \pipe A \x B \pipe A + B
   \pipe \Disc{A} \pipe \Down{\eq{A}} \pipe \tbool
   \vspace{1em}\\
@@ -48,7 +48,7 @@
   \vspace{1em}\\
 
   %% expressions
-  \textsf{expressions} & e
+  \textsf{expressions} & e,f,g
   &\bnfeq& x \pipe \fn\bind{x} e \pipe e\; e
   \pipe \pair{e}{e} \pipe \pi_i\; e
   \pipe \inj{i}{e} \pipe \case{e}{x}{e_1}{x}{e_2} \\
@@ -143,56 +143,113 @@ rules.
   \infer{\J{\GP}{\GG}{\fn\bind{x}{e}}{A \to B}}{
     \J{\GP}{\GG,x \of A}{e}{B}}
 
-  \infer{e_1 \; e_2 : B}{e_1 : A \to B & e_2 : A}
+  \infer{e \; f : B}{e : A \to B & f : A}
   \\
-  \infer{\pair{e_1}{e_2} : A \x B}{e_1 : A & e_2 : B}
+  %% \infer{\pair{e}{f} : A \x B}{e : A & f : B}
+  \infer{\pair{e_1}{e_2} : A_1 \x A_2}{e_i : A_i}
 
   \infer{\pi_i\; e : A_i}{e : A_1 \x A_2}
 
   \infer{\inj{i}{e} : A_1 + A_2}{e : A_i}
 
-  \infer{\case{e}{x}{e_1}{x}{e_2} : B}
-        {e : A_1 + A_2 & \J{\GP}{\GG, x \of A_i}{e_i}{B}}
+  \infer{\case{e}{x}{f_1}{x}{f_2} : B}
+        {e : A_1 + A_2 & \J{\GP}{\GG, x \of A_i}{f_i}{B}}
   \\
   \infer{\J{\GP}{\GG}{\disc{e}}{\Disc{A}}}{\J{\GP}{-}{e}{A}}
 
-  \infer{\letdisc{x}{e_1}{e_2} : B}
-        { e_1 : \Disc{A}
-        & \J{\GP,x\of A}{\GG}{e_2}{B} }
+  \infer{\letdisc{x}{e}{f} : B}
+        { e : \Disc{A}
+        & \J{\GP,x\of A}{\GG}{f}{B} }
 
   \infer{\splitsum{e} : \Disc{A} + \Disc{B}}
         {e : \Disc{(A + B)}}
   \\
   \infer{\unit : \lat{A}}{}
 
-  \infer{e_1 \vee e_2 : \lat{A}}{e_1 : \lat{A} & e_2 : \lat{A}}
+  \infer{e_1 \vee e_2 : \lat{A}}{e_i : \lat{A}}
 
   \infer{\downintro{e} : \Down{A}}{e : A}
 
-  \infer{\downelim{x}{e_1}{e_2} : \lat{B}}
-        { e_1 : \Down{A}
-        & \J{\GP}{\GG,x \of A}{e_2}{\lat{B}}}
+  \infer{\downelim{x}{e}{f} : \lat{B}}
+        { e : \Down{A}
+        & \J{\GP}{\GG,x \of A}{f}{\lat{B}}}
   \\
   \infer{\ett : \tbool}{}
 
   \infer{\eff : \tbool}{}
 
-  \infer{\when{e_1}{e_2} : \lat{A}}{e_1 : \tbool & e_2 : \lat{A}}
+  \infer{\when{e}{f} : \lat{A}}{e : \tbool & f : \lat{A}}
 
-  \infer{\ifthen{e_1}{e_2}{e_3} : A}{e_1 : \Disc{\tbool} & e_2 : A & e_3 : A}
+  \infer{\ifthen{e}{f_1}{f_2} : A}{e : \Disc{\tbool} & f_i : A}
   \\
   \infer{\fix{x}{e} : \under{fix}{A}}{
     \J{\GP}{\GG,x\of \under{fix}{A}}{e}{\under{fix}{A}}}
 
-  \infer{\fixle{x}{e_1}{e_2} : \under{eq,lat}{A}}{
-    e_1 : \under{eq,lat}{A} &
-    \J{\GP}{\GG,x \of \under{eq,lat}{A}}{e_2}{\under{eq,lat}{A}} &
+  \infer{\fixle{x}{e}{f} : \under{eq,lat}{A}}{
+    e : \under{eq,lat}{A} &
+    \J{\GP}{\GG,x \of \under{eq,lat}{A}}{f}{\under{eq,lat}{A}} &
     {\color{red}\text{TODO: elementwise-ACC condition on $A$?}}}
 \end{mathpar}
 
 
-\section{Derivatives}
+\section{A Theory of Changes for Core Datafun}
 
-\TODO
+\subsection{Change types}
+
+For each type $A$ we define a change type $\GD A$:
+\begin{eqnarray*}
+  \GD(A \to B) &=& \Disc{A} \to \Delta A \to \Delta B\\
+  \GD(A \x B) &=& \GD A \x \GD B\\
+  \GD(A + B) &=& \GD A + \GD B\\
+  \GD(\Disc{A}) &=& \Disc{\GD A}\\
+  \GD(\Down{A}) &=& \Down{A}\\
+  \GD 2 &=& 2
+\end{eqnarray*}
+
+\todo{Theorems about change types, like that $\GD \lat{A}$ is a lattice.}
+
+
+\subsection{Derivatives}
+
+We wish to define an operator $\delta$ on typing derivations (or if possible, on
+well-typed terms) such that the following holds:
+\[\infer{\J{\GP,\GD\GP,\GG}{\GD\GG}{\delta(e)}{\Delta A}}
+        {\J{\GP}{\GG}{e}{A}}
+\]
+
+As a matter of convention, prefixing a variable with $d$ refers to the
+corresponding variable of its change type. That is, if $x \of A \in \GP \cup
+\GG$, then $dx \of \GD A \in \GD\GP \cup \GD\GG$. We also transparently use
+weakening and monotone-to-discrete weakening (that is, if
+$\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
+
+\[
+\begin{array}{lcll}
+  \delta x &=& dx\\
+  \delta(\fn\bind{x} e) &=& \fn\bind{y} \letdisc{x}{y} {\fn\bind{dx} \delta(e)}
+  & \text{(for fresh $y$)}\\
+  \delta(e\;f) &=& \delta e \; f \; \delta f\\
+  \delta \pair{e}{f} &=& \pair{\delta{e}}{\delta{f}}\\
+  \delta(\pi_i\; e) &=& \pi_i\; \delta{e}\\
+  \delta(\inj{i}{e}) &=& \inj{i}{\delta{e}}\\
+  \delta(\case{e}{x}{f}{x}{g})
+  &=& \case{e}
+        {x}{\case{\delta e}{dx}{\delta f}{\_}{\ms{abort!}}}
+        {x}{\case{\delta e}{\_}{\ms{abort!}}{dx}{\delta g}}\\
+  \delta(\disc e) &=& \disc{\delta e}\\
+  \delta(\letdisc{x}{e}{f}) &=& \text{\TODO}\\
+  \delta(\splitsum{x}) &=& \text{\TODO}\\
+  \delta(\unit) &=& \unit\\
+  \delta(e \vee f) &=& \delta e \vee \delta f\\
+  \delta(\downintro{e}) &=& \unit\\
+  \delta(\downelim{x}{e}{f}) &=& \text{\TODO}\\
+  \delta(\ett) &=& \eff\\
+  \delta(\eff) &=& \eff\\
+  \delta(\when{e}{f}) &=& \text{\TODO}\\
+  \delta(\ifthen{e}{f}{g}) &=& \text{\TODO}\\
+  \delta(\fix{x}{e}) &=& \text{\TODO}\\
+  \delta(\fixle{x}{e}{f}) &=& \text{\TODO}
+\end{array}
+\]
 
 \end{document}
