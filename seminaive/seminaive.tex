@@ -25,16 +25,16 @@
 
   %% finite types
   \textsf{finite types} & \fin{A}
-  &\bnfeq& {\color{blue} \fin{A} \to \fin{B}}
+  &\bnfeq& {\color{Cerulean} \fin{A} \to \fin{B}}
   \pipe \fin{A} \x \fin{B} \pipe \fin{A} + \fin{B}
   \pipe \Disc{\fin{A}} \pipe \Down{\fin{A}} \pipe \tbool
   \vspace{1em}\\
 
   %% acc types
   \textsf{acc types} & \acc{A}
-  &\bnfeq& {\color{blue} \fin{A} \to \acc{B}}
+  &\bnfeq& {\color{Cerulean} \fin{A} \to \acc{B}}
   \pipe \acc{A} \x \acc{B} \pipe \acc{A} + \acc{B}
-  \pipe {\color{blue} \Disc{A}} \pipe \Down{\fin{A}} \pipe \tbool
+  \pipe {\color{Cerulean} \Disc{A}} \pipe \Down{\fin{A}} \pipe \tbool
   \vspace{1em}\\
 
   %% semilattice types
@@ -65,7 +65,7 @@ implemented as $\Down{\Disc{A}}$, this may have performance implications. A less
 general approach would be to consider only $\Down{\Disc{\eq{A}}}$ to be an
 equality type.
 
-I've put some justified but probably unnecessary rules in {\color{blue} blue}.
+I've put some justified but probably unnecessary rules in {\color{Cerulean} blue}.
 
 
 %% \subsection{Properties of types}
@@ -91,7 +91,7 @@ I've put some justified but probably unnecessary rules in {\color{blue} blue}.
 
 %%   \infer{\tbool \is{eq}}{}
 %%   \\
-%%   {\color{blue} \infer{A \to B \is{fin}}{A \is{fin} & B \is{fin}}}
+%%   {\color{Cerulean} \infer{A \to B \is{fin}}{A \is{fin} & B \is{fin}}}
 
 %%   \infer{A \x B \is{fin}}{A \is{fin} & B \is{fin}}
 
@@ -103,20 +103,20 @@ I've put some justified but probably unnecessary rules in {\color{blue} blue}.
 
 %%   \infer{\tbool \is{fin}}{}
 %%   \\
-%%   {\color{blue} \infer{A \to B \is{acc}}{A \is{fin} & B \is{acc}}}
+%%   {\color{Cerulean} \infer{A \to B \is{acc}}{A \is{fin} & B \is{acc}}}
 
 %%   \infer{A \x B \is{acc}}{A \is{acc} & B \is{acc}}
 
 %%   \infer{A + B \is{acc}}{A \is{acc} & B \is{acc}}
 
-%%   {\color{blue} \infer{\Disc{A} \is{acc}}{}}
+%%   {\color{Cerulean} \infer{\Disc{A} \is{acc}}{}}
 
 %%   \infer{\Down{A} \is{acc}}{A \is{fin}}
 
 %%   \infer{\tbool \is{acc}}{}
 %% \end{mathpar}
 
-%% I've put in {\color{blue} blue} some rules that I think are justified, but
+%% I've put in {\color{Cerulean} blue} some rules that I think are justified, but
 %% probably unnecessary.
 
 %% I've highlighted the rule that says when downsets form equality types in
@@ -206,7 +206,18 @@ For each type $A$ we define a change type $\GD A$:
   \GD 2 &=& 2
 \end{eqnarray*}
 
-\todo{TODO: Theorems about change types, like that $\GD \lat{A}$ is a lattice.}
+\begin{lemma}[Changes on a semilattice form a semilattice]
+  $\GD \lat{A}$ is a semilattice type.
+\end{lemma}
+\begin{proof}
+  By induction on the cases:
+  \begin{eqnarray*}
+    \GD(A \to \lat{B}) &=& \Disc{A} \to \GD A \to \GD \lat{B}\\
+    \GD(\lat{A} \x \lat{B}) &=& \GD \lat{A} \x \GD \lat{B}\\
+    \GD(\Down{A}) &=& \Down{A}\\
+    \GD 2 &=& 2
+  \end{eqnarray*}
+\end{proof}
 
 
 \subsection{Derivatives}
@@ -219,14 +230,14 @@ well-typed terms) such that the following holds:
 
 As a matter of convention, prefixing a variable with $d$ refers to the
 corresponding variable of its change type. That is, if $x \of A \in \GP \cup
-\GG$, then $dx \of \GD A \in \GD\GP \cup \GD\GG$. We also transparently use
+\GG$, then $dx \of \GD A \in \GD\GP \cup \GD\GG$. We also make implicit use of
 weakening and monotone-to-discrete weakening (that is, if
 $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
 
-\todo{Furthermore, if $e : A$ originally, then in the the $\delta$-context,
+\todo{\indent Furthermore, if $e : A$ originally, then in the the $\delta$-context,
   $\disc{e} : \Disc{A}$ for free, since all the variables $e$ uses are now
-  discrete. Can/do we take advantage of this?} {\color{green} Yes we do! See the
-  green $(\disc{e})$ in the case for \textsf{when-then} below.}
+  discrete. Can/do we take advantage of this?} {\color{ForestGreen} Yes we do!
+  See the green $(\disc{e})$ in the case for \textsf{when-then} below.}
 
 \[
 \begin{array}{lcll}
@@ -259,7 +270,7 @@ $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
   \delta(\ett) &=& \eff\\
   \delta(\eff) &=& \eff\\
   \delta(\when{e}{f})
-  &=& \ifthen{\color{green} \disc{e}}{\delta f}{
+  &=& \ifthen{\color{ForestGreen} \disc{e}}{\delta f}{
     \when{\delta e}{(f \oplus \delta f) \ominus \unit}}
   \qquad \text{\color{red} UH-OH}\\
   \delta(\ifthen{e}{f}{g}) &=& \ifthen{e}{\delta f}{\delta g}\\
@@ -274,5 +285,13 @@ $a$:
   (a \oplus da) \ominus \unit = (a \ominus \unit)
   \vee da
 \end{equation*}
+
+\emph{Observation}: Consider $(\when{e}{f})$ for $f : A \to \lat{B}$. We can
+rewrite this as $(\fn\bind{x} \when{e}{f\; x})$. This turns a \ms{when} at type
+$A \to \lat{B}$ into one at type $\lat{B}$. By extending this we can rewrite
+away all uses of \ms{when} at functional types, in the same manner as we can
+rewrite away uses of $\bigvee$ at functional type.
+
+\todo{\par TODO: Proofs which Neel \& I worked out last time.}
 
 \end{document}

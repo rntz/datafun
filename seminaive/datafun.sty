@@ -1,6 +1,3 @@
-\usepackage{tikz}
-\usepackage{tikz-cd}
-
 \usepackage{amssymb,amsmath,amsthm}
 \usepackage{latexsym}
 
@@ -29,7 +26,11 @@
 \usepackage{graphicx}
 
 %% for colors
-\usepackage{color}
+%% must be loaded before tikz in order for options to take effect :/
+\usepackage[dvipsnames]{xcolor}
+
+\usepackage{tikz}
+\usepackage{tikz-cd}
 
 
 %% My commands
