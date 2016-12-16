@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage[margin=0.5in]{geometry}
+\usepackage[a4paper,margin=1in]{geometry}
 
 \usepackage{datafun}
 
@@ -59,8 +59,11 @@
 \end{array}
 \]
 
-I've highlighted the equality type ${\color{red} \Down{\eq{A}}}$ because testing
-down-sets for equality is nontrivial to implement. If finite sets $\{A\}$ are
+NB: ``equality types'' are actually ``types whose partial order is decidable''.
+Maybe we should write $\under{ord}{A}$?
+
+I've highlighted the equality type ${\color{red} \Down{\eq{A}}}$ because
+comparing down-sets is nontrivial to implement. If finite sets $\{A\}$ are
 implemented as $\Down{\Disc{A}}$, this may have performance implications. A less
 general approach would be to consider only $\Down{\Disc{\eq{A}}}$ to be an
 equality type.
@@ -140,8 +143,7 @@ rules.
 \begin{mathpar}
   \infer{\J{\GP}{\GG}{x}{A}}{x \of A \in \GP \cup \GG}
 
-  \infer{\J{\GP}{\GG}{\fn\bind{x}{e}}{A \to B}}{
-    \J{\GP}{\GG,x \of A}{e}{B}}
+  \infer{\fn\bind{x} e : A \to B}{\J{\GP}{\GG,x \of A}{e}{B}}
 
   \infer{e \; f : B}{e : A \to B & f : A}
   \\
