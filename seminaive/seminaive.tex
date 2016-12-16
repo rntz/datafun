@@ -223,11 +223,15 @@ corresponding variable of its change type. That is, if $x \of A \in \GP \cup
 weakening and monotone-to-discrete weakening (that is, if
 $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
 
+\todo{Furthermore, if $e : A$ originally, then in the the $\delta$-context,
+  $\disc{e} : \Disc{A}$ for free, since all the varaibles $e$ uses are now
+  discrete. Can/do we take advantage of this?}
+
 \[
 \begin{array}{lcll}
   \delta x &=& dx\\
   \delta(\fn\bind{x} e) &=& \fn\bind{y} \letdisc{x}{y} {\fn\bind{dx} \delta(e)}
-  & \text{(for fresh $y$)}\\
+  \qquad\text{(for fresh $y$)}\\
   \delta(e\;f) &=& \delta e \; f \; \delta f\\
   \delta \pair{e}{f} &=& \pair{\delta{e}}{\delta{f}}\\
   \delta(\pi_i\; e) &=& \pi_i\; \delta{e}\\
@@ -237,16 +241,25 @@ $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
         {x}{\case{\delta e}{dx}{\delta f}{\_}{\ms{abort!}}}
         {x}{\case{\delta e}{\_}{\ms{abort!}}{dx}{\delta g}}\\
   \delta(\disc e) &=& \disc{\delta e}\\
-  \delta(\letdisc{x}{e}{f}) &=& \text{\TODO}\\
-  \delta(\splitsum{x}) &=& \text{\TODO}\\
+  \delta(\letdisc{x}{e}{f}) &=&
+  \letdisc{x}{e}{
+    \letdisc{dx}{\delta e}{\delta f}}\\
+  \delta(\splitsum{e}) &=&
+  %% want type: Δ□A + Δ□B = □ΔA + □ΔB
+  %% e : □(A + B)
+  %% δe : □(ΔA + ΔB)
+  %% splitsum δe : □ΔA + □ΔB
+  \splitsum{\delta e}\\
   \delta(\unit) &=& \unit\\
-  \delta(e \vee f) &=& \delta e \vee \delta f\\
+  \delta(e \vee f) &=& \delta e \vee \delta f
+  \qquad \text{(this is the critical over-approximation)}\\
   \delta(\downintro{e}) &=& \unit\\
   \delta(\downelim{x}{e}{f}) &=& \text{\TODO}\\
   \delta(\ett) &=& \eff\\
   \delta(\eff) &=& \eff\\
-  \delta(\when{e}{f}) &=& \text{\TODO}\\
-  \delta(\ifthen{e}{f}{g}) &=& \text{\TODO}\\
+  \delta(\when{e}{f})
+  &=& \text{\color{red} UH-OH}\\
+  \delta(\ifthen{e}{f}{g}) &=& \ifthen{e}{\delta f}{\delta g}\\
   \delta(\fix{x}{e}) &=& \text{\TODO}\\
   \delta(\fixle{x}{e}{f}) &=& \text{\TODO}
 \end{array}
