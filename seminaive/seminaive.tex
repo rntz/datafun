@@ -225,7 +225,8 @@ $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
 
 \todo{Furthermore, if $e : A$ originally, then in the the $\delta$-context,
   $\disc{e} : \Disc{A}$ for free, since all the varaibles $e$ uses are now
-  discrete. Can/do we take advantage of this?}
+  discrete. Can/do we take advantage of this?} {\color{green} Yes we do! See the
+  green $(\disc{e})$ in the case for \textsf{when-then} below.}
 
 \[
 \begin{array}{lcll}
@@ -258,11 +259,20 @@ $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
   \delta(\ett) &=& \eff\\
   \delta(\eff) &=& \eff\\
   \delta(\when{e}{f})
-  &=& \text{\color{red} UH-OH}\\
+  &=& \ifthen{\color{green} \disc{e}}{\delta f}{
+    \when{\delta e}{(f \oplus \delta f) \ominus \unit}}
+  \qquad \text{\color{red} UH-OH}\\
   \delta(\ifthen{e}{f}{g}) &=& \ifthen{e}{\delta f}{\delta g}\\
   \delta(\fix{x}{e}) &=& \text{\TODO}\\
   \delta(\fixle{x}{e}{f}) &=& \text{\TODO}
 \end{array}
 \]
+
+\emph{Hypothesis}: For $a : \lat{A}$ and $da : \GD\lat{A}$ a valid change to
+$a$:
+\begin{equation*}
+  (a \oplus da) \ominus \unit = (a \ominus \unit)
+  \vee da
+\end{equation*}
 
 \end{document}
