@@ -1,0 +1,198 @@
+\documentclass{article}
+\usepackage[margin=0.5in]{geometry}
+
+\usepackage{datafun}
+
+\begin{document}
+
+\section{Core Datafun}
+
+
+\subsection{Syntax}
+
+\[
+\begin{array}{rccl}
+  \textsf{types} & A,B
+  &\bnfeq& A \to B \pipe A \x B \pipe A + B
+  \pipe \Disc{A} \pipe \Down{\eq{A}} \pipe \tbool
+  \vspace{1em}\\
+
+  %% equality types
+  \textsf{equality types} & \eq{A}
+  &\bnfeq& \eq{A} \x \eq{B} \pipe \eq{A} + \eq{B}
+  \pipe \Disc{\eq{A}} \pipe {\color{red} \Down{\eq{A}}} \pipe \tbool
+  \vspace{1em}\\
+
+  %% finite types
+  \textsf{finite types} & \fin{A}
+  &\bnfeq& {\color{blue} \fin{A} \to \fin{B}}
+  \pipe \fin{A} \x \fin{B} \pipe \fin{A} + \fin{B}
+  \pipe \Disc{\fin{A}} \pipe \Down{\fin{A}} \pipe \tbool
+  \vspace{1em}\\
+
+  %% acc types
+  \textsf{acc types} & \acc{A}
+  &\bnfeq& {\color{blue} \fin{A} \to \acc{B}}
+  \pipe \acc{A} \x \acc{B} \pipe \acc{A} + \acc{B}
+  \pipe {\color{blue} \Disc{A}} \pipe \Down{\fin{A}} \pipe \tbool
+  \vspace{1em}\\
+
+  %% semilattice types
+  \textsf{semilattice types} & \lat{A}
+  &\bnfeq& A \to \lat{B} \pipe \lat{A} \x \lat{B} \pipe \Down{A} \pipe \tbool
+  \vspace{1em}\\
+
+  %% fixpoint types
+  \textsf{fixed-point types} & \under{fix}{A}
+  &=& \acc{A} \cap \eq{A} \cap \lat{A}
+  \vspace{1em}\\
+
+  %% expressions
+  \textsf{expressions} & e
+  &\bnfeq& x \pipe \fn\bind{x} e \pipe e\; e
+  \pipe \pair{e}{e} \pipe \pi_i\; e
+  \pipe \inj{i}{e} \pipe \case{e}{x}{e_1}{x}{e_2} \\
+  &&\pipe& \disc{e} \pipe \letdisc{x}{e}{e} \pipe \splitsum{e}\\
+  &&\pipe& \unit \pipe e \vee e \pipe \downintro{e} \pipe \downelim{x}{e}{e}\\
+  &&\pipe& \ett \pipe \eff \pipe \when{e}{e} \pipe \ifthen{e}{e}{e}\\
+  &&\pipe& \fix{x}{e} \pipe \fixle{x}{e}{e}
+\end{array}
+\]
+
+I've highlighted the equality type ${\color{red} \Down{\eq{A}}}$ because testing
+down-sets for equality is nontrivial to implement. If finite sets $\{A\}$ are
+implemented as $\Down{\Disc{A}}$, this may have performance implications. A less
+general approach would be to consider only $\Down{\Disc{\eq{A}}}$ to be an
+equality type.
+
+I've put some justified but probably unnecessary rules in {\color{blue} blue}.
+
+
+%% \subsection{Properties of types}
+
+%% Some decidable judgments about types:
+%% \begin{quote}
+%%   \begin{tabular}{ll}
+%%     $A \is{eq}$ & $A$ is an equality type.\\
+%%     $A \is{fin}$ & $A$ has finitely many inhabitants.\\
+%%     $A \is{acc}$ & $A$ satisfies ACC.\\
+%%   \end{tabular}
+%% \end{quote}
+
+%% And their rules:
+%% \begin{mathpar}
+%%   \infer{A \x B \is{eq}}{A \is{eq} & B \is{eq}}
+
+%%   \infer{A + B \is{eq}}{A \is{eq} & B \is{eq}}
+
+%%   \infer{\Disc{A} \is{eq}}{A \is{eq}}
+
+%%   {\color{red} \infer{\Down{A} \is{eq}}{A \is{eq}}}
+
+%%   \infer{\tbool \is{eq}}{}
+%%   \\
+%%   {\color{blue} \infer{A \to B \is{fin}}{A \is{fin} & B \is{fin}}}
+
+%%   \infer{A \x B \is{fin}}{A \is{fin} & B \is{fin}}
+
+%%   \infer{A + B \is{fin}}{A \is{fin} & B \is{fin}}
+
+%%   \infer{\Disc{A} \is{fin}}{A \is{fin}}
+
+%%   \infer{\Down{A} \is{fin}}{A \is{fin}}
+
+%%   \infer{\tbool \is{fin}}{}
+%%   \\
+%%   {\color{blue} \infer{A \to B \is{acc}}{A \is{fin} & B \is{acc}}}
+
+%%   \infer{A \x B \is{acc}}{A \is{acc} & B \is{acc}}
+
+%%   \infer{A + B \is{acc}}{A \is{acc} & B \is{acc}}
+
+%%   {\color{blue} \infer{\Disc{A} \is{acc}}{}}
+
+%%   \infer{\Down{A} \is{acc}}{A \is{fin}}
+
+%%   \infer{\tbool \is{acc}}{}
+%% \end{mathpar}
+
+%% I've put in {\color{blue} blue} some rules that I think are justified, but
+%% probably unnecessary.
+
+%% I've highlighted the rule that says when downsets form equality types in
+%% {\color{red} red} because it might take some nontrivial work to implement
+%% equality testing for downsets. A less powerful but easier to implement rule
+%% would be:
+%% \[
+%% \infer{\Down{\Disc{A}} \is{eq}}{A \is{eq}}
+%% \]
+
+%% 
+\subsection{Typing rules}
+
+The typing judgment \[\J{\GP}{\GG}{e}{A}\] says that $e$ has type $A$ using
+variables with types given by $\GP \cup \GG$, and moreover uses the variables in
+$\GG$ in a monotone fashion.
+
+Where possible without ambiguity, I omit the contexts $\GP;\GG$ from typing
+rules.
+
+\begin{mathpar}
+  \infer{\J{\GP}{\GG}{x}{A}}{x \of A \in \GP \cup \GG}
+
+  \infer{\J{\GP}{\GG}{\fn\bind{x}{e}}{A \to B}}{
+    \J{\GP}{\GG,x \of A}{e}{B}}
+
+  \infer{e_1 \; e_2 : B}{e_1 : A \to B & e_2 : A}
+  \\
+  \infer{\pair{e_1}{e_2} : A \x B}{e_1 : A & e_2 : B}
+
+  \infer{\pi_i\; e : A_i}{e : A_1 \x A_2}
+
+  \infer{\inj{i}{e} : A_1 + A_2}{e : A_i}
+
+  \infer{\case{e}{x}{e_1}{x}{e_2} : B}
+        {e : A_1 + A_2 & \J{\GP}{\GG, x \of A_i}{e_i}{B}}
+  \\
+  \infer{\J{\GP}{\GG}{\disc{e}}{\Disc{A}}}{\J{\GP}{-}{e}{A}}
+
+  \infer{\letdisc{x}{e_1}{e_2} : B}
+        { e_1 : \Disc{A}
+        & \J{\GP,x\of A}{\GG}{e_2}{B} }
+
+  \infer{\splitsum{e} : \Disc{A} + \Disc{B}}
+        {e : \Disc{(A + B)}}
+  \\
+  \infer{\unit : \lat{A}}{}
+
+  \infer{e_1 \vee e_2 : \lat{A}}{e_1 : \lat{A} & e_2 : \lat{A}}
+
+  \infer{\downintro{e} : \Down{A}}{e : A}
+
+  \infer{\downelim{x}{e_1}{e_2} : \lat{B}}
+        { e_1 : \Down{A}
+        & \J{\GP}{\GG,x \of A}{e_2}{\lat{B}}}
+  \\
+  \infer{\ett : \tbool}{}
+
+  \infer{\eff : \tbool}{}
+
+  \infer{\when{e_1}{e_2} : \lat{A}}{e_1 : \tbool & e_2 : \lat{A}}
+
+  \infer{\ifthen{e_1}{e_2}{e_3} : A}{e_1 : \Disc{\tbool} & e_2 : A & e_3 : A}
+  \\
+  \infer{\fix{x}{e} : \under{fix}{A}}{
+    \J{\GP}{\GG,x\of \under{fix}{A}}{e}{\under{fix}{A}}}
+
+  \infer{\fixle{x}{e_1}{e_2} : \under{eq,lat}{A}}{
+    e_1 : \under{eq,lat}{A} &
+    \J{\GP}{\GG,x \of \under{eq,lat}{A}}{e_2}{\under{eq,lat}{A}} &
+    {\color{red}\text{TODO: elementwise-ACC condition on $A$?}}}
+\end{mathpar}
+
+
+\section{Derivatives}
+
+\TODO
+
+\end{document}

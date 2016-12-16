@@ -1,0 +1,158 @@
+\usepackage{tikz}
+\usepackage{tikz-cd}
+
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{latexsym}
+
+\usepackage{url}
+\usepackage{hyperref}
+
+%% uses the AMS Euler math font.
+%% \usepackage{euler}
+
+%% for coloneqq
+\usepackage{mathtools}
+
+%% for \underaccent
+\usepackage{accents}
+
+% for semantic brackets
+\usepackage{stmaryrd}
+
+% for inference rules
+\usepackage{proof}
+
+%% for mathpar environment
+\usepackage{mathpartir}
+
+% for \scalebox, \rotatebox
+\usepackage{graphicx}
+
+%% for colors
+\usepackage{color}
+
+
+%% My commands
+\newcommand{\todo}[1]{\noindent{\color{red}#1}}
+\newcommand{\TODO}{\todo{TODO}}
+
+\newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\mi}[1]{\ensuremath{\mathit{#1}}}
+\newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}
+\newcommand{\fname}{\ms}
+\newcommand{\ent}{\vdash}
+\newcommand{\fn}{\lambda}
+\newcommand{\binder}{.\,}
+\newcommand{\bind}[1]{#1\binder}
+\newcommand{\pipe}{\hspace{0.5em}|\hspace{0.5em}}
+%% TODO: why did I used to have this?
+%% \renewcommand{\pipe}{\mathrel{\mid}}
+\newcommand{\of}{\,{:}\,}
+\newcommand{\widevec}[1]{\overrightarrow{#1}}
+%% equality pattern testing
+\newcommand{\bound}[1]{!{#1}}
+
+\newcommand{\bnfeq}{\dblcolon=}
+\newcommand{\defeq}{\overset{\ms{def}}{=}}
+%% \newcommand{\expandsto}{\Longrightarrow}
+\newcommand{\expandsto}{\xrightarrow{\text{expand}}}
+
+
+%% judgments & rules
+\newcommand{\GP}{\Psi}
+\newcommand{\GD}{\Delta}
+\newcommand{\GG}{\Gamma}
+\newcommand{\J}[4]{{#1};\,{#2}\ent {#3}:{#4}}
+
+\newcommand{\is}[1]{~\ms{#1}}
+
+
+%% types
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\tbool}{2}
+\newcommand{\tzero}{0}
+\newcommand{\tunit}{1}
+\newcommand{\x}{\times}
+%% discrete/monotone \to
+\newcommand{\dto}{\to}
+\newcommand{\mto}{\overset{+\:}{\to}}
+\newcommand{\Pfin}{\mc{P}_{\ms{fin}}}
+\newcommand{\Disc}[1]{\square{#1}}
+\newcommand{\Down}[1]{{\downarrow}\,{#1}}
+%% lexical types
+\newcommand{\lsum}{\lhd}
+\newcommand{\lprod}{\mathop{\x_\lhd}}
+\newcommand{\under}[2]{\underaccent{\mathit{#1}}{#2}}
+
+%% typeclasses
+\newcommand{\eq}[1]{\under{eq}{#1}}
+\newcommand{\fin}[1]{\under{fin}{#1}}
+\newcommand{\lat}[1]{\under{lat}{#1}}
+\newcommand{\acc}[1]{\under{acc}{#1}}
+
+%% expressions
+%% \renewcommand{\v}[1]{\mi{#1}}                %ordinary variables
+\newcommand{\m}[1]{\ensuremath{\mathbf{#1}}}  %monotone variable
+\newcommand{\sub}[1]{[#1]\,}                   % substitution
+\newcommand{\fix}[1]{\ms{fix}~{#1}~\ms{is}~}
+\newcommand{\fixle}[2]{\fix{#1 \le #2}}
+\newcommand{\tuple}[1]{\langle{#1}\rangle}
+\newcommand{\pair}[2]{\tuple{#1,\,#2}}
+\newcommand{\triple}[3]{\tuple{#1,\,#2,\,#3}}
+\newcommand{\triv}{\tuple{}}
+\newcommand{\unit}{\varepsilon}
+\newcommand{\letv}[3]{\ms{let}\;{#1}={#2}\;\ms{in}\;{#3}}
+\newcommand{\ein}{\ms{in}}
+\newcommand{\inj}[2]{\ein_{#1}\;#2}
+\newcommand{\case}[5]{\ms{case}(#1;\, \bind{#2}{#3};\, \bind{#4}{#5})}
+
+\newcommand{\disc}[1]{\ms{disc}\;{#1}}
+\newcommand{\letdisc}[3]{\letv{\disc{#1}}{#2}{#3}}
+\newcommand{\splitsum}[1]{\textsf{split-sum}\; {#1}}
+
+\newcommand{\downintro}[1]{{\downarrow}\,\{#1\}}
+\newcommand{\forin}[1]{\textstyle\bigvee({#1})\ }
+\newcommand{\downelim}[3]{\forin{#1 \in #2} #3}
+
+\newcommand{\eff}{\ms{ff}}
+\newcommand{\ett}{\ms{tt}}
+\newcommand{\when}[2]{\ms{when}~{#1}~\ms{then}~{#2}}
+\newcommand{\ifthen}[3]{\ms{if}~{#1}~\ms{then}~{#2}~\ms{else}~{#3}}
+
+\newcommand{\setfor}[2]{\setlit{{#1}~|~{#2}}}
+\newcommand{\isin}{\mathrel{{\in}\hspace{0.15ex}?}}
+
+%% semantics
+\newcommand{\den}[1]{\ensuremath{\llbracket{#1}\rrbracket}} % denotation
+% denotation for vertically large things
+\newcommand{\Den}[1]{\left\llbracket{#1}\right\rrbracket}
+\newcommand{\one}{\ensuremath{\mathbf{1}}}
+\newcommand{\two}{\ensuremath{\mathbf{2}}}
+%% \newcommand{\Arr}{\supset}
+%% \newcommand{\Arr}{\rightarrowtriangle}
+%% \newcommand{\arr}{\Rightarrow}
+%% \newcommand{\lol}{\multimap}
+%% \newcommand{\Disc}[1]{\ensuremath{\ms{Disc}\;{#1}}}
+%% \newcommand{\slF}{\ensuremath{\mathcal{F}}}
+%% \newcommand{\slU}{\ensuremath{\mathcal{U}}}
+%% \newcommand{\stringset}{\mathbb{S}}
+%% \newcommand{\natposet}{\N_\le}
+%% \newcommand{\below}[2]{\ensuremath{\downarrow\!({#1 : #2})}}
+%% \newcommand{\lfpin}[2]{\text{lfp}\,{#2} \in {#1}}
+
+%% categories
+\newcommand{\cSet}{\ms{Set}}
+\newcommand{\cPoset}{\ms{Poset}}
+\newcommand{\cSL}{\ms{SemiLat}}
+
+%% theorem environments
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+%% for rule names.
+\newcommand{\rn}[1]{\mathsz{8pt}{#1}}
+\newcommand{\rt}[1]{\textsc{#1}}
