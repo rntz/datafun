@@ -1,3 +1,63 @@
+* Datalog-like syntax
+
+NEED TO TRY MOAR EXAMPLES
+- reachability / transitive closure
+- shortest path
+- parsing
+- stratification
+
+See also Dyna; See also chrisamaphone's gist
+https://twitter.com/chrisamaphone/status/803309414916689920
+https://gist.github.com/chrisamaphone/d399abf6d9ebb6c511d9cf414dd1b983
+
+Some ideas:
+
+> rel path(x,y) :- edge(x,y)
+>   | path(x,z) :- path(x,y), path(y,z)
+
+> rel (x,y) ∈ path :- (x,y) ∈ edge.
+>   | (x,z) ∈ path :- (x,y) ∈ path, (y,z) ∈ path.
+
+-- TODO look at Dyna's syntax
+> dist(x,y) is 1 :- edge(x,y).
+> dist(x,y) is d+1 :- edge(x,y), dist(y,z) is d.
+
+Or, backwards:
+
+> (x,y) in path :- (x,y) in edge.
+> (x,z) ∈ path :- (x,y) ∈ edge, (x,z) ∈ edge.
+
+Or, more general but probably confusing to most:
+
+> {(x,y)} <= path :- (x,y) ∈ path, (y,z) ∈ path.
+
+** Simplified grammar
+
+DECL ::= ID(EXPR,*) :- ATOM,* .
+         ID(EXPR,*) is EXPR :- ATOM,* .
+
+-- not sure about {not ID(PAT,*)} & co
+-- maybe {not ID(EXPR,*)} instead?
+-- Datalog can do it, I think! but what does it mean?
+ATOM ::= if EXPR
+         ID(PAT,*) | ID(PAT,*) is PAT
+         not ID(PAT,*) | not ID(PAT,*) is PAT
+
+-- PAT is just Datafun patterns.
+PAT ::= VAR | (PAT,*) | CTOR-ID(PAT,*) | [PAT,*] | LIT | !EXPR
+EXPR = datafun expressions
+
+** What makes Prolog/Datalog syntax convenient?
+Not having to worry about where your variables are coming from! In functional
+syntax, it's always unambiguous whether a variable is being bound or is an
+expression. In {Pro,Data}log, it isn't; no (syntactic) distinction.[1] So, the
+syntax has to treat variables specially somehow.
+
+[1]: In Prolog, there's no semantic distinction either; but Datalog adds
+restrictions to make sure you *can* see every variable as *coming from*
+somewhere. (Every variable in the head must be mentioned in at least one
+positive position, i.e. "generated", in the body.)
+
 * embedding into Haskell or OCaml
 tagless-final style: http://okmij.org/ftp/meta-programming/#QUEL
 http://okmij.org/ftp/meta-programming/quel.pdf
