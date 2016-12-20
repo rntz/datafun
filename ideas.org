@@ -15,21 +15,21 @@ Some ideas:
 > rel path(x,y) :- edge(x,y)
 >   | path(x,z) :- path(x,y), path(y,z)
 
-> rel (x,y) ∈ path :- (x,y) ∈ edge.
->   | (x,z) ∈ path :- (x,y) ∈ path, (y,z) ∈ path.
+> rel (x,y) ∈ path <- (x,y) ∈ edge.
+>   | (x,z) ∈ path <- (x,y) ∈ path, (y,z) ∈ path.
 
 -- TODO look at Dyna's syntax
-> dist(x,y) is 1 :- edge(x,y).
-> dist(x,y) is d+1 :- edge(x,y), dist(y,z) is d.
+> dist(x,y) is 1 <- edge(x,y).
+> dist(x,y) is d+1 <- edge(x,y), dist(y,z) is d.
 
 Or, backwards:
 
-> (x,y) in path :- (x,y) in edge.
-> (x,z) ∈ path :- (x,y) ∈ edge, (x,z) ∈ edge.
+> (x,y) in path <- (x,y) in edge.
+> (x,z) ∈ path <- (x,y) ∈ edge, (x,z) ∈ edge.
 
 Or, more general but probably confusing to most:
 
-> {(x,y)} <= path :- (x,y) ∈ path, (y,z) ∈ path.
+> {(x,y)} <= path <- (x,y) ∈ path, (y,z) ∈ path.
 
 ** Simplified grammar
 
