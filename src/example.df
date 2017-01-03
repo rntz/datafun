@@ -291,3 +291,8 @@ fun rd code flow =
 
 (* possible value analysis *)
 (* type values = {label * var: flat nat} *)
+
+
+(* TODO: an SCC-finding algorithm, or similar *)
+val sccs : {nat, nat} →⁺ {{nat}} × (nat → {nat}) × {{nat}, {nat}}
+fun sccs graph = ({}, fn x => {}, {})
