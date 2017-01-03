@@ -11,13 +11,13 @@
   (eof
    ;; punctuation
    LP RP LSQUARE RSQUARE LCURLY RCURLY
-   DOT BANG COMMA : SEMI _ BAR & BARBAR &&
+   DOT BANG QUERY COMMA : SEMI _ BAR & BARBAR &&
    = <= < >= >
    -> ~> ->- ->+ =>
    + * - / ++ **
    ∨ ∈ ⋁ • ×
    ;; declarations
-   TYPE FUN VAL DISC MONO ANTI
+   TYPE VAL FUN REL DISC MONO ANTI
    ;; types
    SET MAP
    ;; expressions
@@ -44,7 +44,8 @@
    ["(" 'LP]      [")" 'RP]
    ["{" 'LCURLY]  ["}" 'RCURLY]
    ["[" 'LSQUARE] ["]" 'RSQUARE]
-   ["." 'DOT] ["!" 'BANG] ["," 'COMMA] [":" ':] [";" 'SEMI] ["_" '_]
+   ["." 'DOT] ["!" 'BANG] ["?" 'QUERY]
+   ["," 'COMMA] [":" ':] [";" 'SEMI] ["_" '_]
    ["|" 'BAR] ["&" '&] ["||" 'BARBAR] ["&&" '&&]
    ["=" '=] ["<=" '<=] ["<" '<] [">=" '>=] [">" '>]
    ["=>" '=>] ["->" '->] ["~>"  '~>] ["->+" '->+] ["->-" '->-]
@@ -53,7 +54,7 @@
    ["∨" '∨] ["⋁" '⋁] ["∈" '∈] ["•" '•] ["×" '×]
 
    ;; declaration keywords
-   ["type" 'TYPE]   ["val" 'VAL]   ["fun" 'FUN]
+   ["type" 'TYPE]   ["val" 'VAL]   ["fun" 'FUN]     ["rel" 'REL]
    ["disc" 'DISC]   ["mono" 'MONO] ["anti" 'ANTI]
 
    ;; type keywords

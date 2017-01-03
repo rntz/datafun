@@ -103,6 +103,8 @@
      ((FUN LP name oper name RP = expr)
       (list (decl-val $4 (e-lam $3 (e-lam $5 $8))))))
 
+    ;; TODO: (REL ...) declarations!
+
     (tone? (() '()) ((tone) (list $1)))
     (tone ((DISC) 'disc) ((MONO) 'mono) ((ANTI) 'anti))
 
@@ -198,12 +200,19 @@
      ((IF e-op THEN e-op ELSE e-op) (e-if $2 $4 $6))
      ((WHEN LP e-op RP expr)        (e-cond 'mono $3 $5))
      ((UNLESS LP e-op RP expr)      (e-cond 'anti $3 $5))
+     ;; TODO: syntax for tuple fixpoints? (FIX pat = expr)?
+     ;; TODO: FIX should take a nonempty BAR-separated list of expressions, and
+     ;; e-lub them together.
      ((FIX name = expr)             (e-fix $2 $4))
      ((FIX name IS expr)            (e-fix $2 $4))
+     ;; TODO: is this syntax used at all? should it be?
      ((FIX LP name RP expr)         (e-fix $3 $5))
      ((FIX LP name : type RP expr)  (e-ann $5 (e-fix $3 $7)))
      ((FIX name : type = expr)      (e-ann $4 (e-fix $2 $6)))
      ((FIX name : type IS expr)     (e-ann $4 (e-fix $2 $6)))
+     ;; TODO: change for loop syntax
+     ;;   from "for (LOOPS) EXPR"
+     ;;   to "for LOOPS: EXPR" or similar
      ((⋁ LP loops RP expr)          (e-loop $3 $5))
      ((FOR LP loops RP expr)        (e-loop $3 $5))
      ((e-op : type)                 (e-ann $3 $1))
