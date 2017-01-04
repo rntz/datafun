@@ -83,12 +83,16 @@
           ((**) 'cross) ((×) 'cross)
           ((•) 'compose))
 
+    ;; some simple synonyms
+    (is ((IS) (void)) ((=)  (void)))
+
     ;; ----- decls -----
     (decls
      (() '())
      ((decl decls) (append $1 $2)))
     (decl
      ;; TODO: refactor this mess
+     ;; TODO: (VAL pat = expr)?
      ((TYPE name = type)            (list (decl-type $2 $4)))
      ((VAL name-list1 : type)       (for/list ([n $2]) (decl-val-type n $4)))
      ((tone name-list1)             (for/list ([n $2]) (decl-val-tone n $1)))
@@ -98,7 +102,7 @@
      ((tone VAL name = expr)        (list (decl-val-tone $3 $1)
                                           (decl-val $3 $5)))
      ((VAL name = expr)             (list (decl-val $2 $4)))
-     ((FIX name = expr)             (list (decl-val $2 (e-fix $2 $4))))
+     ((FIX name = e-bars)           (list (decl-val $2 (e-fix $2 $4))))
      ((FUN name names1 = expr)      (list (decl-val $2 (e-lam* $3 $5))))
      ((FUN LP name oper name RP = expr)
       (list (decl-val $4 (e-lam $3 (e-lam $5 $8))))))
@@ -183,6 +187,7 @@
      ((pat BAR pat)     (p-or (list $1 $3)))
      ((pat & pat)       (p-and (list $1 $3)))
      ((LP pat RP)       $2)
+     ;; TODO: patterns for records
      ((LP p-list* RP)   (p-tuple $2))
      ((Id)              (p-tag $1 '()))
      ((Id LP p-list RP) (p-tag $1 $3)))
@@ -201,20 +206,21 @@
      ((WHEN LP e-op RP expr)        (e-cond 'mono $3 $5))
      ((UNLESS LP e-op RP expr)      (e-cond 'anti $3 $5))
      ;; TODO: syntax for tuple fixpoints? (FIX pat = expr)?
-     ;; TODO: FIX should take a nonempty BAR-separated list of expressions, and
-     ;; e-lub them together.
-     ((FIX name = expr)             (e-fix $2 $4))
-     ((FIX name IS expr)            (e-fix $2 $4))
+     ((FIX name is e-bars)          (e-fix $2 $4))
+     ((FIX name : type is e-bars)   (e-ann $4 (e-fix $2 $6)))
      ;; TODO: is this syntax used at all? should it be?
      ((FIX LP name RP expr)         (e-fix $3 $5))
      ((FIX LP name : type RP expr)  (e-ann $5 (e-fix $3 $7)))
-     ((FIX name : type = expr)      (e-ann $4 (e-fix $2 $6)))
-     ((FIX name : type IS expr)     (e-ann $4 (e-fix $2 $6)))
      ;; TODO: change for loop syntax
      ;;   from "for (LOOPS) EXPR"
      ;;   to "for LOOPS: EXPR" or similar
      ((⋁ LP loops RP expr)          (e-loop $3 $5))
+     ;; TODO: eliminate this old syntax.
      ((FOR LP loops RP expr)        (e-loop $3 $5))
+     ;; this seems to work in practice, although it causes lots of shift-reduce
+     ;; conflicts
+     ;; TODO: should we use e-bars here?
+     ((FOR loops : expr)            (e-loop $2 $4))
      ((e-op : type)                 (e-ann $3 $1))
      ((e-op)                        $1))
     (e-op ((e-op-) (annotate! $1)))
@@ -235,6 +241,8 @@
     (e-atom ((e-atom-) (annotate! $1)))
     (e-atom-
      ((e-atom DOT name)                 (e-proj $3 $1))
+     ;; TODO: this could produce confusion with floating point numbers.
+     ((e-atom DOT number)               (e-proj $3 $1))
      ((name)                            (if (prim? $1) (e-prim $1) (e-var $1)))
      ((lit)                             (e-lit $1))
      ((EMPTY)                           (e-lub '()))
@@ -242,6 +250,10 @@
      ((LP expr BAR loops RP)            (e-loop $4 $2))
      ((LP e-list* RP)                   (e-tuple $2))
      ;; records
+     ;; TODO: use paren-based syntax for records everywhere. this requires:
+     ;; 1. unifying the empty record type & the empty tuple type
+     ;; 2. figuring out what to do about type-ascription exprs (expr : type)!
+     ;;
      ;; TODO: error on duplicate field identifiers.
      ((LSQUARE e-fields RSQUARE)        (e-record (make-immutable-hash $2)))
      ;; sets, set comprehensions
@@ -260,6 +272,17 @@
     (e-kv-list1
      ((e-kv)                  (list $1))
      ((e-kv COMMA e-kv-list1) (cons $1 $3)))
+
+    ;; an expr or a nonempty bar-separated list of exprs; if the latter,
+    ;; interpreted as lub-ing the exprs together.
+    (e-bars ((bar-exprs) (match $1 [(list x) x] [xs (e-lub xs)])))
+
+    ;; at least one expr, separated and/or started by BARs. more than one BAR is
+    ;; allowed between or before exprs.
+    (bar-exprs
+     ((expr)                (list $1))
+     ((BAR bar-exprs)       $2)
+     ((expr BAR bar-exprs)  (cons $1 $3)))
 
     (e-list
      ((e-list*) $1)
@@ -337,7 +360,7 @@
           (e-lit #t)))
 
 
-;; ;; TESTING
+;; TESTING
 ;; (define parse parse-string)
 
 ;; (define (tokenize s)

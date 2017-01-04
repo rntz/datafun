@@ -29,6 +29,8 @@
 
 ;; type equality is simple, but beware! because we have subtyping, testing for
 ;; type equality is not the same as testing for type *compatibility*.
+;;
+;; TODO: describe what I mean by type compatibility.
 (define/contract (type=? a b) (-> type-wf? type-wf? boolean?) (equal? a b))
 
 ;; However, there is no subtyping among equality types. So this is much safer to
