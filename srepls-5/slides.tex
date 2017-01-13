@@ -1,0 +1,322 @@
+\documentclass{beamer}
+%% apparently this magic helps avoid the dreaded
+%% ``Too many math alphabets used in version normal''
+%% error. Yuk.
+\newcommand\hmmax{0}
+\newcommand\bmmax{0}
+%% end magic
+
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{latexsym}
+
+\usepackage{array}
+
+\usepackage{url}
+\usepackage{hyperref}
+
+%% uses the AMS Euler math font.
+\usepackage{euler}
+
+%% for coloneqq
+%% \usepackage{mathtools}
+
+%% %% for \underaccent
+%% \usepackage{accents}
+
+% for semantic brackets
+%% \usepackage{stmaryrd}
+
+% for inference rules
+\usepackage{proof}
+
+%% for mathpar environment
+\usepackage{mathpartir}
+
+% for \scalebox, \rotatebox
+%% \usepackage{graphicx}
+
+%% for colors
+\usepackage{color}
+
+%% for drawing Hasse diagram
+% \usepackage{tikz}
+
+
+\newcommand{\ms}{\mathsf}
+\newcommand{\mb}{\mathbf}
+\newcommand{\x}{\times}
+\newcommand{\setfor}[2]{\{#1 ~|~ #2\}}
+
+
+\title{Finding fixed points faster}
+\author{Michael Arntzenius}
+\institute{University of Birmingham}
+\date{S-REPLS 5, 2016}
+
+\begin{document}
+\maketitle
+
+\begin{frame}
+  \huge
+  \begin{center}
+    \begin{tabular}{ccc}
+      %% Datalog &$\subseteq$& Datafun\vspace{0.5em}\\
+      \parbox{4cm}{
+        \begin{center}
+          \uncover<2>{\textsuperscript{1}} Datalog\\ +\\
+          \uncover<2>{\textsuperscript{2}} semi-na\"ive\\\ \ evaluation
+        \end{center}}
+      %% semi-na\"ive evaluation
+      &{\Huge $\subseteq$}&
+      \parbox{4cm}{
+        \begin{center}
+          \uncover<2>{\textsuperscript{3}} Datafun\\ +\\
+          \uncover<2>{\textsuperscript{4}} incremental $\lambda$-calculus
+        \end{center}
+      }
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+
+\begin{frame}
+  \huge\centering\bf Finding fixed points faster by static incrementalization
+\end{frame}
+
+
+
+\begin{frame}
+  \Huge \centering Datalog\vspace{0.66cm}
+
+  \huge decidable logic programming\vspace{0.66cm}
+
+  predicates = finite sets
+\end{frame}
+
+\begin{frame}[fragile]
+  \Large
+  \begin{center}
+\begin{verbatim}
+% Transitive closure of `edge'.
+path(X,Y) :- edge(X,Y).
+path(X,Z) :- edge(X,Y), path(Y,Z).
+\end{verbatim}
+  \end{center}
+\end{frame}
+
+
+%% The naive implementation
+\begin{frame}{\Large Na\"ive implementation}\large
+  \[
+  \begin{array}{l}
+    \text{step} ~:~ \ms{Set}\; (\ms{Node} \x \ms{Node}) \to
+    \ms{Set}\; (\ms{Node} \x \ms{Node})\\
+    \text{step}\; path =
+    {\color<2->{red} \setfor{(x,y)}{(x,y) \in edge}}\\
+    \phantom{\text{step}\;path} \hspace{1.15pt}\cup\hspace{1.15pt}
+    {\color<2->{orange} \setfor{(x,z)}{(x,y) \in edge, (y,z) \in path}}\\
+    \\
+    \text{fix} ~:~ (\alpha \to \alpha) \to \alpha \to \alpha\\
+    \text{fix} \; f \; current =
+    \mathbf{let}~ next = {\color<2->{red}f \; current} ~\mathbf{in}\\
+    \phantom{\text{fix} \; f \; current ={ }}
+    \mathbf{if}~next = current ~\mathbf{then}~ current\\
+    \phantom{\text{fix} \; f \; current ={ }}
+    \mathbf{else}~ \text{fix}\; f\; next\\
+    \\
+    \text{path} ~:~ \ms{Set} \; (\ms{Node} \x \ms{Node})\\
+    \text{path} = \text{fix} \; \text{step} \; \emptyset
+  \end{array}
+  \]\vspace{0em}
+
+  \uncover<2->{\Huge \centering \color{red}  Unnecessary recomputation!}
+\end{frame}
+
+
+\begin{frame}{\Large Semi-na\"ive implementation}\large
+  \[
+  \begin{array}{l}
+    \textsf{small-step} ~:~ \ms{Set}\;(\ms{Node} \x \ms{Node})
+    \to \ms{Set}\;(\ms{Node} \x \ms{Node})\\
+    \textsf{small-step} \; new =
+    \setfor{(x,z)}{(x,y) \in edges, (y,z) \in new}\\
+    \\
+    \pause
+    \textsf{fix-faster} : (\ms{Set}\,\alpha \to \ms{Set}\,\alpha \to \ms{Set} \,\alpha)
+    \to \ms{Set}\,\alpha \to \ms{Set}\,\alpha \to \ms{Set}\,\alpha\\
+    \textsf{fix-faster} \; f \; current \; new =\\
+    \quad \mathbf{let}~\textit{to-add} = f \; current \; new ~\mathbf{in}\\
+    \quad \mathbf{if}~ \textit{to-add} \subseteq current ~\mathbf{then}~ current\\
+    \quad \mathbf{else}~ \textsf{fix-faster}\; f \; (current \cup \textit{to-add}) \; \textit{to-add}\\
+    \\
+    \pause
+    \textsf{path} ~:~ \ms{Set}\; (\ms{Node} \x \ms{Node})\\
+    \textsf{path} = \textsf{fix-faster}\; (\lambda x\, dx.\; \textsf{small-step}\; dx)
+    \; edge \; edge
+  \end{array}
+  \]
+\end{frame}
+
+
+\begin{frame}
+  \Huge\centering
+  $\ms{fix} : (\alpha \to \alpha) \to \alpha \to \alpha$
+
+  \vspace{0.66em}
+  \huge
+  as iteration, not laziness
+\end{frame}
+
+\begin{frame}
+  \Huge 
+  \begin{center} Datafun \end{center}
+
+  \huge
+  \begin{itemize}
+  \item Simply-typed $\lambda$-calculus
+  \item with iterative fixed points
+  \item and monotonicity typing
+  \end{itemize}
+  \vspace{0.5cm}
+
+  \large (and other stuff, see ICFP'16 paper)
+\end{frame}
+
+\begin{frame}[fragile]
+  \Large\textbf{Datalog:}
+\begin{verbatim}
+path(X,Y) :- edge(X,Y).
+path(X,Z) :- edge(X,Y), path(Y,Z).
+\end{verbatim}
+\vspace{0.4cm}
+
+\Large\textbf{Datafun:}
+  \[
+  \begin{array}{l}
+    \mb{fix}~path~\mb{is}~edge\\
+    \phantom{\mb{fix}~path}\,\cup~\setfor{(x,z)}{(x,y) \in edge, (y,z) \in path}
+  \end{array}
+  \]
+\end{frame}
+
+
+\begin{frame}
+  \Large
+  Na\"ive implementation strategy for
+  \[
+  \begin{array}{l}
+    \mb{fix}~path~\mb{is}~edge\\
+    \phantom{\mb{fix}~path}\,\cup~\setfor{(x,z)}{(x,y) \in edge, (y,z) \in path}
+  \end{array}
+  \]
+
+  is
+  \[
+  \begin{array}{l}
+    \textsf{fix}\; (\lambda\, path.\\
+    \phantom{\textsf{fix}\; (\lambda\, } edge \cup \setfor{(x,z)}{(x,y) \in edge, (y,z) \in path})
+    \\ \phantom{\textsf{fix}\;}\emptyset
+  \end{array}
+  \]
+
+  using our iterative `$\mathsf{fix}$' function from earlier.
+  \vspace{1em}
+
+  \textbf{Is there an analogue of {\normalfont faster-fix}?}
+\end{frame}
+
+
+\begin{frame}
+  \Huge \centering
+  Incremental $\lambda$-Calculus\vspace{0.5cm}
+
+  \large ``A Theory of Changes for Higher-Order Languages'', PLDI'14\\Yufei
+  Cai, Paulo Giarrusso, Tillman Rendel, Klaus Ostermann
+\end{frame}
+
+\begin{frame}
+  \Large For every type $A$
+  \begin{itemize}
+  \item a \emph{change type} $\Delta A$ 
+  \item and operator $\oplus : A \to \Delta A \to A$.
+  \end{itemize}
+  \vspace{0.5cm}
+
+  Given term $f : A \to B$\\
+  \begin{itemize}
+  \item $\delta f : A \to \Delta A \to \Delta B$
+  \item such that $f(x \oplus dx) = f\; x \oplus \delta f\; x\; dx$
+  \end{itemize}
+  if one knows $v = f\; x$, often cheaper to compute RHS!
+\end{frame}
+
+\begin{frame}
+  \centering {\huge
+  $(\lambda x\, dx.\; \textsf{small-step}\;dx) \approx \delta(\textsf{step})$~{\bf !}}
+
+  \pause
+  \large
+  \[\begin{array}{l}
+    \text{step}\; path =
+    \setfor{(x,y)}{(x,y) \in edge}\\
+    \phantom{\text{step}\;path} \hspace{1.15pt}\cup\hspace{1.15pt}
+    \setfor{(x,z)}{(x,y) \in edge, (y,z) \in path}\\
+    \\
+    \textsf{small-step} ~:~ \ms{Set}\;(\ms{Node} \x \ms{Node})
+    \to \ms{Set}\;(\ms{Node} \x \ms{Node})\\
+    \textsf{small-step} \; new =
+    \setfor{(x,z)}{(x,y) \in edges, (y,z) \in new}\\
+  \end{array}\]
+  \vspace{0cm}
+
+  \pause
+  \huge\bf Find fixed points faster by static incrementalization!
+\end{frame}
+
+
+\begin{frame}
+  \large
+  \[\begin{array}{l}
+  \textsf{faster-fix} ~:~ (\alpha \to \Delta \alpha \to \Delta \alpha)
+  \to \alpha \to \Delta \alpha \to \alpha\\
+  \textsf{faster-fix} \; df \; current \; change =\\
+  \quad \mb{let}~ next = current \oplus change ~\mb{in}\\
+  \quad \mb{if}~ next \le current ~\mb{then}~ current\\
+  \quad \mb{else}~ \textsf{faster-fix} \; df \; next \; (df \; current \; change)
+  \end{array}\]
+
+  %% \vspace{0.5cm}
+
+  %% Then $(\mb{fix}~x~\mb{is}~f\; x)$ becomes
+  %% $(\textsf{faster-fix} \; \delta f \; \emptyset \; (f\; \emptyset))$
+
+  \vspace{0.5cm}
+
+  \small (I have a proof in my notes that
+  this slide is too small to contain.)
+\end{frame}
+
+\begin{frame}{Applying this to Datafun}
+  \large
+  \begin{itemize}
+  \item Monotonicity $\to$ increasing changes only!\\
+    $\Delta(\ms{Set}\; \alpha) = \ms{Set}\;\alpha$
+
+    \vspace{0.2cm}
+
+  \item $\Delta(\square A) = 1$? No!
+
+    \textbf{Zero-changes are not trivial!}
+
+    \vspace{0.2cm}
+
+  \item $\delta (\bigvee(x \in e_1)\; e_2)$?
+
+    In particular, if $e_1 : \ms{Set}\; (A \to B)$.
+
+    \vspace{0.2cm}
+
+  \end{itemize}
+\end{frame}
+
+\end{document}
