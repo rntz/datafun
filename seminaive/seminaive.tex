@@ -2,6 +2,7 @@
 \usepackage[a4paper,margin=1in]{geometry}
 
 \usepackage{datafun}
+\usepackage{array}
 
 \begin{document}
 
@@ -187,9 +188,9 @@ rules.
   \infer{\fix{x}{e} : \under{fix}{A}}{
     \J{\GP}{\GG,x\of \under{fix}{A}}{e}{\under{fix}{A}}}
 
-  \infer{\fixle{x}{e}{f} : \under{eq,lat}{A}}{
-    e : \under{eq,lat}{A} &
-    \J{\GP}{\GG,x \of \under{eq,lat}{A}}{f}{\under{eq,lat}{A}} &
+  \infer{\fixle{x}{e}{f} : \eqlat{A}}{
+    e : \eqlat{A} &
+    \J{\GP}{\GG,x \of \eqlat{A}}{f}{\eqlat{A}} &
     {\color{red}\text{TODO: elementwise-ACC condition on $A$?}}}
 \end{mathpar}
 
@@ -198,15 +199,24 @@ rules.
 
 \subsection{Change types}
 
-For each type $A$ we define a change type $\GD A$:
-\begin{eqnarray*}
-  \GD(A \to B) &=& \Disc{A} \to \Delta A \to \Delta B\\
-  \GD(A \x B) &=& \GD A \x \GD B\\
-  \GD(A + B) &=& \GD A + \GD B\\
-  \GD(\Disc{A}) &=& \Disc{\GD A}\\
-  \GD(\Down{A}) &=& \Down{A}\\
-  \GD 2 &=& 2
-\end{eqnarray*}
+For each type $A$ we define a change type $\GD A$ and an associated operator
+$\oplus : A \to \GD A \to A$:
+
+\[\begin{array}{rcl>{\quad\quad}rcl}
+  \GD(A \to B) &=& \Disc{A} \to \Delta A \to \Delta B
+  & (f \oplus df)\; x &=& f\; x \oplus df\; x\; (\mb{0}\; x)\\
+  \GD(A \x B) &=& \GD A \x \GD B
+  & (x,y) \oplus (dx,dy) &=& (x \oplus dx, y \oplus dy)\\
+  \GD(A + B) &=& \GD A + \GD B
+  & \inj{i}{x} \oplus \inj{i}{dx} &=& \inj{i}{(x \oplus dx)}\\
+  \GD(\Disc{A}) &=& \Disc{\GD A}
+  & \disc{x} \oplus \disc{dx} &=& \disc{(x \oplus dx)}\\
+  \GD(\Down{A}) &=& \Down{A} & x \oplus y &=& x \vee y\\
+  \GD 2 &=& 2 & x \oplus y &=& x \vee y
+\end{array}\]
+
+\todo{TODO: define $\mb{0}$ as well.}
+
 
 \begin{lemma}[Changes on a semilattice form a semilattice]
   $\GD \lat{A}$ is a semilattice type.
@@ -219,6 +229,22 @@ For each type $A$ we define a change type $\GD A$:
     \GD(\Down{A}) &=& \Down{A}\\
     \GD 2 &=& 2
   \end{eqnarray*}
+\end{proof}
+
+\begin{lemma}[Changes on semilattice equality-types are boring]
+  $\GD \eqlat{A} = \eqlat{A}$, and at such types $\oplus = \vee$.
+\end{lemma}
+\begin{proof}
+  By induction on the cases:
+  \[\begin{array}{rclrcl}
+    \GD(\eqlat{A} \x \eqlat{B}) &=& \GD \eqlat{A} \x \GD \eqlat{B}
+    \quad&\quad (x,y) \oplus (dx,dy) &=& (x \oplus dx, y \oplus dy)
+    \\
+    \GD(\Down{\eq{A}}) &=& \Down{\eq{A}}
+    \quad&\quad x \oplus y &=& x \vee y\\
+    \GD 2 &=& 2
+    \quad&\quad x \oplus y &=& x \vee y
+  \end{array}\]
 \end{proof}
 
 
@@ -280,6 +306,25 @@ $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
   \delta(\fixle{x}{e}{f}) &=& \text{\TODO}
 \end{array}
 \]
+
+At equality types, $\delta(\downelim{x}{e}{f})$ has the following definition:
+
+\[\begin{array}{rcl}
+  \delta(\downelim{x}{e}{f})
+  &=& (\downelim{x}{e}{\ms{let}~dx = \mb{0}\; x ~\ms{in}~ \delta f})
+  \\ && \vee~ (\downelim{x}{\delta e}{(f \oplus \delta f) \ominus \unit})
+\end{array}
+
+Translation of $\downelim{x}{e}{f}$ at \emph{non-equality types}, however, is
+type-directed:
+
+\[\begin{array}{lcll}
+  \delta(\downelim{x}{e}{f} : A \to \lat{B})
+  &=& \fn\bind{y} \downelim{x}{e}{f\; y}\\
+  \delta(\downelim{x}{e}{f} : \lat{A} \x \lat{B})
+  &=& \pair{\delta(\downelim{x}{e}{\pi_1\; f})}
+  {\delta(\downelim{x}{e}{\pi_2\; f})}
+\end{array}\]
 
 \emph{Hypothesis}: For $a : \lat{A}$ and $da : \GD\lat{A}$ a valid change to
 $a$:
