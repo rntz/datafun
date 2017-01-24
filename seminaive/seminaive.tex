@@ -1,14 +1,159 @@
 \documentclass{article}
-\usepackage[a4paper,margin=1in]{geometry}
+\usepackage[a4paper,margin=0.8in]{geometry}
 
 \usepackage{datafun}
 \usepackage{array}
+\usepackage{booktabs}
 
 \begin{document}
 
-\section{Core Datafun}
+\section{Poset terminology}
+
+\begin{definition}[Chain]
+  In a poset $A$, a \emph{chain} is a monotone map $f : \N \to A$, which we
+  interpret as an infinite nondecreasing sequence of $A$s, $f(0) \le f(1) \le
+  f(2) \le ...$.
+\end{definition}
+
+\begin{definition}[Strict chain]
+  A chain $f : \N \to A$ is \emph{strict} if $i < j \implies f(i) < f(j)$; in
+  other words, an infinite strictly increasing sequence of $A$s, $f(0) < f(1) <
+  f(2) < ...$.
+\end{definition}
+
+\begin{definition}[Stops-at]
+  A chain $a_0 \le a_1 \le a_2 \le ...$ \emph{stops at $i$} iff:
+  \[
+  \begin{array}{rl}
+    & \forall(j \ge i)\ a_j \le a_i\\
+    \text{or equivalently} & \forall(j \ge i)\ a_i = a_j\\
+    \text{or equivalently} & a_i ~\text{is the supremum of}~a
+  \end{array}
+  \]
+\end{definition}
+
+\begin{definition}[Stops]
+  A chain $a$ \emph{stops} if $\exists i$ st. $a$ stops at $i$; or equivalently,
+  if $a$ contains its own supremum.
+\end{definition}
+
+\begin{observation} Strict chains don't stop. \end{observation}
+
+\begin{definition}
+  For a chain $f$, let the sequence $f^s$ (``the strictification of $f$'') be
+  $f$ with all repeated elements stripped out. If $f^s$ is infinite, it is by
+  construction a strict chain.
+\end{definition}
+
+%% \begin{observation}
+%%   If $f$ is a strict chain, $f^s = f$, since strict chains have no repeated
+%%   elements.
+%% \end{observation}
+
+\begin{lemma}
+  Given a chain $a$, $a^s$ is finite iff $a$ stops (and $a^s$ is a strict chain
+  iff $a$ does not stop).
+\end{lemma}
+\begin{proof}
+  Note that the ranges of $a$ and $a^s$ are identical by construction.
+
+  First, suppose $a^s$ is finite. Note that the last element of $a^s$ is its
+  largest, and therefore the supremum of both sequences, since they have the
+  same range. Therefore $a$ contains its own supremum, and stops.
+
+  Second, suppose $a$ stops. Thus it contains the supremum of both sequences.
+  Let $i$ be the index such that $a^s_i$ is this supremum. There can be no
+  elements in $a^s$ after $a^s_i$. Thus $a^s$ is finite.
+\end{proof}
+
+\begin{definition}[ACC]
+  A poset satisfies the \emph{ascending chain condition (ACC)} iff all chains in
+  it stop, or equivalently, if it has no strict chains.
+\end{definition}
+
+``Every chain stops'' implies no strict chains exist, since every strict chain
+is a chain and strict chains do not stop. Likewise, ``no strict chains exist''
+implies every chain stops, since for every non-stopping chain $f$ there is a
+strict chain $f^s$.
+
+%% \begin{theorem}[ACC $\Leftrightarrow$ no strict chains]
+%%   A poset $A$ satisfies ACC iff there are no strict chains on $A$.
+%% \end{theorem}
+%% \begin{proof}
+%%   First, we show ACC implies no strict chains. Assume $A$ satisfies ACC.
+%%   Consider some strict chain $f : \N \to A$. Any strict chain is a chain.
+%%   Therefore by ACC $\exists i\ \forall(j \ge i)\ f(j) \le f(i)$. Letting $j = i
+%%   + 1$, we have $f(i) < f(i + 1)$ by $f$'s strictness, and $f(i) \ge f(i+1)$ by
+%%   ACC. Contradiction!
+
+%%   Second, we show no strict chains implies ACC. Assume $A$ has no strict chains.
+%%   Consider some (weak) chain $f : \N \to A$. Now, let the sequence $f^s$ be $f$
+%%   with repeated elements stripped out, so that $f^s$ is strictly increasing, but
+%%   might no longer be an infinite sequence. Since $A$ has no strict chains, we
+%%   know $f^s$ is finite. Consider the index $i$ in $f$ of the first occurrence of
+%%   the last (and thus greatest) element of $f^s$. By construction we have
+%%   $\forall (j \ge i)\ f(j) \le f(i)$. Thus $A$ satisfies ACC.
+%% \end{proof}
+
+\begin{definition}[Downset on an element]
+  The \emph{downset on $x$} in a poset $A$, written $\downintro{x : A}$ or just
+  $\downintro{x}$, is the freely generated downward-closed subset of $A$
+  containing $x$, namely $\setfor{y \in A}{y \le x}$.
+\end{definition}
+
+\begin{definition}[Downset]
+  A \emph{downset} on a poset $A$ is a finitely-generated downward-closed subset
+  of $A$; that is to say, for some \emph{finite} subset $G \finsubseteq A$, it
+  is $\bigcup_{x \in G} \downintro{x}$, or equivalently $\setfor{y \in
+    A}{\exists(x \in G)\ y \le x}$.
+\end{definition}
+
+Note that this definition of \emph{downset} is in fact what others might call a
+\emph{finitely generated downset}. I prefer the term \emph{downward-closed set}
+for the more general concept.
+
+We will often regard a downset $D$ of $A$ as a poset, with the same ordering
+relation as $A$, restricted to elements of $D$ (the ``induced ordering'').
+
+\begin{definition}[Downset ACC]
+  A poset $A$ is \emph{downset-ACC} iff every downset $D$ of $A$ satisfies
+  ACC.
+\end{definition}
+
+\begin{lemma}[The union of ACC sets is ACC]\label{lemma:acc-union}
+  Given a poset $\tuple{A,\le}$ and two subsets $B,C \subseteq A$, if
+  $\tuple{B,\le}$ and $\tuple{C,\le}$ each satisfy ACC, then so does $\tuple{B
+    \cup C, \le}$.
+\end{lemma}
+\begin{proof}
+  Assume $B$ and $C$ satisfy ACC.
+  %%
+  It suffices to show that there are no strict chains in $B \cup C$.
+  So consider some strict chain $f : \N \to B \cup C$.
+  %%
+
+  We can split $f(0) < f(1) < f(2) < ...$ into two strictly increasing sequences
+  $b_0 < b_1 < b_2 < ...$ and $c_0 < c_1 < c_2 < ...$ by including in $b_i$ all
+  and only those $f(j) \in B$ and likewise in $c_i$ all and only those $f(j) \in
+  C$. Since $f$ is infinite, at least one of these sequence is infinite; WLOG,
+  assume $b$ is. Thus $b$ is a strict chain in $B$! But by ACC there are no
+  strict chains in $B$. Contradiction.
+\end{proof}
+
+\begin{theorem}[Elementwise ACC implies Downset ACC]
+  A poset $A$ is downset-ACC if, for any $x : A$, $\downintro{x}$ satisfies ACC.
+\end{theorem}
+\begin{proof}
+  The empty set clearly satisfies ACC. Given two subposets $D,E \subseteq A$
+  which both satisfy ACC, their union $D \cup E$ also satisfies ACC by Lemma
+  \ref{lemma:acc-union}. Every downset is the finite union of zero or more
+  singly-generated downsets of the form $\downintro{x}$. So by induction, if
+  every singly-generated downset $\downintro{x}$ satisfies ACC, so do all
+  downsets.
+\end{proof}
 
 
+\section{Core Datafun}
 \subsection{Syntax}
 
 \[
@@ -18,24 +163,30 @@
   \pipe \Disc{A} \pipe \Down{\eq{A}} \pipe \tbool
   \vspace{1em}\\
 
-  %% equality types
-  \textsf{equality types} & \eq{A}
+  %% types where the poset relationship is decidable
+  \textsf{decidable types} & \eq{A}
   &\bnfeq& \eq{A} \x \eq{B} \pipe \eq{A} + \eq{B}
   \pipe \Disc{\eq{A}} \pipe {\color{red} \Down{\eq{A}}} \pipe \tbool
   \vspace{1em}\\
 
   %% finite types
   \textsf{finite types} & \fin{A}
-  &\bnfeq& {\color{Cerulean} \fin{A} \to \fin{B}}
-  \pipe \fin{A} \x \fin{B} \pipe \fin{A} + \fin{B}
+  &\bnfeq& \fin{A} \x \fin{B} \pipe \fin{A} + \fin{B}
   \pipe \Disc{\fin{A}} \pipe \Down{\fin{A}} \pipe \tbool
   \vspace{1em}\\
 
   %% acc types
   \textsf{acc types} & \acc{A}
-  &\bnfeq& {\color{Cerulean} \fin{A} \to \acc{B}}
-  \pipe \acc{A} \x \acc{B} \pipe \acc{A} + \acc{B}
+  &\bnfeq& \acc{A} \x \acc{B} \pipe \acc{A} + \acc{B}
   \pipe {\color{Cerulean} \Disc{A}} \pipe \Down{\fin{A}} \pipe \tbool
+  \vspace{1em}\\
+
+  %% downset-acc types
+  \textsf{downset-acc types} & \eltacc{A}
+  &\bnfeq& \eltacc{A} \x \eltacc{B} \pipe \eltacc{A} + \eltacc{B}
+  \pipe {\color{Cerulean} \Disc{A}}
+  \pipe {\color{Bittersweet} \Down{\fin{A}}} \pipe \Down{\Disc{A}}
+  \pipe \tbool
   \vspace{1em}\\
 
   %% semilattice types
@@ -43,9 +194,14 @@
   &\bnfeq& A \to \lat{B} \pipe \lat{A} \x \lat{B} \pipe \Down{A} \pipe \tbool
   \vspace{1em}\\
 
+  %% decidable semilattice types
+  \textsf{decidable semilattice types} & \eqlat{A}
+  &=& \eq{A} \cap \lat{A}
+  \vspace{1em}\\
+
   %% fixpoint types
-  \textsf{fixed-point types} & \under{fix}{A}
-  &=& \acc{A} \cap \eq{A} \cap \lat{A}
+  \textsf{fixed-point types} & \fixtype{A}
+  &=& \eq{A} \cap \lat{A} \cap \acc{A}
   \vspace{1em}\\
 
   %% expressions
@@ -55,83 +211,45 @@
   \pipe \inj{i}{e} \pipe \case{e}{x}{e_1}{x}{e_2} \\
   &&\pipe& \disc{e} \pipe \letdisc{x}{e}{e} \pipe \splitsum{e}\\
   &&\pipe& \unit \pipe e \vee e \pipe \downintro{e} \pipe \downelim{x}{e}{e}\\
-  &&\pipe& \ett \pipe \eff \pipe \when{e}{e} \pipe \ifthen{e}{e}{e}\\
+  &&\pipe& \etrue \pipe \efalse \pipe \when{e}{e} \pipe \ifthen{e}{e}{e}\\
   &&\pipe& \fix{x}{e} \pipe \fixle{x}{e}{e}
 \end{array}
 \]
 
-NB: ``equality types'' are actually ``types whose partial order is decidable''.
-Maybe we should write $\under{ord}{A}$?
+The ``typeclass'' rules (for decidable, finite, acc, downset-acc, semilattice,
+etc.\! types) are \emph{conservative approximations} of semantic conditions.
 
-I've highlighted the equality type ${\color{red} \Down{\eq{A}}}$ because
-comparing down-sets is nontrivial to implement. If finite sets $\{A\}$ are
-implemented as $\Down{\Disc{A}}$, this may have performance implications. A less
-general approach would be to consider only $\Down{\Disc{\eq{A}}}$ to be an
-equality type.
+``Decidable types'' are those whose partial ordering relation is practically
+decidable; that is, given $x, y : \eq{A}$, there is a reasonable algorithm that
+determines whether $x \le y$. By antisymmetry, this also makes equality $x = y$
+testable at these types.
 
-I've put some justified but probably unnecessary rules in {\color{Cerulean} blue}.
+Theoretically, a function type $\under{fin}{A} \to \eq{B}$ whose domain is
+finite and codomain is decidable is also decidable (it is effectively a finite
+product of $\eq{B}$s). We have omitted this, as it complicates our
+implementation for little practical benefit. We have similarly omitted the cases
+in which function types are finite ($\fin{A} \to \fin{B}$), ACC ($\fin{A} \to
+\acc{B}$), and downset-ACC ($\fin{A} \to \eltacc{B}$).
+
+I've highlighted the decidable type ${\color{red} \Down{\eq{A}}}$ because
+comparing down-sets \emph{efficiently} in general is nontrivial (impossible?).
+If finite sets $\{A\}$ are implemented as $\Down{\Disc{A}}$, this may have
+performance implications. A less general approach would be to consider only
+$\Down{\Disc{\eq{A}}}$ to be decidable.
+
+I've highlighted the downset-acc type ${\color{Bittersweet} \Down{\fin{A}}}$
+because, while correct, it seems insufficiently general. In particular it does
+not cover the extremely useful special case that $\Down{\Disc{A}}$ (finite sets
+of $A$s) is always downset-acc. However, $\Down{A}$ is not always downset-ACC;
+consider $\Down{(\N \mathop{\under{<}{{+}}} 1)}$. \todo{I suspect the correct
+  rule is that $\Down{\eltacc{A}}$ is always downset-acc, but this needs proof.
+  This would generalize $\Down{\Disc{A}}$ as long as we keep the rules that
+  $\Disc{A}$ is always ACC and downset-ACC.}
+
+I've put some semantically justified but probably unnecessary rules in
+{\color{Cerulean} blue}.
 
 
-%% \subsection{Properties of types}
-
-%% Some decidable judgments about types:
-%% \begin{quote}
-%%   \begin{tabular}{ll}
-%%     $A \is{eq}$ & $A$ is an equality type.\\
-%%     $A \is{fin}$ & $A$ has finitely many inhabitants.\\
-%%     $A \is{acc}$ & $A$ satisfies ACC.\\
-%%   \end{tabular}
-%% \end{quote}
-
-%% And their rules:
-%% \begin{mathpar}
-%%   \infer{A \x B \is{eq}}{A \is{eq} & B \is{eq}}
-
-%%   \infer{A + B \is{eq}}{A \is{eq} & B \is{eq}}
-
-%%   \infer{\Disc{A} \is{eq}}{A \is{eq}}
-
-%%   {\color{red} \infer{\Down{A} \is{eq}}{A \is{eq}}}
-
-%%   \infer{\tbool \is{eq}}{}
-%%   \\
-%%   {\color{Cerulean} \infer{A \to B \is{fin}}{A \is{fin} & B \is{fin}}}
-
-%%   \infer{A \x B \is{fin}}{A \is{fin} & B \is{fin}}
-
-%%   \infer{A + B \is{fin}}{A \is{fin} & B \is{fin}}
-
-%%   \infer{\Disc{A} \is{fin}}{A \is{fin}}
-
-%%   \infer{\Down{A} \is{fin}}{A \is{fin}}
-
-%%   \infer{\tbool \is{fin}}{}
-%%   \\
-%%   {\color{Cerulean} \infer{A \to B \is{acc}}{A \is{fin} & B \is{acc}}}
-
-%%   \infer{A \x B \is{acc}}{A \is{acc} & B \is{acc}}
-
-%%   \infer{A + B \is{acc}}{A \is{acc} & B \is{acc}}
-
-%%   {\color{Cerulean} \infer{\Disc{A} \is{acc}}{}}
-
-%%   \infer{\Down{A} \is{acc}}{A \is{fin}}
-
-%%   \infer{\tbool \is{acc}}{}
-%% \end{mathpar}
-
-%% I've put in {\color{Cerulean} blue} some rules that I think are justified, but
-%% probably unnecessary.
-
-%% I've highlighted the rule that says when downsets form equality types in
-%% {\color{red} red} because it might take some nontrivial work to implement
-%% equality testing for downsets. A less powerful but easier to implement rule
-%% would be:
-%% \[
-%% \infer{\Down{\Disc{A}} \is{eq}}{A \is{eq}}
-%% \]
-
-%% 
 \subsection{Typing rules}
 
 The typing judgment \[\J{\GP}{\GG}{e}{A}\] says that $e$ has type $A$ using
@@ -177,16 +295,16 @@ rules.
         { e : \Down{A}
         & \J{\GP}{\GG,x \of A}{f}{\lat{B}}}
   \\
-  \infer{\ett : \tbool}{}
+  \infer{\etrue : \tbool}{}
 
-  \infer{\eff : \tbool}{}
+  \infer{\efalse : \tbool}{}
 
   \infer{\when{e}{f} : \lat{A}}{e : \tbool & f : \lat{A}}
 
   \infer{\ifthen{e}{f_1}{f_2} : A}{e : \Disc{\tbool} & f_i : A}
   \\
-  \infer{\fix{x}{e} : \under{fix}{A}}{
-    \J{\GP}{\GG,x\of \under{fix}{A}}{e}{\under{fix}{A}}}
+  \infer{\fix{x}{e} : \fixtype{A}}{
+    \J{\GP}{\GG,x\of \fixtype{A}}{e}{\fixtype{A}}}
 
   \infer{\fixle{x}{e}{f} : \eqlat{A}}{
     e : \eqlat{A} &
@@ -210,14 +328,85 @@ $\oplus : A \to \GD A \to A$:
   \GD(A + B) &=& \GD A + \GD B
   & \inj{i}{x} \oplus \inj{i}{dx} &=& \inj{i}{(x \oplus dx)}\\
   \GD(\Disc{A}) &=& \Disc{\GD A}
+  %% & \disc{x} \oplus \disc{dx} &=& \disc{(x \oplus dx)}\\
   & \disc{x} \oplus \disc{dx} &=& \disc{(x \oplus dx)}\\
   \GD(\Down{A}) &=& \Down{A} & x \oplus y &=& x \vee y\\
   \GD 2 &=& 2 & x \oplus y &=& x \vee y
 \end{array}\]
 
-\todo{TODO: define $\mb{0}$ as well.}
+We also define associated operators $\ominus : A \to A \to \Delta A$ and $\mb{0}
+: A \to \Delta A$:
+%% \begin{center}
+%% \scalebox{1}{
+\[\arraycolsep=1.5em
+\begin{array}{ccc}
+  \textbf{Type}
+  & {\textbf{Definition of}~\ominus}
+  & {\textbf{Definition of}~\mb{0}}
+  \\ \midrule
+  A \to B
+  & (f \ominus g)\; x \;dx = f\; (x \oplus dx) \ominus g \; x
+  & \mb{0}\; f\; x\; dx = f\; (x \oplus dx) \ominus f\; x
+  \\
+  A \x B
+  & (a,x) \ominus (b,y) = (a \ominus b, x \ominus y)
+  & \mb{0} \; (x,y) = (\mb{0}\; x, \mb{0}\; y)
+  \\
+  A + B
+  & \inj{i}{x} \ominus \inj{i}{y} = \inj{i}{x \ominus y}
+  & \mb{0}\; (\inj{i}{x}) = \inj{i}{(\mb{0}\;x)}
+  \\
+  \Disc{A}
+  & \disc{x} \ominus \disc{y} = \disc{(x \ominus y)}
+  & \mb{0}\; (\disc{x}) = \disc{(\mb{0}\; x)}
+  \\
+  \Down{A}
+  & x \ominus y = x
+  & \mb{0}\; x = \unit
+  \\
+  2
+  & x \ominus y = x
+  & \mb{0}\; x = \unit
+\end{array}
+\]
+%% }
+%% \end{center}
 
+These should satisfy the following laws:
+\begin{eqnarray}
+  x \le y \quad\implies\quad
+  y &=& x \oplus (y \ominus x)\\
+  x &=& x \oplus \mb{0}\; x
+\end{eqnarray}
 
+\todo{TODO: Prove these laws hold.}
+
+\todo{TODO: Note about ``erasure''/invalid changes. Moreover, at $\Disc{A}$
+  type, only valid changes are zero changes.}
+
+\todo{TODO: Note about efficiency of computing $\oplus$, $\ominus$, $\mb{0}$,
+  and which ones we actually need to compute in the implementation. Define
+  efficiently computable $(- \ominus \unit)$ operator for decidable types, and
+  point out that $\mb{0}$ is efficiently computable for decidable types.}
+
+%% Zero on decidable types.
+%% Zero on decidable types:
+%% \[\arraycolsep=1.5em
+%% \begin{array}{c|c}
+%%   \eq{A} \x \eq{B}
+%%   & \mb{0}\; (x,y) = (\mb{0}\; x, \mb{0}\; y)
+%%   \\
+%%   \eq{A} + \eq{B}
+%%   & \mb{0}\; (\inj{i}{x}) = \inj{i}(\mb{0}\; x)\\
+%%   \Disc{\eq{A}}
+%%   & \mb{0}\;(\disc{x}) = \disc{(\mb{0}\; x)}\\
+%%   \Down{\eq{A}} & \mb{0}\;x = \unit\\
+%%   \tbool & \mb{0}\; x = \unit
+%% \end{array}
+%% \]
+
+
+%% Some lemmas.
 \begin{lemma}[Changes on a semilattice form a semilattice]
   $\GD \lat{A}$ is a semilattice type.
 \end{lemma}
@@ -231,20 +420,40 @@ $\oplus : A \to \GD A \to A$:
   \end{eqnarray*}
 \end{proof}
 
-\begin{lemma}[Changes on semilattice equality-types are boring]
-  $\GD \eqlat{A} = \eqlat{A}$, and at such types $\oplus = \vee$.
+\begin{lemma}[Changes on decidable semilattices are boring]
+  For any decidable semilattice type $\eqlat{A}$, $\GD \eqlat{A} = \eqlat{A}$,
+  and moreover the following laws hold:
+  \begin{eqnarray*}
+    x \oplus y &=& x \vee y\\
+    x \ominus y &=& x\\
+    \mb{0}\; x &=& \unit
+  \end{eqnarray*}
 \end{lemma}
 \begin{proof}
   By induction on the cases:
-  \[\begin{array}{rclrcl}
-    \GD(\eqlat{A} \x \eqlat{B}) &=& \GD \eqlat{A} \x \GD \eqlat{B}
-    \quad&\quad (x,y) \oplus (dx,dy) &=& (x \oplus dx, y \oplus dy)
-    \\
-    \GD(\Down{\eq{A}}) &=& \Down{\eq{A}}
-    \quad&\quad x \oplus y &=& x \vee y\\
-    \GD 2 &=& 2
-    \quad&\quad x \oplus y &=& x \vee y
+  \[\begin{array}{rcl}
+    \GD(\eqlat{A} \x \eqlat{B}) &=& \GD \eqlat{A} \x \GD \eqlat{B}\\
+    \GD(\Down{\eq{A}}) &=& \Down{\eq{A}}\\
+    \GD \tbool &=& \tbool
   \end{array}\]
+
+  And, for the operations:
+  \[\arraycolsep=0.75em
+  \begin{array}{c|ccc}
+    \eqlat{A} \x \eqlat{B}
+    & (x,y) \oplus (dx,dy) = (x \oplus dx, y \oplus dy)
+    & (a,x) \ominus (b,y) = (a \ominus b, x \ominus y)
+    & \mb{0}\; (x,y) = (\mb{0}\; x, \mb{0}\; y)\\
+    \Down{\eq{A}}
+    & x \oplus y = x \vee y
+    & x \ominus y = x
+    & \mb{0}\;x = \unit\\
+    \tbool
+    & x \oplus y = x \vee y
+    & x \ominus y = x
+    & \mb{0}\;x = \unit\\
+  \end{array}
+  \]
 \end{proof}
 
 
@@ -295,8 +504,8 @@ $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
   \qquad \text{(this is the critical over-approximation)}\\
   \delta(\downintro{e}) &=& \unit\\
   \delta(\downelim{x}{e}{f}) &=& \text{\TODO}\\
-  \delta(\ett) &=& \eff\\
-  \delta(\eff) &=& \eff\\
+  \delta(\etrue) &=& \efalse\\
+  \delta(\efalse) &=& \efalse\\
   \delta(\when{e}{f})
   &=& \ifthen{\color{ForestGreen} \disc{e}}{\delta f}{
     \when{\delta e}{(f \oplus \delta f) \ominus \unit}}
@@ -312,8 +521,9 @@ At equality types, $\delta(\downelim{x}{e}{f})$ has the following definition:
 \[\begin{array}{rcl}
   \delta(\downelim{x}{e}{f})
   &=& (\downelim{x}{e}{\ms{let}~dx = \mb{0}\; x ~\ms{in}~ \delta f})
-  \\ && \vee~ (\downelim{x}{\delta e}{(f \oplus \delta f) \ominus \unit})
-\end{array}
+  \\ && \vee~ (\downelim{x}{\delta e}{\ms{let}~dx = \mb{0}\; x ~\ms{in}~
+    (f \oplus \delta f) \ominus \unit})
+\end{array}\]
 
 Translation of $\downelim{x}{e}{f}$ at \emph{non-equality types}, however, is
 type-directed:

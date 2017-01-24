@@ -49,6 +49,7 @@
 \newcommand{\pipe}{\hspace{0.5em}|\hspace{0.5em}}
 \newcommand{\of}{\,{:}\,}
 \newcommand{\widevec}[1]{\overrightarrow{#1}}
+\newcommand{\finsubseteq}{\subseteq_{\text{fin}}}
 
 \newcommand{\bnfeq}{\dblcolon=}
 \newcommand{\defeq}{\overset{\ms{def}}{=}}
@@ -81,11 +82,23 @@
 \newcommand{\under}[2]{\underaccent{\mathit{#1}}{#2}}
 
 %% typeclasses
-\newcommand{\eq}[1]{\under{eq}{#1}}
+\newcommand{\eq}[1]{\under{dec}{#1}}
 \newcommand{\fin}[1]{\under{fin}{#1}}
 \newcommand{\lat}[1]{\under{lat}{#1}}
 \newcommand{\acc}[1]{\under{acc}{#1}}
-\newcommand{\eqlat}[1]{\under{eq,lat}{#1}}
+\newcommand{\eltacc}[1]{\under{\downarrow{}acc}{#1}}
+\newcommand{\eqlat}[1]{\under{dec,lat}{#1}}
+\newcommand{\fixtype}[1]{\under{fix}{#1}}
+
+\renewcommand{\eqlat}[1]{\under{dl}{#1}}
+
+%% \renewcommand{\eq}[1]{\under{\mathfrak{D}}{#1}}
+%% \renewcommand{\fin}[1]{\under{\mathfrak{F}}{#1}}
+%% \renewcommand{\lat}[1]{\under{\mathfrak{L}}{#1}}
+%% \renewcommand{\acc}[1]{\under{\mathfrak{A}}{#1}}
+%% \renewcommand{\eqlat}[1]{\under{\mathfrak{D}\cap\mathfrak{L}}{#1}}
+%% \renewcommand{\fixtype}[1]{\under{\mathfrak{X}}{#1}}
+
 
 %% expressions
 %% \renewcommand{\v}[1]{\mi{#1}}                %ordinary variables
@@ -111,11 +124,12 @@
 \newcommand{\forin}[1]{\textstyle\bigvee({#1})\ }
 \newcommand{\downelim}[3]{\forin{#1 \in #2} #3}
 
-\newcommand{\eff}{\ms{ff}}
-\newcommand{\ett}{\ms{tt}}
+\newcommand{\efalse}{\ms{false}}
+\newcommand{\etrue}{\ms{true}}
 \newcommand{\when}[2]{\ms{when}~{#1}~\ms{then}~{#2}}
 \newcommand{\ifthen}[3]{\ms{if}~{#1}~\ms{then}~{#2}~\ms{else}~{#3}}
 
+\newcommand{\setlit}[1]{\{#1\}}
 \newcommand{\setfor}[2]{\setlit{{#1}~|~{#2}}}
 \newcommand{\isin}{\mathrel{{\in}\hspace{0.15ex}?}}
 
@@ -149,6 +163,7 @@
 
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
+\newtheorem{observation}{Observation}
 
 %% for rule names.
 \newcommand{\rn}[1]{\mathsz{8pt}{#1}}
