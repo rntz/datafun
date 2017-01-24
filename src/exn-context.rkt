@@ -43,7 +43,7 @@
     body ...))
 
 (define-syntax-parser try-each
-  [(e) e]
+  [(e) #'e]
   [(e es ...)
    #'(with-handlers
        ([exn:with-context?
