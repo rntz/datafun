@@ -5,8 +5,8 @@ val not: bool → bool
 fun not x = if x then false else true
 
 val range: nat → nat →⁺ {nat}
-fun range i j = for (i <= j) fix (s)
-                {i} lub {x+1 | x in s, x+1 <= j}
+fun range i j = ⋁(i <= j) fix s is
+                 {i} ∨ {x+1 | x in s, x+1 <= j}
 
 val length = strlen
 val substring = substr
@@ -25,7 +25,7 @@ fun cross x y = {(a,b) | a ∈ x, b ∈ y}
 
 (* ---------- 3.2 Equality, membership, and intersection ---------- *)
 val mem: nat → {nat} →⁺ bool
-fun mem x a = for (y ∈ a) x = y
+fun mem x a = for y ∈ a: x = y
 
 (* unlike the paper, which uses nonlinear pattern-matching to imply tests for
  * equality, we have to explicitly annotate patterns that test for equality.
@@ -111,27 +111,25 @@ fun expr_vars x = case x | Atom(a) => atom_vars a
 fun uses stmt = case stmt | Assign(_,e) | If (e,_,_) => expr_vars e
 
 val vars : program → {var}
-fun vars p = for ((_,stmt) ∈ p) uses stmt ∨ defines stmt
+fun vars p = ⋁((_,stmt) ∈ p) uses stmt ∨ defines stmt
 
 type flow = {label × label}
 val flow : program → flow
-fun flow c = for ((i,s) ∈ c)
+fun flow c = ⋁((i,s) ∈ c)
              case s | If(_, j, k) => {(i,j), (i,k)}
                     | _ => {(i, i+1) | i+1 ∈? labels c}
 
 val live : program → flow →⁺ {label × var}
 fun live code flow =
   fix live is
-  for ((i,stmt) ∈ code)
+  ⋁ ((i,stmt) ∈ code)
     {(i,v) | v ∈ uses stmt}
-  ∨ {(i,v) | (!i,j) ∈ flow
-           , (!j,v) ∈ live
-           , not (v ∈? defines stmt)}
+  ∨ {(i,v) | (!i,j) ∈ flow, (!j,v) ∈ live, not (v ∈? defines stmt)}
 
 val reachingDefinitions : program → flow → {(label × var) × label}
 fun reachingDefinitions code flow =
   fix rd is
-  for ((i,stmt) ∈ code)
+  ⋁ ((i,stmt) ∈ code)
     {((i,v),i) | v ∈ defines stmt}
   ∨ {((l,v),i) | (j,!i) ∈ flow
                , ((l,v),!j) ∈ rd
