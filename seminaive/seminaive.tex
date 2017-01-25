@@ -153,7 +153,23 @@ relation as $A$, restricted to elements of $D$ (the ``induced ordering'').
 \end{proof}
 
 
+
 \section{Core Datafun}
+
+\todo{We should carefully distinguish which properties are necessary to safely
+  extend core Datafun --- and therefore, which proofs are ``open''. For example,
+  all that should be necessary to add a type to Datafun and declare it decidable
+  is that it should actually \emph{be} decidable. However, for \emph{decidable
+    semilattice types}, we require that Lemma \ref{lemma:dl-boring} holds in
+  order to extend the language with them.
+
+  This means that when proving something about decidable types, we cannot do it
+  by induction (or we violate extensibility), only by invoking the fact that
+  they are decidable. But when proving something about decidable semilattice
+  types, we can use Lemma \ref{lemma:dl-boring}. The proof of Lemma
+  \ref{lemma:dl-boring} gets to use induction, but the hypothesis can't be
+  strengthened (or we'd violate extensibility).}
+
 \subsection{Syntax}
 
 \[
@@ -204,17 +220,25 @@ relation as $A$, restricted to elements of $D$ (the ``induced ordering'').
   &=& \eq{A} \cap \lat{A} \cap \acc{A}
   \vspace{1em}\\
 
+  \textsf{bounded fixed-point types} & \fixletype{A}
+  &=& \eq{A} \cap \lat{A} \cap \eltacc{A}
+  \vspace{1em}\\
+
   %% expressions
   \textsf{expressions} & e,f,g
-  &\bnfeq& x \pipe \fn\bind{x} e \pipe e\; e
+  &\bnfeq& x \pipe \d{x} \pipe \fn\bind{x} e \pipe e\; e
   \pipe \pair{e}{e} \pipe \pi_i\; e
   \pipe \inj{i}{e} \pipe \case{e}{x}{e_1}{x}{e_2} \\
-  &&\pipe& \disc{e} \pipe \letdisc{x}{e}{e} \pipe \splitsum{e}\\
+  &&\pipe& \disc{e} \pipe \letdisc{\d{x}}{e}{e} \pipe \splitsum{e}\\
   &&\pipe& \unit \pipe e \vee e \pipe \downintro{e} \pipe \downelim{x}{e}{e}\\
   &&\pipe& \etrue \pipe \efalse \pipe \when{e}{e} \pipe \ifthen{e}{e}{e}\\
   &&\pipe& \fix{x}{e} \pipe \fixle{x}{e}{e}
 \end{array}
 \]
+
+\todo{Note: I try to use bold $\d{x}$ for discrete variables and ordinary script
+  $x$ for monotone variables, but sometimes I screw up. Also, this is the
+  opposite of the convention in the original Datafun paper.}
 
 The ``typeclass'' rules (for decidable, finite, acc, downset-acc, semilattice,
 etc.\! types) are \emph{conservative approximations} of semantic conditions.
@@ -278,9 +302,9 @@ rules.
   \\
   \infer{\J{\GP}{\GG}{\disc{e}}{\Disc{A}}}{\J{\GP}{-}{e}{A}}
 
-  \infer{\letdisc{x}{e}{f} : B}
+  \infer{\letdisc{\d{x}}{e}{f} : B}
         { e : \Disc{A}
-        & \J{\GP,x\of A}{\GG}{f}{B} }
+        & \J{\GP,\d{x}\of A}{\GG}{f}{B} }
 
   \infer{\splitsum{e} : \Disc{A} + \Disc{B}}
         {e : \Disc{(A + B)}}
@@ -306,10 +330,9 @@ rules.
   \infer{\fix{x}{e} : \fixtype{A}}{
     \J{\GP}{\GG,x\of \fixtype{A}}{e}{\fixtype{A}}}
 
-  \infer{\fixle{x}{e}{f} : \eqlat{A}}{
-    e : \eqlat{A} &
-    \J{\GP}{\GG,x \of \eqlat{A}}{f}{\eqlat{A}} &
-    {\color{red}\text{TODO: elementwise-ACC condition on $A$?}}}
+  \infer{\fixle{x}{e}{f} : \fixletype{A}}{
+    e : \fixletype{A} &
+    \J{\GP}{\GG,x \of \fixletype{A}}{f}{\fixletype{A}}}
 \end{mathpar}
 
 
@@ -333,6 +356,10 @@ $\oplus : A \to \GD A \to A$:
   \GD(\Down{A}) &=& \Down{A} & x \oplus y &=& x \vee y\\
   \GD 2 &=& 2 & x \oplus y &=& x \vee y
 \end{array}\]
+
+\todo{FIXME: these operators don't typecheck! note this and call them
+  pseudo-operators? Or maybe $\oplus$ should be discrete in its first argument?}
+\todo{FIXME: $\oplus$ uses $\mb{0}$!}
 
 We also define associated operators $\ominus : A \to A \to \Delta A$ and $\mb{0}
 : A \to \Delta A$:
@@ -409,6 +436,8 @@ These should satisfy the following laws:
 %% Some lemmas.
 \begin{lemma}[Changes on a semilattice form a semilattice]
   $\GD \lat{A}$ is a semilattice type.
+
+  \todo{TODO: do we actually need/use this lemma?}
 \end{lemma}
 \begin{proof}
   By induction on the cases:
@@ -420,7 +449,7 @@ These should satisfy the following laws:
   \end{eqnarray*}
 \end{proof}
 
-\begin{lemma}[Changes on decidable semilattices are boring]
+\begin{lemma}[Changes on decidable semilattices are boring]\label{lemma:dl-boring}
   For any decidable semilattice type $\eqlat{A}$, $\GD \eqlat{A} = \eqlat{A}$,
   and moreover the following laws hold:
   \begin{eqnarray*}
@@ -479,31 +508,35 @@ $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
 \[
 \begin{array}{lcll}
   \delta x &=& dx\\
-  \delta(\fn\bind{x} e) &=& \fn\bind{y} \letdisc{x}{y} {\fn\bind{dx} \delta(e)}
+  \delta \d{x} &=& \d{dx}\\
+  \delta(\fn\bind{x} e) &=&
+  \fn\bind{y} \letdisc{\d{x}}{y} {\fn\bind{dx} \delta(e)}
   \qquad\text{(for fresh $y$)}\\
   \delta(e\;f) &=& \delta e \; f \; \delta f\\
   \delta \pair{e}{f} &=& \pair{\delta{e}}{\delta{f}}\\
   \delta(\pi_i\; e) &=& \pi_i\; \delta{e}\\
   \delta(\inj{i}{e}) &=& \inj{i}{\delta{e}}\\
+  && \text{\todo{FIXME: next one needs a \textsf{split-sum} somewhere}}\\
+  && \text{\todo{TODO: use dummy-value function}}\\
   \delta(\case{e}{x}{f}{x}{g})
   &=& \case{e}
         {x}{\case{\delta e}{dx}{\delta f}{\_}{\ms{abort!}}}
         {x}{\case{\delta e}{\_}{\ms{abort!}}{dx}{\delta g}}\\
-  \delta(\disc e) &=& \disc{\delta e}\\
-  \delta(\letdisc{x}{e}{f}) &=&
-  \letdisc{x}{e}{
-    \letdisc{dx}{\delta e}{\delta f}}\\
+  \delta\disc{e} &=& \disc{\delta e}\\
+  \delta(\letdisc{\d{x}}{e} f) &=&
+  \letdisc{\d{x}}{e}
+    \letdisc{\d{dx}}{\delta e} \delta f\\
   \delta(\splitsum{e}) &=&
   %% want type: Δ□A + Δ□B = □ΔA + □ΔB
   %% e : □(A + B)
   %% δe : □(ΔA + ΔB)
   %% splitsum δe : □ΔA + □ΔB
   \splitsum{\delta e}\\
-  \delta(\unit) &=& \unit\\
+  \delta \unit &=& \unit\\
   \delta(e \vee f) &=& \delta e \vee \delta f
   \qquad \text{(this is the critical over-approximation)}\\
   \delta(\downintro{e}) &=& \unit\\
-  \delta(\downelim{x}{e}{f}) &=& \text{\TODO}\\
+  \delta(\downelim{\d{x}}{e}{f}) &=& \text{\TODO}\\
   \delta(\etrue) &=& \efalse\\
   \delta(\efalse) &=& \efalse\\
   \delta(\when{e}{f})
@@ -511,7 +544,8 @@ $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
     \when{\delta e}{(f \oplus \delta f) \ominus \unit}}
   \qquad \text{\color{red} UH-OH}\\
   \delta(\ifthen{e}{f}{g}) &=& \ifthen{e}{\delta f}{\delta g}\\
-  \delta(\fix{x}{e}) &=& \text{\todo{TODO: go look at my notes}}\\
+  \delta(\fix{x}{e}) &=&
+  \letdisc{\d{x}}{\disc{\fix{x} e}}{\fix{dx} \delta e}\\
   \delta(\fixle{x}{e}{f}) &=& \text{\TODO}
 \end{array}
 \]
@@ -550,5 +584,90 @@ away all uses of \ms{when} at functional types, in the same manner as we can
 rewrite away uses of $\bigvee$ at functional type.
 
 \todo{\par TODO: Proofs which Neel \& I worked out last time.}
+
+
+\subsubsection{Justifying derivatives of fixed points}
+
+Our rule for the derivative of a fixed point is:
+\begin{eqnarray*}
+  \delta(\fix{x} e)
+  &=& \letdisc{\d{x}}{\disc{\fix{x} e}}{\fix{dx} \delta e}\\
+  &=& \fix{dx}
+      (\fn \d{x}\, dx\binder \delta e)
+      \; \disc{\fix{x} e}
+      \; dx\\
+  &=& \fix{dx} \delta(\fn\bind{x} e)
+      \; \disc{\fix{x} e}
+      \; dx
+\end{eqnarray*}
+
+Why is this correct? First, let's rephrase this in terms of an operator
+$\ms{fix} : (\fixtype{A} \to \fixtype{A}) \to \fixtype{A}$:
+\begin{equation}
+  \delta(\ms{fix}\; f) = \ms{fix}\; (\delta f \;\disc{\ms{fix}\; f})
+\end{equation}
+
+This is such a beautiful equation it can't be wrong. But let's justify it
+anyway. First I'll justify it by an intuitive but informal argument. Then I'll
+prove it. The intuitive argument goes like this:
+\[
+\begin{array}{rcll}
+  \delta(\ms{fix}\; f)
+  &=& \delta(f \;(\ms{fix}\;f))
+  & \text{because}~\ms{fix}\; f = f\;(\ms{fix}\;f)\\
+  &=& \delta f \;\disc{\ms{fix}\; f} \; \delta(\ms{fix}\; f)
+  & \text{rule for}~\delta(e_1\;e_2)
+\end{array}
+\]
+
+We've now found a recursive equation that describes
+$\delta(\ms{fix}\;f)$ in terms of itself:
+\begin{equation}\label{eqn:delta-fix}
+  \delta(\ms{fix}\;f) = \delta f \;\disc{\ms{fix}\; f} \; \delta(\ms{fix}\;f)
+\end{equation}
+
+Let's apply \ms{fix} to solve the equation!
+\begin{equation}
+  \delta(\ms{fix}\; f)
+  = \ms{fix}\,(\fn\bind{dx}\, \delta f \;\disc{\ms{fix}\;f} \;dx)
+\end{equation}
+
+This is not a proof, however, because we merely established that it was
+\emph{true} that equation \ref{eqn:delta-fix} holds, not that it suffices as a
+\emph{definition} of $\delta(\ms{fix}\;f)$. We haven't shown that
+\emph{anything} of which equation \ref{eqn:delta-fix} holds is in fact a
+derivative of $\ms{fix}\;f$. \todo{TODO: try to establish this directly instead
+  of using the ``indirect'' argument below!}
+
+So, on to a more formal approach:
+
+Let $f' = \delta{f} \;\disc{\ms{fix}\; f}$.
+Let $f_{\ms{new}} = f \oplus \delta f$.
+Observe that:
+\[\begin{array}{rrcll}
+  &   f\;\d{x} \oplus \delta f \;\disc{\d{x}} \;dx
+  &=& (f \oplus \delta f) \; (\d{x} \oplus dx)
+  & \text{see Figure 4 on page 5 in Cai et al}
+  \\ \implies&
+  (f\;\d{x} \oplus \delta f \; \disc{\d{x}} \; dx) \ominus f\;\d{x}
+  &=&
+  (f \oplus \delta f) \; (\d{x} \oplus dx) \ominus f\;\d{x}
+  & \text{apply $(- \ominus f\;\d{x})$ to both sides}
+  \\ \implies&
+  \delta f \; \disc{\d{x}} \; dx
+  &=&
+  (f \oplus \delta f) \; (\d{x} \oplus dx) \ominus f\;\d{x}
+  & \text{because}~(a \oplus da) \ominus a = da
+  \\ \implies&
+  f' \; dx
+  &=& f_{\ms{new}} \; (\ms{fix}\;f \oplus dx)
+      \ominus f\; \disc{\ms{fix}\; f}
+  & \text{substitute $\d{x} \mapsto \ms{fix}\;f$}
+  \\ \implies&
+  f' \; dx
+  &=& f_{\ms{new}} \; (\ms{fix}\;f \oplus dx)
+      \ominus \ms{fix}\; f
+  & \text{because}~f\;(\ms{fix}\;f) = \ms{fix}\;f
+\end{array}\]
 
 \end{document}
