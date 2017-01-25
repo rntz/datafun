@@ -289,7 +289,7 @@
      ((lit)                         (e-lit $1))
      ((EMPTY)                       (e-lub '()))
      ((LP block RP)                 $2)
-     ;; ((LP e-list* RP)               (e-tuple $2))
+     ((LP e-list* RP)               (e-tuple $2))
      ;; records
      ;; TODO: use paren-based syntax for records everywhere. this requires:
      ;; 1. unifying the empty record type & the empty tuple type

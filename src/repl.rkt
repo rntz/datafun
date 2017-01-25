@@ -3,7 +3,11 @@
 (provide (all-defined-out))
 
 (require "util.rkt" "debug.rkt" "ast.rkt" "types.rkt" "env.rkt" "elab.rkt"
-         "defns.rkt" "parser.rkt" "runtime.rkt" "compile.rkt" "to-sexp.rkt")
+         "defns.rkt" "runtime.rkt" "compile.rkt" "to-sexp.rkt")
+
+;; Choose which parser to use.
+(require "parser.rkt")
+;; (require "block-parser.rkt")
 
 (define (show-err e)
   (displayln "* ERROR")
