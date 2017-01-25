@@ -96,7 +96,7 @@
      ((TYPE name = type)            (list (decl-type $2 $4)))
      ((VAL name-list1 : type)       (for/list ([n $2]) (decl-val-type n $4)))
      ((tone name-list1)             (for/list ([n $2]) (decl-val-tone n $1)))
-     ((tone name-list1 : type)      (for/append ([n $2])
+     ((tone name-list1 : type)      (let*/list ([n $2])
                                       (list (decl-val-type n $4)
                                             (decl-val-tone n $1))))
      ((tone VAL name = expr)        (list (decl-val-tone $3 $1)
@@ -252,6 +252,9 @@
      ;; records
      ;; TODO: use paren-based syntax for records everywhere. this requires:
      ;; 1. unifying the empty record type & the empty tuple type
+     ;;    or maybe just make '(:) the empty record or something?
+     ;;    need to think about impl strategy, too.
+     ;;    maybe just make empty p-tuple and p-record compile to wildcard '_.
      ;; 2. figuring out what to do about type-ascription exprs (expr : type)!
      ;;
      ;; TODO: error on duplicate field identifiers.

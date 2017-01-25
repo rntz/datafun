@@ -1,27 +1,30 @@
 #lang racket
 
-(require racket (for-syntax syntax/parse))
-;; re-export syntax/parse, it's fantastic.
-(provide (for-syntax (all-from-out syntax/parse)))
+(require racket syntax/parse/define (for-syntax racket/syntax))
+;; re-export syntax/parse/define, it's fantastic.
+(provide (all-from-out syntax/parse/define))
+
+;; (require (for-syntax syntax/parse))
+;; (provide (for-syntax (all-from-out syntax/parse)))
 
 
 ;;; Syntax manipulation utilities
-(provide define-syntax-parser (for-syntax format-id))
 
-(define-syntax define-syntax-parser
-  (syntax-parser
-    [(_ name:id (pattern body ...) ...)
-      #'(define-syntax name
-          (syntax-parser
-            (pattern body ...)
-            ...))]
-    [(_ (name:id pattern ...) body ...)
-      #'(define-syntax-parser name
-          [(_ pattern ...) body ...])]))
+;; (provide (for-syntax format-id))
+;; (define-for-syntax (format-id fmt id)
+;;   (datum->syntax id (string->symbol (format fmt (syntax->datum id)))))
 
-(provide (for-syntax format-id))
-(define-for-syntax (format-id fmt id)
-  (datum->syntax id (string->symbol (format fmt (syntax->datum id)))))
+;; (provide define-syntax-parser)
+;; (define-syntax define-syntax-parser
+;;   (syntax-parser
+;;     [(_ name:id (pattern body ...) ...)
+;;       #'(define-syntax name
+;;           (syntax-parser
+;;             (pattern body ...)
+;;             ...))]
+;;     [(_ (name:id pattern ...) body ...)
+;;       #'(define-syntax-parser name
+;;           [(_ pattern ...) body ...])]))
 
 
 ;;; Defining functions
@@ -49,8 +52,8 @@
     (pattern (~seq pattern #:when condition))
     (pattern pattern #:attr condition #'#t)))
 
-(define-syntax-parser (match? e p:match-branch ...)
-  #'(match e [p.pattern #:when p.condition #t] ... [_ #f]))
+(define-simple-macro (match? e p:match-branch ...)
+  (match e [p.pattern #:when p.condition #t] ... [_ #f]))
 
 (define-syntax-rule (match/c pattern ...)
   (lambda (x) (match? x pattern ...)))
@@ -59,12 +62,15 @@
 ;;; Exceptions
 (provide exception)
 
+;;; FIXMEEEEE
 (define-syntax-parser exception
   [(_ name) #'(exception name exn:fail)]
   [(_ name parent)
-   (with-syntax ([exn:name       (format-id "exn:~a"      #'name)]
-                 [make-exn:name  (format-id "make-exn:~a" #'name)]
-                 [raise-name     (format-id "raise-~a"    #'name)])
+   ;; TODO: these calls to format-id should be passing an lctx that's not #f.
+   ;; maybe #'name?
+   (with-syntax ([exn:name       (format-id #'name "exn:~a"      #'name)]
+                 [make-exn:name  (format-id #'name "make-exn:~a" #'name)]
+                 [raise-name     (format-id #'name "raise-~a"    #'name)])
     #'(begin
         (struct exn:name parent ()
           #:transparent
@@ -92,15 +98,15 @@
   (define (adjust-outer-context ctx stx)
     (datum->syntax ctx (syntax-e stx))))
 
-(define-syntax-parser
-  (enum-case enum-name:id (case-name:id field:enum-case-field ...))
-  ;; works around define-struct/contract being weird and pulling lexical info
-  ;; about the parent struct from the type/super-type name pair. Adapted from
-  ;; code by lexi-lambda in #racket on freenode.
-  (with-syntax ([type/super (adjust-outer-context
-                             #'enum-name #'(case-name enum-name))])
-    #'(define-struct/contract type/super ((field.name field.contract) ...)
-        #:transparent)))
+(define-syntax-parser enum-case
+  [(enum-case enum-name:id (case-name:id field:enum-case-field ...))
+   ;; works around define-struct/contract being weird and pulling lexical info
+   ;; about the parent struct from the type/super-type name pair. Adapted from
+   ;; code by lexi-lambda in #racket on freenode.
+   (with-syntax ([type/super (adjust-outer-context
+                              #'enum-name #'(case-name enum-name))])
+     #'(define-struct/contract type/super ((field.name field.contract) ...)
+         #:transparent))])
 
 (define-syntax-rule (enum/c (name arg/c ...) ...)
   (or/c (struct/c name arg/c ...) ...))
@@ -136,7 +142,7 @@
             (loop (read) (cons line acc)))))))
 
 ;;; List utilities
-(provide index-of length=? map? foldl1 foldr1 rev-append for/append)
+(provide index-of length=? map? foldl1 foldr1 rev-append let*/list)
 
 (define (index-of v lst)
   (let loop ([i 0] [l lst])
@@ -160,16 +166,19 @@
 (define (rev-append x y)
   (append (reverse x) y))
 
-(define-syntax-rule (for/append clauses body ...)
-  (append* (for/list clauses body ...)))
+;; (provide for/append)
+;; (define-syntax-rule (for/append clauses body ...)
+;;   (append* (for/list clauses body ...)))
+
+(define-syntax-rule (let*/list (clause ...) body ...)
+  (for*/list (clause ... [x (let () body ...)]) x))
 
 
 ;;; Stream and generator utilities
 (require racket/generator)
 (provide (all-from-out racket/generator))
 (provide stream-take stream-append-lazy streams-interleave
-         for/generator for/stream generate/stream generate/list
-         for/generate/list)
+         for/generator generate/stream generate/list for/generate/list)
 
 (define (stream-take n s)
   (for/list ([x (in-stream s)]
@@ -192,8 +201,6 @@
 ;; TODO?: cut these down to just the ones I actually use.
 (define-syntax-rule (for/generator clauses body ...)
   (in-generator (for clauses (yield (begin body ...)))))
-(define-syntax-rule (for/stream clauses body ...)
-  (sequence->stream (for/generator clauses body ...)))
 (define-syntax-rule (generate/stream body ...)
   (sequence->stream (in-generator body ...)))
 (define-syntax-rule (generate/list body ...)
@@ -203,12 +210,16 @@
 
 
 ;;; Set utilities
-(provide freeze-set sets-union sets-intersect set-filter)
+(provide freeze-set sets-union sets-intersect set-filter sequence->set let*/set)
 
-(define (freeze-set s) (for/set ([x s]) x))
+(define (freeze-set s)        (for/set ([x s]) x))
 (define (sets-union sets)     (apply set-union (set) sets))
 (define (sets-intersect sets) (apply set-intersect sets))
-(define (set-filter p s) (for/set ([x s] #:when (p x)) x))
+(define (set-filter p s)      (for/set ([x s] #:when (p x)) x))
+(define (sequence->set seq)   (for/set ([x seq]) x))
+
+(define-syntax-rule (let*/set (for-clause ...) body ...)
+  (for*/set (for-clause ... [x (let () body ...)]) x))
 
 
 ;;; Hash utilities
@@ -252,14 +263,18 @@
     (values k (f (dict-ref a k) (dict-ref b k)))))
 
 
-;;; Racket 6.2 to 6.3 compatibility shims
-(define-syntax-parser static-when
-  [(_ condition body ...)
-   (if (eval #'condition)
-       #'(begin body ...)
-       #'(begin))])
-
-(static-when (equal? "6.2" (version))
-  (provide string-contains?)
-  (define (string-contains? str substr)
-    (regexp-match? (regexp-quote substr) str)))
+;; google mapreduce, but without the parallelism.
+;; a swiss army knife of turning lists into hashes.
+(provide group)
+(define (group seq
+               #:by     key
+               #:map    [mapf list]
+               #:reduce [reducef append]
+               #:init   [init #f])
+  (for/fold ([h (or init (hash))])
+            ([elem seq])
+    (define k (key elem))
+    (define v (mapf elem))
+    (if (dict-has-key? h k)
+        (dict-update h k (curry reducef v))
+        (dict-set h k v))))
