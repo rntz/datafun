@@ -199,10 +199,16 @@
     ;; ----- expressions -----
     (expr ((expr-) (annotate! $1)))
     (expr-
+     ;; consider different syntax: "isa nat 2" instead of "@nat 2"
+     ;; @ is a valuable symbol character.
+     ((AT t-atom expr)              (e-ann $2 $3))
+     ;; TODO: case-lambda
      ((LAMBDA names => expr)        (e-lam* $2 $4))
      ((LET decls IN expr)           (e-let-decls $2 $4))
      ((CASE e-op cases)             (e-case $2 $3))
      ((IF e-op THEN e-op ELSE e-op) (e-if $2 $4 $6))
+     ;; (when (e) f) can be replaced by (for (e) f)!
+     ;; (unless (e) f) can be replaced by (for (not e) f)!
      ((WHEN LP e-op RP expr)        (e-cond 'mono $3 $5))
      ((UNLESS LP e-op RP expr)      (e-cond 'anti $3 $5))
      ;; TODO: syntax for tuple fixpoints? (FIX pat = expr)?
@@ -221,7 +227,7 @@
      ;; conflicts
      ;; TODO: should we use e-bars here?
      ((FOR loops : expr)            (e-loop $2 $4))
-     ((e-op : type)                 (e-ann $3 $1))
+     ;; ((e-op : type)                 (e-ann $3 $1))
      ((e-op)                        $1))
     (e-op ((e-op-) (annotate! $1)))
     (e-op-
