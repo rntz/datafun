@@ -1,0 +1,127 @@
+(* -*- mode: sml-mode -*- *)
+
+(* COMMENTS *)
+
+-- I actually really like Haskell-style comments.
+# Sh/python/script-style comments are ok too.
+// C-style also ok.
+
+;; Lisp style is OK, but semicolons are valuable as operators.
+;; I guess if we require double semicolons, but, eh.
+
+(* ML-style comments are noisy. *)
+/* As are old C-style comments, although less so. */
+
+
+(* ---------- NOTATION ---------- *)
+- applying a set tests membership?
+- applying a dictionary performs lookup?
+
+these works, but I can't e.g. map a dictionary across a list, so it's kind of a
+hack. or can I? I can sometimes. when checking, I can add a coercion? and if I'm
+synthesizing in functional position, I can handle it.
+
+ah, but what if I'm checking a variable which has a type *containing* a
+set/dictionary, and the type I'm checking it at has a function type there. then
+I'm kinda screwed. so it's not really *subtyping*, but it is convenient.
+
+alternatively, postfix ? turns a set or dictionary into membership-test: foo? x
+
+rel path?(x,y) :- edge?(x,y)
+  | path?(x,z) :- edge?(x,y), edge?(y,z)
+
+rel path[x,y] :- edge[x,y]
+  | path[x,z] :- edge[x,y], edge[y,z]
+
+rel path{x,y} :- edge{x,y}
+  | path{x,z} :- edge{x,y}, edge{y,z}
+
+or, I could relegate expressions (and negations?) to a secondary part of the
+syntax, after an "if":
+
+rel path(x,y) :- edge(x,y)
+              if 2 < 3, ~edge(x,y)
+  | path(x,z) :- edge(x,y), edge(y,z)
+
+but this brings it out-of-sync with for-comprehension syntax.
+
+(* THINGS I NEED NOTATION FOR *)
+INFIX
+- field access              foo.bar
+- membership testing        x in? s, s[x]?
+- membership iteration      in
+- vee                       ∨, v, |
+- dict lookup               d[k]
+
+PREFIX
+- iteration                 for
+- bigvee, bigwedge
+
+OTHER
+- type annotation           (EXPR : TYPE), @TYPE EXPR
+- tuples                    (EXPR, EXPR...)
+- records                   (NAME: EXPR, ...)
+- lambda, lambda-case
+- case
+- tonicity                  disc, mono, anti
+
+(* PUNCTUATION AND TOKENS I COULD USE *)
+! ? @ # $ % ^ & | ~
+, ; :
+' `
++ * - /
+() [] {} <>
+
+x in foo, x < 3, bar[x,y] | {x}
+for (x in foo, x < 3, bar[x,y]) {x}
+
+
+(* EXAMPLES *)
+fun transitive r = fix t
+  | r
+  | (t • t)
+
+(a,b) in x: {(a,b), (b,a)}
+
+(a,b in x) {a,b; b,a}
+(a,b in edge; b,c in edge) {a,c}
+(a,b in edge & b,c in edge) {a,c}
+(a,b in edge and b,c in edge) {a,c}
+
+val and : bool ~> bool ~> bool
+fun and x y = (if x) y
+fun and x y = if x: y
+fun and x y = (for x) y
+fun and x y = [x] y
+
+(* if Datafun had big-vee/lub and big-wedge/glb *)
+for any x in foo: BLAH == ⋁(x in foo) BLAH
+for all x in foo: BLAH == ⋀(x in foo) BLAH
+
+(∀ x ∈ a, ∃ y ∈ b) x == y
+for all x in a, any y in b: x == y
+
+(* prefix operators *)
+
+  (for x in y) FOO
+  (when x) FOO
+  (fix f) FOO
+  (fn x) FOO
+
+  for x in y: FOO
+  when x: FOO
+  fix f: FOO
+  fn x: FOO
+
+  for x in y. FOO
+  when x. FOO
+  fix f. FOO
+  fn x. FOO
+
+(* I like this syntax, but it interacts badly with field access on records! And
+   using ': for field *access* expr:field is incompatible w/ using colon for
+   record *construction* (name: expr). ugh. *)
+
+  (x in y) foo
+  (if x) foo
+  (fix f) foo

@@ -1,4 +1,134 @@
-* Datalog-like syntax
+* Syntax
+see syntax-playgroundf.df
+
+** case-lambda
+
+What about casing on multiple arguments?
+
+>   fn | Cons(x,xs) => x
+>      | Nil => 0
+
+** Comprehending over dictionaries and/or finitely-supported maps
+
+for (k:v in some-dict) blah
+for (some-dict[k] = v) blah
+
+becomes
+
+for (k in keys some-dict)
+  let v = some-dict[k]
+  in blah
+
+The only problem is: a monotone or a discrete let?
+
+** Datalog-like syntax
+
+NEED TO TRY MOAR EXAMPLES
+- reachability / transitive closure
+- shortest path
+- parsing
+- stratification
+
+See also Dyna; See also chrisamaphone's gist
+https://twitter.com/chrisamaphone/status/803309414916689920
+https://gist.github.com/chrisamaphone/d399abf6d9ebb6c511d9cf414dd1b983
+
+Some ideas:
+
+> rel path(x,y) :- edge(x,y)
+>   | path(x,z) :- path(x,y), path(y,z)
+
+> rel (x,y) ∈ path <- (x,y) ∈ edge.
+>   | (x,z) ∈ path <- (x,y) ∈ path, (y,z) ∈ path.
+
+-- TODO look at Dyna's syntax
+> dist(x,y) is 1 <- edge(x,y).
+> dist(x,y) is d+1 <- edge(x,y), dist(y,z) is d.
+
+Or, backwards:
+
+> (x,y) in path <- (x,y) in edge.
+> (x,z) ∈ path <- (x,y) ∈ edge, (x,z) ∈ edge.
+
+Or, more general but probably confusing to most:
+
+> {(x,y)} <= path <- (x,y) ∈ path, (y,z) ∈ path.
+
+*** Simplified grammar
+
+DECL ::= ID(EXPR,*) :- ATOM,* .
+         ID(EXPR,*) is EXPR :- ATOM,* .
+
+-- not sure about {not ID(PAT,*)} & co
+-- maybe {not ID(EXPR,*)} instead?
+-- Datalog can do it, I think! but what does it mean?
+ATOM ::= if EXPR
+         ID(PAT,*) | ID(PAT,*) is PAT
+         not ID(PAT,*) | not ID(PAT,*) is PAT
+
+-- PAT is just Datafun patterns.
+PAT ::= VAR | (PAT,*) | CTOR-ID(PAT,*) | [PAT,*] | LIT | !EXPR
+EXPR = datafun expressions
+
+*** What makes Prolog/Datalog syntax convenient?
+Not having to worry about where your variables are coming from! In functional
+syntax, it's always unambiguous whether a variable is being bound or is an
+expression. In {Pro,Data}log, it isn't; no (syntactic) distinction.[1] So, the
+syntax has to treat variables specially somehow.
+
+[1]: In Prolog, there's no semantic distinction either; but Datalog adds
+restrictions to make sure you *can* see every variable as *coming from*
+somewhere. (Every variable in the head must be mentioned in at least one
+positive position, i.e. "generated", in the body.)
+
+** parallel choice in iteration and pattern matching
+
+Suppose I want to define
+
+    fun dom s = {x | (x,_) in s} ∪ {x | (_,x) in s}
+
+We have or-patterns, so why can't I do:
+
+    fun dom s = {x | (x,_)|(_,x) in s}
+
+The syntax is kind of awkward (the "|" character is overloaded), but the meaning
+is obvious. Problem is, it doesn't work. Only the *first* pattern to match
+counts (in this case, (x,_), since it's an irrefutable pattern). Possible
+solution: interpret patterns differently between "case" and looping constructs;
+"case" chooses the first pattern match (prioritized choice), while looping does
+*all* matches (parallel choice).
+
+Alternatively, we could add a "parallel choice" construct over iteration loops,
+written "or":
+
+    fun dom s = {x | (x,_) in s or (_,x) in s}
+
+Again, there'd be funny syntax issues if you wanted to mix parallel (union)
+"or" loops and nested (cross product) "," loops. But the idea is sound.
+
+Maybe use semicolon ";" for disjunction-loop operator, a la Prolog?
+
+** case-lambda
+
+What about casing on multiple arguments?
+
+>   fn | Cons(x,xs) => x
+>      | Nil => 0
+
+** Comprehending over dictionaries and/or finitely-supported maps
+
+for (k:v in some-dict) blah
+for (some-dict[k] = v) blah
+
+becomes
+
+for (k in keys some-dict)
+  let v = some-dict[k]
+  in blah
+
+The only problem is: a monotone or a discrete let?
+
+** Datalog-like syntax
 
 NEED TO TRY MOAR EXAMPLES
 - reachability / transitive closure
@@ -58,41 +188,12 @@ restrictions to make sure you *can* see every variable as *coming from*
 somewhere. (Every variable in the head must be mentioned in at least one
 positive position, i.e. "generated", in the body.)
 
+
 * embedding into Haskell or OCaml
 tagless-final style: http://okmij.org/ftp/meta-programming/#QUEL
 http://okmij.org/ftp/meta-programming/quel.pdf
 
 quoted DSLs?
-
-* for-syntax for fixpoints
-
-    for (fix s) blah blah blah
-==> fix s is blah blah blah
-
-* parallel choice in iteration and pattern matching
-
-Suppose I want to define
-
-    fun dom s = {x | (x,_) in s} ∪ {x | (_,x) in s}
-
-We have or-patterns, so why can't I do:
-
-    fun dom s = {x | (x,_)|(_,x) in s}
-
-The syntax is kind of awkward (the "|" character is overloaded), but the meaning
-is obvious. Problem is, it doesn't work. Only the *first* pattern to match
-counts (in this case, (x,_), since it's an irrefutable pattern). Possible
-solution: interpret patterns differently between "case" and looping constructs;
-"case" chooses the first pattern match (prioritized choice), while looping does
-*all* matches (parallel choice).
-
-Alternatively, we could add a "parallel choice" construct over iteration loops,
-written "or":
-
-    fun dom s = {x | (x,_) in s or (_,x) in s}
-
-Again, there'd be funny syntax issues if you wanted to mix parallel (union)
-"or" loops and nested (cross product) "," loops. But the idea is sound.
 
 * implementation via dataflow / propagators
 
@@ -128,6 +229,7 @@ determine whether a function is intended to be ordinary or monotone?
 
 also, have to incorporate typeclass-like constraint for quantification over
 lattice types.
+
 
 * Future work: generalize to {some,many,all} Eilenberg-Moore categories?
 * Future work: exploring lists, bags, and sets
