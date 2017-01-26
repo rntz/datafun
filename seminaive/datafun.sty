@@ -90,6 +90,7 @@
 \newcommand{\eqlat}[1]{\under{dec,lat}{#1}}
 \newcommand{\fixtype}[1]{\under{fix}{#1}}
 \newcommand{\fixletype}[1]{\under{fix\le}{#1}}
+\newcommand{\fixintype}[1]{\under{\downarrow{}fix}{#1}}
 
 \renewcommand{\eqlat}[1]{\under{dl}{#1}}
 
@@ -104,18 +105,19 @@
 %% expressions
 \renewcommand{\d}[1]{\ensuremath{\mathbf{#1}}} % discrete variables
 \newcommand{\m}[1]{\ensuremath{\mathit{#1}}}   % monotone variables
-\newcommand{\sub}[1]{[#1]\,}                   % substitution
+\newcommand{\sub}[1]{[{#1}]\,}                   % substitution
 \newcommand{\fix}[1]{\ms{fix}~{#1}~\ms{is}~}
-\newcommand{\fixle}[2]{\fix{#1 \le #2}}
+\newcommand{\fixle}[2]{\fix{{#1} \le {#2}}}
+\newcommand{\fixin}[2]{\fix{{#1} \in {#2}}}
 \newcommand{\tuple}[1]{\langle{#1}\rangle}
-\newcommand{\pair}[2]{\tuple{#1,\,#2}}
-\newcommand{\triple}[3]{\tuple{#1,\,#2,\,#3}}
+\newcommand{\pair}[2]{\tuple{{#1},\,{#2}}}
+\newcommand{\triple}[3]{\tuple{{#1},\,{#2},\,{#3}}}
 \newcommand{\triv}{\tuple{}}
 \newcommand{\unit}{\varepsilon}
 \newcommand{\letv}[2]{\ms{let}~{#1}={#2}~\ms{in}~}
 \newcommand{\ein}{\ms{in}}
-\newcommand{\inj}[2]{\ein_{#1}\;#2}
-\newcommand{\case}[5]{\ms{case}(#1;\, \bind{#2}{#3};\, \bind{#4}{#5})}
+\newcommand{\inj}[2]{\ein_{#1}\;{#2}}
+\newcommand{\case}[5]{\ms{case}({#1};\, \bind{#2}{#3};\, \bind{#4}{#5})}
 
 \newcommand{\disc}[1]{\ms{disc}\;{#1}}
 \renewcommand{\disc}[1]{[{#1}]}

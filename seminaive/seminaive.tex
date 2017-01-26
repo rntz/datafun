@@ -2,8 +2,14 @@
 \usepackage[a4paper,margin=0.8in]{geometry}
 
 \usepackage{datafun}
+
+%% Allows using >{blah} and <{blah} in array formats.
 \usepackage{array}
+
+%% for \midrule
 \usepackage{booktabs}
+
+\newcommand{\dummy}{\ms{dummy}}
 
 \begin{document}
 
@@ -21,20 +27,19 @@
   f(2) < ...$.
 \end{definition}
 
-\begin{definition}[Stops-at]
-  A chain $a_0 \le a_1 \le a_2 \le ...$ \emph{stops at $i$} iff:
-  \[
-  \begin{array}{rl}
-    & \forall(j \ge i)\ a_j \le a_i\\
-    \text{or equivalently} & \forall(j \ge i)\ a_i = a_j\\
-    \text{or equivalently} & a_i ~\text{is the supremum of}~a
-  \end{array}
-  \]
+\begin{definition}[Stops at]
+  A chain $a_0 \le a_1 \le a_2 \le ...$ \emph{stops at $i$} iff $a_i$ is the
+  supremum of all $a_j$. Equivalent formulations:
+  \[\begin{array}{ccccc}
+    a_i = \sup_j a_j
+    &\Leftrightarrow& \forall(j \ge i)\ a_j \le a_i
+    &\Leftrightarrow& \forall(j \ge i)\ a_i = a_j\\
+  \end{array}\]
 \end{definition}
 
 \begin{definition}[Stops]
-  A chain $a$ \emph{stops} if $\exists i$ st. $a$ stops at $i$; or equivalently,
-  if $a$ contains its own supremum.
+  A chain $a$ \emph{stops} iff it contains its own supremum (iff $\exists
+  i\binder a~\text{stops at}~i$).
 \end{definition}
 
 \begin{observation} Strict chains don't stop. \end{observation}
@@ -194,14 +199,14 @@ relation as $A$, restricted to elements of $D$ (the ``induced ordering'').
   %% acc types
   \textsf{acc types} & \acc{A}
   &\bnfeq& \acc{A} \x \acc{B} \pipe \acc{A} + \acc{B}
-  \pipe {\color{Cerulean} \Disc{A}} \pipe \Down{\fin{A}} \pipe \tbool
+  \pipe \Disc{A} \pipe \Down{\fin{A}} \pipe \tbool
   \vspace{1em}\\
 
   %% downset-acc types
   \textsf{downset-acc types} & \eltacc{A}
   &\bnfeq& \eltacc{A} \x \eltacc{B} \pipe \eltacc{A} + \eltacc{B}
-  \pipe {\color{Cerulean} \Disc{A}}
-  \pipe {\color{Bittersweet} \Down{\fin{A}}} \pipe \Down{\Disc{A}}
+  \pipe \Disc{A}
+  \pipe {\color{Cerulean} \Down{\fin{A}}} \pipe \Down{\Disc{A}}
   \pipe \tbool
   \vspace{1em}\\
 
@@ -220,7 +225,7 @@ relation as $A$, restricted to elements of $D$ (the ``induced ordering'').
   &=& \eq{A} \cap \lat{A} \cap \acc{A}
   \vspace{1em}\\
 
-  \textsf{bounded fixed-point types} & \fixletype{A}
+  \textsf{bounded fixed-point types} & \fixintype{A}
   &=& \eq{A} \cap \lat{A} \cap \eltacc{A}
   \vspace{1em}\\
 
@@ -232,7 +237,7 @@ relation as $A$, restricted to elements of $D$ (the ``induced ordering'').
   &&\pipe& \disc{e} \pipe \letdisc{\d{x}}{e}{e} \pipe \splitsum{e}\\
   &&\pipe& \unit \pipe e \vee e \pipe \downintro{e} \pipe \downelim{x}{e}{e}\\
   &&\pipe& \etrue \pipe \efalse \pipe \when{e}{e} \pipe \ifthen{e}{e}{e}\\
-  &&\pipe& \fix{x}{e} \pipe \fixle{x}{e}{e}
+  &&\pipe& \fix{x}{e} \pipe \fixin{x}{e}{e}
 \end{array}
 \]
 
@@ -261,7 +266,7 @@ If finite sets $\{A\}$ are implemented as $\Down{\Disc{A}}$, this may have
 performance implications. A less general approach would be to consider only
 $\Down{\Disc{\eq{A}}}$ to be decidable.
 
-I've highlighted the downset-acc type ${\color{Bittersweet} \Down{\fin{A}}}$
+I've highlighted the downset-acc type ${\color{Cerulean} \Down{\fin{A}}}$
 because, while correct, it seems insufficiently general. In particular it does
 not cover the extremely useful special case that $\Down{\Disc{A}}$ (finite sets
 of $A$s) is always downset-acc. However, $\Down{A}$ is not always downset-ACC;
@@ -269,9 +274,6 @@ consider $\Down{(\N \mathop{\under{<}{{+}}} 1)}$. \todo{I suspect the correct
   rule is that $\Down{\eltacc{A}}$ is always downset-acc, but this needs proof.
   This would generalize $\Down{\Disc{A}}$ as long as we keep the rules that
   $\Disc{A}$ is always ACC and downset-ACC.}
-
-I've put some semantically justified but probably unnecessary rules in
-{\color{Cerulean} blue}.
 
 
 \subsection{Typing rules}
@@ -330,9 +332,9 @@ rules.
   \infer{\fix{x}{e} : \fixtype{A}}{
     \J{\GP}{\GG,x\of \fixtype{A}}{e}{\fixtype{A}}}
 
-  \infer{\fixle{x}{e}{f} : \fixletype{A}}{
-    e : \fixletype{A} &
-    \J{\GP}{\GG,x \of \fixletype{A}}{f}{\fixletype{A}}}
+  \infer{\fixin{x}{e}{f} : \fixintype{A}}{
+    e : \Down{\fixintype{A}} &
+    \J{\GP}{\GG,x \of \fixintype{A}}{f}{\fixintype{A}}}
 \end{mathpar}
 
 
@@ -340,64 +342,81 @@ rules.
 
 \subsection{Change types}
 
-For each type $A$ we define a change type $\GD A$ and an associated operator
-$\oplus : A \to \GD A \to A$:
+For each type $A$ we define a change type $\GD A$.
 
 \[\begin{array}{rcl>{\quad\quad}rcl}
-  \GD(A \to B) &=& \Disc{A} \to \Delta A \to \Delta B
-  & (f \oplus df)\; x &=& f\; x \oplus df\; x\; (\mb{0}\; x)\\
-  \GD(A \x B) &=& \GD A \x \GD B
-  & (x,y) \oplus (dx,dy) &=& (x \oplus dx, y \oplus dy)\\
-  \GD(A + B) &=& \GD A + \GD B
-  & \inj{i}{x} \oplus \inj{i}{dx} &=& \inj{i}{(x \oplus dx)}\\
-  \GD(\Disc{A}) &=& \Disc{\GD A}
-  %% & \disc{x} \oplus \disc{dx} &=& \disc{(x \oplus dx)}\\
-  & \disc{x} \oplus \disc{dx} &=& \disc{(x \oplus dx)}\\
-  \GD(\Down{A}) &=& \Down{A} & x \oplus y &=& x \vee y\\
-  \GD 2 &=& 2 & x \oplus y &=& x \vee y
+  \GD(A \to B) &=& \Disc{A} \to \Delta A \to \Delta B\\
+  \GD(A \x B) &=& \GD A \x \GD B\\
+  \GD(A + B) &=& \GD A + \GD B\\
+  \GD(\Disc{A}) &=& \Disc{\GD A}\\
+  \GD(\Down{A}) &=& \Down{A}\\
+  \GD \tbool &=& \tbool
 \end{array}\]
 
-\todo{FIXME: these operators don't typecheck! note this and call them
-  pseudo-operators? Or maybe $\oplus$ should be discrete in its first argument?}
-\todo{FIXME: $\oplus$ uses $\mb{0}$!}
+We also define associated operators $\oplus : A \to \GD A \to A$, $\ominus : A
+\to A \to \Delta A$ and $\mb{0} : A \to \Delta A$. Note, however, the
+definitions of these operators \emph{are not well-typed Datafun terms}. \todo{I
+  do not believe there exists a way to assign them tones that is compatible with
+  Datafun's type system; every way I've tried fails. But I have not proved
+  this.}
 
-We also define associated operators $\ominus : A \to A \to \Delta A$ and $\mb{0}
-: A \to \Delta A$:
-%% \begin{center}
-%% \scalebox{1}{
-\[\arraycolsep=1.5em
-\begin{array}{ccc}
+As for the semantic tonal behavior of these operators, I believe I know this
+much:
+\begin{itemize}
+\item $x \oplus dx$ is monotone in $dx$.
+\item $x \ominus y$ is monotone in $x$ and antitone in $y$.
+\item $\mb{0}$ is discrete; at function type, it finds the derivative of its
+  argument, and a function that is larger pointwise does not necessarily have a
+  derivative that is larger pointwise.
+\end{itemize}
+
+But is $\oplus$ monotone in its first argument? I'm not sure. It seems wrong to
+contemplate changing its first argument without also changing its second ---
+really it should have a dependent type.
+
+\begin{center}
+\[
+\scalebox{0.9}{\(
+\arraycolsep=1.5em
+\begin{array}{cccc}
   \textbf{Type}
+  & {\textbf{Definition of}~\oplus}
   & {\textbf{Definition of}~\ominus}
   & {\textbf{Definition of}~\mb{0}}
   \\ \midrule
   A \to B
+  & (f \oplus df)\; x = f\; x \oplus df\; x\; (\mb{0}\; x)
   & (f \ominus g)\; x \;dx = f\; (x \oplus dx) \ominus g \; x
   & \mb{0}\; f\; x\; dx = f\; (x \oplus dx) \ominus f\; x
   \\
   A \x B
-  & (a,x) \ominus (b,y) = (a \ominus b, x \ominus y)
-  & \mb{0} \; (x,y) = (\mb{0}\; x, \mb{0}\; y)
+  & \pair{x}{y} \oplus \pair{dx}{dy} = \pair{x \oplus dx}{y \oplus dy}
+  & \pair{a}{x} \ominus \pair{b}{y} = \pair{a \ominus b}{x \ominus y}
+  & \mb{0} \; \pair{x}{y} = \pair{\mb{0}\; x}{\mb{0}\; y}
   \\
   A + B
+  & \inj{i}{x} \oplus \inj{i}{dx} = \inj{i}{(x \oplus dx)}
   & \inj{i}{x} \ominus \inj{i}{y} = \inj{i}{x \ominus y}
   & \mb{0}\; (\inj{i}{x}) = \inj{i}{(\mb{0}\;x)}
   \\
   \Disc{A}
-  & \disc{x} \ominus \disc{y} = \disc{(x \ominus y)}
-  & \mb{0}\; (\disc{x}) = \disc{(\mb{0}\; x)}
+  & \disc{x} \oplus \disc{dx} = \disc{x \oplus dx}
+  & \disc{x} \ominus \disc{y} = \disc{x \ominus y}
+  & \mb{0}\; \disc{x} = \disc{\mb{0}\; x}
   \\
   \Down{A}
+  & x \oplus y = x \vee y
   & x \ominus y = x
   & \mb{0}\; x = \unit
   \\
-  2
+  \tbool
+  & x \oplus y = x \vee y
   & x \ominus y = x
   & \mb{0}\; x = \unit
 \end{array}
+\)}
 \]
-%% }
-%% \end{center}
+\end{center}
 
 These should satisfy the following laws:
 \begin{eqnarray}
@@ -490,7 +509,7 @@ These should satisfy the following laws:
 
 We wish to define an operator $\delta$ on typing derivations (or if possible, on
 well-typed terms) such that the following holds:
-\[\infer{\J{\GP,\GD\GP,\GG}{\GD\GG}{\delta(e)}{\Delta A}}
+\[\infer{\J{\GP,\GD\GP,\GG}{\GD\GG}{\delta e}{\Delta A}}
         {\J{\GP}{\GG}{e}{A}}
 \]
 
@@ -510,18 +529,23 @@ $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
   \delta x &=& dx\\
   \delta \d{x} &=& \d{dx}\\
   \delta(\fn\bind{x} e) &=&
-  \fn\bind{y} \letdisc{\d{x}}{y} {\fn\bind{dx} \delta(e)}
+  \fn\bind{y} \letdisc{\d{x}}{y} {\fn\bind{dx} \delta e}
   \qquad\text{(for fresh $y$)}\\
   \delta(e\;f) &=& \delta e \; f \; \delta f\\
   \delta \pair{e}{f} &=& \pair{\delta{e}}{\delta{f}}\\
   \delta(\pi_i\; e) &=& \pi_i\; \delta{e}\\
   \delta(\inj{i}{e}) &=& \inj{i}{\delta{e}}\\
-  && \text{\todo{FIXME: next one needs a \textsf{split-sum} somewhere}}\\
-  && \text{\todo{TODO: use dummy-value function}}\\
-  \delta(\case{e}{x}{f}{x}{g})
-  &=& \case{e}
-        {x}{\case{\delta e}{dx}{\delta f}{\_}{\ms{abort!}}}
-        {x}{\case{\delta e}{\_}{\ms{abort!}}{dx}{\delta g}}\\
+  \delta(\case{e}{x}{f}{y}{g})
+  %% &=& \case{\splitsum{\color{ForestGreen} \disc{e}}}
+  %%       {\disc{\d{x}}}{\case{\delta e}{dx}{\delta f}{\_}{\todo{\ms{abort!}}}}
+  %%       {\disc{\d{x}}}{\textit{(symmetric case)}}\\
+  &=& \ms{case}(\splitsum{\color{ForestGreen}\disc{e}};\\
+   && \phantom{\ms{case}\ }
+      \bind{\disc{\d{x}}}
+      \letv{dx}{\case{\delta e}{dx}{dx}{\_}{\dummy\;\d{x}}} \delta f;\\
+   && \phantom{\ms{case}\ }
+      \bind{\disc{\d{y}}}
+      \letv{dy}{\case{\delta e}{\_}{\dummy\;\d{y}}{dy}{dy}} \delta g)\\
   \delta\disc{e} &=& \disc{\delta e}\\
   \delta(\letdisc{\d{x}}{e} f) &=&
   \letdisc{\d{x}}{e}
@@ -536,17 +560,17 @@ $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
   \delta(e \vee f) &=& \delta e \vee \delta f
   \qquad \text{(this is the critical over-approximation)}\\
   \delta(\downintro{e}) &=& \unit\\
-  \delta(\downelim{\d{x}}{e}{f}) &=& \text{\TODO}\\
+  \delta(\downelim{\d{x}}{e}{f}) &=& \text{\todo{see below}}\\
   \delta(\etrue) &=& \efalse\\
   \delta(\efalse) &=& \efalse\\
   \delta(\when{e}{f})
   &=& \ifthen{\color{ForestGreen} \disc{e}}{\delta f}{
     \when{\delta e}{(f \oplus \delta f) \ominus \unit}}
-  \qquad \text{\color{red} UH-OH}\\
+  \qquad \text{\color{red} see below}\\
   \delta(\ifthen{e}{f}{g}) &=& \ifthen{e}{\delta f}{\delta g}\\
   \delta(\fix{x}{e}) &=&
   \letdisc{\d{x}}{\disc{\fix{x} e}}{\fix{dx} \delta e}\\
-  \delta(\fixle{x}{e}{f}) &=& \text{\TODO}
+  \delta(\fixin{x}{e}{f}) &=& \text{\TODO}
 \end{array}
 \]
 
@@ -554,10 +578,13 @@ At equality types, $\delta(\downelim{x}{e}{f})$ has the following definition:
 
 \[\begin{array}{rcl}
   \delta(\downelim{x}{e}{f})
-  &=& (\downelim{x}{e}{\ms{let}~dx = \mb{0}\; x ~\ms{in}~ \delta f})
+  &=& \phantom{\vee~} (\downelim{x}{e}{\ms{let}~dx = \mb{0}\; x ~\ms{in}~ \delta f})
   \\ && \vee~ (\downelim{x}{\delta e}{\ms{let}~dx = \mb{0}\; x ~\ms{in}~
     (f \oplus \delta f) \ominus \unit})
 \end{array}\]
+
+\todo{TODO: Explain/show that $\oplus$, $(- \ominus \unit)$, and \mb{0} are
+  definable, typeable, and efficiently computable at these types!}
 
 Translation of $\downelim{x}{e}{f}$ at \emph{non-equality types}, however, is
 type-directed:
@@ -584,6 +611,29 @@ away all uses of \ms{when} at functional types, in the same manner as we can
 rewrite away uses of $\bigvee$ at functional type.
 
 \todo{\par TODO: Proofs which Neel \& I worked out last time.}
+
+
+\subsubsection{Dummy values}
+
+The derivative of $\ms{case}$ has branches we know semantically cannot occur;
+but to appease the type system, we need to put an expression in those branches
+of the appropriate type. Instead of introducing an \ms{abort} construct, which
+would complicate our semantics, we generate an expression of the appropriate
+type using a type-indexed dummy-value function $\dummy{} : A \to \Delta{A}$.
+
+\[\begin{array}{lcl}
+\dummy\; (x : \tbool) &=& \efalse\\
+\dummy\; (x : \Down{A}) &=& \unit\\
+\dummy\; \pair{x}{y} &=& \pair{\dummy\;x}{\dummy\;y}\\
+\dummy\; (\inj{i}{x}) &=& \inj{i}{(\dummy\;x)}\\
+\dummy\; \disc{\d{x}} &=& \disc{\dummy\; \d{x}}\\
+\dummy\; (f : A \to B) &=& \fn x\,dx\binder\, \dummy\;(f\;x)
+\end{array}\]
+
+This is a hack to simplify our metatheory. A real implementation would not do
+this.
+
+\todo{NB. To add a type to Datafun, we must extend \dummy{} appropriately.}
 
 
 \subsubsection{Justifying derivatives of fixed points}
