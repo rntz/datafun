@@ -721,14 +721,42 @@ Observe that:
 \end{array}\]
 
 
+\section{Fixed points}
+
+\[\begin{array}{l}
+  \textsf{fast-fix} ~:~
+  (\Disc{\fixtype{A}} \to \Delta\fixtype{A} \to \Delta\fixtype{A})
+  \to \fixtype{A} \to \Delta\fixtype{A} \to \fixtype{A}\\
+  \textsf{fast-fix}\; \mi{df}\; \mi{current}\; \mi{change} =\\
+  \quad \textbf{let}~ {\mi{next} = \mi{current} \oplus \mi{change}}
+  ~\textbf{in}\\
+  \quad \textbf{if}~ \mi{next} \le \mi{current}
+  ~\textbf{then}~ \mi{current}\\
+  \quad \textbf{else}~ \textsf{fast-fix}\; \mi{df}\; \mi{next}
+  \;(\mi{df}\; \mi{current}\; \mi{change})\\
+  \\
+  \textsf{fast-fix}
+  \in ((x : \Disc{L}) \to \Delta(L, x) \to \Delta(L, x)) \to L
+  \\
+  \textsf{fast-fix} \; df =\\
+  \quad\textbf{let}~ \textsf{loop} \in (x : L) \to \Delta(L, x) \to L\\
+  \quad\phantom{\textbf{let}~} \textsf{loop} \;x \;dx =\\
+  \quad\phantom{\textbf{let}~}\quad
+  \textbf{let}~ x' = x \oplus dx ~\textbf{in}\\
+  \quad\phantom{\textbf{let}~}\quad
+  \textbf{if}~ x' \le x ~\textbf{then}~ x ~\textbf{else}\\
+  \quad\phantom{\textbf{let}~}\quad
+  \textsf{loop} \;x' \;(df \; x \; dx)\\
+  \quad\textbf{in}~ \textsf{loop} \; \unit \; (f \; \unit \ominus \unit)
+\end{array}\]
+
+
 \section{Stuff to put in this document}
 
 \begin{enumerate}
-\item Definition of \textsf{fast-fix} (see google doc).
 \item Correctness criterion for $\delta$ (see google doc).
 \item Lemma: for decidable semilattices, $\den{e} \oplus \den{f} = \den{e \vee
   f}$.
-\item Soundness conjecture? (see google doc)
 \end{enumerate}
 
 \end{document}
