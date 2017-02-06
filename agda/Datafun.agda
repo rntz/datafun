@@ -32,10 +32,19 @@ data Type : Set where
   _:+_ : Type → Type → Type
   □ : Type → Type
 
+Eqtype : Type → Set
+Eqtype bool = ⊤
+Eqtype nat = ⊤
+Eqtype (set t) = Eqtype t
+Eqtype (□ t) = Eqtype t
+Eqtype (a :→ b) = ⊥
+Eqtype (a :× b) = Eqtype a × Eqtype b
+Eqtype (a :+ b) = Eqtype a × Eqtype b
+
 Semilattice : Type → Set
 Semilattice bool = ⊤
 Semilattice nat = ⊤
-Semilattice (set a) = ⊤
+Semilattice (set t) = ⊤
 Semilattice (a :→ b) = Semilattice b
 Semilattice (a :× b) = Semilattice a × Semilattice b
 Semilattice (a :+ b) = ⊥
@@ -50,15 +59,6 @@ Finite (□ t) = Finite t
 Finite (a :→ b) = Finite a × Finite b
 Finite (a :× b) = Finite a × Finite b
 Finite (a :+ b) = Finite a × Finite b
-
-Eqtype : Type → Set
-Eqtype bool = ⊤
-Eqtype nat = ⊤
-Eqtype (set t) = Eqtype t
-Eqtype (□ t) = Eqtype t
-Eqtype (a :→ b) = ⊥
-Eqtype (a :× b) = Eqtype a × Eqtype b
-Eqtype (a :+ b) = Eqtype a × Eqtype b
 
 ACC : Type → Set
 ACC bool = ⊤
@@ -108,6 +108,15 @@ _•⊆_ : ∀ {X Y Z} → X ⊆ Y → Y ⊆ Z → X ⊆ Z
 ∷/⊆ : ∀ {X Y e} → X ⊆ Y → (e ∷ X) ⊆ (e ∷ Y)
 ∷/⊆ s car = car
 ∷/⊆ s (cdr x) = cdr (s x)
+
+split∈ : ∀{a}(L R : _) → a ∈ L ++ R → a ∈ L ⊎ a ∈ R
+split∈ [] _ x = inj₂ x
+split∈ (_ ∷ L) _ car = inj₁ car
+split∈ (_ ∷ L) _ (cdr x₁) = [ inj₁ ∘ cdr , inj₂ ] (split∈ L _ x₁)
+
+-- join∈ : ∀{a L R} → a ∈ L ⊎ a ∈ R → a ∈ L ++ R
+-- join∈ (inj₁ x) = {!x!}
+-- join∈ (inj₂ y) = {!y!}
 
 extend-l : ∀ {R} (L : _) → R ⊆ L ++ R
 extend-l [] x = x
@@ -159,7 +168,7 @@ data _⊢_ (X : Env) : Type → Set where
   vee : ∀{a} → Semilattice a → X ⊢ a → X ⊢ a → X ⊢ a
   -- sets
   singleton : ∀{a} → wipe X ⊢ a → X ⊢ set a
-  ⋁ : ∀{a b} → Semilattice b → X ⊢ set a → (disc # a ∷ X ⊢ b) → X ⊢ b
+  ⋁ : ∀{a b} → Eqtype a → Semilattice b → X ⊢ set a → (disc # a ∷ X ⊢ b) → X ⊢ b
   -- booleans
   bool : Bool → X ⊢ bool
   when : ∀{a} → Semilattice a → X ⊢ bool → X ⊢ a → X ⊢ a
@@ -173,6 +182,8 @@ data _⊢_ (X : Env) : Type → Set where
   -- products
   pair : ∀{a b} → X ⊢ a → X ⊢ b → X ⊢ a :× b
   proj : ∀{a b} (i : Bool) → X ⊢ a :× b → X ⊢ (if i then a else b)
+  -- fixed point
+  --fix : ∀{a} → Fixtype a → (mono # a ∷ X ⊢ a) → X ⊢ a
 
 infix 4 _⊢_#_
 _⊢_#_ : Env → Tone → Type → Set
@@ -188,7 +199,7 @@ rename s (letbox M N) = letbox (rename s M) (rename (∷/⊑ disc s) N)
 rename s (unit x) = unit x
 rename s (vee x M M₁) = vee x (rename s M) (rename s M₁)
 rename s (singleton M) = singleton (rename (wipe/⊑ s) M)
-rename s (⋁ x M M₁) = ⋁ x (rename s M) (rename (∷/⊑ disc s) M₁)
+rename s (⋁ x y M M₁) = ⋁ x y (rename s M) (rename (∷/⊑ disc s) M₁)
 rename s (bool x) = bool x
 rename s (when x M M₁) = when x (rename s M) (rename s M₁)
 rename s (if M N₁ N₂) = if (rename (wipe/⊑ s) M) (rename s N₁) (rename s N₂)
@@ -199,6 +210,7 @@ rename s (case mono M M₁ M₂)
   = case mono (rename s M) (rename (∷/⊑ mono s) M₁) (rename (∷/⊑ mono s) M₂)
 rename s (pair M M₁) = pair (rename s M) (rename s M₁)
 rename s (proj i M) = proj i (rename s M)
+--rename s (fix x M) = ?
 
 weaken : ∀ {X a b} → (tone : Tone) → X ⊢ a → (tone # b ∷ X) ⊢ a
 weaken disc = rename (untone cdr id)
@@ -246,7 +258,7 @@ sub s (letbox M N) = letbox (sub s M) (sub (lift disc s) N)
 sub s (unit x) = unit x
 sub s (vee x M M₁) = vee x (sub s M) (sub s M₁)
 sub s (singleton M) = singleton (sub (wipe⇉ s) M)
-sub s (⋁ x M M₁) = ⋁ x (sub s M) (sub (lift disc s) M₁)
+sub s (⋁ x y M M₁) = ⋁ x y (sub s M) (sub (lift disc s) M₁)
 sub s (bool x) = bool x
 sub s (when x M M₁) = when x (sub s M) (sub s M₁)
 sub s (if M N₁ N₂) = if (sub (wipe⇉ s) M) (sub s N₁) (sub s N₂)
@@ -278,6 +290,12 @@ unbox M = letbox M (var disc car)
 
 Δ*-wipe-exchange : (X : _) → Δ* (wipe X) ⊑ wipe (Δ* X)
 Δ*-wipe-exchange X = untone (extend-l (X mono)) (λ ())
+
+-- I need a lemma:
+--
+-- (X ++ a ∷ Y) ⊆ (a ∷ X ++ Y)
+++∷⊆∷++ : ∀{a} (X Y : _) → (X ++ a ∷ Y) ⊆ (a ∷ X ++ Y)
+++∷⊆∷++ X Y x = {!!}
 
 Δ*-disc∷ : ∀{a} (X : _) → Δ* (disc # a ∷ X) ⊑ (disc # Δ a ∷ (disc # a ∷ Δ* X))
 Δ*-disc∷ X mono x = x
@@ -313,23 +331,18 @@ lam□ M = lam (letbox (var mono car) (weaken mono M))
 δ-unit (□ a) ()
 
 δ : ∀{X a} → X ⊢ a → Δ* X ⊢ Δ a
--- What if I pass in a function as a discrete argument, f, to another function,
--- and try to take the derivative of this thing? Then despite the function
--- argument f being a discrete variable, I *will* want a df, variable because I
--- want the derivative of f, and I don't want to have to compute it
--- inefficiently at runtime! Try this argument on Neel.
 δ {X} (var disc x) = var disc (extend-l (X mono) (extend-l (X disc) (map/∈ x)))
 δ (var mono x) = var mono (map/∈ x)
 δ (lam M) = lam□ (lam (δ M))
 δ (app M N) = app (app (δ M) (static-box N)) (δ N)
 δ {X} (box M) = box (rename (Δ*-wipe-exchange X) (δ M))
-δ (letbox M M₁) = letbox (static M)
-                    (letbox (weaken disc (δ M))
-                      (rename {!!} (δ M₁)))
+δ {X} (letbox M M₁) = letbox (static M)
+                        (letbox (weaken disc (δ M))
+                          (rename (Δ*-disc∷ X) (δ M₁)))
 δ {a = a} (unit x) = δ-unit a x
 δ (vee x M M₁) = {!!}
 δ (singleton _) = unit tt
-δ (⋁ x M M₁) = {!!}
+δ (⋁ x y M M₁) = {!!}
 δ (bool x) = bool false
 δ (when x M M₁) = {!!}
 δ (if M N₁ N₂) = {!!}
