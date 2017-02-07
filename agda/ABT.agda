@@ -4,7 +4,7 @@ open import Data.Maybe hiding (map)
 open import Data.Maybe hiding (map)
 open import Data.Nat hiding (_≤_; _≤?_)
 open import Data.Product hiding (map)
-open import Data.Sum hiding (map; [_,_]) renaming (inj₁ to car; inj₂ to cdr)
+open import Data.Sum hiding (map) renaming (inj₁ to car; inj₂ to cdr)
 open import Data.Unit hiding (_≤_; _≤?_)
 open import Function using (id; _∘_; const)
 open import Relation.Binary.PropositionalEquality hiding ([_])
@@ -92,6 +92,22 @@ DEC? (down a) = DEC? a
 Cx : Set₁
 Cx = (o : Tone) (a : Type) -> Set
 
+-- We have two possible choices of interpretation here:
+--
+-- 1. (X o a) means a variable with type `a` is in the context with tone `o`; or,
+-- 2. (X o a) means a variable with type `a` is in the context with tone *at least* `o`.
+--
+-- That is to say, is X expected to preserve the subtone relationship? I.e, does this hold:
+--
+--     ∀(X : Cx) (a : Type) -> X a disc -> X a mono
+--
+-- Currently we choose interpretation (1), becuase it simplifies constructing
+-- Cxs, but the other interpretation would simplify using them.
+
+∅ : Cx
+∅ o a = ⊥
+
+-- Singleton context.
 infix 5 _is_
 data _is_ (a : Type) (o : Tone) : Cx where
   eq : (a is o) o a
@@ -110,7 +126,7 @@ X at mono = X
 X at disc = wipe X
 
 
----------- Terms ----------
+---------- Terms, using a more strongly typed ABT-like abstraction ----------
 infixr 4 _∧_
 data Premise : Set where
   nil    : Premise
@@ -134,11 +150,11 @@ data _⊃_ : Premise -> Type -> Set where
   case : ∀{a b c} -> ∙ (a :+ b) ∧ (a is mono ~ ∙ c) ∧ (b is mono ~ ∙ c) ⊃ c
   splitsum : ∀{a b} -> ∙ (□ (a :+ b)) ⊃ □ a :+ □ b
   -- functions
-  lam  : ∀{a b} -> (a is mono ~ ∙ b) ⊃ b
-  app  : ∀{a b} -> ∙ (a :-> b) ∧ ∙ b ⊃ b
+  lam  : ∀{a b} -> (a is mono ~ ∙ b) ⊃ a :-> b
+  app  : ∀{a b} -> ∙ (a :-> b) ∧ ∙ a ⊃ b
   -- boxes
   box  : ∀{a}   -> □ (∙ a) ⊃ (□ a)
-  let□ : ∀{a b} -> ∙ (□ a) ∧ (a is disc ~ ∙ b) ⊃ b
+  letbox : ∀{a b} -> ∙ (□ a) ∧ (a is disc ~ ∙ b) ⊃ b
   -- semilattices
   eps : ∀{a} -> SL a -> nil ⊃ a
   vee : ∀{a} -> SL a -> ∙ a ∧ ∙ a ⊃ a
@@ -146,10 +162,12 @@ data _⊃_ : Premise -> Type -> Set where
   single : ∀{a} -> (∙ a) ⊃ down a
   bigvee : ∀{a b} (dec : DEC a) (sl : SL b)
          -> ∙ (down a) ∧ (a is mono ~ ∙ b) ⊃ b
+  -- fixed points
+  fix : ∀{a} -> FIX a -> (a is mono ~ ∙ a) ⊃ a
 
 mutual
   infix 3 _⊩_
-  infix 3 _~_
+  infixr 5 _~_
   data _⊩_ (X : Cx) : Premise -> Set where
     tt   : X ⊩ nil
     _,_  : ∀{P Q}   (p : X ⊩ P) (q : X ⊩ Q) -> X ⊩ P ∧ Q
@@ -163,32 +181,52 @@ mutual
   infix 3 _⊢_
   infix 3 _!_
   data _⊢_ (X : Cx) (a : Type) : Set where
-    var : ∀ o -> o ≤ mono -> X o a -> X ⊢ a
+    var : ∀ o (p : o ≤ mono) (x : X o a) -> X ⊢ a
     _!_ : ∀{P} (form : P ⊃ a) (args : X ⊩ P) -> X ⊢ a
+
+
+-- Pattern synonyms for terms.
+pattern bool! b = bool b ! tt
+pattern if! {a} M N₁ N₂ = if {a} ! term M , (term N₁ , term N₂)
+pattern when! {a} sl M N = when {a} sl ! term M , term N
+pattern pair! {a b} M N = pair {a}{b} ! term M , term N
+pattern proj! {a b} i M = proj {a}{b} i ! term M
+pattern inj! {a b} i M = inj {a}{b} i ! term M
+pattern case! {a b c} M N₁ N₂ = case {a}{b}{c} ! term M , ((.mono ~ term N₁) , (.mono ~ term N₂))
+pattern splitsum! {a b} M = splitsum {a}{b} ! term M
+pattern lam! {a b} M = lam {a}{b} ! (.mono ~ term M)
+pattern app! {a b} M N = app {a}{b} ! term M , term N
+pattern box! {a} M = box {a} ! disc (term M)
+pattern letbox! {a b} M N = letbox {a}{b} ! term M , (.disc ~ term N)
+pattern eps! {a} sl = eps {a} sl ! tt
+pattern vee! {a} sl M N = vee {a} sl ! term M , term N
+pattern single! {a} M = single {a} ! term M
+pattern bigvee! {a b} dec sl M N = bigvee {a}{b} dec sl ! term M , (.mono ~ term N)
+pattern fix! {a} p M = fix {a} p ! (.mono ~ term M)
 
 
 -- Extracting a ⊩ into an ordinary value.
 -- TODO: is this useful for anything?
-premise : Cx -> Premise -> Set
-premise X nil = ⊤
-premise X (P ∧ Q) = premise X P × premise X Q
-premise X (∙ a) = X ⊢ a
-premise X (a is o ~ P) = premise (a is o ∪ X) P
-premise X (□ P) = premise (wipe X) P
+-- premise : Cx -> Premise -> Set
+-- premise X nil = ⊤
+-- premise X (P ∧ Q) = premise X P × premise X Q
+-- premise X (∙ a) = X ⊢ a
+-- premise X (a is o ~ P) = premise (a is o ∪ X) P
+-- premise X (□ P) = premise (wipe X) P
 
-un : ∀{X P} -> X ⊩ P -> premise X P
-un tt = tt
-un (p , q) = un p , un q
-un (term M) = M
-un (_ ~ p) = un p
-un (disc p) = un p
+-- un : ∀{X P} -> X ⊩ P -> premise X P
+-- un tt = tt
+-- un (p , q) = un p , un q
+-- un (term M) = M
+-- un (_ ~ p) = un p
+-- un (disc p) = un p
 
-into : ∀{X P} -> premise X P -> X ⊩ P
-into {P = nil} tt = tt
-into {P = P ∧ Q} (x , y) = into x , into y
-into {P = ∙ a} x = term x
-into {P = a is o ~ P} x = o ~ into x
-into {P = □ P} x = disc (into x)
+-- into : ∀{X P} -> premise X P -> X ⊩ P
+-- into {P = nil} tt = tt
+-- into {P = P ∧ Q} (x , y) = into x , into y
+-- into {P = ∙ a} x = term x
+-- into {P = a is o ~ P} x = o ~ into x
+-- into {P = □ P} x = disc (into x)
 
 
 ---------- Context renamings ----------
@@ -275,7 +313,7 @@ sub* σ (disc p) = disc (sub* (wipe/⇉ σ) p)
 Δ (down a) = down a
 Δ (a :x b) = Δ a :x Δ b
 Δ (a :+ b) = Δ a :+ Δ b
-Δ (a :-> b) = □ a :-> Δ a :-> Δ b
+Δ (a :-> b) = □ a :-> (Δ a :-> Δ b)
 Δ (□ a) = □ (Δ a)
 
 ΔSL∈SL : ∀ a -> SL a -> SL (Δ a)
@@ -297,3 +335,97 @@ DEC∧SL⊃Δ=id (a :-> b) () sl
 DEC∧SL⊃Δ=id (□ a) dec ()
 
 
+---------- Change environments ----------
+data Δ* (X : Cx) : Cx where
+  orig  : ∀ o {a} -> X o a -> Δ* X disc a
+  deriv : ∀ {o a} -> X o a -> Δ* X o (Δ a)
+
+wipeΔ*X⇉X : ∀{X} -> wipe (Δ* X) ⇉ X
+wipeΔ*X⇉X disc x = var disc refl (orig disc x)
+wipeΔ*X⇉X mono x = var disc refl (orig mono x)
+
+Δ*X⇉X : ∀{X} -> Δ* X ⇉ X
+Δ*X⇉X o x = rename-at o wipe⊆ (wipeΔ*X⇉X o x)
+
+Δ*/⊆ : ∀{X Y} -> X ⊆ Y -> Δ* X ⊆ Δ* Y
+Δ*/⊆ f disc (orig o x) = orig o (f o x)
+Δ*/⊆ f o (deriv x) = deriv (f o x)
+
+Δ*cons : ∀{X o a} -> Δ* (a is o ∪ X) ⊆ (Δ a is o) ∪ (a is disc) ∪ Δ* X
+Δ*cons .disc (orig o (car eq)) = cdr (car eq)
+Δ*cons .disc (orig o (cdr y)) = cdr (cdr (orig o y))
+Δ*cons o (deriv (car eq)) = car eq
+Δ*cons o (deriv (cdr y)) = cdr (cdr (deriv y))
+
+Δ*-wipe-xchg : ∀{X} -> Δ* (wipe X) ⊆ wipe (Δ* X)
+Δ*-wipe-xchg disc (orig disc x) = orig disc x
+Δ*-wipe-xchg disc (orig mono ())
+Δ*-wipe-xchg disc (deriv x) = deriv x
+Δ*-wipe-xchg mono (deriv ())
+
+
+---------- Helpers for δ ----------
+
+-- A pair of a term and its derivative.
+_⊢δ_ : Cx -> Type -> Set
+X ⊢δ a = X ⊢ a × Δ* X ⊢ Δ a
+
+lam□ : ∀ {X a b} -> a is disc ∪ X ⊢ b -> X ⊢ (□ a) :-> b
+lam□ M = lam! (letbox! (var mono refl (car eq))
+                (rename (λ o -> [ car , cdr ∘ cdr ]) M))
+
+static : ∀{X a} → X ⊢ a → Δ* X ⊢ a
+static = sub Δ*X⇉X
+
+static□ : ∀{X a} → X ⊢ a → Δ* X ⊢ □ a
+static□ M = box! (sub wipeΔ*X⇉X M)
+
+-- lamδ : ∀{X a b} -> Δ* (a is mono ∪ X) ⊢ Δ b -> Δ* X ⊢ Δ (a :-> b)
+-- lamδ dM = lam□ (lam (rename Δ*cons dM))
+
+-- whenδ-DEC : ∀{X} a -> DEC a -> SL a -> X ⊢δ bool -> X ⊢δ a -> Δ* X ⊢ Δ a
+-- whenδ-DEC {X} a dec sl (M , dM) (N , dN)
+--   = if (static-box M) dN
+--        (subst (λ a₁ → Δ* X ⊢ a₁) (sym (DEC∧SL⊃Δ=id a dec sl))
+--          (when sl dM {!vee ? N dN!}))
+
+-- whenδ : ∀ {X} a -> SL a -> X ⊢δ bool -> X ⊢δ a -> Δ* X ⊢ Δ a
+-- whenδ bool sl MdM NdN = whenδ-DEC bool tt tt MdM NdN
+-- whenδ (a :-> b) sl (M , dM) (N , dN)
+--   = lamδ (whenδ b sl
+--             (weaken M , rename (Δ*/⊆ drop) dM)
+--             ( app (weaken N) (var mono refl (car eq))
+--             -- ugh, why do I need to write this. is there a better way?
+--             , {!!} ))
+-- whenδ (a :x b) (ap , bp) M N = {!!}
+-- whenδ (□ a) () M N
+
+
+---------- δ itself ----------
+δ : ∀{X a} -> X ⊢ a -> Δ* X ⊢ Δ a
+δ (var o p x) = var o p (deriv x)
+δ (bool! x) = bool! x
+δ (if! M N₁ N₂) = if! (static M) (δ N₁) (δ N₂)
+δ (when! sl M N) = {!!}
+δ (pair! M N) = pair! (δ M) (δ N)
+δ (proj! true M) = proj! true (δ M)
+δ (proj! false M) = proj! false (δ M)
+δ (inj! true M) = inj! true (δ M)
+δ (inj! false M) = inj! false (δ M)
+δ (case! M N₁ N₂) = {!!}
+δ (splitsum! M) = splitsum! (δ M)
+δ (lam! M) = lam□ (lam! (rename Δ*cons (δ M)))
+δ (app! M N) = app! (app! (δ M) (static□ N)) (δ N)
+δ (box! M) = box! (rename Δ*-wipe-xchg (δ M))
+δ (letbox! M N) = letbox! (static M) (letbox! (weaken (δ M)) (rename Δ*cons (δ N)))
+-- At (eps : a :-> b), is our derivative still eps? it is the derivative of the
+-- constant zero function. Is that also the constant zero function? Yes,
+-- inductively. TODO: put proof of this into seminaive.tex.
+δ (eps! {a} sl) = eps! (ΔSL∈SL a sl)
+-- The critical overapproximation.
+δ (vee! {a} sl M N) = vee! (ΔSL∈SL a sl) (δ M) (δ N)
+δ (single! M) = eps! tt
+-- The whopper.
+δ (bigvee! dec sl M N) = {!!}
+-- The purpose of the whole thing.
+δ (fix! {a} p M) = {!!}
