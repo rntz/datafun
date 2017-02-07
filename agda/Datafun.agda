@@ -234,14 +234,11 @@ infix 3 _⊆_
 _⊆_ : (X Y : Cx) -> Set
 X ⊆ Y = ∀ o {a} -> X o a -> Y o a
 
-cons/⊆ : ∀{X Y o a} -> X ⊆ Y -> (a is o ∪ X) ⊆ (a is o ∪ Y)
-cons/⊆ f _ (car x) = car x
-cons/⊆ f _ (cdr x) = cdr (f _ x)
-
 wipe/⊆ : ∀{X Y} -> X ⊆ Y -> wipe X ⊆ wipe Y
 wipe/⊆ f mono ()
 wipe/⊆ f disc = f disc
 
+-- Is `wipe` a comonad on renamings?
 wipe⊆ : ∀{X} -> wipe X ⊆ X
 wipe⊆ mono ()
 wipe⊆ disc x = x
@@ -252,6 +249,9 @@ wipe-idem disc x = x
 
 drop : ∀{X Y} -> Y ⊆ X ∪ Y
 drop o = cdr
+
+∪/⊆ : ∀{X Y Z} -> X ⊆ Y -> (Z ∪ X) ⊆ (Z ∪ Y)
+∪/⊆ f _ = [ car , cdr ∘ f _ ]
 
 
 ---------- Applying context renamings to terms ----------
@@ -264,7 +264,7 @@ rename f (form ! x) = form ! rename* f x
 rename* f tt = tt
 rename* f (p , q) = rename* f p , rename* f q
 rename* f (term M) = term (rename f M)
-rename* f (o ~ p) = o ~ rename* (cons/⊆ f) p
+rename* f (o ~ p) = o ~ rename* (∪/⊆ f) p
 rename* f (disc p) = disc (rename* (wipe/⊆ f) p)
 
 rename-at : ∀{X Y} o {a} -> X ⊆ Y -> X at o ⊢ a -> Y at o ⊢ a
