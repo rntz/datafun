@@ -240,7 +240,7 @@ DEC∧SL⊃Δ=id (□ a) dec ()
 
 ---------- Change environments ----------
 data Δ* (X : Env) : Env where
-  orig : ∀ o {a} -> X o a -> Δ* X disc a
+  orig  : ∀ o {a} -> X o a -> Δ* X disc a
   deriv : ∀ {o a} -> X o a -> Δ* X o (Δ a)
 
 wipeΔ*X⇉X : ∀{X} -> wipe (Δ* X) ⇉ X
