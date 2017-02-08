@@ -271,10 +271,10 @@ rename-at : ∀{X Y} o {a} -> X ⊆ Y -> X at o ⊢ a -> Y at o ⊢ a
 rename-at mono f M = rename f M
 rename-at disc f M = rename (wipe/⊆ f) M
 
-weaken : ∀{X a o b} -> X ⊢ a -> b is o ∪ X ⊢ a
+weaken : ∀{X Y a} -> X ⊢ a -> Y ∪ X ⊢ a
 weaken = rename drop
 
-weaken-at : ∀ o₁ {X a o b} -> X at o₁ ⊢ a -> (b is o ∪ X) at o₁ ⊢ a
+weaken-at : ∀ o {X Y a} -> X at o ⊢ a -> (Y ∪ X) at o ⊢ a
 weaken-at o = rename-at o drop
 
 
@@ -283,11 +283,10 @@ infix 4 _⇉_
 _⇉_ : Cx -> Cx -> Set₁
 X ⇉ Y = ∀ o {a} -> Y o a -> X at o ⊢ a
 
-cons/⇉ : ∀{X Y} o {a} -> X ⇉ Y -> (a is o ∪ X) ⇉ (a is o ∪ Y)
-cons/⇉ disc s disc  (car eq) = var disc refl (car eq)
-cons/⇉ mono s disc  (car ())
-cons/⇉ .mono s mono (car eq) = var mono refl (car eq)
-cons/⇉ o₁   s o₂    (cdr x) = weaken-at o₂ (s o₂ x)
+∪/⇉ : ∀{X Y Z} -> X ⇉ Y -> (Z ∪ X) ⇉ (Z ∪ Y)
+∪/⇉ s mono (car x) = var mono refl (car x)
+∪/⇉ s disc (car x) = var disc refl (car x)
+∪/⇉ s o    (cdr x) = weaken-at o (s o x)
 
 wipe/⇉ : ∀{X Y} -> X ⇉ Y -> wipe X ⇉ wipe Y
 wipe/⇉ s disc x = rename wipe-idem (s disc x)
@@ -303,7 +302,7 @@ sub σ (form ! args) = form ! sub* σ args
 sub* σ tt = tt
 sub* σ (p , q) = sub* σ p , sub* σ q
 sub* σ (term M) = term (sub σ M)
-sub* σ (o ~ p) = o ~ sub* (cons/⇉ o σ) p
+sub* σ (o ~ p) = o ~ sub* (∪/⇉ σ) p
 sub* σ (box p) = box (sub* (wipe/⇉ σ) p)
 
 
