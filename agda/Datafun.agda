@@ -9,6 +9,7 @@ open import Data.Unit hiding (_≤_; _≤?_)
 open import Function using (id; _∘_; const)
 open import Relation.Binary.PropositionalEquality hiding ([_])
 open import Relation.Nullary using (¬_; Dec; yes; no)
+open import Level
 
 -- ordering: disc < mono.
 -- anticipated future additions: disc < anti.
@@ -24,28 +25,29 @@ _ ≤? disc = false
 _≤_ : Tone -> Tone -> Set
 x ≤ y = (x ≤? y) ≡ true
 
-infixr 6 _:->_
-infixr 7 _:x_ _:+_
-data Type : Set where
-  bool  : Type
-  down  : (a : Type) -> Type
-  _:x_  : (a b : Type) -> Type
-  _:+_  : (a b : Type) -> Type
-  _:->_ : (a b : Type) -> Type
-  □ : (a : Type) -> Type
+mutual
+  infixr 6 _:->_
+  infixr 7 _:x_ _:+_
+  data Type : Set where
+    bool  : Type
+    down  : (a : Type) -> DEC a -> Type
+    _:x_  : (a b : Type) -> Type
+    _:+_  : (a b : Type) -> Type
+    _:->_ : (a b : Type) -> Type
+    □ : (a : Type) -> Type
 
--- Type predicates
-DEC : Type -> Set
-DEC bool = ⊤
-DEC (down a) = DEC a
-DEC (_ :-> _) = ⊥
-DEC (a :x b) = DEC a × DEC b
-DEC (a :+ b) = DEC a × DEC b
-DEC (□ a) = DEC a
+  -- Type predicates
+  DEC : Type -> Set
+  DEC bool = ⊤
+  DEC (down a _) = DEC a
+  DEC (_ :-> _) = ⊥
+  DEC (a :x b) = DEC a × DEC b
+  DEC (a :+ b) = DEC a × DEC b
+  DEC (□ a) = DEC a
 
 SL : Type -> Set
 SL bool = ⊤
-SL (down _) = ⊤
+SL (down _ _) = ⊤
 SL (a :x b) = SL a × SL b
 SL (a :+ b) = ⊥
 SL (a :-> b) = SL b
@@ -53,7 +55,7 @@ SL (□ a) = ⊥
 
 FIN : Type -> Set
 FIN bool = ⊤
-FIN (down a) = FIN a
+FIN (down a _) = FIN a
 FIN (a :x b) = FIN a × FIN b
 FIN (a :+ b) = FIN a × FIN b
 FIN (a :-> b) = ⊥
@@ -61,7 +63,7 @@ FIN (□ a) = FIN a
 
 ACC : Type -> Set
 ACC bool = ⊤
-ACC (down a) = FIN a
+ACC (down a _) = FIN a
 ACC (a :x b) = ACC a × ACC b
 ACC (a :+ b) = ACC a × ACC b
 ACC (a :-> b) = ⊥
@@ -85,7 +87,7 @@ DEC? (a :+ b) with DEC? a | DEC? b
 ... | _ | _ = nothing
 DEC? (a :-> b) = nothing
 DEC? (□ a) = DEC? a
-DEC? (down a) = DEC? a
+DEC? (down a _) = DEC? a
 
 
 ---------- Contexts / typing environments ----------
@@ -126,13 +128,42 @@ X at mono = X
 X at disc = wipe X
 
 
+---------- Context renamings ----------
+infix 3 _⊆_
+_⊆_ : (X Y : Cx) -> Set
+X ⊆ Y = ∀ o {a} -> X o a -> Y o a
+
+wipe/⊆ : ∀{X Y} -> X ⊆ Y -> wipe X ⊆ wipe Y
+wipe/⊆ f mono ()
+wipe/⊆ f disc = f disc
+
+-- Is `wipe` a comonad in the category of contexts and renamings?
+wipe⊆ : ∀{X} -> wipe X ⊆ X
+wipe⊆ mono ()
+wipe⊆ disc x = x
+
+wipe-idem : ∀{X} -> wipe X ⊆ wipe (wipe X)
+wipe-idem mono ()
+wipe-idem disc x = x
+
+drop : ∀{X Y} -> Y ⊆ X ∪ Y
+drop o = cdr
+
+drop2 : ∀{X Y Z} -> Z ⊆ X ∪ Y ∪ Z
+drop2 o = cdr ∘ cdr
+
+∪/⊆ : ∀{X Y Z} -> X ⊆ Y -> (Z ∪ X) ⊆ (Z ∪ Y)
+∪/⊆ f _ = [ car , cdr ∘ f _ ]
+
+
 ---------- Terms, using a more strongly typed ABT-like abstraction ----------
 infixr 4 _∧_
+infixr 4 _~_
 data Premise : Set₁ where
   nil    : Premise
   _∧_    : (P Q : Premise) -> Premise
   ∙      : (a : Type) -> Premise
-  _is_~_ : (a : Type) (o : Tone) (P : Premise) -> Premise
+  _~_    : (X : Cx) (P : Premise) -> Premise
   □      : (P : Premise) -> Premise
 
 -- Term formers.
@@ -159,20 +190,19 @@ data _⊃_ : Premise -> Type -> Set where
   ⊃eps : ∀{a} -> SL a -> nil ⊃ a
   ⊃vee : ∀{a} -> SL a -> ∙ a ∧ ∙ a ⊃ a
   -- downsets
-  ⊃single : ∀{a} -> (∙ a) ⊃ down a
-  ⊃bigvee : ∀{a b} (dec : DEC a) (sl : SL b)
-          -> ∙ (down a) ∧ (a is mono ~ ∙ b) ⊃ b
+  ⊃single : ∀{a}{p : DEC a} -> (∙ a) ⊃ down a p
+  ⊃bigvee : ∀{a b} {dec : DEC a} (sl : SL b)
+          -> ∙ (down a dec) ∧ (a is mono ~ ∙ b) ⊃ b
   -- fixed points
   ⊃fix : ∀{a} -> FIX a -> (a is mono ~ ∙ a) ⊃ a
 
 mutual
   infix 3 _⊩_
-  infixr 4 _~_
   data _⊩_ (X : Cx) : Premise -> Set₁ where
     tt   : X ⊩ nil
     _,_  : ∀{P Q}   (p : X ⊩ P) (q : X ⊩ Q) -> X ⊩ P ∧ Q
     term : ∀{a}     (M : X ⊢ a)              -> X ⊩ ∙ a
-    _~_  : ∀{P a} o (p : a is o ∪ X ⊩ P)     -> X ⊩ a is o ~ P
+    bind : ∀{P Y}   (p : Y ∪ X ⊩ P)          -> X ⊩ Y ~ P
     -- Maybe we should instead have:
     --   ● : Tone -> Premise -> Premise
     --   at-tone : ∀ {P} o (p : X at o ⊩ P) -> X ⊩ ● o P
@@ -184,6 +214,18 @@ mutual
     var : ∀ o (p : o ≤ mono) (x : X o a) -> X ⊢ a
     _!_ : ∀{P} (form : P ⊃ a) (args : X ⊩ P) -> X ⊢ a
 
+-- Some conveniences
+var-mono : ∀{X a} (x : X mono a) -> X ⊢ a
+var-disc : ∀{X a} (x : X disc a) -> X ⊢ a
+var-mono = var mono refl
+var-disc = var disc refl
+
+here : ∀{A : Set}{a o} -> (a is o) o a ⊎ A
+here = car eq
+
+v0 : ∀{X a} -> a is mono ∪ X ⊢ a
+v0 = var-mono here
+
 
 -- Pattern synonyms for terms.
 pattern bool! b             = ⊃bool b ! tt
@@ -192,66 +234,43 @@ pattern when! {a} sl M N    = ⊃when {a} sl ! term M , term N
 pattern pair! {a b} M N     = ⊃pair {a}{b} ! term M , term N
 pattern proj! {a b} i M     = ⊃proj {a}{b} i ! term M
 pattern inj! {a b} i M      = ⊃inj {a}{b} i ! term M
-pattern case! {a b c} M N₁ N₂ = ⊃case {a}{b}{c} ! term M , ((.mono ~ term N₁) , (.mono ~ term N₂))
+pattern case! {a b c} M N₁ N₂ =
+  ⊃case {a}{b}{c} ! term M , (bind (term N₁) , bind (term N₂))
 pattern splitsum! {a b} M   = ⊃splitsum {a}{b} ! term M
-pattern lam! {a b} M        = ⊃lam {a}{b} ! (.mono ~ term M)
+pattern lam! {a b} M        = ⊃lam {a}{b} ! bind (term M)
 pattern app! {a b} M N      = ⊃app {a}{b} ! term M , term N
 pattern box! {a} M          = ⊃box {a} ! box (term M)
-pattern letbox! {a b} M N   = ⊃letbox {a}{b} ! term M , (.disc ~ term N)
+pattern letbox! {a b} M N   = ⊃letbox {a}{b} ! term M , bind (term N)
 pattern eps! {a} sl         = ⊃eps {a} sl ! tt
 pattern vee! {a} sl M N     = ⊃vee {a} sl ! term M , term N
-pattern single! {a} M       = ⊃single {a} ! term M
-pattern bigvee! {a b} dec sl M N = ⊃bigvee {a}{b} dec sl ! term M , (.mono ~ term N)
-pattern fix! {a} p M        = ⊃fix {a} p ! (.mono ~ term M)
+pattern single! {a}{p} M       = ⊃single {a}{p} ! term M
+pattern bigvee! {a b dec} sl M N =
+  ⊃bigvee {a}{b}{dec} sl ! term M , bind (term N)
+pattern fix! {a} p M        = ⊃fix {a} p ! bind (term M)
 
 
--- Extracting a ⊩ into an ordinary value.
--- TODO: is this useful for anything?
--- premise : Cx -> Premise -> Set
--- premise X nil = ⊤
+-- -- Extracting a ⊩ into an ordinary value.
+-- -- TODO: is this useful for anything?
+-- premise : Cx -> Premise -> Set₁
+-- premise X nil = Lift ⊤
 -- premise X (P ∧ Q) = premise X P × premise X Q
 -- premise X (∙ a) = X ⊢ a
--- premise X (a is o ~ P) = premise (a is o ∪ X) P
+-- premise X (Y ~ P) = premise (Y ∪ X) P
 -- premise X (□ P) = premise (wipe X) P
 
 -- un : ∀{X P} -> X ⊩ P -> premise X P
--- un tt = tt
+-- un tt = lift tt
 -- un (p , q) = un p , un q
 -- un (term M) = M
--- un (_ ~ p) = un p
+-- un (bind p) = un p
 -- un (box p) = un p
 
 -- into : ∀{X P} -> premise X P -> X ⊩ P
--- into {P = nil} tt = tt
+-- into {P = nil} (lift tt) = tt
 -- into {P = P ∧ Q} (x , y) = into x , into y
 -- into {P = ∙ a} x = term x
--- into {P = a is o ~ P} x = o ~ into x
+-- into {P = X ~ P} x = bind (into x)
 -- into {P = □ P} x = box (into x)
-
-
----------- Context renamings ----------
-infix 3 _⊆_
-_⊆_ : (X Y : Cx) -> Set
-X ⊆ Y = ∀ o {a} -> X o a -> Y o a
-
-wipe/⊆ : ∀{X Y} -> X ⊆ Y -> wipe X ⊆ wipe Y
-wipe/⊆ f mono ()
-wipe/⊆ f disc = f disc
-
--- Is `wipe` a comonad on renamings?
-wipe⊆ : ∀{X} -> wipe X ⊆ X
-wipe⊆ mono ()
-wipe⊆ disc x = x
-
-wipe-idem : ∀{X} -> wipe X ⊆ wipe (wipe X)
-wipe-idem mono ()
-wipe-idem disc x = x
-
-drop : ∀{X Y} -> Y ⊆ X ∪ Y
-drop o = cdr
-
-∪/⊆ : ∀{X Y Z} -> X ⊆ Y -> (Z ∪ X) ⊆ (Z ∪ Y)
-∪/⊆ f _ = [ car , cdr ∘ f _ ]
 
 
 ---------- Applying context renamings to terms ----------
@@ -264,7 +283,7 @@ rename f (form ! x) = form ! rename* f x
 rename* f tt = tt
 rename* f (p , q) = rename* f p , rename* f q
 rename* f (term M) = term (rename f M)
-rename* f (o ~ p) = o ~ rename* (∪/⊆ f) p
+rename* f (bind p) = bind (rename* (∪/⊆ f) p)
 rename* f (box p) = box (rename* (wipe/⊆ f) p)
 
 rename-at : ∀{X Y} o {a} -> X ⊆ Y -> X at o ⊢ a -> Y at o ⊢ a
@@ -284,8 +303,8 @@ _⇉_ : Cx -> Cx -> Set₁
 X ⇉ Y = ∀ o {a} -> Y o a -> X at o ⊢ a
 
 ∪/⇉ : ∀{X Y Z} -> X ⇉ Y -> (Z ∪ X) ⇉ (Z ∪ Y)
-∪/⇉ s mono (car x) = var mono refl (car x)
-∪/⇉ s disc (car x) = var disc refl (car x)
+∪/⇉ s mono (car x) = var-mono (car x)
+∪/⇉ s disc (car x) = var-disc (car x)
 ∪/⇉ s o    (cdr x) = weaken-at o (s o x)
 
 wipe/⇉ : ∀{X Y} -> X ⇉ Y -> wipe X ⇉ wipe Y
@@ -302,14 +321,33 @@ sub σ (form ! args) = form ! sub* σ args
 sub* σ tt = tt
 sub* σ (p , q) = sub* σ p , sub* σ q
 sub* σ (term M) = term (sub σ M)
-sub* σ (o ~ p) = o ~ sub* (∪/⇉ σ) p
+sub* σ (bind p) = bind (sub* (∪/⇉ σ) p)
 sub* σ (box p) = box (sub* (wipe/⇉ σ) p)
+
+
+---------- Term macros / admissible rules / syntax sugar forms ----------
+unbox : ∀{X a} -> X ⊢ □ a -> X ⊢ a
+unbox M = letbox! M (var-disc here)
+
+box-bind : ∀{X a b} -> a is disc ∪ X ⊢ b -> □ a is mono ∪ X ⊢ b
+box-bind M = letbox! v0 (rename (λ o → [ car , cdr ∘ cdr ]) M)
+
+lam□ : ∀ {X a b} -> a is disc ∪ X ⊢ b -> X ⊢ (□ a) :-> b
+lam□ M = lam! (box-bind M)
+
+case□ : ∀{X a b c} -> X ⊢ □ (a :+ b)
+      -> (a is disc ∪ X) ⊢ c -> (b is disc ∪ X) ⊢ c
+      -> X ⊢ c
+case□ M N₁ N₂ = case! (splitsum! M) (box-bind N₁) (box-bind N₂)
+
+let! : ∀{X a b} -> X ⊢ a -> a is mono ∪ X ⊢ b -> X ⊢ b
+let! M N = app! (lam! N) M
 
 
 ---------- Change types ----------
 Δ : Type -> Type
 Δ bool = bool
-Δ (down a) = down a
+Δ (down a p) = down a p
 Δ (a :x b) = Δ a :x Δ b
 Δ (a :+ b) = Δ a :+ Δ b
 Δ (a :-> b) = □ a :-> (Δ a :-> Δ b)
@@ -317,7 +355,7 @@ sub* σ (box p) = box (sub* (wipe/⇉ σ) p)
 
 ΔSL∈SL : ∀ a -> SL a -> SL (Δ a)
 ΔSL∈SL bool tt = tt
-ΔSL∈SL (down a) tt = tt
+ΔSL∈SL (down a p) tt = tt
 ΔSL∈SL (a :x b) (asl , bsl) = ΔSL∈SL a asl , ΔSL∈SL b bsl
 ΔSL∈SL (a :+ b) ()
 ΔSL∈SL (a :-> b) sl = ΔSL∈SL b sl
@@ -325,7 +363,7 @@ sub* σ (box p) = box (sub* (wipe/⇉ σ) p)
 
 DEC∧SL⊃Δ=id : ∀ a -> DEC a -> SL a -> Δ a ≡ a
 DEC∧SL⊃Δ=id bool dec sl = refl
-DEC∧SL⊃Δ=id (down a) dec sl = refl
+DEC∧SL⊃Δ=id (down a p) dec sl = refl
 DEC∧SL⊃Δ=id (a :x b) (adec , bdec) (asl , bsl)
   rewrite DEC∧SL⊃Δ=id a adec asl
         | DEC∧SL⊃Δ=id b bdec bsl = refl
@@ -333,22 +371,31 @@ DEC∧SL⊃Δ=id (a :+ b) _ ()
 DEC∧SL⊃Δ=id (a :-> b) () sl
 DEC∧SL⊃Δ=id (□ a) dec ()
 
+ΔFIX∈FIX : ∀ a -> FIX a -> FIX (Δ a)
+ΔFIX∈FIX a (acc , (dec , sl)) rewrite DEC∧SL⊃Δ=id a dec sl = acc , (dec , sl)
+
+
+---------- Generating dummy values of a change type ----------
+dummy : ∀{X} -> (a : Type) -> X ⊢ a -> X ⊢ Δ a
+dummy bool x = bool! false
+dummy (down a p) M = eps! tt
+dummy (a :x b) M = pair! (dummy a (proj! true M)) (dummy b (proj! false M))
+dummy (a :+ b) M = case! M (inj! true (dummy a v0)) (inj! false (dummy b v0))
+dummy (a :-> b) M =
+  -- (λx dx. dummy (M x))
+  lam! (lam! (dummy b (app! (rename drop2 M)
+                            (unbox (var-mono (cdr here))))))
+dummy (□ a) M = letbox! M (box! (dummy a (var-disc here)))
+
 
 ---------- Change environments ----------
 data Δ* (X : Cx) : Cx where
   orig  : ∀ o {a} -> X o a -> Δ* X disc a
   deriv : ∀ {o a} -> X o a -> Δ* X o (Δ a)
 
--- ΔP : Premise -> Premise
--- ΔP nil = nil
--- ΔP (P ∧ Q) = ΔP P ∧ ΔP Q
--- ΔP (∙ a) = ∙ (Δ a)
--- ΔP (a is o ~ P) = {!a is disc ~ (Δ a is o ~ (ΔP P))!}
--- ΔP (□ P) = {!!}
-
 wipeΔ*X⇉X : ∀{X} -> wipe (Δ* X) ⇉ X
-wipeΔ*X⇉X disc x = var disc refl (orig disc x)
-wipeΔ*X⇉X mono x = var disc refl (orig mono x)
+wipeΔ*X⇉X disc x = var-disc (orig disc x)
+wipeΔ*X⇉X mono x = var-disc (orig mono x)
 
 Δ*X⇉X : ∀{X} -> Δ* X ⇉ X
 Δ*X⇉X o x = rename-at o wipe⊆ (wipeΔ*X⇉X o x)
@@ -369,17 +416,18 @@ wipeΔ*X⇉X mono x = var disc refl (orig mono x)
 Δ*-wipe-xchg disc (deriv x) = deriv x
 Δ*-wipe-xchg mono (deriv ())
 
+Δ*drop : ∀{X Y} -> Δ* X ⊆ Δ* (Y ∪ X)
+Δ*drop = Δ*/⊆ drop
+
+weakenδ : ∀{X Y a} -> Δ* X ⊢ a -> Δ* (Y ∪ X) ⊢ a
+weakenδ = rename Δ*drop
+
 
 ---------- Helpers for δ ----------
-
 -- A pair of a term and its derivative.
 infix 3 _⊢δ_
 _⊢δ_ : Cx -> Type -> Set₁
 X ⊢δ a = X ⊢ a × Δ* X ⊢ Δ a
-
-lam□ : ∀ {X a b} -> a is disc ∪ X ⊢ b -> X ⊢ (□ a) :-> b
-lam□ M = lam! (letbox! (var mono refl (car eq))
-                (rename (λ o -> [ car , cdr ∘ cdr ]) M))
 
 static : ∀{X a} → X ⊢ a → Δ* X ⊢ a
 static = sub Δ*X⇉X
@@ -387,53 +435,73 @@ static = sub Δ*X⇉X
 static□ : ∀{X a} → X ⊢ a → Δ* X ⊢ □ a
 static□ M = box! (sub wipeΔ*X⇉X M)
 
--- lamδ : ∀{X a b} -> Δ* (a is mono ∪ X) ⊢ Δ b -> Δ* X ⊢ Δ (a :-> b)
--- lamδ dM = lam□ (lam (rename Δ*cons dM))
+lamδ : ∀{X a b} -> Δ* (a is mono ∪ X) ⊢ Δ b -> Δ* X ⊢ Δ (a :-> b)
+lamδ dM = lam□ (lam! (rename Δ*cons dM))
 
--- whenδ-DEC : ∀{X} a -> DEC a -> SL a -> X ⊢δ bool -> X ⊢δ a -> Δ* X ⊢ Δ a
--- whenδ-DEC {X} a dec sl (M , dM) (N , dN)
---   = if (static-box M) dN
---        (subst (λ a₁ → Δ* X ⊢ a₁) (sym (DEC∧SL⊃Δ=id a dec sl))
---          (when sl dM {!vee ? N dN!}))
-
--- whenδ : ∀ {X} a -> SL a -> X ⊢δ bool -> X ⊢δ a -> Δ* X ⊢ Δ a
--- whenδ bool sl MdM NdN = whenδ-DEC bool tt tt MdM NdN
--- whenδ (a :-> b) sl (M , dM) (N , dN)
---   = lamδ (whenδ b sl
---             (weaken M , rename (Δ*/⊆ drop) dM)
---             ( app (weaken N) (var mono refl (car eq))
---             -- ugh, why do I need to write this. is there a better way?
---             , {!!} ))
--- whenδ (a :x b) (ap , bp) M N = {!!}
--- whenδ (□ a) () M N
+-- I think DEC is in principle the wrong property;
+-- (down (a :-> b)) should be fine, for example!
+-- except we can't have (down (a :-> b)) b/c (a :-> b) not decidable!
+whenδ-DEC : ∀{X} a -> DEC a -> SL a -> X ⊢δ bool -> X ⊢δ a -> Δ* X ⊢ Δ a
+-- d(when e then f) = if [e] then df else when de then (f + df) - ε
+-- note that at decidable semilattice type,
+--  ((f + df) - ε) = f v df
+whenδ-DEC {X} a dec sl (M , dM) (N , dN) =
+  let Δsl = ΔSL∈SL a sl
+  in if! (static□ M) dN
+       (when! Δsl dM
+         (vee! Δsl dN
+           (subst (λ a₁ → Δ* X ⊢ a₁) (sym (DEC∧SL⊃Δ=id a dec sl))
+             (sub Δ*X⇉X N))))
 
 appδ : ∀{X a b} -> X ⊢δ a :-> b -> X ⊢δ a -> Δ* X ⊢ Δ b
 appδ (M , dM) (N , dN) = app! (app! dM (static□ N)) dN
+
+whenδ : ∀ {X} a -> SL a -> X ⊢δ bool -> X ⊢δ a -> Δ* X ⊢ Δ a
+whenδ bool sl Mδ Nδ = whenδ-DEC bool tt tt Mδ Nδ
+-- What would happen here if we lifted the requirement that `a` was decidable?
+whenδ (down a p) sl M N = whenδ-DEC (down a p) p tt M N
+whenδ (a :x b) (ap , bp) M (N , dN) =
+  pair! (whenδ a ap M (proj! true N , proj! true dN))
+        (whenδ b bp M (proj! false N , proj! false dN))
+whenδ (a :+ b) () M N
+-- when M (N : a -> b) == \x. when M (N x)
+whenδ (a :-> b) sl (M , dM) (N , dN)
+  = lamδ (whenδ b sl
+            (weaken M , weakenδ dM)
+            -- ugh, why do I need to write this. is there a better way?
+            ( app! (weaken N) v0
+            , appδ (weaken N , weakenδ dN) (v0 , var-mono (deriv here)) ))
+whenδ (□ a) () M N
 
 
 ---------- δ itself ----------
 δ* : ∀{X a} -> X ⊢ a -> X ⊢δ a
 δ : ∀{X a} -> X ⊢ a -> Δ* X ⊢ Δ a
--- δP : ∀{X P} -> X ⊩ P -> X ⊩ ΔP P
 
 δ* M = (M , δ M)
 
 δ (var o p x) = var o p (deriv x)
 δ (bool! x) = bool! x
 δ (if! M N₁ N₂) = if! (static M) (δ N₁) (δ N₂)
-δ (when! {a} sl M N) = {!!}
+δ (when! {a} sl M N) = whenδ a sl (δ* M) (δ* N)
 δ (pair! M N) = pair! (δ M) (δ N)
 δ (proj! true M) = proj! true (δ M)
 δ (proj! false M) = proj! false (δ M)
 δ (inj! true M) = inj! true (δ M)
 δ (inj! false M) = inj! false (δ M)
-δ (case! M N₁ N₂) = {!!}
+δ (case!{b}{c} M N₁ N₂) =
+  case□ (static□ M)
+    (let! (case! (weaken (δ M)) v0 (dummy _ (var-disc (cdr here))))
+          (rename Δ*cons (δ N₁)))
+    (let! (case! (weaken (δ M)) (dummy _ (var-disc (cdr here))) v0)
+          (rename Δ*cons (δ N₂)))
 δ (splitsum! M) = splitsum! (δ M)
 δ (lam! M) = lam□ (lam! (rename Δ*cons (δ M)))
 δ (app! M N) = appδ (δ* M) (δ* N)
 -- app! (app! (δ M) (static□ N)) (δ N)
 δ (box! M) = box! (rename Δ*-wipe-xchg (δ M))
-δ (letbox! M N) = letbox! (static M) (letbox! (weaken (δ M)) (rename Δ*cons (δ N)))
+δ (letbox! M N) =
+  letbox! (static M) (letbox! (weaken (δ M)) (rename Δ*cons (δ N)))
 -- At (eps : a :-> b), is our derivative still eps? it is the derivative of the
 -- constant zero function. Is that also the constant zero function? Yes,
 -- inductively. TODO: put proof of this into seminaive.tex.
@@ -442,6 +510,52 @@ appδ (M , dM) (N , dN) = app! (app! dM (static□ N)) dN
 δ (vee! {a} sl M N) = vee! (ΔSL∈SL a sl) (δ M) (δ N)
 δ (single! M) = eps! tt
 -- The whopper.
-δ (bigvee! dec sl M N) = {!!}
--- The purpose of the whole thing.
-δ (fix! {a} p M) = {!!}
+δ (bigvee! {dec = dec} sl M N) = {!!}
+-- The purpose of this whole thing.
+δ (fix! {a} p M) = letbox! (static□ (fix! p M))
+                     (fix! (ΔFIX∈FIX a p) (rename Δ*cons (δ M)))
+
+
+---------- Leftovers ----------
+
+-- ΔP : Premise -> Premise
+-- ΔP nil = nil
+-- ΔP (P ∧ Q) = ΔP P ∧ ΔP Q
+-- -- -- Originally:
+-- -- ΔP (∙ a) = ∙ (Δ a)
+-- -- Alternatively:
+-- ΔP (∙ a) = ∙ (□ a) ∧ ∙ (Δ a)
+-- ΔP (X ~ P) = Δ* X ~ ΔP P
+-- ΔP (□ P) = □ (ΔP P)
+
+-- Δ*-distrib-∪ : ∀{X Y} -> Δ* (Y ∪ X) ⊆ Δ* Y ∪ Δ* X
+-- Δ*-distrib-∪ .disc (orig o (car x)) = car (orig o x)
+-- Δ*-distrib-∪ .disc (orig o (cdr y)) = cdr (orig o y)
+-- Δ*-distrib-∪ o (deriv (car x)) = car (deriv x)
+-- Δ*-distrib-∪ o (deriv (cdr y)) = cdr (deriv y)
+
+-- δP : ∀{X P} -> X ⊩ P -> Δ* X ⊩ ΔP P
+-- δP tt = tt
+-- δP (p , q) = δP p , δP q
+-- δP (term M) = term (static□ M) , term (δ M)
+-- δP (bind p) = bind (rename* Δ*-distrib-∪ (δP p))
+-- δP (box p) = box (rename* Δ*-wipe-xchg (δP p))
+
+-- δ⊃ : ∀{X P a} -> P ⊃ a -> premise (Δ* X) (ΔP P) -> Δ* X ⊢ a
+-- δ⊃ (⊃bool x) (lift tt) = bool! x
+-- δ⊃ ⊃if ((M , dM) , ((N₁ , dN₁) , (N₂ , dN₂))) = {!!}
+-- δ⊃ (⊃when sl) args = {!!}
+-- δ⊃ ⊃pair args = {!!}
+-- δ⊃ (⊃proj i) args = {!!}
+-- δ⊃ (⊃inj i) args = {!!}
+-- δ⊃ ⊃case args = {!!}
+-- δ⊃ ⊃splitsum args = {!!}
+-- δ⊃ ⊃lam args = {!!}
+-- δ⊃ ⊃app args = {!!}
+-- δ⊃ ⊃box args = {!!}
+-- δ⊃ ⊃letbox args = {!!}
+-- δ⊃ (⊃eps x) args = {!!}
+-- δ⊃ (⊃vee x) args = {!!}
+-- δ⊃ ⊃single args = {!!}
+-- δ⊃ (⊃bigvee dec sl) args = {!!}
+-- δ⊃ (⊃fix x) args = {!!}
