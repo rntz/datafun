@@ -744,9 +744,9 @@ Observe that:
   \quad\phantom{\textbf{let}~}\quad
   \textbf{let}~ x' = x \oplus dx ~\textbf{in}\\
   \quad\phantom{\textbf{let}~}\quad
-  \textbf{if}~ x' \le x ~\textbf{then}~ x ~\textbf{else}\\
+  \textbf{if}~ x' \le x ~\textbf{then}~ x\\
   \quad\phantom{\textbf{let}~}\quad
-  \textsf{loop} \;x' \;(df \; x \; dx)\\
+  \textbf{else}~\textsf{loop} \;x' \;(df \; x \; dx)\\
   \quad\textbf{in}~ \textsf{loop} \; \unit \; (f \; \unit \ominus \unit)
 \end{array}\]
 
@@ -757,6 +757,23 @@ Observe that:
 \item Correctness criterion for $\delta$ (see google doc).
 \item Lemma: for decidable semilattices, $\den{e} \oplus \den{f} = \den{e \vee
   f}$.
+\item Lemma justifying $\delta (\unit : A \to L) = \unit : \Disc{A} \to
+  \Delta{A} \to \Delta{L}$ at functional types.
+\item Definition of $\Delta_A : \Den{A} \to \ms{Poset}$.
+\item Show $\Delta_A(a)$ is an induced subposet of $\Den{A}$.
+\item Define $\oplus_A : a : \Disc{\Den{A}} \to \GD_A(a) \to \Den{A}$ and show it
+  is monotone in its second argument. This also involves defining \mb{0}.
 \end{enumerate}
+
+\[\begin{array}{rcl}
+  \GD_2(\_) &=& \Den{\tbool}\\
+  \GD_{A_1 + A_2}(\inj{i}{x}) &=& \setfor{\inj{i}{dx}}{dx \in \GD_{A_i}(x)}\\
+  \GD_{A \x B}(\pair{x}{y}) &=& \GD_A(x) \x \GD_B(y)\\
+  \GD_{\Disc{A}}(x) &=& \setfor{dx}{dx \in \GD_A(x), x \oplus_A dx = x}\\
+  \GD_{\Down{A}}(x) &=& \Down{\Den{A}}\\
+  \GD_{A \to B}(f) &=&
+  \setfor{df \in \Disc{\Den{A}} \to \Den{\GD{A}} \to \Den{\GD{B}}}
+         {\forall(x \in \Den{A}, da \in \GD_A(a))~df(a)(da) \in \GD_B(f(a))}
+\end{array}\]
 
 \end{document}
