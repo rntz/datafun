@@ -583,6 +583,16 @@ At equality types, $\delta(\downelim{x}{e}{f})$ has the following definition:
     (f \oplus \delta f) \ominus \unit})
 \end{array}\]
 
+\todo{\todo{FIXME}: this doesn't type check! In $\downelim{x}{e} \letv{dx}{\mb{0}\;
+  x}{\delta f}$, the variable $x$ is bound monotone, but it needs to be
+discrete! we have $e : \Disc{\Down{A}}$, but that's not the same as
+$\Down{\Disc{A}}$. Maybe we need an axiom:
+\[ \ms{suprema} : \Disc{\Down{\eq{A}}} \to \Down{\Disc{\eq{A}}} \]
+
+But what about the second case? Same problem! And it's not clear it can be fixed
+this time! Uh-oh. Are there any examples where this computes the *wrong*
+derivative?}
+
 \todo{TODO: Explain/show that $\oplus$, $(- \ominus \unit)$, and \mb{0} are
   definable, typeable, and efficiently computable at these types!}
 
@@ -751,6 +761,52 @@ Observe that:
 \end{array}\]
 
 
+\section{Dependent change types}
+
+\[\begin{array}{rcl}
+  \GD_2(\_) &=& \Den{\tbool}\\
+  \GD_{A_1 + A_2}(\inj{i}{x}) &=& \setfor{\inj{i}{dx}}{dx \in \GD_{A_i}(x)}\\
+  \GD_{A \x B}(\pair{x}{y}) &=& \GD_A(x) \x \GD_B(y)\\
+  \GD_{\Disc{A}}(x) &=& \setfor{dx}{dx \in \GD_A(x), x \oplus_A dx = x}\\
+  \GD_{\Down{A}}(x) &=& \Down{\Den{A}}\\
+  \GD_{A \to B}(f) &=&
+  \{\ df \in \Disc{\Den{A}} \to \Den{\GD{A}} \to \Den{\GD{B}}\\
+  %% &&|\quad df \in \Pi(a : \Den{A})\ \GD_A(a) \to \GD_B(f(a))\\
+  &&|\quad \forall(x \in \Den{A})~ \forall(da \in \GD_A(a))~ df(a)(da) \in \GD_B(f(a))\\
+  &&{\!\!\wedge}~~ (f \oplus_{A \to B} df) ~\textsf{is monotone} ~\}
+  %% \setfor{df \in \Disc{\Den{A}} \to \Den{\GD{A}} \to \Den{\GD{B}}}
+  %%        {\forall(x \in \Den{A}, da \in \GD_A(a))~df(a)(da) \in \GD_B(f(a))}
+\end{array}\]
+
+\todo{FIXME: NOT WELL-FOUNDED. Because $\oplus_A : \Pi(a : A)~ \GD_A(a) \to A$
+  uses $\GD_{A}$ in its type, but $\GD_{A \to B}$ uses $\oplus_{A \to B}$. Can
+  probably be fixed by eta-expanding a little?}
+
+%% \todo{$\GD_{A \to B}$ IS WRONG: it doesn't ensure that $f \oplus df$ is still monotone!}
+
+\begin{theorem}[Legitimacy]
+  Given $\J{\GP}{\GG}{e}{A}$ we have $\den{\delta e} \in \GD_{\Disc{\Psi} \x \GG
+    \to A}(\den{e})$.
+\end{theorem}
+
+\begin{theorem}[Correctness]
+  Given $\J{\GP}{\GG}{e}{A}$, $\psi \in \Den{\GP}$, $\gamma \in \Den{\GG}$,
+  $\delta\psi \in \GD_\Psi{\psi}$, $\delta\gamma \in \GD_\GG(\gamma)$, we have
+  \begin{equation*}
+    \den{e}\; (\psi \oplus \delta \psi)\; (\gamma \oplus \delta\gamma)
+    =
+    \den{e}\; \psi\; \gamma \oplus
+    \den{\delta e}\;(\psi, \gamma, \delta \psi) \; \delta\gamma
+  \end{equation*}
+\end{theorem}
+
+Strategy: attack each by induction on $\J{\GP}{\GG}{e}{A}$. Try legitimacy
+first.
+
+NB. In order for that last $\oplus$ to be well-defined, we need legitimacy to
+hold.
+
+
 \section{Stuff to put in this document}
 
 \begin{enumerate}
@@ -760,20 +816,11 @@ Observe that:
 \item Lemma justifying $\delta (\unit : A \to L) = \unit : \Disc{A} \to
   \Delta{A} \to \Delta{L}$ at functional types.
 \item Definition of $\Delta_A : \Den{A} \to \ms{Poset}$.
+
+  or $\Delta(A, a) \in \ms{Poset}$ for $a \in \Den{A}$
 \item Show $\Delta_A(a)$ is an induced subposet of $\Den{A}$.
 \item Define $\oplus_A : a : \Disc{\Den{A}} \to \GD_A(a) \to \Den{A}$ and show it
   is monotone in its second argument. This also involves defining \mb{0}.
 \end{enumerate}
-
-\[\begin{array}{rcl}
-  \GD_2(\_) &=& \Den{\tbool}\\
-  \GD_{A_1 + A_2}(\inj{i}{x}) &=& \setfor{\inj{i}{dx}}{dx \in \GD_{A_i}(x)}\\
-  \GD_{A \x B}(\pair{x}{y}) &=& \GD_A(x) \x \GD_B(y)\\
-  \GD_{\Disc{A}}(x) &=& \setfor{dx}{dx \in \GD_A(x), x \oplus_A dx = x}\\
-  \GD_{\Down{A}}(x) &=& \Down{\Den{A}}\\
-  \GD_{A \to B}(f) &=&
-  \setfor{df \in \Disc{\Den{A}} \to \Den{\GD{A}} \to \Den{\GD{B}}}
-         {\forall(x \in \Den{A}, da \in \GD_A(a))~df(a)(da) \in \GD_B(f(a))}
-\end{array}\]
 
 \end{document}
