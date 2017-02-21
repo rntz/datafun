@@ -2,6 +2,7 @@
 *.aux
 *.bbl
 *.blg
+*.dep
 *.dvi
 *.fdb_latexmk
 *.fls
@@ -12,6 +13,7 @@
 *.snm
 *.toc
 *.vrb
+*.zo
 *~
 .\#*
 \#*\#
