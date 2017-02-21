@@ -8,7 +8,10 @@ DEPENDS := Makefile $(wildcard *.sty)
 all: $(TEXS:.tex=.pdf)
 
 watch: all
-	@while inotifywait -e modify $(TEXS) $(DEPENDS); do make all; done
+	@while inotifywait -e modify $(TEXS) $(DEPENDS) >/dev/null 2>&1; do \
+		echo; \
+		make --no-print-directory -j all; \
+	done
 
 clean:
 	$(LATEXRUN) --clean-all
