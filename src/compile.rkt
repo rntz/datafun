@@ -1,6 +1,6 @@
 #lang racket
 
-(require "util.rkt" "ast.rkt" "to-sexp.rkt" "env.rkt" "elab.rkt" "runtime.rkt")
+(require "util.rkt" "ast.rkt" "to-sexp.rkt" "env.rkt" "runtime.rkt")
 (provide compile)
 
 ;; `env' is an env (see env.rkt) mapping variables to what they should compile
