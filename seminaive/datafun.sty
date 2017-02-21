@@ -70,12 +70,13 @@
 \newcommand{\tzero}{0}
 \newcommand{\tunit}{1}
 \newcommand{\x}{\times}
+\newcommand{\Disc}[1]{\square{#1}}
+\newcommand{\Down}[1]{{\downarrow}\,{#1}}
+\newcommand{\Set}[1]{\{{#1}\}}
 %% discrete/monotone \to
 \newcommand{\dto}{\to}
 \newcommand{\mto}{\overset{+\:}{\to}}
 \newcommand{\Pfin}{\mc{P}_{\ms{fin}}}
-\newcommand{\Disc}[1]{\square{#1}}
-\newcommand{\Down}[1]{{\downarrow}\,{#1}}
 %% lexical types
 \newcommand{\lsum}{\lhd}
 \newcommand{\lprod}{\mathop{\x_\lhd}}
@@ -101,6 +102,8 @@
 %% \renewcommand{\eqlat}[1]{\under{\mathfrak{D}\cap\mathfrak{L}}{#1}}
 %% \renewcommand{\fixtype}[1]{\under{\mathfrak{X}}{#1}}
 
+%% patterns
+\newcommand{\pwild}{\underline{\phantom{x}}}
 
 %% expressions
 \renewcommand{\d}[1]{\ensuremath{\mathbf{#1}}} % discrete variables
@@ -140,7 +143,7 @@
 %% semantics
 \newcommand{\den}[1]{\ensuremath{\llbracket{#1}\rrbracket}} % denotation
 % denotation for vertically large things
-\newcommand{\Den}[1]{\left\llbracket{#1}\right\rrbracket}
+\newcommand{\Den}[1]{{\left\llbracket{#1}\right\rrbracket}}
 \newcommand{\one}{\ensuremath{\mathbf{1}}}
 \newcommand{\two}{\ensuremath{\mathbf{2}}}
 %% \newcommand{\Arr}{\supset}
@@ -154,6 +157,10 @@
 %% \newcommand{\natposet}{\N_\le}
 %% \newcommand{\below}[2]{\ensuremath{\downarrow\!({#1 : #2})}}
 %% \newcommand{\lfpin}[2]{\text{lfp}\,{#2} \in {#1}}
+
+%% change types, derivatives, etc
+\newcommand{\zero}{\mb{0}}
+\newcommand{\Changes}[2]{\GD_{#1}({#2})}
 
 %% categories
 \newcommand{\cSet}{\ms{Set}}

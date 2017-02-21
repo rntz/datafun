@@ -354,7 +354,7 @@ For each type $A$ we define a change type $\GD A$.
 \end{array}\]
 
 We also define associated operators $\oplus : A \to \GD A \to A$, $\ominus : A
-\to A \to \Delta A$ and $\mb{0} : A \to \Delta A$. Note, however, the
+\to A \to \Delta A$ and $\zero : A \to \Delta A$. Note, however, the
 definitions of these operators \emph{are not well-typed Datafun terms}. \todo{I
   do not believe there exists a way to assign them tones that is compatible with
   Datafun's type system; every way I've tried fails. But I have not proved
@@ -365,7 +365,7 @@ much:
 \begin{itemize}
 \item $x \oplus dx$ is monotone in $dx$.
 \item $x \ominus y$ is monotone in $x$ and antitone in $y$.
-\item $\mb{0}$ is discrete; at function type, it finds the derivative of its
+\item $\zero$ is discrete; at function type, it finds the derivative of its
   argument, and a function that is larger pointwise does not necessarily have a
   derivative that is larger pointwise.
 \end{itemize}
@@ -382,37 +382,37 @@ really it should have a dependent type.
   \textbf{Type}
   & {\textbf{Definition of}~\oplus}
   & {\textbf{Definition of}~\ominus}
-  & {\textbf{Definition of}~\mb{0}}
+  & {\textbf{Definition of}~\zero}
   \\ \midrule
   A \to B
-  & (f \oplus df)\; x = f\; x \oplus df\; x\; (\mb{0}\; x)
+  & (f \oplus df)\; x = f\; x \oplus df\; x\; (\zero\; x)
   & (f \ominus g)\; x \;dx = f\; (x \oplus dx) \ominus g \; x
-  & \mb{0}\; f\; x\; dx = f\; (x \oplus dx) \ominus f\; x
+  & \zero\; f\; x\; dx = f\; (x \oplus dx) \ominus f\; x
   \\
   A \x B
   & \pair{x}{y} \oplus \pair{dx}{dy} = \pair{x \oplus dx}{y \oplus dy}
   & \pair{a}{x} \ominus \pair{b}{y} = \pair{a \ominus b}{x \ominus y}
-  & \mb{0} \; \pair{x}{y} = \pair{\mb{0}\; x}{\mb{0}\; y}
+  & \zero \; \pair{x}{y} = \pair{\zero\; x}{\zero\; y}
   \\
   A + B
   & \inj{i}{x} \oplus \inj{i}{dx} = \inj{i}{(x \oplus dx)}
   & \inj{i}{x} \ominus \inj{i}{y} = \inj{i}{x \ominus y}
-  & \mb{0}\; (\inj{i}{x}) = \inj{i}{(\mb{0}\;x)}
+  & \zero\; (\inj{i}{x}) = \inj{i}{(\zero\;x)}
   \\
   \Disc{A}
   & \disc{x} \oplus \disc{dx} = \disc{x \oplus dx}
   & \disc{x} \ominus \disc{y} = \disc{x \ominus y}
-  & \mb{0}\; \disc{x} = \disc{\mb{0}\; x}
+  & \zero\; \disc{x} = \disc{\zero\; x}
   \\
   \Down{A}
   & x \oplus y = x \vee y
   & x \ominus y = x
-  & \mb{0}\; x = \unit
+  & \zero\; x = \unit
   \\
   \tbool
   & x \oplus y = x \vee y
   & x \ominus y = x
-  & \mb{0}\; x = \unit
+  & \zero\; x = \unit
 \end{array}
 \)}
 \]
@@ -422,7 +422,7 @@ These should satisfy the following laws:
 \begin{eqnarray}
   x \le y \quad\implies\quad
   y &=& x \oplus (y \ominus x)\\
-  x &=& x \oplus \mb{0}\; x
+  x &=& x \oplus \zero\; x
 \end{eqnarray}
 
 \todo{TODO: Prove these laws hold.}
@@ -430,24 +430,24 @@ These should satisfy the following laws:
 \todo{TODO: Note about ``erasure''/invalid changes. Moreover, at $\Disc{A}$
   type, only valid changes are zero changes.}
 
-\todo{TODO: Note about efficiency of computing $\oplus$, $\ominus$, $\mb{0}$,
+\todo{TODO: Note about efficiency of computing $\oplus$, $\ominus$, $\zero$,
   and which ones we actually need to compute in the implementation. Define
   efficiently computable $(- \ominus \unit)$ operator for decidable types, and
-  point out that $\mb{0}$ is efficiently computable for decidable types.}
+  point out that $\zero$ is efficiently computable for decidable types.}
 
 %% Zero on decidable types.
 %% Zero on decidable types:
 %% \[\arraycolsep=1.5em
 %% \begin{array}{c|c}
 %%   \eq{A} \x \eq{B}
-%%   & \mb{0}\; (x,y) = (\mb{0}\; x, \mb{0}\; y)
+%%   & \zero\; (x,y) = (\zero\; x, \zero\; y)
 %%   \\
 %%   \eq{A} + \eq{B}
-%%   & \mb{0}\; (\inj{i}{x}) = \inj{i}(\mb{0}\; x)\\
+%%   & \zero\; (\inj{i}{x}) = \inj{i}(\zero\; x)\\
 %%   \Disc{\eq{A}}
-%%   & \mb{0}\;(\disc{x}) = \disc{(\mb{0}\; x)}\\
-%%   \Down{\eq{A}} & \mb{0}\;x = \unit\\
-%%   \tbool & \mb{0}\; x = \unit
+%%   & \zero\;(\disc{x}) = \disc{(\zero\; x)}\\
+%%   \Down{\eq{A}} & \zero\;x = \unit\\
+%%   \tbool & \zero\; x = \unit
 %% \end{array}
 %% \]
 
@@ -474,7 +474,7 @@ These should satisfy the following laws:
   \begin{eqnarray*}
     x \oplus y &=& x \vee y\\
     x \ominus y &=& x\\
-    \mb{0}\; x &=& \unit
+    \zero\; x &=& \unit
   \end{eqnarray*}
 \end{lemma}
 \begin{proof}
@@ -491,15 +491,15 @@ These should satisfy the following laws:
     \eqlat{A} \x \eqlat{B}
     & (x,y) \oplus (dx,dy) = (x \oplus dx, y \oplus dy)
     & (a,x) \ominus (b,y) = (a \ominus b, x \ominus y)
-    & \mb{0}\; (x,y) = (\mb{0}\; x, \mb{0}\; y)\\
+    & \zero\; (x,y) = (\zero\; x, \zero\; y)\\
     \Down{\eq{A}}
     & x \oplus y = x \vee y
     & x \ominus y = x
-    & \mb{0}\;x = \unit\\
+    & \zero\;x = \unit\\
     \tbool
     & x \oplus y = x \vee y
     & x \ominus y = x
-    & \mb{0}\;x = \unit\\
+    & \zero\;x = \unit\\
   \end{array}
   \]
 \end{proof}
@@ -578,12 +578,12 @@ At equality types, $\delta(\downelim{x}{e}{f})$ has the following definition:
 
 \[\begin{array}{rcl}
   \delta(\downelim{x}{e}{f})
-  &=& \phantom{\vee~} (\downelim{x}{e}{\ms{let}~dx = \mb{0}\; x ~\ms{in}~ \delta f})
-  \\ && \vee~ (\downelim{x}{\delta e}{\ms{let}~dx = \mb{0}\; x ~\ms{in}~
+  &=& \phantom{\vee~} (\downelim{x}{e}{\ms{let}~dx = \zero\; x ~\ms{in}~ \delta f})
+  \\ && \vee~ (\downelim{x}{\delta e}{\ms{let}~dx = \zero\; x ~\ms{in}~
     (f \oplus \delta f) \ominus \unit})
 \end{array}\]
 
-\todo{\todo{FIXME}: this doesn't type check! In $\downelim{x}{e} \letv{dx}{\mb{0}\;
+\todo{\todo{FIXME}: this doesn't type check! In $\downelim{x}{e} \letv{dx}{\zero\;
   x}{\delta f}$, the variable $x$ is bound monotone, but it needs to be
 discrete! we have $e : \Disc{\Down{A}}$, but that's not the same as
 $\Down{\Disc{A}}$. Maybe we need an axiom:
@@ -593,7 +593,7 @@ But what about the second case? Same problem! And it's not clear it can be fixed
 this time! Uh-oh. Are there any examples where this computes the *wrong*
 derivative?}
 
-\todo{TODO: Explain/show that $\oplus$, $(- \ominus \unit)$, and \mb{0} are
+\todo{TODO: Explain/show that $\oplus$, $(- \ominus \unit)$, and \zero are
   definable, typeable, and efficiently computable at these types!}
 
 Translation of $\downelim{x}{e}{f}$ at \emph{non-equality types}, however, is
@@ -763,6 +763,131 @@ Observe that:
 
 \section{Dependent change types}
 
+We will define the following type-indexed sets and operators:
+
+\[\begin{array}{ccccl}
+  \Changes{A}{a} &\subseteq& |\Den{\GD{A}}|
+  &\text{for}& a \in \Den{A}
+  \\
+  a \oplus_A da &\in& \Den{A}
+  &\text{for}& a \in \Den{A} ~\text{and}~ da \in \Changes{A}{a}
+  \\
+  b \ominus_A a &\in& \Changes{A}{a}
+  &\text{for}& a, b \in \Den{A} ~\text{and}~ a \le b
+  \\
+  \zero_A\; a &\in& \Changes{A}{a}
+  &\text{for}& a \in \Den{A}
+\end{array}\]
+
+\zero{} is simply syntax sugar; $\zero_A\; x = x \ominus_A x$. The other three
+are defined mutually, by induction on types. First we give the rules for
+$\Changes{A}{a}$:
+
+\[
+\def\arraystretch{1.2}
+\begin{array}{lcl}
+  \Changes{\tbool}{\pwild} &=& \Den{\tbool}
+  \\
+  \Changes{\Down{A}}{\pwild} &=& \Den{\Down{A}}
+  \\
+  \Changes{A_1 + A_2}{\inj{i}{x}}
+  &=& \setfor{\inj{i}{dx}}{dx \in \Changes{A_i}{dx}}
+  %% \\
+  %% \inj{i}{dx} \in \Changes{A_1 + A_2}{\inj{i}{x}}
+  %% &\iff& dx \in \Changes{A_i}{x}
+  \\
+  \Changes{A \x B}{\pair{a}{b}}
+  &=& \Changes{A}{a} \x \Changes{B}{b}
+  \\
+  \Changes{\Disc{A}}{a}
+  &=& \setfor{dx \in \Changes{A}{a}}{x \oplus_A dx = x}
+  \\
+  df \in \Changes{A \to B}{f}
+  &\Leftrightarrow&
+  \forall({a,b \in \Den{A}},\, da \in \Changes{A}{a},\, db \in \Changes{A}{b})\\
+  &&\phantom{{}\wedge{}}
+  df\; a\; da \in \Changes{B}{f\; a}
+  \wedge df\;b\;db \in \Changes{B}{f\; b}
+  %% \\
+  %% &&{}\wedge (a \mapsto f\; a \oplus_B df\; a \; (\zero_A\; a))
+  %% ~\text{is monotone}
+  \\
+  &&{}\wedge (a \oplus da \le b \oplus db \implies
+  f\;a \oplus df\;a\;da \le f\;b \oplus df\;b\;db)
+\end{array}
+\]
+
+The condition defining $df \in \Changes{A \to B}{f}$ can be phrased as requiring
+that the map $(a, da) \mapsto (f\;a, df\;a\;da)$ is monotone when we order its
+domain and codomain by $(a,da) \le (b,db) \iff a \oplus da \le b \oplus db$.
+
+And the operators:
+\begin{center}
+  \scalebox{1}{\(
+  \begin{array}{cccc}
+    \textbf{Type} & \oplus & \ominus %% & \zero
+    \\ \midrule
+    \tbool
+    & a \oplus da = a \vee da
+    & b \ominus a = b
+    %% & \zero\; a = \ms{false}
+    \\
+    \Down{A}
+    & a \oplus da = a \cup da
+    & b \ominus a = b
+    %% & \zero\; a = \emptyset
+    \\
+    A + B
+    & \inj{i}{a} \oplus \inj{i}{da} = \inj{i}{a \oplus da}
+    & \inj{i}{b} \ominus \inj{i}{a} = \inj{i}{b \ominus a}
+    %% & \zero\; (\inj{i}{a}) = \inj{i}{\zero\; a}
+    \\
+    A \x B
+    & \pair{a}{b} \oplus \pair{da}{db} = \pair{a \oplus da}{b \oplus db}
+    & \pair{b}{y} \ominus \pair{a}{x} = \pair{b \ominus a}{y \ominus x}
+    %% & \zero\;\pair{a}{b} = \pair{\zero\; a}{\zero\; b}
+    \\
+    \Disc{A}
+    & a \oplus da = a
+    & b \ominus_{\Disc{A}} a = \zero_{A}\; a
+    %% & \zero_{\Disc{A}}\; a = \zero_{A}\; a
+    \\
+    A \to B
+    & (f \oplus df)\; x = f\; x \oplus df\; x \; (\zero\; x)
+    & (g \ominus f)\; x\; dx = g\; (x \oplus dx) \ominus f\; x
+    %% & (\zero\; f)\; x\; dx = f\; (x \oplus dx) \ominus f\; x
+  \end{array}
+  \)}
+\end{center}
+
+Although we define $\Changes{A}{a}$ as a subset of the elements $\Den{\GD{A}}$,
+we consider it to be a poset with the induced ordering.
+
+We will show the following:
+
+\begin{enumerate}
+\item $a \oplus_A \zero_A\; a = a$.
+
+\item $a \oplus_A da$ is monotone in $da$. That is: for any $a \in \Den{A}$ and
+  $da, db \in \Changes{A}{a}$, if $da \le db$ in $\Den{\GD{A}}$, then $a
+  \oplus_A da \le a \oplus_A db$ in $\Den{A}$.
+
+\item \todo{(it should be true, but do we need to show this?)} $b \ominus_A a$ is
+  monotone in $b$.
+\end{enumerate}
+
+\begin{lemma}[Zero changes do nothing]
+  $a \oplus_A \zero_A\; a = a$
+\end{lemma}
+
+%% NB. One might think we could also say something like: ``$\zero_A\; a$ is the
+%% least element of $\Changes{A}{a}$''. This might be true for $\zero$ as defined
+%% (although I'm not sure it is), but it is not true of zero changes in general:
+%% $\{5\}$ is a zero-change on $\{5\}$, but not the least element of
+%% $\Changes{\Set{{\N}}}{\{5\}}$; the empty set (also a zero-change) is smaller.
+
+\subsection{Previously}
+
 \[\begin{array}{rcl}
   \GD_2(\_) &=& \Den{\tbool}\\
   \GD_{A_1 + A_2}(\inj{i}{x}) &=& \setfor{\inj{i}{dx}}{dx \in \GD_{A_i}(x)}\\
@@ -772,15 +897,20 @@ Observe that:
   \GD_{A \to B}(f) &=&
   \{\ df \in \Disc{\Den{A}} \to \Den{\GD{A}} \to \Den{\GD{B}}\\
   %% &&|\quad df \in \Pi(a : \Den{A})\ \GD_A(a) \to \GD_B(f(a))\\
-  &&|\quad \forall(x \in \Den{A})~ \forall(da \in \GD_A(a))~ df(a)(da) \in \GD_B(f(a))\\
-  &&{\!\!\wedge}~~ (f \oplus_{A \to B} df) ~\textsf{is monotone} ~\}
+  &&|\quad \forall(a \in \Den{A})~ \forall(da \in \GD_A(a))~ df(a)(da) \in \GD_B(f(a))\\
+  &&{\!\!\wedge}~~
+  (a \mapsto f\; a \oplus_B df\; a\; (\zero_A\; a)) ~\textsf{is monotone in}~a\}
+  %% (f \oplus_{A \to B} df) ~\textsf{is monotone} ~\}
   %% \setfor{df \in \Disc{\Den{A}} \to \Den{\GD{A}} \to \Den{\GD{B}}}
   %%        {\forall(x \in \Den{A}, da \in \GD_A(a))~df(a)(da) \in \GD_B(f(a))}
 \end{array}\]
 
-\todo{FIXME: NOT WELL-FOUNDED. Because $\oplus_A : \Pi(a : A)~ \GD_A(a) \to A$
-  uses $\GD_{A}$ in its type, but $\GD_{A \to B}$ uses $\oplus_{A \to B}$. Can
-  probably be fixed by eta-expanding a little?}
+%% \todo{FIXME: NOT WELL-FOUNDED. Because $\oplus_A : \Pi(a : A)~ \GD_A(a) \to A$
+%%   uses $\GD_{A}$ in its type, but $\GD_{A \to B}$ uses $\oplus_{A \to B}$. Can
+%%   this be fixed by inlining?}
+
+
+\section{Metatheory}
 
 %% \todo{$\GD_{A \to B}$ IS WRONG: it doesn't ensure that $f \oplus df$ is still monotone!}
 
@@ -820,7 +950,7 @@ hold.
   or $\Delta(A, a) \in \ms{Poset}$ for $a \in \Den{A}$
 \item Show $\Delta_A(a)$ is an induced subposet of $\Den{A}$.
 \item Define $\oplus_A : a : \Disc{\Den{A}} \to \GD_A(a) \to \Den{A}$ and show it
-  is monotone in its second argument. This also involves defining \mb{0}.
+  is monotone in its second argument. This also involves defining \zero.
 \end{enumerate}
 
 \end{document}
