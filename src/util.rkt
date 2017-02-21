@@ -62,12 +62,12 @@
 ;;; Exceptions
 (provide exception)
 
-;;; FIXMEEEEE
+;; FIXME
+;; ^ what was this FIXME about?
+;; TODO: don't automatically add "exn:" prefix, maybe?
 (define-syntax-parser exception
-  [(_ name) #'(exception name exn:fail)]
-  [(_ name parent)
-   ;; TODO: these calls to format-id should be passing an lctx that's not #f.
-   ;; maybe #'name?
+  [(_ name-or-fields) #'(exception name-or-fields exn:fail)]
+  [(_ name:id parent:id)
    (with-syntax ([exn:name       (format-id #'name "exn:~a"      #'name)]
                  [make-exn:name  (format-id #'name "make-exn:~a" #'name)]
                  [raise-name     (format-id #'name "raise-~a"    #'name)])
@@ -99,6 +99,11 @@
     (datum->syntax ctx (syntax-e stx))))
 
 (define-syntax-parser enum-case
+  ;; If there are no contracts, we don't use define-struct/contract. This means
+  ;; in particular we are usable within typed/racket, although I don't know if
+  ;; that's a good idea.
+  [(enum-case enum-name:id (case-name:id field:id ...))
+   #'(struct case-name enum-name (field ...) #:transparent)]
   [(enum-case enum-name:id (case-name:id field:enum-case-field ...))
    ;; works around define-struct/contract being weird and pulling lexical info
    ;; about the parent struct from the type/super-type name pair. Adapted from
@@ -144,11 +149,11 @@
 ;;; List utilities
 (provide index-of length=? map? foldl1 foldr1 rev-append let*/list)
 
-(define (index-of v lst)
+(define (index-of v lst [eq equal?])
   (let loop ([i 0] [l lst])
     (match l
       ['() #f]
-      [(cons x xs) (if (equal? x v) i (loop (+ 1 i) xs))])))
+      [(cons x xs) (if (eq x v) i (loop (+ 1 i) xs))])))
 
 (define (length=? l . lsts)
   (define len (length l))
@@ -178,11 +183,15 @@
 (require racket/generator)
 (provide (all-from-out racket/generator))
 (provide stream-take stream-append-lazy streams-interleave
-         for/generator generate/stream generate/list for/generate/list)
+         for/generator generate/stream generate/list for/generate/list
+         let*/stream)
 
 (define (stream-take n s)
-  (for/list ([x (in-stream s)]
-             [_ (in-range n)])
+  ;; NB. order of clauses is important, otherwise we attempt to take one more
+  ;; element from `s` than is necessary, which can lead to infinite loops if `s`
+  ;; is unproductive after `n` elements.
+  (for/list ([_ (in-range n)]
+             [x (in-stream s)])
     x))
 
 (define (stream-append-lazy stream stream-thunk)
@@ -197,6 +206,10 @@
     [ss     (stream-append-lazy
              (stream-map stream-first ss)
              (lambda () (streams-interleave (map stream-rest ss))))]))
+
+(define-syntax-rule (let*/stream [clause ...] body ...)
+  (for*/stream [clause ... [x (let () body ...)]]
+    x))
 
 ;; TODO?: cut these down to just the ones I actually use.
 (define-syntax-rule (for/generator clauses body ...)
