@@ -1,13 +1,11 @@
+LATEXRUN := ./latexrun
+
 TEXS    := seminaive.tex
 # other things which affect compilation result
 DEPENDS := Makefile $(wildcard *.sty)
 
-PDFS   := $(TEXS:.tex=.pdf)
-
-LATEXRUN := ./latexrun
-
 .PHONY: all watch view clean FORCE
-all: $(PDFS)
+all: $(TEXS:.tex=.pdf)
 
 watch: all
 	@while inotifywait -e modify $(TEXS) $(DEPENDS); do make all; done
