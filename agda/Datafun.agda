@@ -155,6 +155,9 @@ drop2 o = cdr ∘ cdr
 ∪/⊆ : ∀{X Y Z} -> X ⊆ Y -> (Z ∪ X) ⊆ (Z ∪ Y)
 ∪/⊆ f _ = [ car , cdr ∘ f _ ]
 
+drop-mid : ∀{X Y Z} -> X ∪ Z ⊆ X ∪ Y ∪ Z
+drop-mid o = [ car , cdr ∘ cdr ]
+
 
 ---------- Terms, using a more strongly typed ABT-like abstraction ----------
 infixr 4 _∧_
@@ -185,7 +188,7 @@ data _⊃_ : Premise -> Type -> Set where
   ⊃app  : ∀{a b} -> ∙ (a :-> b) ∧ ∙ a ⊃ b
   -- boxes
   ⊃box  : ∀{a}   -> □ (∙ a) ⊃ (□ a)
-  ⊃letbox : ∀{a b} -> ∙ (□ a) ∧ (a is disc ~ ∙ b) ⊃ b
+  ⊃letbox : ∀{a b} -> ∙ (□ a) ∧ (a is disc ~ (∙ b)) ⊃ b
   -- semilattices
   ⊃eps : ∀{a} -> SL a -> nil ⊃ a
   ⊃vee : ∀{a} -> SL a -> ∙ a ∧ ∙ a ⊃ a
@@ -330,7 +333,7 @@ unbox : ∀{X a} -> X ⊢ □ a -> X ⊢ a
 unbox M = letbox! M (var-disc here)
 
 box-bind : ∀{X a b} -> a is disc ∪ X ⊢ b -> □ a is mono ∪ X ⊢ b
-box-bind M = letbox! v0 (rename (λ o → [ car , cdr ∘ cdr ]) M)
+box-bind M = letbox! v0 (rename drop-mid M)
 
 lam□ : ∀ {X a b} -> a is disc ∪ X ⊢ b -> X ⊢ (□ a) :-> b
 lam□ M = lam! (box-bind M)
@@ -457,13 +460,15 @@ appδ : ∀{X a b} -> X ⊢δ a :-> b -> X ⊢δ a -> Δ* X ⊢ Δ b
 appδ (M , dM) (N , dN) = app! (app! dM (static□ N)) dN
 
 whenδ : ∀ {X} a -> SL a -> X ⊢δ bool -> X ⊢δ a -> Δ* X ⊢ Δ a
-whenδ bool sl Mδ Nδ = whenδ-DEC bool tt tt Mδ Nδ
+whenδ bool = whenδ-DEC bool tt
 -- What would happen here if we lifted the requirement that `a` was decidable?
-whenδ (down a p) sl M N = whenδ-DEC (down a p) p tt M N
+whenδ (down a p) = whenδ-DEC (down a p) p
+-- Ideally we should put a guard using DEC? here, so that for decidable types we
+-- use whenδ-DEC, since that's more efficient (we think).
 whenδ (a :x b) (ap , bp) M (N , dN) =
   pair! (whenδ a ap M (proj! true N , proj! true dN))
         (whenδ b bp M (proj! false N , proj! false dN))
-whenδ (a :+ b) () M N
+whenδ (a :+ b) ()
 -- when M (N : a -> b) == \x. when M (N x)
 whenδ (a :-> b) sl (M , dM) (N , dN)
   = lamδ (whenδ b sl
@@ -471,7 +476,59 @@ whenδ (a :-> b) sl (M , dM) (N , dN)
             -- ugh, why do I need to write this. is there a better way?
             ( app! (weaken N) v0
             , appδ (weaken N , weakenδ dN) (v0 , var-mono (deriv here)) ))
-whenδ (□ a) () M N
+whenδ (□ a) ()
+
+zeroδ : ∀{X} a -> DEC a -> X ⊢ a -> X ⊢ Δ a
+zeroδ bool tt M = bool! false
+zeroδ (down a x) dec M = eps! tt
+zeroδ (a :x b) (adec , bdec) M = pair! (zeroδ a adec (proj! true M))
+                                       (zeroδ b bdec (proj! false M))
+zeroδ (a :+ b) (adec , bdec) M =
+  case! M (inj! true (zeroδ a adec v0))
+          (inj! false (zeroδ b bdec v0))
+zeroδ (a :-> b) () M
+zeroδ (□ a) dec M = letbox! M (box! (zeroδ a dec (var-disc here)))
+
+bigveeδ-DEC : ∀{X a p} c -> DEC c -> SL c
+            -> X ⊢δ down a p -> a is mono ∪ X ⊢δ c
+            -> Δ* X ⊢ Δ c
+bigveeδ-DEC {X}{a}{p} c dec sl (M , dM) (N , dN) =
+  let Δsl = ΔSL∈SL c sl
+  in vee! Δsl
+       (bigvee! Δsl (static M)
+         (let! (zeroδ a p v0) (rename {!Δ*cons!} dN)))
+       (bigvee! Δsl dM {!!})
+
+bigveeδ : ∀{X a p} c -> SL c
+        -> X ⊢δ down a p -> a is mono ∪ X ⊢δ c
+        -> Δ* X ⊢ Δ c
+bigveeδ bool = bigveeδ-DEC bool tt
+bigveeδ (down c p) = bigveeδ-DEC (down c p) p
+-- Ideally we should put a guard using DEC? here, so that for decidable types we
+-- use whenδ-DEC, since that's more efficient (we think).
+bigveeδ (c :x d) (csl , dsl) MdM (N , dN) =
+  pair! (bigveeδ c csl MdM (proj! true N , proj! true dN))
+        (bigveeδ d dsl MdM (proj! false N , proj! false dN))
+bigveeδ (c :+ d) ()
+-- d(V(x in M) N)
+-- == d(λy. V(x in M) N y)
+-- == λ y dy. d(V(x in M) N y)
+--
+-- d(N y) = dN y dy
+bigveeδ {X}{a}{p} (c :-> d) sl (M , dM) (N , dN) = lam□ (lam! (rename r O))
+  where
+    r : Δ* (c is mono ∪ X) ⊆ Δ c is mono ∪ c is disc ∪ Δ* X
+    r .disc (orig .mono (car eq)) = cdr (car eq)
+    r .disc (orig o (cdr y)) = cdr (cdr (orig o y))
+    r .mono (deriv (car eq)) = car eq
+    r o (deriv (cdr y)) = cdr (cdr (deriv y))
+    O : Δ* (c is mono ∪ X) ⊢ Δ d
+    O = bigveeδ d sl (weaken M , weakenδ dM)
+          ( app! (rename drop-mid N) (var-mono (cdr here))
+          , app! (app! (rename (Δ*/⊆ drop-mid) dN)
+                       (box! (var-disc (orig mono (cdr here)))))
+                 (var-mono (deriv (cdr here))))
+bigveeδ (□ c) ()
 
 
 ---------- δ itself ----------
@@ -510,7 +567,7 @@ whenδ (□ a) () M N
 δ (vee! {a} sl M N) = vee! (ΔSL∈SL a sl) (δ M) (δ N)
 δ (single! M) = eps! tt
 -- The whopper.
-δ (bigvee! {dec = dec} sl M N) = {!!}
+δ (bigvee! {b = b} sl M N) = bigveeδ b sl (δ* M) (δ* N)
 -- The purpose of this whole thing.
 δ (fix! {a} p M) = letbox! (static□ (fix! p M))
                      (fix! (ΔFIX∈FIX a p) (rename Δ*cons (δ M)))
