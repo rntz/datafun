@@ -13,13 +13,13 @@ pred (S x) = x
 -- but critically, not in its second!
 -- woah, how did that happen? induction broke our monotonicity guarantee!
 
+sub Z = \x. x
+sub (S x) = \y. pred (sub x y)
+
 -- **what's the type of natrec?**
 -- what justifies inductive datastructures in a monotone setting?
 -- does Poset have all initial algebras?
 -- (what the hell are subobject classifiers?)
-
-sub Z = \x. x
-sub (S x) = \y. pred (sub x y)
 
 -- what is this monotone in?
 -- if z <= s z, then it's monotone in n (and s?)
