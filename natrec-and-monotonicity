@@ -16,6 +16,11 @@ pred (S x) = x
 sub Z = \x. x
 sub (S x) = \y. pred (sub x y)
 
+sub = natrec (\x. x) (\f y. pred (f y))
+
+-- so sub x = (pred . pred . ... . pred), with `x` many `pred`s
+-- key point: id > pred > pred . pred > ... and so on.
+
 -- **what's the type of natrec?**
 -- what justifies inductive datastructures in a monotone setting?
 -- does Poset have all initial algebras?
