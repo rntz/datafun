@@ -1,0 +1,27 @@
+data Nat = Z | S Nat
+
+-- plus is monotone
+plus Z = \x. x
+plus (S x) = \y. S (plus x y)
+
+-- pred is monotone
+pred Z = Z
+pred (S x) = x
+
+-- (sub x y) = y - x
+-- sub is monotone in its first argument
+-- but critically, not in its second!
+-- woah, how did that happen? induction broke our monotonicity guarantee!
+
+-- **what's the type of natrec?**
+-- what justifies inductive datastructures in a monotone setting?
+-- does Poset have all initial algebras?
+-- (what the hell are subobject classifiers?)
+
+sub Z = \x. x
+sub (S x) = \y. pred (sub x y)
+
+-- what is this monotone in?
+-- if z <= s z, then it's monotone in n (and s?)
+-- if s z <= z, then it's antitone in n
+natrec : (z : a) (s : a -> a) (n : Nat) -> a
