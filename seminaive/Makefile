@@ -1,6 +1,6 @@
 LATEXRUN := ./latexrun
 
-TEXS    := seminaive.tex
+TEXS    := seminaive.tex fixderiv.tex
 # other things which affect compilation result
 DEPENDS := Makefile $(wildcard *.sty)
 

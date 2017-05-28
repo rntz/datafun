@@ -1,0 +1,227 @@
+\documentclass{article}
+\usepackage[a4paper,margin=0.8in]{geometry}
+
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{latexsym}
+\usepackage{url}
+\usepackage{hyperref}
+
+%% uses the AMS Euler math font.
+\usepackage{euler}
+
+%% for colors
+%% must be loaded before tikz in order for options to take effect :/
+\usepackage[dvipsnames]{xcolor}
+
+\newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\mb}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\mi}[1]{\ensuremath{\mathit{#1}}}
+\newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}
+
+\newcommand{\todo}[1]{\noindent{\color{red}#1}}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\fn}{\lambda}
+\newcommand{\binder}{.\,}
+\newcommand{\bind}[1]{{#1}\binder}
+\newcommand{\sub}[1]{\;\{{#1}\}}
+\newcommand{\Disc}[1]{\square{#1}}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{property}{Property}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{observation}{Observation}
+
+\newcommand{\fix}{\ms{fix}}
+\newcommand{\dv}{\delta}
+
+\title{$\dv(\fix\;f) = \fix\;(\dv{f} \; (\fix\;f))$
+  \\\vspace{0.5em}
+\large Static differentiation of monotone fixed points}
+\author{Michael Robert Arntzenius}
+\date{28 May 2017}
+
+\begin{document}
+
+\maketitle
+
+\section{Preliminaries}
+
+I use capital letters $A, B, P, Q$ to stand for posets. I write $P \to Q$ for
+the poset of \emph{monotone} maps from $P$ to $Q$. I write $\Disc{P}$ for the
+discrete poset on $P$, where $x \le y \iff x = y$.
+
+Fix a poset $P$ with a least element $\bot : P$ admitting a least-fixed-point
+operator $\fix : (P \to P) \to P$ such that $\fix\;f = f^i\;\bot$ for some $i :
+\N$.
+
+Let us consider a higher-order language $\mc{L}$ which can, among perhaps many
+other things, express monotone maps on $P$. Let's assume we have a theory of
+changes (\`a la ``A Theory of Changes for Higher Order Languages'' by Cai et al,
+PLDI 2014) for $\mc{L}$. We wish to extend $\mc{L}$ with $\fix$, and find a
+theory of changes for the resulting $\mc{L}_\fix$. In particular, we want to
+know how to compute derivatives of fixed points. The answer is in the title:
+\[ \dv(\fix\;f) = \fix\;(\dv{f} \; (\fix\;f)) \]
+
+The correctness criterion for $\dv$ on an expression $e$ with (without loss of
+generality) one free variable $x$ is:
+\begin{equation}
+  e \sub{x \mapsto x \oplus dx} = e \oplus \dv e
+  \label{eqn:correctness}
+\end{equation}
+
+This article gives a proof that this holds for the provided definition of
+$\dv(\fix\;f)$, namely that:
+\[ (\fix\;f) \sub{x \mapsto x \oplus dx} = \fix\;f \oplus \dv(\fix\;f) \]
+
+
+\section{Assumptions}
+
+I will assume $\Delta P = P$ and make use of this implicitly. This is a fairly
+strong assumption, but is true for seminaive Datalog (where $P$ is roughly
+``finite sets of facts'' or ``relations'') and in Datafun. I do not provide
+definitions of $\oplus$, $\ominus$ etc for $P$; I assume they are already a part
+of $\mc{L}$'s theory of changes. I will also assume the following lemmas:
+
+\begin{lemma}[Bottom changes]
+  $\bot : \Delta P$ is a valid change to any $x : P$, and $x \oplus \bot = x$.
+
+  \label{lem:bot-change}
+\end{lemma}
+
+NB. Not all values $dx : \Delta{A}$ are necessarily \emph{valid} changes to a
+given $x : A$. For example, $-3$ is an invalid change to the natural number $0$,
+because $0 + -3$ is not a natural number. (The Cai et al paper formalizes this
+point using a dependently-typed theory of changes. I will argue a bit more
+informally.)
+
+\begin{lemma}[Function changes]
+  If $df$ is a valid change to $f : A \to B$ and $dx$ is a valid change to $x :
+  A$, then:
+  \begin{enumerate}
+  \item $df\; x\; dx$ is a valid change to $f\;x$.
+  \item \( (f \oplus df)\;(x \oplus dx) = f\;x \oplus df\;x\;dx \)
+  \end{enumerate}
+  \label{lem:fun-change}
+\end{lemma}
+
+\begin{lemma}[Curiously specific]
+  For $f : P \to P$, we have $f \le f \oplus \dv f$.
+  \label{lem:curiously-specific}
+\end{lemma}
+
+The substance of this ``curiously specific'' lemma is that all derivatives of
+functions which we take fixed points of must be \emph{increasing} changes. In
+Datafun this is true universally: all changes are increases.
+
+
+\section{Proof of correctness}
+
+Consider some expression $f : P \to P$ in one free variable $x$, whose
+derivative is $\dv f : \Disc{P} \to \Delta P \to \Delta P$. We assume $\dv f$ is
+a correct derivative, and therefore by equation \ref{eqn:correctness}:
+\[
+  (\fix\;f)\sub{x\mapsto x \oplus dx}
+  = \fix\;(f\sub{x\mapsto x \oplus dx})
+  = \fix\;(f \oplus \dv f)
+\]
+
+Thus it suffices to show that:
+\[ \fix\;(f \oplus \dv f) = \fix\;f \oplus \dv(\fix\;f) \]
+
+To do this, we will first need one crucial lemma:
+
+\begin{lemma}[Crux]
+  For any $i : \N$ and any valid change $e : \Delta{P}$ to $\fix\;f$,
+  \[
+  (f\oplus\dv f)^i \;(\fix\;f \oplus e)
+  = \fix\;f \oplus (\dv f \; (\fix\;f))^i \;e
+  \]
+  \label{lem:crux}
+\end{lemma}
+
+I'd like to be able to give a plain-English explanation for the intuition behind
+this lemma, but I don't have one. If you do, email me at
+\href{mailto:daekharel@gmail.com}{daekharel@gmail.com}.
+
+\begin{proof}
+  Induct on $i$. When $i = 0$, this becomes trivial: $\fix\;f\oplus e = \fix\;f
+  \oplus e$. Otherwise, we'll assume it holds for some $i$ (and for any valid
+  $e$) and prove it for $i+1$:
+
+  \[\begin{array}{cll}
+   & (f \oplus \dv f)^{i+1} \; (\fix\;f \oplus e)\\
+  =& (f \oplus \dv f)^i \; ((f \oplus \dv f) \; (\fix\;f \oplus e))\\
+  =& (f \oplus \dv f)^i \; (f\;(\fix\;f) \oplus \dv f \;(\fix\;f) \;e)
+  & \text{by Lemma \ref{lem:fun-change}, since $\dv f$ and $e$ are valid}\\
+  =& (f \oplus \dv f)^i \; (\fix\;f \oplus \dv f \;(\fix\;f) \;e)
+  & \text{b/c $\fix\;f$ is a fixed point}\\
+  =& \fix\;f \oplus (\dv f \;(fix\;f))^i \;(\dv f \;(\fix\;f) \;e)
+  & \text{by IH, letting $dx = \dv f \;(\fix\;f) \;e$ (*)}\\
+  =& \fix\;f \oplus (\dv f\;(\fix\;f))^{i+1}\;e
+  \end{array}\]
+
+  Which is what we wished to show. (At the point marked (*), there is a slight
+  omission: by Lemma \ref{lem:fun-change} and the validity of $\dv f$ and $e$ we
+  know $\dv f\; (\fix\;f) \;e$ is a valid change to $f\;(\fix\;f) = \fix\;f$.
+  Thus we can apply our IH.)
+\end{proof}
+
+We'll also need a simple but cute lemma about monotone fixed points in general:
+
+\begin{lemma}[Jcreed's lemma]
+  For any $f : P \to P$, if $a \le \fix\;f$ and $\fix\;f = f^i\;\bot$ then
+  $f^i\;a = \fix\;f$.
+  \label{lem:jcreed}
+\end{lemma}
+\begin{proof}
+  Since $\bot \le a$, by monotonicity $\fix\;f = f^i\;\bot \le f^i\;a$. Since $a
+  \le \fix\;f$, by monotonicity $f^i\;a \le f^i\;(\fix\;f) = \fix\;f$. So by
+  antisymmetry $f^i\;a = \fix\;f$.
+\end{proof}
+
+Armed with these, we can prove our main result:
+
+\begin{theorem}[Correctness of $\dv(\fix\;f)$]
+  \[ \fix\;(f \oplus \dv f) = \fix\;f \oplus \dv(\fix\;f) \]
+\end{theorem}
+
+\begin{proof}
+  Pick $i$ such that:
+  \begin{eqnarray*}
+    \fix\;(f \oplus \delta f) &=& (f \oplus \dv f)^i \;\bot\\
+    \fix\;(\dv f \;(\fix\;f)) &=& (\dv f\;(\fix\;f))^i \;\bot
+  \end{eqnarray*}
+
+  We can pick such an $i$ because it's always the case that $\fix\;f = f^i \bot$
+  for some ``iteration count'' $i$; and since $f^i\;\bot$ is a fixed point, we
+  can increase $i$ without changing its value. So just take the larger of the
+  ``iteration counts'' for $f \oplus \dv f$ and $\dv f\;(\fix\;f)$.
+
+  Then:
+  \[
+  \begin{array}{cll}
+     & \fix\;(f \oplus \dv f)\\
+    =& (f \oplus \dv f)^i \; (\fix\;f)
+    & \text{by Jcreed's Lemma \ref{lem:jcreed} (*)}\\
+    =& (f \oplus \dv f)^i \; (\fix\;f \oplus \bot)
+    & \text{by Lemma \ref{lem:bot-change}}\\
+    =& \fix\;f \oplus (\dv f \;(\fix\;f))^i \;\bot
+    & \text{by the crucial Lemma \ref{lem:crux}, since $\dv f$ is valid and $\bot$ is always valid by Lemma \ref{lem:bot-change}}\\
+    =& \fix\;f \oplus \fix\;(\dv f\;(\fix\;f))
+  \end{array}
+  \]
+
+  Which is what we wished to show.
+
+  At the point (*), we need to show that $\fix\; f \le \fix\; (f \oplus \dv f)$.
+  This follows from monotonicity of $\fix$ applied to $f \le f \oplus \dv f$
+  (the curiously specific Lemma \ref{lem:curiously-specific}).
+
+\end{proof}
+
+\end{document}
