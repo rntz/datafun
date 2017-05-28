@@ -88,9 +88,8 @@ definitions of $\oplus$, $\ominus$ etc for $P$; I assume they are already a part
 of $\mc{L}$'s theory of changes. I will also assume the following lemmas:
 
 \begin{lemma}[Bottom changes]
-  $\bot : \Delta P$ is a valid change to any $x : P$, and $x \oplus \bot = x$.
-
   \label{lem:bot-change}
+  $\bot : \Delta P$ is a valid change to any $x : P$, and $x \oplus \bot = x$.
 \end{lemma}
 
 NB. Not all values $dx : \Delta{A}$ are necessarily \emph{valid} changes to a
@@ -100,18 +99,17 @@ point using a dependently-typed theory of changes. I will argue a bit more
 informally.)
 
 \begin{lemma}[Function changes]
+  \label{lem:fun-change}
   If $df$ is a valid change to $f : A \to B$ and $dx$ is a valid change to $x :
   A$, then:
   \begin{enumerate}
   \item $df\; x\; dx$ is a valid change to $f\;x$.
   \item \( (f \oplus df)\;(x \oplus dx) = f\;x \oplus df\;x\;dx \)
   \end{enumerate}
-  \label{lem:fun-change}
 \end{lemma}
 
-\begin{lemma}[Curiously specific]
+\begin{lemma}[Curiously specific]  \label{lem:curiously-specific}
   For $f : P \to P$, we have $f \le f \oplus \dv f$.
-  \label{lem:curiously-specific}
 \end{lemma}
 
 The substance of this ``curiously specific'' lemma is that all derivatives of
@@ -136,12 +134,12 @@ Thus it suffices to show that:
 To do this, we will first need one crucial lemma:
 
 \begin{lemma}[Crux]
+  \label{lem:crux}
   For any $i : \N$ and any valid change $e : \Delta{P}$ to $\fix\;f$,
   \[
   (f\oplus\dv f)^i \;(\fix\;f \oplus e)
   = \fix\;f \oplus (\dv f \; (\fix\;f))^i \;e
   \]
-  \label{lem:crux}
 \end{lemma}
 
 I'd like to be able to give a plain-English explanation for the intuition behind
@@ -173,10 +171,9 @@ this lemma, but I don't have one. If you do, email me at
 
 We'll also need a simple but cute lemma about monotone fixed points in general:
 
-\begin{lemma}[Jcreed's lemma]
+\begin{lemma}[Jcreed's lemma] \label{lem:jcreed}
   For any $f : P \to P$, if $a \le \fix\;f$ and $\fix\;f = f^i\;\bot$ then
   $f^i\;a = \fix\;f$.
-  \label{lem:jcreed}
 \end{lemma}
 \begin{proof}
   Since $\bot \le a$, by monotonicity $\fix\;f = f^i\;\bot \le f^i\;a$. Since $a
