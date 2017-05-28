@@ -9,8 +9,8 @@ pred Z = Z
 pred (S x) = x
 
 -- (sub x y) = y - x
--- sub is monotone in its first argument
--- but critically, not in its second!
+-- sub is monotone in its second argument
+-- but critically, not in its first!
 -- woah, how did that happen? induction broke our monotonicity guarantee!
 
 sub Z = \x. x
@@ -29,4 +29,17 @@ sub = natrec (\x. x) (\f y. pred (f y))
 -- what is this monotone in?
 -- if z <= s z, then it's monotone in n (and s?)
 -- if s z <= z, then it's antitone in n
-natrec : (z : a) (s : a -> a) (n : Nat) -> a
+natrec : (z : a) (s : a -> a) -> (n : []Nat) -> a
+
+-- conjecture: monotone in s and z, but not necessarily in n?
+-- what does this mean?
+
+type ChurchNat = forall a. (a -> a) -> a -> a
+
+natrec : Nat -> ChurchNat
+
+-- What is the "natural" order on ChurchNat?
+-- I dunno, what's the order on a forall-type?
+-- *aha*, finally an interesting question!
+-- how do we give semantics to forall in Poset?
+-- how do we give semantics to forall at all?
