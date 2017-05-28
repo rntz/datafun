@@ -142,44 +142,87 @@ a correct derivative, and therefore by equation \ref{eqn:correctness}:
 Thus it suffices to show that:
 \[ \fix\;(f \oplus \dv f) = \fix\;f \oplus \dv(\fix\;f) \]
 
-To do this, we will first need one crucial lemma:
+To do this, we will need the corollary of one crucial lemma:
 
-\begin{lemma}[Crux]
-  \label{lem:crux}
+
+\begin{lemma}[Iterated changes]
+  \label{lem:crux} If $df$ is a valid change to $f$ and $dx$ is a valid change to $x : P$, then for any $i : \N$,
+  \[
+  (f\oplus df)^i \;(x \oplus dx)
+  = f^i\;x \oplus
+  (df\;(f^{i-1}\;x) \circ df\;(f^{i-2}\;x) \circ ... \circ df\;x)\; dx
+  \]
+\end{lemma}
+
+\begin{proof}
+  Induct on $i$, applying Lemma \ref{lem:fun-change}. The base case is $x \oplus
+  dx = x \oplus dx$. The inductive case is:
+  \[
+  \begin{array}{cll}
+     & (f \oplus df)^{i+1}\; (x \oplus dx)\\
+    =& (f \oplus df)\; (f^i\;x \oplus
+    (df \;(f^{i-1}\;x) \circ ... \circ df\;x)\;dx)
+    & \text{by our inductive hypothesis}\\
+    =& f^{i+1}\;x \oplus df\; (f^i\;x) \;
+    ((df \;(f^{i-1}\;x) \circ ... \circ df\;x)\;dx)
+    & \text{by Lemma \ref{lem:fun-change}}\\
+    =& f^{i+1}\;x \oplus
+    (df\;(f^i\;x) \circ df\;(f^{i-1}\;x) \circ ... \circ df\;x)\;dx
+  \end{array}
+  \]
+\end{proof}
+
+\begin{corollary}
+  \label{cor:crux}
   For any $i : \N$ and any valid change $e : \Delta{P}$ to $\fix\;f$,
   \[
   (f\oplus\dv f)^i \;(\fix\;f \oplus e)
   = \fix\;f \oplus (\dv f \; (\fix\;f))^i \;e
   \]
-\end{lemma}
-
-I'd like to be able to give a plain-English explanation for the intuition behind
-this lemma, but I don't have one. If you do, email me at
-\href{mailto:daekharel@gmail.com}{daekharel@gmail.com}.
-
+\end{corollary}
 \begin{proof}
-  Induct on $i$. When $i = 0$, this becomes trivial: $\fix\;f\oplus e = \fix\;f
-  \oplus e$. Otherwise, we'll assume it holds for some $i$ (and for any valid
-  $e$) and prove it for $i+1$:
-
-  \[\begin{array}{cll}
-   & (f \oplus \dv f)^{i+1} \; (\fix\;f \oplus e)\\
-  =& (f \oplus \dv f)^i \; ((f \oplus \dv f) \; (\fix\;f \oplus e))\\
-  =& (f \oplus \dv f)^i \; (f\;(\fix\;f) \oplus \dv f \;(\fix\;f) \;e)
-  & \text{by Lemma \ref{lem:fun-change}, since $\dv f$ and $e$ are valid}\\
-  =& (f \oplus \dv f)^i \; (\fix\;f \oplus \dv f \;(\fix\;f) \;e)
-  & \text{b/c $\fix\;f$ is a fixed point}\\
-  =& \fix\;f \oplus (\dv f \;(fix\;f))^i \;(\dv f \;(\fix\;f) \;e)
-  & \text{by IH, letting $dx = \dv f \;(\fix\;f) \;e$ (*)}\\
-  =& \fix\;f \oplus (\dv f\;(\fix\;f))^{i+1}\;e
-  \end{array}\]
-
-  Which is what we wished to show. (At the point marked (*), there is a slight
-  omission: by Lemma \ref{lem:fun-change} and the validity of $\dv f$ and $e$ we
-  know $\dv f\; (\fix\;f) \;e$ is a valid change to $f\;(\fix\;f) = \fix\;f$.
-  Thus we can apply our IH.)
+  Apply Lemma \ref{lem:crux} with $x = \fix\;f$ and $dx = e$, noting that
+  $f^j\;(\fix\;f) = \fix\;f$ for any $j$.
 \end{proof}
 
+
+%% \begin{lemma}[Crux]
+%%   \label{lem:crux}
+%%   For any $i : \N$ and any valid change $e : \Delta{P}$ to $\fix\;f$,
+%%   \[
+%%   (f\oplus\dv f)^i \;(\fix\;f \oplus e)
+%%   = \fix\;f \oplus (\dv f \; (\fix\;f))^i \;e
+%%   \]
+%% \end{lemma}
+
+%% I'd like to be able to give a plain-English explanation for the intuition behind
+%% this lemma, but I don't have one. If you do, email me at
+%% \href{mailto:daekharel@gmail.com}{daekharel@gmail.com}.
+
+%% \begin{proof}
+%%   Induct on $i$. When $i = 0$, this becomes trivial: $\fix\;f\oplus e = \fix\;f
+%%   \oplus e$. Otherwise, we'll assume it holds for some $i$ (and for any valid
+%%   $e$) and prove it for $i+1$:
+
+%%   \[\begin{array}{cll}
+%%    & (f \oplus \dv f)^{i+1} \; (\fix\;f \oplus e)\\
+%%   =& (f \oplus \dv f)^i \; ((f \oplus \dv f) \; (\fix\;f \oplus e))\\
+%%   =& (f \oplus \dv f)^i \; (f\;(\fix\;f) \oplus \dv f \;(\fix\;f) \;e)
+%%   & \text{by Lemma \ref{lem:fun-change}, since $\dv f$ and $e$ are valid}\\
+%%   =& (f \oplus \dv f)^i \; (\fix\;f \oplus \dv f \;(\fix\;f) \;e)
+%%   & \text{b/c $\fix\;f$ is a fixed point}\\
+%%   =& \fix\;f \oplus (\dv f \;(fix\;f))^i \;(\dv f \;(\fix\;f) \;e)
+%%   & \text{by IH, letting $dx = \dv f \;(\fix\;f) \;e$ (*)}\\
+%%   =& \fix\;f \oplus (\dv f\;(\fix\;f))^{i+1}\;e
+%%   \end{array}\]
+
+%%   Which is what we wished to show. (At the point marked (*), there is a slight
+%%   omission: by Lemma \ref{lem:fun-change} and the validity of $\dv f$ and $e$ we
+%%   know $\dv f\; (\fix\;f) \;e$ is a valid change to $f\;(\fix\;f) = \fix\;f$.
+%%   Thus we can apply our IH.)
+%% \end{proof}
+
+
 We'll also need a simple but cute lemma about monotone fixed points in general:
 
 \begin{lemma}[Jcreed's lemma] \label{lem:jcreed}
@@ -219,7 +262,7 @@ Armed with these, we can prove our main result:
     =& (f \oplus \dv f)^i \; (\fix\;f \oplus \bot)
     & \text{by Lemma \ref{lem:bot-change}}\\
     =& \fix\;f \oplus (\dv f \;(\fix\;f))^i \;\bot
-    & \text{by the crucial Lemma \ref{lem:crux}, since $\dv f$ is valid and $\bot$ is always valid by Lemma \ref{lem:bot-change}}\\
+    & \text{by Corollary \ref{cor:crux}, since $\dv f$ is valid and $\bot$ is always valid by Lemma \ref{lem:bot-change}}\\
     =& \fix\;f \oplus \fix\;(\dv f\;(\fix\;f))
   \end{array}
   \]
