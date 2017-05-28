@@ -49,6 +49,17 @@
 
 \maketitle
 
+\begin{center}
+  \large
+  \textbf{Slogan:}\\
+  \it The derivative of a fixed point\\
+  is the fixed point of a derivative.
+  %% \it A function's fixed point's derivative\\
+  %% is the function's derivative's fixed point.
+  %% \it The derivative of a function's fixed point\\
+  %% is the fixed point of its derivative.
+\end{center}
+
 \section{Preliminaries}
 
 I use capital letters $A, B, P, Q$ to stand for posets. I write $P \to Q$ for
@@ -61,10 +72,10 @@ operator $\fix : (P \to P) \to P$ such that $\fix\;f = f^i\;\bot$ for some $i :
 
 Let us consider a higher-order language $\mc{L}$ which can, among perhaps many
 other things, express monotone maps on $P$. Let's assume we have a theory of
-changes (\`a la ``A Theory of Changes for Higher Order Languages'' by Cai et al,
-PLDI 2014) for $\mc{L}$. We wish to extend $\mc{L}$ with $\fix$, and find a
-theory of changes for the resulting $\mc{L}_\fix$. In particular, we want to
-know how to compute derivatives of fixed points. The answer is in the title:
+changes for $\mc{L}$ (\`a la ``A Theory of Changes for Higher Order Languages''
+by Cai et al, PLDI 2014). We wish to extend $\mc{L}$ with $\fix$, and find a
+theory of changes for the resulting $\mc{L}_\fix$. In particular, how do we
+compute derivatives of fixed points? The answer is in the title:
 \[ \dv(\fix\;f) = \fix\;(\dv{f} \; (\fix\;f)) \]
 
 The correctness criterion for $\dv$ on an expression $e$ with (without loss of
