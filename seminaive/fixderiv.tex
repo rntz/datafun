@@ -225,14 +225,14 @@ To do this, we will need the corollary of one crucial lemma:
 
 We'll also need a simple but cute lemma about monotone fixed points in general:
 
-\begin{lemma}[Jcreed's lemma] \label{lem:jcreed}
+\begin{lemma}[Jason Reed's lemma] \label{lem:jcreed}
   For any $f : P \to P$, if $a \le \fix\;f$ and $\fix\;f = f^i\;\bot$ then
   $f^i\;a = \fix\;f$.
 \end{lemma}
 \begin{proof}
   Since $\bot \le a$, by monotonicity $\fix\;f = f^i\;\bot \le f^i\;a$. Since $a
   \le \fix\;f$, by monotonicity $f^i\;a \le f^i\;(\fix\;f) = \fix\;f$. So by
-  antisymmetry $f^i\;a = \fix\;f$.
+  antisymmetry $f^i\;a = \fix\;f$.\footnote{This is a special-case of a more general lemma, which you can find at \url{https://mathoverflow.net/questions/269117/random-iteration-of-a-set-of-monotone-maps-until-fixed-point}.}
 \end{proof}
 
 Armed with these, we can prove our main result:
@@ -258,7 +258,7 @@ Armed with these, we can prove our main result:
   \begin{array}{cll}
      & \fix\;(f \oplus \dv f)\\
     =& (f \oplus \dv f)^i \; (\fix\;f)
-    & \text{by Jcreed's Lemma \ref{lem:jcreed} (*)}\\
+    & \text{by Reed's Lemma \ref{lem:jcreed} (*)}\\
     =& (f \oplus \dv f)^i \; (\fix\;f \oplus \bot)
     & \text{by Lemma \ref{lem:bot-change}}\\
     =& \fix\;f \oplus (\dv f \;(\fix\;f))^i \;\bot
