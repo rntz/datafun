@@ -262,7 +262,7 @@ Armed with these, we can prove our main result:
   \begin{array}{cll}
      & \fix\;(f \oplus \dv f)\\
     =& (f \oplus \dv f)^i \; (\fix\;f)
-    & \text{by Reed's Lemma \ref{lem:jcreed} (*)}\\
+    & \text{by Reed's Lemma \ref{lem:jcreed}, since $\fix\;f \le \fix\;(f \oplus \dv f)$ (*)}\\
     =& (f \oplus \dv f)^i \; (\fix\;f \oplus \bot)
     & \text{by Lemma \ref{lem:bot-change}}\\
     =& \fix\;f \oplus (\dv f \;(\fix\;f))^i \;\bot
@@ -273,9 +273,13 @@ Armed with these, we can prove our main result:
 
   Which is what we wished to show.
 
-  At the point (*), we need to show that $\fix\; f \le \fix\; (f \oplus \dv f)$.
-  This follows from monotonicity of $\fix$ applied to $f \le f \oplus \dv f$
-  (the curiously specific Lemma \ref{lem:curiously-specific}).
+  %% TODO: doesn't this show that we don't need \bot to be the zero-change, we
+  %% just need there to be *a* zero change? And we need it to be the least
+  %% change, so that fix : (\Delta P -> \Delta P) -> \Delta P can be computed in
+  %% terms of it.
+
+  At (*), $\fix\; f \le \fix\; (f \oplus \dv f)$ follows from monotonicity of
+  $\fix$ applied to $f \le f \oplus \dv f$ (Lemma \ref{lem:curiously-specific}).
 
 \end{proof}
 
