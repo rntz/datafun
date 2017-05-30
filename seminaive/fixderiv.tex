@@ -78,6 +78,9 @@ theory of changes for the resulting $\mc{L}_\fix$. In particular, how do we
 compute derivatives of fixed points? The answer is in the title:
 \[ \dv(\fix\;f) = \fix\;(\dv{f} \; (\fix\;f)) \]
 
+%% TODO: show derivation of this from d(fix f) = d(f (fix f)) and the function
+%% application rule.
+
 The correctness criterion for $\dv$ on an expression $e$ with (without loss of
 generality) one free variable $x$ is:
 \begin{equation}
@@ -87,7 +90,7 @@ generality) one free variable $x$ is:
 
 This article gives a proof that this holds for the provided definition of
 $\dv(\fix\;f)$, namely that:
-\[ (\fix\;f) \sub{x \mapsto x \oplus dx} = \fix\;f \oplus \dv(\fix\;f) \]
+\[ (\fix\;f) \sub{x \mapsto x \oplus dx} = \fix\;f \oplus \fix\;(\dv f \; (\fix\;f)) \]
 
 
 \section{Assumptions}
@@ -140,7 +143,7 @@ a correct derivative, and therefore by equation \ref{eqn:correctness}:
 \]
 
 Thus it suffices to show that:
-\[ \fix\;(f \oplus \dv f) = \fix\;f \oplus \dv(\fix\;f) \]
+\[ \fix\;(f \oplus \dv f) = \fix\;f \oplus \fix\;(\dv f\; (\fix\;f)) \]
 
 To do this, we will need the corollary of one crucial lemma:
 
@@ -238,7 +241,7 @@ We'll also need a simple but cute lemma about monotone fixed points in general:
 Armed with these, we can prove our main result:
 
 \begin{theorem}[Correctness of $\dv(\fix\;f)$]
-  \[ \fix\;(f \oplus \dv f) = \fix\;f \oplus \dv(\fix\;f) \]
+  \[ \fix\;(f \oplus \dv f) = \fix\;f \oplus \fix\;(\dv f\; (\fix\;f)) \]
 \end{theorem}
 
 \begin{proof}
