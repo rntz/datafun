@@ -1,16 +1,6 @@
 module Preorders where
 
-open import Level renaming (zero to lzero; suc to lsuc)
-
-import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_)
-
-open import Data.Bool
-open import Data.Empty
-open import Data.Product
-open import Data.Sum
-open import Data.Unit using (⊤; tt)
-open import Function using (id; _∘_)
+open import Prelude
 
 -- -- from https://agda.readthedocs.io/en/latest/language/instance-arguments.html
 -- -- They call this "it", I call it "auto"
@@ -36,12 +26,14 @@ record IsPreorder {A} (R : Rel A) : Set where
 open IsPreorder
 
 refl : ∀{A R} {{p : IsPreorder {A} R}} {x} -> R x x
+infixr 6 _•_
 _•_ : ∀{A R} {{p : IsPreorder {A} R}} {x y z} -> R x y -> R y z -> R x z
 refl {{p}} = reflexive p; _•_ {{p}} = transitive p
 
 Preorder : Set -> Set₁
 Preorder A = Σ (Rel A) IsPreorder
 
+infix 4 _≤_
 _≤_ : ∀ {a} {{_ : Preorder a}} -> Rel a
 isPreorder : ∀ {a} {{_ : Preorder a}} -> IsPreorder _≤_
 Monotone : ∀ {A B} {{_ : Preorder A}} {{_ : Preorder B}} (f : A -> B) -> Set
@@ -60,8 +52,9 @@ related (_ , R , _) = R
 infixr 1 _⇒_
 record _⇒_ (A B : Proset) : Set where
   constructor func
-  field call : carrier A -> carrier B
-  field isMonotone : ∀{x y} -> related A x y -> related B (call x) (call y)
+  infixr 9 _$_ _$≤_
+  field _$_ : carrier A -> carrier B
+  field _$≤_ : ∀{x y} -> related A x y -> related B (_$_ x) (_$_ y)
 
 open _⇒_
 
@@ -82,6 +75,23 @@ IsPreorder:Pointwise : ∀{A B}{R : Rel B} (P : IsPreorder R)
                      -> IsPreorder (Pointwise {A} R)
 reflexive (IsPreorder:Pointwise P) _ = refl
 transitive (IsPreorder:Pointwise P) aRb bRc x = aRb x • bRc x
+
+PointwiseΠ : ∀ A (B : A -> Set) (R : ∀ x -> Rel (B x)) -> Rel (∀ x -> B x)
+PointwiseΠ _ _ R f g = ∀ x → R x (f x) (g x)
+
+-- DEPENDENT FUNCTION TIME
+IsPreorder:PointwiseΠ : ∀ {A B R}
+                        -> (∀ x -> IsPreorder (R x))
+                        -> IsPreorder (PointwiseΠ A B R)
+reflexive (IsPreorder:PointwiseΠ P) x = reflexive (P x)
+transitive (IsPreorder:PointwiseΠ P) fRg gRh x = transitive (P x) (fRg x) (gRh x)
+
+Preorder:Π : ∀{A} {B : A -> Set}
+           -> (∀ x -> Preorder (B x)) -> Preorder (∀ x -> B x)
+Preorder:Π P = , IsPreorder:PointwiseΠ (proj₂ ∘ P)
+
+Proset:Π : ∀ {A : Set} (B : A -> Proset) -> Proset
+Proset:Π B = , Preorder:Π (proj₂ ∘ B)
 
 
 -- Products and sums
@@ -158,7 +168,7 @@ Proset:Bool : Proset
 
 Proset:× (_ , P) (_ , Q) = , Preorder:× P Q
 Proset:⊎ (_ , P) (_ , Q) = , Preorder:⊎ P Q
-Proset:⇒ P Q = (P ⇒ Q) , Preorder:On call (Preorder:-> (proj₂ Q))
+Proset:⇒ P Q = (P ⇒ Q) , Preorder:On _$_ (Preorder:-> (proj₂ Q))
 Proset:Iso (_ , P) = , Preorder:Iso P
 Proset:Bool = , Preorder:Bool
 

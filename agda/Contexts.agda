@@ -1,10 +1,7 @@
 module Contexts (Type : Set) where
 
-import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_; refl)
-open import Data.Empty
-open import Data.Sum
-open import Function using (id; _∘_)
+open import Prelude
+open import Data.Sum using ([_,_])
 
 
 ---------- Contexts ----------

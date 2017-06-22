@@ -1,14 +1,7 @@
 -- Interpreting a non-modal STLC into Posets.
 module STLC where
 
-open import Level renaming (zero to lzero; suc to lsuc)
-
-import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_; refl)
-open import Data.Bool
-open import Data.Empty
-open import Data.Product
-open import Data.Unit
+open import Prelude
 
 open import Preorders
 import Trees
@@ -18,10 +11,10 @@ open Trees using (TreeSet)
 ---------- Types and contexts ----------
 infixr 6 _⊃_
 data Type : Set where
-  bool : Type
-  setof : Type -> Type
-  disc : Type -> Type
   _⊃_ : Type -> Type -> Type
+  bool : Type
+  disc : Type -> Type
+  setof : Type -> Type
 
 open import Contexts (Type)
 
@@ -44,19 +37,61 @@ data _⊢_ (X : Cx) : Type -> Set where
   -- -- This unnecessarily requires us to be monotone. Hm.
   -- setBind : ∀{a b} (M : X ⊢ setof a) (N : a ∷ X ⊢ setof b) -> X ⊢ setof b
 
--- -- Renaming
--- rename : ∀{X Y a} -> X ⊆ Y -> X ⊢ a -> Y ⊢ a
--- rename f (var x) = var (f x)
--- rename {X} f (lam M) = lam (rename (∷/⊆ X f) M)
--- rename f (app M N) = app (rename f M) (rename f N)
+-- Renaming
+rename : ∀{X Y a} -> X ⊆ Y -> X ⊢ a -> Y ⊢ a
+rename f (var x) = var (f x)
+rename {X} f (lam M) = lam (rename (∷/⊆ X f) M)
+rename f (app M N) = app (rename f M) (rename f N)
 -- rename f (boolean x) = boolean x
 -- rename f (ifThen M N₁ N₂) = ifThen (rename f M) (rename f N₁) (rename f N₂)
 
 
--- Denotations
+---------- Denotations ----------
 ⟦_⟧ : Type -> Proset
-⟦ bool ⟧ = Proset:Bool
-⟦ setof t ⟧ = TreeSet (carrier ⟦ t ⟧)
-⟦ disc t ⟧ = Proset:Iso ⟦ t ⟧
 ⟦ s ⊃ t ⟧ = Proset:⇒ ⟦ s ⟧ ⟦ t ⟧
+⟦ bool ⟧ = Proset:Bool
+⟦ disc t ⟧ = Proset:Iso ⟦ t ⟧
+⟦ setof t ⟧ = TreeSet (carrier ⟦ t ⟧)
 
+record Vars (X : Cx) : Set where
+  constructor Var
+  field typeof : Type
+  field posn : typeof ∈ X
+open Vars
+
+at : ∀{X a} -> a ∈ X -> Vars X
+at p = record { typeof = _; posn = p }
+
+-- Vars : Cx -> Set
+-- Vars X = ∃ (λ a -> a ∈ X)
+
+-- typeof : ∀ {X} -> Vars X -> Type
+-- typeof = proj₁
+
+-- at : ∀{X a} -> a ∈ X -> Vars X
+-- at = ,_
+
+-- you can solve every problem with enough abstract nonsense
+⟦_⟧* : Cx -> Proset
+⟦ X ⟧* = Proset:Π {Vars X} (λ v → ⟦ typeof v ⟧)
+
+module _ where
+  open _⇒_
+
+  private
+    -- flipped function application
+    pipe : ∀{A : Set}{B : A -> Set} (x : A) (f : ∀ x -> B x) -> B x
+    pipe x f = f x
+
+    -- -- _$_ : A ⇒ B -> carrier A -> carrier B
+    -- infixr 1 _$_
+    -- _$_ = call
+
+  eval : ∀{X a} -> X ⊢ a -> ⟦ X ⟧* ⇒ ⟦ a ⟧
+  eval (var x) = func (pipe (at x)) (pipe (at x))
+  _$_  (eval (app M N)) env = (eval M $ env) $ eval N $ env
+  _$≤_ (eval {X} {a} (app M N)) {e1} {e2} e1≤e2 = {!!}
+    where foo : related {!!} (eval M $ e1) {!!}
+          foo = {!!}
+          bar = proj₂ (preorder ⟦ a ⟧)
+  eval (lam M) = {!!}

@@ -1,11 +1,6 @@
 module Trees where
 
-open import Level renaming (zero to lzero; suc to lsuc)
-
-import Relation.Binary.PropositionalEquality as Eq
-open Eq using (_≡_; refl)
-open import Data.Product
-open import Data.Unit
+open import Prelude
 
 open import Preorders
 

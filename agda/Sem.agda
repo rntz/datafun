@@ -1,12 +1,6 @@
 module Sem where
 
-open import Data.Bool
-open import Data.Empty
-open import Data.Unit using (⊤; tt)
-open import Level
-open import Relation.Binary.PropositionalEquality using (_≡_; refl)
-open import Data.Product
-open import Data.Sum
+open import Prelude
 
 -- from https://agda.readthedocs.io/en/latest/language/instance-arguments.html
 -- They call this "it", I call it "auto"
