@@ -1,15 +1,7 @@
-open import Data.Bool hiding (_∨_; _∧_)
-open import Data.Empty
-open import Data.Maybe hiding (map)
-open import Data.Maybe hiding (map)
-open import Data.Nat hiding (_≤_; _≤?_)
-open import Data.Product hiding (map)
+open import Prelude
 open import Data.Sum hiding (map) renaming (inj₁ to car; inj₂ to cdr)
-open import Data.Unit hiding (_≤_; _≤?_)
-open import Function using (id; _∘_; const)
-open import Relation.Binary.PropositionalEquality hiding ([_])
-open import Relation.Nullary using (¬_; Dec; yes; no)
-open import Level
+
+open Eq hiding ([_])
 
 -- ordering: disc < mono.
 -- anticipated future additions: disc < anti.

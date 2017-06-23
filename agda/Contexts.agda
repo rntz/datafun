@@ -26,7 +26,7 @@ infixr 4 _∷_
 _∷_ : Type -> Cx -> Cx
 a ∷ X = hyp a ∪ X
 
-pattern here = inj₁ refl
+pattern here = inj₁ Eq.refl
 pattern next x = inj₂ x
 
 

@@ -1,6 +1,7 @@
 module Preorders where
 
 open import Prelude
+import Data.Product
 
 -- -- from https://agda.readthedocs.io/en/latest/language/instance-arguments.html
 -- -- They call this "it", I call it "auto"
@@ -26,9 +27,8 @@ record IsPreorder {A} (R : Rel A) : Set where
 open IsPreorder
 
 refl : ∀{A R} {{p : IsPreorder {A} R}} {x} -> R x x
-infixr 6 _•_
-_•_ : ∀{A R} {{p : IsPreorder {A} R}} {x y z} -> R x y -> R y z -> R x z
-refl {{p}} = reflexive p; _•_ {{p}} = transitive p
+trans : ∀{A R} {{p : IsPreorder {A} R}} {x y z} -> R x y -> R y z -> R x z
+refl {{p}} = reflexive p; trans {{p}} = transitive p
 
 Preorder : Set -> Set₁
 Preorder A = Σ (Rel A) IsPreorder
@@ -52,9 +52,8 @@ related (_ , R , _) = R
 infixr 1 _⇒_
 record _⇒_ (A B : Proset) : Set where
   constructor func
-  infixr 9 _$_ _$≤_
-  field _$_ : carrier A -> carrier B
-  field _$≤_ : ∀{x y} -> related A x y -> related B (_$_ x) (_$_ y)
+  field call : carrier A -> carrier B
+  field mono : ∀{x y} -> related A x y -> related B (call x) (call y)
 
 open _⇒_
 
@@ -74,7 +73,7 @@ Pointwise R f g = ∀ x -> R (f x) (g x)
 IsPreorder:Pointwise : ∀{A B}{R : Rel B} (P : IsPreorder R)
                      -> IsPreorder (Pointwise {A} R)
 reflexive (IsPreorder:Pointwise P) _ = refl
-transitive (IsPreorder:Pointwise P) aRb bRc x = aRb x • bRc x
+transitive (IsPreorder:Pointwise P) aRb bRc x = trans (aRb x) (bRc x)
 
 PointwiseΠ : ∀ A (B : A -> Set) (R : ∀ x -> Rel (B x)) -> Rel (∀ x -> B x)
 PointwiseΠ _ _ R f g = ∀ x → R x (f x) (g x)
@@ -105,13 +104,13 @@ data _⊕_ {A B} (R : Rel A) (S : Rel B) : Rel (A ⊎ B) where
 module _ {A B R S} (P : IsPreorder R) (Q : IsPreorder S) where
   IsPreorder:⊗ : IsPreorder {A × B} (R ⊗ S)
   reflexive IsPreorder:⊗ = refl , refl
-  transitive IsPreorder:⊗ (aRb , xRy) (bRc , yRz) = aRb • bRc , xRy • yRz
+  transitive IsPreorder:⊗ = Data.Product.zip trans trans
 
   IsPreorder:⊕ : IsPreorder {A ⊎ B} (R ⊕ S)
   reflexive  IsPreorder:⊕ {inj₁ _} = rel₁ refl
   reflexive  IsPreorder:⊕ {inj₂ _} = rel₂ refl
-  transitive IsPreorder:⊕ (rel₁ x) (rel₁ y) = rel₁ (x • y)
-  transitive IsPreorder:⊕ (rel₂ x) (rel₂ y) = rel₂ (x • y)
+  transitive IsPreorder:⊕ (rel₁ x) (rel₁ y) = rel₁ (trans x y)
+  transitive IsPreorder:⊕ (rel₂ x) (rel₂ y) = rel₂ (trans x y)
 
 
 -- The "discrete" or "equivalence quotient" preorder.
@@ -121,7 +120,7 @@ Iso R x y = R x y × R y x
 
 IsPreorder:Iso : ∀{A R} (P : IsPreorder {A} R) -> IsPreorder (Iso R)
 reflexive (IsPreorder:Iso P) = refl , refl
-transitive (IsPreorder:Iso P) (aRb , bRa) (bRc , cRb) = aRb • bRc , cRb • bRa
+transitive (IsPreorder:Iso P) = Data.Product.zip trans (flip trans)
 
 
 -- The booleans, ordered false < true.
@@ -168,7 +167,7 @@ Proset:Bool : Proset
 
 Proset:× (_ , P) (_ , Q) = , Preorder:× P Q
 Proset:⊎ (_ , P) (_ , Q) = , Preorder:⊎ P Q
-Proset:⇒ P Q = (P ⇒ Q) , Preorder:On _$_ (Preorder:-> (proj₂ Q))
+Proset:⇒ P Q = (P ⇒ Q) , Preorder:On call (Preorder:-> (proj₂ Q))
 Proset:Iso (_ , P) = , Preorder:Iso P
 Proset:Bool = , Preorder:Bool
 
