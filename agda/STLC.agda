@@ -1,4 +1,4 @@
--- Interpreting a non-modal STLC into Posets.
+-- Interpreting a non-modal STLC into Preorder.
 module STLC where
 
 open import Prelude

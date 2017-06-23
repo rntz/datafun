@@ -21,11 +21,9 @@ mutual
   infixr 6 _:->_
   infixr 7 _:x_ _:+_
   data Type : Set where
-    bool  : Type
-    down  : (a : Type) -> DEC a -> Type
-    _:x_  : (a b : Type) -> Type
-    _:+_  : (a b : Type) -> Type
-    _:->_ : (a b : Type) -> Type
+    bool : Type
+    down : (a : Type) -> DEC a -> Type
+    _:x_ _:+_ _:->_ : (a b : Type) -> Type
     □ : (a : Type) -> Type
 
   -- Type predicates
