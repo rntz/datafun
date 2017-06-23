@@ -3,11 +3,6 @@ module Preorders where
 open import Prelude
 import Data.Product
 
--- -- from https://agda.readthedocs.io/en/latest/language/instance-arguments.html
--- -- They call this "it", I call it "auto"
--- auto : ∀ {i} {A : Set i} {{_ : A}} -> A
--- auto {{x}} = x
-
 Rel : Set -> Set₁
 Rel a = a -> a -> Set
 
@@ -18,79 +13,82 @@ Transitive {A} R = ∀{a b c} -> R a b -> R b c -> R a c
 Respects : ∀ {A B} (R : Rel A) (Q : Rel B) (f : A -> B) -> Set
 Respects R Q f = ∀ {a b} -> R a b -> Q (f a) (f b)
 
-record IsPreorder {A} (R : Rel A) : Set where
-  constructor IsPreorder:
-  field
-    reflexive : Reflexive R
-    transitive : Transitive R
+Preorder : ∀ A -> Rel A -> Set
+Preorder A R = Compose A R
 
-open IsPreorder
+-- -- This is just a lawless category. We call it Proset because
+-- -- (a) it's lawless;
+-- -- (b) we care only whether two objects are related, not about the nature of the
+-- --     maps between them;
+-- -- (c) thus, we don't expect functors to preserve identity and composition;
+-- --     they're just monotone maps.
+-- record Proset : Set1 where
+--   constructor Proset:
+--   field obj : Set
+--   field rel : (a b : obj) -> Set
+--   field preorder : Preorder obj rel
 
-refl : ∀{A R} {{p : IsPreorder {A} R}} {x} -> R x x
-trans : ∀{A R} {{p : IsPreorder {A} R}} {x y z} -> R x y -> R y z -> R x z
-refl {{p}} = reflexive p; trans {{p}} = transitive p
+-- open Proset public
+-- pattern proset {A} {R} P = Proset: A R P
 
-Preorder : Set -> Set₁
-Preorder A = Σ (Rel A) IsPreorder
+Proset : Set1
+Proset = Cat lzero lzero
 
-infix 4 _≤_
-_≤_ : ∀ {a} {{_ : Preorder a}} -> Rel a
-isPreorder : ∀ {a} {{_ : Preorder a}} -> IsPreorder _≤_
-Monotone : ∀ {A B} {{_ : Preorder A}} {{_ : Preorder B}} (f : A -> B) -> Set
-_≤_ {{P}} = proj₁ P; isPreorder {{P}} = proj₂ P; Monotone = Respects _≤_ _≤_
+obj : Proset -> Set
+rel : (P : Proset) -> Rel (obj P)
+preorder : (P : Proset) -> Preorder (obj P) (rel P)
+obj = Obj; rel = Hom; preorder = compose:Hom
 
-Proset : Set₁
-Proset = Σ Set Preorder
+pattern proset {A} {R} P = Cat: A R P
 
-carrier : Proset -> Set
-preorder : (P : Proset) -> Preorder (carrier P)
-carrier = proj₁; preorder = proj₂
+infix 3 _≤_
+_≤_ : {{P : Proset}} -> Rel (obj P)
+_≤_ = _⇨_
 
-related : (P : Proset) -> Rel (carrier P)
-related (_ , R , _) = R
-
+-- A functor, without the laws about preserving id and _•_.
 infixr 1 _⇒_
 record _⇒_ (A B : Proset) : Set where
   constructor func
-  field call : carrier A -> carrier B
-  field mono : ∀{x y} -> related A x y -> related B (call x) (call y)
+  field call : obj A -> obj B
+  field mono : ∀{x y} -> x ⇨ y -> call x ⇨ call y
 
 open _⇒_
 
-
--- Ordering by projection
-On : ∀{A B} (f : A -> B) (R : Rel B) -> Rel A
-On f R x y = R (f x) (f y)
+-- Prosets and ⇒ form a category.
+instance
+  compose:⇒ : Compose Proset _⇒_
+  identity compose:⇒ = func id id
+  compose compose:⇒ (func f f≤) (func g g≤) = func (f • g) (f≤ • g≤)
 
-IsPreorder:On : ∀{A B R} f -> IsPreorder R -> IsPreorder (On {A}{B} f R)
-IsPreorder:On _ (IsPreorder: r t) = IsPreorder: r t
+
+-- Ordering by projection, using Function._on_
+
+-- TODO: check this experimentally: If I made this `instance`, would (Preorder A
+-- R) get solved by instance search?
+preorder:on : ∀{A B R} f -> Preorder A R -> Preorder B (R on f)
+preorder:on _ (Compose: r t) = Compose: r t
 
 
 -- Pointwise preorder on functions
-Pointwise : ∀ {A B} (R : Rel B) -> Rel (A -> B)
+Pointwise : ∀{A B} -> Rel B -> Rel (A -> B)
 Pointwise R f g = ∀ x -> R (f x) (g x)
 
-IsPreorder:Pointwise : ∀{A B}{R : Rel B} (P : IsPreorder R)
-                     -> IsPreorder (Pointwise {A} R)
-reflexive (IsPreorder:Pointwise P) _ = refl
-transitive (IsPreorder:Pointwise P) aRb bRc x = trans (aRb x) (bRc x)
+preorder:Pointwise : ∀{A B R} -> Preorder B R -> Preorder (A -> B) (Pointwise R)
+identity (preorder:Pointwise P) _ = id
+compose  (preorder:Pointwise p) aRb bRc x = aRb x • bRc x
 
 PointwiseΠ : ∀ A (B : A -> Set) (R : ∀ x -> Rel (B x)) -> Rel (∀ x -> B x)
 PointwiseΠ _ _ R f g = ∀ x → R x (f x) (g x)
 
 -- DEPENDENT FUNCTION TIME
-IsPreorder:PointwiseΠ : ∀ {A B R}
-                        -> (∀ x -> IsPreorder (R x))
-                        -> IsPreorder (PointwiseΠ A B R)
-reflexive (IsPreorder:PointwiseΠ P) x = reflexive (P x)
-transitive (IsPreorder:PointwiseΠ P) fRg gRh x = transitive (P x) (fRg x) (gRh x)
+preorder:PointwiseΠ : ∀ {A B R}
+                    -> (∀ x -> Preorder (B x) (R x))
+                    -> Preorder (∀ x -> B x) (PointwiseΠ A B R)
+identity (preorder:PointwiseΠ P) x = identity (P x)
+compose  (preorder:PointwiseΠ P) fRg gRh x = compose (P x) (fRg x) (gRh x)
 
-Preorder:Π : ∀{A} {B : A -> Set}
-           -> (∀ x -> Preorder (B x)) -> Preorder (∀ x -> B x)
-Preorder:Π P = , IsPreorder:PointwiseΠ (proj₂ ∘ P)
-
-Proset:Π : ∀ {A : Set} (B : A -> Proset) -> Proset
-Proset:Π B = , Preorder:Π (proj₂ ∘ B)
+proset:Π : ∀ {A : Set} (B : A -> Proset) -> Proset
+proset:Π B = proset (preorder:PointwiseΠ (preorder ∘ B))
 
 
 -- Products and sums
@@ -101,16 +99,15 @@ data _⊕_ {A B} (R : Rel A) (S : Rel B) : Rel (A ⊎ B) where
   rel₁ : ∀{x y} -> R x y -> (R ⊕ S) (inj₁ x) (inj₁ y)
   rel₂ : ∀{x y} -> S x y -> (R ⊕ S) (inj₂ x) (inj₂ y)
 
-module _ {A B R S} (P : IsPreorder R) (Q : IsPreorder S) where
-  IsPreorder:⊗ : IsPreorder {A × B} (R ⊗ S)
-  reflexive IsPreorder:⊗ = refl , refl
-  transitive IsPreorder:⊗ = Data.Product.zip trans trans
+module _ {A B R S} (P : Preorder A R) (Q : Preorder B S) where
+  preorder:⊗ : Preorder (A × B) (R ⊗ S)
+  preorder:⊗ = Compose: (id , id) (Data.Product.zip _•_ _•_)
 
-  IsPreorder:⊕ : IsPreorder {A ⊎ B} (R ⊕ S)
-  reflexive  IsPreorder:⊕ {inj₁ _} = rel₁ refl
-  reflexive  IsPreorder:⊕ {inj₂ _} = rel₂ refl
-  transitive IsPreorder:⊕ (rel₁ x) (rel₁ y) = rel₁ (trans x y)
-  transitive IsPreorder:⊕ (rel₂ x) (rel₂ y) = rel₂ (trans x y)
+  preorder:⊕ : Preorder (A ⊎ B) (R ⊕ S)
+  identity preorder:⊕ {inj₁ _} = rel₁ id
+  identity preorder:⊕ {inj₂ _} = rel₂ id
+  compose  preorder:⊕ (rel₁ x) (rel₁ y) = rel₁ (x • y)
+  compose  preorder:⊕ (rel₂ x) (rel₂ y) = rel₂ (x • y)
 
 
 -- The "discrete" or "equivalence quotient" preorder.
@@ -118,9 +115,9 @@ module _ {A B R S} (P : IsPreorder R) (Q : IsPreorder S) where
 Iso : ∀{A} -> Rel A -> Rel A
 Iso R x y = R x y × R y x
 
-IsPreorder:Iso : ∀{A R} (P : IsPreorder {A} R) -> IsPreorder (Iso R)
-reflexive (IsPreorder:Iso P) = refl , refl
-transitive (IsPreorder:Iso P) = Data.Product.zip trans (flip trans)
+preorder:Iso : ∀{A R} (P : Preorder A R) -> Preorder A (Iso R)
+identity (preorder:Iso P) = id , id
+compose  (preorder:Iso P) = Data.Product.zip _•_ (flip _•_)
 
 
 -- The booleans, ordered false < true.
@@ -128,10 +125,10 @@ data bool≤ : Rel Bool where
   bool-refl : Reflexive bool≤
   false<true : bool≤ false true
 
-IsPreorder:bool≤ : IsPreorder bool≤
-reflexive IsPreorder:bool≤ = bool-refl
-transitive IsPreorder:bool≤ bool-refl y = y
-transitive IsPreorder:bool≤ false<true bool-refl = false<true
+preorder:bool≤ : Preorder Bool bool≤
+identity preorder:bool≤ = bool-refl
+compose  preorder:bool≤ bool-refl y = y
+compose  preorder:bool≤ false<true bool-refl = false<true
 
 
 -- Reflexive transitive closure of a relation
@@ -140,62 +137,18 @@ data Path {A} (R : Rel A) : Rel A where
   path-refl : Reflexive (Path R)
   path-trans : Transitive (Path R)
 
-IsPreorder:Path : ∀{A R} -> IsPreorder (Path {A} R)
-IsPreorder:Path = IsPreorder: path-refl path-trans
+preorder:Path : ∀{A R} -> Preorder A (Path R)
+preorder:Path = Compose: path-refl path-trans
 
 
 -- Boilerplate.
-Preorder:× : ∀{A B} -> Preorder A -> Preorder B -> Preorder (A × B)
-Preorder:⊎ : ∀{A B} -> Preorder A -> Preorder B -> Preorder (A ⊎ B)
-Preorder:-> : ∀{A B} (P : Preorder B) -> Preorder (A -> B)
-Preorder:On : ∀{A B} (f : A -> B) -> Preorder B -> Preorder A
-Preorder:Iso : ∀{A} (P : Preorder A) -> Preorder A
-Preorder:Path : ∀{A} -> Rel A -> Preorder A
-Preorder:Bool : Preorder Bool
 
-Preorder:× P Q = , IsPreorder:⊗ isPreorder isPreorder
-Preorder:⊎ P Q = , IsPreorder:⊕ isPreorder isPreorder
-Preorder:-> P = _ , IsPreorder:Pointwise isPreorder
-Preorder:On f P = , IsPreorder:On f isPreorder
-Preorder:Iso P = , IsPreorder:Iso isPreorder
-Preorder:Path R = , IsPreorder:Path {R = R}
-Preorder:Bool = , IsPreorder:bool≤
+proset:× proset:⊎ proset:⇒ : Proset -> Proset -> Proset
+proset:Iso : Proset -> Proset
+proset:Bool : Proset
 
-Proset:× Proset:⊎ Proset:⇒ : Proset -> Proset -> Proset
-Proset:Iso : Proset -> Proset
-Proset:Bool : Proset
-
-Proset:× (_ , P) (_ , Q) = , Preorder:× P Q
-Proset:⊎ (_ , P) (_ , Q) = , Preorder:⊎ P Q
-Proset:⇒ P Q = (P ⇒ Q) , Preorder:On call (Preorder:-> (proj₂ Q))
-Proset:Iso (_ , P) = , Preorder:Iso P
-Proset:Bool = , Preorder:Bool
-
-
--- ---------- Finite sets as a preorder ----------
-
--- -- This isn't actually "the" finite set preorder; rather, it is
--- -- preorder-isomorphic to it.
-
--- record Setof (A : Set) : Set where
-
--- Proset:Setof : Proset -> Proset
--- Proset:Setof = {!!}
-
-
--- ---------- Types and their denotations ----------
--- data Type : Set where
---   bool : Type
---   set : (a : Type) -> Type
---   _:->_ : (a b : Type) -> Type
---   _:x_ : (a b : Type) -> Type
---   _:+_ : (a b : Type) -> Type
---   □ : (a : Type) -> Type
-
--- [[_]] : Type -> Proset
--- [[ bool ]] = Proset:Bool
--- [[ set a ]] = Proset:Setof [[ a ]]
--- [[ a :-> b ]] = Proset:-> [[ a ]] [[ b ]]
--- [[ a :x b ]] = Proset:× [[ a ]] [[ b ]]
--- [[ a :+ b ]] = Proset:⊎ [[ a ]] [[ b ]]
--- [[ □ a ]] = Proset:Iso [[ a ]]
+proset:× (proset P) (proset Q) = proset (preorder:⊗ P Q)
+proset:⊎ (proset P) (proset Q) = proset (preorder:⊕ P Q)
+proset:⇒ P Q = proset {P ⇒ Q} (preorder:on call (preorder:Pointwise (preorder Q)))
+proset:Iso (proset P) = proset (preorder:Iso P)
+proset:Bool = proset preorder:bool≤
