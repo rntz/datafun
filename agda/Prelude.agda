@@ -19,4 +19,4 @@ module Eq where
 open Eq using (_≡_) public
 
 -- MY STUFF
-open import Composition public
+open import Cat public

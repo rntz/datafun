@@ -1,5 +1,5 @@
 -- Categories, without the laws, as a "typeclass".
-module Composition where
+module Cat where
 
 open import Level
 
