@@ -16,56 +16,29 @@ Respects R Q f = ∀ {a b} -> R a b -> Q (f a) (f b)
 Preorder : ∀ A -> Rel A -> Set
 Preorder A R = Compose A R
 
--- -- This is just a lawless category. We call it Proset because
--- -- (a) it's lawless;
--- -- (b) we care only whether two objects are related, not about the nature of the
--- --     maps between them;
--- -- (c) thus, we don't expect functors to preserve identity and composition;
--- --     they're just monotone maps.
--- record Proset : Set1 where
---   constructor Proset:
---   field obj : Set
---   field rel : (a b : obj) -> Set
---   field preorder : Preorder obj rel
-
--- open Proset public
--- pattern proset {A} {R} P = Proset: A R P
-
+-- A proset is just a name for a category regarded a certain way: we only care
+-- about whether (a ⇨ b) is inhabited, not about its structure. In particular,
+-- maps between prosets don't need to preserve id and •. (Although probably most
+-- of those we define do, if you use the right equivalence relation.)
 Proset : Set1
 Proset = Cat lzero lzero
-
-obj : Proset -> Set
-rel : (P : Proset) -> Rel (obj P)
-preorder : (P : Proset) -> Preorder (obj P) (rel P)
-obj = Obj; rel = Hom; preorder = compose:Hom
-
+cat:Proset = cat:Cat lzero lzero
 pattern proset {A} {R} P = Cat: A R P
+preorder : ∀ P -> Preorder _ (Hom P)
+preorder = isCat
 
-infix 3 _≤_
-_≤_ : {{P : Proset}} -> Rel (obj P)
-_≤_ = _⇨_
-
--- A functor, without the laws about preserving id and _•_.
-infixr 1 _⇒_
-record _⇒_ (A B : Proset) : Set where
-  constructor func
-  field call : obj A -> obj B
-  field mono : ∀{x y} -> x ⇨ y -> call x ⇨ call y
-
-open _⇒_
-
--- Prosets and ⇒ form a category.
-instance
-  compose:⇒ : Compose Proset _⇒_
-  identity compose:⇒ = func id id
-  compose compose:⇒ (func f f≤) (func g g≤) = func (f • g) (f≤ • g≤)
+-- For readability's sake, we define _⇒_ for monotone maps (i.e. functors) and
+-- _≤_ for preorder relations (i.e. Hom-sets).
+infix 3 _⇒_ _≤_
+_⇒_ : (a b : Proset) -> Set
+_≤_ : {{P : Proset}} -> Rel (Obj P)
+_⇒_ = Functor; _≤_ = _⇨_
 
 
 -- Ordering by projection, using Function._on_
 
--- TODO: check this experimentally: If I made this `instance`, would (Preorder A
--- R) get solved by instance search?
-preorder:on : ∀{A B R} f -> Preorder A R -> Preorder B (R on f)
+-- this looks like a contravariant mapping function. Hm...
+preorder:on : ∀{A B R} (f : B -> A) -> Preorder A R -> Preorder B (R on f)
 preorder:on _ (Compose: r t) = Compose: r t
 
 
@@ -142,13 +115,13 @@ preorder:Path = Compose: path-refl path-trans
 
 
 -- Boilerplate.
-
 proset:× proset:⊎ proset:⇒ : Proset -> Proset -> Proset
 proset:Iso : Proset -> Proset
 proset:Bool : Proset
 
 proset:× (proset P) (proset Q) = proset (preorder:⊗ P Q)
 proset:⊎ (proset P) (proset Q) = proset (preorder:⊕ P Q)
-proset:⇒ P Q = proset {P ⇒ Q} (preorder:on call (preorder:Pointwise (preorder Q)))
+proset:⇒ P Q =
+  proset {P ⇒ Q} (preorder:on ap (preorder:Pointwise (preorder Q)))
 proset:Iso (proset P) = proset (preorder:Iso P)
 proset:Bool = proset preorder:bool≤

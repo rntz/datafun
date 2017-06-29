@@ -20,3 +20,7 @@ open Eq using (_≡_) public
 
 -- MY STUFF
 open import Cat public
+
+-- The agda tutorial calls this `it`.
+auto : ∀{i}{A : Set i} {{x : A}} -> A
+auto {{x}} = x

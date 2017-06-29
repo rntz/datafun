@@ -5,8 +5,9 @@ open import Prelude
 -- maybe left/rite instead of car/cdr?
 open import Data.Sum using ([_,_]) renaming (inj₁ to left; inj₂ to rite)
 
-open import PreorderCat
+open import ProsetCat
 open import Preorders
+--open import Nonsense
 
 
 ---------- Tones, types ----------
@@ -16,6 +17,8 @@ data _≺_ : (o p : Tone) -> Set where
   tone-refl : ∀{o} -> o ≺ o
   tone-disc : ∀{o} -> disc ≺ o
 
+-- NB. ≺ forms a Preorder but I haven't needed an instance for it... yet.
+
 _≺?_ : ∀ o p -> Dec (o ≺ p)
 mono ≺? mono = yes tone-refl
 mono ≺? disc = no (λ ())
@@ -24,7 +27,7 @@ disc ≺? _ = yes tone-disc
 infixr 6 _⊃_
 data Type : Set where
   _⊃_ : (a b : Type) -> Type
-  □ : Type -> Type
+  ■ : Type -> Type
 
 
 ---------- Contexts / typing environments ----------
@@ -70,28 +73,32 @@ infix 3 _⊆_
 _⊆_ : (X Y : Cx) -> Set
 X ⊆ Y = ∀ o {a} -> X o a -> Y o a
 
-_•_ : ∀ {X Y Z} -> X ⊆ Y -> Y ⊆ Z -> X ⊆ Z
-f • g = ?
+instance
+  compose:Cx : Compose Cx _⊆_
+  identity compose:Cx _ = id
+  compose  compose:Cx X⊆Y Y⊆Z o = X⊆Y o • Y⊆Z o
 
 wipe/⊆ : ∀{X Y} -> X ⊆ Y -> wipe X ⊆ wipe Y
 wipe/⊆ f mono ()
 wipe/⊆ f disc = f disc
 
--- Is `wipe` a comonad in the category of contexts and renamings?
-wipe-extract : ∀{X} -> wipe X ⊆ X
-wipe-extract mono ()
-wipe-extract disc x = x
+record Comonadic {i j} (C : Cat i j) (□ : Functor C C) : Set (i ⊔ j) where
+  field dup : ∀{x} -> ap □ x ⇨ ap □ (ap □ x)
+  field extract : ∀{x} -> ap □ x ⇨ x
 
-wipe-dup : ∀{X} -> wipe X ⊆ wipe (wipe X)
-wipe-dup mono ()
-wipe-dup disc x = x
+-- Make □/dup/extract instance methods.
+open Comonadic {{...}}
 
-∪-inj₂
+instance
+  comonadic:wipe : Comonadic (cat compose:Cx) (functor wipe/⊆)
+  dup {{comonadic:wipe}} mono ()
+  dup {{comonadic:wipe}} disc x = x
+  extract {{comonadic:wipe}} mono ()
+  extract {{comonadic:wipe}} disc x = x
+
+-- ∪-inj₂ ?
 drop : ∀{X Y} -> Y ⊆ X ∪ Y
 drop o = rite
-
-drop2 : ∀{X Y Z} -> Z ⊆ X ∪ Y ∪ Z
-drop2 o = rite ∘ rite
 
 ∪/⊆ : ∀{X Y Z} -> X ⊆ Y -> (Z ∪ X) ⊆ (Z ∪ Y)
 ∪/⊆ f _ = [ left , rite ∘ f _ ]
