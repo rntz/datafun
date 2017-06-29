@@ -3,7 +3,8 @@ module STLC where
 
 open import Prelude
 
-open import PreorderCat
+open import Cartesian
+open import ProsetCat
 open import Preorders
 
 
@@ -35,8 +36,8 @@ rename f (proj d M) = proj d (rename f M)
 
 ---------- Denotations ----------
 ⟦_⟧ : Type -> Proset
-⟦ s ⊃ t ⟧ = Proset:⇒ ⟦ s ⟧ ⟦ t ⟧
-⟦ s * t ⟧ = Proset:× ⟦ s ⟧ ⟦ t ⟧
+⟦ s ⊃ t ⟧ = proset:⇒ ⟦ s ⟧ ⟦ t ⟧
+⟦ s * t ⟧ = proset:× ⟦ s ⟧ ⟦ t ⟧
 
 Vars : Cx -> Set
 Vars X = ∃ (λ a -> a ∈ X)
@@ -46,26 +47,24 @@ typeof = proj₁
 
 -- you can solve every problem with enough abstract nonsense
 ⟦_⟧* : Cx -> Proset
-⟦ X ⟧* = Proset:Π {Vars X} (λ v → ⟦ typeof v ⟧)
+⟦ X ⟧* = proset:Π {Vars X} (λ v → ⟦ typeof v ⟧)
 
 module _ where
-  open _⇒_
-
   open import Data.Sum using ([_,_])
 
   lookup : ∀{X a} -> a ∈ X -> ⟦ X ⟧* ⇒ ⟦ a ⟧
-  lookup p = func (λ f -> f (at p)) (λ f -> f (at p))
+  lookup p = functor {(λ f -> f (at p))} (λ f -> f (at p))
 
-  cons : ∀{X a} -> Proset:× ⟦ X ⟧* ⟦ a ⟧ ⇒ ⟦ a ∷ X ⟧*
-  call cons (env , x) (at here) = x
-  mono cons (env , x) (at here) = x
-  call cons (env , x) (at (next p)) = env (at p)
-  mono cons (env , x) (at (next p)) = env (at p)
+  cons : ∀{X a} -> proset:× ⟦ X ⟧* ⟦ a ⟧ ⇒ ⟦ a ∷ X ⟧*
+  ap  cons (env , x) (at here) = x
+  cov cons (env , x) (at here) = x
+  ap  cons (env , x) (at (next p)) = env (at p)
+  cov cons (env , x) (at (next p)) = env (at p)
 
   eval : ∀{X a} -> X ⊢ a -> ⟦ X ⟧* ⇒ ⟦ a ⟧
   eval (var x) = lookup x
-  eval (app M N) = ⟨ eval M , eval N ⟩ • Preorder-eval
-  eval (lam M) = Preorder-λ (cons • eval M)
+  eval (app M N) = ⟨ eval M , eval N ⟩ • apply
+  eval (lam M) = curry (cons • eval M)
   eval (pair M N) = ⟨ eval M , eval N ⟩
   eval (proj true  M) = eval M • π₁
   eval (proj false M) = eval M • π₂
