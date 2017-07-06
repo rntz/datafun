@@ -2,7 +2,6 @@
 module MTLC where
 
 open import Prelude
--- maybe left/rite instead of car/cdr?
 open import Data.Sum using () renaming (inj₁ to left; inj₂ to rite)
 
 open import Cartesian
@@ -28,14 +27,16 @@ disc ≺? _ = yes tone-disc
 infixr 6 _⊃_
 data Type : Set where
   _⊃_ : (a b : Type) -> Type
-  ■ : Type -> Type
+  □ : Type -> Type
+
+-- NB. Type is currently uninhabited.
 
 
 ---------- Contexts / typing environments ----------
 open import Contexts (Tone × Type)
 
 -- Singleton context.
-infix 5 _is_
+infix 7 _is_
 _is_ : Type -> Tone -> Cx
 a is o = hyp (o , a)
 
@@ -61,85 +62,62 @@ X at mono = X
 X at disc = wipe X
 
 
--- ---------- Contexts / typing environments ----------
--- Cx : Set₁
--- Cx = (o : Tone) (a : Type) -> Set
-
--- -- We have two possible choices of interpretation here:
--- --
--- -- 1. (X o a) means a variable with type `a` is in the context with tone `o`; or,
--- -- 2. (X o a) means a variable with type `a` is in the context with tone *at least* `o`.
--- --
--- -- That is to say, is X expected to preserve the subtone relationship? I.e, does this hold:
--- --
--- --     ∀(X : Cx) (a : Type) -> X a disc -> X a mono
--- --
--- -- Currently we choose interpretation (1), becuase it simplifies constructing
--- -- Cxs, but the other interpretation would simplify using them.
-
--- ∅ : Cx
--- ∅ o a = ⊥
-
--- -- Singleton context.
--- infix 5 _is_
--- data _is_ (a : Type) (o : Tone) : Cx where
---   eq : (a is o) o a
-
--- infixr 4 _∪_
--- _∪_ : (X Y : Cx) -> Cx
--- (X ∪ Y) o a = X o a ⊎ Y o a
-
--- wipe : (X : Cx) -> Cx
--- wipe X mono = λ _ -> ⊥
--- wipe X disc = X disc
-
--- infix 4 _at_
--- _at_ : Cx -> Tone -> Cx
--- X at mono = X
--- X at disc = wipe X
-
-
--- ---------- Context renamings ----------
--- infix 3 _⊆_
--- _⊆_ : (X Y : Cx) -> Set
--- X ⊆ Y = ∀ o {a} -> X o a -> Y o a
-
--- -- contexts under _⊆_ form a category. TODO: show it has sums (& products?)!
-
--- instance
---   compose:Cx : Compose Cx _⊆_
---   identity compose:Cx _ = id
---   compose  compose:Cx X⊆Y Y⊆Z o = X⊆Y o • Y⊆Z o
-
--- cat:Cx = cat compose:Cx
-
--- -- ∪ forms coproducts on Cx under renaming.
--- sums:Cx : Sums cat:Cx _∪_
--- in₁ {{sums:Cx}} _ = left
--- in₂ {{sums:Cx}} _ = rite
--- [_,_] {{sums:Cx}} f g _ = [ f _ , g _ ]
-
--- -- Wiping (throwing out all non-discrete variables) forms a comonad.
--- wipe/⊆ : ∀{X Y} -> X ⊆ Y -> wipe X ⊆ wipe Y
--- wipe/⊆ f mono ()
--- wipe/⊆ f disc = f disc
-
--- instance
---   comonadic:wipe : Comonadic (cat compose:Cx) (functor wipe/⊆)
---   dup {{comonadic:wipe}} mono ()
---   dup {{comonadic:wipe}} disc x = x
---   extract {{comonadic:wipe}} mono ()
---   extract {{comonadic:wipe}} disc x = x
-
--- -- ∪-inj₂ ?
--- drop : ∀{X Y} -> Y ⊆ X ∪ Y
--- drop o = rite
-
--- ∪/⊆ : ∀{X Y Z} -> X ⊆ Y -> (Z ∪ X) ⊆ (Z ∪ Y)
--- ∪/⊆ f _ = [ left , rite ∘ f _ ]
-
--- drop-mid : ∀{X Y Z} -> X ∪ Z ⊆ X ∪ Y ∪ Z
--- drop-mid o = [ left , rite ∘ rite ]
-
-
 ---------- ABTs ----------
+infix  3 _⊫_ _⊩_ _⊢_ _!_
+infixr 4 _∧_
+infix  5 _▷_
+
+data Premise : Set1 where
+  nil : Premise
+  _∧_ : (P Q : Premise) -> Premise
+  □ : (P : Premise) -> Premise
+  _▷_ : (X : Cx) (P : Premise) -> Premise
+  term : (a : Type) -> Premise
+
+-- Term formers
+data _⊫_ : Premise -> Type -> Set where
+  -- functions
+  ⊫lam : ∀{a b} -> a is mono ▷ term b ⊫ a ⊃ b
+  ⊫app : ∀{a b} -> term (a ⊃ b) ∧ term a ⊫ b
+  -- box
+  ⊫box    : ∀{a} -> □ (term a) ⊫ □ a
+  ⊫letbox : ∀{a b} -> term (□ a) ∧ (a is disc ▷ term b) ⊫ b
+
+data _⊩_ (X : Cx) : Premise -> Set1 where
+  tt   : X ⊩ nil
+  _,_  : ∀{P Q} (p : X ⊩ P) (q : X ⊩ Q) -> X ⊩ P ∧ Q
+  bind : ∀{P Y} (p : Y ∪ X ⊩ P) -> X ⊩ Y ▷ P
+  box  : ∀{P}   (p : wipe X ⊩ P) -> X ⊩ □ P
+  -- terms
+  _!_ : ∀{P a} (form : P ⊫ a) (args : X ⊩ P) -> X ⊩ term a
+  var : ∀{a} o (p : X (o , a)) -> X ⊩ term a
+
+_⊢_ : Cx -> Type -> Set1
+X ⊢ a = X ⊩ term a
+
+
+-- Pattern synonyms for terms.
+pattern lam! {a b} M        = ⊫lam {a}{b} ! bind M
+pattern app! {a b} M N      = ⊫app {a}{b} ! M , N
+pattern box! {a} M          = ⊫box {a} ! box M
+pattern letbox! {a b} M N   = ⊫letbox {a}{b} ! M , bind N
+
+
+-- Applying context renamings to terms
+rename : ∀{X Y P} -> X ⊆ Y -> X ⊩ P -> Y ⊩ P
+rename f tt = tt
+rename f (M , N) = rename f M , rename f N
+rename f (bind M) = bind (rename (∪/⊆ f) M)
+rename f (box M) = box (rename (map {{Wipe}} f) M)
+rename f (form ! M) = form ! rename f M
+rename f (var o p) = var o (f (o , _) p)
+
+rename-at : ∀{X Y} o {a} -> X ⊆ Y -> X at o ⊢ a -> Y at o ⊢ a
+rename-at mono f M = rename f M
+rename-at disc f M = rename (map f) M
+
+
+---------- TODO Substitutions ----------
+
+
+---------- TODO Denotations ----------

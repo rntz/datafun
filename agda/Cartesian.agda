@@ -2,7 +2,7 @@ module Cartesian where
 
 open import Prelude
 
--- Technically, none of this needs Cat. It just needs SetRel! Hm...
+-- Technically, none of this needs Cat. It just needs SetRel/Graph/Quiv! Hm...
 
 cat:× : ∀{i j} (A B : Cat i j) -> Cat i j
 Obj (cat:× A B) = Obj A × Obj B
@@ -14,6 +14,7 @@ compose (isCat (cat:× (cat A) (cat B))) (f₁ , f₂) (g₁ , g₂) = f₁ • 
 -- blow up and produce horrible error messages.
 record Products {i}{j} (C : Cat i j) (_⊗_ : Obj C -> Obj C -> Obj C) : Set (i ⊔ j) where
   constructor Products:
+  -- maybe these should be fst/snd rather than π₁/π₂?
   field π₁ : ∀{A B} -> A ⊗ B ⇨ A
   field π₂ : ∀{A B} -> A ⊗ B ⇨ B
   field ⟨_,_⟩ : ∀{A B C} -> A ⇨ B -> A ⇨ C -> A ⇨ B ⊗ C
@@ -23,6 +24,7 @@ record Products {i}{j} (C : Cat i j) (_⊗_ : Obj C -> Obj C -> Obj C) : Set (i 
 
 record Sums {i}{j} (C : Cat i j) (_⊕_ : Obj C -> Obj C -> Obj C) : Set (i ⊔ j) where
   constructor Sums:
+  -- maybe these should be left/rite rather than in₁/in₂?
   field in₁ : ∀{A B} -> A ⇨ A ⊕ B
   field in₂ : ∀{A B} -> B ⇨ A ⊕ B
   field [_,_] : ∀{A B C} -> A ⇨ C -> B ⇨ C -> A ⊕ B ⇨ C

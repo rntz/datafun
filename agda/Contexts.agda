@@ -49,8 +49,9 @@ instance
   in₂ {{sums:Cx}} _ = inj₂
   [_,_] {{sums:Cx}} f g _ = [ f _ , g _ ]
 
-∪/⊆ : ∀ X L {R} -> L ⊆ R -> X ∪ L ⊆ X ∪ R
-∪/⊆ _ _ f = [ in₁ , f • in₂ ]
+-- TODO: does this really need X and L to be explicit arguments?
+∪/⊆ : ∀ {X L R} -> L ⊆ R -> X ∪ L ⊆ X ∪ R
+∪/⊆ f = [ in₁ , f • in₂ ]
 
 ∷/⊆ : ∀ L {R a} -> L ⊆ R -> a ∷ L ⊆ a ∷ R
-∷/⊆ _ = ∪/⊆ _ _
+∷/⊆ _ = ∪/⊆
