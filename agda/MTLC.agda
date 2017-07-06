@@ -3,11 +3,12 @@ module MTLC where
 
 open import Prelude
 -- maybe left/rite instead of car/cdr?
-open import Data.Sum using ([_,_]) renaming (inj₁ to left; inj₂ to rite)
+open import Data.Sum using () renaming (inj₁ to left; inj₂ to rite)
 
-open import ProsetCat
+open import Cartesian
+open import Monads
 open import Preorders
---open import Nonsense
+open import ProsetCat
 
 
 ---------- Tones, types ----------
@@ -31,36 +32,28 @@ data Type : Set where
 
 
 ---------- Contexts / typing environments ----------
-Cx : Set₁
-Cx = (o : Tone) (a : Type) -> Set
-
--- We have two possible choices of interpretation here:
---
--- 1. (X o a) means a variable with type `a` is in the context with tone `o`; or,
--- 2. (X o a) means a variable with type `a` is in the context with tone *at least* `o`.
---
--- That is to say, is X expected to preserve the subtone relationship? I.e, does this hold:
---
---     ∀(X : Cx) (a : Type) -> X a disc -> X a mono
---
--- Currently we choose interpretation (1), becuase it simplifies constructing
--- Cxs, but the other interpretation would simplify using them.
-
-∅ : Cx
-∅ o a = ⊥
+open import Contexts (Tone × Type)
 
 -- Singleton context.
 infix 5 _is_
-data _is_ (a : Type) (o : Tone) : Cx where
-  eq : (a is o) o a
+_is_ : Type -> Tone -> Cx
+a is o = hyp (o , a)
 
-infixr 4 _∪_
-_∪_ : (X Y : Cx) -> Cx
-(X ∪ Y) o a = X o a ⊎ Y o a
+-- Wipe is a comonad on contexts that removes all non-discrete variables.
+instance
+  Wipe : cat:Cx ⇨ cat:Cx
+  ap Wipe X (mono , _) = ⊥
+  ap Wipe X (disc , a) = X (disc , a)
+  cov Wipe f (mono , _) ()
+  cov Wipe f (disc , a) = f (disc , a)
 
-wipe : (X : Cx) -> Cx
-wipe X mono = λ _ -> ⊥
-wipe X disc = X disc
+  comonadic:Wipe : Comonadic _ Wipe
+  dup {{comonadic:Wipe}} (mono , _) ()
+  dup {{comonadic:Wipe}} (disc , a) = id
+  extract {{comonadic:Wipe}} (mono , _) ()
+  extract {{comonadic:Wipe}} (disc , a) = id
+
+wipe = ap Wipe
 
 infix 4 _at_
 _at_ : Cx -> Tone -> Cx
@@ -68,43 +61,85 @@ X at mono = X
 X at disc = wipe X
 
 
----------- Context renamings ----------
-infix 3 _⊆_
-_⊆_ : (X Y : Cx) -> Set
-X ⊆ Y = ∀ o {a} -> X o a -> Y o a
+-- ---------- Contexts / typing environments ----------
+-- Cx : Set₁
+-- Cx = (o : Tone) (a : Type) -> Set
 
-instance
-  compose:Cx : Compose Cx _⊆_
-  identity compose:Cx _ = id
-  compose  compose:Cx X⊆Y Y⊆Z o = X⊆Y o • Y⊆Z o
+-- -- We have two possible choices of interpretation here:
+-- --
+-- -- 1. (X o a) means a variable with type `a` is in the context with tone `o`; or,
+-- -- 2. (X o a) means a variable with type `a` is in the context with tone *at least* `o`.
+-- --
+-- -- That is to say, is X expected to preserve the subtone relationship? I.e, does this hold:
+-- --
+-- --     ∀(X : Cx) (a : Type) -> X a disc -> X a mono
+-- --
+-- -- Currently we choose interpretation (1), becuase it simplifies constructing
+-- -- Cxs, but the other interpretation would simplify using them.
 
-wipe/⊆ : ∀{X Y} -> X ⊆ Y -> wipe X ⊆ wipe Y
-wipe/⊆ f mono ()
-wipe/⊆ f disc = f disc
+-- ∅ : Cx
+-- ∅ o a = ⊥
 
-record Comonadic {i j} (C : Cat i j) (□ : Functor C C) : Set (i ⊔ j) where
-  field dup : ∀{x} -> ap □ x ⇨ ap □ (ap □ x)
-  field extract : ∀{x} -> ap □ x ⇨ x
+-- -- Singleton context.
+-- infix 5 _is_
+-- data _is_ (a : Type) (o : Tone) : Cx where
+--   eq : (a is o) o a
 
--- Make □/dup/extract instance methods.
-open Comonadic {{...}}
+-- infixr 4 _∪_
+-- _∪_ : (X Y : Cx) -> Cx
+-- (X ∪ Y) o a = X o a ⊎ Y o a
 
-instance
-  comonadic:wipe : Comonadic (cat compose:Cx) (functor wipe/⊆)
-  dup {{comonadic:wipe}} mono ()
-  dup {{comonadic:wipe}} disc x = x
-  extract {{comonadic:wipe}} mono ()
-  extract {{comonadic:wipe}} disc x = x
+-- wipe : (X : Cx) -> Cx
+-- wipe X mono = λ _ -> ⊥
+-- wipe X disc = X disc
 
--- ∪-inj₂ ?
-drop : ∀{X Y} -> Y ⊆ X ∪ Y
-drop o = rite
+-- infix 4 _at_
+-- _at_ : Cx -> Tone -> Cx
+-- X at mono = X
+-- X at disc = wipe X
 
-∪/⊆ : ∀{X Y Z} -> X ⊆ Y -> (Z ∪ X) ⊆ (Z ∪ Y)
-∪/⊆ f _ = [ left , rite ∘ f _ ]
+
+-- ---------- Context renamings ----------
+-- infix 3 _⊆_
+-- _⊆_ : (X Y : Cx) -> Set
+-- X ⊆ Y = ∀ o {a} -> X o a -> Y o a
 
-drop-mid : ∀{X Y Z} -> X ∪ Z ⊆ X ∪ Y ∪ Z
-drop-mid o = [ left , rite ∘ rite ]
+-- -- contexts under _⊆_ form a category. TODO: show it has sums (& products?)!
+
+-- instance
+--   compose:Cx : Compose Cx _⊆_
+--   identity compose:Cx _ = id
+--   compose  compose:Cx X⊆Y Y⊆Z o = X⊆Y o • Y⊆Z o
+
+-- cat:Cx = cat compose:Cx
+
+-- -- ∪ forms coproducts on Cx under renaming.
+-- sums:Cx : Sums cat:Cx _∪_
+-- in₁ {{sums:Cx}} _ = left
+-- in₂ {{sums:Cx}} _ = rite
+-- [_,_] {{sums:Cx}} f g _ = [ f _ , g _ ]
+
+-- -- Wiping (throwing out all non-discrete variables) forms a comonad.
+-- wipe/⊆ : ∀{X Y} -> X ⊆ Y -> wipe X ⊆ wipe Y
+-- wipe/⊆ f mono ()
+-- wipe/⊆ f disc = f disc
+
+-- instance
+--   comonadic:wipe : Comonadic (cat compose:Cx) (functor wipe/⊆)
+--   dup {{comonadic:wipe}} mono ()
+--   dup {{comonadic:wipe}} disc x = x
+--   extract {{comonadic:wipe}} mono ()
+--   extract {{comonadic:wipe}} disc x = x
+
+-- -- ∪-inj₂ ?
+-- drop : ∀{X Y} -> Y ⊆ X ∪ Y
+-- drop o = rite
+
+-- ∪/⊆ : ∀{X Y Z} -> X ⊆ Y -> (Z ∪ X) ⊆ (Z ∪ Y)
+-- ∪/⊆ f _ = [ left , rite ∘ f _ ]
+
+-- drop-mid : ∀{X Y Z} -> X ∪ Z ⊆ X ∪ Y ∪ Z
+-- drop-mid o = [ left , rite ∘ rite ]
 
 
 ---------- ABTs ----------

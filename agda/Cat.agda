@@ -57,15 +57,18 @@ cat:Set : ∀ i -> Cat _ _
 cat:Set i = cat (compose:-> {i})
 
 -- The identity functor... just in case someone needs it?
-IdentityFunctor : ∀{i j} A -> Functor {i}{j} A A
-IdentityFunctor _ = functor id
+IdentityFunctor : ∀{i j} C -> Functor {i}{j} C C
+IdentityFunctor C = functor id
 
 -- Categories & functors form a category.
-open import Function using (_∘_)
 instance
   compose:Functor : ∀{i j} -> Compose (Cat i j) Functor
   identity compose:Functor = functor id
   compose compose:Functor (functor x) (functor y) = functor (x • y)
 
-  cat:Cat : ∀ i j -> Cat (suc (i ⊔ j)) (i ⊔ j)
-  cat:Cat i j = cat (compose:Functor {i}{j})
+cat:Cat : ∀ i j -> Cat (suc (i ⊔ j)) (i ⊔ j)
+cat:Cat i j = cat (compose:Functor {i}{j})
+
+-- Allows using (C ⇨ D) syntax for functors between categories with the same
+-- Level indices.
+instance auto-cat:Cat : ∀{i j} -> Cat _ _; auto-cat:Cat {i}{j} = cat:Cat i j

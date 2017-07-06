@@ -29,10 +29,8 @@ preorder = isCat
 
 -- For readability's sake, we define _⇒_ for monotone maps (i.e. functors) and
 -- _≤_ for preorder relations (i.e. Hom-sets).
-infix 3 _⇒_ _≤_
-_⇒_ : (a b : Proset) -> Set
-_≤_ : {{P : Proset}} -> Rel (Obj P)
-_⇒_ = Functor; _≤_ = _⇨_
+infix 3 _⇒_; _⇒_ : (a b : Proset) -> Set; _⇒_ = Functor
+infix 3 _≤_; _≤_ : {{P : Proset}} -> Rel (Obj P); _≤_ = _⇨_
 
 
 -- Ordering by projection, using Function._on_
@@ -49,6 +47,19 @@ Pointwise R f g = ∀ x -> R (f x) (g x)
 preorder:Pointwise : ∀{A B R} -> Preorder B R -> Preorder (A -> B) (Pointwise R)
 identity (preorder:Pointwise P) _ = id
 compose  (preorder:Pointwise p) aRb bRc x = aRb x • bRc x
+
+-- record Denotation {i j} (A : Set i) (B : Set j) : Set (i ⊔ j) where
+--   field denotation : A -> B
+
+-- open Denotation public
+-- ⟦_⟧ : ∀ {i j A B} {{D : Denotation {i} {j} A B}} -> A -> B
+-- ⟦_⟧ {{D}} = denotation D
+
+proset:Pointwise : Set -> Proset -> Proset
+Obj (proset:Pointwise A B) = A -> Obj B
+Hom (proset:Pointwise A B) = Pointwise (Hom B)
+identity (isCat (proset:Pointwise A (cat B))) _ = id
+compose (isCat (proset:Pointwise A (cat B))) aRb bRc x = aRb x • bRc x
 
 PointwiseΠ : ∀ A (B : A -> Set) (R : ∀ x -> Rel (B x)) -> Rel (∀ x -> B x)
 PointwiseΠ _ _ R f g = ∀ x → R x (f x) (g x)

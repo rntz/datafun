@@ -1,7 +1,7 @@
 module Contexts (Type : Set) where
 
 open import Prelude
-open import Data.Sum using ([_,_])
+open import Cartesian
 
 
 ---------- Contexts ----------
@@ -11,9 +11,9 @@ Cx = Type -> Set
 ∅ : Cx
 ∅ _ = ⊥
 
-infix 4 _∈_
-_∈_ : Type -> Cx -> Set
-a ∈ X = X a
+-- infix 4 _∈_
+-- _∈_ : Type -> Cx -> Set
+-- a ∈ X = X a
 
 hyp : Type -> Cx
 hyp = _≡_
@@ -33,13 +33,24 @@ pattern next x = inj₂ x
 ---------- Context renamings ----------
 infix 1 _⊆_
 _⊆_ : Cx -> Cx -> Set
-X ⊆ Y = ∀ {a} -> X a -> Y a
+X ⊆ Y = ∀ a -> X a -> Y a
+
+instance
+  compose:Cx : Compose Cx _⊆_
+  identity compose:Cx _ = id
+  compose  compose:Cx X⊆Y Y⊆Z o = X⊆Y o • Y⊆Z o
+
+cat:Cx = cat compose:Cx
+
+-- ∪ forms coproducts on Cx under renaming.
+instance
+  sums:Cx : Sums cat:Cx _∪_
+  in₁ {{sums:Cx}} _ = inj₁
+  in₂ {{sums:Cx}} _ = inj₂
+  [_,_] {{sums:Cx}} f g _ = [ f _ , g _ ]
 
 ∪/⊆ : ∀ X L {R} -> L ⊆ R -> X ∪ L ⊆ X ∪ R
-∪/⊆ _ _ f = Data.Sum.map id f
+∪/⊆ _ _ f = [ in₁ , f • in₂ ]
 
 ∷/⊆ : ∀ L {R a} -> L ⊆ R -> a ∷ L ⊆ a ∷ R
 ∷/⊆ _ = ∪/⊆ _ _
-
-dedup : ∀ X -> X ∪ X ⊆ X
-dedup _ = [ id , id ]

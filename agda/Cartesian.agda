@@ -4,6 +4,12 @@ open import Prelude
 
 -- Technically, none of this needs Cat. It just needs SetRel! Hm...
 
+cat:× : ∀{i j} (A B : Cat i j) -> Cat i j
+Obj (cat:× A B) = Obj A × Obj B
+Hom (cat:× A B) (a₁ , b₁) (a₂ , b₂) = (a₁ ⇨ a₂) × (b₁ ⇨ b₂)
+identity (isCat (cat:× (cat A) (cat B))) = id , id
+compose (isCat (cat:× (cat A) (cat B))) (f₁ , f₂) (g₁ , g₂) = f₁ • g₁ , f₂ • g₂
+
 -- TODO: check that instance search for these things will actually work and not
 -- blow up and produce horrible error messages.
 record Products {i}{j} (C : Cat i j) (_⊗_ : Obj C -> Obj C -> Obj C) : Set (i ⊔ j) where
@@ -11,6 +17,9 @@ record Products {i}{j} (C : Cat i j) (_⊗_ : Obj C -> Obj C -> Obj C) : Set (i 
   field π₁ : ∀{A B} -> A ⊗ B ⇨ A
   field π₂ : ∀{A B} -> A ⊗ B ⇨ B
   field ⟨_,_⟩ : ∀{A B C} -> A ⇨ B -> A ⇨ C -> A ⇨ B ⊗ C
+
+  -- asFunctor : Functor (cat:× C C) C
+  -- asFunctor = {!!}
 
 record Sums {i}{j} (C : Cat i j) (_⊕_ : Obj C -> Obj C -> Obj C) : Set (i ⊔ j) where
   constructor Sums:

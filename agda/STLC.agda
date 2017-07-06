@@ -19,7 +19,7 @@ open import Contexts (Type)
 ---------- Terms ----------
 infix 1 _⊢_
 data _⊢_ (X : Cx) : Type -> Set where
-  var : ∀{a} (x : a ∈ X) -> X ⊢ a
+  var : ∀{a} (x : X a) -> X ⊢ a
   lam : ∀{a b} (M : a ∷ X ⊢ b) -> X ⊢ a ⊃ b
   app : ∀{a b} (M : X ⊢ a ⊃ b) (N : X ⊢ a) -> X ⊢ b
   pair : ∀{a b} (M : X ⊢ a) (N : X ⊢ b) -> X ⊢ a * b
@@ -27,7 +27,7 @@ data _⊢_ (X : Cx) : Type -> Set where
 
 -- Renaming
 rename : ∀{X Y a} -> X ⊆ Y -> X ⊢ a -> Y ⊢ a
-rename f (var x) = var (f x)
+rename f (var x) = var (f _ x)
 rename {X} f (lam M) = lam (rename (∷/⊆ X f) M)
 rename f (app M N) = app (rename f M) (rename f N)
 rename f (pair M N) = pair (rename f M) (rename f N)
@@ -40,7 +40,7 @@ rename f (proj d M) = proj d (rename f M)
 ⟦ s * t ⟧ = proset:× ⟦ s ⟧ ⟦ t ⟧
 
 Vars : Cx -> Set
-Vars X = ∃ (λ a -> a ∈ X)
+Vars X = ∃ (λ a -> X a)
 pattern at p = _ , p
 typeof : ∀ {X} -> Vars X -> Type
 typeof = proj₁
@@ -52,7 +52,7 @@ typeof = proj₁
 module _ where
   open import Data.Sum using ([_,_])
 
-  lookup : ∀{X a} -> a ∈ X -> ⟦ X ⟧* ⇒ ⟦ a ⟧
+  lookup : ∀{X a} -> X a -> ⟦ X ⟧* ⇒ ⟦ a ⟧
   lookup p = functor {(λ f -> f (at p))} (λ f -> f (at p))
 
   cons : ∀{X a} -> proset:× ⟦ X ⟧* ⟦ a ⟧ ⇒ ⟦ a ∷ X ⟧*
