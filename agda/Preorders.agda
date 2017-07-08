@@ -128,7 +128,7 @@ preorder:Path = Compose: path-refl path-trans
 -- Boilerplate.
 proset:× proset:⊎ proset:⇒ : Proset -> Proset -> Proset
 proset:Iso : Proset -> Proset
-proset:Bool : Proset
+proset:⊤ proset:Bool : Proset
 
 proset:× (proset P) (proset Q) = proset (preorder:⊗ P Q)
 proset:⊎ (proset P) (proset Q) = proset (preorder:⊕ P Q)
@@ -136,3 +136,4 @@ proset:⇒ P Q =
   proset {P ⇒ Q} (preorder:on ap (preorder:Pointwise (preorder Q)))
 proset:Iso (proset P) = proset (preorder:Iso P)
 proset:Bool = proset preorder:bool≤
+proset:⊤ = proset {⊤} {λ a b -> ⊤} (Compose: tt (λ _ _ → tt))

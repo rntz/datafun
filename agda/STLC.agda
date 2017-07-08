@@ -49,22 +49,19 @@ typeof = proj₁
 ⟦_⟧* : Cx -> Proset
 ⟦ X ⟧* = proset:Π {Vars X} (λ v → ⟦ typeof v ⟧)
 
-module _ where
-  open import Data.Sum using ([_,_])
+lookup : ∀{X a} -> X a -> ⟦ X ⟧* ⇒ ⟦ a ⟧
+lookup p = functor {(λ f -> f (at p))} (λ f -> f (at p))
 
-  lookup : ∀{X a} -> X a -> ⟦ X ⟧* ⇒ ⟦ a ⟧
-  lookup p = functor {(λ f -> f (at p))} (λ f -> f (at p))
+cons : ∀{X a} -> proset:× ⟦ X ⟧* ⟦ a ⟧ ⇒ ⟦ a ∷ X ⟧*
+ap  cons (env , x) (at here) = x
+cov cons (env , x) (at here) = x
+ap  cons (env , x) (at (next p)) = env (at p)
+cov cons (env , x) (at (next p)) = env (at p)
 
-  cons : ∀{X a} -> proset:× ⟦ X ⟧* ⟦ a ⟧ ⇒ ⟦ a ∷ X ⟧*
-  ap  cons (env , x) (at here) = x
-  cov cons (env , x) (at here) = x
-  ap  cons (env , x) (at (next p)) = env (at p)
-  cov cons (env , x) (at (next p)) = env (at p)
-
-  eval : ∀{X a} -> X ⊢ a -> ⟦ X ⟧* ⇒ ⟦ a ⟧
-  eval (var x) = lookup x
-  eval (app M N) = ⟨ eval M , eval N ⟩ • apply
-  eval (lam M) = curry (cons • eval M)
-  eval (pair M N) = ⟨ eval M , eval N ⟩
-  eval (proj true  M) = eval M • π₁
-  eval (proj false M) = eval M • π₂
+eval : ∀{X a} -> X ⊢ a -> ⟦ X ⟧* ⇒ ⟦ a ⟧
+eval (var x) = lookup x
+eval (app M N) = ⟨ eval M , eval N ⟩ • apply
+eval (lam M) = curry (cons • eval M)
+eval (pair M N) = ⟨ eval M , eval N ⟩
+eval (proj true  M) = eval M • π₁
+eval (proj false M) = eval M • π₂

@@ -36,7 +36,11 @@ record Closed {i}{j} (C : Cat i j)
               : Set (i ⊔ j) where
   constructor Closed:
   field apply : ∀{A B} -> hom A B ⊗ A ⇨ B
-  field curry : ∀{A B C} -> (A ⊗ B) ⇨ C -> A ⇨ (hom B C)
+  field curry : ∀{A B C} -> A ⊗ B ⇨ C -> A ⇨ hom B C
+
+  uncurry : ∀{{_ : Products C _⊗_}} {A B C} -> A ⇨ hom B C -> A ⊗ B ⇨ C
+  uncurry {{X}} f = ⟨ π₁ • f , π₂ ⟩ • apply
+    where open Products X; instance comp = isCat C
 
 open Products {{...}} public
 open Sums {{...}} public
@@ -54,3 +58,8 @@ instance
   in₁ {{sums:Set}} = inj₁
   in₂ {{sums:Set}} = inj₂
   [_,_] {{sums:Set}} = Data.Sum.[_,_] where import Data.Sum
+
+  closed:Set : ∀{i} -> Closed (cat:Set i) _×_ (λ a b -> a -> b)
+  apply {{closed:Set}} (f , x) = f x
+  curry {{closed:Set}} f x y = f (x , y)
+  
