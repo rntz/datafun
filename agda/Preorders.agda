@@ -6,9 +6,10 @@ import Data.Product
 Rel : Set -> Set₁
 Rel a = a -> a -> Set
 
-Reflexive Transitive : ∀{A} -> Rel A -> Set
+Reflexive Transitive Antisym : ∀{A} -> Rel A -> Set
 Reflexive {A} R = ∀{a} -> R a a
 Transitive {A} R = ∀{a b c} -> R a b -> R b c -> R a c
+Antisym {A} R = ∀{a b} -> R a b × R b a -> a ≡ b
 
 Respects : ∀ {A B} (R : Rel A) (Q : Rel B) (f : A -> B) -> Set
 Respects R Q f = ∀ {a b} -> R a b -> Q (f a) (f b)
@@ -113,6 +114,10 @@ preorder:bool≤ : Preorder Bool bool≤
 identity preorder:bool≤ = bool-refl
 compose  preorder:bool≤ bool-refl y = y
 compose  preorder:bool≤ false<true bool-refl = false<true
+
+antisym:bool≤ : Antisym bool≤
+antisym:bool≤ (bool-refl , bool-refl) = Eq.refl
+antisym:bool≤ (false<true , ())
 
 
 -- Reflexive transitive closure of a relation
