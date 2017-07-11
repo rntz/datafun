@@ -1,7 +1,8 @@
 module Preorders where
 
-open import Prelude
 import Data.Product
+
+open import Prelude
 
 Rel : Set -> Set₁
 Rel a = a -> a -> Set

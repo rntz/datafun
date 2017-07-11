@@ -2,9 +2,6 @@
 module MTLC where
 
 open import Prelude
-open import Data.Sum using () renaming (inj₁ to left; inj₂ to rite)
-
-open import Cartesian
 open import Monads
 open import Preorders
 open import ProsetCat
@@ -26,16 +23,14 @@ disc ≺? _ = yes tone-disc
 
 infixr 6 _⊃_
 data Type : Set where
-  _⊃_ _*_ : (a b : Type) -> Type
+  _⊃_ _*_ _+_ : (a b : Type) -> Type
   □ : Type -> Type
   bool : Type
-  -- TODO: sum types, sets
-
--- NB. Type is currently uninhabited.
+  -- TODO: sets
 
 
 ---------- Contexts / typing environments ----------
-open import Contexts (Tone × Type)
+open import Contexts (Tone × Type) public
 
 -- Singleton context.
 infix 7 _is_
@@ -90,6 +85,9 @@ data _⊩_ : Premise -> Type -> Set where
   pair   : ∀{a b} -> term a ∧ term b ⊩ a * b
   proj   : ∀{a b} d -> term (a * b) ⊩ (if d then a else b)
   -- TODO sums
+  inj    : ∀{a b} d -> term (if d then a else b) ⊩ a + b
+  case   : ∀{a b c} -> term (a + b) ∧ (a is mono ▷ term c) ∧ (b is mono ▷ term c) ⊩ c
+  splitsum : ∀{a b} -> term (□ (a + b)) ⊩ □ a + □ b
   -- booleans
   bool   : Bool -> nil ⊩ bool
   if     : ∀{a} -> □ (term bool) ∧ term a ∧ term a ⊩ a
@@ -117,7 +115,7 @@ rename : ∀{X Y P} -> X ⊆ Y -> X ⊢ P -> Y ⊢ P
 rename f tt = tt
 rename f (M , N) = rename f M , rename f N
 rename f (bind M) = bind (rename (∪/⊆ f) M)
-rename f (box M) = box (rename (map {{Wipe}} f) M)
+rename f (box M) = box (rename (map f) M)
 rename f (form ! M) = form ! rename f M
 rename f (var o p) = var o (f (o , _) p)
 
@@ -139,6 +137,7 @@ pattern Var {o} {a} p = (o , a) , p
 type : Type -> Proset
 type (a ⊃ b) = proset:⇒ (type a) (type b)
 type (a * b) = proset:× (type a) (type b)
+type (a + b) = proset:⊎ (type a) (type b)
 type bool = proset:Bool
 type (□ a) = ■ (type a)
 
@@ -155,25 +154,32 @@ type (□ a) = ■ (type a)
 ⟦ X ▷ P ⟧+  = proset:⇒ ⟦ X ⟧ ⟦ P ⟧+
 ⟦ term a ⟧+ = type a
 
-
 
 ---------- Lemmas for denotational semantics of terms ----------
 -- I've tried to put the most general lemmas at the beginning.
-swap : ∀{A B : Set} -> A × B -> B × A
-swap (x , y) = y , x
-
 precompose : ∀{i j C _⊗_ hom} {{P : Products {i}{j} C _⊗_}} {{Cl : Closed C _⊗_ hom}}
            {a b c} -> a ⇨ b -> hom b c ⇨ hom a c
-precompose {C = cat C} f = curry (⟨ π₁ , π₂ • f ⟩ • apply)
+precompose {C = cat C} f = curry (×-map id f • apply)
+
+-- This actually holds in any bicartesian closed category, but if I write it
+-- that way typechecking takes an extra .8 seconds or so. Argh!
+distrib-×/⊎ : ∀{a b c} -> proset:× (proset:⊎ a b) c ⇒ proset:⊎ (proset:× a c) (proset:× b c)
+distrib-×/⊎ = ×-map [ curry in₁ , curry in₂ ] id • apply
+
+-- (a ⊎ b) × c ----> (a × c) ⊎ (a × b)
+
+-- distrib : ∀{i j} {C : Cat i j} {_⊗_ _⊕_ hom : Obj C -> Obj C -> Obj C}
+--           {{Pro : Products {i}{j} C _⊗_}} {{Sum : Sums C _⊕_}} {{Clo : Closed C _⊗_ hom}}
+--           {a b c} -> (a ⊕ b) ⊗ c ⇨ (a ⊗ c) ⊕ (b ⊗ c)
+-- distrib {C = cat C} = ×-map [ curry in₁ , curry in₂ ] id • apply
 
 -- Lifts a non-monotone function over an antisymmetric domain into a monotone
 -- map over its discrete preorder.
 antisym-lift : ∀{A B} -> Antisym (Hom A) -> (Obj A -> Obj B) -> ■ A ⇒ B
-antisym-lift {A}{B} antisym f = functor {f} helper
-  where instance A' = isCat A; B' = isCat B
-        helper : ∀{x y} -> Hom (■ A) x y -> Hom B (f x) (f y)
+antisym-lift {A}{B} antisym f = Functor: f helper
+  where helper : ∀{x y} -> Hom (■ A) x y -> Hom B (f x) (f y)
         helper x with antisym x
-        ... | Eq.refl = id
+        ... | Eq.refl = id {{isCat B}}
 
 instance
   -- If (f : a -> b) is monotone, then (f : Disc a -> Disc b) is also monotone.
@@ -196,8 +202,8 @@ lookup p = functor (λ f -> f (Var p))
 
 cons : ∀{X Y} -> proset:× ⟦ X ⟧ ⟦ Y ⟧ ⇒ ⟦ Y ∪ X ⟧
 ap cons (f , g) (Var p) = [ g ∘ Var , f ∘ Var ] p
-cov cons (f , g) (_ , left p) = g (Var p)
-cov cons (f , g) (_ , rite p) = f (Var p)
+cov cons (f , g) (_ , inj₁ p) = g (Var p)
+cov cons (f , g) (_ , inj₂ p) = f (Var p)
 
 singleton : ∀{x} -> ⟦ x ⟧₁ ⇒ ⟦ hyp x ⟧
 ap  singleton x   (Var Eq.refl) = x
@@ -205,34 +211,10 @@ cov singleton x≤y (Var Eq.refl) = x≤y
 
 wipe-sym : ∀{X x y} -> Hom ⟦ wipe X ⟧ x y -> Hom ⟦ wipe X ⟧ y x
 wipe-sym f (Var {mono} ())
-wipe-sym f (Var {disc} p) = swap (f (Var {disc} p))
+wipe-sym f (Var {disc} p) = swap {{products:Set}} (f (Var {disc} p))
 
 wipe⇒■ : ∀{X} -> ⟦ wipe X ⟧ ⇒ ■ ⟦ wipe X ⟧
 wipe⇒■ = functor ⟨ id , wipe-sym ⟩
 
 lambda : ∀{x c} -> proset:⇒ ⟦ hyp x ⟧ c ⇒ proset:⇒ ⟦ x ⟧₁ c
 lambda = precompose singleton
-
-
----------- Denotations of terms, premises, and term formers ----------
-eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ⇒ ⟦ P ⟧+
-eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ⇒ type a
-
-eval tt = functor (λ _ -> tt)
-eval (M , N) = ⟨ eval M , eval N ⟩
-eval (bind M) = curry (cons • eval M)
-eval (box M) = forget • wipe⇒■ • map (eval M)
-  where forget = corename extract
-eval (var mono p) = lookup p
-eval (var disc p) = lookup p • extract
-eval (form ! M) = eval M • eval⊩ form
-
-eval⊩ lam = lambda
-eval⊩ app = apply
-eval⊩ box = id
-eval⊩ letbox = ⟨ π₂ • lambda , π₁ ⟩ • apply
-eval⊩ pair = id
-eval⊩ (proj true)  = π₁
-eval⊩ (proj false) = π₂
-eval⊩ (bool b) = Functor: (λ _ -> b) (λ _ → bool-refl)
-eval⊩ if = uncurry (antisym-lift antisym:bool≤ (λ x -> if x then π₁ else π₂))

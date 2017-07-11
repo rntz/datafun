@@ -11,9 +11,9 @@ Cx = Type -> Set
 ∅ : Cx
 ∅ _ = ⊥
 
--- infix 4 _∈_
--- _∈_ : Type -> Cx -> Set
--- a ∈ X = X a
+infix 4 _∈_
+_∈_ : Type -> Cx -> Set
+a ∈ X = X a
 
 hyp : Type -> Cx
 hyp = _≡_
@@ -33,7 +33,7 @@ pattern next x = inj₂ x
 ---------- Context renamings ----------
 infix 1 _⊆_
 _⊆_ : Cx -> Cx -> Set
-X ⊆ Y = ∀ a -> X a -> Y a
+X ⊆ Y = ∀ a -> a ∈ X -> a ∈ Y
 
 instance
   compose:Cx : Compose Cx _⊆_

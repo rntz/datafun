@@ -5,7 +5,6 @@ open import Level
 
 infix  3 _⇨_
 infixr 5 _•_
-infixl 5 _⟨$⟩_
 
 record Compose {i j} (A : Set i) (R : A -> A -> Set j) : Set (i ⊔ j) where
   constructor Compose:
@@ -13,6 +12,8 @@ record Compose {i j} (A : Set i) (R : A -> A -> Set j) : Set (i ⊔ j) where
   field compose : ∀{a b c} -> R a b -> R b c -> R a c
 
 record Cat i j : Set (suc (i ⊔ j)) where
+  -- TODO??? once I have a more recent version of agda:
+  -- eta-equality
   constructor Cat:
   field Obj : Set i
   field Hom : (a b : Obj) -> Set j
@@ -36,13 +37,8 @@ record Functor {i j k l} (A : Cat i j) (B : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l)
   field cov : ∀{x y} -> x ⇨ y -> ap x ⇨ ap y
 
 open Functor public
+open Functor {{...}} using () renaming (cov to map) public
 pattern functor {F} f = Functor: F f
-
-map : ∀{i j k l A B} {{F : Functor {i}{j}{k}{l} A B}} {x y}
-    -> x ⇨ y -> ap F x ⇨ ap F y
-map {{F}} = cov F
-
-_⟨$⟩_ = map
 
 
 -- Sets & functions form a category.

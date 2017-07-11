@@ -1,6 +1,10 @@
 module Cartesian where
 
-open import Prelude
+open import Level
+open import Data.Product hiding (curry; uncurry; swap)
+open import Data.Sum hiding ([_,_])
+
+open import Cat
 
 -- Technically, none of this needs Cat. It just needs SetRel/Graph/Quiv! Hm...
 
@@ -15,14 +19,21 @@ compose (isCat (cat:× (cat A) (cat B))) (f₁ , f₂) (g₁ , g₂) = f₁ • 
 record Products {i}{j} (C : Cat i j) (_⊗_ : Obj C -> Obj C -> Obj C) : Set (i ⊔ j) where
   constructor Products:
   -- maybe these should be fst/snd rather than π₁/π₂?
-  field π₁ : ∀{A B} -> A ⊗ B ⇨ A
-  field π₂ : ∀{A B} -> A ⊗ B ⇨ B
-  field ⟨_,_⟩ : ∀{A B C} -> A ⇨ B -> A ⇨ C -> A ⇨ B ⊗ C
+  field π₁ : ∀{a b} -> a ⊗ b ⇨ a
+  field π₂ : ∀{a b} -> a ⊗ b ⇨ b
+  infix 4 ⟨_,_⟩
+  field ⟨_,_⟩ : ∀{a b c} -> a ⇨ b -> a ⇨ c -> a ⇨ b ⊗ c
 
-  -- asFunctor : Functor (cat:× C C) C
-  -- asFunctor = {!!}
+  swap : ∀{a b} -> a ⊗ b ⇨ b ⊗ a
+  swap = ⟨ π₂ , π₁ ⟩
 
-record Sums {i}{j} (C : Cat i j) (_⊕_ : Obj C -> Obj C -> Obj C) : Set (i ⊔ j) where
+  ×-map : ∀{a₁ b₁ a₂ b₂} -> a₁ ⇨ a₂ -> b₁ ⇨ b₂ -> a₁ ⊗ b₁ ⇨ a₂ ⊗ b₂
+  ×-map f g = let x = isCat C in ⟨ π₁ • f , π₂ • g ⟩
+
+  ∇ : ∀{a} -> a ⇨ a ⊗ a
+  ∇ = let x = isCat C in ⟨ id , id ⟩
+
+record Sums {i j} (C : Cat i j) (_⊕_ : Obj C -> Obj C -> Obj C) : Set (i ⊔ j) where
   constructor Sums:
   -- maybe these should be left/rite rather than in₁/in₂?
   field in₁ : ∀{A B} -> A ⇨ A ⊕ B
@@ -38,9 +49,17 @@ record Closed {i}{j} (C : Cat i j)
   field apply : ∀{A B} -> hom A B ⊗ A ⇨ B
   field curry : ∀{A B C} -> A ⊗ B ⇨ C -> A ⇨ hom B C
 
-  uncurry : ∀{{_ : Products C _⊗_}} {A B C} -> A ⇨ hom B C -> A ⊗ B ⇨ C
-  uncurry {{X}} f = ⟨ π₁ • f , π₂ ⟩ • apply
-    where open Products X; instance comp = isCat C
+  module _ {{Prod : Products C _⊗_}} where
+    private open Products Prod; instance comp = isCat C
+
+    -- swapply : ∀{a b} -> a ⊗ hom a b ⇨ b
+    -- swapply = swap • apply
+
+    uncurry : ∀{A B C} -> A ⇨ hom B C -> A ⊗ B ⇨ C
+    uncurry f = ×-map f id • apply
+
+    flip : ∀ {A B C} -> A ⇨ hom B C -> B ⇨ hom A C
+    flip f = curry (swap • uncurry f)
 
 open Products {{...}} public
 open Sums {{...}} public
@@ -50,16 +69,22 @@ open Closed {{...}} public
 -- Instances for cat:Set.
 instance
   products:Set : ∀{i} -> Products (cat:Set i) _×_
-  ⟨_,_⟩ {{products:Set {i}}} = <_,_> where open import Data.Product
-  π₁ {{products:Set}} = proj₁
-  π₂ {{products:Set}} = proj₂
+  products:Set = Products: proj₁ proj₂ <_,_>
 
   sums:Set : ∀{i} -> Sums (cat:Set i) _⊎_
-  in₁ {{sums:Set}} = inj₁
-  in₂ {{sums:Set}} = inj₂
-  [_,_] {{sums:Set}} = Data.Sum.[_,_] where import Data.Sum
+  sums:Set = Sums: inj₁ inj₂ Data.Sum.[_,_]
 
   closed:Set : ∀{i} -> Closed (cat:Set i) _×_ (λ a b -> a -> b)
   apply {{closed:Set}} (f , x) = f x
   curry {{closed:Set}} f x y = f (x , y)
-  
+
+
+-- XXX REMOVE
+-- why does this work here but not in Cat3.agda?
+private
+  open import Data.Product
+  postulate
+    ℕ : Set
+    wub : ℕ × ℕ
+  x : ℕ
+  x = π₁ wub

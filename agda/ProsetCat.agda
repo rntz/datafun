@@ -21,6 +21,15 @@ instance
   π₁ {{products:proset}} = functor proj₁
   π₂ {{products:proset}} = functor proj₂
 
+-- Sums
+instance
+  sums:proset : Sums cat:Proset proset:⊎
+  in₁ {{sums:proset}} = functor rel₁
+  in₂ {{sums:proset}} = functor rel₂
+  ap ([_,_] {{sums:proset}} f g) = [ ap f , ap g ]
+  cov ([_,_] {{sums:proset}} f g) (rel₁ x) = cov f x
+  cov ([_,_] {{sums:proset}} f g) (rel₂ x) = cov g x
+
 
 -- Closure / curry & apply
 Proset-λ : ∀{A B C} -> proset:× A B ⇒ C -> A ⇒ (proset:⇒ B C)
