@@ -4,8 +4,10 @@ module Cat where
 open import Level
 open import Relation.Binary using (Rel)
 
-infix  1 _≤_
+Function : ∀{i j} (A : Set i) (B : Set j) -> Set (i ⊔ j)
+Function a b = a -> b
 
+---------- Categories ----------
 record Compose {i j} Obj (Arr : Rel {i} Obj j) : Set (i ⊔ j) where
   constructor Compose:
   infixr 9 _•_
@@ -22,20 +24,21 @@ record Cat i j : Set (suc (i ⊔ j)) where
 
 open Cat public
 
-_≤_ : ∀{i j} {{C : Cat i j}} (a b : Obj C) -> Set j; _≤_ {{C}} = Arr C
+infix  1 _≤_
+_≤_ : ∀{i j} {{C : Cat i j}} (a b : Obj C) -> Set j
+_≤_ {{C}} = Arr C
 
 instance
   -- wait, this apparently has an effect?! despite taking an explicit argument?!
   cat->compose : ∀{i j} (C : Cat i j) -> Compose (Obj C) (Arr C)
   cat->compose C = Compose: (ident C) (compo C)
-  -- cat->compose : ∀{i j} {{C : Cat i j}} -> Compose (Obj C) (Arr C)
-  -- cat->compose {{C}} = Compose: (ident C) (compo C)
 
 make-cat : ∀{i j A R} -> Compose {i}{j} A R -> Cat i j
 make-cat {A = A} {R = R} C =
   record { Obj = A ; Arr = R ; ident = id {{C}} ; compo = _•_ {{C}} }
 
--- Functors
+
+---------- Functors ----------
 record Homo {i j k l} (A : Cat i j) (B : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l) where
   constructor Homo:
   field app : Obj A -> Obj B
@@ -49,19 +52,18 @@ open Homo {{...}} public using () renaming (cov to map)
 --   open Homo F public using () renaming (cov to map)
 
 
--- Some useful categories.
-Function : ∀{i j} (A : Set i) (B : Set j) -> Set (i ⊔ j)
-Function a b = a -> b
-
+---------- Some useful categories ----------
 instance
-  cat:set : ∀{i} -> Cat _ _
-  Obj (cat:set {i}) = Set i
-  Arr cat:set = Function
-  ident cat:set x = x
-  compo cat:set f g x = g (f x)
+  compose:-> : ∀{i} -> Compose (Set i) Function
+  id {{compose:->}} x = x
+  _•_ {{compose:->}} f g x = g (f x)
+
+  cat:set : ∀ {i} -> Cat _ _
+  cat:set {i} = make-cat (compose:-> {i})
+
+  compose:homo : ∀{i j} -> Compose (Cat i j) Homo
+  id {{compose:homo}} = homo id
+  _•_ {{compose:homo}} (homo f) (homo g) = homo (f • g)
 
   cat:cat : ∀{i j} -> Cat _ _
-  Obj (cat:cat {i}{j}) = Cat i j
-  Arr cat:cat = Homo
-  ident cat:cat = homo id
-  compo cat:cat (homo f) (homo g) = homo (f • g)
+  cat:cat {i} {j} = make-cat (compose:homo {i}{j})

@@ -109,11 +109,11 @@ instance
   apply {{BiCC.exps bicc:set}} (f , a) = f a
   curry {{BiCC.exps bicc:set}} f a b = f (a , b)
 
-  products:cat : ∀{i j} -> Products (cat:cat {i}{j})
+  products:cat : ∀{i j} -> Products (cat:cat {i} {j})
   products:cat = record { _∧_ = cat× ; π₁ = homo π₁ ; π₂ = homo π₂
     ; ⟨_,_⟩ = λ where (homo f) (homo g) → homo ⟨ f , g ⟩ }
 
-  sums:cat : ∀{i j} -> Sums (cat:cat {i}{j})
+  sums:cat : ∀{i j} -> Sums (cat:cat {i} {j})
   _∨_ {{sums:cat}} = cat+; in₁ {{sums:cat}} = homo rel₁; in₂ {{sums:cat}} = homo rel₂
   app ([_,_] {{sums:cat}} F G) = [ app F , app G ]
   cov ([_,_] {{sums:cat}} F G) (rel₁ x) = cov F x
