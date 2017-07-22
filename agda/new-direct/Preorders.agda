@@ -1,6 +1,7 @@
 module Preorders where
 
 open import Prelude
+open import Cartesian
 
 open import Relation.Binary using (Rel; Reflexive) public
 
