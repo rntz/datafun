@@ -7,7 +7,6 @@ open import Data.Sum using (_⊎_; inj₁; inj₂)
 open import Relation.Binary using (Rel)
 
 infix  1 _≤_
-infix  9 _‼_
 infixr 9 _•_
 
 record Cat i j : Set (suc (i ⊔ j)) where
@@ -30,7 +29,6 @@ record Homo {i j k l} (A : Cat i j) (B : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l) wh
 
 open Homo public
 pattern homo {app} f = Homo: app f
-_‼_ = Homo.app
 -- FIXME TODO does this definition of `map` even work wrt instance resolution?
 open Homo {{...}} public using () renaming (cov to map)
 -- module _ {i j k l} {{A : Cat i j}} {{B : Cat k l}} {{F : Homo A B}} where
