@@ -31,58 +31,64 @@ compo (cat+ C D) (rel₂ x) (rel₂ y) = rel₂ (compo D x y)
 
 
 ---------- Properties of / structures on categories ----------
-record Products {i j} Obj Arr (_⊗_ : Obj -> Obj -> Obj)
-       {{C : Compose {i}{j} Obj Arr}} : Set (i ⊔ j) where
+record Products {i j} (C : Cat i j) (_∧_ : (a b : Obj C) -> Obj C) : Set (i ⊔ j) where
   constructor Products:
-  private instance cc = make-cat C
-  field π₁ : ∀{a b} -> a ⊗ b ≤ a
-  field π₂ : ∀{a b} -> a ⊗ b ≤ b
+  private instance cc = C
+  field π₁ : ∀{a b} -> a ∧ b ≤ a
+  field π₂ : ∀{a b} -> a ∧ b ≤ b
   infix 4 ⟨_,_⟩
-  field ⟨_,_⟩ : ∀{a b c} -> a ≤ b -> a ≤ c -> a ≤ b ⊗ c
+  field ⟨_,_⟩ : ∀{a b c} -> a ≤ b -> a ≤ c -> a ≤ b ∧ c
 
-  swap : ∀{a b} -> a ⊗ b ≤ b ⊗ a
+  swap : ∀{a b} -> a ∧ b ≤ b ∧ a
   swap = ⟨ π₂ , π₁ ⟩
 
-  ×-map : ∀{a₁ b₁ a₂ b₂} -> a₁ ≤ a₂ -> b₁ ≤ b₂ -> a₁ ⊗ b₁ ≤ a₂ ⊗ b₂
+  ×-map : ∀{a₁ b₁ a₂ b₂} -> a₁ ≤ a₂ -> b₁ ≤ b₂ -> a₁ ∧ b₁ ≤ a₂ ∧ b₂
   ×-map f g = ⟨ π₁ • f , π₂ • g ⟩
 
-  ∇ : ∀{a} -> a ≤ a ⊗ a
+  ∇ : ∀{a} -> a ≤ a ∧ a
   ∇ = ⟨ id , id ⟩
 
--- Can I define this in a more natural way and then use module hacks to get the
--- instance resolution to work out?
---
--- Also, can _⊕_ be pushed inside the record body?
-record Sums {i j} Obj Arr (_⊕_ : Obj -> Obj -> Obj)
-       {{C : Compose {i}{j} Obj Arr}} : Set (i ⊔ j) where
+record Sums {i j} (C : Cat i j) (_∨_ : (a b : Obj C) -> Obj C) : Set (i ⊔ j) where
   constructor Sums:
-  private instance cc = make-cat C
-  field in₁ : ∀{A B} -> A ≤ A ⊕ B
-  field in₂ : ∀{A B} -> B ≤ A ⊕ B
-  field [_,_] : ∀{A B C} -> A ≤ C -> B ≤ C -> A ⊕ B ≤ C
+  private instance cc = C
+  field in₁ : ∀{a b} -> a ≤ a ∨ b
+  field in₂ : ∀{a b} -> b ≤ a ∨ b
+  field [_,_] : ∀{a b c} -> a ≤ c -> b ≤ c -> a ∨ b ≤ c
+
+-- TODO: exponentials
+record Closed {i j} (C : Cat i j) (_⊗_ _⇨_ : (a b : Obj C) -> Obj C) : Set (i ⊔ j) where
+  constructor Closed:
+  private instance cc = C
+  field apply : ∀{a b} -> (a ⇨ b) ⊗ a ≤ b
+  field curry : ∀{a b c} -> a ⊗ b ≤ c -> a ≤ b ⇨ c
 
 
--- Instances
-open Products {{...}} public
-open Sums {{...}} public
+-- Expose Products & Sums methods with appropriate instance arguments.
+module _ {i j Obj Arr} {{C : Compose {i}{j} Obj Arr}} where
+  module _ {_⊗_} {{Prod : Products (cat C) _⊗_}} where
+    open Products Prod public
+    infixr 2 _∧_; _∧_ = _⊗_
 
-Products~ Sums~ : ∀{i j} (C : Cat i j) _⊗_ -> Set _
-Products~ C _⊗_ = Products (Obj C) (Arr C) _⊗_ {{cat->compose C}}
-Sums~ C _⊕_ = Sums (Obj C) (Arr C) _⊕_ {{cat->compose C}}
+  module _ {_⊕_} {{Sum : Sums (cat C) _⊕_}} where
+    open Sums Sum public
+    infixr 3 _∨_; _∨_ = _⊕_
+
+  module _ {_⊗_ hom} {{Clo : Closed (cat C) _⊗_ hom}} where
+    open Closed Clo public
+    infixr 4 _⇨_; _⇨_ = hom
 
 
--- Instances for cat:Set (and cat:Cat?)
+-- Instances for cat:set and cat:cat
 instance
-  products:set : ∀{i} -> Products~ (cat:set {i}) _×_
+  products:set : ∀{i} -> Products (cat:set {i}) _×_
   products:set = Products: proj₁ proj₂ <_,_>
 
-  sums:set : ∀{i} -> Sums~ (cat:set {i}) _⊎_
+  sums:set : ∀{i} -> Sums (cat:set {i}) _⊎_
   sums:set = Sums: inj₁ inj₂ Data.Sum.[_,_]
 
-  products:cat : ∀{i j} -> Products~ (cat:cat {i} {j}) cat×
-  π₁ {{products:cat}} = homo proj₁
-  π₂ {{products:cat}} = homo proj₂
-  ⟨_,_⟩ {{products:cat}} (homo f) (homo g) = homo ⟨ f , g ⟩
+  products:cat : ∀{i j} -> Products (cat:cat {i} {j}) cat×
+  products:cat = Products: (homo proj₁) (homo proj₂)
+                 λ where (homo f) (homo g) → homo ⟨ f , g ⟩
 
 
 -- -- FIXME: These seem to be taking a while to compile. :(

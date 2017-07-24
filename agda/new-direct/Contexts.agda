@@ -11,9 +11,9 @@ Cx = Type -> Set
 ∅ : Cx
 ∅ _ = ⊥
 
-infix 4 _∈_
-_∈_ : Type -> Cx -> Set
-a ∈ X = X a
+-- infix 4 _∈_
+-- _∈_ : Type -> Cx -> Set
+-- a ∈ X = X a
 
 hyp : Type -> Cx
 hyp = _≡_
@@ -33,7 +33,7 @@ pattern next x = inj₂ x
 ---------- Context renamings ----------
 infix 1 _⊆_
 _⊆_ : Cx -> Cx -> Set
-X ⊆ Y = ∀ a -> a ∈ X -> a ∈ Y
+X ⊆ Y = ∀ a -> X a -> Y a
 
 cat:cx : Cat _ _
 Obj cat:cx = Cx
@@ -49,8 +49,7 @@ import Data.Sum
 
 -- ∪ forms coproducts on Cx under renaming.
 instance
-  sums:cx : Sums~ cat:cx _∪_
-  -- _∨_ {{sums:cx}} = _∪_
+  sums:cx : Sums cat:cx _∪_
   in₁ {{sums:cx}} _ = inj₁
   in₂ {{sums:cx}} _ = inj₂
   [_,_] {{sums:cx}} f g _ = Data.Sum.[ f _ , g _ ]

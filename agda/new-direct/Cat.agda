@@ -14,28 +14,27 @@ record Compose {i j} Obj (Arr : Rel {i} Obj j) : Set (i ⊔ j) where
   field id : ∀{a} -> Arr a a
   field _•_ : ∀{a b c} -> Arr a b -> Arr b c -> Arr a c
 
-open Compose {{...}} public
-
 record Cat i j : Set (suc (i ⊔ j)) where
+  constructor Cat:
   field Obj : Set i
   field Arr : (a b : Obj) -> Set j
   field ident : ∀{a} -> Arr a a
   field compo : ∀{a b c} -> Arr a b -> Arr b c -> Arr a c
 
+  instance
+    cat->compose : Compose Obj Arr
+    cat->compose = Compose: ident compo
+
+open Compose {{...}} public
+open Compose public using () renaming (id to ident; _•_ to compo)
 open Cat public
 
 infix  1 _≤_
 _≤_ : ∀{i j} {{C : Cat i j}} (a b : Obj C) -> Set j
 _≤_ {{C}} = Arr C
 
-instance
-  -- wait, this apparently has an effect?! despite taking an explicit argument?!
-  cat->compose : ∀{i j} (C : Cat i j) -> Compose (Obj C) (Arr C)
-  cat->compose C = Compose: (ident C) (compo C)
-
-make-cat : ∀{i j A R} -> Compose {i}{j} A R -> Cat i j
-make-cat {A = A} {R = R} C =
-  record { Obj = A ; Arr = R ; ident = id {{C}} ; compo = _•_ {{C}} }
+cat : ∀{i j A R} -> Compose {i}{j} A R -> Cat i j
+cat {A = A} {R = R} C = Cat: A R (ident C) (compo C)
 
 
 ---------- Functors ----------
@@ -55,15 +54,14 @@ open Homo {{...}} public using () renaming (cov to map)
 ---------- Some useful categories ----------
 instance
   compose:-> : ∀{i} -> Compose (Set i) Function
-  id {{compose:->}} x = x
-  _•_ {{compose:->}} f g x = g (f x)
-
-  cat:set : ∀ {i} -> Cat _ _
-  cat:set {i} = make-cat (compose:-> {i})
+  ident compose:-> x = x
+  compo compose:-> f g x = g (f x)
 
   compose:homo : ∀{i j} -> Compose (Cat i j) Homo
-  id {{compose:homo}} = homo id
-  _•_ {{compose:homo}} (homo f) (homo g) = homo (f • g)
+  ident compose:homo = homo id
+  compo compose:homo (homo f) (homo g) = homo (f • g)
 
+  cat:set : ∀ {i} -> Cat _ _
+  cat:set {i} = cat (compose:-> {i})
   cat:cat : ∀{i j} -> Cat _ _
-  cat:cat {i} {j} = make-cat (compose:homo {i}{j})
+  cat:cat {i} {j} = cat (compose:homo {i}{j})

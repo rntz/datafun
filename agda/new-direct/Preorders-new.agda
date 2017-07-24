@@ -1,7 +1,7 @@
-module Preorders where
+module Preorders-new where
 
 open import Prelude
-open import Cartesian
+open import Cartesian-new
 
 open import Relation.Binary using (Rel; Reflexive) public
 
@@ -57,15 +57,15 @@ proset⇒ A B .ident {F} = cov F
 proset⇒ A B .compo {F}{G}{H} F≤G G≤H {x}{y} x≤y = compo B (F≤G x≤y) (G≤H (ident A))
 
 -- Now we can show that cat:proset has exponentials.
-exponentials:proset : Exponentials cat:proset
-_⇨_   {{exponentials:proset}} = proset⇒
+closed:proset : Closed cat:proset cat× proset⇒
+-- _⇨_   {{closed:proset}} = proset⇒
 -- apply or eval
-apply {{exponentials:proset}} .app (F , a) = app F a
-apply {{exponentials:proset}} .cov (F≤G , a≤a') = F≤G a≤a'
+apply {{closed:proset}} .app (F , a) = app F a
+apply {{closed:proset}} .cov (F≤G , a≤a') = F≤G a≤a'
 -- curry or λ
-curry {{exponentials:proset}} {A}{B}{C} F .app a .app b  = app F (a , b)
-curry {{exponentials:proset}} {A}{B}{C} F .app a .cov b  = cov F (ident A , b)
-curry {{exponentials:proset}} {A}{B}{C} F .cov a≤a' b≤b' = cov F (a≤a' , b≤b')
+curry {{closed:proset}} {A}{B}{C} F .app a .app b  = app F (a , b)
+curry {{closed:proset}} {A}{B}{C} F .app a .cov b  = cov F (ident A , b)
+curry {{closed:proset}} {A}{B}{C} F .cov a≤a' b≤b' = cov F (a≤a' , b≤b')
 
 
 -- The "equivalence quotient" of a preorder.

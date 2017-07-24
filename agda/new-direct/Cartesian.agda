@@ -32,6 +32,7 @@ compo (cat+ C D) (rel₂ x) (rel₂ y) = rel₂ (compo D x y)
 
 ---------- Properties of / structures on categories ----------
 record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
+  constructor Products:
   private instance cc = C
   infixr 2 _∧_
   field _∧_ : (a b : Obj C) -> Obj C
@@ -56,6 +57,7 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   -- ×-map₁ f = ×-map f id; ×-map₂ f = ×-map id f
 
 record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
+  constructor Sums:
   private instance cc = C
   infixr 3 _∨_
   field _∨_ : (a b : Obj C) -> Obj C
@@ -66,6 +68,7 @@ record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   field [_,_] : ∀{a b c} -> a ≤ c -> b ≤ c -> a ∨ b ≤ c
 
 record Exponentials {i j} (C : Cat i j) {{Prod : Products C}} : Set (i ⊔ j) where
+  constructor Exponentials:
   private instance cc = C; open Products Prod
   infixr 4 _⇨_
   field _⇨_ : (a b : Obj C) -> Obj C
@@ -103,18 +106,18 @@ record BiCC {i j} (C : Cat i j) : Set (i ⊔ j) where
 instance
   -- I'm not sure this is working!
   bicc:set : ∀{i} -> BiCC (cat:set {i})
-  BiCC.pros bicc:set = record { _∧_ = _×_ ; π₁ = proj₁ ; π₂ = proj₂ ; ⟨_,_⟩ = <_,_> }
-  BiCC.sums bicc:set = record { _∨_ = _⊎_ ; in₁ = inj₁ ; in₂ = inj₂ ; [_,_] = Data.Sum.[_,_] }
+  BiCC.pros bicc:set = Products: _×_ proj₁ proj₂ <_,_>
+  BiCC.sums bicc:set = Sums: _⊎_ inj₁ inj₂ Data.Sum.[_,_]
   _⇨_ {{BiCC.exps bicc:set}} = Function
   apply {{BiCC.exps bicc:set}} (f , a) = f a
   curry {{BiCC.exps bicc:set}} f a b = f (a , b)
 
   products:cat : ∀{i j} -> Products (cat:cat {i} {j})
-  products:cat = record { _∧_ = cat× ; π₁ = homo π₁ ; π₂ = homo π₂
-    ; ⟨_,_⟩ = λ where (homo f) (homo g) → homo ⟨ f , g ⟩ }
+  products:cat = Products: cat× (homo π₁) (homo π₂)
+                           (λ where (homo f) (homo g) → homo ⟨ f , g ⟩)
 
   sums:cat : ∀{i j} -> Sums (cat:cat {i} {j})
-  _∨_ {{sums:cat}} = cat+; in₁ {{sums:cat}} = homo rel₁; in₂ {{sums:cat}} = homo rel₂
-  app ([_,_] {{sums:cat}} F G) = [ app F , app G ]
-  cov ([_,_] {{sums:cat}} F G) (rel₁ x) = cov F x
-  cov ([_,_] {{sums:cat}} F G) (rel₂ x) = cov G x
+  sums:cat = Sums: cat+ (homo rel₁) (homo rel₂) λ where
+    F G .app → [ app F , app G ]
+    F G .cov (rel₁ x) → cov F x
+    F G .cov (rel₂ x) → cov G x
