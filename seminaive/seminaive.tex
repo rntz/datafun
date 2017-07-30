@@ -292,8 +292,8 @@ rules.
 
   \infer{e \; f : B}{e : A \to B & f : A}
   \\
-  %% \infer{\pair{e}{f} : A \x B}{e : A & f : B}
-  \infer{\pair{e_1}{e_2} : A_1 \x A_2}{e_i : A_i}
+  \infer{\pair{e}{f} : A \x B}{e : A & f : B}
+  %% \infer{\pair{e_1}{e_2} : A_1 \x A_2}{e_1 : A_1 & e_2 : A_2}
 
   \infer{\pi_i\; e : A_i}{e : A_1 \x A_2}
 
@@ -694,7 +694,7 @@ Let's apply \ms{fix} to solve the equation!
   \delta f \;\disc{\ms{fix}\;f} \;{\color{blue}dx})
 \end{equation*}
 
-Unfortunately, this is not a proof of correctness. We merely established that it
+However, this is not a proof of correctness. We merely established that it
 was \emph{true} that equation \ref{eqn:delta-fix} holds, not that it suffices as
 a \emph{definition} of $\delta(\ms{fix}\;f)$. The correctness criterion for
 $\delta(\ms{fix}\; f)$ is roughly:
@@ -704,220 +704,43 @@ $\delta(\ms{fix}\; f)$ is roughly:
   = (\mfix\;f)\sub{\gamma \oplus \delta\gamma/\gamma}
 \end{equation}
 
-That is, an expression plus its derivative equals the original expression
-computed with updated free variables. Let's prove this holds for our proposed
-definition!
+That is, a $\ms{fix}$ expression plus its derivative equals the original
+expression computed with updated free variables. We give a proof of this for our
+definition of $\delta(\ms{fix}\;f)$ in \url{fixderiv.pdf}, which is also
+available \href{http://www.rntz.net/files/fixderiv.pdf}{online}. This proof is
+quite generic, and not specific to Datafun; as such, it assumes a few lemmas,
+which we prove here:
 
-\begin{theorem}
-  \(\mfix\; f \oplus \mfix\;(\delta f \; \disc{\mfix\;f})
-  = (\mfix\; f)\sub{\gamma \oplus \delta\gamma/\gamma}
-  \)
-\end{theorem}
-\begin{proof}
-  First, we require that we have a correct derivative for $f$, and therefore:
-  \begin{eqnarray*}
-    (\mfix\; f)\sub{\gamma\oplus\delta\gamma/\gamma}
-    &=& \mfix\;(f\sub{\gamma\oplus\delta\gamma/\gamma})\\
-    &=& \mfix\;(f \oplus \delta f)
-  \end{eqnarray*}
-
-  So it suffices to show:
-  \begin{equation}
-    \mfix\; f \oplus \mfix\;(\delta f \; \disc{\mfix\;f})
-    = \mfix\; (f \oplus \delta f)
-  \end{equation}
-
-  We'll do this by showing inequalities in each direction. First, we'll show
-  that $\mfix\;f\oplus\mfix\;(\delta f\;\disc{\mfix\;f})$ is a fixed point of $f
-  \oplus \delta f$. Since $\mfix\;(f\oplus \delta f)$ is the least such fixed
-  point, this will establish one direction of our inequality:
-  \[
-  \begin{array}{rcll}
-    & (f \oplus \delta f)
-    \; (\mfix\;f \oplus \mfix\;(\delta f\;\disc{\mfix\;f}))
-    \\
-    =& f\; (\mfix\;f) \oplus \delta f \;\disc{\mfix\;f} \;
-    (\mfix\; (\delta f \;\disc{\mfix\;f}))
-    & \text{\todo{property of $\delta$ and $\oplus$; see Figure 4 on page 5 in Cai et all}}
-  \end{array}
-  \]
-
-   First, consider the left-hand side.
-  Because of the way fixed points are computed, we can pick $i$ such that \(
-  \mfix\;(\delta f \;\disc{\mfix\;f}) = (\delta f \; \disc{\mfix\;f})^i \;\unit
-  \). Applying the crucial Lemma \ref{lemma:crux} with $dx = \unit$, we have
-  \[\begin{array}{rcll}
-  \mfix\;f\oplus\mfix\;(\delta f \;\disc{\mfix\;f})
-  &=& \mfix\;f\oplus(\delta f \; \disc{\mfix\;f})^i \;\unit
-  & \text{by our choice of $i$}\\
-  &=& (f \oplus \delta f)^i \; (\mfix\;f \oplus \unit)
-  & \text{Lemma \ref{lemma:crux} with $dx = \unit$}\\
-  &=& (f \oplus \delta f)^i \; (\mfix\;f)
-  & \text{$\unit$ is a unit of $\oplus$ by Lemma \ref{lemma:dl-boring}}\\
-  &\le& (f \oplus \delta f)^i \; (\mfix\;(f \oplus \delta f))
-  & \text{monotonicity and Lemma \ref{lemma:oplus-increasing}}\\
-  &=& \mfix\;(f \oplus \delta f)
-  & \text{it's a fixed point}
-  \end{array}\]
-
-  So transitively, $\mfix\;f\oplus\mfix\;(\delta f \;\disc{\mfix\;f}) \le
-  \mfix\;(f \oplus\delta f)$. It remains to show the other direction.
-
-  We know $\mfix\;(f \oplus \delta f) = (f \oplus \delta f)^i \; \unit$ for some
-  $i$. Then, again applying the crucial Lemma \ref{lemma:crux}:
-  \[
-  \begin{array}{rcll}
-    \mfix\;(f \oplus \delta f)
-    &=& (f \oplus \delta f)^i\; \unit\\
-    &\le& (f \oplus \delta f)^i \; (\mfix\;f \oplus \unit)
-    & \text{monotonicity}\\
-    &=& \mfix\;f \oplus (\delta f \;\disc{\mfix\;f})^i \;\unit
-    & \text{Lemma \ref{lemma:crux} with $dx = \unit$}
-  \end{array}
-  \]
-
-  %% \[\begin{array}{rcll}
-  %%   f &\le& f \oplus \delta f
-  %%   & \text{Lemma \ref{lemma:oplus-increasing}}\\
-  %%   \mfix\;f &\le& \mfix\;(f\oplus\delta f)
-  %%   & \text{monotonicity of $\mfix$}\\
-  %%   \mfix\;f \oplus \unit &\le& \mfix\;(f \oplus \delta f)
-  %%   & \text{$\unit$ is the unit of $\oplus$, by Lemma \ref{lemma:dl-boring}}\\
-  %%   (f\oplus\delta f)^i\; (\mfix\;f\oplus\unit)
-  %%   &\le&
-  %%   (f \oplus\delta f)^i\; (\mfix\;(f\oplus \delta f))
-  %%   & \text{monotonicity of $f \oplus \delta f$}\\
-  %%   (f\oplus\delta f)^i\; (\mfix\;f\oplus\unit)
-  %%   &\le& \mfix\;(f\oplus \delta f)
-  %%   & \text{it's a fixed point!}
-  %% \end{array}\]
-  %% Now we apply the crucial Lemma \ref{lemma:crux}:
-
-\end{proof}
-
-\begin{theorem}[Soundness of ordering on change types]
-  For any $dx, dx' : \Delta A$, if $dx \le dx'$, then for any $x : A$, we have
-  $x \oplus dx \le x \oplus dx'$.
-\end{theorem}
-\begin{proof}
-  \todo{TODO. This seems like it should be true. Note that we don't \emph{need}
-    this to be true for all types, just for fixed-point types $\fixtype{A}$, but
-    it would be surprising if it weren't true generally.}
-\end{proof}
-
-\begin{lemma}
-  $x \le x \oplus dx$
-  \label{lemma:oplus-increasing}
-\end{lemma}
-\begin{proof}
-  \todo{TODO.}
-\end{proof}
+\par \todo{TODO: insert proofs of the lemmas from \texttt{fixderiv} here}
 
 %% \begin{lemma}
-%%   If $a \le \mfix\;f$ then $\forall\bind{i} f^i\;a \le \mfix\;f$.
-%%   \label{lemma:fix-stays-bigger}
+%%   $x \le x \oplus dx$
+%%   \label{lemma:oplus-increasing}
 %% \end{lemma}
 %% \begin{proof}
-%%   By monotonicity, $f^i\; a \le f^i \;(\mfix\;f)$. But since $\mfix\;f$ is a
-%%   fixed point of $f$, $f^i\;(\mfix\;f) = \mfix\;f$.
+%%   \todo{TODO.}
 %% \end{proof}
 
-%% \begin{lemma}[jcreed's lemma, adapted]
-%%   If $a \le \mfix\;f$ and $\mfix\;f = f^i\;\unit$, then $f^i\;a = \mfix\;f$.
-%%   \label{lemma:jcreed}
+%% \begin{lemma} For $f : A \to B$, $x : A$, $df : \Delta (A \to B)$, and $x :
+%%   \Delta A$, where $df$ and $dx$ are valid changes to $f$,$x$ respectively (see
+%%   section on ``Dependent change types'', below), we have:
+%%   \[(f \oplus df) \; (x \oplus dx) = f\;x \oplus df\;x\;dx\]
 %% \end{lemma}
 %% \begin{proof}
-%%   Firstly, by monotonicity $f^i\;a \le f^i\;(\mfix\;f) = \mfix\;f$ (since
-%%   $\mfix\;f$ is a fixed point). Second, since $\unit \le a $, by monotonicity
-%%   $\mfix\;f = f^i\;\unit \le f^i\;a$.
+%%   \todo{TODO. See figure 4, page 5, in Cai et al.}
 %% \end{proof}
 
-\begin{lemma}[Crux]
-  For any $i \in \N$ and $dx : \Delta \fixtype{A}$ \todo{(TODO: we might need
-    $dx$ to be a valid change, actually)}, we have
-  \[
-  \mfix\;f \oplus (\delta f \;\disc{\mfix\;f})^i\;dx
-  =
-  (f \oplus \delta f)^i \;(\mfix\; f \oplus dx)
-  \]
-  \todo{TODO: Explain this in English somehow? I don't have an intuition for why
-    this should be so, but I feel like there is an intuitive explanation waiting
-    to be found.}
-  \label{lemma:crux}
-\end{lemma}
-\begin{proof}
-  By induction on $i$.
+%% I don't know whether we need this theorem.
 
-  \textbf{Base case, $i = 0$:} Trivial: \( \mfix\;f \oplus dx = \mfix\;f \oplus
-  dx \).
-
-  \textbf{Inductive case:} We know inductively that, for any $dx$,
-  \[
-  \mfix\;f \oplus (\delta f \;\disc{\mfix\;f})^i\;dx
-  =
-  (f \oplus \delta f)^i \;(\mfix\; f \oplus dx)
-  \]
-
-  We show the same for $i+1$:
-  \[\begin{array}{cl>{\hspace{1em}}l}
-     & \mfix\;f \oplus (\delta f \;\disc{\mfix\;f})^{i+1}\;dx\\
-    =& \mfix\;f\oplus (\delta f \;\disc{\mfix\;f})^i
-    \;(\delta f \;\disc{\mfix\;f} \;dx)\\
-    =& (f \oplus \delta f)^i \;
-    (\mfix\;f \oplus \delta f \;\disc{\mfix\;f}\; dx)
-    & \text{by IH, substituting \((\delta f \;\disc{\mfix\;f}\;dx\)) for $dx$}\\
-    =& (f \oplus \delta f)^i \;
-    (f\;(\mfix\;f) \oplus \delta f\; \disc{\mfix\;f}\; dx)
-    & \text{since $\mfix\;f = f\;(\mfix\;f)$}\\
-    =& (f \oplus \delta f)^i \;
-    ((f \oplus \delta f)\;(\mfix\;f \oplus dx))
-    & \text{\todo{property of $\delta f$; see Figure 4 on page 5 in Cai et
-        al}}\\
-    =& (f \oplus \delta f)^{i+1} \; (\mfix\;f \oplus dx)
-  \end{array}\]
-
-\end{proof}
-
-\begin{lemma} For $f : A \to B$, $x : A$, $df : \Delta (A \to B)$, and $x :
-  \Delta A$, where $df$ and $dx$ are valid changes to $f$,$x$ respectively (see
-  section on ``Dependent change types'', below), we have:
-  \[(f \oplus df) \; (x \oplus dx) = f\;x \oplus df\;x\;dx\]
-\end{lemma}
-\begin{proof}
-  \todo{TODO. See figure 4, page 5, in Cai et al.}
-\end{proof}
-
-
-%% So, on to a more formal approach:
-
-%% Let $f' = \delta{f} \;\disc{\ms{fix}\; f}$.
-%% Let $f_{\ms{new}} = f \oplus \delta f$.
-%% Observe that:
-%% \[\begin{array}{rrcll}
-%%   &   f\;\d{x} \oplus \delta f \;\disc{\d{x}} \;dx
-%%   &=& (f \oplus \delta f) \; (\d{x} \oplus dx)
-%%   & \text{see Figure 4 on page 5 in Cai et al}
-%%   \\ \implies&
-%%   (f\;\d{x} \oplus \delta f \; \disc{\d{x}} \; dx) \ominus f\;\d{x}
-%%   &=&
-%%   (f \oplus \delta f) \; (\d{x} \oplus dx) \ominus f\;\d{x}
-%%   & \text{apply $(- \ominus f\;\d{x})$ to both sides}
-%%   \\ \implies&
-%%   \delta f \; \disc{\d{x}} \; dx
-%%   &=&
-%%   (f \oplus \delta f) \; (\d{x} \oplus dx) \ominus f\;\d{x}
-%%   & \text{because}~(a \oplus da) \ominus a = da
-%%   \\ \implies&
-%%   f' \; dx
-%%   &=& f_{\ms{new}} \; (\ms{fix}\;f \oplus dx)
-%%       \ominus f\; \disc{\ms{fix}\; f}
-%%   & \text{substitute $\d{x} \mapsto \ms{fix}\;f$}
-%%   \\ \implies&
-%%   f' \; dx
-%%   &=& f_{\ms{new}} \; (\ms{fix}\;f \oplus dx)
-%%       \ominus \ms{fix}\; f
-%%   & \text{because}~f\;(\ms{fix}\;f) = \ms{fix}\;f
-%% \end{array}\]
+%% \begin{theorem}[Soundness of ordering on change types]
+%%   For any $dx, dx' : \Delta A$, if $dx \le dx'$, then for any $x : A$, we have
+%%   $x \oplus dx \le x \oplus dx'$.
+%% \end{theorem}
+%% \begin{proof}
+%%   \todo{TODO. This seems like it should be true. Note that we don't \emph{need}
+%%     this to be true for all types, just for fixed-point types $\fixtype{A}$, but
+%%     it would be surprising if it weren't true generally.}
+%% \end{proof}
 
 
 \section{Fixed points}
