@@ -109,11 +109,11 @@
 
 %% expressions
 % \d for discrete, \m for monotone variables
-\renewcommand{\d}[1]{\ensuremath{\mathbf{\dt{#1}}}}
+\renewcommand{\d}[1]{\ensuremath{\mb{\dt{#1}}}}
 \newcommand{\m}[1]{\ensuremath{\mt{\mathit{#1}}}}
 \newcommand{\sub}[1]{[{#1}]\,}                   % substitution
-\newcommand{\mfix}{\ms{fix}}
-\newcommand{\fix}[1]{\mfix~{#1}~\ms{is}~}
+\newcommand{\mfix}{\mb{fix}}
+\newcommand{\fix}[1]{\mfix~{#1}~\mb{is}~}
 \newcommand{\fixle}[2]{\fix{{#1} \le {#2}}}
 \newcommand{\tuple}[1]{\langle{#1}\rangle}
 \newcommand{\pair}[2]{\tuple{{#1},\,{#2}}}
@@ -121,18 +121,18 @@
 \newcommand{\triv}{\tuple{}}
 %% \newcommand{\unit}{\varepsilon}
 \newcommand{\unit}{\bot}
-\newcommand{\letv}[2]{\ms{let}~{#1}={#2}~\ms{in}~}
+\newcommand{\letv}[2]{\mb{let}~{#1}={#2}~\mb{in}~}
 \newcommand{\ein}{\ms{in}}
 \newcommand{\inj}[2]{\ein_{#1}\,{#2}}
 
 \newcommand{\cto}{\shortrightarrow}
 \newcommand{\case}[5]{%%
-  \ms{case}({#1};\; \inj{1}{#2} \cto {#3};\; \inj{2}{#4} \cto {#5})}
+  \mb{case}({#1};\; \inj{1}{#2} \cto {#3};\; \inj{2}{#4} \cto {#5})}
 
-\newcommand{\disc}[1]{\ms{disc}\;{#1}}
+\newcommand{\disc}[1]{\mb{disc}\;{#1}}
 \renewcommand{\disc}[1]{[{#1}]}
 \newcommand{\letdisc}[2]{\letv{\disc{#1}}{#2}}
-\newcommand{\splitsum}[1]{\textsf{split-sum}\; {#1}}
+\newcommand{\splitsum}[1]{\mb{splitsum}\; {#1}}
 
 \newcommand{\forin}[1]{\textstyle\bigvee({#1})\ }
 \newcommand{\setelim}[2]{\forin{{#1} \in {#2}}}
@@ -140,8 +140,8 @@
 
 \newcommand{\efalse}{\ms{false}}
 \newcommand{\etrue}{\ms{true}}
-\newcommand{\when}[2]{\ms{when}~{#1}~\ms{then}~{#2}}
-\newcommand{\ifthen}[3]{\ms{if}~{#1}~\ms{then}~{#2}~\ms{else}~{#3}}
+\newcommand{\when}[2]{\mb{when}~{#1}~\mb{then}~{#2}}
+\newcommand{\ifthen}[3]{\mb{if}~{#1}~\mb{then}~{#2}~\mb{else}~{#3}}
 
 \newcommand{\setlit}[1]{\{{#1}\}}
 \newcommand{\setfor}[2]{\setlit{{#1}~|~{#2}}}
@@ -151,8 +151,8 @@
 \newcommand{\den}[1]{\ensuremath{\llbracket{#1}\rrbracket}} % denotation
 % denotation for vertically large things
 \newcommand{\Den}[1]{{\left\llbracket{#1}\right\rrbracket}}
-\newcommand{\one}{\ensuremath{\mathbf{1}}}
-\newcommand{\two}{\ensuremath{\mathbf{2}}}
+\newcommand{\one}{\ensuremath{\mb{1}}}
+\newcommand{\two}{\ensuremath{\mb{2}}}
 %% \newcommand{\Arr}{\supset}
 %% \newcommand{\Arr}{\rightarrowtriangle}
 %% \newcommand{\arr}{\Rightarrow}

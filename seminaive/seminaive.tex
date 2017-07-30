@@ -522,27 +522,21 @@ $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
   \delta \pair{e}{f} &=& \pair{\delta{e}}{\delta{f}}\\
   \delta(\pi_i\; e) &=& \pi_i\; \delta{e}\\
   \delta(\inj{i}{e}) &=& \inj{i}{\delta{e}}\\
-  \delta(\case{e}{\m x}{f}{\m y}{g})
-  %% &=& \case{\splitsum{\color{ForestGreen} \disc{e}}}
-  %%       {\disc{\d{x}}}{\case{\delta e}{dx}{\delta f}{\_}{\todo{\ms{abort!}}}}
-  %%       {\disc{\d{x}}}{\textit{(symmetric case)}}\\
 
-  &=& \ms{case}(\splitsum{\preserve{e}};\\
-   && \phantom{\ms{case}\ }
-      \bind{\disc{\d{x}}}
-      \letv{\m{dx}}
-           {\case{\delta e}{\m{dx}}{\m{dx}}{\_}{\dummy\;\d{x}}}
-           \delta f;\\
-   && \phantom{\ms{case}\ }
-      \bind{\disc{\d{y}}}
-      \letv{\m{dy}}
-           {\case{\delta e}{\m{\_}}{\dummy\;\d{y}}{\m{dy}}{\m{dy}}}
-           \delta g)\\
+  \delta(\case{e}{\m x}{f}{\m y}{g})
+  &=& \mathbf{case} \; \pair{\splitsum{\preserve{e}}}{\delta e} ~\mathbf{of}\\
+   && \quad \pair{\inj{1}{\disc{\d{x}}}}{\inj{1}{\m{dx}}} \cto \delta f\\
+   && \quad \pair{\inj{2}{\disc{\d{y}}}}{\inj{2}{\m{dy}}} \cto \delta g\\
+   && \quad \pair{\inj{1}{\disc{\d{x}}}}{\inj{2}{\m{\pwild}}} \cto
+      \letv{\m{dx}}{\dummy\; \d{x}} \delta f\\
+   && \quad \pair{\inj{2}{\disc{\d{y}}}}{\inj{1}{\m{\pwild}}} \cto
+      \letv{\m{dy}}{\dummy\; \d{y}} \delta g\\
 
   \delta\disc{e} &=& \disc{\delta e}\\
   \delta(\letdisc{\d{x}}{e} f) &=&
-  \letdisc{\d{x}}{e}
-    \letdisc{\d{dx}}{\delta e} \delta f\\
+  %% TODO: Wait, is this right? Check with Agda code.
+    \letdisc{\d{x}}{e} \letdisc{\d{dx}}{\delta e} \delta f\\
+
   \delta(\splitsum{e}) &=&
   %% want type: Δ□A + Δ□B = □ΔA + □ΔB
   %% e : □(A + B)
