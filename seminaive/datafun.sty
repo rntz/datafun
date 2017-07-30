@@ -59,10 +59,13 @@
 \newcommand{\GP}{\Psi}
 \newcommand{\GD}{\Delta}
 \newcommand{\GG}{\Gamma}
-\newcommand{\J}[4]{{#1};\,{#2}\ent {#3}:{#4}}
+\newcommand{\J}[4]{\dt{#1};\,\mt{#2}\ent {#3}:{#4}}
 
 \newcommand{\is}[1]{~\ms{#1}}
 
+%% tones: discrete and monotone
+\newcommand{\dt}[1]{{\color{RedOrange}{#1}}}
+\newcommand{\mt}[1]{{\color{blue}{#1}}}
 
 %% types
 \newcommand{\N}{\mathbb{N}}
@@ -71,8 +74,8 @@
 \newcommand{\tunit}{1}
 \newcommand{\x}{\times}
 \newcommand{\Disc}[1]{\square{#1}}
-\newcommand{\Down}[1]{{\downarrow}\,{#1}}
 \newcommand{\Set}[1]{\{{#1}\}}
+\newcommand{\Seteq}[1]{\Set{\eq{#1}}}
 %% discrete/monotone \to
 \newcommand{\dto}{\to}
 \newcommand{\mto}{\overset{+\:}{\to}}
@@ -87,57 +90,60 @@
 \newcommand{\fin}[1]{\under{fin}{#1}}
 \newcommand{\lat}[1]{\under{lat}{#1}}
 \newcommand{\acc}[1]{\under{acc}{#1}}
-\newcommand{\eltacc}[1]{\under{\downarrow{}acc}{#1}}
+\newcommand{\eltacc}[1]{\under{acc\le}{#1}}
 \newcommand{\eqlat}[1]{\under{dec,lat}{#1}}
 \newcommand{\fixtype}[1]{\under{fix}{#1}}
 \newcommand{\fixletype}[1]{\under{fix\le}{#1}}
-\newcommand{\fixintype}[1]{\under{\downarrow{}fix}{#1}}
 
 \renewcommand{\eqlat}[1]{\under{dl}{#1}}
 
-%% \renewcommand{\eq}[1]{\under{\mathfrak{D}}{#1}}
-%% \renewcommand{\fin}[1]{\under{\mathfrak{F}}{#1}}
-%% \renewcommand{\lat}[1]{\under{\mathfrak{L}}{#1}}
-%% \renewcommand{\acc}[1]{\under{\mathfrak{A}}{#1}}
-%% \renewcommand{\eqlat}[1]{\under{\mathfrak{D}\cap\mathfrak{L}}{#1}}
-%% \renewcommand{\fixtype}[1]{\under{\mathfrak{X}}{#1}}
+%% \renewcommand{\eq}[1]{\under{\mathcal{D}}{#1}}
+%% \renewcommand{\fin}[1]{\under{\mathcal{F}}{#1}}
+%% \renewcommand{\lat}[1]{\under{\mathcal{L}}{#1}}
+%% \renewcommand{\acc}[1]{\under{\mathcal{A}}{#1}}
+%% \renewcommand{\eqlat}[1]{\under{\mathcal{D}\cap\mathcal{L}}{#1}}
+%% \renewcommand{\fixtype}[1]{\under{\mathcal{X}}{#1}}
 
 %% patterns
 \newcommand{\pwild}{\underline{\phantom{x}}}
 
 %% expressions
-\renewcommand{\d}[1]{\ensuremath{\mathbf{#1}}} % discrete variables
-\newcommand{\m}[1]{\ensuremath{\mathit{#1}}}   % monotone variables
+% \d for discrete, \m for monotone variables
+\renewcommand{\d}[1]{\ensuremath{\mathbf{\dt{#1}}}}
+\newcommand{\m}[1]{\ensuremath{\mt{\mathit{#1}}}}
 \newcommand{\sub}[1]{[{#1}]\,}                   % substitution
 \newcommand{\mfix}{\ms{fix}}
 \newcommand{\fix}[1]{\mfix~{#1}~\ms{is}~}
 \newcommand{\fixle}[2]{\fix{{#1} \le {#2}}}
-\newcommand{\fixin}[2]{\fix{{#1} \in {#2}}}
 \newcommand{\tuple}[1]{\langle{#1}\rangle}
 \newcommand{\pair}[2]{\tuple{{#1},\,{#2}}}
 \newcommand{\triple}[3]{\tuple{{#1},\,{#2},\,{#3}}}
 \newcommand{\triv}{\tuple{}}
-\newcommand{\unit}{\varepsilon}
+%% \newcommand{\unit}{\varepsilon}
+\newcommand{\unit}{\bot}
 \newcommand{\letv}[2]{\ms{let}~{#1}={#2}~\ms{in}~}
 \newcommand{\ein}{\ms{in}}
 \newcommand{\inj}[2]{\ein_{#1}\,{#2}}
-\newcommand{\case}[5]{\ms{case}({#1};\, \bind{#2}{#3};\, \bind{#4}{#5})}
+
+\newcommand{\cto}{\shortrightarrow}
+\newcommand{\case}[5]{%%
+  \ms{case}({#1};\; \inj{1}{#2} \cto {#3};\; \inj{2}{#4} \cto {#5})}
 
 \newcommand{\disc}[1]{\ms{disc}\;{#1}}
 \renewcommand{\disc}[1]{[{#1}]}
 \newcommand{\letdisc}[2]{\letv{\disc{#1}}{#2}}
 \newcommand{\splitsum}[1]{\textsf{split-sum}\; {#1}}
 
-\newcommand{\downintro}[1]{{\downarrow}\,\{#1\}}
 \newcommand{\forin}[1]{\textstyle\bigvee({#1})\ }
-\newcommand{\downelim}[3]{\forin{#1 \in #2} #3}
+\newcommand{\setelim}[2]{\forin{{#1} \in {#2}}}
+\newcommand{\single}[1]{\{{#1}\}}
 
 \newcommand{\efalse}{\ms{false}}
 \newcommand{\etrue}{\ms{true}}
 \newcommand{\when}[2]{\ms{when}~{#1}~\ms{then}~{#2}}
 \newcommand{\ifthen}[3]{\ms{if}~{#1}~\ms{then}~{#2}~\ms{else}~{#3}}
 
-\newcommand{\setlit}[1]{\{#1\}}
+\newcommand{\setlit}[1]{\{{#1}\}}
 \newcommand{\setfor}[2]{\setlit{{#1}~|~{#2}}}
 \newcommand{\isin}{\mathrel{{\in}\hspace{0.15ex}?}}
 
@@ -162,6 +168,7 @@
 %% change types, derivatives, etc
 \newcommand{\zero}{\mb{0}}
 \newcommand{\Changes}[2]{\GD_{#1}({#2})}
+\newcommand{\Ch}{\Delta}
 
 %% categories
 \newcommand{\cSet}{\ms{Set}}
@@ -181,3 +188,12 @@
 %% for rule names.
 \newcommand{\rn}[1]{\mathsz{8pt}{#1}}
 \newcommand{\rt}[1]{\textsc{#1}}
+
+
+%% We no longer have \Down in the core theory, hence the \todo's here.
+%% TODO: Once we've eliminated all uses, delete this.
+\newcommand{\Down}[1]{\todo{{\downarrow}\,{#1}}}
+\newcommand{\downintro}[1]{\todo{{\downarrow}\,\{#1\}}}
+\newcommand{\downelim}[3]{\todo{\forin{#1 \in #2} #3}}
+\newcommand{\fixin}[2]{\todo{\fix{{#1} \in {#2}}}}
+\newcommand{\fixintype}[1]{\todo{\under{\downarrow{}fix}{#1}}}

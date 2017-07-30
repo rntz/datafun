@@ -120,6 +120,9 @@ for the more general concept.
 We will often regard a downset $D$ of $A$ as a poset, with the same ordering
 relation as $A$, restricted to elements of $D$ (the ``induced ordering'').
 
+\todo{I probably no longer need all this theory about downset-ACC types and can
+  just use elementwise-ACC types.}
+
 \begin{definition}[Downset ACC]
   A poset $A$ is \emph{downset-ACC} iff every downset $D$ of $A$ satisfies
   ACC.
@@ -181,38 +184,36 @@ relation as $A$, restricted to elements of $D$ (the ``induced ordering'').
 \begin{array}{rccl}
   \textsf{types} & A,B,C
   &\bnfeq& A \to B \pipe A \x B \pipe A + B
-  \pipe \Disc{A} \pipe \Down{\eq{A}} \pipe \tbool
+  \pipe \Disc{A} \pipe \Seteq{A} \pipe \tbool
   \vspace{1em}\\
 
   %% types where the poset relationship is decidable
   \textsf{decidable types} & \eq{A}
   &\bnfeq& \eq{A} \x \eq{B} \pipe \eq{A} + \eq{B}
-  \pipe \Disc{\eq{A}} \pipe {\color{red} \Down{\eq{A}}} \pipe \tbool
+  \pipe \Disc{\eq{A}} \pipe \Seteq{A} \pipe \tbool
   \vspace{1em}\\
 
   %% finite types
   \textsf{finite types} & \fin{A}
   &\bnfeq& \fin{A} \x \fin{B} \pipe \fin{A} + \fin{B}
-  \pipe \Disc{\fin{A}} \pipe \Down{\fin{A}} \pipe \tbool
+  \pipe \Disc{\fin{A}} \pipe \Set{\fin{A}} \pipe \tbool
   \vspace{1em}\\
 
   %% acc types
-  \textsf{acc types} & \acc{A}
+  \textsf{ACC types} & \acc{A}
   &\bnfeq& \acc{A} \x \acc{B} \pipe \acc{A} + \acc{B}
-  \pipe \Disc{A} \pipe \Down{\fin{A}} \pipe \tbool
+  \pipe \Disc{A} \pipe \Set{\fin{A}} \pipe \tbool
   \vspace{1em}\\
 
-  %% downset-acc types
-  \textsf{downset-acc types} & \eltacc{A}
+  %% elementwise-ACC types
+  \textsf{elementwise-ACC types} & \eltacc{A}
   &\bnfeq& \eltacc{A} \x \eltacc{B} \pipe \eltacc{A} + \eltacc{B}
-  \pipe \Disc{A}
-  \pipe {\color{Cerulean} \Down{\fin{A}}} \pipe \Down{\Disc{A}}
-  \pipe \tbool
+  \pipe \Disc{A} \pipe \Seteq{A} \pipe \tbool
   \vspace{1em}\\
 
   %% semilattice types
   \textsf{semilattice types} & \lat{A}
-  &\bnfeq& A \to \lat{B} \pipe \lat{A} \x \lat{B} \pipe \Down{A} \pipe \tbool
+  &\bnfeq& A \to \lat{B} \pipe \lat{A} \x \lat{B} \pipe \Seteq{A} \pipe \tbool
   \vspace{1em}\\
 
   %% decidable semilattice types
@@ -225,88 +226,69 @@ relation as $A$, restricted to elements of $D$ (the ``induced ordering'').
   &=& \eq{A} \cap \lat{A} \cap \acc{A}
   \vspace{1em}\\
 
-  \textsf{bounded fixed-point types} & \fixintype{A}
+  %% TODO: note that, currently, \eq{A} \cap \eltacc{A} = \eq{A}?
+  %% however, this would change if we added lexical sums.
+  %% (nat <+ 1) is not elementwise-acc, for example.
+  \textsf{bounded fixed-point types} & \fixletype{A}
   &=& \eq{A} \cap \lat{A} \cap \eltacc{A}
   \vspace{1em}\\
 
   %% expressions
   \textsf{expressions} & e,f,g
-  &\bnfeq& x \pipe \d{x} \pipe \fn\bind{x} e \pipe e\; e
-  \pipe \pair{e}{e} \pipe \pi_i\; e
-  \pipe \inj{i}{e} \pipe \case{e}{x}{e_1}{x}{e_2} \\
+  &\bnfeq& \m{x} \pipe \d{x} \pipe \fn\bind{\m{x}} e \pipe e\; e
+  \pipe \pair{e}{e} \pipe \pi_i\; e\\
+  &&\pipe& \inj{i}{e} \pipe \case{e}{\m{x}}{e_1}{\m{x}}{e_2}\\
   &&\pipe& \disc{e} \pipe \letdisc{\d{x}}{e}{e} \pipe \splitsum{e}\\
-  &&\pipe& \unit \pipe e \vee e \pipe \downintro{e} \pipe \downelim{x}{e}{e}\\
+  &&\pipe& \unit \pipe e \vee e \pipe \single{e} \pipe \setelim{\m{x}}{e}{e}\\
   &&\pipe& \etrue \pipe \efalse \pipe \when{e}{e} \pipe \ifthen{e}{e}{e}\\
-  &&\pipe& \fix{x}{e} \pipe \fixin{x}{e}{e}
+  &&\pipe& \fix{\m{x}}{e} \pipe \fixle{\m{x}}{e}{e}
 \end{array}
 \]
 
-\todo{Note: I try to use bold $\d{x}$ for discrete variables and ordinary script
-  $x$ for monotone variables, but sometimes I screw up. Also, this is the
-  opposite of the convention in the original Datafun paper.}
+I use blue script for monotone variables $\m{x}$, and orange bold for discrete variables $\d{x}$.
 
-The ``typeclass'' rules (for decidable, finite, acc, downset-acc, semilattice,
-etc.\! types) are \emph{conservative approximations} of semantic conditions.
+The ``typeclass'' rules (for decidable, finite, ACC, elementwise-ACC, semilattice, etc.\! types) are \emph{conservative approximations} of the corresponding semantic conditions.
 
-``Decidable types'' are those whose partial ordering relation is practically
-decidable; that is, given $x, y : \eq{A}$, there is a reasonable algorithm that
-determines whether $x \le y$. By antisymmetry, this also makes equality $x = y$
-testable at these types.
-
-Theoretically, a function type $\under{fin}{A} \to \eq{B}$ whose domain is
-finite and codomain is decidable is also decidable (it is effectively a finite
-product of $\eq{B}$s). We have omitted this, as it complicates our
-implementation for little practical benefit. We have similarly omitted the cases
-in which function types are finite ($\fin{A} \to \fin{B}$), ACC ($\fin{A} \to
-\acc{B}$), and downset-ACC ($\fin{A} \to \eltacc{B}$).
-
-I've highlighted the decidable type ${\color{red} \Down{\eq{A}}}$ because
-comparing down-sets \emph{efficiently} in general is nontrivial (impossible?).
-If finite sets $\{A\}$ are implemented as $\Down{\Disc{A}}$, this may have
-performance implications. A less general approach would be to consider only
-$\Down{\Disc{\eq{A}}}$ to be decidable.
-
-I've highlighted the downset-acc type ${\color{Cerulean} \Down{\fin{A}}}$
-because, while correct, it seems insufficiently general. In particular it does
-not cover the extremely useful special case that $\Down{\Disc{A}}$ (finite sets
-of $A$s) is always downset-acc. However, $\Down{A}$ is not always downset-ACC;
-consider $\Down{(\N \mathop{\under{<}{{+}}} 1)}$. \todo{I suspect the correct
-  rule is that $\Down{\eltacc{A}}$ is always downset-acc, but this needs proof.
-  This would generalize $\Down{\Disc{A}}$ as long as we keep the rules that
-  $\Disc{A}$ is always ACC and downset-ACC.}
+``Decidable types'' are those whose partial ordering relation is practically decidable; that is, given $x, y : \eq{A}$, there is a reasonable algorithm that determines whether $x \le y$.
+%%
+By antisymmetry, this also makes equality $x = y$ testable at these types. Theoretically, a function type $\under{fin}{A} \to \eq{B}$ whose domain is finite and codomain is decidable is also decidable.
+%%
+We have omitted this, as it complicates our implementation for little practical
+benefit.
+%%
+We have similarly omitted the cases in which function types are finite $\fin{A} \to \fin{B}$, ACC $\fin{A} \to \acc{B}$, and elementwise-ACC $\fin{A} \to \eltacc{B}$.
 
 
 \subsection{Typing rules}
 
-The typing judgment \[\J{\GP}{\GG}{e}{A}\] says that $e$ has type $A$ using
-variables with types given by $\GP \cup \GG$, and moreover uses the variables in
-$\GG$ in a monotone fashion.
-
-Where possible without ambiguity, I omit the contexts $\GP;\GG$ from typing
-rules.
+The typing judgment \[\J{\d{\GP}}{\m{\GG}}{e}{A}\] says that $e$ has type $A$ using variables with types given by $\d{\GP} \cup \m{\GG}$, and moreover uses the variables in $\m{\GG}$ in a monotone fashion.
+%% 
+Where possible without ambiguity, I omit the contexts $\dt{\GP};\mt{\GG}$ from typing rules.
 
 \begin{mathpar}
-  \infer{\J{\GP}{\GG}{x}{A}}{x \of A \in \GP \cup \GG}
+  \infer{\J{\GP}{\GG}{\m{x}}{A}}{\mt{\m{x} \of A} \in \mt{\GG}}
 
-  \infer{\fn\bind{x} e : A \to B}{\J{\GP}{\GG,x \of A}{e}{B}}
+  \infer{\J{\GP}{\GG}{\d{x}}{A}}{\dt{\d{x} \of A} \in \dt{\GP}}
+
+  \infer{\fn\bind{\m{x}} e : A \to B}{\J{\GP}{\GG,\m{x} \of A}{e}{B}}
 
   \infer{e \; f : B}{e : A \to B & f : A}
   \\
-  \infer{\pair{e}{f} : A \x B}{e : A & f : B}
-  %% \infer{\pair{e_1}{e_2} : A_1 \x A_2}{e_1 : A_1 & e_2 : A_2}
+  %% \infer{\pair{e}{f} : A \x B}{e : A & f : B}
+  \infer{\pair{e_1}{e_2} : A_1 \x A_2}{e_i : A_i}
 
   \infer{\pi_i\; e : A_i}{e : A_1 \x A_2}
 
   \infer{\inj{i}{e} : A_1 + A_2}{e : A_i}
 
-  \infer{\case{e}{x}{f_1}{x}{f_2} : B}
-        {e : A_1 + A_2 & \J{\GP}{\GG, x \of A_i}{f_i}{B}}
+  \infer{\case{e}{\m{x}}{f_1}{\m{x}}{f_2} : B}
+        {e : A_1 + A_2 & \J{\GP}{\GG, \m{x} \of A_i}{f_i}{B}}
   \\
   \infer{\J{\GP}{\GG}{\disc{e}}{\Disc{A}}}{\J{\GP}{-}{e}{A}}
 
   \infer{\letdisc{\d{x}}{e}{f} : B}
         { e : \Disc{A}
-        & \J{\GP,\d{x}\of A}{\GG}{f}{B} }
+        & \J{\GP, \d{x}\of A}{\GG}{f}{B}}
 
   \infer{\splitsum{e} : \Disc{A} + \Disc{B}}
         {e : \Disc{(A + B)}}
@@ -315,11 +297,14 @@ rules.
 
   \infer{e_1 \vee e_2 : \lat{A}}{e_i : \lat{A}}
 
-  \infer{\downintro{e} : \Down{A}}{e : A}
+  \infer{\J{\GP}{\GG}{\single{e}}{\Seteq{A}}}
+        { \J{\GP}{-}{e}{\eq{A}} }
 
-  \infer{\downelim{x}{e}{f} : \lat{B}}
-        { e : \Down{A}
-        & \J{\GP}{\GG,x \of A}{f}{\lat{B}}}
+  %% TODO: explain that although we allow only decidable types here, we can
+  %% eta-expand function types, so we can pretend we allow any semilattice type.
+  \infer{\setelim{\d{x}}{e}{f} : \eqlat{B}}
+        { e : \Seteq{A}
+        & \J{\GP, \d{x} \of A}{\GG}{f}{\eqlat{B}}}
   \\
   \infer{\etrue : \tbool}{}
 
@@ -329,12 +314,12 @@ rules.
 
   \infer{\ifthen{e}{f_1}{f_2} : A}{e : \Disc{\tbool} & f_i : A}
   \\
-  \infer{\fix{x}{e} : \fixtype{A}}{
-    \J{\GP}{\GG,x\of \fixtype{A}}{e}{\fixtype{A}}}
+  \infer{\fix{\m{x}}{e} : \fixtype{A}}{
+    \J{\GP}{\GG, \m{x}\of\fixtype{A}}{e}{\fixtype{A}}}
 
-  \infer{\fixin{x}{e}{f} : \fixintype{A}}{
-    e : \Down{\fixintype{A}} &
-    \J{\GP}{\GG,x \of \fixintype{A}}{f}{\fixintype{A}}}
+  \infer{\fixle{\m{x}}{e}{f} : \fixletype{A}}{
+    e : \fixletype{A} &
+    \J{\GP}{\GG, \m{x}\of\fixletype{A}}{f}{\fixletype{A}}}
 \end{mathpar}
 
 
@@ -342,19 +327,19 @@ rules.
 
 \subsection{Change types}
 
-For each type $A$ we define a change type $\GD A$.
+For each type $A$ we define a change type $\Ch A$.
 
 \[\begin{array}{rcl>{\quad\quad}rcl}
-  \GD(A \to B) &=& \Disc{A} \to \Delta A \to \Delta B\\
-  \GD(A \x B) &=& \GD A \x \GD B\\
-  \GD(A + B) &=& \GD A + \GD B\\
-  \GD(\Disc{A}) &=& \Disc{\GD A}\\
-  \GD(\Down{A}) &=& \Down{A}\\
-  \GD \tbool &=& \tbool
+  \Ch(A \to B) &=& \Disc{A} \to \Ch A \to \Ch B\\
+  \Ch(A \x B) &=& \Ch A \x \Ch B\\
+  \Ch(A + B) &=& \Ch A + \Ch B\\
+  \Ch \Disc{A} &=& \Disc{\Ch A}\\
+  \Ch\thinspace \Seteq{A} &=& \Seteq{A}\\
+  \Ch\thinspace \tbool &=& \tbool
 \end{array}\]
 
-We also define associated operators $\oplus : A \to \GD A \to A$, $\ominus : A
-\to A \to \Delta A$ and $\zero : A \to \Delta A$. Note, however, the
+We also define associated operators $\oplus : A \to \Ch A \to A$, $\ominus : A
+\to A \to \Ch A$ and $\zero : A \to \Ch A$. Note, however, the
 definitions of these operators \emph{are not well-typed Datafun terms}. \todo{I
   do not believe there exists a way to assign them tones that is compatible with
   Datafun's type system; every way I've tried fails. But I have not proved
@@ -404,7 +389,7 @@ really it should have a dependent type.
   & \disc{x} \ominus \disc{y} = \disc{x \ominus y}
   & \zero\; \disc{x} = \disc{\zero\; x}
   \\
-  \Down{A}
+  \Seteq{A}
   & x \oplus y = x \vee y
   & x \ominus y = x
   & \zero\; x = \unit
@@ -454,22 +439,22 @@ These should satisfy the following laws:
 
 %% Some lemmas.
 \begin{lemma}[Changes on a semilattice form a semilattice]
-  $\GD \lat{A}$ is a semilattice type.
+  $\Ch \lat{A}$ is a semilattice type.
 
   \todo{TODO: do we actually need/use this lemma?}
 \end{lemma}
 \begin{proof}
   By induction on the cases:
   \begin{eqnarray*}
-    \GD(A \to \lat{B}) &=& \Disc{A} \to \GD A \to \GD \lat{B}\\
-    \GD(\lat{A} \x \lat{B}) &=& \GD \lat{A} \x \GD \lat{B}\\
-    \GD(\Down{A}) &=& \Down{A}\\
-    \GD 2 &=& 2
+    \Ch(A \to \lat{B}) &=& \Disc{A} \to \Ch A \to \Ch \lat{B}\\
+    \Ch(\lat{A} \x \lat{B}) &=& \Ch \lat{A} \x \Ch \lat{B}\\
+    \Ch\thinspace \Seteq{A} &=& \Seteq{A}\\
+    \Ch\thinspace 2 &=& 2
   \end{eqnarray*}
 \end{proof}
 
 \begin{lemma}[Changes on decidable semilattices are boring]\label{lemma:dl-boring}
-  For any decidable semilattice type $\eqlat{A}$, $\GD \eqlat{A} = \eqlat{A}$,
+  For any decidable semilattice type $\eqlat{A}$, $\Ch \eqlat{A} = \eqlat{A}$,
   and moreover the following laws hold:
   \begin{eqnarray*}
     x \oplus y &=& x \vee y\\
@@ -480,9 +465,9 @@ These should satisfy the following laws:
 \begin{proof}
   By induction on the cases:
   \[\begin{array}{rcl}
-    \GD(\eqlat{A} \x \eqlat{B}) &=& \GD \eqlat{A} \x \GD \eqlat{B}\\
-    \GD(\Down{\eq{A}}) &=& \Down{\eq{A}}\\
-    \GD \tbool &=& \tbool
+    \Ch(\eqlat{A} \x \eqlat{B}) &=& \Ch \eqlat{A} \x \Ch \eqlat{B}\\
+    \Ch\thinspace \Seteq{A} &=& \Seteq{A}\\
+    \Ch\thinspace \tbool &=& \tbool
   \end{array}\]
 
   And, for the operations:
@@ -509,43 +494,51 @@ These should satisfy the following laws:
 
 We wish to define an operator $\delta$ on typing derivations (or if possible, on
 well-typed terms) such that the following holds:
-\[\infer{\J{\GP,\GD\GP,\GG}{\GD\GG}{\delta e}{\Delta A}}
+\[\infer{\J{\GP,\GG,\Ch\GP}{\Ch\GG}{\delta e}{\Ch A}}
         {\J{\GP}{\GG}{e}{A}}
 \]
 
 As a matter of convention, prefixing a variable with $d$ refers to the
 corresponding variable of its change type. That is, if $x \of A \in \GP \cup
-\GG$, then $dx \of \GD A \in \GD\GP \cup \GD\GG$. We also make implicit use of
+\GG$, then $dx \of \Ch A \in \Ch\GP \cup \Ch\GG$. We also make implicit use of
 weakening and monotone-to-discrete weakening (that is, if
 $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
 
-\todo{\indent Furthermore, if $e : A$ originally, then in the the $\delta$-context,
-  $\disc{e} : \Disc{A}$ for free, since all the variables $e$ uses are now
-  discrete. Can/do we take advantage of this?} {\color{ForestGreen} Yes we do!
-  See the green $(\disc{e})$ in the case for \textsf{when-then} below.}
+\newcommand{\preserve}[1]{{\color{ForestGreen}{\disc{#1}}}}
+
+\todo{\indent Furthermore, if $e : A$ originally, then in the the
+  $\delta$-context, $\preserve{e} : \Disc{A}$ for free, since all the variables
+  $e$ uses are now discrete. Can/do we take advantage of this?}
+     {\color{ForestGreen} Yes we do! We mark such uses with green to make them
+       stand out.}
 
 \[
 \begin{array}{lcll}
-  \delta x &=& dx\\
+  \delta \m{x} &=& \m{dx}\\
   \delta \d{x} &=& \d{dx}\\
-  \delta(\fn\bind{x} e) &=&
-  \fn\bind{y} \letdisc{\d{x}}{y} {\fn\bind{dx} \delta e}
-  \qquad\text{(for fresh $y$)}\\
-  \delta(e\;f) &=& \delta e \; f \; \delta f\\
+  \delta(\fn\bind{\m{x}} e) &=&
+  \fn\bind{\disc{\d{x}} \, \m{dx}} \delta e\\
+  \delta(e\;f) &=& \delta e \; \preserve{f} \; \delta f\\
   \delta \pair{e}{f} &=& \pair{\delta{e}}{\delta{f}}\\
   \delta(\pi_i\; e) &=& \pi_i\; \delta{e}\\
   \delta(\inj{i}{e}) &=& \inj{i}{\delta{e}}\\
-  \delta(\case{e}{x}{f}{y}{g})
+  \delta(\case{e}{\m x}{f}{\m y}{g})
   %% &=& \case{\splitsum{\color{ForestGreen} \disc{e}}}
   %%       {\disc{\d{x}}}{\case{\delta e}{dx}{\delta f}{\_}{\todo{\ms{abort!}}}}
   %%       {\disc{\d{x}}}{\textit{(symmetric case)}}\\
-  &=& \ms{case}(\splitsum{\color{ForestGreen}\disc{e}};\\
+
+  &=& \ms{case}(\splitsum{\preserve{e}};\\
    && \phantom{\ms{case}\ }
       \bind{\disc{\d{x}}}
-      \letv{dx}{\case{\delta e}{dx}{dx}{\_}{\dummy\;\d{x}}} \delta f;\\
+      \letv{\m{dx}}
+           {\case{\delta e}{\m{dx}}{\m{dx}}{\_}{\dummy\;\d{x}}}
+           \delta f;\\
    && \phantom{\ms{case}\ }
       \bind{\disc{\d{y}}}
-      \letv{dy}{\case{\delta e}{\_}{\dummy\;\d{y}}{dy}{dy}} \delta g)\\
+      \letv{\m{dy}}
+           {\case{\delta e}{\m{\_}}{\dummy\;\d{y}}{\m{dy}}{\m{dy}}}
+           \delta g)\\
+
   \delta\disc{e} &=& \disc{\delta e}\\
   \delta(\letdisc{\d{x}}{e} f) &=&
   \letdisc{\d{x}}{e}
@@ -559,55 +552,47 @@ $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
   \delta \unit &=& \unit\\
   \delta(e \vee f) &=& \delta e \vee \delta f
   \qquad \text{(this is the critical over-approximation)}\\
-  \delta(\downintro{e}) &=& \unit\\
-  \delta(\downelim{\d{x}}{e}{f}) &=& \text{\todo{see below}}\\
+  \delta(\single{e}) &=& \unit\\
+  \delta(\setelim{\d{x}}{e}{f}) &=& \text{\todo{see below}}\\
   \delta(\etrue) &=& \efalse\\
   \delta(\efalse) &=& \efalse\\
   \delta(\when{e}{f})
-  &=& \ifthen{\color{ForestGreen} \disc{e}}{\delta f}{
+  &=& \ifthen{\preserve{e}}{\delta f}{
     \when{\delta e}{(f \oplus \delta f) \ominus \unit}}
   \qquad \text{\color{red} see below}\\
   \delta(\ifthen{e}{f}{g}) &=& \ifthen{e}{\delta f}{\delta g}\\
-  \delta(\fix{x}{e}) &=&
-  \letdisc{\d{x}}{\disc{\fix{x} e}}{\fix{dx} \delta e}\\
-  \delta(\fixin{x}{e}{f}) &=& \text{\TODO}
+  \delta(\fix{\m{x}}{e}) &=&
+  \letdisc{\d{x}}
+          {\disc{\fix{\m{x}} {\color{ForestGreen}e}}}
+          {\fix{\m{dx}} \delta e}\\
+  \delta(\fixle{\m{x}}{e}{f}) &=& \text{\TODO}
 \end{array}
 \]
 
-At equality types, $\delta(\downelim{x}{e}{f})$ has the following definition:
+At decidable types, $\delta(\setelim{\d{x}}{e}{f})$ has the following definition:
 
 \[\begin{array}{rcl}
-  \delta(\downelim{x}{e}{f})
-  &=& \phantom{\vee~} (\downelim{x}{e}{\ms{let}~dx = \zero\; x ~\ms{in}~ \delta f})
-  \\ && \vee~ (\downelim{x}{\delta e}{\ms{let}~dx = \zero\; x ~\ms{in}~
+  \delta(\setelim{\d{x}}{e}{f})
+  &=& \phantom{\vee~} (\setelim{\d{x}}{e}{\letv{\m{dx}}{\zero\; \d{x}} \delta f})
+  \\ && \vee~ (\setelim{\d{x}}{\delta e}{\letv{\m{dx}}{\zero\; \d{x}}
     (f \oplus \delta f) \ominus \unit})
 \end{array}\]
-
-\todo{\todo{FIXME}: this doesn't type check! In $\downelim{x}{e} \letv{dx}{\zero\;
-  x}{\delta f}$, the variable $x$ is bound monotone, but it needs to be
-discrete! we have $e : \Disc{\Down{A}}$, but that's not the same as
-$\Down{\Disc{A}}$. Maybe we need an axiom:
-\[ \ms{suprema} : \Disc{\Down{\eq{A}}} \to \Down{\Disc{\eq{A}}} \]
-
-But what about the second case? Same problem! And it's not clear it can be fixed
-this time! Uh-oh. Are there any examples where this computes the *wrong*
-derivative?}
 
 \todo{TODO: Explain/show that $\oplus$, $(- \ominus \unit)$, and \zero{} are
   definable, typeable, and efficiently computable at these types!}
 
-Translation of $\downelim{x}{e}{f}$ at \emph{non-equality types}, however, is
-type-directed:
+Translation of $\setelim{\d{x}}{e}{f}$ at \emph{non-decidable types}, however,
+is type-directed:
 
 \[\begin{array}{lcll}
-  \delta(\downelim{x}{e}{f} : A \to \lat{B})
-  &=& \fn\bind{y} \downelim{x}{e}{f\; y}\\
-  \delta(\downelim{x}{e}{f} : \lat{A} \x \lat{B})
-  &=& \pair{\delta(\downelim{x}{e}{\pi_1\; f})}
-  {\delta(\downelim{x}{e}{\pi_2\; f})}
+  \delta(\setelim{\d{x}}{e}{f} : A \to \lat{B})
+  &=& \delta(\fn\bind{\m y} \setelim{\d{x}}{e}{f\; \m y})\\
+  \delta(\setelim{\d{x}}{e}{f} : \lat{A} \x \lat{B})
+  &=& \pair{\delta(\setelim{\d{x}}{e}{\pi_1\; f})}
+  {\delta(\setelim{\d{x}}{e}{\pi_2\; f})}
 \end{array}\]
 
-\emph{Hypothesis}: For $a : \lat{A}$ and $da : \GD\lat{A}$ a valid change to
+\emph{Hypothesis}: For $a : \lat{A}$ and $da : \Ch\lat{A}$ a valid change to
 $a$:
 \begin{equation*}
   (a \oplus da) \ominus \unit = (a \ominus \unit)
@@ -629,15 +614,19 @@ The derivative of $\ms{case}$ has branches we know semantically cannot occur;
 but to appease the type system, we need to put an expression in those branches
 of the appropriate type. Instead of introducing an \ms{abort} construct, which
 would complicate our semantics, we generate an expression of the appropriate
-type using a type-indexed dummy-value function $\dummy{} : A \to \Delta{A}$.
+type using a type-indexed dummy-value function $\dummy{} : A \to \Ch{A}$.
+
+\todo{TODO: actually, I think we can give \dummy{} the type $A \to
+  \Disc{\Ch{A}}$. Should we?}
 
 \[\begin{array}{lcl}
 \dummy\; (x : \tbool) &=& \efalse\\
-\dummy\; (x : \Down{A}) &=& \unit\\
+\dummy\; (x : \Seteq{A}) &=& \unit\\
 \dummy\; \pair{x}{y} &=& \pair{\dummy\;x}{\dummy\;y}\\
 \dummy\; (\inj{i}{x}) &=& \inj{i}{(\dummy\;x)}\\
 \dummy\; \disc{\d{x}} &=& \disc{\dummy\; \d{x}}\\
-\dummy\; (f : A \to B) &=& \fn x\,dx\binder\, \dummy\;(f\;x)
+\dummy\; (f : A \to B) &=&
+  \fn \disc{\d{x}} \, \m{dx} \binder\, \dummy\;(f\;\d{x})
 \end{array}\]
 
 This is a hack to simplify our metatheory. A real implementation would not do
@@ -721,8 +710,8 @@ which we prove here:
 %%   \todo{TODO.}
 %% \end{proof}
 
-%% \begin{lemma} For $f : A \to B$, $x : A$, $df : \Delta (A \to B)$, and $x :
-%%   \Delta A$, where $df$ and $dx$ are valid changes to $f$,$x$ respectively (see
+%% \begin{lemma} For $f : A \to B$, $x : A$, $df : \Ch (A \to B)$, and $x :
+%%   \Ch A$, where $df$ and $dx$ are valid changes to $f$,$x$ respectively (see
 %%   section on ``Dependent change types'', below), we have:
 %%   \[(f \oplus df) \; (x \oplus dx) = f\;x \oplus df\;x\;dx\]
 %% \end{lemma}
@@ -733,7 +722,7 @@ which we prove here:
 %% I don't know whether we need this theorem.
 
 %% \begin{theorem}[Soundness of ordering on change types]
-%%   For any $dx, dx' : \Delta A$, if $dx \le dx'$, then for any $x : A$, we have
+%%   For any $dx, dx' : \Ch A$, if $dx \le dx'$, then for any $x : A$, we have
 %%   $x \oplus dx \le x \oplus dx'$.
 %% \end{theorem}
 %% \begin{proof}
@@ -747,8 +736,8 @@ which we prove here:
 
 \[\begin{array}{l}
   \textsf{fast-fix} ~:~
-  (\Disc{\fixtype{A}} \to \Delta\fixtype{A} \to \Delta\fixtype{A})
-  \to \fixtype{A} \to \Delta\fixtype{A} \to \fixtype{A}\\
+  (\Disc{\fixtype{A}} \to \Ch\fixtype{A} \to \Ch\fixtype{A})
+  \to \fixtype{A} \to \Ch\fixtype{A} \to \fixtype{A}\\
   \textsf{fast-fix}\; \mi{df}\; \mi{current}\; \mi{change} =\\
   \quad \textbf{let}~ {\mi{next} = \mi{current} \oplus \mi{change}}
   ~\textbf{in}\\
@@ -778,7 +767,7 @@ which we prove here:
 We will define the following type-indexed sets and operators:
 
 \[\begin{array}{ccccl}
-  \Changes{A}{a} &\subseteq& |\Den{\GD{A}}|
+  \Changes{A}{a} &\subseteq& |\Den{\Ch{A}}|
   &\text{for}& a \in \Den{A}
   \\
   a \oplus_A da &\in& \Den{A}
@@ -876,7 +865,7 @@ And the operators:
   \)}
 \end{center}
 
-Although we define $\Changes{A}{a}$ as a subset of the elements $\Den{\GD{A}}$,
+Although we define $\Changes{A}{a}$ as a subset of the elements $\Den{\Ch{A}}$,
 we consider it to be a poset with the induced ordering.
 
 We will show the following:
@@ -886,7 +875,7 @@ We will show the following:
   follows that $a \oplus_A \zero_A\; a = a$.
 
 \item $a \oplus_A da$ is monotone in $da$. That is: for any $a \in \Den{A}$ and
-  $da, db \in \Changes{A}{a}$, if $da \le db$ in $\Den{\GD{A}}$, then $a
+  $da, db \in \Changes{A}{a}$, if $da \le db$ in $\Den{\Ch{A}}$, then $a
   \oplus_A da \le a \oplus_A db$ in $\Den{A}$.
 
 \item \todo{(it should be true, but do we need to show this?)} $b \ominus_A a$ is
