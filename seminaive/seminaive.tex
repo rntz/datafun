@@ -81,65 +81,10 @@ is a chain and strict chains do not stop. Likewise, ``no strict chains exist''
 implies every chain stops, since for every non-stopping chain $f$ there is a
 strict chain $f^s$.
 
-\todo{I no longer need all this theory about downsets and downset-ACC types and
-  can just use elementwise-ACC types.}
-
-\begin{definition}[Downset on an element]
-  The \emph{downset on $x$} in a poset $A$, written $\downintro{x : A}$ or just
-  $\downintro{x}$, is the freely generated downward-closed subset of $A$
-  containing $x$, namely $\setfor{y \in A}{y \le x}$.
+\begin{definition}[Elementwise ACC]
+  A poset $A$ is \emph{elementwise-ACC} iff for any $x : A$, the induced
+  sub-poset $\setfor{y}{y \le x}$, consisting of the elements below $x$, is ACC.
 \end{definition}
-
-\begin{definition}[Downset]
-  A \emph{downset} on a poset $A$ is a finitely-generated downward-closed subset
-  of $A$; that is to say, for some \emph{finite} subset $G \finsubseteq A$, it
-  is $\bigcup_{x \in G} \downintro{x}$, or equivalently $\setfor{y \in
-    A}{\exists(x \in G)\ y \le x}$.
-\end{definition}
-
-Note that this definition of \emph{downset} is in fact what others might call a
-\emph{finitely generated downset}. I prefer the term \emph{downward-closed set}
-for the more general concept.
-
-We will often regard a downset $D$ of $A$ as a poset, with the same ordering
-relation as $A$, restricted to elements of $D$ (the ``induced ordering'').
-
-\begin{definition}[Downset ACC]
-  A poset $A$ is \emph{downset-ACC} iff every downset $D$ of $A$ satisfies
-  ACC.
-\end{definition}
-
-\begin{lemma}[The union of ACC sets is ACC]\label{lemma:acc-union}
-  Given a poset $\tuple{A,\le}$ and two subsets $B,C \subseteq A$, if
-  $\tuple{B,\le}$ and $\tuple{C,\le}$ each satisfy ACC, then so does $\tuple{B
-    \cup C, \le}$.
-\end{lemma}
-\begin{proof}
-  Assume $B$ and $C$ satisfy ACC.
-  %%
-  It suffices to show that there are no strict chains in $B \cup C$.
-  So consider some strict chain $f : \N \to B \cup C$.
-  %%
-
-  We can split $f(0) < f(1) < f(2) < ...$ into two strictly increasing sequences
-  $b_0 < b_1 < b_2 < ...$ and $c_0 < c_1 < c_2 < ...$ by including in $b_i$ all
-  and only those $f(j) \in B$ and likewise in $c_i$ all and only those $f(j) \in
-  C$. Since $f$ is infinite, at least one of these sequence is infinite; WLOG,
-  assume $b$ is. Thus $b$ is a strict chain in $B$! But by ACC there are no
-  strict chains in $B$. Contradiction.
-\end{proof}
-
-\begin{theorem}[Elementwise ACC implies Downset ACC]
-  A poset $A$ is downset-ACC if, for any $x : A$, $\downintro{x}$ satisfies ACC.
-\end{theorem}
-\begin{proof}
-  The empty set clearly satisfies ACC. Given two subposets $D,E \subseteq A$
-  which both satisfy ACC, their union $D \cup E$ also satisfies ACC by Lemma
-  \ref{lemma:acc-union}. Every downset is the finite union of zero or more
-  singly-generated downsets of the form $\downintro{x}$. So by induction, if
-  every singly-generated downset $\downintro{x}$ satisfies ACC, so do all
-  downsets.
-\end{proof}
 
 
 
