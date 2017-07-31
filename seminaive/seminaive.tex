@@ -81,24 +81,8 @@ is a chain and strict chains do not stop. Likewise, ``no strict chains exist''
 implies every chain stops, since for every non-stopping chain $f$ there is a
 strict chain $f^s$.
 
-%% \begin{theorem}[ACC $\Leftrightarrow$ no strict chains]
-%%   A poset $A$ satisfies ACC iff there are no strict chains on $A$.
-%% \end{theorem}
-%% \begin{proof}
-%%   First, we show ACC implies no strict chains. Assume $A$ satisfies ACC.
-%%   Consider some strict chain $f : \N \to A$. Any strict chain is a chain.
-%%   Therefore by ACC $\exists i\ \forall(j \ge i)\ f(j) \le f(i)$. Letting $j = i
-%%   + 1$, we have $f(i) < f(i + 1)$ by $f$'s strictness, and $f(i) \ge f(i+1)$ by
-%%   ACC. Contradiction!
-
-%%   Second, we show no strict chains implies ACC. Assume $A$ has no strict chains.
-%%   Consider some (weak) chain $f : \N \to A$. Now, let the sequence $f^s$ be $f$
-%%   with repeated elements stripped out, so that $f^s$ is strictly increasing, but
-%%   might no longer be an infinite sequence. Since $A$ has no strict chains, we
-%%   know $f^s$ is finite. Consider the index $i$ in $f$ of the first occurrence of
-%%   the last (and thus greatest) element of $f^s$. By construction we have
-%%   $\forall (j \ge i)\ f(j) \le f(i)$. Thus $A$ satisfies ACC.
-%% \end{proof}
+\todo{I no longer need all this theory about downsets and downset-ACC types and
+  can just use elementwise-ACC types.}
 
 \begin{definition}[Downset on an element]
   The \emph{downset on $x$} in a poset $A$, written $\downintro{x : A}$ or just
@@ -119,9 +103,6 @@ for the more general concept.
 
 We will often regard a downset $D$ of $A$ as a poset, with the same ordering
 relation as $A$, restricted to elements of $D$ (the ``induced ordering'').
-
-\todo{I probably no longer need all this theory about downset-ACC types and can
-  just use elementwise-ACC types.}
 
 \begin{definition}[Downset ACC]
   A poset $A$ is \emph{downset-ACC} iff every downset $D$ of $A$ satisfies
@@ -261,8 +242,8 @@ We have similarly omitted the cases in which function types are finite $\fin{A} 
 
 \subsection{Typing rules}
 
-The typing judgment \[\J{\d{\GP}}{\m{\GG}}{e}{A}\] says that $e$ has type $A$ using variables with types given by $\d{\GP} \cup \m{\GG}$, and moreover uses the variables in $\m{\GG}$ in a monotone fashion.
-%% 
+The typing judgment \[\J{\GP}{\GG}{e}{A}\] says that $e$ has type $A$ using variables with types given by $\d{\GP} \cup \m{\GG}$, and moreover uses the variables in $\m{\GG}$ in a monotone fashion.
+%%
 Where possible without ambiguity, I omit the contexts $\dt{\GP};\mt{\GG}$ from typing rules.
 
 \begin{mathpar}
