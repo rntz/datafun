@@ -633,15 +633,15 @@ this.
 
 Our rule for the derivative of a fixed point is:
 \begin{eqnarray*}
-  \delta(\fix{x} e)
-  &=& \letdisc{\d{x}}{\disc{\fix{x} e}}{\fix{dx} \delta e}\\
-  &=& \fix{dx}
-      (\fn \d{x}\, dx\binder \delta e)
-      \; \disc{\fix{x} e}
-      \; dx\\
-  &=& \fix{dx} \delta(\fn\bind{x} e)
-      \; \disc{\fix{x} e}
-      \; dx
+  \delta(\fix{\m{x}} e)
+  &=& \letdisc{\d{x}}{\disc{\fix{\m{x}} e}} \fix{\m{dx}} \delta e\\
+  &=& \fix{\m{dx}}
+      (\fn \disc{\d{x}}\, \m{dx}\binder\, \delta e)
+      \; \disc{\fix{\m{x}} e}
+      \; \m{dx}\\
+  &=& \fix{\m{dx}} \delta(\fn\bind{\m{x}} e)
+      \; \disc{\fix{\m{x}} e}
+      \; \m{dx}
 \end{eqnarray*}
 
 Why is this correct? First, let's rephrase this in terms of an operator
@@ -663,28 +663,28 @@ equation? Well,
 \]
 
 We've now found a recursive equation that describes
-${\color{blue}\delta(\ms{fix}\;f)}$ in terms of itself:
+${\color{Cyan}\delta(\ms{fix}\;f)}$ in terms of itself:
 \begin{equation}\label{eqn:delta-fix}
-  {\color{blue} \delta(\ms{fix}\;f)}
-  = \delta f \;\disc{\ms{fix}\; f} \; {\color{blue}\delta(\ms{fix}\;f)}
+  {\color{Cyan} \delta(\ms{fix}\;f)}
+  = \delta f \;\disc{\ms{fix}\; f} \; {\color{Cyan}\delta(\ms{fix}\;f)}
 \end{equation}
 
 Let's apply \ms{fix} to solve the equation!
 \begin{equation*}
   \delta(\ms{fix}\; f)
   =
-  \ms{fix}\,(\fn\bind{\color{blue}dx}
-  \delta f \;\disc{\ms{fix}\;f} \;{\color{blue}dx})
+  \ms{fix}\,(\fn\bind{\m{\color{Cyan} dx}}
+  \delta f \;\disc{\ms{fix}\;f} \;{\m{\color{Cyan} dx}})
 \end{equation*}
 
 However, this is not a proof of correctness. We merely established that it
 was \emph{true} that equation \ref{eqn:delta-fix} holds, not that it suffices as
 a \emph{definition} of $\delta(\ms{fix}\;f)$. The correctness criterion for
-$\delta(\ms{fix}\; f)$ is roughly:
+$\delta(\ms{fix}\; f)$ is:
 
 \begin{equation}
   \ms{fix}\;f \oplus \delta(\ms{fix}\;f)
-  = (\mfix\;f)\sub{\gamma \oplus \delta\gamma/\gamma}
+  = (\ms{fix}\;f)\sub{\gamma \oplus \delta\gamma/\gamma}
 \end{equation}
 
 That is, a $\ms{fix}$ expression plus its derivative equals the original
