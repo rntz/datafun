@@ -10,6 +10,7 @@
 \usepackage{booktabs}
 
 \newcommand{\dummy}{\ms{dummy}}
+\newcommand{\longarray}{\renewcommand\arraystretch{1.2}}
 
 \begin{document}
 
@@ -87,22 +88,7 @@ strict chain $f^s$.
 \end{definition}
 
 
-
 \section{Core Datafun}
-
-\todo{We should carefully distinguish which properties are necessary to safely
-  extend core Datafun --- and therefore, which proofs are ``open''. For example,
-  all that should be necessary to add a type to Datafun and declare it decidable
-  is that it should actually \emph{be} decidable. However, for \emph{decidable
-    semilattice types}, we require that Lemma \ref{lemma:dl-boring} holds in
-  order to extend the language with them.
-
-  This means that when proving something about decidable types, we cannot do it
-  by induction (or we violate extensibility), only by invoking the fact that
-  they are decidable. But when proving something about decidable semilattice
-  types, we can use Lemma \ref{lemma:dl-boring}. The proof of Lemma
-  \ref{lemma:dl-boring} gets to use induction, but the hypothesis can't be
-  strengthened (or we'd violate extensibility).}
 
 \subsection{Syntax}
 
@@ -171,30 +157,30 @@ strict chain $f^s$.
 \end{array}
 \]
 
-I use blue script for monotone variables $\m{x}$, and orange bold for discrete variables $\d{x}$.
+I use blue italics for monotone variables $\m{x}$, and orange bold for discrete variables $\d{x}$.
 
 The ``typeclass'' rules (for decidable, finite, ACC, elementwise-ACC, semilattice, etc.\! types) are \emph{conservative approximations} of the corresponding semantic conditions.
 
 ``Decidable types'' are those whose partial ordering relation is practically decidable; that is, given $x, y : \eq{A}$, there is a reasonable algorithm that determines whether $x \le y$.
-%%
+%
 By antisymmetry, this also makes equality $x = y$ testable at these types. Theoretically, a function type $\under{fin}{A} \to \eq{B}$ whose domain is finite and codomain is decidable is also decidable.
-%%
+%
 We have omitted this, as it complicates our implementation for little practical
 benefit.
-%%
+%
 We have similarly omitted the cases in which function types are finite $\fin{A} \to \fin{B}$, ACC $\fin{A} \to \acc{B}$, and elementwise-ACC $\fin{A} \to \eltacc{B}$.
 
 
 \subsection{Typing rules}
 
 The typing judgment \[\J{\GP}{\GG}{e}{A}\] says that $e$ has type $A$ using variables with types given by $\d{\GP} \cup \m{\GG}$, and moreover uses the variables in $\m{\GG}$ in a monotone fashion.
-%%
+%
 Where possible without ambiguity, I omit the contexts $\dt{\GP};\mt{\GG}$ from typing rules.
 
 \begin{mathpar}
-  \infer{\J{\GP}{\GG}{\m{x}}{A}}{\mt{\m{x} \of A} \in \mt{\GG}}
+  \infer{\J{\GP}{\GG}{\m{x}}{A}}{\mt{\m{x} \of A \in \GG}}
 
-  \infer{\J{\GP}{\GG}{\d{x}}{A}}{\dt{\d{x} \of A} \in \dt{\GP}}
+  \infer{\J{\GP}{\GG}{\d{x}}{A}}{\dt{\d{x} \of A \in \GP}}
 
   \infer{\fn\bind{\m{x}} e : A \to B}{\J{\GP}{\GG,\m{x} \of A}{e}{B}}
 
@@ -236,7 +222,8 @@ Where possible without ambiguity, I omit the contexts $\dt{\GP};\mt{\GG}$ from t
 
   \infer{\efalse : \tbool}{}
 
-  \infer{\when{e}{f} : \lat{A}}{e : \tbool & f : \lat{A}}
+  %% TODO: Same explanation about eta-expansion here
+  \infer{\when{e}{f} : \eqlat{A}}{e : \tbool & f : \eqlat{A}}
 
   \infer{\ifthen{e}{f_1}{f_2} : A}{e : \Disc{\tbool} & f_i : A}
   \\
@@ -249,20 +236,43 @@ Where possible without ambiguity, I omit the contexts $\dt{\GP};\mt{\GG}$ from t
 \end{mathpar}
 
 
+\subsection{Eta-expanding excessively expressive eliminators}
+%% \subsection{$\eta$-expanding for expressive eliminators}
+
+\todo{Explain how to lift the decidability constraint on the type of the conclusion in the rules for $\bigvee$ and $\mb{when}$ by $\eta$-expanding.}
+
+We can translate away uses of $\bigvee$ and $\mb{when}$ at non-decidable types by $\eta$-expansion:
+
+\[\longarray
+\begin{array}{lclcl}
+  \setelim{\d{x}}{e}{f} &:& A \to \lat{B}
+  &=& \fn\bind{\m y} \setelim{\d{x}}{e}{f\; \m y}\\
+  \setelim{\d{x}}{e}{f} &:& \lat{A} \x \lat{B}
+  &=& \pair{\setelim{\d{x}}{e}{\pi_1\; f}}
+          {\setelim{\d{x}}{e}{\pi_2\; f}}\\
+  \when{e}{f} &:& A \to \lat{B} &=& \fn\bind{\m x} \when{e}{f\;\m{x}}\\
+  \when{e}{f} &:& \lat{A} \x \lat{B}
+  &=& \pair{\when{e}{\pi_1\; f}}{\when{e}{\pi_2\; f}}\\
+\end{array}\]
+
+%% This turns a \ms{when} at type $A \to \lat{B}$ into one at type $\lat{B}$. By extending this we can rewrite away all uses of \ms{when} at functional types, in the same manner as we can rewrite away uses of $\bigvee$ at functional type.
+
+
 \section{A Theory of Changes for Core Datafun}
 
-\subsection{Change types}
+\subsection{Change types and operators}
+\label{sec:change-types}
 
 For each type $A$ we define a change type $\Ch A$.
-
-\[\begin{array}{rcl>{\quad\quad}rcl}
+%
+\begin{eqnarray*}
   \Ch(A \to B) &=& \Disc{A} \to \Ch A \to \Ch B\\
   \Ch(A \x B) &=& \Ch A \x \Ch B\\
   \Ch(A + B) &=& \Ch A + \Ch B\\
   \Ch \Disc{A} &=& \Disc{\Ch A}\\
   \Ch\thinspace \Seteq{A} &=& \Seteq{A}\\
   \Ch\thinspace \tbool &=& \tbool
-\end{array}\]
+\end{eqnarray*}
 
 We also define associated operators $\oplus : A \to \Ch A \to A$, $\ominus : A
 \to A \to \Ch A$ and $\zero : A \to \Ch A$. Note, however, the
@@ -346,7 +356,6 @@ These should satisfy the following laws:
   efficiently computable $(- \ominus \unit)$ operator for decidable types, and
   point out that $\zero$ is efficiently computable for decidable types.}
 
-%% Zero on decidable types.
 %% Zero on decidable types:
 %% \[\arraycolsep=1.5em
 %% \begin{array}{c|c}
@@ -390,20 +399,20 @@ These should satisfy the following laws:
 \end{lemma}
 \begin{proof}
   By induction on the cases:
-  \[\begin{array}{rcl}
+  \begin{eqnarray*}
     \Ch(\eqlat{A} \x \eqlat{B}) &=& \Ch \eqlat{A} \x \Ch \eqlat{B}\\
     \Ch\thinspace \Seteq{A} &=& \Seteq{A}\\
     \Ch\thinspace \tbool &=& \tbool
-  \end{array}\]
+  \end{eqnarray*}
 
   And, for the operations:
-  \[\arraycolsep=0.75em
+  \[\arraycolsep=0.75em\longarray
   \begin{array}{c|ccc}
     \eqlat{A} \x \eqlat{B}
     & (x,y) \oplus (dx,dy) = (x \oplus dx, y \oplus dy)
     & (a,x) \ominus (b,y) = (a \ominus b, x \ominus y)
     & \zero\; (x,y) = (\zero\; x, \zero\; y)\\
-    \Down{\eq{A}}
+    \Set{\eq{A}}
     & x \oplus y = x \vee y
     & x \ominus y = x
     & \zero\;x = \unit\\
@@ -418,41 +427,43 @@ These should satisfy the following laws:
 
 \subsection{Derivatives}
 
-We wish to define an operator $\delta$ on typing derivations (or if possible, on
-well-typed terms) such that the following holds:
-\[\infer{\J{\GP,\GG,\Ch\GP}{\Ch\GG}{\delta e}{\Ch A}}
-        {\J{\GP}{\GG}{e}{A}}
+\newcommand{\preserve}[1]{{\color{ForestGreen}{#1}}}
+\newcommand{\preservedisc}[1]{\preserve{\disc{#1}}}
+
+We wish to define an operator $\delta$ on well-typed terms such that the following holds:
+\[
+\infer{\J{\GP,\GG,\Ch\GP}{\Ch\GG}{\delta e}{\Ch A}}
+      {\J{\GP}{\GG}{e}{A}}
 \]
 
-As a matter of convention, prefixing a variable with $d$ refers to the
-corresponding variable of its change type. That is, if $x \of A \in \GP \cup
-\GG$, then $dx \of \Ch A \in \Ch\GP \cup \Ch\GG$. We also make implicit use of
-weakening and monotone-to-discrete weakening (that is, if
-$\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
-
-\newcommand{\preserve}[1]{{\color{ForestGreen}{\disc{#1}}}}
-
-\todo{\indent Furthermore, if $e : A$ originally, then in the the
-  $\delta$-context, $\preserve{e} : \Disc{A}$ for free, since all the variables
-  $e$ uses are now discrete. Can/do we take advantage of this?}
-     {\color{ForestGreen} Yes we do! We mark such uses with green to make them
-       stand out.}
-
+As a matter of convention, prefixing a variable with $d$ refers to the corresponding variable of its change type.
+%
+So if $\dt{\d{x} \of A \in \GP}$, then $\dt{\d{dx} \of \Ch A \in \Ch \GP}$, and if $\mt{\m{x} \of A \in \GG}$, then $\mt{\m{dx} \of \Ch A \in \Ch \GG}$.
+%
+We also make implicit use of weakening and of monotone-to-discrete weakening: that is, if $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$.
+%
+In particular, if $\J{\GP}{\GG}{e}{A}$, then $\J{\GP,\GG,\Ch\GP}{-}{e}{A}$.
+%
+This means $e$ may be used in its own derivative, even in positions which require an empty monotone context, such as $\disc{e}$ or $\single{e}$.
+%
+We highlight such uses in \preserve{green}.
+%
 \[
 \begin{array}{lcll}
   \delta \m{x} &=& \m{dx}\\
   \delta \d{x} &=& \d{dx}\\
   \delta(\fn\bind{\m{x}} e) &=&
   \fn\bind{\disc{\d{x}} \, \m{dx}} \delta e\\
-  \delta(e\;f) &=& \delta e \; \preserve{f} \; \delta f\\
+  \delta(e\;f) &=& \delta e \; \preservedisc{f} \; \delta f\\
   \delta \pair{e}{f} &=& \pair{\delta{e}}{\delta{f}}\\
   \delta(\pi_i\; e) &=& \pi_i\; \delta{e}\\
   \delta(\inj{i}{e}) &=& \inj{i}{\delta{e}}\\
 
   \delta(\case{e}{\m x}{f}{\m y}{g})
-  &=& \mathbf{case} \; \pair{\splitsum{\preserve{e}}}{\delta e} ~\mathbf{of}\\
+  &=& \mb{case}~ \pair{\splitsum{\preservedisc{e}}}{\delta e} ~\mb{of}\\
    && \quad \pair{\inj{1}{\disc{\d{x}}}}{\inj{1}{\m{dx}}} \cto \delta f\\
    && \quad \pair{\inj{2}{\disc{\d{y}}}}{\inj{2}{\m{dy}}} \cto \delta g\\
+   && \quad \textit{--- The following cases are unreachable.}\\
    && \quad \pair{\inj{1}{\disc{\d{x}}}}{\inj{2}{\m{\pwild}}} \cto
       \letv{\m{dx}}{\dummy\; \d{x}} \delta f\\
    && \quad \pair{\inj{2}{\disc{\d{y}}}}{\inj{1}{\m{\pwild}}} \cto
@@ -471,91 +482,134 @@ $\J{\GP}{\GG_1,\GG_2}{e}{A}$, then $\J{\GP,\GG_1}{\GG_2}{e}{A}$).
   \splitsum{\delta e}\\
   \delta \unit &=& \unit\\
   \delta(e \vee f) &=& \delta e \vee \delta f
-  \qquad \text{(this is the critical over-approximation)}\\
+  \qquad \textit{--- This is a crucial over-approximation.}\\
   \delta(\single{e}) &=& \unit\\
-  \delta(\setelim{\d{x}}{e}{f}) &=& \text{\todo{see below}}\\
+  %% \delta(\setelim{\d{x}}{e}{f}) &=& \text{\todo{see below}}\\
+
+  \delta(\setelim{\d{x}}{e}{f})
+  &=& \phantom{\vee~} (\setelim{\d{x}}{e}
+        {\phantom{\delta} \letv{\m{dx}}{\zero\; \d{x}} \delta f})\\
+  && \vee~ (\setelim{\d{x}}{\delta e}
+        {\letv{\m{dx}}{\zero\; \d{x}}
+          (f \oplus \delta f) \ominus \unit})\\
+
   \delta(\etrue) &=& \efalse\\
   \delta(\efalse) &=& \efalse\\
   \delta(\when{e}{f})
-  &=& \ifthen{\preserve{e}}{\delta f}{
-    \when{\delta e}{(f \oplus \delta f) \ominus \unit}}
-  \qquad \text{\color{red} see below}\\
+  &=& \ifthen{\preservedisc{e}}{\delta f}{}\\
+  && \when{\delta e}{(f \oplus \delta f) \ominus \unit}
+  \\
   \delta(\ifthen{e}{f}{g}) &=& \ifthen{e}{\delta f}{\delta g}\\
   \delta(\fix{\m{x}}{e}) &=&
   \letdisc{\d{x}}
-          {\disc{\fix{\m{x}} {\color{ForestGreen}e}}}
+          {\disc{\fix{\m{x}} \preserve{e}}}
           {\fix{\m{dx}} \delta e}\\
-  \delta(\fixle{\m{x}}{e}{f}) &=& \text{\TODO}
+  && \textit{\todo{--- I'm not sure this next definition is right yet.}}\\
+  %% the best way to find out is probably to try to prove it, though
+  \delta(\fixle{\m{x}}{e}{f}) &=&
+    \letdisc{\d x}{\disc{\fixle{\m x}{\preserve{e}}{\preserve{f}}}}
+    \fixle{\m{dx}}{e \ominus \unit}{\delta f}
 \end{array}
 \]
 
-At decidable types, $\delta(\setelim{\d{x}}{e}{f})$ has the following definition:
+
+\subsubsection{Overapproximation}
 
-\[\begin{array}{rcl}
-  \delta(\setelim{\d{x}}{e}{f})
-  &=& \phantom{\vee~} (\setelim{\d{x}}{e}{\letv{\m{dx}}{\zero\; \d{x}} \delta f})
-  \\ && \vee~ (\setelim{\d{x}}{\delta e}{\letv{\m{dx}}{\zero\; \d{x}}
-    (f \oplus \delta f) \ominus \unit})
-\end{array}\]
-
-\todo{TODO: Explain/show that $\oplus$, $(- \ominus \unit)$, and \zero{} are
-  definable, typeable, and efficiently computable at these types!}
-
-Translation of $\setelim{\d{x}}{e}{f}$ at \emph{non-decidable types}, however,
-is type-directed:
-
-\[\begin{array}{lcll}
-  \delta(\setelim{\d{x}}{e}{f} : A \to \lat{B})
-  &=& \delta(\fn\bind{\m y} \setelim{\d{x}}{e}{f\; \m y})\\
-  \delta(\setelim{\d{x}}{e}{f} : \lat{A} \x \lat{B})
-  &=& \pair{\delta(\setelim{\d{x}}{e}{\pi_1\; f})}
-  {\delta(\setelim{\d{x}}{e}{\pi_2\; f})}
-\end{array}\]
-
-\emph{Hypothesis}: For $a : \lat{A}$ and $da : \Ch\lat{A}$ a valid change to
-$a$:
-\begin{equation*}
-  (a \oplus da) \ominus \unit = (a \ominus \unit)
-  \vee da
-\end{equation*}
-
-\emph{Observation}: Consider $(\when{e}{f})$ for $f : A \to \lat{B}$. We can
-rewrite this as $(\fn\bind{x} \when{e}{f\; x})$. This turns a \ms{when} at type
-$A \to \lat{B}$ into one at type $\lat{B}$. By extending this we can rewrite
-away all uses of \ms{when} at functional types, in the same manner as we can
-rewrite away uses of $\bigvee$ at functional type.
-
-\todo{\par TODO: Proofs which Neel \& I worked out last time.}
+\todo{Explain overapproximation by example. Explain why we do it (performance).
+  Discuss which derivatives can produce approximations - is it only $\delta(e
+  \vee f)$, or can $\delta(\setelim{\d{x}}{e}{f})$ also do it?}
 
 
-\subsubsection{Dummy values}
+\subsubsection{Computing dummy values}
 
-The derivative of $\ms{case}$ has branches we know semantically cannot occur;
-but to appease the type system, we need to put an expression in those branches
-of the appropriate type. Instead of introducing an \ms{abort} construct, which
-would complicate our semantics, we generate an expression of the appropriate
-type using a type-indexed dummy-value function $\dummy{} : A \to \Ch{A}$.
+The derivative of $\ms{case}$ has branches we know semantically cannot occur; but to appease the type system, we need to put an expression in those branches of the appropriate type.
+%
+Instead of introducing an \ms{abort} construct, which would complicate our semantics, we generate an expression of the appropriate type using a type-indexed dummy-value function $\dummy{} : A \to \Ch{A}$.
+%
+\[
+\begin{array}{lcl}
+  \dummy\; (\m{x} : \tbool) &=& \efalse\\
+  \dummy\; (\m{x} : \Seteq{A}) &=& \unit\\
+  \dummy\; \pair{\m{x}}{\m{y}} &=& \pair{\dummy\;\m{x}}{\dummy\;\m{y}}\\
+  \dummy\; (\inj{i}{\m{x}}) &=& \inj{i}{(\dummy\;\m{x})}\\
+  \dummy\; \disc{\d{x}} &=& \disc{\dummy\; \d{x}}\\
+  \dummy\; (\m{f} : A \to B) &=&
+    \fn \disc{\d{x}} \, \m{dx} \binder\, \dummy\;(\m{f}\;\d{x})
+\end{array}
+\]
 
-\todo{TODO: actually, I think we can give \dummy{} the type $A \to
-  \Disc{\Ch{A}}$. Should we?}
-
-\[\begin{array}{lcl}
-\dummy\; (x : \tbool) &=& \efalse\\
-\dummy\; (x : \Seteq{A}) &=& \unit\\
-\dummy\; \pair{x}{y} &=& \pair{\dummy\;x}{\dummy\;y}\\
-\dummy\; (\inj{i}{x}) &=& \inj{i}{(\dummy\;x)}\\
-\dummy\; \disc{\d{x}} &=& \disc{\dummy\; \d{x}}\\
-\dummy\; (f : A \to B) &=&
-  \fn \disc{\d{x}} \, \m{dx} \binder\, \dummy\;(f\;\d{x})
-\end{array}\]
-
-This is a hack to simplify our metatheory. A real implementation would not do
-this.
-
-\todo{NB. To add a type to Datafun, we must extend \dummy{} appropriately.}
+This is mostly a hack to simplify our metatheory; however, see Section \ref{sec:change-operators-at-decidable-semilattice-types} for another use of $\ms{dummy}$.
 
 
-\subsubsection{Justifying derivatives of fixed points}
+\subsubsection{Useless definition time!}
+
+It's \emph{almost} possible to give \dummy{} the type $A \to \Disc{\Ch A}$.
+%
+It requires an additional (semantically valid) axiom internalizing the fact that if $B$ is a discrete type, then so is $A \to B$:
+%
+\begin{eqnarray*}
+  \ms{axiom} &:& (A \to \Disc{B}) \to \Disc(A \to \Disc{B})\\
+  \ms{axiom}\;f &=& f \quad\text{(semantically speaking; does not typecheck)}
+\end{eqnarray*}
+
+With this axiom, we can define a ``shape'' function:
+%
+\newcommand{\shape}{\ms{shape}}
+\begin{eqnarray*}
+  \shape &:& A \to \Disc{A}\\
+  \shape\; (\m{f} : A \to B) &=&
+    \ms{axiom}\; (\fn\bind{\m{x}} \shape\; (\m{f}\;\m{x}))\\
+  \shape\; \pair{\m{x}}{\m{y}} &=&
+    \letdisc{\d{x'}}{\shape\;\m{x}}
+    \letdisc{\d{y'}}{\shape\;\m{y}}
+    \disc{\pair{\d{x'}}{\d{y'}}}\\
+  \shape\; (\inj{i}{\m{x}}) &=&
+    \letdisc{\d{x'}}{\shape\;\m x} \disc{\inj{i}{\d{x'}}}\\
+  \shape\; \disc{\d{x}} &=& \disc{\disc{\d{x}}}\\
+  \shape\; (\m{x} : \Seteq{A}) &=& \disc{\bot}\\
+  \shape\; (\m{x} : 2) &=& \disc{\efalse}
+\end{eqnarray*}
+
+If we ignore monotonicity, $\dummy = \ms{shape} \circ \dummy = \dummy \circ \ms{shape}$. (I think; I haven't proved this.)
+%
+Note also that we only require \ms{axiom} in the function case; a restricted version of \ms{shape} can be defined with the type $\eq{A} \to \Disc{\eq{A}}$.
+
+
+\subsubsection{Computing change operators at decidable semilattice types}
+\label{sec:change-operators-at-decidable-semilattice-types}
+
+The definition of $\delta$ given above makes use of the change operators $\zero$, $\oplus$, and $\ominus$ in the cases for $\bigvee$ and $\mb{when}$.
+%
+But as mentioned in Section \ref{sec:change-types}, in general these operators do not have definitions which Datafun is capable of type-checking!
+%
+One solution would be to add these operators to Datafun as primitives.
+%
+This is undesirable, for several reasons:
+\begin{itemize}
+\item $\zero$ and $\ominus$ are not efficiently computable in general, since
+  they find the derivative of functions by runtime calculation rather than
+  static differentiation.
+
+\item $x \ominus y$ is only meaningful if $x \ge y$; Datafun's type system
+  can't enforce this constraint.
+
+\item We'd need to define $\delta(e \oplus f)$, $\delta(\zero\;e)$, and
+  $\delta(e \ominus f)$. This is probably possible; but if we don't need it, why
+  bother?
+\end{itemize}
+
+Fortunately, our definition of $\delta$ only uses these operators at \emph{decidable semilattice types}.\footnote{\todo{TODO: put a call-back to the $\eta$-expansion trick here}} Moreover, it only uses $\ominus$ in the restricted idiom $e \ominus \unit$. We can implement these cases in core Datafun as follows:
+%
+\begin{eqnarray*}
+  \zero\; e &=& \dummy\; e\\
+  e \oplus f &=& e \vee f\\
+  e \ominus \unit &=& e
+\end{eqnarray*}
+
+\todo{TODO: Prove these definitions correct for the case of decidable semilattice types.}
+
+
+\subsubsection{Derivatives of fixed points}
 
 Our rule for the derivative of a fixed point is:
 \begin{eqnarray*}
@@ -596,17 +650,14 @@ ${\color{Cyan}\delta(\ms{fix}\;f)}$ in terms of itself:
 \end{equation}
 
 Let's apply \ms{fix} to solve the equation!
-\begin{equation*}
+\begin{equation}
   \delta(\ms{fix}\; f)
   =
   \ms{fix}\,(\fn\bind{\m{\color{Cyan} dx}}
   \delta f \;\disc{\ms{fix}\;f} \;{\m{\color{Cyan} dx}})
-\end{equation*}
+\end{equation}
 
-However, this is not a proof of correctness. We merely established that it
-was \emph{true} that equation \ref{eqn:delta-fix} holds, not that it suffices as
-a \emph{definition} of $\delta(\ms{fix}\;f)$. The correctness criterion for
-$\delta(\ms{fix}\; f)$ is:
+However, this is not a proof. We have merely established it is \emph{true} that equation \ref{eqn:delta-fix} holds, not that it suffices as a \emph{definition} of $\delta(\ms{fix}\;f)$. The correctness criterion for $\delta(\ms{fix}\; f)$ is:
 
 \begin{equation}
   \ms{fix}\;f \oplus \delta(\ms{fix}\;f)
@@ -652,7 +703,8 @@ which we prove here:
 %% \end{proof}
 
 
-\section{Fixed points}
+\section{Finding fixed points faster}
+%% \section{Finding fixed points faster with $\delta$}
 
 \[\begin{array}{l}
   \textsf{fast-fix} ~:~
@@ -891,6 +943,25 @@ first.
 
 NB. In order for that last $\oplus$ to be well-defined, we need legitimacy to
 hold.
+
+
+\section{Extending Datafun}
+
+\todo{NB. To add a type to Datafun, we must extend \dummy{} appropriately.}
+
+\todo{We should carefully distinguish which properties are necessary to safely
+  extend core Datafun --- and therefore, which proofs are ``open''. For example,
+  all that should be necessary to add a type to Datafun and declare it decidable
+  is that it should actually \emph{be} decidable. However, for \emph{decidable
+    semilattice types}, we require that Lemma \ref{lemma:dl-boring} holds in
+  order to extend the language with them.
+
+  This means that when proving something about decidable types, we cannot do it
+  by induction (or we violate extensibility), only by invoking the fact that
+  they are decidable. But when proving something about decidable semilattice
+  types, we can use Lemma \ref{lemma:dl-boring}. The proof of Lemma
+  \ref{lemma:dl-boring} gets to use induction, but the hypothesis can't be
+  strengthened (or we'd violate extensibility).}
 
 
 \section{Stuff to put in this document}
