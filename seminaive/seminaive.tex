@@ -9,8 +9,15 @@
 %% for \midrule
 \usepackage{booktabs}
 
-\newcommand{\dummy}{\ms{dummy}}
 \newcommand{\longarray}{\renewcommand\arraystretch{1.2}}
+
+\newcommand{\dummy}{\ms{dummy}}
+\newcommand{\shape}{\ms{shape}}
+
+\newcommand{\preserve}[1]{{\color{ForestGreen}{#1}}}
+\newcommand{\preservedisc}[1]{\preserve{\disc{#1}}}
+
+\newcommand{\comment}[1]{\textit{--- {#1}}}
 
 \begin{document}
 
@@ -241,7 +248,7 @@ Where possible without ambiguity, I omit the contexts $\dt{\GP};\mt{\GG}$ from t
 
 \todo{Explain how to lift the decidability constraint on the type of the conclusion in the rules for $\bigvee$ and $\mb{when}$ by $\eta$-expanding.}
 
-We can translate away uses of $\bigvee$ and $\mb{when}$ at non-decidable types by $\eta$-expansion:
+We can translate away uses of $\bigvee$ and $\mb{when}$ at non-decidable semilattice types by $\eta$-expansion:
 
 \[\longarray
 \begin{array}{lclcl}
@@ -427,9 +434,6 @@ These should satisfy the following laws:
 
 \subsection{Derivatives}
 
-\newcommand{\preserve}[1]{{\color{ForestGreen}{#1}}}
-\newcommand{\preservedisc}[1]{\preserve{\disc{#1}}}
-
 We wish to define an operator $\delta$ on well-typed terms such that the following holds:
 \[
 \infer{\J{\GP,\GG,\Ch\GP}{\Ch\GG}{\delta e}{\Ch A}}
@@ -463,7 +467,7 @@ We highlight such uses in \preserve{green}.
   &=& \mb{case}~ \pair{\splitsum{\preservedisc{e}}}{\delta e} ~\mb{of}\\
    && \quad \pair{\inj{1}{\disc{\d{x}}}}{\inj{1}{\m{dx}}} \cto \delta f\\
    && \quad \pair{\inj{2}{\disc{\d{y}}}}{\inj{2}{\m{dy}}} \cto \delta g\\
-   && \quad \textit{--- The following cases are unreachable.}\\
+   && \quad \comment{The following cases are unreachable.}\\
    && \quad \pair{\inj{1}{\disc{\d{x}}}}{\inj{2}{\m{\pwild}}} \cto
       \letv{\m{dx}}{\dummy\; \d{x}} \delta f\\
    && \quad \pair{\inj{2}{\disc{\d{y}}}}{\inj{1}{\m{\pwild}}} \cto
@@ -482,7 +486,7 @@ We highlight such uses in \preserve{green}.
   \splitsum{\delta e}\\
   \delta \unit &=& \unit\\
   \delta(e \vee f) &=& \delta e \vee \delta f
-  \qquad \textit{--- This is a crucial over-approximation.}\\
+  \qquad \comment{This is a crucial over-approximation.}\\
   \delta(\single{e}) &=& \unit\\
   %% \delta(\setelim{\d{x}}{e}{f}) &=& \text{\todo{see below}}\\
 
@@ -504,11 +508,11 @@ We highlight such uses in \preserve{green}.
   \letdisc{\d{x}}
           {\disc{\fix{\m{x}} \preserve{e}}}
           {\fix{\m{dx}} \delta e}\\
-  && \textit{\todo{--- I'm not sure this next definition is right yet.}}\\
+  && \todo{\comment{I'm not sure this next definition is right yet.}}\\
   %% the best way to find out is probably to try to prove it, though
   \delta(\fixle{\m{x}}{e}{f}) &=&
     \letdisc{\d x}{\disc{\fixle{\m x}{\preserve{e}}{\preserve{f}}}}
-    \fixle{\m{dx}}{e \ominus \unit}{\delta f}
+    \fixle{\m{dx}}{(e \oplus \delta e) \ominus \unit}{\delta f}
 \end{array}
 \]
 
@@ -554,7 +558,6 @@ It requires an additional (semantically valid) axiom internalizing the fact that
 
 With this axiom, we can define a ``shape'' function:
 %
-\newcommand{\shape}{\ms{shape}}
 \begin{eqnarray*}
   \shape &:& A \to \Disc{A}\\
   \shape\; (\m{f} : A \to B) &=&
@@ -627,7 +630,7 @@ Our rule for the derivative of a fixed point is:
 Why is this correct? First, let's rephrase this in terms of an operator
 $\ms{fix} : (\fixtype{A} \to \fixtype{A}) \to \fixtype{A}$:
 \begin{equation}
-  \delta(\ms{fix}\; f) = \ms{fix}\; (\delta f \;\disc{\ms{fix}\; f})
+  \delta(\ms{fix}\; f) = \ms{fix}\; (\delta f \;\disc{\ms{fix}\; \preserve{f}})
 \end{equation}
 
 This is such a beautiful equation it can't be wrong. How did we arrive at this
@@ -637,7 +640,7 @@ equation? Well,
   \delta(\ms{fix}\; f)
   &=& \delta(f \;(\ms{fix}\;f))
   & \text{because}~\ms{fix}\; f = f\;(\ms{fix}\;f)\\
-  &=& \delta f \;\disc{\ms{fix}\; f} \; \delta(\ms{fix}\; f)
+  &=& \delta f \;\disc{\ms{fix}\; \preserve{f}} \; \delta(\ms{fix}\; f)
   & \text{rule for}~\delta(e_1\;e_2)
 \end{array}
 \]
@@ -646,7 +649,7 @@ We've now found a recursive equation that describes
 ${\color{Cyan}\delta(\ms{fix}\;f)}$ in terms of itself:
 \begin{equation}\label{eqn:delta-fix}
   {\color{Cyan} \delta(\ms{fix}\;f)}
-  = \delta f \;\disc{\ms{fix}\; f} \; {\color{Cyan}\delta(\ms{fix}\;f)}
+  = \delta f\;\disc{\ms{fix}\; \preserve{f}}\;{\color{Cyan}\delta(\ms{fix}\;f)}
 \end{equation}
 
 Let's apply \ms{fix} to solve the equation!
@@ -654,7 +657,7 @@ Let's apply \ms{fix} to solve the equation!
   \delta(\ms{fix}\; f)
   =
   \ms{fix}\,(\fn\bind{\m{\color{Cyan} dx}}
-  \delta f \;\disc{\ms{fix}\;f} \;{\m{\color{Cyan} dx}})
+  \delta f \;\disc{\ms{fix}\;\preserve{f}} \;{\m{\color{Cyan} dx}})
 \end{equation}
 
 However, this is not a proof. We have merely established it is \emph{true} that equation \ref{eqn:delta-fix} holds, not that it suffices as a \emph{definition} of $\delta(\ms{fix}\;f)$. The correctness criterion for $\delta(\ms{fix}\; f)$ is:
