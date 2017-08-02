@@ -742,66 +742,58 @@ which we prove here:
 We will define the following type-indexed sets and operators:
 
 \[\begin{array}{ccccl}
-  \Changes{A}{a} &\subseteq& |\Den{\Ch{A}}|
+  \Change{A}{a} &\subseteq& |\Den{\Ch{A}}|
   &\text{for}& a \in \Den{A}
   \\
   a \oplus_A da &\in& \Den{A}
-  &\text{for}& a \in \Den{A} ~\text{and}~ da \in \Changes{A}{a}
+  &\text{for}& a \in \Den{A} ~\text{and}~ da \in \Change{A}{a}
   \\
-  b \ominus_A a &\in& \Changes{A}{a}
+  b \ominus_A a &\in& \Change{A}{a}
   &\text{for}& a, b \in \Den{A} ~\text{and}~ a \le b
   \\
-  \zero_A\; a &\in& \Changes{A}{a}
+  \zero_A\; a &\in& \Change{A}{a}
   &\text{for}& a \in \Den{A}
 \end{array}\]
 
 \zero{} is simply syntax sugar; $\zero_A\; x = x \ominus_A x$. The other three
 are defined mutually, by induction on types. First we give the rules for
-$\Changes{A}{a}$:
+$\Change{A}{a}$:
 
 \[
 \def\arraystretch{1.2}
-\begin{array}{lcl}
-  \Changes{\tbool}{\pwild} &=& \Den{\tbool}
+\begin{array}{rcl}
+  \Change{\tbool}{\pwild} &=& \Den{\tbool}
   \\
-  \Changes{\Down{A}}{\pwild} &=& \Den{\Down{A}}
+  \Change{\Seteq{A}}{\pwild} &=& \Den{\Seteq{A}}
   \\
-  \Changes{A_1 + A_2}{\inj{i}{x}}
-  &=& \setfor{\inj{i}{dx}}{dx \in \Changes{A_i}{dx}}
+  \Change{A_1 + A_2}{\inj{i}{x}}
+  &=& \setfor{\inj{i}{dx}}{dx \in \Change{A_i}{dx}}
   %% \\
-  %% \inj{i}{dx} \in \Changes{A_1 + A_2}{\inj{i}{x}}
-  %% &\iff& dx \in \Changes{A_i}{x}
+  %% \inj{i}{dx} \in \Change{A_1 + A_2}{\inj{i}{x}}
+  %% &\iff& dx \in \Change{A_i}{x}
   \\
-  \Changes{A \x B}{\pair{a}{b}}
-  &=& \Changes{A}{a} \x \Changes{B}{b}
+  \Change{A \x B}{\pair{a}{b}}
+  &=& \Change{A}{a} \x \Change{B}{b}
   \\
-  \Changes{\Disc{A}}{a}
-  &=& \setfor{dx \in \Changes{A}{a}}{x \oplus_A dx = x}
+  \Change{\Disc{A}}{a}
+  &=& \setfor{dx \in \Change{A}{a}}{x \oplus_A dx = x}
   \\
-  df \in \Changes{A \to B}{f}
+  df \in \Change{A \to B}{f}
   &\Leftrightarrow&
-  \forall({a,b \in \Den{A}},\, da \in \Changes{A}{a},\, db \in \Changes{A}{b})\\
+  \forall({a,b \in \Den{A}},\, da \in \Change{A}{a},\, db \in \Change{A}{b})\\
   &&\phantom{{}\wedge{}}
-  df\; a\; da \in \Changes{B}{f\; a}
-  \wedge df\;b\;db \in \Changes{B}{f\; b}
+  df\; a\; da \in \Change{B}{f\; a}
+  \wedge df\;b\;db \in \Change{B}{f\; b}
   %% \\
   %% &&{}\wedge (a \mapsto f\; a \oplus_B df\; a \; (\zero_A\; a))
   %% ~\text{is monotone}
   \\
-  &&{}\wedge (a \oplus da \le b \oplus db \implies
-  f\;a \oplus df\;a\;da \le f\;b \oplus df\;b\;db)
+  &&{}\wedge (a \oplus_A da \le b \oplus_A db \implies
+  f\;a \oplus_B df\;a\;da \le f\;b \oplus_B df\;b\;db)
 \end{array}
 \]
 
-The condition defining $df \in \Changes{A \to B}{f}$ can be phrased as requiring
-that the map $(a, da) \mapsto (f\;a, df\;a\;da)$ is monotone when we order its
-domain and codomain by $(a,da) \le (b,db) \iff a \oplus da \le b \oplus db$.
-\todo{FIXME: see figure 4, page 5 in Cai et al. They have a different
-  condition/semantics for $\Delta(A \to B)$, namely: $df \in \Changes{A \to
-    B}{f}$ iff $(f \oplus df)\;(a \oplus da) = f\;a\oplus df\;a\;da$. Can ours
-  prove theirs?}
-
-And the operators:
+Next we define the operators:
 \begin{center}
   \scalebox{1}{\(
   \begin{array}{cccc}
@@ -812,9 +804,10 @@ And the operators:
     & b \ominus a = b
     %% & \zero\; a = \ms{false}
     \\
-    \Down{A}
+    \Seteq{A}
     & a \oplus da = a \cup da
-    & b \ominus a = b
+    %% should this be: b \ominus a = b \setminus a?
+    & b \ominus a = \todo{b}
     %% & \zero\; a = \emptyset
     \\
     A + B
@@ -840,8 +833,27 @@ And the operators:
   \)}
 \end{center}
 
-Although we define $\Changes{A}{a}$ as a subset of the elements $\Den{\Ch{A}}$,
+Although we define $\Change{A}{a}$ as a subset of the elements $\Den{\Ch{A}}$,
 we consider it to be a poset with the induced ordering.
+
+The last line in the definition of $df \in \Change{A \to B}{f}$ is equivalent to
+saying the map $(a, da) \mapsto (f\;a, df\;a\;da)$ is monotone when we order its
+domain and codomain by $(a,da) \le (b,db) \iff a \oplus da \le b \oplus db$.
+%
+In Cai et al., figure 4, page 5, the corresponding condition is
+$(f \oplus_{A \to B} df)\; (a \oplus_A da) = f\;a \oplus_B df\;a\;da$.
+%
+Our condition is stronger, to account for monotonicity, and implies theirs as follows:
+%
+\[\begin{array}{crcll}
+  & a \oplus da &=& (a \oplus da) \oplus \zero_A \;(a \oplus da)
+  & \text{by Lemma \ref{lemma:zero-id}}\\
+  \implies& f\;a \oplus df\;a\;da &=&
+  f\;(a \oplus da) \oplus df \;(a \oplus da) \;(\zero_A \;(a \oplus da))
+  & \text{our condition, reflexivity and antisymmetry}\\
+  \implies& f\;a \oplus df\;a\;da &=& (f \oplus df) \; (a \oplus da)
+  & \text{definition of $f \oplus_{A \to B} df$}
+\end{array}\]
 
 We will show the following:
 
@@ -849,21 +861,23 @@ We will show the following:
 \item If $a \le b$ then $a \oplus_A (b \ominus_A a) = b$. From this it
   follows that $a \oplus_A \zero_A\; a = a$.
 
-\item $a \oplus_A da$ is monotone in $da$. That is: for any $a \in \Den{A}$ and
-  $da, db \in \Changes{A}{a}$, if $da \le db$ in $\Den{\Ch{A}}$, then $a
-  \oplus_A da \le a \oplus_A db$ in $\Den{A}$.
+\item \todo{(do we use this?)} $a \oplus_A da$ is monotone in $da$. That is: for
+  any $a \in \Den{A}$ and $da, db \in \Change{A}{a}$, if $da \le db$ in
+  $\Den{\Ch{A}}$, then $a \oplus_A da \le a \oplus_A db$ in $\Den{A}$.
 
-\item \todo{(it should be true, but do we need to show this?)} $b \ominus_A a$ is
-  monotone in $b$.
+\item \todo{(do we use this?)} $b \ominus_A a$ is monotone in $b$.
 \end{enumerate}
 
 %% NB. One might think we could also say something like: ``$\zero_A\; a$ is the
-%% least element of $\Changes{A}{a}$''. This might be true for $\zero$ as defined
+%% least element of $\Change{A}{a}$''. This might be true for $\zero$ as defined
 %% (although I'm not sure it is), but it is not true of zero changes in general:
 %% $\{5\}$ is a zero-change on $\{5\}$, but not the least element of
-%% $\Changes{\Set{{\N}}}{\{5\}}$; the empty set (also a zero-change) is smaller.
+%% $\Change{\Set{{\N}}}{\{5\}}$; the empty set (also a zero-change) is smaller.
 
+
 \begin{lemma}
+  \label{lemma:oplus-ominus}
+  \label{lemma:zero-id}
   If $a \le b$ then $a \oplus_A (b \ominus_A a) = b$.
 \end{lemma}
 
@@ -876,9 +890,9 @@ We will show the following:
       \end{equation*}
       Where $a \vee b = b$ follows from $a \le b$.
 
-    \item[Case $\Down{A}$]
+    \item[Case $\Seteq{A}$]
       \begin{equation*}
-        a \oplus_{\Down{A}} (b \ominus_{\Down{A}} a)
+        a \oplus_{\Seteq{A}} (b \ominus_{\Seteq{A}} a)
         = a \cup b
         = b
       \end{equation*}
@@ -923,22 +937,62 @@ We will show the following:
 
 \section{Metatheory}
 
-%% \todo{$\GD_{A \to B}$ IS WRONG: it doesn't ensure that $f \oplus df$ is still monotone!}
+\begin{theorem}[Denotation]
+  \label{thm:denotation}
+  If $\J{\GP}{\GG}{e}{A}$, then $\den{e} \in \Den{\Disc{\GP} \x \GG \to A}$.
+\end{theorem}
+\begin{proof}
+  \todo{Assumed, for now.}
+\end{proof}
+
+\newcommand{\dendelta}[1]{\den{#1}_\delta}
+
+If $\J{\GP}{\GG}{e}{A}$, then $\J{\GP, \GG, \Ch\GP}{\Ch\GG}{\delta e}{\Ch A}$.
+%
+So by Theorem \ref{thm:denotation} we have
+$\den{\delta e} \in \Den{\Disc{(\GP \x \GG \x \Ch\GP)} \x \Ch\GG \to \Ch A}$.
+%
+We define $\dendelta{e}$ to be a reassociated version of
+$\den{\delta e}$ with a type that looks like the change type of $\den{e}$:
+%
+\begin{eqnarray*}
+  \dendelta{e} &\in& \Den{\Ch (\Disc{\GP} \x \GG \to A) }\\
+  \dendelta{e} &\in& \Disc{(\Den{\GP} \x \Den{\GG})}
+    \to \Disc{\Den{\Ch\GP}} \x \Den{\Ch\GG}  \to \Den{A}\\
+  \dendelta{e} \; (\psi, \gamma) \; (d\psi, d\gamma)
+  &\defeq& \den{\delta e} \; ((\psi, \gamma, d\psi), d\gamma)
+\end{eqnarray*}
+%
+Now we prove that $\dendelta{e}$ is indeed a change to $\den{e}$:
 
 \begin{theorem}[Legitimacy]
-  Given $\J{\GP}{\GG}{e}{A}$ we have $\den{\delta e} \in \GD_{\Disc{\Psi} \x \GG
-    \to A}(\den{e})$.
+  Given $\J{\GP}{\GG}{e}{A}$ we have
+  $\dendelta{e} \in \Change{\Disc{\Psi} \x \GG \to A}{\den{e}}$.
 \end{theorem}
 
+In fact, $\dendelta{e}$ is a zero change to $\den{e}$, that is, a derivative:
+
 \begin{theorem}[Correctness]
-  Given $\J{\GP}{\GG}{e}{A}$, $\psi \in \Den{\GP}$, $\gamma \in \Den{\GG}$,
-  $\delta\psi \in \GD_\Psi{\psi}$, $\delta\gamma \in \GD_\GG(\gamma)$, we have
+  Given $\J{\GP}{\GG}{e}{A}$, $s \in \Den{\Disc{\GP} \x \GG}$,
+  and $ds \in \Change{\Disc{\GP} \x \GG}{s}$, we have
   \begin{equation*}
-    \den{e}\; (\psi \oplus \delta \psi)\; (\gamma \oplus \delta\gamma)
+    \den{e}\; (s \oplus ds)
     =
-    \den{e}\; \psi\; \gamma \oplus
-    \den{\delta e}\;(\psi, \gamma, \delta \psi) \; \delta\gamma
+    \den{e}\; s \oplus \dendelta{e} \; s \; ds
   \end{equation*}
+
+  %% Given $\J{\GP}{\GG}{e}{A}$,
+  %% $\psi \in \Den{\Disc{\GP}}$, $\gamma \in \Den{\GG}$,
+  %% $\delta\psi \in \Change{\Disc{\Psi}}{\psi}$,
+  %% $\delta\gamma \in \Change{\GG}{\gamma}$,
+  %% we have
+  %% \begin{equation*}
+  %%   \den{e}\; (\psi \oplus \delta \psi, \gamma \oplus \delta\gamma)
+  %%   =
+  %%   \den{e}\; (\psi, \gamma) \oplus
+  %%   \den{\delta e}\;(\psi, \gamma, \delta \psi, \delta\gamma)
+  %% \end{equation*}
+
 \end{theorem}
 
 Strategy: attack each by induction on $\J{\GP}{\GG}{e}{A}$. Try legitimacy
@@ -979,8 +1033,11 @@ hold.
 
   or $\Delta(A, a) \in \ms{Poset}$ for $a \in \Den{A}$
 \item Show $\Delta_A(a)$ is an induced subposet of $\Den{A}$.
-\item Define $\oplus_A : a : \Disc{\Den{A}} \to \GD_A(a) \to \Den{A}$ and show it
-  is monotone in its second argument. This also involves defining \zero.
+
+\item Define $\oplus_A : (a : \Disc{\Den{A}}) \to \Change{A}{a} \to \Den{A}$
+  and show it is monotone in its second argument.
+  This also involves defining \zero.
+
 \end{enumerate}
 
 \end{document}
