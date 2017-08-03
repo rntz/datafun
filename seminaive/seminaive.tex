@@ -154,7 +154,7 @@ strict chain $f^s$.
 
   %% expressions
   \textsf{expressions} & e,f,g
-  &\bnfeq& \m{x} \pipe \d{x} \pipe \fn\bind{\m{x}} e \pipe e\; e
+  &\bnfeq& \m{x} \pipe \d{x} \pipe \lam{\m{x}} e \pipe e\; e
   \pipe \pair{e}{e} \pipe \pi_i\; e\\
   &&\pipe& \inj{i}{e} \pipe \case{e}{\m{x}}{e_1}{\m{x}}{e_2}\\
   &&\pipe& \disc{e} \pipe \letdisc{\d{x}}{e}{e} \pipe \splitsum{e}\\
@@ -189,7 +189,7 @@ Where possible without ambiguity, I omit the contexts $\dt{\GP};\mt{\GG}$ from t
 
   \infer{\J{\GP}{\GG}{\d{x}}{A}}{\dt{\d{x} \of A \in \GP}}
 
-  \infer{\fn\bind{\m{x}} e : A \to B}{\J{\GP}{\GG,\m{x} \of A}{e}{B}}
+  \infer{\lam{\m{x}} e : A \to B}{\J{\GP}{\GG,\m{x} \of A}{e}{B}}
 
   \infer{e \; f : B}{e : A \to B & f : A}
   \\
@@ -253,11 +253,11 @@ We can translate away uses of $\bigvee$ and $\mb{when}$ at non-decidable semilat
 \[\longarray
 \begin{array}{lclcl}
   \setelim{\d{x}}{e}{f} &:& A \to \lat{B}
-  &=& \fn\bind{\m y} \setelim{\d{x}}{e}{f\; \m y}\\
+  &=& \lam{\m y} \setelim{\d{x}}{e}{f\; \m y}\\
   \setelim{\d{x}}{e}{f} &:& \lat{A} \x \lat{B}
   &=& \pair{\setelim{\d{x}}{e}{\pi_1\; f}}
           {\setelim{\d{x}}{e}{\pi_2\; f}}\\
-  \when{e}{f} &:& A \to \lat{B} &=& \fn\bind{\m x} \when{e}{f\;\m{x}}\\
+  \when{e}{f} &:& A \to \lat{B} &=& \lam{\m x} \when{e}{f\;\m{x}}\\
   \when{e}{f} &:& \lat{A} \x \lat{B}
   &=& \pair{\when{e}{\pi_1\; f}}{\when{e}{\pi_2\; f}}\\
 \end{array}\]
@@ -456,8 +456,8 @@ We highlight such uses in \preserve{green}.
 \begin{array}{lcll}
   \delta \m{x} &=& \m{dx}\\
   \delta \d{x} &=& \d{dx}\\
-  \delta(\fn\bind{\m{x}} e) &=&
-  \fn\bind{\disc{\d{x}} \, \m{dx}} \delta e\\
+  \delta(\lam{\m{x}} e) &=&
+  \lam{\disc{\d{x}} \, \m{dx}} \delta e\\
   \delta(e\;f) &=& \delta e \; \preservedisc{f} \; \delta f\\
   \delta \pair{e}{f} &=& \pair{\delta{e}}{\delta{f}}\\
   \delta(\pi_i\; e) &=& \pi_i\; \delta{e}\\
@@ -561,7 +561,7 @@ With this axiom, we can define a ``shape'' function:
 \begin{eqnarray*}
   \shape &:& A \to \Disc{A}\\
   \shape\; (\m{f} : A \to B) &=&
-    \ms{axiom}\; (\fn\bind{\m{x}} \shape\; (\m{f}\;\m{x}))\\
+    \ms{axiom}\; (\lam{\m{x}} \shape\; (\m{f}\;\m{x}))\\
   \shape\; \pair{\m{x}}{\m{y}} &=&
     \letdisc{\d{x'}}{\shape\;\m{x}}
     \letdisc{\d{y'}}{\shape\;\m{y}}
@@ -622,7 +622,7 @@ Our rule for the derivative of a fixed point is:
       (\fn \disc{\d{x}}\, \m{dx}\binder\, \delta e)
       \; \disc{\fix{\m{x}} e}
       \; \m{dx}\\
-  &=& \fix{\m{dx}} \delta(\fn\bind{\m{x}} e)
+  &=& \fix{\m{dx}} \delta(\lam{\m{x}} e)
       \; \disc{\fix{\m{x}} e}
       \; \m{dx}
 \end{eqnarray*}
@@ -656,7 +656,7 @@ Let's apply \ms{fix} to solve the equation!
 \begin{equation}
   \delta(\ms{fix}\; f)
   =
-  \ms{fix}\,(\fn\bind{\m{\color{Cyan} dx}}
+  \ms{fix}\,(\lam{\m{\color{Cyan} dx}}
   \delta f \;\disc{\ms{fix}\;\preserve{f}} \;{\m{\color{Cyan} dx}})
 \end{equation}
 
@@ -850,7 +850,7 @@ Our condition is stronger, to account for monotonicity, and implies theirs as fo
   & \text{by Lemma \ref{lemma:zero-id}}\\
   \implies& f\;a \oplus df\;a\;da &=&
   f\;(a \oplus da) \oplus df \;(a \oplus da) \;(\zero_A \;(a \oplus da))
-  & \text{our condition, reflexivity and antisymmetry}\\
+  & \text{our condition and antisymmetry}\\
   \implies& f\;a \oplus df\;a\;da &=& (f \oplus df) \; (a \oplus da)
   & \text{definition of $f \oplus_{A \to B} df$}
 \end{array}\]
@@ -1000,6 +1000,45 @@ first.
 
 NB. In order for that last $\oplus$ to be well-defined, we need legitimacy to
 hold.
+
+
+\subsection{Proofs}
+
+We prove legitimacy and correctness together, in one induction:
+
+\begin{lemma}[Legitimacy \& Correctness]
+  Given $\J{\GP}{\GG}{e}{A}$, $s \in \Den{\Disc{\GP} \x \GG}$, and $ds \in
+  \Change{\Disc{\GP} \x \GG}{s}$, we have $\dendelta{e} \in \Change{\Disc{\GP} \x
+    \GG \to A}{e}$ and $\den{e} \;(s \oplus ds) = \den{e}\;s \oplus
+  \dendelta{e}\;s\;ds$.
+\end{lemma}
+
+\begin{proof}
+  By induction on $\J{\GP}{\GG}{e}{A}$:
+
+  \begin{description}
+    \item[Case $\m x$:]
+    \item[Case $\d x$:]
+    \item[Case $\lam{\m{x}} e$:]
+    \item[Case $e\;f$:]
+    \item[Case $\pair{e}{f}$:]
+    \item[Case $\pi_i\;e$:]
+    \item[Case $\inj{i}{e}$:]
+    \item[Case $\disc{e}$:]
+    \item[Case $(\letdisc{\d{x}}{e}{f})$:]
+    \item[Case $(\splitsum{e})$:]
+    \item[Case $\unit$:]
+    \item[Case $e \vee f$:]
+    \item[Case $\single{e}$:]
+    \item[Case $\setelim{\d{x}}{e}{f}$:]
+    \item[Case $\etrue$:]
+    \item[Case $\efalse$:]
+    \item[Case $(\when{e}{f})$:]
+    \item[Case $(\ifthen{e}{f}{g})$:]
+    \item[Case $(\fix{\m{x}} e)$:]
+    \item[Case $(\fixle{\m x}{e}{f})$:]
+  \end{description}
+\end{proof}
 
 
 \section{Extending Datafun}
