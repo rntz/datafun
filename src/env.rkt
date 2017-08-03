@@ -29,7 +29,7 @@
 (define (env-ref-type e n [orelse (lambda () (error "undefined type:" n))])
   (hash-ref (env-types e) n orelse))
 (define (env-bind-type name type e)
-  ;; we substitue the type to ensure that envs never contain non-type-wf? types
+  ;; we substitute the type to ensure that envs never contain non-type-wf? types
   (env (env-vars e) (hash-set (env-types e) name (env-subst-type e type))))
 
 (define/contract

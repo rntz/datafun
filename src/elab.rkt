@@ -98,6 +98,7 @@ sub-expression: ~s
 
 ;; whether we need to remember the type of an expression
 (define/match (should-remember-type? expr)
+  ;; TODO FIXME: crap, deriv.rkt needs us to remember the types of functions!
   [((or (e-lub _) (e-set-bind _ _ _) (e-map-bind _ _ _ _) (e-map-get _ _)
         (e-cond _ _ _) (e-fix _ _))) #t]
   ;; we actually don't need to remember primitives; see do-prim in compile.rkt
