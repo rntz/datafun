@@ -33,11 +33,22 @@ pattern fun {F} f = Fun: F f
 
 
 -- Constructions on relations & categories
-cat× : ∀{i j k l} (C : Cat i j) (D : Cat k l) -> Cat _ _
+data rel+ {i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) : Rel (A ⊎ B) (j ⊔ l) where
+  rel₁ : ∀{a b} -> R a b -> rel+ R S (inj₁ a) (inj₁ b)
+  rel₂ : ∀{a b} -> S a b -> rel+ R S (inj₂ a) (inj₂ b)
+
+cat× cat+ : ∀{i j k l} (C : Cat i j) (D : Cat k l) -> Cat _ _
 cat× C D .Obj = Obj C × Obj D
 cat× C D .Hom (a , x) (b , y) = Hom C a b × Hom D x y
 cat× C D .ident = ident C , ident D
 cat× C D .compo (f₁ , g₁) (f₂ , g₂) = compo C f₁ f₂ , compo D g₁ g₂
+
+cat+ C D .Obj = Obj C ⊎ Obj D
+cat+ C D .Hom = rel+ (Hom C) (Hom D)
+cat+ C D .ident {inj₁ _} = rel₁ (ident C)
+cat+ C D .ident {inj₂ _} = rel₂ (ident D)
+cat+ C D .compo (rel₁ x) (rel₁ y) = rel₁ (compo C x y)
+cat+ C D .compo (rel₂ x) (rel₂ y) = rel₂ (compo D x y)
 
 -- "Indexed product of categories"?
 catΠ : ∀{i j k} (A : Set i) (B : A -> Cat j k) -> Cat _ _
@@ -122,3 +133,9 @@ instance
   cat-products : ∀{i j} -> Products (suc (i ⊔ j)) (i ⊔ j)
   cat-products {i}{j} = Products: {{cats {i}{j}}} cat× (fun π₁) (fun π₂)
                         λ where (fun f) (fun g) → fun ⟨ f , g ⟩
+
+  cat-sums : ∀{i j} -> Sums (suc (i ⊔ j)) (i ⊔ j)
+  cat-sums {i}{j} = Sums: {{cats {i}{j}}} cat+ (fun rel₁) (fun rel₂)
+    λ where F G .ap -> [ ap F , ap G ]
+            F G .cov (rel₁ x) -> cov F x
+            F G .cov (rel₂ x) -> cov G x
