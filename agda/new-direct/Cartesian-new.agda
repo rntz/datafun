@@ -62,6 +62,13 @@ record Closed {i j} (C : Cat i j) (_⊗_ _⇨_ : (a b : Obj C) -> Obj C) : Set (
   field apply : ∀{a b} -> (a ⇨ b) ⊗ a ≤ b
   field curry : ∀{a b c} -> a ⊗ b ≤ c -> a ≤ b ⇨ c
 
+record Exponentials {i j} (C : Cat i j) {_∧_} (P : Products C _∧_)
+                    (_⇨_ : (a b : Obj C) -> Obj C) : Set (i ⊔ j) where
+  constructor Exponentials:
+  private instance cc = C
+  field apply : ∀{a b} -> (a ⇨ b) ∧ a ≤ b
+  field curry : ∀{a b c} -> a ∧ b ≤ c -> a ≤ b ⇨ c
+
 
 -- Expose Products & Sums methods with appropriate instance arguments.
 module _ {i j Obj Arr} {{C : Compose {i}{j} Obj Arr}} where
@@ -69,13 +76,21 @@ module _ {i j Obj Arr} {{C : Compose {i}{j} Obj Arr}} where
     open Products Prod public
     infixr 2 _∧_; _∧_ = _⊗_
 
+    -- module _ {hom} {{Exp : Closed (cat C) _⊗_ hom}} where
+    --   open Closed Exp public
+    --   infixr 4 _⇨_; _⇨_ = hom
+
+    module _ {hom} {{Exp : Exponentials (cat C) Prod hom}} where
+      open Exponentials Exp public
+      infixr 4 _⇨_; _⇨_ = hom
+
   module _ {_⊕_} {{Sum : Sums (cat C) _⊕_}} where
     open Sums Sum public
     infixr 3 _∨_; _∨_ = _⊕_
 
-  module _ {_⊗_ hom} {{Clo : Closed (cat C) _⊗_ hom}} where
-    open Closed Clo public
-    infixr 4 _⇨_; _⇨_ = hom
+  -- module _ {_⊗_ hom} {{Clo : Closed (cat C) _⊗_ hom}} where
+  --   open Closed Clo public
+  --   infixr 4 _⇨_; _⇨_ = hom
 
 
 -- Instances for cat:set and cat:cat

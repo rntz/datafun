@@ -7,20 +7,19 @@ open import Data.Sum hiding ([_,_])
 open import Cat
 
 cat× : ∀{i j} (A B : Cat i j) -> Cat i j
-Obj (cat× A B) = Obj A × Obj B
-Arr (cat× A B) (a₁ , b₁) (a₂ , b₂) = Arr A a₁ a₂ × Arr B b₁ b₂
-ident (isCat (cat× (cat A) (cat B))) = ident A , ident B
-compo (isCat (cat× A B)) (f₁ , f₂) (g₁ , g₂) = f₁ • g₁ , f₂ • g₂
-  where instance aa = A; bb = B
+cat× A B .Obj = Obj A × Obj B
+cat× A B .Arr (a₁ , b₁) (a₂ , b₂) = Arr A a₁ a₂ × Arr B b₁ b₂
+cat× (cat A) (cat B) .isCat .ident = ident A , ident B
+cat× (cat A) (cat B) .isCat .compo (f₁ , f₂) (g₁ , g₂) = compo A f₁ g₁ , compo B f₂ g₂
 
 -- FIXME
-record Prod {i j} (C : Cat i j) (_⊗_ : Obj C -> Obj C -> Obj C) : Set (i ⊔ j) where
-  constructor Prod:
-  private instance cc = C
-  field π₁ : ∀{a b} -> a ⊗ b ≤ a
-  field π₂ : ∀{a b} -> a ⊗ b ≤ b
-  infix 4 ⟨_,_⟩
-  field ⟨_,_⟩ : ∀{a b c} -> a ≤ b -> a ≤ c -> a ≤ b ⊗ c
+-- record Prod {i j} (C : Cat i j) (_⊗_ : Obj C -> Obj C -> Obj C) : Set (i ⊔ j) where
+--   constructor Prod:
+--   private instance cc = C
+--   field π₁ : ∀{a b} -> a ⊗ b ≤ a
+--   field π₂ : ∀{a b} -> a ⊗ b ≤ b
+--   infix 4 ⟨_,_⟩
+--   field ⟨_,_⟩ : ∀{a b c} -> a ≤ b -> a ≤ c -> a ≤ b ⊗ c
 
 record Products {i j} Obj Arr (_⊗_ : Obj -> Obj -> Obj)
        {{C : Compose {i}{j} Obj Arr}} : Set (i ⊔ j) where
@@ -89,17 +88,17 @@ module _ {i j A R _⊗_ arr} {{C : Compose {i}{j} A R}}
 
 -- Instances for cat:Set (and cat:Cat?)
 instance
-  products:Set : ∀{i} -> Products~ (cat:Set i) _×_
+  products:Set : ∀{i} -> Products~ (cat:set i) _×_
   products:Set = Products: proj₁ proj₂ <_,_>
 
-  sums:Set : ∀{i} -> Sums~ (cat:Set i) _⊎_
+  sums:Set : ∀{i} -> Sums~ (cat:set i) _⊎_
   sums:Set = Sums: inj₁ inj₂ Data.Sum.[_,_]
 
-  closed:Set : ∀{i} -> Closed~ (cat:Set i) _×_ (λ a b -> a -> b)
+  closed:Set : ∀{i} -> Closed~ (cat:set i) _×_ (λ a b -> a -> b)
   apply {{closed:Set}} (f , x) = f x
   curry {{closed:Set}} f x y = f (x , y)
 
-  products:Cat : ∀{i j} -> Products~ (cat:Cat i j) cat×
+  products:Cat : ∀{i j} -> Products~ (cat:cat i j) cat×
   π₁ {{products:Cat}} = homo proj₁
   π₂ {{products:Cat}} = homo proj₂
   ⟨_,_⟩ {{products:Cat}} (homo f) (homo g) = homo ⟨ f , g ⟩

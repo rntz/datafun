@@ -118,6 +118,6 @@ instance
 
   sums:cat : ∀{i j} -> Sums (cat:cat {i} {j})
   sums:cat = Sums: cat+ (homo rel₁) (homo rel₂) λ where
-    F G .app → [ app F , app G ]
+    F G .ap → [ ap F , ap G ]
     F G .cov (rel₁ x) → cov F x
     F G .cov (rel₂ x) → cov G x

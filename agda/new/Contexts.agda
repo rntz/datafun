@@ -1,19 +1,13 @@
 module Contexts (Type : Set) where
 
 open import Prelude
-open import Cartesian
 
-
 ---------- Contexts ----------
 Cx : Set1
 Cx = Type -> Set
 
 ∅ : Cx
 ∅ _ = ⊥
-
--- infix 4 _∈_
--- _∈_ : Type -> Cx -> Set
--- a ∈ X = X a
 
 hyp : Type -> Cx
 hyp = _≡_
@@ -36,20 +30,20 @@ _⊆_ : Cx -> Cx -> Set
 X ⊆ Y = ∀ a -> X a -> Y a
 
 instance
-  compose:Cx : Compose Cx _⊆_
-  ident compose:Cx _ = id
-  compo compose:Cx X⊆Y Y⊆Z o = X⊆Y o • Y⊆Z o
-
-cat:Cx = cat compose:Cx
-
-import Data.Sum
+  cxs : Cat _ _
+  cxs .Obj = Cx
+  cxs .Hom = _⊆_
+  cxs .ident _ = id
+  cxs .compo X⊆Y Y⊆Z x = X⊆Y x • Y⊆Z x
 
 -- ∪ forms coproducts on Cx under renaming.
 instance
-  sums:Cx : Sums~ cat:Cx _∪_
-  in₁ {{sums:Cx}} _ = inj₁
-  in₂ {{sums:Cx}} _ = inj₂
-  [_,_] {{sums:Cx}} f g _ = Data.Sum.[ f _ , g _ ]
+  cx-sums : Sums _ _
+  Sums.cat cx-sums = cxs
+  _∨_ {{cx-sums}} = _∪_
+  in₁ {{cx-sums}} _ = inj₁
+  in₂ {{cx-sums}} _ = inj₂
+  [_,_] {{cx-sums}} f g _ = [ f _ , g _ ]
 
 ∪/⊆ : ∀ {X L R} -> L ⊆ R -> X ∪ L ⊆ X ∪ R
 ∪/⊆ f = [ in₁ , f • in₂ ]

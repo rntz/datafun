@@ -52,20 +52,33 @@ proset⇒ : (A B : Proset) -> Proset
 proset⇒ A B .Obj = Homo A B
 -- We use this definition rather than the more usual pointwise definition
 -- because it makes more sense when generalized to categories.
-proset⇒ A B .Arr F G = ∀ {x y} -> Arr A x y -> Arr B (app F x) (app G y)
+proset⇒ A B .Arr F G = ∀ {x y} -> Arr A x y -> Arr B (ap F x) (ap G y)
 proset⇒ A B .ident {F} = cov F
 proset⇒ A B .compo {F}{G}{H} F≤G G≤H {x}{y} x≤y = compo B (F≤G x≤y) (G≤H (ident A))
 
+-- -- Now we can show that cat:proset has exponentials.
+-- instance
+--   closed:proset : Closed cat:proset cat× proset⇒
+--   -- _⇨_   {{closed:proset}} = proset⇒
+--   -- apply or eval
+--   apply {{closed:proset}} .ap (F , a) = ap F a
+--   apply {{closed:proset}} .cov (F≤G , a≤a') = F≤G a≤a'
+--   -- curry or λ
+--   curry {{closed:proset}} {A}{B}{C} F .ap a .ap b    = ap F (a , b)
+--   curry {{closed:proset}} {A}{B}{C} F .ap a .cov b   = cov F (ident A , b)
+--   curry {{closed:proset}} {A}{B}{C} F .cov a≤a' b≤b' = cov F (a≤a' , b≤b')
+
 -- Now we can show that cat:proset has exponentials.
-closed:proset : Closed cat:proset cat× proset⇒
--- _⇨_   {{closed:proset}} = proset⇒
--- apply or eval
-apply {{closed:proset}} .app (F , a) = app F a
-apply {{closed:proset}} .cov (F≤G , a≤a') = F≤G a≤a'
--- curry or λ
-curry {{closed:proset}} {A}{B}{C} F .app a .app b  = app F (a , b)
-curry {{closed:proset}} {A}{B}{C} F .app a .cov b  = cov F (ident A , b)
-curry {{closed:proset}} {A}{B}{C} F .cov a≤a' b≤b' = cov F (a≤a' , b≤b')
+instance
+  closed:proset : Exponentials cat:proset products:cat proset⇒
+  -- _⇨_   {{closed:proset}} = proset⇒
+  -- apply or eval
+  apply {{closed:proset}} .ap (F , a) = ap F a
+  apply {{closed:proset}} .cov (F≤G , a≤a') = F≤G a≤a'
+  -- curry or λ
+  curry {{closed:proset}} {A}{B}{C} F .ap a .ap b    = ap F (a , b)
+  curry {{closed:proset}} {A}{B}{C} F .ap a .cov b   = cov F (ident A , b)
+  curry {{closed:proset}} {A}{B}{C} F .cov a≤a' b≤b' = cov F (a≤a' , b≤b')
 
 
 -- The "equivalence quotient" of a preorder.

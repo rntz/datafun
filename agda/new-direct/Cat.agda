@@ -40,11 +40,11 @@ cat {A = A} {R = R} C = Cat: A R (ident C) (compo C)
 ---------- Functors ----------
 record Homo {i j k l} (A : Cat i j) (B : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l) where
   constructor Homo:
-  field app : Obj A -> Obj B
-  field cov : ∀{a b} -> Arr A a b -> Arr B (app a) (app b)
+  field ap : Obj A -> Obj B
+  field cov : ∀{a b} -> Arr A a b -> Arr B (ap a) (ap b)
 
 open Homo public
-pattern homo {app} f = Homo: app f
+pattern homo {ap} f = Homo: ap f
 -- FIXME TODO does this definition of `map` even work wrt instance resolution?
 open Homo {{...}} public using () renaming (cov to map)
 -- module _ {i j k l} {{A : Cat i j}} {{B : Cat k l}} {{F : Homo A B}} where
@@ -61,7 +61,7 @@ instance
   ident compose:homo = homo id
   compo compose:homo (homo f) (homo g) = homo (f • g)
 
-  cat:set : ∀ {i} -> Cat _ _
-  cat:set {i} = cat (compose:-> {i})
-  cat:cat : ∀{i j} -> Cat _ _
-  cat:cat {i} {j} = cat (compose:homo {i}{j})
+cat:set : ∀ {i} -> Cat _ _
+cat:set {i} = cat (compose:-> {i})
+cat:cat : ∀{i j} -> Cat _ _
+cat:cat {i} {j} = cat (compose:homo {i}{j})

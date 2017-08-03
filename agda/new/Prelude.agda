@@ -12,15 +12,14 @@ open import Data.Sum using (_⊎_; inj₁; inj₂) public
 open import Data.Unit using (⊤; tt) public
 open import Function using (_∘_; _on_) public
 open import Relation.Nullary using (¬_; Dec; yes; no) public
+open import Relation.Binary using (Rel; Reflexive; Transitive; Symmetric) public
 
-module Eq where
-  open import Relation.Binary.PropositionalEquality public
+module Eq where open import Relation.Binary.PropositionalEquality public
+open Eq using (_≡_; refl) public
 
-open Eq using (_≡_) public
-
+
 -- MY STUFF
 open import Cat public
 
--- The agda tutorial calls this `it`.
-auto : ∀{i}{A : Set i} {{x : A}} -> A
-auto {{x}} = x
+it : ∀{i}{A : Set i} {{x : A}} -> A
+it {{x}} = x

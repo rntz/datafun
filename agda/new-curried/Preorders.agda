@@ -12,7 +12,7 @@ open import Relation.Binary using (Rel; Reflexive) public
 Proset : Set1
 Proset = Cat Level.zero Level.zero
 
-cat:proset = cat:cat {Level.zero} {Level.zero}
+cat:proset = cat:cat Level.zero Level.zero
 
 -- For readability's sake, we define _⇒_ to mean monotone maps (i.e. functors).
 infix 3 _⇒_
@@ -43,8 +43,8 @@ _⇒_ : (a b : Proset) -> Set; _⇒_ = Homo
 catΠ : ∀{i j k} (A : Set i) (B : A -> Cat j k) -> Cat _ _
 catΠ A B .Obj         = ∀ x → B x .Obj
 catΠ A B .Arr f g     = ∀ x → B x .Arr (f x) (g x)
-catΠ A B .ident x     = B x .ident
-catΠ A B .compo f g x = B x .compo (f x) (g x)
+catΠ A B .isCat .ident x     = B x .isCat .ident
+catΠ A B .isCat .compo f g x = B x .isCat .compo (f x) (g x)
 
 -- The proset of monotone maps between two prosets. Like the category of
 -- functors and natural transformations, but without the naturality condition.
@@ -53,18 +53,18 @@ proset⇒ A B .Obj = Homo A B
 -- We use this definition rather than the more usual pointwise definition
 -- because it makes more sense when generalized to categories.
 proset⇒ A B .Arr F G = ∀ {x y} -> Arr A x y -> Arr B (ap F x) (ap G y)
-proset⇒ A B .ident {F} = cov F
-proset⇒ A B .compo {F}{G}{H} F≤G G≤H {x}{y} x≤y = compo B (F≤G x≤y) (G≤H (ident A))
+proset⇒ A B .isCat .ident {F} = cov F
+proset⇒ (cat A) (cat B) .isCat .compo {F}{G}{H} F≤G G≤H {x}{y} x≤y =
+  compo B (F≤G x≤y) (G≤H (ident A))
 
 -- Now we can show that cat:proset has exponentials.
-exponentials:proset : Exponentials cat:proset
-_⇨_   {{exponentials:proset}} = proset⇒
+exponentials:proset : Closed~ cat:proset cat× proset⇒
 -- apply or eval
 apply {{exponentials:proset}} .ap  (F , a)      = ap F a
 apply {{exponentials:proset}} .cov (F≤G , a≤a') = F≤G a≤a'
 -- curry or λ
 curry {{exponentials:proset}} {A}{B}{C} F .ap a .ap b    = ap F (a , b)
-curry {{exponentials:proset}} {A}{B}{C} F .ap a .cov b   = cov F (ident A , b)
+curry {{exponentials:proset}} {A}{B}{C} F .ap a .cov b   = cov F (A .isCat .ident , b)
 curry {{exponentials:proset}} {A}{B}{C} F .cov a≤a' b≤b' = cov F (a≤a' , b≤b')
 
 
@@ -77,8 +77,8 @@ relEquiv R x y = R x y × R y x
 catEquiv : ∀{i j} -> Cat i j -> Cat i j
 Obj (catEquiv C) = Obj C
 Arr (catEquiv C) = relEquiv (Arr C)
-ident (catEquiv C) = ident C , ident C
-compo (catEquiv C) (f₁ , f₂) (g₁ , g₂) = compo C f₁ g₁ , compo C g₂ f₂
+catEquiv (cat C) .isCat .ident = ident C , ident C
+catEquiv (cat C) .isCat .compo (f₁ , f₂) (g₁ , g₂) = compo C f₁ g₁ , compo C g₂ f₂
 
 
 -- The booleans, ordered false < true.
