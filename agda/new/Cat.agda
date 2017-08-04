@@ -1,15 +1,6 @@
 module Cat where
 
-open import Level
-open import Relation.Binary using (Rel)
-open import Data.Product using (Σ; Σ-syntax; _,_; proj₁; proj₂; _×_; <_,_>; ,_)
-open import Data.Sum using (_⊎_; inj₁; inj₂)
-
-Op : ∀{i} -> Set i -> Set i
-Op A = A -> A -> A
-
-Function : ∀{i j} -> Set i -> Set j -> Set _
-Function A B = A -> B
+open import Prelude
 
 record Cat i j : Set (suc (i ⊔ j)) where
   infix  1 Hom
@@ -26,7 +17,7 @@ open Cat {{...}} public using () renaming (Hom to _≤_; ident to id; compo to _
 record Fun {i j k l} (C : Cat i j) (D : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l) where
   constructor Fun:
   field ap : Obj C -> Obj D
-  field cov : ∀{a b} -> Hom C a b -> Hom D (ap a) (ap b)
+  field map : ∀{a b} -> Hom C a b -> Hom D (ap a) (ap b)
 
 open Fun public
 pattern fun {F} f = Fun: F f
@@ -61,12 +52,15 @@ catΠ A B .compo f g x = B x .compo (f x) (g x)
 -- Cartesian structure.
 record Products i j : Set (suc (i ⊔ j)) where
   constructor Products:
-  field overlap {{cat}} : Cat i j
+  field overlap {{C}} : Cat i j
   infixr 2 _∧_
-  field _∧_ : Op (Obj cat)
+  field _∧_ : Op (Obj C)
   field π₁ : ∀{a b} -> (a ∧ b) ≤ a
   field π₂ : ∀{a b} -> (a ∧ b) ≤ b
   field ⟨_,_⟩ : ∀{a b x} -> x ≤ a -> x ≤ b -> x ≤ (a ∧ b)
+
+  ∧-map : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∧ b ≤ c ∧ d
+  ∧-map f g = ⟨ π₁ • f , π₂ • g ⟩
 
   ∇ : ∀{a} -> a ≤ a ∧ a
   ∇ = ⟨ id , id ⟩
@@ -74,17 +68,17 @@ record Products i j : Set (suc (i ⊔ j)) where
   swap : ∀{a b} -> a ∧ b ≤ b ∧ a
   swap = ⟨ π₂ , π₁ ⟩
 
-  ∧-map : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∧ b ≤ c ∧ d
-  ∧-map f g = ⟨ π₁ • f , π₂ • g ⟩
-
 record Sums i j : Set (suc (i ⊔ j)) where
   constructor Sums:
-  field overlap {{cat}} : Cat i j
-  infixr 3 _∨_
-  field _∨_ : Op (Obj cat)
+  field overlap {{C}} : Cat i j
+  infixr 2 _∨_
+  field _∨_ : Op (Obj C)
   field in₁ : ∀{a b} -> a ≤ a ∨ b
   field in₂ : ∀{a b} -> b ≤ a ∨ b
   field [_,_] : ∀{a b c} -> a ≤ c -> b ≤ c -> a ∨ b ≤ c
+
+  ∨-map : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
+  ∨-map f g = [ f • in₁ , g • in₂ ]
 
 -- CCC means "cartesian closed category".
 record CCC i j : Set (suc (i ⊔ j)) where
@@ -92,7 +86,7 @@ record CCC i j : Set (suc (i ⊔ j)) where
   field overlap {{products}} : Products i j
   open Products products
   infixr 4 _⇨_
-  field _⇨_ : Op (Obj cat)
+  field _⇨_ : Op (Obj C)
   field apply : ∀{a b} -> (a ⇨ b) ∧ a ≤ b
   field curry : ∀{a b c} -> a ∧ b ≤ c -> a ≤ b ⇨ c
 
@@ -102,9 +96,25 @@ record CCC i j : Set (suc (i ⊔ j)) where
   flip : ∀{a b c} -> a ≤ b ⇨ c -> b ≤ a ⇨ c
   flip f = curry (swap • uncurry f)
 
-open Products {{...}} public hiding (cat)
-open Sums {{...}} public hiding (cat)
-open CCC {{...}} public hiding (products)
+-- open Products public using (cat; Obj; Hom)
+-- open Sums public using (cat; Obj; Hom)
+-- open CCC public using (cat; products; Obj; Hom)
+
+open Products {{...}} public using (_∧_; π₁; π₂; ⟨_,_⟩; ∧-map; ∇; swap)
+open Sums {{...}} public using (_∨_; in₁; in₂; [_,_]; ∨-map)
+open CCC {{...}} public using (_⇨_; apply; curry; uncurry; flip)
+
+
+-- Some convenient conversions
+instance
+  cat->obj : ∀{i j k} -> Cast k (Cat i j) (Set i)
+  cat->obj = Cast: Obj
+
+  products->cat : ∀{i j k} -> Cast k (Products i j) (Cat i j)
+  products->cat = Cast: Products.C
+
+  ccc->products : ∀{i j k} -> Cast k (CCC i j) (Products i j)
+  ccc->products = Cast: CCC.products
 
 
 -- Some useful categories
@@ -117,12 +127,14 @@ instance
 
   set-products : ∀{i} -> Products (suc i) i
   set-products = Products: _×_ proj₁ proj₂ <_,_>
+    where open import Data.Product
 
   set-sums : ∀{i} -> Sums (suc i) i
   set-sums = Sums: _⊎_ inj₁ inj₂ Data.Sum.[_,_]
+    where open import Data.Sum
 
-  set-exponentials : ∀{i} -> CCC (suc i) i
-  set-exponentials = CCC: Function (λ { (f , a) -> f a }) (λ f x y -> f (x , y))
+  set-cc : ∀{i} -> CCC (suc i) i
+  set-cc = CCC: Function (λ { (f , a) -> f a }) (λ f x y -> f (x , y))
 
   cats : ∀{i j} -> Cat (suc (i ⊔ j)) (i ⊔ j)
   Obj (cats {i}{j}) = Cat i j
@@ -137,5 +149,5 @@ instance
   cat-sums : ∀{i j} -> Sums (suc (i ⊔ j)) (i ⊔ j)
   cat-sums {i}{j} = Sums: {{cats {i}{j}}} cat+ (fun rel₁) (fun rel₂)
     λ where F G .ap -> [ ap F , ap G ]
-            F G .cov (rel₁ x) -> cov F x
-            F G .cov (rel₂ x) -> cov G x
+            F G .map (rel₁ x) -> map F x
+            F G .map (rel₂ x) -> map G x

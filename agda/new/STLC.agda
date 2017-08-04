@@ -2,6 +2,7 @@
 module STLC where
 
 open import Prelude
+open import Cat
 open import Prosets
 
 
@@ -25,7 +26,7 @@ data _⊢_ (X : Cx) : Type -> Set where
 -- Renaming
 rename : ∀{X Y a} -> X ⊆ Y -> X ⊢ a -> Y ⊢ a
 rename f (var x) = var (f _ x)
-rename {X} f (lam M) = lam (rename (∷/⊆ X f) M)
+rename {X} f (lam M) = lam (rename (∪/⊆ f) M)
 rename f (app M N) = app (rename f M) (rename f N)
 rename f (pair M N) = pair (rename f M) (rename f N)
 rename f (proj d M) = proj d (rename f M)
@@ -33,8 +34,8 @@ rename f (proj d M) = proj d (rename f M)
 
 ---------- Denotations ----------
 ⟦_⟧ : Type -> Proset
-⟦ s ⊃ t ⟧ = proset⇒ ⟦ s ⟧ ⟦ t ⟧
-⟦ s * t ⟧ = cat× ⟦ s ⟧ ⟦ t ⟧
+⟦ s ⊃ t ⟧ = ⟦ s ⟧ ⇨ ⟦ t ⟧
+⟦ s * t ⟧ = ⟦ s ⟧ ∧ ⟦ t ⟧
 
 Vars : Cx -> Set
 Vars X = ∃ (λ a -> X a)
@@ -46,16 +47,16 @@ typeof = proj₁
 ⟦_⟧* : Cx -> Proset
 ⟦ X ⟧* = catΠ (Vars X) (λ v → ⟦ typeof v ⟧)
 
-lookup : ∀{X a} -> X a -> ⟦ X ⟧* ⇒ ⟦ a ⟧
+lookup : ∀{X a} -> X a -> ⟦ X ⟧* ≤ ⟦ a ⟧
 lookup p = fun {(λ f -> f (at p))} (λ f -> f (at p))
 
-cons : ∀{X a} -> cat× ⟦ X ⟧* ⟦ a ⟧ ⇒ ⟦ a ∷ X ⟧*
+cons : ∀{X a} -> ⟦ X ⟧* ∧ ⟦ a ⟧ ≤ ⟦ a ∷ X ⟧*
 ap  cons (env , x) (at here) = x
-cov cons (env , x) (at here) = x
+map cons (env , x) (at here) = x
 ap  cons (env , x) (at (next p)) = env (at p)
-cov cons (env , x) (at (next p)) = env (at p)
+map cons (env , x) (at (next p)) = env (at p)
 
-eval : ∀{X a} -> X ⊢ a -> ⟦ X ⟧* ⇒ ⟦ a ⟧
+eval : ∀{X a} -> X ⊢ a -> ⟦ X ⟧* ≤ ⟦ a ⟧
 eval (var x) = lookup x
 eval (app M N) = ⟨ eval M , eval N ⟩ • apply
 eval (lam M) = curry (cons • eval M)

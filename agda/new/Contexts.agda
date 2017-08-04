@@ -1,6 +1,7 @@
 module Contexts (Type : Set) where
 
 open import Prelude
+open import Cat
 
 ---------- Contexts ----------
 Cx : Set1
@@ -39,14 +40,11 @@ instance
 -- ∪ forms coproducts on Cx under renaming.
 instance
   cx-sums : Sums _ _
-  Sums.cat cx-sums = cxs
+  Sums.C cx-sums = cxs
   _∨_ {{cx-sums}} = _∪_
   in₁ {{cx-sums}} _ = inj₁
   in₂ {{cx-sums}} _ = inj₂
   [_,_] {{cx-sums}} f g _ = [ f _ , g _ ]
 
 ∪/⊆ : ∀ {X L R} -> L ⊆ R -> X ∪ L ⊆ X ∪ R
-∪/⊆ f = [ in₁ , f • in₂ ]
-
-∷/⊆ : ∀ L {R a} -> L ⊆ R -> a ∷ L ⊆ a ∷ R
-∷/⊆ _ = ∪/⊆
+∪/⊆ f = ∨-map id f
