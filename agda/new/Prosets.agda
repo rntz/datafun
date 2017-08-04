@@ -9,6 +9,11 @@ Proset = Cat zero zero
 prosets : Cat _ _
 prosets = cats {zero} {zero}
 
+-- A type for monotone maps.
+infix 1 _⇒_
+_⇒_ : Rel Proset _
+_⇒_ = Fun
+
 -- The proset of monotone maps between two prosets. Like the category of
 -- functors and natural transformations, but without the naturality condition.
 proset→ : (A B : Proset) -> Proset
@@ -58,3 +63,7 @@ instance
   ident bools = bool-refl
   compo bools bool-refl x = x
   compo bools false<true bool-refl = false<true
+
+antisym:bool≤ : Antisymmetric _≡_ bool≤
+antisym:bool≤ bool-refl bool-refl = Eq.refl
+antisym:bool≤ false<true ()

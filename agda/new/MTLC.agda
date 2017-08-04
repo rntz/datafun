@@ -46,14 +46,13 @@ instance
   map Wipe f (mono , _) ()
   map Wipe f (disc , a) = f (disc , a)
 
-  -- comonadic:Wipe : Comonadic _
-  -- -- dup : wipe X ⊆ wipe (wipe X)
-  -- -- extract : wipe X ⊆ X
-  -- Comonadic.□ comonadic:Wipe = Wipe
-  -- dup {{comonadic:Wipe}} (mono , _) ()
-  -- dup {{comonadic:Wipe}} (disc , a) = id
-  -- extract {{comonadic:Wipe}} (mono , _) ()
-  -- extract {{comonadic:Wipe}} (disc , a) = id
+  comonadic:Wipe : Comonadic _ Wipe
+  -- dup : wipe X ⊆ wipe (wipe X)
+  -- extract : wipe X ⊆ X
+  dup {{comonadic:Wipe}} (mono , _) ()
+  dup {{comonadic:Wipe}} (disc , a) = id
+  extract {{comonadic:Wipe}} (mono , _) ()
+  extract {{comonadic:Wipe}} (disc , a) = id
 
 wipe = ap Wipe
 
