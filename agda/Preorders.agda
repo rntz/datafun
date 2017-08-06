@@ -26,7 +26,7 @@ Proset : Set1
 Proset = Cat lzero lzero
 cat:Proset = cat:Cat lzero lzero
 pattern proset {A} {R} P = Cat: A R P
-preorder : ∀ P -> Preorder _ (Hom P)
+preorder : ∀ P -> Preorder _ (Arr P)
 preorder = isCat
 
 -- For readability's sake, we define _⇒_ for monotone maps (i.e. functors) and
@@ -47,8 +47,8 @@ Pointwise : ∀{A B} -> Rel B -> Rel (A -> B)
 Pointwise R f g = ∀ x -> R (f x) (g x)
 
 preorder:Pointwise : ∀{A B R} -> Preorder B R -> Preorder (A -> B) (Pointwise R)
-identity (preorder:Pointwise P) _ = id
-compose  (preorder:Pointwise p) aRb bRc x = aRb x • bRc x
+ident (preorder:Pointwise P) _ = ident P
+compo (preorder:Pointwise P) aRb bRc x = compo P (aRb x) (bRc x)
 
 -- record Denotation {i j} (A : Set i) (B : Set j) : Set (i ⊔ j) where
 --   field denotation : A -> B
@@ -59,9 +59,9 @@ compose  (preorder:Pointwise p) aRb bRc x = aRb x • bRc x
 
 proset:Pointwise : Set -> Proset -> Proset
 Obj (proset:Pointwise A B) = A -> Obj B
-Hom (proset:Pointwise A B) = Pointwise (Hom B)
-identity (isCat (proset:Pointwise A (cat B))) _ = id
-compose (isCat (proset:Pointwise A (cat B))) aRb bRc x = aRb x • bRc x
+Arr (proset:Pointwise A B) = Pointwise (Arr B)
+ident (isCat (proset:Pointwise A (cat B))) _ = ident B
+compo (isCat (proset:Pointwise A (cat B))) aRb bRc x = compo B (aRb x) (bRc x)
 
 PointwiseΠ : ∀ A (B : A -> Set) (R : ∀ x -> Rel (B x)) -> Rel (∀ x -> B x)
 PointwiseΠ _ _ R f g = ∀ x → R x (f x) (g x)
@@ -70,8 +70,8 @@ PointwiseΠ _ _ R f g = ∀ x → R x (f x) (g x)
 preorder:PointwiseΠ : ∀ {A B R}
                     -> (∀ x -> Preorder (B x) (R x))
                     -> Preorder (∀ x -> B x) (PointwiseΠ A B R)
-identity (preorder:PointwiseΠ P) x = identity (P x)
-compose  (preorder:PointwiseΠ P) fRg gRh x = compose (P x) (fRg x) (gRh x)
+ident (preorder:PointwiseΠ P) x = ident (P x)
+compo (preorder:PointwiseΠ P) fRg gRh x = compo (P x) (fRg x) (gRh x)
 
 proset:Π : ∀ {A : Set} (B : A -> Proset) -> Proset
 proset:Π B = proset (preorder:PointwiseΠ (preorder ∘ B))
@@ -90,10 +90,10 @@ module _ {A B R S} (P : Preorder A R) (Q : Preorder B S) where
   preorder:⊗ = Compose: (id , id) (Data.Product.zip _•_ _•_)
 
   preorder:⊕ : Preorder (A ⊎ B) (R ⊕ S)
-  identity preorder:⊕ {inj₁ _} = rel₁ id
-  identity preorder:⊕ {inj₂ _} = rel₂ id
-  compose  preorder:⊕ (rel₁ x) (rel₁ y) = rel₁ (x • y)
-  compose  preorder:⊕ (rel₂ x) (rel₂ y) = rel₂ (x • y)
+  ident preorder:⊕ {inj₁ _} = rel₁ id
+  ident preorder:⊕ {inj₂ _} = rel₂ id
+  compo  preorder:⊕ (rel₁ x) (rel₁ y) = rel₁ (x • y)
+  compo  preorder:⊕ (rel₂ x) (rel₂ y) = rel₂ (x • y)
 
 
 -- The "discrete" or "equivalence quotient" preorder.
@@ -102,8 +102,8 @@ Iso : ∀{A} -> Rel A -> Rel A
 Iso R x y = R x y × R y x
 
 preorder:Iso : ∀{A R} (P : Preorder A R) -> Preorder A (Iso R)
-identity (preorder:Iso P) = id , id
-compose  (preorder:Iso P) = Data.Product.zip _•_ (flip _•_)
+ident (preorder:Iso P) = id , id
+compo  (preorder:Iso P) = Data.Product.zip _•_ (flip _•_)
 
 
 -- The booleans, ordered false < true.
@@ -112,9 +112,9 @@ data bool≤ : Rel Bool where
   false<true : bool≤ false true
 
 preorder:bool≤ : Preorder Bool bool≤
-identity preorder:bool≤ = bool-refl
-compose  preorder:bool≤ bool-refl y = y
-compose  preorder:bool≤ false<true bool-refl = false<true
+ident preorder:bool≤ = bool-refl
+compo  preorder:bool≤ bool-refl y = y
+compo  preorder:bool≤ false<true bool-refl = false<true
 
 antisym:bool≤ : Antisym bool≤
 antisym:bool≤ (bool-refl , bool-refl) = Eq.refl

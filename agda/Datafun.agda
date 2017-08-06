@@ -1,4 +1,4 @@
-open import Prelude
+open import Prelude hiding ([_,_])
 open import Data.Sum hiding (map) renaming (inj₁ to car; inj₂ to cdr)
 
 open Eq hiding ([_])

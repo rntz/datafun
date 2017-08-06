@@ -37,21 +37,23 @@ X ⊆ Y = ∀ a -> a ∈ X -> a ∈ Y
 
 instance
   compose:Cx : Compose Cx _⊆_
-  identity compose:Cx _ = id
-  compose  compose:Cx X⊆Y Y⊆Z o = X⊆Y o • Y⊆Z o
+  ident compose:Cx _ = id
+  compo compose:Cx X⊆Y Y⊆Z o = X⊆Y o • Y⊆Z o
 
 cat:Cx = cat compose:Cx
+
+import Data.Sum
 
 -- ∪ forms coproducts on Cx under renaming.
 instance
   sums:Cx : Sums cat:Cx _∪_
   in₁ {{sums:Cx}} _ = inj₁
   in₂ {{sums:Cx}} _ = inj₂
-  [_,_] {{sums:Cx}} f g _ = [ f _ , g _ ]
+  [_,_] {{sums:Cx}} f g _ = Data.Sum.[ f _ , g _ ]
 
--- TODO: does this really need X and L to be explicit arguments?
 ∪/⊆ : ∀ {X L R} -> L ⊆ R -> X ∪ L ⊆ X ∪ R
-∪/⊆ f = [ in₁ , f • in₂ ]
+-- ∪/⊆ f = [ in₁ , f • in₂ ]
+∪/⊆ f = [_,_] {{sums:Cx}} (in₁ {{sums:Cx}}) (f • (in₂ {{sums:Cx}}))
 
 ∷/⊆ : ∀ L {R a} -> L ⊆ R -> a ∷ L ⊆ a ∷ R
 ∷/⊆ _ = ∪/⊆
