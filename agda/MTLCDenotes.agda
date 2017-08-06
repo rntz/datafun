@@ -1,7 +1,5 @@
 module MTLCDenotes where
 
-open import Data.Sum using (inj₁; inj₂)
-
 open import Prelude
 open import Cat
 open import MTLC

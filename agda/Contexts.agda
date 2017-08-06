@@ -38,7 +38,6 @@ instance
   cxs .compo X⊆Y Y⊆Z x = X⊆Y x • Y⊆Z x
 
 -- ∪ forms coproducts on Cx under renaming.
-instance
   cx-sums : Sums _ _
   Sums.C cx-sums = cxs
   _∨_ {{cx-sums}} = _∪_

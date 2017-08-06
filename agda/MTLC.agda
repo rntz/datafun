@@ -3,7 +3,6 @@ module MTLC where
 
 open import Prelude
 open import Cat
-open import Prosets
 open import Monads
 
 

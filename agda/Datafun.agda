@@ -2,7 +2,6 @@ module Datafun where
 
 open import Prelude
 open import Cat
-open import Prosets
 open import Monads
 
  ---------- Tones and types ----------
