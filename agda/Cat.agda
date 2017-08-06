@@ -113,14 +113,14 @@ open CCC {{...}} public using (_⇨_; apply; curry; uncurry; flip)
 
 -- Some convenient conversions
 instance
-  cat->obj : ∀{i j k} -> Cast k (Cat i j) (Set i)
-  cat->obj = Cast: Obj
+  cast-cat->set : ∀{i j k} -> Cast k (Cat i j) (Set i)
+  cast-cat->set = Cast: Obj
 
-  products->cat : ∀{i j k} -> Cast k (Products i j) (Cat i j)
-  products->cat = Cast: Products.C
+  cast-products->cat : ∀{i j k} -> Cast k (Products i j) (Cat i j)
+  cast-products->cat = Cast: Products.C
 
-  ccc->products : ∀{i j k} -> Cast k (CCC i j) (Products i j)
-  ccc->products = Cast: CCC.products
+  cast-ccc->products : ∀{i j k} -> Cast k (CCC i j) (Products i j)
+  cast-ccc->products = Cast: CCC.products
 
 
 -- Some useful categories

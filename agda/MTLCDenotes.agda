@@ -49,11 +49,6 @@ precompose {{C}} f = curry (∧-map id f • apply)
 distrib-∧/∨ : ∀{a b c} -> (a ∨ b) ∧ c ⇒ (a ∧ c) ∨ (b ∧ c)
 distrib-∧/∨ = ∧-map [ curry in₁ , curry in₂ ] id • apply
 
--- distrib : ∀{i j} {C : Cat i j} {_⊗_ _⊕_ hom : Obj C -> Obj C -> Obj C}
---           {{Pro : Products {i}{j} C _⊗_}} {{Sum : Sums C _⊕_}} {{Clo : Closed C _⊗_ hom}}
---           {a b c} -> (a ⊕ b) ⊗ c ≤ (a ⊗ c) ⊕ (b ⊗ c)
--- distrib {C = cat C} = ×-map [ curry in₁ , curry in₂ ] id • apply
-
 -- Lifts an arbitrary function over an antisymmetric domain into a monotone map
 -- over its discrete preorder.
 antisym-lift : ∀{A B} -> Antisymmetric _≡_ (Hom A) -> (Obj A -> Obj B) -> isos A ⇒ B
@@ -109,10 +104,8 @@ eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ⇒ type a
 eval tt = fun (λ _ -> tt)
 eval (M , N) = ⟨ eval M , eval N ⟩
 eval (bind M) = curry (cons • eval M)
--- Argh!
 eval (box M) = corename (extract Wipe) • wipe⇒isos • map Isos (eval M)
 eval (var mono p) = lookup p
--- Argh!
 eval (var disc p) = lookup p • extract Isos
 eval (form ! M) = eval M • eval⊩ form
 

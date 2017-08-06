@@ -47,9 +47,9 @@ map Wipe f (disc , a) = f (disc , a)
 instance
   Wipe-comonad : Comonad Wipe
   -- dup : wipe X ⊆ wipe (wipe X)
-  -- extract : wipe X ⊆ X
   Comonad.dup Wipe-comonad (mono , _) ()
   Comonad.dup Wipe-comonad (disc , a) = id
+  -- extract : wipe X ⊆ X
   Comonad.extract Wipe-comonad (mono , _) ()
   Comonad.extract Wipe-comonad (disc , a) = id
 

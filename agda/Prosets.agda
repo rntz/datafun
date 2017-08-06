@@ -40,7 +40,7 @@ instance
 
 -- The "equivalence quotient" of a proset. Not actually a category of
 -- isomorphisms, since we don't require that the arrows be inverses.
-isos : ∀{i j} -> Cat i j -> Cat i j
+isos : Proset -> Proset
 isos C .Obj = Obj C
 isos C .Hom x y = Hom C x y × Hom C y x
 isos C .ident = ident C , ident C

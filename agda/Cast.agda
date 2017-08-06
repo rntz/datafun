@@ -23,7 +23,7 @@ Cast: f .convert x = f (cast x)
 obj : ∀{i j A} {{C : Convert {i} A (Set j)}} -> A -> Set j
 obj = cast
 
-
+ -- Examples
 private
   module Examples where
     postulate
