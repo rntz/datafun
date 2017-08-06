@@ -22,12 +22,17 @@ record Fun {i j k l} (C : Cat i j) (D : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l) whe
 open Fun public
 pattern fun {F} f = Fun: F f
 
+auto-map : ∀{i j k l} {{C D}} {{F : Fun {i}{j}{k}{l} C D}} {a b}
+           -> Hom C a b -> Hom D (ap F a) (ap F b)
+auto-map {{F = F}} = map F
+
 
 -- Constructions on relations & categories
 data rel+ {i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) : Rel (A ⊎ B) (j ⊔ l) where
   rel₁ : ∀{a b} -> R a b -> rel+ R S (inj₁ a) (inj₁ b)
   rel₂ : ∀{a b} -> S a b -> rel+ R S (inj₂ a) (inj₂ b)
 
+-- I would really like to make these instances but that makes Agda loooooooop.
 cat× cat+ : ∀{i j k l} (C : Cat i j) (D : Cat k l) -> Cat _ _
 cat× C D .Obj = Obj C × Obj D
 cat× C D .Hom (a , x) (b , y) = Hom C a b × Hom D x y
@@ -68,6 +73,11 @@ record Products i j : Set (suc (i ⊔ j)) where
   swap : ∀{a b} -> a ∧ b ≤ b ∧ a
   swap = ⟨ π₂ , π₁ ⟩
 
+  -- This *could* be useful if cat× were an instance, but it's not.
+  -- instance
+  ∧-functor : Fun (cat× C C) C
+  ∧-functor = fun λ { (f , g) -> ∧-map f g }
+
 record Sums i j : Set (suc (i ⊔ j)) where
   constructor Sums:
   field overlap {{C}} : Cat i j
@@ -95,10 +105,6 @@ record CCC i j : Set (suc (i ⊔ j)) where
 
   flip : ∀{a b c} -> a ≤ b ⇨ c -> b ≤ a ⇨ c
   flip f = curry (swap • uncurry f)
-
--- open Products public using (cat; Obj; Hom)
--- open Sums public using (cat; Obj; Hom)
--- open CCC public using (cat; products; Obj; Hom)
 
 open Products {{...}} public using (_∧_; π₁; π₂; ⟨_,_⟩; ∧-map; ∇; swap)
 open Sums {{...}} public using (_∨_; in₁; in₂; [_,_]; ∨-map)

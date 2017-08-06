@@ -38,22 +38,22 @@ _is_ : Type -> Tone -> Cx
 a is o = hyp (o , a)
 
 -- Wipe is a comonad on contexts that removes all non-discrete variables.
-instance
-  -- There's no use in having this be an instance.
-  Wipe : cxs ≤ cxs
-  ap Wipe X (mono , _) = ⊥
-  ap Wipe X (disc , a) = X (disc , a)
-  map Wipe f (mono , _) ()
-  map Wipe f (disc , a) = f (disc , a)
+Wipe : cxs ≤ cxs
+ap Wipe X (mono , _) = ⊥
+ap Wipe X (disc , a) = X (disc , a)
+map Wipe f (mono , _) ()
+map Wipe f (disc , a) = f (disc , a)
 
-  comonadic:Wipe : Comonadic _ Wipe
+instance
+  Wipe-comonad : Comonad Wipe
   -- dup : wipe X ⊆ wipe (wipe X)
   -- extract : wipe X ⊆ X
-  dup {{comonadic:Wipe}} (mono , _) ()
-  dup {{comonadic:Wipe}} (disc , a) = id
-  extract {{comonadic:Wipe}} (mono , _) ()
-  extract {{comonadic:Wipe}} (disc , a) = id
+  Comonad.dup Wipe-comonad (mono , _) ()
+  Comonad.dup Wipe-comonad (disc , a) = id
+  Comonad.extract Wipe-comonad (mono , _) ()
+  Comonad.extract Wipe-comonad (disc , a) = id
 
+wipe : Cx -> Cx
 wipe = ap Wipe
 
 infix 4 _at_

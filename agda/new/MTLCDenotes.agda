@@ -14,25 +14,23 @@ Vars : Cx -> Set
 Vars X = ∃ (λ a -> X a)
 pattern Var {o} {a} p = (o , a) , p
 
-■ = isos
-
 type : Type -> Proset
 type (a ⊃ b) = type a ⇨ type b
 type (a * b) = type a ∧ type b
 type (a + b) = type a ∨ type b
 type bool = bools
-type (□ a) = ■ (type a)
+type (□ a) = isos (type a)
 
 ⟦_⟧₁ : Tone × Type -> Proset
 ⟦ mono , a ⟧₁ = type a
-⟦ disc , a ⟧₁ = ■ (type a)
+⟦ disc , a ⟧₁ = isos (type a)
 
 ⟦_⟧ : Cx -> Proset
 ⟦_⟧+ : Premise -> Proset
 ⟦ X ⟧ = catΠ (Vars X) (λ v -> ⟦ proj₁ v ⟧₁)
 ⟦ nil ⟧+    = ⊤-proset
 ⟦ P , Q ⟧+  = cat× ⟦ P ⟧+ ⟦ Q ⟧+
-⟦ □ P ⟧+    = ■ ⟦ P ⟧+
+⟦ □ P ⟧+    = isos ⟦ P ⟧+
 ⟦ X ▷ P ⟧+  = ⟦ X ⟧ ⇨ ⟦ P ⟧+
 ⟦ term a ⟧+ = type a
 
@@ -58,21 +56,21 @@ distrib-∧/∨ = ∧-map [ curry in₁ , curry in₂ ] id • apply
 
 -- Lifts an arbitrary function over an antisymmetric domain into a monotone map
 -- over its discrete preorder.
-antisym-lift : ∀{A B} -> Antisymmetric _≡_ (Hom A) -> (Obj A -> Obj B) -> ■ A ⇒ B
+antisym-lift : ∀{A B} -> Antisymmetric _≡_ (Hom A) -> (Obj A -> Obj B) -> isos A ⇒ B
 antisym-lift {A}{B} antisym f = Fun: f helper
-  where helper : ∀{x y} -> Hom (■ A) x y -> Hom B (f x) (f y)
+  where helper : ∀{x y} -> Hom (isos A) x y -> Hom B (f x) (f y)
         helper (x , y) with antisym x y
         ... | refl = ident B
 
 instance
-  -- If (f : a -> b) is monotone, then (f : Disc a -> Disc b) is also monotone.
-  Discrete : prosets ≤ prosets
-  ap Discrete = ■
-  map Discrete f = fun (λ { (x , y) -> map f x , map f y })
+  -- If (f : a -> b) is monotone, then (f : Isos a -> Isos b) is also monotone.
+  Isos : prosets ≤ prosets
+  ap Isos = isos
+  map Isos f = fun (λ { (x , y) -> map f x , map f y })
 
-  comonadic:■ : Comonadic _ Discrete
-  dup {{comonadic:■}} = fun ⟨ id , swap ⟩
-  extract {{comonadic:■}} = fun proj₁
+  Isos-comonad : Comonad Isos
+  Comonad.dup Isos-comonad = fun ⟨ id , swap ⟩
+  Comonad.extract Isos-comonad = fun proj₁
 
 -- ⟦_⟧ is a functor, Cx^op -> Proset
 -- TODO: better name
@@ -97,8 +95,8 @@ wipe-sym f (Var {mono} ())
 -- Argh!
 wipe-sym f (Var {disc} p) = swap {{set-products}} (f (Var {disc} p))
 
-wipe⇒■ : ∀{X} -> ⟦ wipe X ⟧ ⇒ ■ ⟦ wipe X ⟧
-wipe⇒■ = fun ⟨ id , wipe-sym ⟩
+wipe⇒isos : ∀{X} -> ⟦ wipe X ⟧ ⇒ isos ⟦ wipe X ⟧
+wipe⇒isos = fun ⟨ id , wipe-sym ⟩
 
 lambda : ∀{x c} -> ⟦ hyp x ⟧ ⇨ c ⇒ ⟦ x ⟧₁ ⇨ c
 lambda = precompose singleton
@@ -112,10 +110,10 @@ eval tt = fun (λ _ -> tt)
 eval (M , N) = ⟨ eval M , eval N ⟩
 eval (bind M) = curry (cons • eval M)
 -- Argh!
-eval (box M) = corename (extract {{comonadic:Wipe}}) • wipe⇒■ • map Discrete (eval M)
+eval (box M) = corename (extract Wipe) • wipe⇒isos • map Isos (eval M)
 eval (var mono p) = lookup p
 -- Argh!
-eval (var disc p) = lookup p • extract {{comonadic:■}}
+eval (var disc p) = lookup p • extract Isos
 eval (form ! M) = eval M • eval⊩ form
 
 eval⊩ lam = lambda
