@@ -1,5 +1,5 @@
--- Denotational semantics for types & such core Datafun.
-module TypeDenotation where
+-- Denotational semantics for types in core Datafun.
+module TypeSem where
 
 open import Prelude
 open import Cat

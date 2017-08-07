@@ -1,4 +1,5 @@
-module TermDenotation where
+-- Denotational semantics for terms in core Datafun.
+module TermSem where
 
 open import Prelude
 open import Cat
@@ -6,7 +7,7 @@ open import Prosets
 open import Datafun
 open import Monads
 open import TreeSet
-open import TypeDenotation
+open import TypeSem
 
 
 ---------- Lemmas for denotational semantics of terms ----------
