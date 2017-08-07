@@ -1,5 +1,4 @@
--- Denotational semantics for core Datafun.
-module Denotation where
+module TermDenotation where
 
 open import Prelude
 open import Cat
@@ -7,59 +6,19 @@ open import Prosets
 open import Datafun
 open import Monads
 open import TreeSet
+open import TypeDenotation
 
- ---------- Denotations of types & tones ----------
-Vars : Cx -> Set
-Vars X = ∃ (λ a -> X a)
-pattern Var {o} {a} p = (o , a) , p
-
-type : Type -> Proset
-type bool = bools
-type (set a p) = trees (isos (type a))
-type (□ a) = isos (type a)
-type (a ⊃ b) = type a ⇨ type b
-type (a * b) = type a ∧ type b
-type (a + b) = type a ∨ type b
-
-⟦_⟧₁ : Tone × Type -> Proset
-⟦ mono , a ⟧₁ = type a
-⟦ disc , a ⟧₁ = isos (type a)
-
-⟦_⟧ : Cx -> Proset
-⟦_⟧+ : Premise -> Proset
-⟦ X ⟧ = catΠ (Vars X) (λ v -> ⟦ proj₁ v ⟧₁)
-⟦ nil ⟧+    = ⊤-proset
-⟦ P , Q ⟧+  = cat× ⟦ P ⟧+ ⟦ Q ⟧+
-⟦ □ P ⟧+    = isos ⟦ P ⟧+
-⟦ X ▷ P ⟧+  = ⟦ X ⟧ ⇨ ⟦ P ⟧+
-⟦ term a ⟧+ = type a
-
- ---------- TODO: Semantics of type-classes ----------
-IsDecidable IsSemilattice HasACC : Proset -> Set
-IsDecidable A = {!!}
--- Problem: this is going to be like (HasSums A), but with a zero. argh!
-IsSemilattice A = {!!}
-HasACC A = {!!}
-
-prove-dec : ∀{a} -> DEC a -> IsDecidable (type a)
-prove-dec = {!!}
-
-prove-sl : ∀{a} -> SL a -> IsSemilattice (type a)
-prove-sl = {!!}
-
-prove-acc : ∀{a} -> ACC a -> HasACC (type a)
-prove-acc = {!!}
-
- ---------- Lemmas for denotational semantics of terms ----------
+
+---------- Lemmas for denotational semantics of terms ----------
 -- I've tried to put the most general lemmas at the beginning.
 precompose : ∀{i j} {{C : Cat i j}} {{cc : CC C}} {a b c : Obj C}
            -> a ≤ b -> b ⇨ c ≤ a ⇨ c
 precompose f = curry (∧-map id f • apply)
 
--- This holds in any bicartesian closed category, but last time I tried writing
--- it that way it made typechecking take an extra .8 seconds or so.
--- TODO: try again.
+-- This actually holds in any bicartesian closed category, but we only need it for prosets.
 distrib-∧/∨ : ∀{a b c} -> (a ∨ b) ∧ c ⇒ (a ∧ c) ∨ (b ∧ c)
+-- distrib-∧/∨ : ∀{i j} {{C : Cat i j}} {{cc : CC C}} {{S : Sums C}}
+--               {a b c : Obj C} -> (a ∨ b) ∧ c ≤ (a ∧ c) ∨ (b ∧ c)
 distrib-∧/∨ = ∧-map [ curry in₁ , curry in₂ ] id • apply
 
 -- Lifts an arbitrary function over an antisymmetric domain into a monotone map
@@ -71,11 +30,12 @@ antisym-lift {A}{B} antisym f = Fun: f helper
         ... | refl = ident B
 
 instance
-  -- If (f : a -> b) is monotone, then (f : Isos a -> Isos b) is also monotone.
+  -- If (f : a -> b) is monotone, then (f : isos a -> isos b) is also monotone.
   Isos : prosets ≤ prosets
   ap Isos = isos
   map Isos f = fun (λ { (x , y) -> map f x , map f y })
 
+  -- This comonad factors into an adjunction to groupoids, I believe.
   Isos-comonad : Comonad Isos
   Comonad.dup Isos-comonad = fun ⟨ id , swap ⟩
   Comonad.extract Isos-comonad = fun proj₁
