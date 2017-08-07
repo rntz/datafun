@@ -29,6 +29,8 @@ _∨_ {{tree-sums C}} = node
 in₁ {{tree-sums C}} = inj₁
 in₂ {{tree-sums C}} = inj₂
 [_,_] {{tree-sums C}} f g = [ f , g ]
+init {{tree-sums C}} = empty
+init≤ {{tree-sums C}} ()
 
 instance
   tree-sums-auto : {{P : Proset}} -> Sums (trees P)

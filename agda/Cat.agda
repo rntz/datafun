@@ -54,7 +54,21 @@ catΠ A B .ident x     = B x .ident
 catΠ A B .compo f g x = B x .compo (f x) (g x)
 
 
--- Cartesian structure.
+-- Cartesian structures.
+record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
+  constructor Sums:
+  private instance the-cat = C
+  infixr 2 _∨_
+  field _∨_ : Op (Obj C)
+  field in₁ : ∀{a b} -> a ≤ a ∨ b
+  field in₂ : ∀{a b} -> b ≤ a ∨ b
+  field [_,_] : ∀{a b c} -> a ≤ c -> b ≤ c -> a ∨ b ≤ c
+  field init : Obj C
+  field init≤ : ∀{a} -> init ≤ a
+
+  ∨-map : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
+  ∨-map f g = [ f • in₁ , g • in₂ ]
+
 record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Products:
   private instance the-cat = C
@@ -63,6 +77,7 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   field π₁ : ∀{a b} -> (a ∧ b) ≤ a
   field π₂ : ∀{a b} -> (a ∧ b) ≤ b
   field ⟨_,_⟩ : ∀{a b x} -> x ≤ a -> x ≤ b -> x ≤ (a ∧ b)
+  -- TODO: terminal object?
 
   ∧-map : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∧ b ≤ c ∧ d
   ∧-map f g = ⟨ π₁ • f , π₂ • g ⟩
@@ -77,18 +92,6 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   -- instance
   ∧-functor : Fun (cat× C C) C
   ∧-functor = fun λ { (f , g) -> ∧-map f g }
-
-record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
-  constructor Sums:
-  private instance the-cat = C
-  infixr 2 _∨_
-  field _∨_ : Op (Obj C)
-  field in₁ : ∀{a b} -> a ≤ a ∨ b
-  field in₂ : ∀{a b} -> b ≤ a ∨ b
-  field [_,_] : ∀{a b c} -> a ≤ c -> b ≤ c -> a ∨ b ≤ c
-
-  ∨-map : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
-  ∨-map f g = [ f • in₁ , g • in₂ ]
 
 -- CC means "cartesian closed".
 record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
@@ -109,7 +112,7 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
 
 module _ {i j} {{C : Cat i j}} where
   module _ {{S : Sums C}} where
-    open Sums S public using (_∨_; in₁; in₂; [_,_]; ∨-map)
+    open Sums S public using (_∨_; in₁; in₂; [_,_]; init; init≤; ∨-map)
   module _ {{P : Products C}} where
     open Products P public using (_∧_; π₁; π₂; ⟨_,_⟩; ∧-map; ∇; swap)
   module _ {{Ccc : CC C}} where
@@ -138,8 +141,8 @@ instance
     where open import Data.Product
 
   set-sums : ∀{i} -> Sums (sets {i})
-  set-sums = Sums: _⊎_ inj₁ inj₂ Data.Sum.[_,_]
-    where open import Data.Sum
+  set-sums = Sums: _⊎_ inj₁ inj₂ Data.Sum.[_,_] (Lift Data.Empty.⊥) (λ { (lift ()) })
+    where import Data.Sum; import Data.Empty
 
   set-cc : ∀{i} -> CC (sets {i})
   set-cc = CC: Function (λ { (f , a) -> f a }) (λ f x y -> f (x , y))
@@ -151,12 +154,18 @@ instance
   compo cats (fun f) (fun g) = fun (f • g)
 
   cat-products : ∀{i j} -> Products (cats {i}{j})
-  cat-products {i}{j} = Products: cat× (fun proj₁) (fun proj₂)
-                        λ where (fun f) (fun g) → fun < f , g >
-    where open import Data.Product
+  cat-products {i}{j} = Products: cat× (fun π₁) (fun π₂)
+                        λ where (fun f) (fun g) → fun ⟨ f , g ⟩
 
   cat-sums : ∀{i j} -> Sums (cats {i}{j})
-  cat-sums {i}{j} = Sums: cat+ (fun rel₁) (fun rel₂)
-    λ where F G .ap -> [ ap F , ap G ]
-            F G .map (rel₁ x) -> map F x
-            F G .map (rel₂ x) -> map G x
+  _∨_ {{cat-sums}} = cat+
+  in₁ {{cat-sums}} = fun rel₁
+  in₂ {{cat-sums}} = fun rel₂
+  [_,_] {{cat-sums}} F G .ap = [ ap F , ap G ]
+  [_,_] {{cat-sums}} F G .map (rel₁ x) = map F x
+  [_,_] {{cat-sums}} F G .map (rel₂ x) = map G x
+  init {{cat-sums}} .Obj = init
+  init {{cat-sums}} .Hom (lift ())
+  init {{cat-sums}} .ident {lift ()}
+  init {{cat-sums}} .compo {lift ()}
+  init≤ {{cat-sums}} = Fun: init≤ (λ { {lift ()} })
