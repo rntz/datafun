@@ -82,8 +82,8 @@ isos C .Hom x y = Hom C x y × Hom C y x
 isos C .ident = ident C , ident C
 isos C .compo (f₁ , f₂) (g₁ , g₂) = compo C f₁ g₁ , compo C g₂ f₂
 
-isos-decidable : ∀{A} -> Decidable≤ A -> Decidable≤ (isos A)
-isos-decidable test x y = dec× (test x y) (test y x)
+isos-decidable : ∀ A -> Decidable≤ A -> Decidable≤ (isos A)
+isos-decidable _ test x y = dec× (test x y) (test y x)
 
 
 -- The trivial proset.

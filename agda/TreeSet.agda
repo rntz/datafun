@@ -12,14 +12,14 @@ data Tree (a : Set) : Set where
   leaf : (x : a) -> Tree a
   node : (l r : Tree a) -> Tree a
 
-Tree∈ : ∀{a} -> Rel a zero -> a -> Tree a -> Set
-Tree∈ R x empty = ⊥
-Tree∈ R x (leaf y) = R x y
-Tree∈ R x (node t u) = Tree∈ R x t ⊎ Tree∈ R x u
-
 infix 4 _∈[_]_
 _∈[_]_ : ∀{a} -> a -> Rel a zero -> Tree a -> Set
-x ∈[ R ] t = Tree∈ R x t
+x ∈[ R ] empty = ⊥
+x ∈[ R ] leaf y = R x y
+x ∈[ R ] node l r = x ∈[ R ] l ⊎ x ∈[ R ] r
+
+Tree∈ : ∀{a} -> Rel a zero -> a -> Tree a -> Set
+Tree∈ R x t = x ∈[ R ] t
 
 trees : Proset -> Proset
 trees C .Obj = Tree (Obj C)
@@ -48,13 +48,20 @@ decide-Tree∈ test x (node t u) with decide-Tree∈ test x t | decide-Tree∈ t
 ... | a | yes b = yes (inj₂ b)
 ... | no ¬a | no ¬b = no [ ¬a , ¬b ]
 
-module _ {P : Proset} (≤? : Decidable≤ P) where
+module _ (P : Proset) (≤? : Decidable≤ P) where
   private instance pp = P
+
+  down-closed : ∀{x y : Obj P} -> x ≤ y -> ∀ t -> y ∈[ _≤_ ] t -> x ∈[ _≤_ ] t
+  down-closed x≤y empty ()
+  down-closed x≤y (leaf z) y≤z = x≤y • y≤z
+  down-closed x≤y (node l r) (inj₁ z) = inj₁ (down-closed x≤y l z)
+  down-closed x≤y (node l r) (inj₂ z) = inj₂ (down-closed x≤y r z)
+
   trees-decidable : Decidable≤ (trees P)
   trees-decidable empty t = yes ⊥-elim
   trees-decidable (leaf x) t with decide-Tree∈ ≤? x t
   -- TODO: need downward-closure lemma!
-  ... | yes p = yes λ {x'} x'≤x → {!!}
+  ... | yes p = yes λ y≤x → down-closed y≤x t p
   ... | no ¬p = no  λ y → ¬p (y id)
   trees-decidable (node l r) t with dec× (trees-decidable l t) (trees-decidable r t)
   ... | yes (a , b) = yes λ { (inj₁ x) → a x; (inj₂ y) → b y }

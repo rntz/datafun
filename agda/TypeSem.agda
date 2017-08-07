@@ -45,9 +45,10 @@ class (C , D) P = class C P × class D P
 
 is! : ∀{C a} -> Is C a -> class C (type a)
 is! {DEC} bool = bool≤-decidable
-is! {DEC} (set a) = {!!}
 -- argh!
-is! {DEC} (□ {a} p) = isos-decidable {type a} (is! p)
+is! {DEC} (set {a} p) = trees-decidable (isos (type a)) (isos-decidable (type a) (is! p))
+-- argh.
+is! {DEC} (□ {a} p) = isos-decidable (type a) (is! p)
 is! {DEC} (a * b) = decidable× (is! a) (is! b)
 is! {DEC} (a + b) = decidable+ (is! a) (is! b)
 
