@@ -8,8 +8,7 @@ open import Datafun
 open import Monads
 open import TreeSet
 
-
----------- Denotations of types & tones ----------
+ ---------- Denotations of types & tones ----------
 Vars : Cx -> Set
 Vars X = ∃ (λ a -> X a)
 pattern Var {o} {a} p = (o , a) , p
@@ -35,8 +34,23 @@ type (a + b) = type a ∨ type b
 ⟦ X ▷ P ⟧+  = ⟦ X ⟧ ⇨ ⟦ P ⟧+
 ⟦ term a ⟧+ = type a
 
-
----------- Lemmas for denotational semantics of terms ----------
+ ---------- TODO: Semantics of type-classes ----------
+IsDecidable IsSemilattice HasACC : Proset -> Set
+IsDecidable A = {!!}
+-- Problem: this is going to be like (HasSums A), but with a zero. argh!
+IsSemilattice A = {!!}
+HasACC A = {!!}
+
+prove-dec : ∀{a} -> DEC a -> IsDecidable (type a)
+prove-dec = {!!}
+
+prove-sl : ∀{a} -> SL a -> IsSemilattice (type a)
+prove-sl = {!!}
+
+prove-acc : ∀{a} -> ACC a -> HasACC (type a)
+prove-acc = {!!}
+
+ ---------- Lemmas for denotational semantics of terms ----------
 -- I've tried to put the most general lemmas at the beginning.
 precompose : ∀{i j} {{C : CCC i j}} {a b c : obj C}
            -> a ≤ b -> b ⇨ c ≤ a ⇨ c
@@ -97,8 +111,7 @@ wipe⇒isos = fun ⟨ id , wipe-sym ⟩
 lambda : ∀{x c} -> ⟦ hyp x ⟧ ⇨ c ⇒ ⟦ x ⟧₁ ⇨ c
 lambda = precompose singleton
 
-
----------- Denotations of terms, premises, and term formers ----------
+ ---------- Denotations of terms, premises, and term formers ----------
 eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ⇒ ⟦ P ⟧+
 eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ⇒ type a
 
@@ -128,10 +141,10 @@ eval⊩ splitsum .ap x = x
 eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
 eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)
 -- TODO
-eval⊩ (when x) = ?
-eval⊩ (single p) = ?
-eval⊩ (for-in p q) = ?
-eval⊩ (bottom x) = ?
-eval⊩ (join x) = ?
-eval⊩ (fix x) = ?
-eval⊩ (fix≤ x) = ?
+eval⊩ (when (dec , sl)) = {!!}
+eval⊩ (single dec) = {!!}
+eval⊩ (for-in a-dec (b-dec , b-sl)) = {!!}
+eval⊩ (bottom sl) = {!!}
+eval⊩ (join sl) = {!!}
+eval⊩ (fix is-fix) = {!!}
+eval⊩ (fix≤ is-fix≤) = {!!}
