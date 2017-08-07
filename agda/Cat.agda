@@ -32,6 +32,9 @@ auto-map {{F = F}} = map F
 
 
 -- Constructions on relations & categories
+rel× : ∀{i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) -> Rel (A × B) (j ⊔ l)
+rel× R S (a , x) (b , y) = R a b × S x y
+
 data rel+ {i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) : Rel (A ⊎ B) (j ⊔ l) where
   rel₁ : ∀{a b} -> R a b -> rel+ R S (inj₁ a) (inj₁ b)
   rel₂ : ∀{a b} -> S a b -> rel+ R S (inj₂ a) (inj₂ b)
@@ -39,7 +42,7 @@ data rel+ {i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) : Rel (A ⊎ B) (j �
 -- I would really like to make these instances but that makes Agda loooooooop.
 cat× cat+ : ∀{i j k l} (C : Cat i j) (D : Cat k l) -> Cat _ _
 cat× C D .Obj = Obj C × Obj D
-cat× C D .Hom (a , x) (b , y) = Hom C a b × Hom D x y
+cat× C D .Hom = rel× (Hom C) (Hom D)
 cat× C D .ident = ident C , ident D
 cat× C D .compo (f₁ , g₁) (f₂ , g₂) = compo C f₁ f₂ , compo D g₁ g₂
 

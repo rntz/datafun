@@ -34,7 +34,33 @@ type (a + b) = type a ∨ type b
 ⟦ X ▷ P ⟧+  = ⟦ X ⟧ ⇨ ⟦ P ⟧+
 ⟦ term a ⟧+ = type a
 
- ---------- TODO: Semantics of type-classes ----------
+ ---------- Semantics of type-classes ----------
+class : Class -> Proset -> Set
+class DEC  A = Decidable (Hom A)
+class SL   = Sums
+class FIN  = TODO
+class ACC  = TODO
+class ACC≤ = TODO
+class (C , D) P = class C P × class D P
+
+is! : ∀{C a} -> Is C a -> class C (type a)
+is! {DEC} bool = bool≤-decidable
+is! {DEC} (set a) = {!!}
+-- argh!
+is! {DEC} (□ {a} p) = isos-decidable {type a} (is! p)
+is! {DEC} (a * b) = decidable× (is! a) (is! b)
+is! {DEC} (a + b) = decidable+ (is! a) (is! b)
+
+is! {SL} bool     = bool-sums
+is! {SL} (set a)  = tree-sums (isos (type a))
+is! {SL} (a * b)  = cat×-sums (is! a) (is! b)
+is! {SL} (a ⊃ b)  = proset→-sums (is! b)
+
+is! {FIN} a = TODO
+is! {ACC} a = TODO
+is! {ACC≤} a = TODO
+
+is! {C , D} (x , y) = is! x , is! y
 
 -- IsDecidable HasACC : Proset -> Set
 -- IsDecidable A = {!!}
@@ -46,11 +72,11 @@ type (a + b) = type a ∨ type b
 -- is-acc : ∀{a} -> ACC a -> HasACC (type a)
 -- is-acc = {!!}
 
-IsSemilattice : Proset -> Set
-IsSemilattice A = Sums A
+-- IsSemilattice : Proset -> Set
+-- IsSemilattice A = Sums A
 
-is-sl : ∀ {a} -> Is SL a -> IsSemilattice (type a)
-is-sl bool = bool-sums
-is-sl (set a) = tree-sums (isos (type a))
-is-sl (a * b) = cat×-sums (is-sl a) (is-sl b)
-is-sl (a ⊃ b) = proset→-sums (is-sl b)
+-- is-sl : ∀ {a} -> Is SL a -> IsSemilattice (type a)
+-- is-sl bool = bool-sums
+-- is-sl (set a) = tree-sums (isos (type a))
+-- is-sl (a * b) = cat×-sums (is-sl a) (is-sl b)
+-- is-sl (a ⊃ b) = proset→-sums (is-sl b)

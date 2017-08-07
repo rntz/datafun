@@ -14,6 +14,30 @@ infix 1 _⇒_
 _⇒_ : Rel Proset _
 _⇒_ = Fun
 
+-- Decidability of the hom-sets of a proset/category.
+Decidable≤ : Proset -> Set
+Decidable≤ P = Decidable (Hom P)
+
+dec× : ∀{i j P Q} -> Dec {i} P -> Dec {j} Q -> Dec (P × Q)
+dec× (yes p) (yes q) = yes (p , q)
+dec× (no ¬p) _ = no (λ { (x , y) -> ¬p x })
+dec× _ (no ¬p) = no (λ { (x , y) -> ¬p y })
+
+decidable× : ∀{i j k l A B} {R : Rel {i} A j} {S : Rel {k} B l}
+           -> Decidable R -> Decidable S -> Decidable (rel× R S)
+decidable× P Q (a₁ , b₁) (a₂ , b₂) = dec× (P a₁ a₂) (Q b₁ b₂)
+
+decidable+ : ∀{i j k l A B} {R : Rel {i} A j} {S : Rel {k} B l}
+           -> Decidable R -> Decidable S -> Decidable (rel+ R S)
+decidable+ P Q (inj₁ x) (inj₁ y) with P x y
+... | yes p = yes (rel₁ p)
+... | no ¬p = no (λ { (rel₁ x) → ¬p x })
+decidable+ P Q (inj₂ x) (inj₂ y) with Q x y
+... | yes p = yes (rel₂ p)
+... | no ¬p = no (λ { (rel₂ x) → ¬p x })
+decidable+ P Q (inj₁ x) (inj₂ y) = no λ {()}
+decidable+ P Q (inj₂ y) (inj₁ x) = no λ {()}
+
 -- The proset of monotone maps between two prosets. Like the category of
 -- functors and natural transformations, but without the naturality condition.
 proset→ : (A B : Proset) -> Proset
@@ -58,6 +82,9 @@ isos C .Hom x y = Hom C x y × Hom C y x
 isos C .ident = ident C , ident C
 isos C .compo (f₁ , f₂) (g₁ , g₂) = compo C f₁ g₁ , compo C g₂ f₂
 
+isos-decidable : ∀{A} -> Decidable≤ A -> Decidable≤ (isos A)
+isos-decidable test x y = dec× (test x y) (test y x)
+
 
 -- The trivial proset.
 ⊤-proset : Proset
@@ -67,6 +94,12 @@ isos C .compo (f₁ , f₂) (g₁ , g₂) = compo C f₁ g₁ , compo C g₂ f�
 data bool≤ : Rel Bool zero where
   bool-refl : Reflexive bool≤
   false<true : bool≤ false true
+
+bool≤-decidable : Decidable bool≤
+bool≤-decidable false false = yes bool-refl
+bool≤-decidable false true = yes false<true
+bool≤-decidable true false = no λ {()}
+bool≤-decidable true true = yes bool-refl
 
 instance
   bools : Cat _ _
