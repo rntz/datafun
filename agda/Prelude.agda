@@ -19,7 +19,7 @@ open Eq using (_≡_; refl) public
 
 
 -- MY STUFF
-open import Cast public
+-- open import Cast public
 
 Op : ∀{i} -> Set i -> Set i
 Op A = A -> A -> A

@@ -22,6 +22,10 @@ record Fun {i j k l} (C : Cat i j) (D : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l) whe
 open Fun public
 pattern fun {F} f = Fun: F f
 
+const-fun : ∀{i j k l C D} -> Obj D -> Fun {i}{j}{k}{l} C D
+const-fun {D = D} x = Fun: (λ _ -> x) (λ _ -> ident D)
+
+-- TODO: remove auto-map?
 auto-map : ∀{i j k l} {{C D}} {{F : Fun {i}{j}{k}{l} C D}} {a b}
            -> Hom C a b -> Hom D (ap F a) (ap F b)
 auto-map {{F = F}} = map F
@@ -68,6 +72,9 @@ record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
 
   ∨-map : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
   ∨-map f g = [ f • in₁ , g • in₂ ]
+
+  ∨-functor : Fun (cat× C C) C
+  ∨-functor = fun λ { (f , g) -> ∨-map f g }
 
 record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Products:
@@ -119,13 +126,13 @@ module _ {i j} {{C : Cat i j}} where
     open CC Ccc public using (_⇨_; apply; curry; uncurry; flip)
 
 
--- Some convenient conversions
-instance
-  cast-cat->set : ∀{i j k} -> Cast k (Cat i j) (Set i)
-  cast-cat->set = Cast: Obj
+-- -- Some convenient conversions
+-- instance
+--   cast-cat->set : ∀{i j k} -> Cast k (Cat i j) (Set i)
+--   cast-cat->set = Cast: Obj
 
-  cast-ccc->products : ∀{i j k C} -> Cast k (CC {i}{j} C) (Products C)
-  cast-ccc->products = Cast: CC.products
+--   cast-ccc->products : ∀{i j k C} -> Cast k (CC {i}{j} C) (Products C)
+--   cast-ccc->products = Cast: CC.products
 
 
 -- Some useful categories
@@ -169,3 +176,14 @@ instance
   init {{cat-sums}} .ident {lift ()}
   init {{cat-sums}} .compo {lift ()}
   init≤ {{cat-sums}} = Fun: init≤ (λ { {lift ()} })
+
+ -- Preserving cartesian structure over operations on categories.
+module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
+  private instance cc = C; cs = P; dd = D; ds = Q
+  cat×-sums : Sums (cat× C D)
+  _∨_ {{cat×-sums}} (a , x) (b , y) = (a ∨ b) , (x ∨ y)
+  in₁ {{cat×-sums}} = in₁ , in₁
+  in₂ {{cat×-sums}} = in₂ , in₂
+  [_,_] {{cat×-sums}} (f₁ , f₂) (g₁ , g₂) = [ f₁ , g₁ ] , [ f₂ , g₂ ]
+  init {{cat×-sums}} = init , init
+  init≤ {{cat×-sums}} = init≤ , init≤

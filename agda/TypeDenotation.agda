@@ -35,21 +35,24 @@ type (a + b) = type a ∨ type b
 ⟦ term a ⟧+ = type a
 
  ---------- TODO: Semantics of type-classes ----------
-IsDecidable IsSemilattice HasACC : Proset -> Set
-IsDecidable A = {!!}
+
+-- IsDecidable HasACC : Proset -> Set
+-- IsDecidable A = {!!}
+-- HasACC A = {!!}
+
+-- prove-dec : ∀{a} -> DEC a -> IsDecidable (type a)
+-- prove-dec = {!!}
+
+-- prove-acc : ∀{a} -> ACC a -> HasACC (type a)
+-- prove-acc = {!!}
+
+IsSemilattice : Proset -> Set
 IsSemilattice A = Sums A
-HasACC A = {!!}
 
-prove-dec : ∀{a} -> DEC a -> IsDecidable (type a)
-prove-dec = {!!}
-
-prove-sl : ∀{a} -> SL a -> IsSemilattice (type a)
-prove-sl {bool} p = {!!}
-prove-sl {set a p} p₁ = {!!}
-prove-sl {□ a} p = {!!}
-prove-sl {a ⊃ a₁} p = {!!}
-prove-sl {a * a₁} p = {!!}
-prove-sl {a + a₁} p = {!!}
-
-prove-acc : ∀{a} -> ACC a -> HasACC (type a)
-prove-acc = {!!}
+prove-sl : ∀ a -> SL a -> IsSemilattice (type a)
+prove-sl bool tt = bool-sums
+prove-sl (set a p) tt = tree-sums (isos (type a))
+prove-sl (□ a) ()
+prove-sl (a ⊃ b) p = proset→-sums (prove-sl b p)
+prove-sl (a * b) (pa , pb) = cat×-sums (prove-sl a pa) (prove-sl b pb)
+prove-sl (a + b) ()
