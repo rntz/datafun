@@ -69,6 +69,12 @@ wipe⇒isos = fun ⟨ id , wipe-sym ⟩
 lambda : ∀{x c} -> ⟦ hyp x ⟧ ⇨ c ⇒ ⟦ x ⟧₁ ⇨ c
 lambda = precompose singleton
 
+from-bool : ∀{a} (S : Sums a) -> bools ∧ a ⇒ a
+from-bool S .ap (c , x) = if c then x else Sums.init S
+from-bool {a} S .map {false , x} (bool-refl , x≤y) = ident a
+from-bool S .map {true  , x} (bool-refl , x≤y) = x≤y
+from-bool S .map {false , x} (false<true , x≤y) = Sums.init≤ S
+
  ---------- Denotations of terms, premises, and term formers ----------
 eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ⇒ ⟦ P ⟧+
 eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ⇒ type a
@@ -99,10 +105,10 @@ eval⊩ splitsum .ap x = x
 eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
 eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)
 -- TODO
-eval⊩ (when (dec , sl)) = {!!}
+eval⊩ (when {a} (dec , sl)) = from-bool (is-sl a sl)
 eval⊩ (single dec) = {!!}
 eval⊩ (for-in a-dec (b-dec , b-sl)) = {!!}
-eval⊩ (bottom {a} sl) = const-fun (Sums.init (prove-sl a sl))
-eval⊩ (join {a} sl) = Sums.∨-functor (prove-sl a sl)
+eval⊩ (bottom {a} sl) = const-fun (Sums.init (is-sl a sl))
+eval⊩ (join {a} sl) = Sums.∨-functor (is-sl a sl)
 eval⊩ (fix is-fix) = {!!}
 eval⊩ (fix≤ is-fix≤) = {!!}

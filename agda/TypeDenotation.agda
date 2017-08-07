@@ -49,10 +49,10 @@ type (a + b) = type a ∨ type b
 IsSemilattice : Proset -> Set
 IsSemilattice A = Sums A
 
-prove-sl : ∀ a -> SL a -> IsSemilattice (type a)
-prove-sl bool tt = bool-sums
-prove-sl (set a p) tt = tree-sums (isos (type a))
-prove-sl (□ a) ()
-prove-sl (a ⊃ b) p = proset→-sums (prove-sl b p)
-prove-sl (a * b) (pa , pb) = cat×-sums (prove-sl a pa) (prove-sl b pb)
-prove-sl (a + b) ()
+is-sl : ∀ a -> SL a -> IsSemilattice (type a)
+is-sl bool tt = bool-sums
+is-sl (set a p) tt = tree-sums (isos (type a))
+is-sl (□ a) ()
+is-sl (a ⊃ b) p = proset→-sums (is-sl b p)
+is-sl (a * b) (pa , pb) = cat×-sums (is-sl a pa) (is-sl b pb)
+is-sl (a + b) ()

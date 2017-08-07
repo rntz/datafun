@@ -25,7 +25,6 @@ mutual
     set : (a : Type) (p : DEC a) -> Type
     □ : Type -> Type
     _⊃_ _*_ _+_ : (a b : Type) -> Type
-    -- TODO: sets
 
   DEC : Type -> Set
   DEC bool = ⊤
