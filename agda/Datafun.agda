@@ -65,23 +65,6 @@ mutual
   data ACC! : Type -> Set where  -- TODO
   data ACC≤! : Type -> Set where -- TODO
 
- -- Deciding type predicates.
-
--- -- Currently only semi-deciding: that is, we prove that if we answer "yes" then
--- -- the type does have the property, but not vice-versa. TODO: Prove Dec for
--- -- decidability instead.
--- DEC? : ∀ a -> Maybe (DEC a)
--- DEC? bool = just tt
--- DEC? (set a _) = DEC? a
--- DEC? (□ a) = DEC? a
--- DEC? (a * b) with DEC? a | DEC? b
--- ... | just x | just y = just (x , y)
--- ... | _ | _ = nothing
--- DEC? (a + b) with DEC? a | DEC? b
--- ... | just x | just y = just (x , y)
--- ... | _ | _ = nothing
--- DEC? (a ⊃ b) = nothing
-
  ---------- Contexts / typing environments ----------
 open import Contexts (Tone × Type) public
 
