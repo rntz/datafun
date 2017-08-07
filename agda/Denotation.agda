@@ -6,6 +6,7 @@ open import Cat
 open import Prosets
 open import Datafun
 open import Monads
+open import TreeSet
 
 
 ---------- Denotations of types & tones ----------
@@ -15,7 +16,7 @@ pattern Var {o} {a} p = (o , a) , p
 
 type : Type -> Proset
 type bool = bools
-type (set a p) = {!!}
+type (set a p) = trees (isos (type a))
 type (□ a) = isos (type a)
 type (a ⊃ b) = type a ⇨ type b
 type (a * b) = type a ∧ type b
@@ -127,4 +128,10 @@ eval⊩ splitsum .ap x = x
 eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
 eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)
 -- TODO
-eval⊩ R = {!!}
+eval⊩ (when x) = ?
+eval⊩ (single p) = ?
+eval⊩ (for-in p q) = ?
+eval⊩ (bottom x) = ?
+eval⊩ (join x) = ?
+eval⊩ (fix x) = ?
+eval⊩ (fix≤ x) = ?
