@@ -5,33 +5,32 @@ open import Cat
 open import Prosets
 open import Monads
 
+open import Data.Empty
+
 data Tree (a : Set) : Set where
   empty : Tree a
   leaf : (x : a) -> Tree a
   node : (l r : Tree a) -> Tree a
 
-data _∈_ {a : Set} (x : a) : Tree a -> Set where
-  ∈-leaf : x ∈ leaf x
-  ∈-node : ∀{l r} -> (p : x ∈ l ⊎ x ∈ r) -> x ∈ node l r
+infix 4 _∈[_]_
+_∈[_]_ : ∀{a} -> a -> Rel a zero -> Tree a -> Set
+x ∈[ R ] empty = ⊥
+x ∈[ R ] leaf y = R x y
+x ∈[ R ] node t u = x ∈[ R ] t ⊎ x ∈[ R ] u
 
-infix 4 _⊑_
-_⊑_ : ∀ {a} (t u : Tree a) -> Set
-t ⊑ u = ∀{x} -> x ∈ t -> x ∈ u
+trees : Proset -> Proset
+trees C .Obj = Tree (Obj C)
+trees C .Hom t u = ∀ {x} (p : x ∈[ Hom C ] t) -> x ∈[ Hom C ] u
+trees C .ident = id
+trees C .compo f g = f • g
 
-trees : ∀ a -> Proset
-trees a .Obj = Tree a
-trees a .Hom = _⊑_
-trees a .ident p = p
-trees a .compo f g p = g (f p)
+tree-sums : Proset -> Sums _ _
+tree-sums C .cat = trees C
+_∨_ {{tree-sums C}} = node
+in₁ {{tree-sums C}} = inj₁
+in₂ {{tree-sums C}} = inj₂
+[_,_] {{tree-sums C}} f g = [ f , g ]
 
 instance
-  trees-auto : ∀{a} -> Proset
-  trees-auto {a} = trees a
-
-  -- node forms coproducts on trees under ⊑.
-  tree-sums : ∀{a} -> Sums _ _
-  tree-sums {a} .Sums.C = trees a
-  _∨_ {{tree-sums}} = node
-  in₁ {{tree-sums}} = in₁ • ∈-node
-  in₂ {{tree-sums}} = in₂ • ∈-node
-  [_,_] {{tree-sums}} f g (∈-node p) = [ f , g ] p
+  tree-sums-auto : {{P : Proset}} -> Sums _ _
+  tree-sums-auto {{P}} = tree-sums P
