@@ -57,9 +57,9 @@ catΠ A B .compo f g x = B x .compo (f x) (g x)
 -- Cartesian structure.
 record Products i j : Set (suc (i ⊔ j)) where
   constructor Products:
-  field overlap {{C}} : Cat i j
+  field overlap {{cat}} : Cat i j
   infixr 2 _∧_
-  field _∧_ : Op (Obj C)
+  field _∧_ : Op (Obj cat)
   field π₁ : ∀{a b} -> (a ∧ b) ≤ a
   field π₂ : ∀{a b} -> (a ∧ b) ≤ b
   field ⟨_,_⟩ : ∀{a b x} -> x ≤ a -> x ≤ b -> x ≤ (a ∧ b)
@@ -75,14 +75,14 @@ record Products i j : Set (suc (i ⊔ j)) where
 
   -- This *could* be useful if cat× were an instance, but it's not.
   -- instance
-  ∧-functor : Fun (cat× C C) C
+  ∧-functor : Fun (cat× cat cat) cat
   ∧-functor = fun λ { (f , g) -> ∧-map f g }
 
 record Sums i j : Set (suc (i ⊔ j)) where
   constructor Sums:
-  field overlap {{C}} : Cat i j
+  field overlap {{cat}} : Cat i j
   infixr 2 _∨_
-  field _∨_ : Op (Obj C)
+  field _∨_ : Op (Obj cat)
   field in₁ : ∀{a b} -> a ≤ a ∨ b
   field in₂ : ∀{a b} -> b ≤ a ∨ b
   field [_,_] : ∀{a b c} -> a ≤ c -> b ≤ c -> a ∨ b ≤ c
@@ -96,7 +96,7 @@ record CCC i j : Set (suc (i ⊔ j)) where
   field overlap {{products}} : Products i j
   open Products products
   infixr 4 _⇨_
-  field _⇨_ : Op (Obj C)
+  field _⇨_ : Op (Obj cat)
   field apply : ∀{a b} -> (a ⇨ b) ∧ a ≤ b
   field curry : ∀{a b c} -> a ∧ b ≤ c -> a ≤ b ⇨ c
 
@@ -106,6 +106,9 @@ record CCC i j : Set (suc (i ⊔ j)) where
   flip : ∀{a b c} -> a ≤ b ⇨ c -> b ≤ a ⇨ c
   flip f = curry (swap • uncurry f)
 
+open Products public using (cat)
+open Sums public using (cat)
+open CCC public using (products)
 open Products {{...}} public using (_∧_; π₁; π₂; ⟨_,_⟩; ∧-map; ∇; swap)
 open Sums {{...}} public using (_∨_; in₁; in₂; [_,_]; ∨-map)
 open CCC {{...}} public using (_⇨_; apply; curry; uncurry; flip)
@@ -117,7 +120,7 @@ instance
   cast-cat->set = Cast: Obj
 
   cast-products->cat : ∀{i j k} -> Cast k (Products i j) (Cat i j)
-  cast-products->cat = Cast: Products.C
+  cast-products->cat = Cast: Products.cat
 
   cast-ccc->products : ∀{i j k} -> Cast k (CCC i j) (Products i j)
   cast-ccc->products = Cast: CCC.products

@@ -39,7 +39,7 @@ instance
 
 -- ∪ forms coproducts on Cx under renaming.
   cx-sums : Sums _ _
-  Sums.C cx-sums = cxs
+  cat cx-sums = cxs
   _∨_ {{cx-sums}} = _∪_
   in₁ {{cx-sums}} _ = inj₁
   in₂ {{cx-sums}} _ = inj₂
