@@ -4,7 +4,7 @@ open import Prelude
 open import Cat
 open import Monads
 
- ---------- Tones and types ----------
+ ---------- Tones, types, and typeclasses ----------
 data Tone : Set where mono disc : Tone
 
 data _≺_ : (o p : Tone) -> Set where
@@ -157,7 +157,7 @@ data _⊢_ (X : Cx) : Premise -> Set1 where
   _!_ : ∀{P a} (form : P ⊩ a) (args : X ⊢ P) -> X ⊢ term a
   var : ∀{a} o (p : X (o , a)) -> X ⊢ term a
 
- -- Pattern synonyms for terms.
+ -- Pattern synonyms for terms.
 -- pattern lam! {a b} M        = lam {a}{b} ! bind M
 -- pattern app! {a b} M N      = app {a}{b} ! M , N
 -- pattern box! {a} M          = box {a} ! box M

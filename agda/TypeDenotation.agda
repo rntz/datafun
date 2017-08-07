@@ -40,11 +40,11 @@ type (a + b) = type a ∨ type b
 -- IsDecidable A = {!!}
 -- HasACC A = {!!}
 
--- prove-dec : ∀{a} -> DEC a -> IsDecidable (type a)
--- prove-dec = {!!}
+-- is-dec : ∀{a} -> DEC a -> IsDecidable (type a)
+-- is-dec = {!!}
 
--- prove-acc : ∀{a} -> ACC a -> HasACC (type a)
--- prove-acc = {!!}
+-- is-acc : ∀{a} -> ACC a -> HasACC (type a)
+-- is-acc = {!!}
 
 IsSemilattice : Proset -> Set
 IsSemilattice A = Sums A
