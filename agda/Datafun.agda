@@ -18,72 +18,69 @@ mono ≺? mono = yes tone-refl
 mono ≺? disc = no (λ ())
 disc ≺? _ = yes tone-disc
 
+data Class : Set where
+  DEC SL FIN ACC ACC≤ : Class
+  _,_ : Op Class
+
+FIX FIX≤ : Class
+FIX = DEC , SL , ACC
+FIX≤ = DEC , SL , ACC≤
+
 mutual
   infixr 6 _⊃_
   data Type : Set where
     bool : Type
-    set : (a : Type) (p : DEC a) -> Type
+    set : (a : Type) (p : Is DEC a) -> Type
     □ : Type -> Type
     _⊃_ _*_ _+_ : (a b : Type) -> Type
 
-  DEC : Type -> Set
-  DEC bool = ⊤
-  DEC (set a _) = DEC a
-  DEC (□ a) = DEC a
-  DEC (_ ⊃ _) = ⊥
-  DEC (a * b) = DEC a × DEC b
-  DEC (a + b) = DEC a × DEC b
+  Is : Class -> Type -> Set
+  Is DEC = Dec!
+  Is SL = SL!
+  Is FIN = Fin!
+  Is ACC = ACC!
+  Is ACC≤ = ACC≤!
+  Is (C , D) a = Is C a × Is D a
 
--- Type predicates
-SL FIN ACC ACC≤ DECSL FIX FIX≤ : Type -> Set
-SL bool = ⊤
-SL (set _ _) = ⊤
-SL (□ a) = ⊥
-SL (a * b) = SL a × SL b
-SL (a + b) = ⊥
-SL (a ⊃ b) = SL b
+  data Dec! : Type -> Set where
+    bool : Dec! bool
+    set  : ∀{a} p -> Dec! (set a p)
+    □    : ∀{a} (p : Dec! a) -> Dec! (□ a)
+    _*_  : ∀{a} (p : Dec! a) {b} (q : Dec! b) -> Dec! (a * b)
+    _+_  : ∀{a} (p : Dec! a) {b} (q : Dec! b) -> Dec! (a + b)
 
-FIN bool = ⊤
-FIN (set a _) = FIN a
-FIN (□ a) = FIN a
-FIN (a * b) = FIN a × FIN b
-FIN (a + b) = FIN a × FIN b
-FIN (a ⊃ b) = ⊥
+  data SL! : Type -> Set where
+    bool : SL! bool
+    set  : ∀ a {p} -> SL! (set a p)
+    _*_  : ∀{a} (p : SL! a) {b} (q : SL! b) -> SL! (a * b)
+    _⊃_  : ∀ a {b} (p : SL! b) -> SL! (a ⊃ b)
 
-ACC bool = ⊤
-ACC (set a _) = FIN a
-ACC (□ a) = ⊤
-ACC (a * b) = ACC a × ACC b
-ACC (a + b) = ACC a × ACC b
-ACC (a ⊃ b) = ⊥
+  data Fin! : Type -> Set where
+    bool : Fin! bool
+    set  : ∀{a p} -> Fin! a -> Fin! (set a p)
+    _*_  : ∀{a} (p : Fin! a) {b} (q : Fin! b) -> Fin! (a * b)
+    _+_  : ∀{a} (p : Fin! a) {b} (q : Fin! b) -> Fin! (a + b)
+    -- could add a case for (a ⊃ b) here, but would never use it.
 
-ACC≤ bool = ⊤
-ACC≤ (set a _) = ⊤
-ACC≤ (□ a) = ⊤
-ACC≤ (a ⊃ b) = ⊥
-ACC≤ (a * b) = ACC≤ a × ACC≤ b
-ACC≤ (a + b) = ACC≤ a × ACC≤ b
-
-DECSL a = DEC a × SL a
-FIX a = ACC a × DECSL a
-FIX≤ a = ACC≤ a × DECSL a
+  data ACC! : Type -> Set where  -- TODO
+  data ACC≤! : Type -> Set where -- TODO
 
  -- Deciding type predicates.
 
--- Currently only semi-deciding: that is, we prove that if we answer "yes" then
--- the type does have the property, but not vice-versa. TODO: Prove Dec for
--- decidability instead.
-DEC? : ∀ a -> Maybe (DEC a)
-DEC? bool = just tt
-DEC? (set a _) = DEC? a
-DEC? (□ a) = DEC? a
-DEC? (a * b) with DEC? a | DEC? b
-... | just x | just y = just (x , y)
-... | _ | _ = nothing
-DEC? (a + b) with DEC? a | DEC? b
-... | just x | just y = just (x , y)
-... | _ | _ = nothing
-DEC? (a ⊃ b) = nothing
+-- -- Currently only semi-deciding: that is, we prove that if we answer "yes" then
+-- -- the type does have the property, but not vice-versa. TODO: Prove Dec for
+-- -- decidability instead.
+-- DEC? : ∀ a -> Maybe (DEC a)
+-- DEC? bool = just tt
+-- DEC? (set a _) = DEC? a
+-- DEC? (□ a) = DEC? a
+-- DEC? (a * b) with DEC? a | DEC? b
+-- ... | just x | just y = just (x , y)
+-- ... | _ | _ = nothing
+-- DEC? (a + b) with DEC? a | DEC? b
+-- ... | just x | just y = just (x , y)
+-- ... | _ | _ = nothing
+-- DEC? (a ⊃ b) = nothing
 
  ---------- Contexts / typing environments ----------
 open import Contexts (Tone × Type) public
@@ -147,10 +144,10 @@ data _⊩_ : Premise -> Type -> Set where
   -- booleans
   bool   : Bool -> nil ⊩ bool
   if     : ∀{a} -> □ (term bool) , term a , term a ⊩ a
-  when   : ∀{a} -> DECSL a -> term bool , term a ⊩ a
+  when   : ∀{a} -> Is (DEC , SL) a -> term bool , term a ⊩ a
   -- TODO: sets and set-comprehension
-  single : ∀{a} (p : DEC a) -> □ (term a) ⊩ set a p
-  for-in : ∀{a b} (p : DEC a) (q : DECSL b)
+  single : ∀{a} (p : Is DEC a) -> □ (term a) ⊩ set a p
+  for-in : ∀{a b} (p : Is DEC a) (q : Is (DEC , SL) b)
          -> term (set a p) , a is disc ▷ term b ⊩ b
   -- Semilattices. Do these need to be decidable, too?
   --
@@ -162,11 +159,11 @@ data _⊩_ : Premise -> Type -> Set where
   --              = df v dg
   --
   -- So it looks like no.
-  bottom : ∀{a} -> SL a -> nil ⊩ a
-  join   : ∀{a} -> SL a -> term a , term a ⊩ a
+  bottom : ∀{a} -> Is SL a -> nil ⊩ a
+  join   : ∀{a} -> Is SL a -> term a , term a ⊩ a
   -- fixed points
-  fix    : ∀{a} -> FIX a -> a is mono ▷ term a ⊩ a
-  fix≤   : ∀{a} -> FIX≤ a -> term a , a is mono ▷ term a ⊩ a
+  fix    : ∀{a} -> Is FIX a -> a is mono ▷ term a ⊩ a
+  fix≤   : ∀{a} -> Is FIX≤ a -> term a , a is mono ▷ term a ⊩ a
 
 data _⊢_ (X : Cx) : Premise -> Set1 where
   tt   : X ⊢ nil

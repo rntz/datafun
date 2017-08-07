@@ -105,10 +105,10 @@ eval⊩ splitsum .ap x = x
 eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
 eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)
 -- TODO
-eval⊩ (when {a} (dec , sl)) = from-bool (is-sl a sl)
 eval⊩ (single dec) = {!!}
+eval⊩ (when (dec , sl)) = from-bool (is-sl sl)
 eval⊩ (for-in a-dec (b-dec , b-sl)) = {!!}
-eval⊩ (bottom {a} sl) = const-fun (Sums.init (is-sl a sl))
-eval⊩ (join {a} sl) = Sums.∨-functor (is-sl a sl)
+eval⊩ (bottom sl) = const-fun (Sums.init (is-sl sl))
+eval⊩ (join sl) = Sums.∨-functor (is-sl sl)
 eval⊩ (fix is-fix) = {!!}
 eval⊩ (fix≤ is-fix≤) = {!!}
