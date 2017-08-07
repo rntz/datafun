@@ -24,13 +24,12 @@ trees C .Hom t u = ∀ {x} (p : x ∈[ Hom C ] t) -> x ∈[ Hom C ] u
 trees C .ident = id
 trees C .compo f g = f • g
 
-tree-sums : Proset -> Sums _ _
-tree-sums C .cat = trees C
+tree-sums : (P : Proset) -> Sums (trees P)
 _∨_ {{tree-sums C}} = node
 in₁ {{tree-sums C}} = inj₁
 in₂ {{tree-sums C}} = inj₂
 [_,_] {{tree-sums C}} f g = [ f , g ]
 
 instance
-  tree-sums-auto : {{P : Proset}} -> Sums _ _
+  tree-sums-auto : {{P : Proset}} -> Sums (trees P)
   tree-sums-auto {{P}} = tree-sums P

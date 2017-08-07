@@ -52,15 +52,13 @@ prove-acc = {!!}
 
  ---------- Lemmas for denotational semantics of terms ----------
 -- I've tried to put the most general lemmas at the beginning.
-precompose : ∀{i j} {{C : CCC i j}} {a b c : obj C}
+precompose : ∀{i j} {{C : Cat i j}} {{cc : CC C}} {a b c : Obj C}
            -> a ≤ b -> b ⇨ c ≤ a ⇨ c
-precompose {{C}} f = curry (∧-map id f • apply)
+precompose f = curry (∧-map id f • apply)
 
 -- This holds in any bicartesian closed category, but last time I tried writing
 -- it that way it made typechecking take an extra .8 seconds or so.
---
--- Actually, it's not even clear how to quantify over bicartesian categories
--- with the current scheme! ARGH.
+-- TODO: try again.
 distrib-∧/∨ : ∀{a b c} -> (a ∨ b) ∧ c ⇒ (a ∧ c) ∨ (b ∧ c)
 distrib-∧/∨ = ∧-map [ curry in₁ , curry in₂ ] id • apply
 
@@ -103,7 +101,7 @@ map singleton x≤y (Var Eq.refl) = x≤y
 wipe-sym : ∀{X x y} -> Hom ⟦ wipe X ⟧ x y -> Hom ⟦ wipe X ⟧ y x
 wipe-sym f (Var {mono} ())
 -- Argh!
-wipe-sym f (Var {disc} p) = swap {{set-products}} (f (Var {disc} p))
+wipe-sym f (Var {disc} p) = swap {{sets}} (f (Var {disc} p))
 
 wipe⇒isos : ∀{X} -> ⟦ wipe X ⟧ ⇒ isos ⟦ wipe X ⟧
 wipe⇒isos = fun ⟨ id , wipe-sym ⟩

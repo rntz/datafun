@@ -55,11 +55,11 @@ catΠ A B .compo f g x = B x .compo (f x) (g x)
 
 
 -- Cartesian structure.
-record Products i j : Set (suc (i ⊔ j)) where
+record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Products:
-  field overlap {{cat}} : Cat i j
+  private instance the-cat = C
   infixr 2 _∧_
-  field _∧_ : Op (Obj cat)
+  field _∧_ : Op (Obj C)
   field π₁ : ∀{a b} -> (a ∧ b) ≤ a
   field π₂ : ∀{a b} -> (a ∧ b) ≤ b
   field ⟨_,_⟩ : ∀{a b x} -> x ≤ a -> x ≤ b -> x ≤ (a ∧ b)
@@ -75,14 +75,14 @@ record Products i j : Set (suc (i ⊔ j)) where
 
   -- This *could* be useful if cat× were an instance, but it's not.
   -- instance
-  ∧-functor : Fun (cat× cat cat) cat
+  ∧-functor : Fun (cat× C C) C
   ∧-functor = fun λ { (f , g) -> ∧-map f g }
 
-record Sums i j : Set (suc (i ⊔ j)) where
+record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Sums:
-  field overlap {{cat}} : Cat i j
+  private instance the-cat = C
   infixr 2 _∨_
-  field _∨_ : Op (Obj cat)
+  field _∨_ : Op (Obj C)
   field in₁ : ∀{a b} -> a ≤ a ∨ b
   field in₂ : ∀{a b} -> b ≤ a ∨ b
   field [_,_] : ∀{a b c} -> a ≤ c -> b ≤ c -> a ∨ b ≤ c
@@ -90,13 +90,14 @@ record Sums i j : Set (suc (i ⊔ j)) where
   ∨-map : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
   ∨-map f g = [ f • in₁ , g • in₂ ]
 
--- CCC means "cartesian closed category".
-record CCC i j : Set (suc (i ⊔ j)) where
-  constructor CCC:
-  field overlap {{products}} : Products i j
+-- CC means "cartesian closed".
+record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
+  constructor CC:
+  private instance the-cat = C
+  field overlap {{products}} : Products C
   open Products products
   infixr 4 _⇨_
-  field _⇨_ : Op (Obj cat)
+  field _⇨_ : Op (Obj C)
   field apply : ∀{a b} -> (a ⇨ b) ∧ a ≤ b
   field curry : ∀{a b c} -> a ∧ b ≤ c -> a ≤ b ⇨ c
 
@@ -106,12 +107,13 @@ record CCC i j : Set (suc (i ⊔ j)) where
   flip : ∀{a b c} -> a ≤ b ⇨ c -> b ≤ a ⇨ c
   flip f = curry (swap • uncurry f)
 
-open Products public using (cat)
-open Sums public using (cat)
-open CCC public using (products)
-open Products {{...}} public using (_∧_; π₁; π₂; ⟨_,_⟩; ∧-map; ∇; swap)
-open Sums {{...}} public using (_∨_; in₁; in₂; [_,_]; ∨-map)
-open CCC {{...}} public using (_⇨_; apply; curry; uncurry; flip)
+module _ {i j} {{C : Cat i j}} where
+  module _ {{S : Sums C}} where
+    open Sums S public using (_∨_; in₁; in₂; [_,_]; ∨-map)
+  module _ {{P : Products C}} where
+    open Products P public using (_∧_; π₁; π₂; ⟨_,_⟩; ∧-map; ∇; swap)
+  module _ {{Ccc : CC C}} where
+    open CC Ccc public using (_⇨_; apply; curry; uncurry; flip)
 
 
 -- Some convenient conversions
@@ -119,11 +121,8 @@ instance
   cast-cat->set : ∀{i j k} -> Cast k (Cat i j) (Set i)
   cast-cat->set = Cast: Obj
 
-  cast-products->cat : ∀{i j k} -> Cast k (Products i j) (Cat i j)
-  cast-products->cat = Cast: Products.cat
-
-  cast-ccc->products : ∀{i j k} -> Cast k (CCC i j) (Products i j)
-  cast-ccc->products = Cast: CCC.products
+  cast-ccc->products : ∀{i j k C} -> Cast k (CC {i}{j} C) (Products C)
+  cast-ccc->products = Cast: CC.products
 
 
 -- Some useful categories
@@ -134,16 +133,16 @@ instance
   ident sets x = x
   compo sets f g x = g (f x)
 
-  set-products : ∀{i} -> Products (suc i) i
+  set-products : ∀{i} -> Products (sets {i})
   set-products = Products: _×_ proj₁ proj₂ <_,_>
     where open import Data.Product
 
-  set-sums : ∀{i} -> Sums (suc i) i
+  set-sums : ∀{i} -> Sums (sets {i})
   set-sums = Sums: _⊎_ inj₁ inj₂ Data.Sum.[_,_]
     where open import Data.Sum
 
-  set-cc : ∀{i} -> CCC (suc i) i
-  set-cc = CCC: Function (λ { (f , a) -> f a }) (λ f x y -> f (x , y))
+  set-cc : ∀{i} -> CC (sets {i})
+  set-cc = CC: Function (λ { (f , a) -> f a }) (λ f x y -> f (x , y))
 
   cats : ∀{i j} -> Cat (suc (i ⊔ j)) (i ⊔ j)
   Obj (cats {i}{j}) = Cat i j
@@ -151,12 +150,13 @@ instance
   ident cats = fun id
   compo cats (fun f) (fun g) = fun (f • g)
 
-  cat-products : ∀{i j} -> Products (suc (i ⊔ j)) (i ⊔ j)
-  cat-products {i}{j} = Products: {{cats {i}{j}}} cat× (fun π₁) (fun π₂)
-                        λ where (fun f) (fun g) → fun ⟨ f , g ⟩
+  cat-products : ∀{i j} -> Products (cats {i}{j})
+  cat-products {i}{j} = Products: cat× (fun proj₁) (fun proj₂)
+                        λ where (fun f) (fun g) → fun < f , g >
+    where open import Data.Product
 
-  cat-sums : ∀{i j} -> Sums (suc (i ⊔ j)) (i ⊔ j)
-  cat-sums {i}{j} = Sums: {{cats {i}{j}}} cat+ (fun rel₁) (fun rel₂)
+  cat-sums : ∀{i j} -> Sums (cats {i}{j})
+  cat-sums {i}{j} = Sums: cat+ (fun rel₁) (fun rel₂)
     λ where F G .ap -> [ ap F , ap G ]
             F G .map (rel₁ x) -> map F x
             F G .map (rel₂ x) -> map G x

@@ -38,8 +38,7 @@ instance
   cxs .compo X⊆Y Y⊆Z x = X⊆Y x • Y⊆Z x
 
 -- ∪ forms coproducts on Cx under renaming.
-  cx-sums : Sums _ _
-  cat cx-sums = cxs
+  cx-sums : Sums cxs
   _∨_ {{cx-sums}} = _∪_
   in₁ {{cx-sums}} _ = inj₁
   in₂ {{cx-sums}} _ = inj₂

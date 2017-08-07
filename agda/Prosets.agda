@@ -26,8 +26,8 @@ proset→ A B .compo {F}{G}{H} F≤G G≤H {x}{y} x≤y = compo B (F≤G x≤y) 
 
 -- Now we can show that prosets is cartesian closed.
 instance
-  proset-cc : CCC _ _
-  CCC.products proset-cc = cat-products
+  proset-cc : CC prosets
+  CC.products proset-cc = cat-products
   _⇨_   {{proset-cc}} = proset→
   -- apply or eval
   apply {{proset-cc}} .ap (F , a) = ap F a
