@@ -105,11 +105,13 @@ eval⊩ case = distrib-∧/∨
 eval⊩ splitsum .ap x = x
 eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
 eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)
-eval⊩ (when (dec , sl)) = from-bool (is! sl)
-eval⊩ (single dec) .ap = leaf
-eval⊩ (single {a} dec) .map = leaf≤
--- TODO
-eval⊩ (for-in a-dec (b-dec , b-sl)) = {!!}
+eval⊩ (when (_ , sl)) = from-bool (is! sl)
+eval⊩ (single _) .ap = leaf
+eval⊩ (single _) .map = leaf≤
+eval⊩ (for-in _ (_ , b-sl)) =
+  ∧-map id (lambda • Tree-map)
+  • swapply
+  • tree-⋁ _ (is! b-sl)
 eval⊩ (bottom sl) = const-fun (Sums.init (is! sl))
 eval⊩ (join sl) = Sums.∨-functor (is! sl)
 -- TODO

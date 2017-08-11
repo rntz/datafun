@@ -46,6 +46,19 @@ module Trees (C : Proset) where
   init {{tree-sums}} = empty
   init≤ {{tree-sums}} = empty≤
 
+  -- Semilattice join / categorical sum lifted over trees, ⋁
+  module _ (Sums : Sums C) where
+    private instance s = Sums
+    tree-⋁ : trees ⇒ C
+    ap tree-⋁ empty = init
+    ap tree-⋁ (leaf x) = x
+    ap tree-⋁ (node l r) = ap tree-⋁ l ∨ ap tree-⋁ r
+    map tree-⋁ empty≤ = init≤
+    map tree-⋁ (leaf≤ x≤y) = x≤y
+    map tree-⋁ (node≤ t≤u t≤v) = [ map tree-⋁ t≤u , map tree-⋁ t≤v ]
+    map tree-⋁ (split₁ t≤u) = map tree-⋁ t≤u • in₁
+    map tree-⋁ (split₂ t≤u) = map tree-⋁ t≤u • in₂
+
   -- Decidability
   module _ (≤? : Decidable≤ C) where
     tree≤? : Decidable≤ trees
@@ -77,3 +90,13 @@ map Trees F .map (leaf≤ x) = leaf≤ (map F x)
 map Trees F .map (node≤ x y) = node≤ (map Trees F .map x) (map Trees F .map y)
 map Trees F .map (split₁ x) = split₁ (map Trees F .map x)
 map Trees F .map (split₂ x) = split₂ (map Trees F .map x)
+
+-- Is this... 2-Functoriality or something? I'm not sure.
+Tree-map : ∀{A B} -> A ⇨ B ⇒ trees A ⇨ trees B
+ap Tree-map = map Trees
+map Tree-map f≤g empty≤ = empty≤
+map Tree-map f≤g (leaf≤ x≤y) = leaf≤ (f≤g x≤y)
+map Tree-map f≤g (node≤ t≤u t≤v) = node≤ (map Tree-map f≤g t≤u) (map Tree-map f≤g t≤v)
+map Tree-map f≤g (split₁ t≤u) = split₁ (map Tree-map f≤g t≤u)
+map Tree-map f≤g (split₂ t≤u) = split₂ (map Tree-map f≤g t≤u)
+
