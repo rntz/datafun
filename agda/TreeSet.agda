@@ -3,66 +3,77 @@ module TreeSet where
 open import Prelude
 open import Cat
 open import Prosets
-open import Monads
-
-open import Data.Empty
 
 data Tree (a : Set) : Set where
   empty : Tree a
   leaf : (x : a) -> Tree a
   node : (l r : Tree a) -> Tree a
 
-infix 4 _∈[_]_
-_∈[_]_ : ∀{a} -> a -> Rel a zero -> Tree a -> Set
-x ∈[ R ] empty = ⊥
-x ∈[ R ] leaf y = R x y
-x ∈[ R ] node l r = x ∈[ R ] l ⊎ x ∈[ R ] r
+module Trees (C : Proset) where
+  private a = Obj C; instance cc = C
+  data _⊑_ : Rel (Tree a) zero where
+    empty≤ : ∀{t} -> empty ⊑ t
+    leaf≤ : ∀{x y} -> x ≤ y -> leaf x ⊑ leaf y
+    node≤ : ∀{l r t} -> l ⊑ t -> r ⊑ t -> node l r ⊑ t
+    split₁ : ∀{t l r} -> t ⊑ l -> t ⊑ node l r
+    split₂ : ∀{t l r} -> t ⊑ r -> t ⊑ node l r
 
-Tree∈ : ∀{a} -> Rel a zero -> a -> Tree a -> Set
-Tree∈ R x t = x ∈[ R ] t
+  unsplit : ∀{l r t} -> node l r ⊑ t -> l ⊑ t × r ⊑ t
+  unsplit (node≤ l r) = l , r
+  unsplit (split₁ p) = ∧-map split₁ split₁ (unsplit p)
+  unsplit (split₂ p) = ∧-map split₂ split₂ (unsplit p)
 
-trees : Proset -> Proset
-trees C .Obj = Tree (Obj C)
-trees C .Hom t u = ∀ {x} (p : x ∈[ Hom C ] t) -> x ∈[ Hom C ] u
-trees C .ident = id
-trees C .compo f g = f • g
+  trees : Proset
+  private instance trees-auto : Proset; trees-auto = trees
+  Obj trees = Tree a
+  Hom trees = _⊑_
+  ident trees {empty} = empty≤
+  ident trees {leaf x} = leaf≤ id
+  ident trees {node l r} = node≤ (split₁ id) (split₂ id)
+  compo trees empty≤ _ = empty≤
+  compo trees (leaf≤ x) (leaf≤ y) = leaf≤ (x • y)
+  compo trees x (split₁ y) = split₁ (x • y)
+  compo trees x (split₂ y) = split₂ (x • y)
+  compo trees (node≤ l r) x = node≤ (l • x) (r • x)
+  compo trees (split₁ x) (node≤ y z) = x • y
+  compo trees (split₂ x) (node≤ y z) = x • z
 
-tree-sums : (P : Proset) -> Sums (trees P)
-_∨_ {{tree-sums C}} = node
-in₁ {{tree-sums C}} = inj₁
-in₂ {{tree-sums C}} = inj₂
-[_,_] {{tree-sums C}} f g = [ f , g ]
-init {{tree-sums C}} = empty
-init≤ {{tree-sums C}} ()
+  tree-sums : Sums trees
+  _∨_ {{tree-sums}} = node
+  in₁ {{tree-sums}} = split₁ id
+  in₂ {{tree-sums}} = split₂ id
+  [_,_] {{tree-sums}} f g = node≤ f g
+  init {{tree-sums}} = empty
+  init≤ {{tree-sums}} = empty≤
 
-instance
-  tree-sums-auto : {{P : Proset}} -> Sums (trees P)
-  tree-sums-auto {{P}} = tree-sums P
+  -- Decidability
+  module _ (≤? : Decidable≤ C) where
+    tree≤? : Decidable≤ trees
+    tree≤? empty y = yes empty≤
+    tree≤? (leaf x) empty = no λ {()}
+    tree≤? (leaf x) (leaf y) with ≤? x y
+    ... | yes x≤y = yes (leaf≤ x≤y)
+    ... | no ¬x≤y = no λ { (leaf≤ x≤y) → ¬x≤y x≤y }
+    tree≤? (leaf x) (node l r) with tree≤? (leaf x) l | tree≤? (leaf x) r
+    ... | yes p | _ = yes (split₁ p)
+    ... | _ | yes p = yes (split₂ p)
+    ... | no ¬p | no ¬q = no λ { (split₁ p) → ¬p p ; (split₂ q) → ¬q q }
+    tree≤? (node l r) y with tree≤? l y | tree≤? r y
+    ... | yes p | yes q = yes (node≤ p q)
+    ... | no ¬p | _ = no (unsplit • π₁ • ¬p)
+    ... | _ | no ¬q = no (unsplit • π₂ • ¬q)
 
--- Decidability of relations
-decide-Tree∈ : ∀{a}{R : Rel a zero} -> Decidable R -> Decidable (Tree∈ R)
-decide-Tree∈ test x empty = no ⊥-elim
-decide-Tree∈ test x (leaf y) = test x y
-decide-Tree∈ test x (node t u) with decide-Tree∈ test x t | decide-Tree∈ test x u
-... | yes a | b = yes (inj₁ a)
-... | a | yes b = yes (inj₂ b)
-... | no ¬a | no ¬b = no [ ¬a , ¬b ]
+open Trees public renaming (_⊑_ to Tree≤) hiding (unsplit)
 
-module _ (P : Proset) (≤? : Decidable≤ P) where
-  private instance pp = P
-
-  down-closed : ∀{x y : Obj P} -> x ≤ y -> ∀ t -> y ∈[ _≤_ ] t -> x ∈[ _≤_ ] t
-  down-closed x≤y empty ()
-  down-closed x≤y (leaf z) y≤z = x≤y • y≤z
-  down-closed x≤y (node l r) (inj₁ z) = inj₁ (down-closed x≤y l z)
-  down-closed x≤y (node l r) (inj₂ z) = inj₂ (down-closed x≤y r z)
-
-  trees-decidable : Decidable≤ (trees P)
-  trees-decidable empty t = yes ⊥-elim
-  trees-decidable (leaf x) t with decide-Tree∈ ≤? x t
-  -- TODO: need downward-closure lemma!
-  ... | yes p = yes λ y≤x → down-closed y≤x t p
-  ... | no ¬p = no  λ y → ¬p (y id)
-  trees-decidable (node l r) t with dec× (trees-decidable l t) (trees-decidable r t)
-  ... | yes (a , b) = yes λ { (inj₁ x) → a x; (inj₂ y) → b y }
-  ... | no ¬p = no λ x → ¬p (in₁ • x , in₂ • x)
+
+-- Functoriality
+Trees : prosets ≤ prosets
+ap Trees = trees
+map Trees F .ap empty = empty
+map Trees F .ap (leaf x) = leaf (ap F x)
+map Trees F .ap (node t u) = node (map Trees F .ap t) (map Trees F .ap u)
+map Trees F .map empty≤ = empty≤
+map Trees F .map (leaf≤ x) = leaf≤ (map F x)
+map Trees F .map (node≤ x y) = node≤ (map Trees F .map x) (map Trees F .map y)
+map Trees F .map (split₁ x) = split₁ (map Trees F .map x)
+map Trees F .map (split₂ x) = split₂ (map Trees F .map x)

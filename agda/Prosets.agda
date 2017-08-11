@@ -75,15 +75,16 @@ module _ {A B : Proset} (bs : Sums B) where
 
 
 -- The "equivalence quotient" of a proset. Not actually a category of
--- isomorphisms, since we don't require that the arrows be inverses.
+-- isomorphisms, since we don't require that the arrows be inverses. But if we
+-- were gonna put equations on arrows, that's what we'd require.
 isos : Proset -> Proset
 isos C .Obj = Obj C
 isos C .Hom x y = Hom C x y × Hom C y x
 isos C .ident = ident C , ident C
 isos C .compo (f₁ , f₂) (g₁ , g₂) = compo C f₁ g₁ , compo C g₂ f₂
 
-isos-decidable : ∀ A -> Decidable≤ A -> Decidable≤ (isos A)
-isos-decidable _ test x y = dec× (test x y) (test y x)
+isos≤? : ∀ A -> Decidable≤ A -> Decidable≤ (isos A)
+isos≤? _ test x y = dec× (test x y) (test y x)
 
 
 -- The trivial proset.
@@ -95,11 +96,15 @@ data bool≤ : Rel Bool zero where
   bool-refl : Reflexive bool≤
   false<true : bool≤ false true
 
-bool≤-decidable : Decidable bool≤
-bool≤-decidable false false = yes bool-refl
-bool≤-decidable false true = yes false<true
-bool≤-decidable true false = no λ {()}
-bool≤-decidable true true = yes bool-refl
+bool≤? : Decidable bool≤
+bool≤? false true = yes false<true
+bool≤? true  false = no λ {()}
+bool≤? false false = yes bool-refl
+bool≤? true  true = yes bool-refl
+
+false≤ : ∀{a} -> bool≤ false a
+false≤ {false} = bool-refl
+false≤ {true}  = false<true
 
 instance
   bools : Cat _ _
@@ -112,27 +117,23 @@ instance
   -- I never thought I'd commit a proof by exhaustive case analysis,
   -- but I was wrong.
   bool-sums : Sums bools
-  _∨_ {{bool-sums}} false y = y
-  _∨_ {{bool-sums}} true _ = true
-  in₁ {{bool-sums}} {false} {true} = false<true
-  in₁ {{bool-sums}} {false} {false} = bool-refl
-  in₁ {{bool-sums}} {true} = bool-refl
-  in₂ {{bool-sums}} {false} {false} = bool-refl
+  _∨_ {{bool-sums}} true  _ = true
+  _∨_ {{bool-sums}} _  true = true
+  _∨_ {{bool-sums}} _ _ = false
+  in₁ {{bool-sums}} {false} = false≤
+  in₁ {{bool-sums}} {true}  = bool-refl
+  in₂ {{bool-sums}} {_} {false} = false≤
   in₂ {{bool-sums}} {false} {true} = bool-refl
-  in₂ {{bool-sums}} {true} {false} = false<true
   in₂ {{bool-sums}} {true} {true} = bool-refl
-  [_,_] {{bool-sums}} {false} {false} {false} x y = bool-refl
-  [_,_] {{bool-sums}} {false} {false} {true} x y = false<true
-  [_,_] {{bool-sums}} {false} {true} {false} x ()
-  [_,_] {{bool-sums}} {false} {true} {true} x y = bool-refl
-  [_,_] {{bool-sums}} {true} {false} {false} () y
-  [_,_] {{bool-sums}} {true} {false} {true} x y = bool-refl
-  [_,_] {{bool-sums}} {true} {true} {false} () y
-  [_,_] {{bool-sums}} {true} {true} {true} x y = bool-refl
+  [_,_] {{bool-sums}} {false} {false} x y = false≤
+  [_,_] {{bool-sums}} {_}     {true}  {false} x ()
+  [_,_] {{bool-sums}} {true}  {false} {false} () y
+  [_,_] {{bool-sums}} {false} {true}  {true}  x y = bool-refl
+  [_,_] {{bool-sums}} {true}  {false} {true}  x y = bool-refl
+  [_,_] {{bool-sums}} {true}  {true}  {true}  x y = bool-refl
   init {{bool-sums}} = false
-  init≤ {{bool-sums}} {false} = bool-refl
-  init≤ {{bool-sums}} {true} = false<true
+  init≤ {{bool-sums}} = false≤
 
 antisym:bool≤ : Antisymmetric _≡_ bool≤
-antisym:bool≤ bool-refl bool-refl = Eq.refl
+antisym:bool≤ bool-refl _ = Eq.refl
 antisym:bool≤ false<true ()
