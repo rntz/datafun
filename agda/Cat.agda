@@ -25,11 +25,6 @@ pattern fun {F} f = Fun: F f
 const-fun : ∀{i j k l C D} -> Obj D -> Fun {i}{j}{k}{l} C D
 const-fun {D = D} x = Fun: (λ _ -> x) (λ _ -> ident D)
 
--- TODO: remove auto-map?
-auto-map : ∀{i j k l} {{C D}} {{F : Fun {i}{j}{k}{l} C D}} {a b}
-           -> Hom C a b -> Hom D (ap F a) (ap F b)
-auto-map {{F = F}} = map F
-
 
 -- Constructions on relations & categories
 rel× : ∀{i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) -> Rel (A × B) (j ⊔ l)
