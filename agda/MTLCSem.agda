@@ -63,7 +63,6 @@ instance
   Comonad.extract Isos-comonad = fun proj₁
 
 -- ⟦_⟧ is a functor, Cx^op -> Proset
--- TODO: better name
 corename : ∀{X Y} -> X ⊆ Y -> ⟦ Y ⟧ ⇒ ⟦ X ⟧
 corename f = fun (λ { γ≤σ (Var p) -> γ≤σ (Var (f _ p)) })
 

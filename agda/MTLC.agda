@@ -25,7 +25,6 @@ data Type : Set where
   _⊃_ _*_ _+_ : (a b : Type) -> Type
   □ : Type -> Type
   bool : Type
-  -- TODO: sets
 
 
 ---------- Contexts / typing environments ----------
@@ -84,14 +83,13 @@ data _⊩_ : Premise -> Type -> Set where
   -- products
   pair   : ∀{a b} -> term a , term b ⊩ a * b
   proj   : ∀{a b} d -> term (a * b) ⊩ (if d then a else b)
-  -- TODO sums
+  -- sums
   inj    : ∀{a b} d -> term (if d then a else b) ⊩ a + b
   case   : ∀{a b c} -> term (a + b) , (a is mono ▷ term c) , (b is mono ▷ term c) ⊩ c
   splitsum : ∀{a b} -> term (□ (a + b)) ⊩ □ a + □ b
   -- booleans
   bool   : Bool -> nil ⊩ bool
   if     : ∀{a} -> □ (term bool) , term a , term a ⊩ a
-  -- TODO: monotone `if` eliminator, using semilattices
 
 data _⊢_ (X : Cx) : Premise -> Set1 where
   tt   : X ⊢ nil
@@ -122,6 +120,3 @@ rename f (var o p)  = var o (f (o , _) p)
 rename-at : ∀{X Y} o {a} -> X ⊆ Y -> X at o ⊢ a -> Y at o ⊢ a
 rename-at mono f M = rename f M
 rename-at disc f M = rename (map Wipe f) M
-
-
----------- TODO Substitutions ----------

@@ -128,7 +128,7 @@ data _⊩_ : Premise -> Type -> Set where
   bool   : Bool -> nil ⊩ bool
   if     : ∀{a} -> □ (term bool) , term a , term a ⊩ a
   when   : ∀{a} -> Is (DEC , SL) a -> term bool , term a ⊩ a
-  -- TODO: sets and set-comprehension
+  -- sets and set-comprehension
   single : ∀{a} (p : Is DEC a) -> □ (term a) ⊩ set a p
   for-in : ∀{a b} (p : Is DEC a) (q : Is (DEC , SL) b)
          -> term (set a p) , a is disc ▷ term b ⊩ b
