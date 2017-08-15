@@ -62,7 +62,13 @@ is! {SL} (a * b)  = cat×-sums (is! a) (is! b)
 is! {SL} (a ⊃ b)  = proset→-sums (is! b)
 
 is! {FIN} a = TODO
-is! {ACC} a = TODO
+
+is! {ACC} bool    = TODO
+is! {ACC} (set x) = TODO
+is! {ACC} (□ a)   = TODO
+is! {ACC} (a * b) = TODO
+is! {ACC} (a + b) = TODO
+
 is! {ACC≤} a = TODO
 
 is! {C , D} (x , y) = is! x , is! y

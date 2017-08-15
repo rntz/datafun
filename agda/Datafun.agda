@@ -38,8 +38,8 @@ mutual
   Is DEC = Dec!
   Is SL = SL!
   Is FIN = Fin!
-  Is ACC = ACC!
-  Is ACC≤ = ACC≤!
+  Is ACC = Acc!
+  Is ACC≤ = Acc≤!
   Is (C , D) a = Is C a × Is D a
 
   data Dec! : Type -> Set where
@@ -62,8 +62,15 @@ mutual
     _+_  : ∀{a} (p : Fin! a) {b} (q : Fin! b) -> Fin! (a + b)
     -- could add a case for (a ⊃ b) here, but would never use it.
 
-  data ACC! : Type -> Set where  -- TODO
-  data ACC≤! : Type -> Set where -- TODO
+  data Acc! : Type -> Set where
+    bool : Acc! bool
+    set  : ∀{a p} -> Fin! a -> Acc! (set a p)
+    □    : ∀ a -> Acc! (□ a)    -- do we need □ for ACC?
+    _*_  : ∀{a} (p : Acc! a) {b} (q : Acc! b) -> Acc! (a * b)
+    -- do we need + for ACC types?
+    _+_  : ∀{a} (p : Acc! a) {b} (q : Acc! b) -> Acc! (a + b)
+
+  data Acc≤! : Type -> Set where -- TODO
 
  ---------- Contexts / typing environments ----------
 open import Contexts (Tone × Type) public
