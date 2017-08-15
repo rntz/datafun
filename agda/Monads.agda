@@ -3,6 +3,16 @@ module Monads where
 open import Prelude
 open import Cat
 
+-- TODO: do we need this?
+record Monad {i j C} (□ : Fun {i}{j} C C) : Set (i ⊔ j) where
+  private instance cc = C
+  field join : ∀{x} -> ap □ (ap □ x) ≤ ap □ x
+  field pure : ∀{x} -> x ≤ ap □ x
+
+  infixr 3 bind
+  bind : ∀{a b} -> a ≤ ap □ b -> ap □ a ≤ ap □ b
+  bind f = map □ f • join
+
 record Comonad {i j C} (□ : Fun {i}{j} C C) : Set (i ⊔ j) where
   private instance cc = C
   field dup : ∀{x} -> ap □ x ≤ ap □ (ap □ x)
