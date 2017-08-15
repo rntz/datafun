@@ -30,17 +30,6 @@ antisym-lift {A}{B} antisym f = Fun: f helper
         helper (x , y) with antisym x y
         ... | refl = ident B
 
-instance
-  -- If (f : a -> b) is monotone, then (f : isos a -> isos b) is also monotone.
-  Isos : prosets ≤ prosets
-  ap Isos = isos
-  map Isos f = fun (λ { (x , y) -> map f x , map f y })
-
-  -- This comonad factors into an adjunction to groupoids, I believe.
-  Isos-comonad : Comonad Isos
-  Comonad.dup Isos-comonad = fun ⟨ id , swap ⟩
-  Comonad.extract Isos-comonad = fun proj₁
-
 -- ⟦_⟧ is a functor, Cx^op -> Proset
 -- TODO: better name
 corename : ∀{X Y} -> X ⊆ Y -> ⟦ Y ⟧ ⇒ ⟦ X ⟧

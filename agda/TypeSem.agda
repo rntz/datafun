@@ -1,11 +1,12 @@
 -- Denotational semantics for types in core Datafun.
 module TypeSem where
 
-open import Prelude
 open import Cat
-open import Prosets
 open import Datafun
+open import Decidability
 open import Monads
+open import Prelude
+open import Prosets
 open import TreeSet
 
  ---------- Denotations of types & tones ----------
@@ -35,11 +36,14 @@ type (a + b) = type a ∨ type b
 ⟦ term a ⟧+ = type a
 
  ---------- Semantics of type-classes ----------
+-- open import ACC
+
 class : Class -> Proset -> Set
 class DEC  A = Decidable (Hom A)
 class SL   = Sums
 class FIN  = TODO
-class ACC  = TODO
+-- maybe I want ACC to depend on DEC?
+class ACC  = TODO               -- TODO NEXT
 class ACC≤ = TODO
 class (C , D) P = class C P × class D P
 

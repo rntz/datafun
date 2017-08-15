@@ -3,6 +3,7 @@ module TreeSet where
 open import Prelude
 open import Cat
 open import Prosets
+open import Decidability
 
 data Tree (a : Set) : Set where
   empty : Tree a
