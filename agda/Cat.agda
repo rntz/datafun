@@ -3,6 +3,7 @@ module Cat where
 open import Prelude
 
 record Cat i j : Set (suc (i ⊔ j)) where
+  no-eta-equality
   infix  1 Hom
   infixr 9 compo
   field Obj : Set i
