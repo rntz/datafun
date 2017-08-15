@@ -6,7 +6,7 @@ open import Level public
 open import Data.Bool public using (Bool; true; false; not; if_then_else_)
 open import Data.Empty public using (⊥; ⊥-elim)
 open import Data.Maybe public using (Maybe; just; nothing; maybe)
-open import Data.Nat public using (ℕ; module ℕ)
+open import Data.Nat public using (ℕ)
 open import Data.Product public using (Σ; proj₁; proj₂; Σ-syntax; ∃; ∄; _×_; _,_; ,_)
 open import Data.Sum public using (_⊎_; inj₁; inj₂)
 open import Data.Unit public using (⊤; tt)

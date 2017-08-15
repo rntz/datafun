@@ -134,3 +134,30 @@ instance
 antisym:bool≤ : Antisymmetric _≡_ bool≤
 antisym:bool≤ bool-refl _ = Eq.refl
 antisym:bool≤ false<true ()
+
+
+-- Natural numbers
+open import Data.Nat as Nat using (ℕ; z≤n; s≤s) renaming (_≤_ to _≤'_; _⊔_ to _⊔'_)
+open import Relation.Binary using (module DecTotalOrder)
+
+instance
+  ℕ≤ : Proset
+  Obj ℕ≤ = ℕ
+  Hom ℕ≤ = Nat._≤_
+  ident ℕ≤ = DecTotalOrder.refl Nat.decTotalOrder
+  compo ℕ≤ = DecTotalOrder.trans Nat.decTotalOrder
+
+  -- ℕ forms a semilattice with 0 and ⊔ (max).
+  ℕ-sums : Sums ℕ≤
+  Sums._∨_ ℕ-sums = Nat._⊔_
+  Sums.in₁ ℕ-sums {ℕ.zero}  {_}       = z≤n
+  Sums.in₁ ℕ-sums {ℕ.suc a} {ℕ.zero}  = id
+  Sums.in₁ ℕ-sums {ℕ.suc a} {ℕ.suc b} = s≤s in₁
+  Sums.in₂ ℕ-sums {a}       {ℕ.zero}  = z≤n
+  Sums.in₂ ℕ-sums {ℕ.zero}  {ℕ.suc b} = id
+  Sums.in₂ ℕ-sums {ℕ.suc a} {ℕ.suc b} = s≤s (in₂ {a = a})
+  [_,_] {{ℕ-sums}} z≤n x = x
+  [_,_] {{ℕ-sums}} (s≤s f) z≤n = s≤s f
+  [_,_] {{ℕ-sums}} (s≤s f) (s≤s g) = s≤s [ f , g ]
+  Sums.init ℕ-sums  = 0
+  Sums.init≤ ℕ-sums = z≤n
