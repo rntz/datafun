@@ -17,8 +17,8 @@ open Cat {{...}} public using () renaming (Hom to _≤_; ident to id; compo to _
 -- Functors
 record Fun {i j k l} (C : Cat i j) (D : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l) where
   constructor Fun:
-  field ap : Obj C -> Obj D
-  field map : ∀{a b} -> Hom C a b -> Hom D (ap a) (ap b)
+  field ap  : Obj C -> Obj D
+  field map : Hom C =[ ap ]⇒ Hom D
 
 open Fun public
 pattern fun {F} f = Fun: F f
