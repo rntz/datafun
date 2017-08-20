@@ -44,8 +44,8 @@ mutual
 
   data Dec! : Type -> Set where
     bool : Dec! bool
-    set  : ∀{a} p -> Dec! (set a p)
-    □    : ∀{a} (p : Dec! a) -> Dec! (□ a)
+    set  : ∀ a p -> Dec! (set a p)
+    □    : ∀ a (p : Dec! a) -> Dec! (□ a)
     _*_  : ∀{a} (p : Dec! a) {b} (q : Dec! b) -> Dec! (a * b)
     _+_  : ∀{a} (p : Dec! a) {b} (q : Dec! b) -> Dec! (a + b)
 

@@ -110,6 +110,9 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   field apply : ∀{a b} -> (a ⇨ b) ∧ a ≤ b
   field curry : ∀{a b c} -> a ∧ b ≤ c -> a ≤ b ⇨ c
 
+  call : ∀{a b c} -> a ≤ (b ⇨ c) -> a ≤ b -> a ≤ c
+  call f a = ⟨ f , a ⟩ • apply
+
   swapply : ∀{a b} -> a ∧ (a ⇨ b) ≤ b
   swapply = swap • apply
 
@@ -125,7 +128,7 @@ module _ {i j} {{C : Cat i j}} where
   module _ {{P : Products C}} where
     open Products P public using (_∧_; π₁; π₂; ⟨_,_⟩; ∧-map; ∇; swap)
   module _ {{Ccc : CC C}} where
-    open CC Ccc public using (_⇨_; apply; curry; swapply; uncurry; flip)
+    open CC Ccc public using (_⇨_; apply; curry; call; swapply; uncurry; flip)
 
 
 -- -- Some convenient conversions

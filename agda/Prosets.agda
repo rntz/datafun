@@ -69,15 +69,15 @@ isos C .Hom x y = Iso C x y
 isos C .ident = ident C , ident C
 isos C .compo (f₁ , f₂) (g₁ , g₂) = compo C f₁ g₁ , compo C g₂ f₂
 
+isos≤? : ∀ A -> Decidable≤ A -> Decidable≤ (isos A)
+isos≤? _ test x y = dec× (test x y) (test y x)
+
+-- If (f : a -> b) is monotone, then (f : isos a -> isos b) is also monotone.
+Isos : prosets ≤ prosets
+ap Isos = isos
+map Isos f = fun (λ { (x , y) -> map f x , map f y })
+
 instance
-  isos≤? : ∀ A -> Decidable≤ A -> Decidable≤ (isos A)
-  isos≤? _ test x y = dec× (test x y) (test y x)
-
-  -- If (f : a -> b) is monotone, then (f : isos a -> isos b) is also monotone.
-  Isos : prosets ≤ prosets
-  ap Isos = isos
-  map Isos f = fun (λ { (x , y) -> map f x , map f y })
-
   -- This comonad factors into an adjunction to groupoids, I believe.
   Isos-comonad : Comonad Isos
   Comonad.dup Isos-comonad = fun ⟨ id , swap ⟩
