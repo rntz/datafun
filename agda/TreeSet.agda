@@ -11,8 +11,8 @@ data Tree (a : Set) : Set where
   node : (l r : Tree a) -> Tree a
 
 module Trees (C : Proset) where
-  private a = Obj C; instance cc = C
-  data _⊑_ : Rel (Tree a) zero where
+  private instance cc = C
+  data _⊑_ : Rel (Tree (Obj C)) zero where
     empty≤ : ∀{t} -> empty ⊑ t
     leaf≤ : ∀{x y} -> x ≤ y -> leaf x ⊑ leaf y
     node≤ : ∀{l r t} -> l ⊑ t -> r ⊑ t -> node l r ⊑ t
@@ -26,7 +26,7 @@ module Trees (C : Proset) where
 
   trees : Proset
   private instance trees-auto : Proset; trees-auto = trees
-  Obj trees = Tree a
+  Obj trees = Tree (Obj C)
   Hom trees = _⊑_
   ident trees {empty} = empty≤
   ident trees {leaf x} = leaf≤ id
