@@ -4,6 +4,7 @@ open import Prelude
 
 record Cat i j : Set (suc (i ⊔ j)) where
   no-eta-equality
+  constructor Cat:
   infix  1 Hom
   infixr 9 compo
   field Obj : Set i
@@ -138,6 +139,10 @@ module _ {i j} {{C : Cat i j}} where
 --   cast-ccc->products = Cast: CC.products
 
  -- Some useful categories
+⊤-cat ⊥-cat : ∀{i j} -> Cat i j
+⊥-cat = Cat: (Lift ⊥) (λ { (lift ()) }) (λ { {lift ()} }) (λ { {lift ()} })
+⊤-cat = Cat: (Lift ⊤) (λ _ _ -> Lift ⊤) (lift tt) (λ _ _ → lift tt)
+
 instance
   sets : ∀{i} -> Cat (suc i) i
   Obj (sets {i}) = Set i
@@ -167,17 +172,9 @@ instance
                         λ where (fun f) (fun g) → fun ⟨ f , g ⟩
 
   cat-sums : ∀{i j} -> Sums (cats {i}{j})
-  _∨_ {{cat-sums}} = cat+
-  in₁ {{cat-sums}} = fun rel₁
-  in₂ {{cat-sums}} = fun rel₂
-  [_,_] {{cat-sums}} F G .ap = [ ap F , ap G ]
-  [_,_] {{cat-sums}} F G .map (rel₁ x) = map F x
-  [_,_] {{cat-sums}} F G .map (rel₂ x) = map G x
-  init {{cat-sums}} .Obj = init
-  init {{cat-sums}} .Hom (lift ())
-  init {{cat-sums}} .ident {lift ()}
-  init {{cat-sums}} .compo {lift ()}
-  init≤ {{cat-sums}} = Fun: init≤ (λ { {lift ()} })
+  cat-sums {i}{j} = Sums: cat+ (fun rel₁) (fun rel₂) disj ⊥-cat (Fun: init≤ λ { {lift ()} })
+    where disj : ∀ {a b c : Cat i j} -> a ≤ c -> b ≤ c -> cat+ a b ≤ c
+          disj F G = Fun: [ ap F , ap G ] (λ { (rel₁ x) → map F x ; (rel₂ x) → map G x })
 
  -- Preserving cartesian structure over operations on categories.
 module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
