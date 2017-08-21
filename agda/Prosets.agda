@@ -84,10 +84,6 @@ instance
   Comonad.extract Isos-comonad = fun proj₁
 
 
--- The trivial proset.
-⊤-proset : Proset
-⊤-proset = record { Obj = ⊤ ; Hom = λ { tt tt → ⊤ } ; ident = tt ; compo = λ { tt tt → tt } }
-
 -- The booleans, ordered false < true.
 data bool≤ : Rel Bool zero where
   bool-refl : Reflexive bool≤

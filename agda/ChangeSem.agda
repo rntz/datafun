@@ -15,6 +15,9 @@ juggle : ∀{i j k l} {A B C D}
        -> Σ (A × B) λ { (a , b) -> C a × D b }
 juggle ((a , c) , (b , d)) = (a , b) , (c , d)
 
+constant : ∀{A B} -> Obj B -> A ⇒ B
+constant {A}{B} x = Fun: (λ _ → x) (λ _ → ident B)
+
 isos∧ : ∀{A B} -> isos A ∧ isos B ⇒ isos (A ∧ B)
 isos∧ = fun juggle
 
@@ -25,9 +28,6 @@ isos∨ .map (rel₂ p , rel₂ q) = rel₂ (p , q)
 
 isojuggle : ∀{A B C D} -> (isos A ∧ B) ∧ (isos C ∧ D) ⇒ isos (A ∧ C) ∧ (B ∧ D)
 isojuggle = fun juggle • ∧-map isos∧ id
-
-constant : ∀{A B} -> Obj B -> A ⇒ B
-constant {A}{B} x = Fun: (λ _ → x) (λ _ → ident B)
 
 module _ {{A : Proset}} {{Sum : Sums A}} where
   juggle∨ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≤ (a ∨ c) ∨ (b ∨ d)
@@ -67,9 +67,9 @@ data rel3+ {A A' B B' C C' : Set} (R : A -> B -> C -> Set) (S : A' -> B' -> C' -
 
 ⊥-change : Change
 𝑶 ⊥-change = init
-𝑫 ⊥-change = ⊤-proset
+𝑫 ⊥-change = ⊤-cat
 Path ⊥-change _ (lift ())
-dummy ⊥-change = tt
+dummy ⊥-change = lift tt
 
 change-bool : Change
 𝑶 change-bool = bools
