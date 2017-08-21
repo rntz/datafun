@@ -1,5 +1,5 @@
 {-# OPTIONS --postfix-projections #-}
-module ChangeSem3 where
+module ChangeSem where
 
 open import Cast
 open import Cat
