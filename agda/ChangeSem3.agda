@@ -29,6 +29,16 @@ isojuggle = fun juggle • ∧-map isos∧ id
 constant : ∀{A B} -> Obj B -> A ⇒ B
 constant {A}{B} x = Fun: (λ _ → x) (λ _ → ident B)
 
+module _ {{A : Proset}} {{Sum : Sums A}} where
+  juggle∨ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≤ (a ∨ c) ∨ (b ∨ d)
+  juggle∨ = [ ∨-map in₁ in₁ , ∨-map in₂ in₂ ]
+
+  juggle∨≈ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≈ (a ∨ c) ∨ (b ∨ d)
+  juggle∨≈ = juggle∨ , juggle∨
+
+  ∨≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∨ b) ≈ (a' ∨ b')
+  ∨≈ a≈a' b≈b' = ∨-map (proj₁ a≈a') (proj₁ b≈b') , ∨-map (proj₂ a≈a') (proj₂ b≈b')
+
 
 -- Prosets equipped with change structures
 record Change : Set1 where
@@ -177,20 +187,6 @@ instance
 
 
 -- foo
-module _ {{A : Proset}} {{Sum : Sums A}} where
-  -- node× : a ≈ a' → b ≈ b' → node a a' ≈ node b b'
-  juggle∨ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≤ (a ∨ c) ∨ (b ∨ d)
-  -- juggle-tree .proj₁ = node≤ (node≤ (split₁ in₁) (split₂ in₁)) {!!}
-  juggle∨ = [ [ in₁ • in₁ , in₁ • in₂ ]
-            , [ in₂ • in₁ , in₂ • in₂ ] ]
-
-  juggle∨≈ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≈ (a ∨ c) ∨ (b ∨ d)
-  juggle∨≈ = juggle∨ , juggle∨
-
-  ∨≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∨ b) ≈ (a' ∨ b')
-  ∨≈ a≈a' b≈b' = [ proj₁ a≈a' • in₁ , proj₁ b≈b' • in₂ ]
-               , [ proj₂ a≈a' • in₁ , proj₂ b≈b' • in₂ ]
-
 module _ {A : Change} where
   instance trees-a = trees (𝑶 A); treesums-a = tree-sums (𝑶 A)
            isotrees = isos trees-a
