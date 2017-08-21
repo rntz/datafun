@@ -26,8 +26,7 @@ pattern fun {F} f = Fun: F f
 const-fun : ∀{i j k l C D} -> Obj D -> Fun {i}{j}{k}{l} C D
 const-fun {D = D} x = Fun: (λ _ -> x) (λ _ -> ident D)
 
-
--- Constructions on relations & categories
+ -- Constructions on relations & categories
 rel× : ∀{i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) -> Rel (A × B) (j ⊔ l)
 rel× R S (a , x) (b , y) = R a b × S x y
 
@@ -56,8 +55,7 @@ catΠ A B .Hom f g = ∀ x -> B x .Hom (f x) (g x)
 catΠ A B .ident x     = B x .ident
 catΠ A B .compo f g x = B x .compo (f x) (g x)
 
-
--- Cartesian structures.
+ -- Cartesian structures.
 record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Sums:
   private instance the-cat = C
@@ -139,8 +137,7 @@ module _ {i j} {{C : Cat i j}} where
 --   cast-ccc->products : ∀{i j k C} -> Cast k (CC {i}{j} C) (Products C)
 --   cast-ccc->products = Cast: CC.products
 
-
--- Some useful categories
+ -- Some useful categories
 instance
   sets : ∀{i} -> Cat (suc i) i
   Obj (sets {i}) = Set i
