@@ -37,6 +37,7 @@ module _ {{A : Proset}} {{Sum : Sums A}} where
 
 -- Prosets equipped with change structures
 record Change : Set1 where
+  constructor Change:
   field {{𝑶}} : Proset          -- O for objects
   field 𝑫 : Proset              -- D for deltas
   object = Obj 𝑶
@@ -60,32 +61,20 @@ data rel3+ {A A' B B' C C' : Set} (R : A -> B -> C -> Set) (S : A' -> B' -> C' -
   rel₁ : ∀{a b c} -> R a b c -> rel3+ R S (inj₁ a) (inj₁ b) (inj₁ c)
   rel₂ : ∀{a b c} -> S a b c -> rel3+ R S (inj₂ a) (inj₂ b) (inj₂ c)
 
-⊥-change : Change
-𝑶 ⊥-change = init
-𝑫 ⊥-change = ⊤-cat
-Path ⊥-change _ (lift ())
-dummy ⊥-change = lift tt
+⊤-change ⊥-change : Change
+⊤-change = Change: {{⊤-cat}} ⊤-cat (λ da a b → ⊤) (lift tt)
+⊥-change = Change: {{⊥-cat}} ⊤-cat (λ { _ (lift ()) }) (lift tt)
 
 change-bool : Change
-𝑶 change-bool = bools
-𝑫 change-bool = bools
-Path change-bool da a b = (a ∨ da) ≈ b
-dummy change-bool = false
+change-bool = Change: {{bools}} bools (λ da a b → (a ∨ da) ≈ b) false
 
 module _ (A B : Change) where
-  change× : Change
-  𝑶 change× = 𝑶 A ∧ 𝑶 B
-  𝑫 change× = 𝑫 A ∧ 𝑫 B
-  Path change× (da , db) = rel× (Path A da) (Path B db)
-  dummy change× = (dummy A , dummy B)
+  change× change+ change→ : Change
+  change× = Change: {{𝑶 A ∧ 𝑶 B}} (𝑫 A ∧ 𝑫 B) paths (dummy A , dummy B)
+    where paths = λ { (da , db) → rel× (Path A da) (Path B db) }
 
-  change+ : Change
-  𝑶 change+ = 𝑶 A ∨ 𝑶 B
-  𝑫 change+ = 𝑫 A ∨ 𝑫 B
-  Path change+ = rel3+ (Path A) (Path B)
-  dummy change+ = inj₁ (dummy A)
+  change+ = Change: {{𝑶 A ∨ 𝑶 B}} (𝑫 A ∨ 𝑫 B) (rel3+ (Path A) (Path B)) (inj₁ (dummy A))
 
-  change→ : Change
   𝑶 change→ = 𝑶 A ⇨ 𝑶 B
   𝑫 change→ = (isos (𝑶 A) ∧ 𝑫 A) ⇨ 𝑫 B
   Path change→ df f g = ∀{da a b} (da:a→b : Path A da a b)

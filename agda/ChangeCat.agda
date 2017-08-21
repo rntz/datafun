@@ -73,14 +73,14 @@ instance
 
 -- blah
 module _ {A : Change} where
-  instance trees-a = trees (𝑶 A); treesums-a = tree-sums (𝑶 A)
-           isotrees = isos trees-a
+  instance a-trees = trees (𝑶 A); a-treesums = tree-sums (𝑶 A); a-isotrees = isos a-trees
 
   union : change-tree A ∧ change-tree A ≤ change-tree A
-  union .func = Sums.∨-functor (tree-sums (𝑶 A))
-  -- (isos (trees (𝑶 A) ∧ trees (𝑶 A))) ∧ (trees (𝑶 A) ∧ trees (𝑶 A))
-  --       a               b                da            db
-  -- ⇒ trees (𝑶 A)
-  union .deriv = π₂ • func union
-  union .is-id {da , db}{a , b}{a' , b'} (da:a→a' , db:b→b') =
-    juggle∨≈ • ∨≈ da:a→a' db:b→b'
+  func union = Sums.∨-functor a-treesums
+  -- (isos (trees (𝑶 A) ∧ trees (𝑶 A))) ∧ (trees (𝑶 A) ∧ trees (𝑶 A)) ⇒ trees (𝑶 A)
+  --       a               b                da            db           ↦ da ∨ db
+  deriv union = π₂ • func union
+  is-id union (da:a→a' , db:b→b') = juggle∨≈ • ∨≈ da:a→a' db:b→b'
+
+  Empty : ⊤-change ⇒ change-tree A
+  Empty = ?
