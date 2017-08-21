@@ -92,7 +92,7 @@ map Trees F .map (node≤ x y) = node≤ (map Trees F .map x) (map Trees F .map 
 map Trees F .map (split₁ x) = split₁ (map Trees F .map x)
 map Trees F .map (split₂ x) = split₂ (map Trees F .map x)
 
--- Is this... 2-Functoriality or something? I'm not sure.
+-- TODO: Is this... 2-Functoriality or something? I'm not sure.
 Tree-map : ∀{A B} -> A ⇨ B ⇒ trees A ⇨ trees B
 ap Tree-map = map Trees
 map Tree-map f≤g empty≤ = empty≤
