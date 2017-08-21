@@ -40,17 +40,18 @@ record Change : Set1 where
   constructor Change:
   field {{𝑶}} : Proset          -- O for objects
   field 𝑫 : Proset              -- D for deltas
-  object = Obj 𝑶
-  delta  = Obj 𝑫
 
   -- this needs to respect equivalence of objects & deltas, doesn't it? I think
   -- for all the ones we actually construct this will be the case; I'm not sure
   -- if we need it for any of the proofs we're doing.
-  field Path : (da : delta) (a b : object) -> Set
+  field Path : (da : Obj 𝑫) (a b : Obj 𝑶) -> Set
 
   -- This hack is needed to prove Change has coproducts. We need it for the
   -- derivative of case-analysis, [_,_], to invent values to use in the
   -- impossible case branches.
+  --
+  -- Another strategy would be to require (dummy : 𝑶 ⇒ 𝑫). This complicates the
+  -- code, but doesn't require that 𝑫 be inhabited for uninhabited 𝑶.
   field dummy : Obj 𝑫
 
 open Change public
