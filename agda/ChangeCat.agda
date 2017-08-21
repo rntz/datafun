@@ -82,5 +82,7 @@ module _ {A : Change} where
   deriv union = π₂ • func union
   is-id union (da:a→a' , db:b→b') = juggle∨≈ • ∨≈ da:a→a' db:b→b'
 
-  Empty : ⊤-change ⇒ change-tree A
-  Empty = ?
+  Empty : ⊤-change ≤ change-tree A
+  func Empty = constant empty
+  deriv Empty = constant empty
+  is-id Empty tt = node≤ empty≤ empty≤ , empty≤
