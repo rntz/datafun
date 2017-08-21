@@ -174,3 +174,32 @@ instance
   -- agh.
   Comonad.dup Change□-comonad .is-id p@(da:a→b , a≈b) = p , a≈b , swap {{sets}} a≈b
   Comonad.extract Change□-comonad = cfun (extract Isos) (π₂ • extract Isos) proj₁
+
+
+-- foo
+module _ {{A : Proset}} {{Sum : Sums A}} where
+  -- node× : a ≈ a' → b ≈ b' → node a a' ≈ node b b'
+  juggle∨ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≤ (a ∨ c) ∨ (b ∨ d)
+  -- juggle-tree .proj₁ = node≤ (node≤ (split₁ in₁) (split₂ in₁)) {!!}
+  juggle∨ = [ [ in₁ • in₁ , in₁ • in₂ ]
+            , [ in₂ • in₁ , in₂ • in₂ ] ]
+
+  juggle∨≈ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≈ (a ∨ c) ∨ (b ∨ d)
+  juggle∨≈ = juggle∨ , juggle∨
+
+  ∨≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∨ b) ≈ (a' ∨ b')
+  ∨≈ a≈a' b≈b' = [ proj₁ a≈a' • in₁ , proj₁ b≈b' • in₂ ]
+               , [ proj₂ a≈a' • in₁ , proj₂ b≈b' • in₂ ]
+
+module _ {A : Change} where
+  instance trees-a = trees (𝑶 A); treesums-a = tree-sums (𝑶 A)
+           isotrees = isos trees-a
+
+  union : change-tree A ∧ change-tree A ≤ change-tree A
+  union .func = Sums.∨-functor (tree-sums (𝑶 A))
+  -- (isos (trees (𝑶 A) ∧ trees (𝑶 A))) ∧ (trees (𝑶 A) ∧ trees (𝑶 A))
+  --       a               b                da            db
+  -- ⇒ trees (𝑶 A)
+  union .deriv = π₂ • func union
+  union .is-id {da , db}{a , b}{a' , b'} (da:a→a' , db:b→b') =
+    juggle∨≈ • ∨≈ da:a→a' db:b→b'
