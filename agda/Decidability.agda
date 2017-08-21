@@ -7,14 +7,6 @@ open import Cat
 Decidable≤ : ∀{i j} -> Cat i j -> Set _
 Decidable≤ P = Decidable (Hom P)
 
-instance
-  -- FIXME: do we need this?
-  decide : ∀{i j A} (R : Rel {i} A j) {{R? : Decidable R}} -> Decidable R
-  decide _ {{R?}} = R?
-
-  -- _≤?_ : ∀{{P : Proset}} {{D : Decidable≤ P}} (a b : Obj P) -> Dec (a ≤ b)
-  -- _≤?_ = {!!}
-
 dec¬ : ∀{i}{A : Set i} -> Dec A -> Dec (¬ A)
 dec¬ (yes p) = no (λ x → x p)
 dec¬ (no ¬p) = yes ¬p
