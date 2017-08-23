@@ -69,18 +69,11 @@ data rel3+ {A A' B B' C C' : Set} (R : A -> B -> C -> Set) (S : A' -> B' -> C' -
 change-bool : Change
 change-bool = Change: {{bools}} bools (λ da a b → (a ∨ da) ≈ b) false
 
-module _ (A B : Change) where
-  change× change+ change→ : Change
-  change× = Change: {{𝑶 A ∧ 𝑶 B}} (𝑫 A ∧ 𝑫 B) paths (dummy A , dummy B)
-    where paths = λ { (da , db) → rel× (Path A da) (Path B db) }
-
-  change+ = Change: {{𝑶 A ∨ 𝑶 B}} (𝑫 A ∨ 𝑫 B) (rel3+ (Path A) (Path B)) (inj₁ (dummy A))
-
-  𝑶 change→ = 𝑶 A ⇨ 𝑶 B
-  𝑫 change→ = (isos (𝑶 A) ∧ 𝑫 A) ⇨ 𝑫 B
-  Path change→ df f g = ∀{da a b} (da:a→b : Path A da a b)
-                      -> Path B (ap df (a , da)) (ap f a) (ap g b)
-  dummy change→ = constant (dummy B)
+changeΠ : (A : Set) (B : A -> Change) -> Change
+changeΠ A B .𝑶 = catΠ A (λ a -> B a .𝑶)
+changeΠ A B .𝑫 = catΠ A (λ a -> B a .𝑫)
+changeΠ A B .Path df f g = ∀ a -> Path (B a) (df a) (f a) (g a)
+changeΠ A B .dummy a = dummy (B a)
 
 module _ (A : Change) where
   change□ : Change
@@ -94,6 +87,19 @@ module _ (A : Change) where
   𝑫 change-tree = trees (𝑶 A)
   Path change-tree da a b = Hom (isos (trees (𝑶 A))) (node a da) b
   dummy change-tree = empty
+
+module _ (A B : Change) where
+  change× change+ change→ : Change
+  change× = Change: {{𝑶 A ∧ 𝑶 B}} (𝑫 A ∧ 𝑫 B) paths (dummy A , dummy B)
+    where paths = λ { (da , db) → rel× (Path A da) (Path B db) }
+
+  change+ = Change: {{𝑶 A ∨ 𝑶 B}} (𝑫 A ∨ 𝑫 B) (rel3+ (Path A) (Path B)) (inj₁ (dummy A))
+
+  𝑶 change→ = 𝑶 A ⇨ 𝑶 B
+  𝑫 change→ = (isos (𝑶 A) ∧ 𝑫 A) ⇨ 𝑫 B
+  Path change→ df f g = ∀{da a b} (da:a→b : Path A da a b)
+                      -> Path B (ap df (a , da)) (ap f a) (ap g b)
+  dummy change→ = constant (dummy B)
 
  -- Morphisms between change structures.
 record ChangeFun (A B : Change) : Set where
