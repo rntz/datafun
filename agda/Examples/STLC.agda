@@ -1,5 +1,5 @@
 -- Interpreting a non-modal STLC into Preorder.
-module STLC where
+module Examples.STLC where
 
 open import Prelude
 open import Cat

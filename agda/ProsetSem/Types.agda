@@ -1,5 +1,5 @@
 -- Denotational semantics for types in core Datafun.
-module TypeSem where
+module ProsetSem.Types where
 
 open import Cat
 open import Datafun

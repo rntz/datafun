@@ -1,25 +1,47 @@
--- Denotational semantics for terms in core Datafun.
-module TermSem where
+module Examples.MTLCSem where
 
 open import Prelude
 open import Cat
-open import Prosets
-open import Datafun
+open import Examples.MTLC
 open import Monads
-open import TreeSet
-open import TypeSem
+open import Prosets
+
+
+---------- Denotations of types & tones ----------
+Vars : Cx -> Set
+Vars X = ∃ (λ a -> X a)
+pattern Var {o} {a} p = (o , a) , p
+
+type : Type -> Proset
+type (a ⊃ b) = type a ⇨ type b
+type (a * b) = type a ∧ type b
+type (a + b) = type a ∨ type b
+type bool = bools
+type (□ a) = isos (type a)
+
+⟦_⟧₁ : Tone × Type -> Proset
+⟦ mono , a ⟧₁ = type a
+⟦ disc , a ⟧₁ = isos (type a)
+
+⟦_⟧ : Cx -> Proset
+⟦_⟧+ : Premise -> Proset
+⟦ X ⟧ = catΠ (Vars X) (λ v -> ⟦ proj₁ v ⟧₁)
+⟦ nil ⟧+    = ⊤-cat
+⟦ P , Q ⟧+  = cat× ⟦ P ⟧+ ⟦ Q ⟧+
+⟦ □ P ⟧+    = isos ⟦ P ⟧+
+⟦ X ▷ P ⟧+  = ⟦ X ⟧ ⇨ ⟦ P ⟧+
+⟦ term a ⟧+ = type a
 
 
 ---------- Lemmas for denotational semantics of terms ----------
 -- I've tried to put the most general lemmas at the beginning.
-precompose : ∀{i j} {{C : Cat i j}} {{cc : CC C}} {a b c : Obj C}
+precompose : ∀{i j} {{C}} {{cc : CC {i}{j} C}} {a b c : Obj C}
            -> a ≤ b -> b ⇨ c ≤ a ⇨ c
 precompose f = curry (∧-map id f • apply)
 
--- This actually holds in any bicartesian closed category, but we only need it for prosets.
+-- This holds in any bicartesian closed category, but last time I tried writing
+-- it that way it made typechecking take an extra .8 seconds or so.
 distrib-∧/∨ : ∀{a b c} -> (a ∨ b) ∧ c ⇒ (a ∧ c) ∨ (b ∧ c)
--- distrib-∧/∨ : ∀{i j} {{C : Cat i j}} {{cc : CC C}} {{S : Sums C}}
---               {a b c : Obj C} -> (a ∨ b) ∧ c ≤ (a ∧ c) ∨ (b ∧ c)
 distrib-∧/∨ = ∧-map [ curry in₁ , curry in₂ ] id • apply
 
 -- Lifts an arbitrary function over an antisymmetric domain into a monotone map
@@ -31,7 +53,6 @@ antisym-lift {A}{B} antisym f = Fun: f helper
         ... | refl = ident B
 
 -- ⟦_⟧ is a functor, Cx^op -> Proset
--- TODO: better name
 corename : ∀{X Y} -> X ⊆ Y -> ⟦ Y ⟧ ⇒ ⟦ X ⟧
 corename f = fun (λ { γ≤σ (Var p) -> γ≤σ (Var (f _ p)) })
 
@@ -59,13 +80,8 @@ wipe⇒isos = fun ⟨ id , wipe-sym ⟩
 lambda : ∀{x c} -> ⟦ hyp x ⟧ ⇨ c ⇒ ⟦ x ⟧₁ ⇨ c
 lambda = precompose singleton
 
-from-bool : ∀{a} (S : Sums a) -> bools ∧ a ⇒ a
-from-bool S .ap (c , x) = if c then x else Sums.init S
-from-bool {a} S .map {false , x} (bool-refl , x≤y) = ident a
-from-bool S .map {true  , x} (bool-refl , x≤y) = x≤y
-from-bool S .map {false , x} (false<true , x≤y) = Sums.init≤ S
-
- ---------- Denotations of terms, premises, and term formers ----------
+
+---------- Denotations of terms, premises, and term formers ----------
 eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ⇒ ⟦ P ⟧+
 eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ⇒ type a
 
@@ -94,15 +110,3 @@ eval⊩ case = distrib-∧/∨
 eval⊩ splitsum .ap x = x
 eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
 eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)
-eval⊩ (when (_ , sl)) = from-bool (is! sl)
-eval⊩ (single _) .ap = leaf
-eval⊩ (single _) .map = leaf≤
-eval⊩ (for-in _ (_ , b-sl)) =
-  ∧-map id (lambda • Tree-map)
-  • swapply
-  • tree-⋁ _ (is! b-sl)
-eval⊩ (bottom sl) = const-fun (Sums.init (is! sl))
-eval⊩ (join sl) = Sums.∨-functor (is! sl)
--- TODO
-eval⊩ (fix is-fix) = {!!}
-eval⊩ (fix≤ is-fix≤) = {!!}
