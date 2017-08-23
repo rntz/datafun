@@ -19,8 +19,8 @@ mono ≺? disc = no (λ ())
 disc ≺? _ = yes tone-disc
 
 data Class : Set where
-  DEC SL FIN ACC ACC≤ : Class
   _,_ : Op Class
+  DEC SL FIN ACC ACC≤ : Class
 
 FIX FIX≤ : Class
 FIX = DEC , SL , ACC
@@ -35,12 +35,12 @@ mutual
     _⊃_ _*_ _+_ : (a b : Type) -> Type
 
   Is : Class -> Type -> Set
+  Is (C , D) a = Is C a × Is D a
   Is DEC = Dec!
   Is SL = SL!
   Is FIN = Fin!
   Is ACC = Acc!
   Is ACC≤ = Acc≤!
-  Is (C , D) a = Is C a × Is D a
 
   data Dec! : Type -> Set where
     bool : Dec! bool
