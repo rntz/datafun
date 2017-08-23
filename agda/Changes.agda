@@ -63,8 +63,15 @@ data rel3+ {A A' B B' C C' : Set} (R : A -> B -> C -> Set) (S : A' -> B' -> C' -
 ⊤-change = Change: {{⊤-cat}} ⊤-cat (λ da a b → ⊤) (lift tt)
 ⊥-change = Change: {{⊥-cat}} ⊤-cat (λ { _ (lift ()) }) (lift tt)
 
+change-SL : (P : Proset) (S : Sums P) -> Change
+change-SL P S = Change: {{P}} P (λ da a b → a ∨ da ≈ b) init
+  where instance p = P; s = S
+
 change-bool : Change
-change-bool = Change: {{bools}} bools (λ da a b → (a ∨ da) ≈ b) false
+change-bool = change-SL bools bool-sums
+
+change-tree : Change -> Change
+change-tree A = change-SL (trees (𝑶 A)) (tree-sums (𝑶 A))
 
 changeΠ : (A : Set) (B : A -> Change) -> Change
 changeΠ A B .𝑶 = catΠ A (λ a -> B a .𝑶)
@@ -78,12 +85,6 @@ module _ (A : Change) where
   𝑫 change□ = isos (𝑫 A)
   Path change□ da a b = Path A da a b ∧ (a ≈ b)
   dummy change□ = dummy A
-
-  change-tree : Change
-  𝑶 change-tree = trees (𝑶 A)
-  𝑫 change-tree = trees (𝑶 A)
-  Path change-tree da a b = Hom (isos (trees (𝑶 A))) (node a da) b
-  dummy change-tree = empty
 
 module _ (A B : Change) where
   change× change+ change→ : Change

@@ -1,4 +1,3 @@
-{-# OPTIONS --postfix-projections #-}
 module ChangeSem.Types where
 
 open import Cat
@@ -42,8 +41,19 @@ record Semilat (A : Change) : Set where
   field vee : A ∧ A ≤ A
   field eps : ⊤-change ≤ A
   -- Do I need a proof that _∨_ actually is a semilattice on (𝑶 A)?
-
 open Semilat public
+
+module _ (A : Proset) (S : Sums A) where
+  private instance aa = A; ss = S; instance isosaa = isos A
+  -- For any change structure where ⊕ = ∨, we have δ(a ∨ b) = δa ∨ δb.
+  -- TODO: rename
+  flub : Semilat (change-SL A S)
+  flub .vee .func = Sums.∨-functor S
+  flub .vee .deriv = π₂ • Sums.∨-functor S
+  flub .vee .is-id (p , q) = juggle∨≈ • ∨≈ p q
+  flub .eps .func = constant (init {{A}})
+  flub .eps .deriv = constant (init {{A}})
+  flub .eps .is-id tt = ∨-idem , in₁
 
  ---------- Semantics of type-classes ----------
 class : Class -> Change -> Set
@@ -65,17 +75,8 @@ is! {DEC} (□ a p) = isos≤? (type a .𝑶) (is! p)
 is! {DEC} (a * b) = decidable× (is! a) (is! b)
 is! {DEC} (a + b) = decidable+ (is! a) (is! b)
 
--- Can't I give a general proof that any semilattice operator is monotone?
--- wait, isn't ∨-functor exactly that, for Sums?
---
--- also, can't I give a general proof that its derivative is itself?!
--- yes, I think I can!
-is! {SL} bool .vee .func = Sums.∨-functor bool-sums
-is! {SL} bool .vee .deriv = {!!}
-is! {SL} bool .vee .is-id = {!!}
-is! {SL} bool .eps = {!!}
-
-is! {SL} (set a) = {!!}
+is! {SL} bool = flub it it
+is! {SL} (set a) = flub (trees _) (tree-sums _)
 is! {SL} (a * b) = {!!}
 is! {SL} (a ⊃ b) = {!!}
 
