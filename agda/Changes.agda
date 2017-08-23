@@ -10,9 +10,6 @@ juggle : ∀{i j k l} {A B C D}
        -> Σ (A × B) λ { (a , b) -> C a × D b }
 juggle ((a , c) , (b , d)) = (a , b) , (c , d)
 
-constant : ∀{A B} -> Obj B -> A ⇒ B
-constant {A}{B} x = Fun: (λ _ → x) (λ _ → ident B)
-
 isos∧ : ∀{A B} -> isos A ∧ isos B ⇒ isos (A ∧ B)
 isos∧ = fun juggle
 

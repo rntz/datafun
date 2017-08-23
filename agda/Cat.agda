@@ -24,8 +24,8 @@ record Fun {i j k l} (C : Cat i j) (D : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l) whe
 open Fun public
 pattern fun {F} f = Fun: F f
 
-const-fun : ∀{i j k l C D} -> Obj D -> Fun {i}{j}{k}{l} C D
-const-fun {D = D} x = Fun: (λ _ -> x) (λ _ -> ident D)
+constant : ∀{i j k l C D} -> Obj D -> Fun {i}{j}{k}{l} C D
+constant {D = D} x = Fun: (λ _ -> x) (λ _ -> ident D)
 
  -- Constructions on relations & categories
 rel× : ∀{i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) -> Rel (A × B) (j ⊔ l)
@@ -67,6 +67,9 @@ record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   field [_,_] : ∀{a b c} -> a ≤ c -> b ≤ c -> a ∨ b ≤ c
   field init : Obj C
   field init≤ : ∀{a} -> init ≤ a
+
+  ∨-idem : ∀{a} -> a ∨ a ≤ a
+  ∨-idem = [ id , id ]
 
   ∨-map : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
   ∨-map f g = [ f • in₁ , g • in₂ ]
@@ -123,7 +126,7 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
 
 module _ {i j} {{C : Cat i j}} where
   module _ {{S : Sums C}} where
-    open Sums S public using (_∨_; in₁; in₂; [_,_]; init; init≤; ∨-map)
+    open Sums S public using (_∨_; in₁; in₂; [_,_]; init; init≤; ∨-map; ∨-idem)
   module _ {{P : Products C}} where
     open Products P public using (_∧_; π₁; π₂; ⟨_,_⟩; ∧-map; ∇; swap)
   module _ {{Ccc : CC C}} where

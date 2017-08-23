@@ -101,7 +101,7 @@ eval⊩ (for-in _ (_ , b-sl)) =
   ∧-map id (lambda • Tree-map)
   • swapply
   • tree-⋁ _ (is! b-sl)
-eval⊩ (bottom sl) = const-fun (Sums.init (is! sl))
+eval⊩ (bottom sl) = constant (Sums.init (is! sl))
 eval⊩ (join sl) = Sums.∨-functor (is! sl)
 -- TODO
 eval⊩ (fix is-fix) = {!!}

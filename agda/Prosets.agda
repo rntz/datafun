@@ -49,7 +49,7 @@ module _ {A B : Proset} (bs : Sums B) where
   in₁ {{proset→-sums}} {f}{g} x≤y = map f x≤y • in₁
   in₂ {{proset→-sums}} {f}{g} x≤y = map g x≤y • in₂
   [_,_] {{proset→-sums}} {f}{g}{h} f≤h g≤h x≤y = [ f≤h x≤y , g≤h x≤y ]
-  init {{proset→-sums}} = const-fun init
+  init {{proset→-sums}} = constant init
   init≤ {{proset→-sums}} _ = init≤
 
 
