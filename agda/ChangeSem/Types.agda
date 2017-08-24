@@ -28,9 +28,13 @@ type (a + b) = type a ∨ type b
 ⟦ mono , a ⟧₁ = type a
 ⟦ disc , a ⟧₁ = change□ (type a)
 
+⟦_⟧v : ∀{X} -> Vars X -> Change
+⟦ oa , _ ⟧v = ⟦ oa ⟧₁
+
 ⟦_⟧ : Cx -> Change
+⟦ X ⟧ = changeΠ (Vars X) ⟦_⟧v
+
 ⟦_⟧+ : Premise -> Change
-⟦ X ⟧ = changeΠ (Vars X) (λ v -> ⟦ proj₁ v ⟧₁)
 ⟦ nil ⟧+    = ⊤-change
 ⟦ P , Q ⟧+  = ⟦ P ⟧+ ∧ ⟦ Q ⟧+
 ⟦ □ P ⟧+    = change□ ⟦ P ⟧+

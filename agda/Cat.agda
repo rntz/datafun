@@ -50,7 +50,8 @@ cat+ C D .compo (rel₁ x) (rel₁ y) = rel₁ (compo C x y)
 cat+ C D .compo (rel₂ x) (rel₂ y) = rel₂ (compo D x y)
 
 -- "Indexed product of categories"?
-catΠ : ∀{i j k} (A : Set i) (B : A -> Cat j k) -> Cat _ _
+-- Does this deserve to be its own typeclass, like Sums and Products?
+catΠ : ∀{i j k} (A : Set i) (B : A -> Cat j k) -> Cat (j ⊔ i) (k ⊔ i)
 catΠ A B .Obj     = ∀ x -> B x .Obj
 catΠ A B .Hom f g = ∀ x -> B x .Hom (f x) (g x)
 catΠ A B .ident x     = B x .ident
@@ -138,10 +139,23 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   precompose : ∀{a b c} -> a ≤ b -> b ⇨ c ≤ a ⇨ c
   precompose f = curry (map∧ id f • apply)
 
+ --- Infinitary products
+record SetΠ k {i j} (C : Cat i j) : Set (i ⊔ j ⊔ suc k) where
+  constructor SetΠ:
+  private instance the-cat = C
+  field Π : (A : Set k) (P : A -> Obj C) -> Obj C
+  field mapΠ : ∀{A B P Q} (f : B -> A) (g : ∀ a -> P (f a) ≤ Q a) -> Π A P ≤ Π B Q
+
+  prefixΠ : ∀{A B} (P : A -> Obj C) (f : B -> A) -> Π A P ≤ Π B (P ∘ f)
+  prefixΠ P f = mapΠ f (λ _ → id)
+  suffixΠ : ∀{A} {B B' : A -> Obj C} (f : ∀ a -> B a ≤ B' a) -> Π A B ≤ Π A B'
+  suffixΠ f = mapΠ (λ x → x) f
+
 module _ {i j} {{C : Cat i j}} where
   module _ {{S : Sums C}} where open Sums S public
   module _ {{P : Products C}} where open Products P public
   module _ {{Ccc : CC C}} where open CC Ccc public hiding (products)
+  module _ {k} {{Pi : SetΠ k C}} where open SetΠ Pi public
 
  -- Some useful categories & their structures.
 ⊤-cat ⊥-cat : ∀{i j} -> Cat i j
@@ -166,6 +180,9 @@ instance
   set-cc : ∀{i} -> CC (sets {i})
   set-cc = CC: Function (λ { (f , a) -> f a }) (λ f x y -> f (x , y))
 
+  sets-Π : ∀{i} -> SetΠ i (sets {i})
+  sets-Π = SetΠ: (λ A P → (x : A) -> P x) (λ F G ∀P b → G b (∀P (F b)))
+
   cats : ∀{i j} -> Cat (suc (i ⊔ j)) (i ⊔ j)
   Obj (cats {i}{j}) = Cat i j
   Hom cats = Fun
@@ -180,6 +197,9 @@ instance
   cat-sums {i}{j} = Sums: cat+ (fun rel₁) (fun rel₂) disj ⊥-cat (Fun: init≤ λ { {lift ()} })
     where disj : ∀ {a b c : Cat i j} -> a ≤ c -> b ≤ c -> cat+ a b ≤ c
           disj F G = Fun: [ ap F , ap G ] (λ { (rel₁ x) → map F x ; (rel₂ x) → map G x })
+
+  cats-Π : ∀{i j k} -> SetΠ k (cats {i ⊔ k} {j ⊔ k})
+  cats-Π = SetΠ: catΠ λ F G → fun λ ∀P≤ b → G b .map (∀P≤ (F b))
 
  -- Preserving cartesian structure over operations on categories.
 module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where

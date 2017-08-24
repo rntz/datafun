@@ -27,8 +27,9 @@ type (a + b) = type a ∨ type b
 ⟦ disc , a ⟧₁ = isos (type a)
 
 ⟦_⟧ : Cx -> Proset
-⟦_⟧+ : Premise -> Proset
 ⟦ X ⟧ = catΠ (Vars X) (λ v -> ⟦ proj₁ v ⟧₁)
+
+⟦_⟧+ : Premise -> Proset
 ⟦ nil ⟧+    = ⊤-cat
 ⟦ P , Q ⟧+  = cat× ⟦ P ⟧+ ⟦ Q ⟧+
 ⟦ □ P ⟧+    = isos ⟦ P ⟧+

@@ -12,18 +12,19 @@ open import ProsetSem.Types
 
 ---------- Lemmas for denotational semantics of terms ----------
 -- ⟦_⟧ is a functor, Cx^op -> Proset
--- TODO: better name
-corename : ∀{X Y} -> X ⊆ Y -> ⟦ Y ⟧ ⇒ ⟦ X ⟧
-corename f = fun (λ { γ≤σ (Var p) -> γ≤σ (Var (f _ p)) })
+comap⟦_⟧ : ∀{X Y} -> X ⊆ Y -> ⟦ Y ⟧ ⇒ ⟦ X ⟧
+comap⟦ f ⟧ = comapΠ (∃-map f)
 
 -- Managing environments.
 lookup : ∀{X x} -> X x -> ⟦ X ⟧ ⇒ ⟦ x ⟧₁
 lookup p = fun (λ f -> f (Var p))
 
+-- isn't this just... pairing?
+-- i.e. can't I express this without the semantic brackets?
 cons : ∀{X Y} -> ⟦ X ⟧ ∧ ⟦ Y ⟧ ⇒ ⟦ Y ∪ X ⟧
-ap cons (f , g) (Var p) = [ g ∘ Var , f ∘ Var ] p
-map cons (f , g) (_ , inj₁ p) = g (Var p)
-map cons (f , g) (_ , inj₂ p) = f (Var p)
+ap cons (f , g) (, p) = [ g ∘ Var , f ∘ Var ] p
+map cons (f , g) (, inj₁ p) = g (Var p)
+map cons (f , g) (, inj₂ p) = f (Var p)
 
 singleton : ∀{x} -> ⟦ x ⟧₁ ⇒ ⟦ hyp x ⟧
 ap  singleton x   (Var Eq.refl) = x
@@ -53,7 +54,7 @@ eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ⇒ type a
 eval tt = fun (λ _ -> lift tt)
 eval (M , N) = ⟨ eval M , eval N ⟩
 eval (bind M) = curry (cons • eval M)
-eval (box M) = corename (extract Wipe) • wipe⇒isos • map Isos (eval M)
+eval (box M) = comap⟦ extract Wipe ⟧ • wipe⇒isos • map Isos (eval M)
 eval (var mono p) = lookup p
 eval (var disc p) = lookup p • extract Isos
 eval (form ! M) = eval M • eval⊩ form

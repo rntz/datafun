@@ -54,7 +54,7 @@ module _ {A B : Proset} (bs : Sums B) where
 
 
 -- The "equivalence quotient" of a proset. Not actually a category of
--- isomorphisms, since we don't require that the arrows be inverses. But if we
+-- isomorphisms, since we don't require that the arrows be inverses. But *if* we
 -- were gonna put equations on arrows, that's what we'd require.
 Iso : (C : Proset) (a b : Obj C) -> Set
 Iso C a b = Hom C a b × Hom C b a
