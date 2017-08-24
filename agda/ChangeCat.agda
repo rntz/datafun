@@ -27,7 +27,7 @@ instance
   _∨_ {{change-sums}} = change+
   in₁ {{change-sums}} = cfun in₁ (π₂ • in₁) rel₁
   in₂ {{change-sums}} = cfun in₂ (π₂ • in₂) rel₂
-  [_,_] {{change-sums}} f g .func = [ func f , func g ]
+  [_,_] {{change-sums}} f g .funct = [ funct f , funct g ]
   -- isos (𝑶 a ∨ 𝑶 b) ∧ (𝑫 a ∨ 𝑫 b) ⇒ 𝑫 c
   -- this is the bit where I have to invent values.
   [_,_] {{change-sums}} {A}{B}{C} f g .deriv = uncurry (isos∨ • [ flip [ use f , fail ]
@@ -44,13 +44,9 @@ instance
   change-cc : CC changes
   CC.products change-cc = change-products
   _⇨_ {{change-cc}} = change→
-  apply {{change-cc}} .func = apply
-  -- ((f , a) , (df , da)) ↦ df (a , da)
-  -- is there a simpler way to write this? one that typechecks faster?
-  -- apply {{change-cc}} .deriv = ⟨ π₂ • π₁ , ⟨ π₁ • ∧isos • π₂ , π₂ • π₂ ⟩ ⟩ • apply
+  apply {{change-cc}} .funct = apply
   apply {{change-cc}} .deriv .ap ((f , a) , df , da) = ap df (a , da)
-  apply {{change-cc}} .deriv .map (fa≈gb , df≤df' , da≤da') =
-    df≤df' (juggle fa≈gb .proj₂ , da≤da')
+  apply {{change-cc}} .deriv .map (fa≈gb , df≤ , da≤) = df≤ (juggle fa≈gb .proj₂ , da≤)
   apply {{change-cc}} .is-id (df:f→g , dx:x→y) = df:f→g dx:x→y
   curry {{change-cc}} (cfun f df ok) =
     cfun (curry f) (curry (isojuggle • df)) (λ da db → ok (da , db))
@@ -64,7 +60,7 @@ map Change□ (cfun f df ok) =
 
 instance
   Change□-comonad : Comonad Change□
-  Comonad.dup Change□-comonad .func = dup Isos
+  Comonad.dup Change□-comonad .funct = dup Isos
   Comonad.dup Change□-comonad .deriv = π₂ • dup Isos
   -- agh.
   Comonad.dup Change□-comonad .is-id p@(da:a→b , a≈b) = p , a≈b , swap {{sets}} a≈b
@@ -76,13 +72,11 @@ module _ {A : Change} where
   instance a-trees = trees (𝑶 A); a-treesums = tree-sums (𝑶 A); a-isotrees = isos a-trees
 
   union : change-tree A ∧ change-tree A ≤ change-tree A
-  func union = Sums.∨-functor a-treesums
+  funct union = ∨-functor
   -- (isos (trees (𝑶 A) ∧ trees (𝑶 A))) ∧ (trees (𝑶 A) ∧ trees (𝑶 A)) ⇒ trees (𝑶 A)
   --       a               b                da            db           ↦ da ∨ db
-  deriv union = π₂ • func union
+  deriv union = π₂ • funct union
   is-id union (da:a→a' , db:b→b') = juggle∨≈ • ∨≈ da:a→a' db:b→b'
 
   Empty : ⊤-change ≤ change-tree A
-  func Empty = constant empty
-  deriv Empty = constant empty
-  is-id Empty tt = node≤ empty≤ empty≤ , empty≤
+  Empty = const-cfun empty empty (∨-idem , empty≤)

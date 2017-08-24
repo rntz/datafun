@@ -60,6 +60,7 @@ catΠ A B .compo f g x = B x .compo (f x) (g x)
 record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Sums:
   private instance the-cat = C
+  -- TODO: don't use an infix operator for this here.
   infixr 2 _∨_
   field _∨_ : Op (Obj C)
   field in₁ : ∀{a b} -> a ≤ a ∨ b
@@ -80,6 +81,7 @@ record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
 record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Products:
   private instance the-cat = C
+  -- TODO: don't use an infix operator for this here
   infixr 2 _∧_
   field _∧_ : Op (Obj C)
   field π₁ : ∀{a b} -> (a ∧ b) ≤ a
@@ -107,6 +109,7 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   private instance the-cat = C
   field overlap {{products}} : Products C
   open Products products
+  -- TODO FIXME: shouldn't bind tighter than ∧.
   infixr 4 _⇨_
   field _⇨_ : Op (Obj C)
   field apply : ∀{a b} -> (a ⇨ b) ∧ a ≤ b
@@ -126,9 +129,9 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
 
 module _ {i j} {{C : Cat i j}} where
   module _ {{S : Sums C}} where
-    open Sums S public using (_∨_; in₁; in₂; [_,_]; init; init≤; ∨-map; ∨-idem)
+    open Sums S public using (_∨_; in₁; in₂; [_,_]; init; init≤; ∨-map; ∨-functor; ∨-idem)
   module _ {{P : Products C}} where
-    open Products P public using (_∧_; π₁; π₂; ⟨_,_⟩; ∧-map; ∇; swap)
+    open Products P public using (_∧_; π₁; π₂; ⟨_,_⟩; ∧-map; ∧-functor; ∇; swap)
   module _ {{Ccc : CC C}} where
     open CC Ccc public using (_⇨_; apply; curry; call; swapply; uncurry; flip)
 
@@ -189,3 +192,13 @@ module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
   [_,_] {{cat×-sums}} (f₁ , f₂) (g₁ , g₂) = [ f₁ , g₁ ] , [ f₂ , g₂ ]
   init {{cat×-sums}} = init , init
   init≤ {{cat×-sums}} = init≤ , init≤
+
+-- -- This is correct, but not yet useful.
+-- module _ {i j k} (A : Set i) {B} (P : ∀ a -> Sums {j}{k} (B a)) where
+--   catΠ-sums : Sums (catΠ A B)
+--   Sums._∨_ catΠ-sums f g x = P x .Sums._∨_ (f x) (g x)
+--   Sums.in₁ catΠ-sums x = P x .Sums.in₁
+--   Sums.in₂ catΠ-sums x = P x .Sums.in₂
+--   Sums.[_,_] catΠ-sums f g x = P x .Sums.[_,_] (f x) (g x)
+--   Sums.init catΠ-sums x = P x .Sums.init
+--   Sums.init≤ catΠ-sums x = P x .Sums.init≤

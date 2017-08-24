@@ -102,7 +102,7 @@ eval⊩ (for-in _ (_ , b-sl)) =
   • swapply
   • tree-⋁ _ (is! b-sl)
 eval⊩ (bottom sl) = constant (Sums.init (is! sl))
-eval⊩ (join sl) = Sums.∨-functor (is! sl)
+eval⊩ (join sl) = ∨-functor {{S = is! sl}}
 -- TODO
 eval⊩ (fix is-fix) = {!!}
 eval⊩ (fix≤ is-fix≤) = {!!}

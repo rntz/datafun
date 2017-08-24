@@ -1,35 +1,10 @@
 module Changes where
 
+open import Cast
 open import Cat
 open import Prelude
 open import Prosets
 open import TreeSet
-
-juggle : ∀{i j k l} {A B C D}
-       -> Σ {i}{j} A C × Σ {k}{l} B D
-       -> Σ (A × B) λ { (a , b) -> C a × D b }
-juggle ((a , c) , (b , d)) = (a , b) , (c , d)
-
-isos∧ : ∀{A B} -> isos A ∧ isos B ⇒ isos (A ∧ B)
-isos∧ = fun juggle
-
-isos∨ : ∀{A B} -> isos (A ∨ B) ⇒ isos A ∨ isos B
-isos∨ .ap = id
-isos∨ .map (rel₁ p , rel₁ q) = rel₁ (p , q)
-isos∨ .map (rel₂ p , rel₂ q) = rel₂ (p , q)
-
-isojuggle : ∀{A B C D} -> (isos A ∧ B) ∧ (isos C ∧ D) ⇒ isos (A ∧ C) ∧ (B ∧ D)
-isojuggle = fun juggle • ∧-map isos∧ id
-
-module _ {{A : Proset}} {{Sum : Sums A}} where
-  juggle∨ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≤ (a ∨ c) ∨ (b ∨ d)
-  juggle∨ = [ ∨-map in₁ in₁ , ∨-map in₂ in₂ ]
-
-  juggle∨≈ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≈ (a ∨ c) ∨ (b ∨ d)
-  juggle∨≈ = juggle∨ , juggle∨
-
-  ∨≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∨ b) ≈ (a' ∨ b')
-  ∨≈ a≈a' b≈b' = ∨-map (proj₁ a≈a') (proj₁ b≈b') , ∨-map (proj₂ a≈a') (proj₂ b≈b')
 
 
 -- Prosets equipped with change structures
@@ -50,6 +25,9 @@ record Change : Set1 where
   -- Another strategy would be to require (dummy : 𝑶 ⇒ 𝑫). This complicates the
   -- code, but doesn't require that 𝑫 be inhabited for uninhabited 𝑶.
   field dummy : Obj 𝑫
+
+  IdPath : (da : Obj 𝑫) (a : Obj 𝑶) -> Set
+  IdPath da a = Path da a a
 
 open Change public
 
@@ -100,13 +78,28 @@ module _ (A B : Change) where
   dummy change→ = constant (dummy B)
 
  -- Morphisms between change structures.
+Zero : (A : Change) (a : Obj (𝑶 A)) -> Set
+Zero A a = Σ[ δ ∈ Obj (𝑫 A) ] IdPath A δ a
+
+Deriv : ∀ A B (f : _) -> Set
+Deriv A B f = Zero (change→ A B) f
+
 record ChangeFun (A B : Change) : Set where
   constructor cfun
-  field func  : 𝑶 A ⇒ 𝑶 B
+  field funct  : 𝑶 A ⇒ 𝑶 B
   field deriv : isos (𝑶 A) ∧ 𝑫 A ⇒ 𝑫 B
-  field is-id : Path (change→ A B) deriv func func
+  field is-id : IdPath (change→ A B) deriv funct
 
   func&deriv : isos (𝑶 A) ∧ 𝑫 A ⇒ isos (𝑶 B) ∧ 𝑫 B
-  func&deriv = ⟨ π₁ • map Isos func , deriv ⟩
+  func&deriv = ⟨ π₁ • map Isos funct , deriv ⟩
+
+  cfun→zero : Deriv A B funct
+  cfun→zero = deriv , is-id
 
 open ChangeFun public
+
+zero→cfun : ∀{A B} f -> Deriv A B f -> ChangeFun A B
+zero→cfun f (d , isd) = cfun f d isd
+
+const-cfun : ∀{A B} (x : Obj (𝑶 B)) (dx : Obj (𝑫 B)) -> Path B dx x x -> ChangeFun A B
+const-cfun x dx dx:x→x = cfun (constant x) (constant dx) (λ _ → dx:x→x)
