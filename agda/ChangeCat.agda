@@ -56,7 +56,7 @@ instance
 Change□ : changes ≤ changes
 ap  Change□ = change□
 map Change□ (cfun f df ok) =
-  cfun (map Isos f) (isos∧ • map Isos df) (∧-map ok (map Isos f .map))
+  cfun (map Isos f) (isos∧ • map Isos df) (map∧ ok (map Isos f .map))
 
 instance
   Change□-comonad : Comonad Change□
@@ -72,11 +72,11 @@ module _ {A : Change} where
   instance a-trees = trees (𝑶 A); a-treesums = tree-sums (𝑶 A); a-isotrees = isos a-trees
 
   union : change-tree A ∧ change-tree A ≤ change-tree A
-  funct union = ∨-functor
+  funct union = functor∨
   -- (isos (trees (𝑶 A) ∧ trees (𝑶 A))) ∧ (trees (𝑶 A) ∧ trees (𝑶 A)) ⇒ trees (𝑶 A)
   --       a               b                da            db           ↦ da ∨ db
   deriv union = π₂ • funct union
   is-id union (da:a→a' , db:b→b') = juggle∨≈ • ∨≈ da:a→a' db:b→b'
 
   Empty : ⊤-change ≤ change-tree A
-  Empty = const-cfun empty empty (∨-idem , empty≤)
+  Empty = const-cfun empty empty (idem∨ , empty≤)

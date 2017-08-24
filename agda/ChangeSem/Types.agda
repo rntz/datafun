@@ -37,6 +37,12 @@ type (a + b) = type a ∨ type b
 ⟦ X ▷ P ⟧+  = ⟦ X ⟧ ⇨ ⟦ P ⟧+
 ⟦ term a ⟧+ = type a
 
+ -- What does it mean for a type's denotation to be decidable?
+record IsDEC (A : Change) : Set where
+  constructor IsDEC:
+  field decide≤ : Decidable (Hom (𝑶 A))
+  field find-zero : 𝑶 A ⇒ 𝑫 A
+
  -- What does it mean for a type's denotation to be a semilattice?
 -- 1. 𝑶 is a semilattice
 -- 2. 𝑫 is a semilattice
@@ -50,7 +56,7 @@ record IsSL (A : Change) : Set where
   private
     -- δ(a ∨ b) = δa ∨ δb
     vee-deriv : ((A ∧ A) ⇨ A) .𝑫 .Obj
-    vee-deriv = π₂ • Sums.∨-functor 𝑫-sums
+    vee-deriv = π₂ • Sums.functor∨ 𝑫-sums
 
     -- δ(⊥) = ⊥
     eps-func : ⊤-cat ⇒ 𝑶 A
@@ -59,31 +65,30 @@ record IsSL (A : Change) : Set where
     eps-deriv = constant (Sums.init 𝑫-sums)
 
   field eps-ok : IdPath (change→ ⊤-change A) eps-deriv eps-func
-  field vee-ok : IdPath (change→ (A ∧ A) A) vee-deriv ∨-functor
+  field vee-ok : IdPath (change→ (A ∧ A) A) vee-deriv functor∨
 
   eps : ⊤-change ≤ A
   eps = cfun eps-func eps-deriv eps-ok
   vee : A ∧ A ≤ A
-  vee = cfun ∨-functor vee-deriv vee-ok
+  vee = cfun functor∨ vee-deriv vee-ok
 
 open IsSL public
 
 slSL : ∀ A S -> IsSL (change-SL A S)
-slSL A S = IsSL: S (λ _ → ∨-idem , in₁) (λ { (p , q) → juggle∨≈ • ∨≈ p q })
+slSL A S = IsSL: S (λ _ → idem∨ , in₁) (λ { (p , q) → juggle∨≈ • ∨≈ p q })
   where private instance aa = A; ss = S; isosaa = isos A
 
 sl× : ∀ {A B} (P : IsSL A) (Q : IsSL B) -> IsSL (A ∧ B)
 sl× P Q .𝑶-sums = cat×-sums (𝑶-sums P) (𝑶-sums Q)
 sl× P Q .𝑫-sums = cat×-sums (𝑫-sums P) (𝑫-sums Q)
 sl× P Q .eps-ok = is-id ⟨ eps P , eps Q ⟩
-sl× P Q .vee-ok = is-id (juggle∧ • ∧-map (vee P) (vee Q))
+sl× P Q .vee-ok = is-id (juggle∧ • map∧ (vee P) (vee Q))
 
--- TODO
 sl→ : ∀ A {B} (P : IsSL B) -> IsSL (change→ A B)
 sl→ A P .𝑶-sums = proset→-sums (𝑶-sums P)
 sl→ A P .𝑫-sums = proset→-sums (𝑫-sums P)
 sl→ A P .eps-ok tt _ = eps-ok P tt
-sl→ A P .vee-ok (df:f→g , dh:h→k) da:a→b = {!!}
+sl→ A P .vee-ok (df-ok , dg-ok) da-ok = vee-ok P (df-ok da-ok , dg-ok da-ok)
 
  ---------- Semantics of type-classes ----------
 class : Class -> Change -> Set

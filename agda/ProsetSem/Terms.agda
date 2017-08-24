@@ -11,25 +11,6 @@ open import ProsetSem.Types
 
 
 ---------- Lemmas for denotational semantics of terms ----------
--- I've tried to put the most general lemmas at the beginning.
-precompose : ∀{i j} {{C : Cat i j}} {{cc : CC C}} {a b c : Obj C}
-           -> a ≤ b -> b ⇨ c ≤ a ⇨ c
-precompose f = curry (∧-map id f • apply)
-
--- This actually holds in any bicartesian closed category, but we only need it for prosets.
-distrib-∧/∨ : ∀{a b c} -> (a ∨ b) ∧ c ⇒ (a ∧ c) ∨ (b ∧ c)
--- distrib-∧/∨ : ∀{i j} {{C : Cat i j}} {{cc : CC C}} {{S : Sums C}}
---               {a b c : Obj C} -> (a ∨ b) ∧ c ≤ (a ∧ c) ∨ (b ∧ c)
-distrib-∧/∨ = ∧-map [ curry in₁ , curry in₂ ] id • apply
-
--- Lifts an arbitrary function over an antisymmetric domain into a monotone map
--- over its discrete preorder.
-antisym-lift : ∀{A B} -> Antisymmetric _≡_ (Hom A) -> (Obj A -> Obj B) -> isos A ⇒ B
-antisym-lift {A}{B} antisym f = Fun: f helper
-  where helper : ∀{x y} -> Hom (isos A) x y -> Hom B (f x) (f y)
-        helper (x , y) with antisym x y
-        ... | refl = ident B
-
 -- ⟦_⟧ is a functor, Cx^op -> Proset
 -- TODO: better name
 corename : ∀{X Y} -> X ⊆ Y -> ⟦ Y ⟧ ⇒ ⟦ X ⟧
@@ -80,17 +61,17 @@ eval (form ! M) = eval M • eval⊩ form
 eval⊩ lam = lambda
 eval⊩ app = apply
 eval⊩ box = id
-eval⊩ letbox = ∧-map id lambda • swap • apply
+eval⊩ letbox = map∧ id lambda • swap • apply
 eval⊩ pair = id
 eval⊩ (proj true)  = π₁
 eval⊩ (proj false) = π₂
 eval⊩ (bool b) = Fun: (λ _ -> b) (λ _ → bool-refl)
-eval⊩ if = uncurry (antisym-lift antisym:bool≤ (λ x -> if x then π₁ else π₂))
+eval⊩ if = uncurry (antisym⇒ antisym:bool≤ (λ x -> if x then π₁ else π₂))
 eval⊩ (inj true)  = in₁
 eval⊩ (inj false) = in₂
 eval⊩ case = distrib-∧/∨
-           • [ ∧-map singleton π₁ • swap • apply
-             , ∧-map singleton π₂ • swap • apply ]
+           • [ map∧ singleton π₁ • swap • apply
+             , map∧ singleton π₂ • swap • apply ]
 eval⊩ splitsum .ap x = x
 eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
 eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)
@@ -98,11 +79,11 @@ eval⊩ (when (_ , sl)) = from-bool (is! sl)
 eval⊩ (single _) .ap = leaf
 eval⊩ (single _) .map = leaf≤
 eval⊩ (for-in _ (_ , b-sl)) =
-  ∧-map id (lambda • Tree-map)
+  map∧ id (lambda • Tree-map)
   • swapply
   • tree-⋁ _ (is! b-sl)
 eval⊩ (bottom sl) = constant (Sums.init (is! sl))
-eval⊩ (join sl) = ∨-functor {{S = is! sl}}
+eval⊩ (join sl) = functor∨ {{S = is! sl}}
 -- TODO
 eval⊩ (fix is-fix) = {!!}
 eval⊩ (fix≤ is-fix≤) = {!!}

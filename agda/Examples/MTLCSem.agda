@@ -34,24 +34,6 @@ type (□ a) = isos (type a)
 
 
 ---------- Lemmas for denotational semantics of terms ----------
--- I've tried to put the most general lemmas at the beginning.
-precompose : ∀{i j} {{C}} {{cc : CC {i}{j} C}} {a b c : Obj C}
-           -> a ≤ b -> b ⇨ c ≤ a ⇨ c
-precompose f = curry (∧-map id f • apply)
-
--- This holds in any bicartesian closed category, but last time I tried writing
--- it that way it made typechecking take an extra .8 seconds or so.
-distrib-∧/∨ : ∀{a b c} -> (a ∨ b) ∧ c ⇒ (a ∧ c) ∨ (b ∧ c)
-distrib-∧/∨ = ∧-map [ curry in₁ , curry in₂ ] id • apply
-
--- Lifts an arbitrary function over an antisymmetric domain into a monotone map
--- over its discrete preorder.
-antisym-lift : ∀{A B} -> Antisymmetric _≡_ (Hom A) -> (Obj A -> Obj B) -> isos A ⇒ B
-antisym-lift {A}{B} antisym f = Fun: f helper
-  where helper : ∀{x y} -> Hom (isos A) x y -> Hom B (f x) (f y)
-        helper (x , y) with antisym x y
-        ... | refl = ident B
-
 -- ⟦_⟧ is a functor, Cx^op -> Proset
 corename : ∀{X Y} -> X ⊆ Y -> ⟦ Y ⟧ ⇒ ⟦ X ⟧
 corename f = fun (λ { γ≤σ (Var p) -> γ≤σ (Var (f _ p)) })
@@ -96,17 +78,17 @@ eval (form ! M) = eval M • eval⊩ form
 eval⊩ lam = lambda
 eval⊩ app = apply
 eval⊩ box = id
-eval⊩ letbox = ∧-map id lambda • swap • apply
+eval⊩ letbox = map∧ id lambda • swap • apply
 eval⊩ pair = id
 eval⊩ (proj true)  = π₁
 eval⊩ (proj false) = π₂
 eval⊩ (bool b) = Fun: (λ _ -> b) (λ _ → bool-refl)
-eval⊩ if = uncurry (antisym-lift antisym:bool≤ (λ x -> if x then π₁ else π₂))
+eval⊩ if = uncurry (antisym⇒ antisym:bool≤ (λ x -> if x then π₁ else π₂))
 eval⊩ (inj true)  = in₁
 eval⊩ (inj false) = in₂
 eval⊩ case = distrib-∧/∨
-           • [ ∧-map singleton π₁ • swap • apply
-             , ∧-map singleton π₂ • swap • apply ]
+           • [ map∧ singleton π₁ • swap • apply
+             , map∧ singleton π₂ • swap • apply ]
 eval⊩ splitsum .ap x = x
 eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
 eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)

@@ -45,7 +45,7 @@ module _ {A B : Proset} (bs : Sums B) where
   private instance b' = B; bs' = bs
   proset→-sums : Sums (proset→ A B)
   _∨_ {{proset→-sums}} f g .ap x = ap f x ∨ ap g x
-  _∨_ {{proset→-sums}} f g .map x≤y = ∨-map (map f x≤y) (map g x≤y)
+  _∨_ {{proset→-sums}} f g .map x≤y = map∨ (map f x≤y) (map g x≤y)
   in₁ {{proset→-sums}} {f}{g} x≤y = map f x≤y • in₁
   in₂ {{proset→-sums}} {f}{g} x≤y = map g x≤y • in₂
   [_,_] {{proset→-sums}} {f}{g}{h} f≤h g≤h x≤y = [ f≤h x≤y , g≤h x≤y ]
@@ -98,22 +98,22 @@ isos∨ .map (rel₁ p , rel₁ q) = rel₁ (p , q)
 isos∨ .map (rel₂ p , rel₂ q) = rel₂ (p , q)
 
 isojuggle : ∀{A B C D} -> (isos A ∧ B) ∧ (isos C ∧ D) ⇒ isos (A ∧ C) ∧ (B ∧ D)
-isojuggle = fun juggle • ∧-map isos∧ id
-
--- These should maybe live in Cat?
-module _ {i j} {{C : Cat i j}} {{Prod : Products C}} where
-  juggle∧ : ∀{a b c d : Obj C} -> (a ∧ b) ∧ (c ∧ d) ≤ (a ∧ c) ∧ (b ∧ d)
-  juggle∧ = ⟨ ∧-map π₁ π₁ , ∧-map π₂ π₂ ⟩
+isojuggle = fun juggle • map∧ isos∧ id
 
 module _ {{A : Proset}} {{Sum : Sums A}} where
-  juggle∨ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≤ (a ∨ c) ∨ (b ∨ d)
-  juggle∨ = [ ∨-map in₁ in₁ , ∨-map in₂ in₂ ]
-
   juggle∨≈ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≈ (a ∨ c) ∨ (b ∨ d)
   juggle∨≈ = juggle∨ , juggle∨
 
   ∨≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∨ b) ≈ (a' ∨ b')
-  ∨≈ a≈a' b≈b' = ∨-map (proj₁ a≈a') (proj₁ b≈b') , ∨-map (proj₂ a≈a') (proj₂ b≈b')
+  ∨≈ a≈a' b≈b' = map∨ (proj₁ a≈a') (proj₁ b≈b') , map∨ (proj₂ a≈a') (proj₂ b≈b')
+
+-- Lifts an arbitrary function over an antisymmetric domain into a monotone map
+-- over its discrete preorder.
+antisym⇒ : ∀{A B} -> Antisymmetric _≡_ (Hom A) -> (Obj A -> Obj B) -> isos A ⇒ B
+antisym⇒ {A}{B} antisym f = Fun: f helper
+  where helper : ∀{x y} -> Hom (isos A) x y -> Hom B (f x) (f y)
+        helper (x , y) with antisym x y
+        ... | refl = ident B
 
 
 -- The booleans, ordered false < true.

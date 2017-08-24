@@ -57,6 +57,7 @@ catΠ A B .ident x     = B x .ident
 catΠ A B .compo f g x = B x .compo (f x) (g x)
 
  -- Cartesian structures.
+ --- Sums
 record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Sums:
   private instance the-cat = C
@@ -69,15 +70,19 @@ record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   field init : Obj C
   field init≤ : ∀{a} -> init ≤ a
 
-  ∨-idem : ∀{a} -> a ∨ a ≤ a
-  ∨-idem = [ id , id ]
+  idem∨ : ∀{a} -> a ∨ a ≤ a
+  idem∨ = [ id , id ]
 
-  ∨-map : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
-  ∨-map f g = [ f • in₁ , g • in₂ ]
+  map∨ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
+  map∨ f g = [ f • in₁ , g • in₂ ]
 
-  ∨-functor : Fun (cat× C C) C
-  ∨-functor = fun λ { (f , g) -> ∨-map f g }
+  functor∨ : Fun (cat× C C) C
+  functor∨ = fun λ { (f , g) -> map∨ f g }
 
+  juggle∨ : ∀{a b c d} -> (a ∨ b) ∨ (c ∨ d) ≤ (a ∨ c) ∨ (b ∨ d)
+  juggle∨ = [ map∨ in₁ in₁ , map∨ in₂ in₂ ]
+
+ --- Products
 record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Products:
   private instance the-cat = C
@@ -89,8 +94,8 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   field ⟨_,_⟩ : ∀{a b x} -> x ≤ a -> x ≤ b -> x ≤ (a ∧ b)
   -- TODO: terminal object?
 
-  ∧-map : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∧ b ≤ c ∧ d
-  ∧-map f g = ⟨ π₁ • f , π₂ • g ⟩
+  map∧ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∧ b ≤ c ∧ d
+  map∧ f g = ⟨ π₁ • f , π₂ • g ⟩
 
   ∇ : ∀{a} -> a ≤ a ∧ a
   ∇ = ⟨ id , id ⟩
@@ -100,10 +105,13 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
 
   -- This *could* be useful if cat× were an instance, but it's not.
   -- instance
-  ∧-functor : Fun (cat× C C) C
-  ∧-functor = fun λ { (f , g) -> ∧-map f g }
+  functor∧ : Fun (cat× C C) C
+  functor∧ = fun λ { (f , g) -> map∧ f g }
 
--- CC means "cartesian closed".
+  juggle∧ : ∀{a b c d} -> (a ∧ b) ∧ (c ∧ d) ≤ (a ∧ c) ∧ (b ∧ d)
+  juggle∧ = ⟨ map∧ π₁ π₁ , map∧ π₂ π₂ ⟩
+
+ --- CC means "cartesian closed".
 record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor CC:
   private instance the-cat = C
@@ -122,29 +130,20 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   swapply = swap • apply
 
   uncurry : ∀{a b c} -> a ≤ b ⇨ c -> a ∧ b ≤ c
-  uncurry f = ∧-map f id • apply
+  uncurry f = map∧ f id • apply
 
   flip : ∀{a b c} -> a ≤ b ⇨ c -> b ≤ a ⇨ c
   flip f = curry (swap • uncurry f)
 
+  precompose : ∀{a b c} -> a ≤ b -> b ⇨ c ≤ a ⇨ c
+  precompose f = curry (map∧ id f • apply)
+
 module _ {i j} {{C : Cat i j}} where
-  module _ {{S : Sums C}} where
-    open Sums S public using (_∨_; in₁; in₂; [_,_]; init; init≤; ∨-map; ∨-functor; ∨-idem)
-  module _ {{P : Products C}} where
-    open Products P public using (_∧_; π₁; π₂; ⟨_,_⟩; ∧-map; ∧-functor; ∇; swap)
-  module _ {{Ccc : CC C}} where
-    open CC Ccc public using (_⇨_; apply; curry; call; swapply; uncurry; flip)
+  module _ {{S : Sums C}} where open Sums S public
+  module _ {{P : Products C}} where open Products P public
+  module _ {{Ccc : CC C}} where open CC Ccc public hiding (products)
 
-
--- -- Some convenient conversions
--- instance
---   cast-cat->set : ∀{i j k} -> Cast k (Cat i j) (Set i)
---   cast-cat->set = Cast: Obj
-
---   cast-ccc->products : ∀{i j k C} -> Cast k (CC {i}{j} C) (Products C)
---   cast-ccc->products = Cast: CC.products
-
- -- Some useful categories
+ -- Some useful categories & their structures.
 ⊤-cat ⊥-cat : ∀{i j} -> Cat i j
 ⊥-cat = Cat: (Lift ⊥) (λ { (lift ()) }) (λ { {lift ()} }) (λ { {lift ()} })
 ⊤-cat = Cat: (Lift ⊤) (λ _ _ -> Lift ⊤) (lift tt) (λ _ _ → lift tt)
@@ -202,3 +201,8 @@ module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
 --   Sums.[_,_] catΠ-sums f g x = P x .Sums.[_,_] (f x) (g x)
 --   Sums.init catΠ-sums x = P x .Sums.init
 --   Sums.init≤ catΠ-sums x = P x .Sums.init≤
+
+ -- Some general lemmas
+distrib-∧/∨ : ∀{i j} {{C : Cat i j}} {{Ccc : CC C}} {{S : Sums C}} {a b c : Obj C}
+            -> (a ∨ b) ∧ c ≤ (a ∧ c) ∨ (b ∧ c)
+distrib-∧/∨ = map∧ [ curry in₁ , curry in₂ ] id • apply

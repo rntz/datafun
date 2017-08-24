@@ -21,8 +21,8 @@ module Trees (C : Proset) where
 
   unsplit : ∀{l r t} -> node l r ⊑ t -> l ⊑ t × r ⊑ t
   unsplit (node≤ l r) = l , r
-  unsplit (split₁ p) = ∧-map split₁ split₁ (unsplit p)
-  unsplit (split₂ p) = ∧-map split₂ split₂ (unsplit p)
+  unsplit (split₁ p) = map∧ split₁ split₁ (unsplit p)
+  unsplit (split₂ p) = map∧ split₂ split₂ (unsplit p)
 
   trees : Proset
   private instance trees-auto : Proset; trees-auto = trees
