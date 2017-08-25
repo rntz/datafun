@@ -34,10 +34,10 @@ rel× : ∀{a b c d r s} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
      -> (A × B) -> (C × D) -> Set _
 rel× R S (a , x) (b , y) = R a b × S x y
 
-data rel+ {a b c d r s} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
-          (R : A -> C -> Set r) (S : B -> D -> Set s)
-     : (A ⊎ B) -> (C ⊎ D) -> Set (r ⊔ s) where
--- data rel+ {i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) : Rel (A ⊎ B) (j ⊔ l) where
+-- data rel+ {a b c d r s} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
+--           (R : A -> C -> Set r) (S : B -> D -> Set s)
+--      : (A ⊎ B) -> (C ⊎ D) -> Set (r ⊔ s) where
+data rel+ {i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) : Rel (A ⊎ B) (j ⊔ l) where
   rel₁ : ∀{a b} -> R a b -> rel+ R S (inj₁ a) (inj₁ b)
   rel₂ : ∀{a b} -> S a b -> rel+ R S (inj₂ a) (inj₂ b)
 
