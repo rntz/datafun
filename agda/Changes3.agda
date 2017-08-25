@@ -71,7 +71,7 @@ module _ (A B : Change) where
 
   𝑶 change→ = 𝑶 A ⇨ 𝑶 B
   𝑫 change→ = (isos (𝑶 A) ∧ 𝑫 A) ⇨ 𝑫 B
-  Path change→ f≤g df = ∀{a b} .(a≤b : a ≤ b) {da} (da-ok : Path A {a}{b} a≤b da)
+  Path change→ f≤g df = ∀{a b} .{{a≤b : a ≤ b}} {da} (da-ok : Path A a≤b da)
                       -> Path B (f≤g a≤b) (ap df (a , da))
   dummy change→ = constant (dummy B)
 
@@ -104,12 +104,14 @@ open ChangeFun public
 
 -- Is there a category of ChangeFuns? Is it useful? Am I really doing 2-category
 -- theory?
+record ChangeFun₂ {A B : Change} (F G : ChangeFun A B) : Set where
+  field F≤G : TODO
 
 zero→cfun : ∀{A B} f -> Deriv A B f -> ChangeFun A B
 zero→cfun f (d , isd) = cfun f d isd
 
 const-cfun : ∀{A B} (x : Obj (𝑶 B)) (dx : Obj (𝑫 B)) -> IdPath B x dx -> ChangeFun A B
-const-cfun x dx dx:x→x = cfun (constant x) (constant dx) (λ _ _ → dx:x→x)
+const-cfun x dx dx:x→x = cfun (constant x) (constant dx) (λ _ → dx:x→x)
 
 -- Is this useful? WHY? WHEN?
 record Hom! (A : Change) (a b : 𝑶 A .Obj) : Set where

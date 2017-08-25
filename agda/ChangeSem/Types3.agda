@@ -79,7 +79,7 @@ record IsSL (A : Change) : Set where
 open IsSL public
 
 slSL : ∀ A S -> IsSL (change-SL A S)
-slSL A S = IsSL: S (λ _ _ → idem∨ , in₁) (λ { _ (p , q) → juggle∨≈ • ∨≈ p q })
+slSL A S = IsSL: S (λ _ → idem∨ , in₁) (λ { (p , q) → juggle∨≈ • ∨≈ p q })
   where private instance aa = A; ss = S; isosaa = isos A
 
 sl× : ∀ {A B} (P : IsSL A) (Q : IsSL B) -> IsSL (A ∧ B)
@@ -91,9 +91,9 @@ sl× P Q .vee-ok = is-id (juggle∧ • map∧ (vee P) (vee Q))
 sl→ : ∀ A {B} (P : IsSL B) -> IsSL (change→ A B)
 sl→ A P .𝑶-sums = proset→-sums (𝑶-sums P)
 sl→ A P .𝑫-sums = proset→-sums (𝑫-sums P)
-sl→ A P .eps-ok _ tt _ p = eps-ok P _ tt
-sl→ A P .vee-ok _ (df-ok , dg-ok) _ da-ok =
-  vee-ok P (_ , _) (df-ok _ da-ok , dg-ok _ da-ok)
+sl→ A P .eps-ok tt p = eps-ok P tt
+sl→ A P .vee-ok (df-ok , dg-ok) da-ok =
+  vee-ok P {{_ , _}} (df-ok da-ok , dg-ok da-ok)
 
  ---------- Semantics of type-classes ----------
 class : Class -> Change -> Set
