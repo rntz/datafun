@@ -118,20 +118,20 @@ antisym⇒ {A}{B} antisym f = Fun: f helper
 
 -- The booleans, ordered false < true.
 data bool≤ : Rel Bool zero where
-  bool-refl : Reflexive bool≤
+  refl : Reflexive bool≤
   false<true : bool≤ false true
 
 false≤ : ∀{a} -> bool≤ false a
-false≤ {false} = bool-refl
+false≤ {false} = refl
 false≤ {true}  = false<true
 
 instance
   bools : Cat _ _
   Obj bools = Bool
   Hom bools = bool≤
-  ident bools = bool-refl
-  compo bools bool-refl x = x
-  compo bools false<true bool-refl = false<true
+  ident bools = refl
+  compo bools refl x = x
+  compo bools false<true refl = false<true
 
   -- I never thought I'd commit a proof by exhaustive case analysis,
   -- but I was wrong.
@@ -140,28 +140,33 @@ instance
   _∨_ {{bool-sums}} _  true = true
   _∨_ {{bool-sums}} _ _ = false
   in₁ {{bool-sums}} {false} = false≤
-  in₁ {{bool-sums}} {true}  = bool-refl
+  in₁ {{bool-sums}} {true}  = refl
   in₂ {{bool-sums}} {_}    {false} = false≤
-  in₂ {{bool-sums}} {false} {true} = bool-refl
-  in₂ {{bool-sums}} {true}  {true} = bool-refl
+  in₂ {{bool-sums}} {false} {true} = refl
+  in₂ {{bool-sums}} {true}  {true} = refl
   [_,_] {{bool-sums}} {false} {false} x y = false≤
   [_,_] {{bool-sums}} {_}     {true}  {false} x ()
   [_,_] {{bool-sums}} {true}  {false} {false} () y
-  [_,_] {{bool-sums}} {false} {true}  {true}  x y = bool-refl
-  [_,_] {{bool-sums}} {true}  {false} {true}  x y = bool-refl
-  [_,_] {{bool-sums}} {true}  {true}  {true}  x y = bool-refl
+  [_,_] {{bool-sums}} {false} {true}  {true}  x y = refl
+  [_,_] {{bool-sums}} {true}  {false} {true}  x y = refl
+  [_,_] {{bool-sums}} {true}  {true}  {true}  x y = refl
   init {{bool-sums}} = false
   init≤ {{bool-sums}} = false≤
 
   bool≤? : Decidable bool≤
   bool≤? false true = yes false<true
   bool≤? true  false = no λ {()}
-  bool≤? false false = yes bool-refl
-  bool≤? true  true = yes bool-refl
+  bool≤? false false = yes refl
+  bool≤? true  true = yes refl
 
 antisym:bool≤ : Antisymmetric _≡_ bool≤
-antisym:bool≤ bool-refl _ = Eq.refl
+antisym:bool≤ refl _ = Eq.refl
 antisym:bool≤ false<true ()
+
+bool⇒ : ∀{A a b} -> Hom A a b -> bools ⇒ A
+bool⇒ {_}{a}{b} a≤b .ap x = if x then b else a
+bool⇒ {A} a≤b .map refl = ident A
+bool⇒ a≤b .map false<true = a≤b
 
 
 -- Natural numbers

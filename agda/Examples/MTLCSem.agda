@@ -25,7 +25,7 @@ type (□ a) = isos (type a)
 
 ⟦_⟧ : Cx -> Proset
 ⟦_⟧+ : Premise -> Proset
-⟦ X ⟧ = catΠ (Vars X) (λ v -> ⟦ proj₁ v ⟧₁)
+⟦ X ⟧ = Π (Vars X) (λ v -> ⟦ proj₁ v ⟧₁)
 ⟦ nil ⟧+    = ⊤-cat
 ⟦ P , Q ⟧+  = cat× ⟦ P ⟧+ ⟦ Q ⟧+
 ⟦ □ P ⟧+    = isos ⟦ P ⟧+
@@ -35,12 +35,12 @@ type (□ a) = isos (type a)
 
 ---------- Lemmas for denotational semantics of terms ----------
 -- ⟦_⟧ is a functor, Cx^op -> Proset
-corename : ∀{X Y} -> X ⊆ Y -> ⟦ Y ⟧ ⇒ ⟦ X ⟧
-corename f = fun (λ { γ≤σ (Var p) -> γ≤σ (Var (f _ p)) })
+comap⟦_⟧ : ∀{X Y} -> X ⊆ Y -> ⟦ Y ⟧ ⇒ ⟦ X ⟧
+comap⟦ f ⟧ = prefixΠ (∃-map f)
 
 -- Managing environments.
 lookup : ∀{X x} -> X x -> ⟦ X ⟧ ⇒ ⟦ x ⟧₁
-lookup p = fun (λ f -> f (Var p))
+lookup p = Πe (Var p)
 
 cons : ∀{X Y} -> ⟦ X ⟧ ∧ ⟦ Y ⟧ ⇒ ⟦ Y ∪ X ⟧
 ap cons (f , g) (Var p) = [ g ∘ Var , f ∘ Var ] p
@@ -70,7 +70,7 @@ eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ⇒ type a
 eval tt = fun (λ _ -> lift tt)
 eval (M , N) = ⟨ eval M , eval N ⟩
 eval (bind M) = curry (cons • eval M)
-eval (box M) = corename (extract Wipe) • wipe⇒isos • map Isos (eval M)
+eval (box M) = comap⟦ extract Wipe ⟧ • wipe⇒isos • map Isos (eval M)
 eval (var mono p) = lookup p
 eval (var disc p) = lookup p • extract Isos
 eval (form ! M) = eval M • eval⊩ form

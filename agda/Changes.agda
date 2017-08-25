@@ -18,6 +18,10 @@ record Change : Set1 where
   -- if we need it for any of the proofs we're doing.
   field Path : (da : Obj 𝑫) (a b : Obj 𝑶) -> Set
 
+  -- THIS IS IMPOSSIBLE AT EXPONENTIALS AGHHH
+  -- -- Paths are consistent with the ordering on 𝑶.
+  -- field path≤ : ∀{da a b} -> Path da a b -> a ≤ b
+
   -- This hack is needed to prove Change has coproducts. We need it for the
   -- derivative of case-analysis, [_,_], to invent values to use in the
   -- impossible case branches.
@@ -51,12 +55,6 @@ change-bool = change-SL bools bool-sums
 change-tree : Change -> Change
 change-tree A = change-SL (trees (𝑶 A)) (tree-sums (𝑶 A))
 
-changeΠ : (A : Set) (B : A -> Change) -> Change
-changeΠ A B .𝑶 = catΠ A (λ a -> B a .𝑶)
-changeΠ A B .𝑫 = catΠ A (λ a -> B a .𝑫)
-changeΠ A B .Path df f g = ∀ a -> Path (B a) (df a) (f a) (g a)
-changeΠ A B .dummy a = dummy (B a)
-
 module _ (A : Change) where
   change□ : Change
   𝑶 change□ = isos (𝑶 A)
@@ -77,6 +75,12 @@ module _ (A B : Change) where
                       -> Path B (ap df (a , da)) (ap f a) (ap g b)
   dummy change→ = constant (dummy B)
 
+changeΠ : (A : Set) (B : A -> Change) -> Change
+changeΠ A B .𝑶 = catΠ A (λ a -> B a .𝑶)
+changeΠ A B .𝑫 = catΠ A (λ a -> B a .𝑫)
+changeΠ A B .Path df f g = ∀ a -> Path (B a) (df a) (f a) (g a)
+changeΠ A B .dummy a = dummy (B a)
+
  -- Morphisms between change structures.
 Zero : (A : Change) (a : Obj (𝑶 A)) -> Set
 Zero A a = Σ[ δ ∈ Obj (𝑫 A) ] IdPath A δ a
@@ -88,7 +92,7 @@ record ChangeFun (A B : Change) : Set where
   constructor cfun
   field funct  : 𝑶 A ⇒ 𝑶 B
   field deriv : isos (𝑶 A) ∧ 𝑫 A ⇒ 𝑫 B
-  field is-id : IdPath (change→ A B) deriv funct
+  field is-id : Path (change→ A B) deriv funct funct
 
   func&deriv : isos (𝑶 A) ∧ 𝑫 A ⇒ isos (𝑶 B) ∧ 𝑫 B
   func&deriv = ⟨ π₁ • map Isos funct , deriv ⟩
@@ -98,8 +102,17 @@ record ChangeFun (A B : Change) : Set where
 
 open ChangeFun public
 
+-- Is there a category of ChangeFuns? Is it useful? Am I really doing 2-category
+-- theory?
+
 zero→cfun : ∀{A B} f -> Deriv A B f -> ChangeFun A B
 zero→cfun f (d , isd) = cfun f d isd
 
 const-cfun : ∀{A B} (x : Obj (𝑶 B)) (dx : Obj (𝑫 B)) -> Path B dx x x -> ChangeFun A B
 const-cfun x dx dx:x→x = cfun (constant x) (constant dx) (λ _ → dx:x→x)
+
+-- Is this useful? WHY? WHEN?
+record Hom! (A : Change) (a b : 𝑶 A .Obj) : Set where
+  field a≤b : 𝑶 A .Hom a b
+  field path : 𝑫 A .Obj
+  field path-ok : Path A path a b

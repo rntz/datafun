@@ -32,7 +32,7 @@ type (a + b) = type a ∨ type b
 ⟦ oa , _ ⟧v = ⟦ oa ⟧₁
 
 ⟦_⟧ : Cx -> Change
-⟦ X ⟧ = changeΠ (Vars X) ⟦_⟧v
+⟦ X ⟧ = Π (Vars X) ⟦_⟧v
 
 ⟦_⟧+ : Premise -> Change
 ⟦ nil ⟧+    = ⊤-change

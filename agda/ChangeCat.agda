@@ -1,3 +1,4 @@
+{-# OPTIONS --postfix-projections #-}
 module ChangeCat where
 
 open import Cat
@@ -6,8 +7,6 @@ open import Prosets
 open import TreeSet
 open import Changes
 open import Monads
-
--- TODO: SetΠ zero Change
 
  -- Category of changes
 instance
@@ -52,6 +51,13 @@ instance
   apply {{change-cc}} .is-id (df:f→g , dx:x→y) = df:f→g dx:x→y
   curry {{change-cc}} (cfun f df ok) =
     cfun (curry f) (curry (isojuggle • df)) (λ da db → ok (da , db))
+
+  change-Π : SetΠ zero changes
+  SetΠ.Π change-Π = changeΠ
+  SetΠ.Πi change-Π Γ→P .funct = Πi λ a → Γ→P a .funct
+  SetΠ.Πi change-Π Γ→P .deriv = Πi λ a → Γ→P a .deriv
+  SetΠ.Πi change-Π Γ→P .is-id df:f→g a = Γ→P a .is-id df:f→g
+  SetΠ.Πe change-Π a = cfun (Πe a) (π₂ • Πe a) (λ df-ok → df-ok a)
 
  -- Showing that □ is a comonad on the category of changes.
 Change□ : changes ≤ changes

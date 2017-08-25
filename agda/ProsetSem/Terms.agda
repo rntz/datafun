@@ -13,22 +13,19 @@ open import ProsetSem.Types
 ---------- Lemmas for denotational semantics of terms ----------
 -- ⟦_⟧ is a functor, Cx^op -> Proset
 comap⟦_⟧ : ∀{X Y} -> X ⊆ Y -> ⟦ Y ⟧ ⇒ ⟦ X ⟧
-comap⟦ f ⟧ = comapΠ (∃-map f)
+comap⟦ f ⟧ = prefixΠ (∃-map f)
 
 -- Managing environments.
 lookup : ∀{X x} -> X x -> ⟦ X ⟧ ⇒ ⟦ x ⟧₁
-lookup p = fun (λ f -> f (Var p))
+lookup p = Πe (Var p)
 
--- isn't this just... pairing?
--- i.e. can't I express this without the semantic brackets?
 cons : ∀{X Y} -> ⟦ X ⟧ ∧ ⟦ Y ⟧ ⇒ ⟦ Y ∪ X ⟧
-ap cons (f , g) (, p) = [ g ∘ Var , f ∘ Var ] p
-map cons (f , g) (, inj₁ p) = g (Var p)
-map cons (f , g) (, inj₂ p) = f (Var p)
+cons = Πi λ { (, inj₁ x) → π₂ • lookup x ; (, inj₂ y) → π₁ • lookup y }
 
-singleton : ∀{x} -> ⟦ x ⟧₁ ⇒ ⟦ hyp x ⟧
-ap  singleton x   (Var Eq.refl) = x
-map singleton x≤y (Var Eq.refl) = x≤y
+--singleton : ∀{x} -> ⟦ x ⟧₁ ⇒ ⟦ hyp x ⟧
+singleton : ∀{o a} -> ⟦ o , a ⟧₁ ⇒ ⟦ hyp (o , a) ⟧
+ap  singleton x   (Var refl) = x
+map singleton x≤y (Var refl) = x≤y
 
 wipe-sym : ∀{X x y} -> Hom ⟦ wipe X ⟧ x y -> Hom ⟦ wipe X ⟧ y x
 wipe-sym f (Var {mono} ())

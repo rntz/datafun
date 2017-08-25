@@ -1,6 +1,7 @@
 module Cat where
 
 open import Prelude
+import Data.Sum
 
 record Cat i j : Set (suc (i ⊔ j)) where
   no-eta-equality
@@ -28,10 +29,15 @@ constant : ∀{i j k l C D} -> Obj D -> Fun {i}{j}{k}{l} C D
 constant {D = D} x = Fun: (λ _ -> x) (λ _ -> ident D)
 
  -- Constructions on relations & categories
-rel× : ∀{i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) -> Rel (A × B) (j ⊔ l)
+rel× : ∀{a b c d r s} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
+     -> (R : A -> C -> Set r) (S : B -> D -> Set s)
+     -> (A × B) -> (C × D) -> Set _
 rel× R S (a , x) (b , y) = R a b × S x y
 
-data rel+ {i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) : Rel (A ⊎ B) (j ⊔ l) where
+data rel+ {a b c d r s} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
+          (R : A -> C -> Set r) (S : B -> D -> Set s)
+     : (A ⊎ B) -> (C ⊎ D) -> Set (r ⊔ s) where
+-- data rel+ {i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) : Rel (A ⊎ B) (j ⊔ l) where
   rel₁ : ∀{a b} -> R a b -> rel+ R S (inj₁ a) (inj₁ b)
   rel₂ : ∀{a b} -> S a b -> rel+ R S (inj₂ a) (inj₂ b)
 
@@ -92,7 +98,7 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   field _∧_ : Op (Obj C)
   field π₁ : ∀{a b} -> (a ∧ b) ≤ a
   field π₂ : ∀{a b} -> (a ∧ b) ≤ b
-  field ⟨_,_⟩ : ∀{a b x} -> x ≤ a -> x ≤ b -> x ≤ (a ∧ b)
+  field ⟨_,_⟩ : ∀{a b Γ} -> Γ ≤ a -> Γ ≤ b -> Γ ≤ (a ∧ b)
   -- TODO: terminal object?
 
   map∧ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∧ b ≤ c ∧ d
@@ -112,12 +118,15 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   juggle∧ : ∀{a b c d} -> (a ∧ b) ∧ (c ∧ d) ≤ (a ∧ c) ∧ (b ∧ d)
   juggle∧ = ⟨ map∧ π₁ π₁ , map∧ π₂ π₂ ⟩
 
+module _ {i j} {{C : Cat i j}} where
+  module _ {{S : Sums C}} where open Sums S public
+  module _ {{P : Products C}} where open Products P public
+
  --- CC means "cartesian closed".
 record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor CC:
   private instance the-cat = C
   field overlap {{products}} : Products C
-  open Products products
   -- TODO FIXME: shouldn't bind tighter than ∧.
   infixr 4 _⇨_
   field _⇨_ : Op (Obj C)
@@ -126,7 +135,6 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
 
   call : ∀{a b c} -> a ≤ (b ⇨ c) -> a ≤ b -> a ≤ c
   call f a = ⟨ f , a ⟩ • apply
-
   swapply : ∀{a b} -> a ∧ (a ⇨ b) ≤ b
   swapply = swap • apply
 
@@ -139,23 +147,39 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   precompose : ∀{a b c} -> a ≤ b -> b ⇨ c ≤ a ⇨ c
   precompose f = curry (map∧ id f • apply)
 
- --- Infinitary products
+  module _ {{S : Sums C}} where
+    distrib-∧/∨ : ∀{a b c} -> (a ∨ b) ∧ c ≤ (a ∧ c) ∨ (b ∧ c)
+    distrib-∧/∨ = map∧ [ curry in₁ , curry in₂ ] id • apply
+
+module _ {i j} {{C : Cat i j}} {{Ccc : CC C}} where open CC Ccc public hiding (products)
+
+ --- Possibly-infinitary products
 record SetΠ k {i j} (C : Cat i j) : Set (i ⊔ j ⊔ suc k) where
   constructor SetΠ:
   private instance the-cat = C
   field Π : (A : Set k) (P : A -> Obj C) -> Obj C
-  field mapΠ : ∀{A B P Q} (f : B -> A) (g : ∀ a -> P (f a) ≤ Q a) -> Π A P ≤ Π B Q
+  -- Do I need projection and an introduction form?
+  field Πi : ∀{A P Γ} (Γ→P : (a : A) -> Γ ≤ P a) -> Γ ≤ Π A P
+  field Πe : ∀{A P} (a : A) -> Π A P ≤ P a
 
-  prefixΠ : ∀{A B} (P : A -> Obj C) (f : B -> A) -> Π A P ≤ Π B (P ∘ f)
-  prefixΠ P f = mapΠ f (λ _ → id)
+  mapΠ : ∀{A B P Q} (F : B -> A) (G : ∀ b -> P (F b) ≤ Q b) -> Π A P ≤ Π B Q
+  mapΠ F G = Πi λ b → Πe (F b) • G b
+
+  prefixΠ : ∀{A B P} (f : B -> A) -> Π A P ≤ Π B (P ∘ f)
+  prefixΠ f = Πi (Πe ∘ f) -- mapΠ f (λ _ → id)
+
   suffixΠ : ∀{A} {B B' : A -> Obj C} (f : ∀ a -> B a ≤ B' a) -> Π A B ≤ Π A B'
   suffixΠ f = mapΠ (λ x → x) f
 
-module _ {i j} {{C : Cat i j}} where
-  module _ {{S : Sums C}} where open Sums S public
-  module _ {{P : Products C}} where open Products P public
-  module _ {{Ccc : CC C}} where open CC Ccc public hiding (products)
-  module _ {k} {{Pi : SetΠ k C}} where open SetΠ Pi public
+  -- module _ {{Prod : Products C}} where
+  --   -- TODO: RENAME
+  --   twiddle : ∀{A P Q} -> Π A P ∧ Π A Q ≤ Π A (λ a -> P a ∧ Q a)
+  --   twiddle = Πi λ a → map∧ (Πe a) (Πe a)
+
+  --   fwiddle : ∀{A B P Q} -> Π A P ∧ Π B Q ≤ Π (A ⊎ B) Data.Sum.[ P , Q ]
+  --   fwiddle = Πi Data.Sum.[ (λ x → π₁ • Πe x) , (λ x → π₂ • Πe x) ]
+
+module _ {i j k} {{C : Cat i j}} {{Pi : SetΠ k C}} where open SetΠ Pi public
 
  -- Some useful categories & their structures.
 ⊤-cat ⊥-cat : ∀{i j} -> Cat i j
@@ -174,14 +198,13 @@ instance
     where open import Data.Product
 
   set-sums : ∀{i} -> Sums (sets {i})
-  set-sums = Sums: _⊎_ inj₁ inj₂ Data.Sum.[_,_] (Lift Data.Empty.⊥) (λ { (lift ()) })
-    where import Data.Sum; import Data.Empty
+  set-sums = Sums: _⊎_ inj₁ inj₂ Data.Sum.[_,_] (Lift ⊥) (λ { (lift ()) })
 
   set-cc : ∀{i} -> CC (sets {i})
   set-cc = CC: Function (λ { (f , a) -> f a }) (λ f x y -> f (x , y))
 
-  sets-Π : ∀{i} -> SetΠ i (sets {i})
-  sets-Π = SetΠ: (λ A P → (x : A) -> P x) (λ F G ∀P b → G b (∀P (F b)))
+  set-Π : ∀{i} -> SetΠ i (sets {i})
+  set-Π = SetΠ: (λ A P → (x : A) -> P x) (λ Γ→P γ a → Γ→P a γ) (λ a ∀P → ∀P a)
 
   cats : ∀{i j} -> Cat (suc (i ⊔ j)) (i ⊔ j)
   Obj (cats {i}{j}) = Cat i j
@@ -198,8 +221,8 @@ instance
     where disj : ∀ {a b c : Cat i j} -> a ≤ c -> b ≤ c -> cat+ a b ≤ c
           disj F G = Fun: [ ap F , ap G ] (λ { (rel₁ x) → map F x ; (rel₂ x) → map G x })
 
-  cats-Π : ∀{i j k} -> SetΠ k (cats {i ⊔ k} {j ⊔ k})
-  cats-Π = SetΠ: catΠ λ F G → fun λ ∀P≤ b → G b .map (∀P≤ (F b))
+  cat-Π : ∀{i j k} -> SetΠ k (cats {i ⊔ k} {j ⊔ k})
+  cat-Π = SetΠ: catΠ (λ Γ→P → fun (λ γ a → Γ→P a .map γ)) (λ a → fun (λ ∀P≤ → ∀P≤ a))
 
  -- Preserving cartesian structure over operations on categories.
 module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
@@ -221,8 +244,3 @@ module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
 --   Sums.[_,_] catΠ-sums f g x = P x .Sums.[_,_] (f x) (g x)
 --   Sums.init catΠ-sums x = P x .Sums.init
 --   Sums.init≤ catΠ-sums x = P x .Sums.init≤
-
- -- Some general lemmas
-distrib-∧/∨ : ∀{i j} {{C : Cat i j}} {{Ccc : CC C}} {{S : Sums C}} {a b c : Obj C}
-            -> (a ∨ b) ∧ c ≤ (a ∧ c) ∨ (b ∧ c)
-distrib-∧/∨ = map∧ [ curry in₁ , curry in₂ ] id • apply
