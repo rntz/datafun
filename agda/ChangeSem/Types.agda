@@ -24,9 +24,15 @@ type (a ⊃ b) = type a ⇨ type b
 type (a * b) = type a ∧ type b
 type (a + b) = type a ∨ type b
 
+tone : Tone -> changes ≤ changes
+tone mono = id
+tone disc = Change□
+
 ⟦_⟧₁ : Tone × Type -> Change
-⟦ mono , a ⟧₁ = type a
-⟦ disc , a ⟧₁ = change□ (type a)
+⟦ o , a ⟧₁ = tone o .ap (type a)
+-- original definition
+-- ⟦ mono , a ⟧₁ = type a
+-- ⟦ disc , a ⟧₁ = change□ (type a)
 
 ⟦_⟧v : ∀{X} -> Vars X -> Change
 ⟦ oa , _ ⟧v = ⟦ oa ⟧₁

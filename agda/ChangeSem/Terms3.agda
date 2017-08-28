@@ -18,7 +18,7 @@ comap⟦ f ⟧ = prefixΠ {P = ⟦_⟧v} (∃-map f)
 
 -- Managing environments.
 lookup : ∀{X x} -> X x -> ⟦ X ⟧ ≤ ⟦ x ⟧₁
-lookup p = Πe (Var p)
+lookup p = Πe {P = ⟦_⟧v} (Var p)
 
 cons : ∀{X Y} -> ⟦ X ⟧ ∧ ⟦ Y ⟧ ≤ ⟦ Y ∪ X ⟧
 cons = Πi {P = ⟦_⟧v} λ { (, inj₁ x) → π₂ • lookup x ; (, inj₂ y) → π₁ • lookup y }
