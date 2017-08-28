@@ -95,6 +95,7 @@ map Trees F .map (split₂ x) = split₂ (map Trees F .map x)
 -- TODO: Is this... 2-Functoriality or something? I'm not sure.
 Tree-map : ∀{A B} -> A ⇨ B ⇒ trees A ⇨ trees B
 ap Tree-map = map Trees
+-- this proof looks suspiciously like the cases for `map Trees F .map`, above.
 map Tree-map f≤g empty≤ = empty≤
 map Tree-map f≤g (leaf≤ x≤y) = leaf≤ (f≤g x≤y)
 map Tree-map f≤g (node≤ t≤u t≤v) = node≤ (map Tree-map f≤g t≤u) (map Tree-map f≤g t≤v)
