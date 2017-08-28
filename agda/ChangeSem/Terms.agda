@@ -28,14 +28,12 @@ singleton = Πi duh
  where duh : ∀{x} (v : Vars (hyp x)) -> ⟦ x ⟧₁ ≤ ⟦ v ⟧v
        duh (Var refl) = id
 
-Π□ : ∀{A} P -> changeΠ A (λ a -> change□ (P a)) ≤ change□ (changeΠ A P)
--- TODO: simplify
-Π□ P .funct = fun (λ F → proj₁ ∘ F , proj₂ ∘ F)
-Π□ P .deriv = π₂ • fun (λ F → proj₁ ∘ F , proj₂ ∘ F)
-Π□ P .is-id da:a→b = (proj₁ ∘ da:a→b) , proj₁ ∘ proj₂ ∘ da:a→b , proj₂ ∘ proj₂ ∘ da:a→b
+-- TODO: rename some of these functions.
+Π□ : ∀{A} P -> Π A (λ a -> change□ (P a)) ≤ change□ (Π A P)
+-- I find this slightly incomprehensible myself.
+Π□ _ = cfun (fun Π/∧) (π₂ • fun Π/∧) (Π/∧ • map∧ id Π/∧)
 
-Πbox : ∀{A P} -> (∀ a -> P a ≤ change□ (P a))
-     -> changeΠ A P ≤ change□ (changeΠ A P)
+Πbox : ∀{A P} -> (∀ a -> P a ≤ change□ (P a)) -> Π A P ≤ change□ (Π A P)
 Πbox {P = P} F = suffixΠ F • Π□ P
 
 wipevar : ∀{X} (v : Vars (wipe X)) -> ⟦ v ⟧v ≤ change□ ⟦ v ⟧v
@@ -44,40 +42,12 @@ wipevar (Var {disc} p) = dup Change□
 
 wipe≤□ : ∀{X} -> ⟦ wipe X ⟧ ≤ change□ ⟦ wipe X ⟧
 wipe≤□ = Πbox wipevar
-
--- HORRIBLE OLD CODE
--- lift-sym : ∀{A : Set} (P : A -> Proset) -> (∀ a -> Symmetric (P a .Hom)) -> Symmetric (catΠ A P .Hom)
--- lift-sym _ sym f≤g a = sym a (f≤g a)
-
--- asdf : ∀ {X} -> (v : Vars (wipe X)) -> Symmetric (⟦ v ⟧v .𝑶 .Hom)
--- asdf (Var {mono} ())
--- asdf (Var {disc} p) = swap
-
--- wsym : ∀{X} -> Symmetric (catΠ (Vars (wipe X)) (λ a → ⟦ a ⟧v .𝑶) .Hom)
--- wsym = lift-sym (λ a → ⟦ a ⟧v .𝑶) asdf
-
--- wipe-sym : ∀{X} -> Symmetric (changeΠ (Vars (wipe X)) ⟦_⟧v .𝑶 .Hom)
--- wipe-sym f (Var {mono} ())
--- wipe-sym f (Var {disc} p) = swap {{sets}} (f (Var {disc} p))
-
--- wipe-dsym : ∀{X} -> Symmetric (Hom (𝑫 ⟦ wipe X ⟧))
--- wipe-dsym f (Var {mono} ())
--- wipe-dsym f (Var {disc} p) = swap {{sets}} (f (Var {disc} p))
-
--- wipe⇒□ : ∀{X} -> ⟦ wipe X ⟧ ≤ change□ ⟦ wipe X ⟧
--- wipe⇒□ .funct = fun ⟨ id , wipe-sym ⟩
--- wipe⇒□ .deriv = π₂ • fun (⟨ id , wipe-dsym ⟩)
--- wipe⇒□ .is-id {da}{a}{b} da:a→b
---   = da:a→b , ( (λ { (Var {mono} ())
---                   ; (Var {disc} p) → da:a→b (Var {disc} p) .proj₂ })
---              , (λ { (Var {mono} ())
---                   ; (Var {disc} p) → swap {{sets}} (da:a→b (Var {disc} p) .proj₂) }))
--- -- end horrible proof
--- END HORRIBLE OLD CODE
+-- end functions needing renaming
 
 lambda : ∀{c x} -> ⟦ hyp x ⟧ ⇨ c ≤ ⟦ x ⟧₁ ⇨ c
 lambda {c} = precompose {c = c} singleton
 
+-- this is wrong and should be destroyed
 module _ {A : Change} (f g : ⊤-change ≤ A) (d : Hom! (⊤-change ⇨ A) (funct f) (funct g)) where
   private instance aaa = A; daa = 𝑫 A
   from-bool : change-bool ≤ A

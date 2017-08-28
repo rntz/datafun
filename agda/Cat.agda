@@ -171,13 +171,16 @@ record SetΠ k {i j} (C : Cat i j) : Set (i ⊔ j ⊔ suc k) where
   suffixΠ : ∀{A} {B B' : A -> Obj C} (f : ∀ a -> B a ≤ B' a) -> Π A B ≤ Π A B'
   suffixΠ f = mapΠ (λ x → x) f
 
-  -- module _ {{Prod : Products C}} where
-  --   -- TODO: RENAME
-  --   twiddle : ∀{A P Q} -> Π A P ∧ Π A Q ≤ Π A (λ a -> P a ∧ Q a)
-  --   twiddle = Πi λ a → map∧ (Πe a) (Πe a)
+  module _ {{Prod : Products C}} where
+    Π/∧ : ∀{A P Q} -> Π A (λ a → P a ∧ Q a) ≤ Π A P ∧ Π A Q
+    Π/∧ = ⟨ suffixΠ (λ _ → π₁) , suffixΠ (λ _ → π₂) ⟩
 
-  --   fwiddle : ∀{A B P Q} -> Π A P ∧ Π B Q ≤ Π (A ⊎ B) Data.Sum.[ P , Q ]
-  --   fwiddle = Πi Data.Sum.[ (λ x → π₁ • Πe x) , (λ x → π₂ • Πe x) ]
+    -- Currently unused:
+    -- ∧/Π : ∀{A P Q} -> Π A P ∧ Π A Q ≤ Π A (λ a -> P a ∧ Q a)
+    -- ∧/Π = Πi λ a → map∧ (Πe a) (Πe a)
+
+    -- fwiddle : ∀{A B P Q} -> Π A P ∧ Π B Q ≤ Π (A ⊎ B) Data.Sum.[ P , Q ]
+    -- fwiddle = Πi Data.Sum.[ (λ x → π₁ • Πe x) , (λ x → π₂ • Πe x) ]
 
 module _ {i j k} {{C : Cat i j}} {{Pi : SetΠ k C}} where open SetΠ Pi public
 
