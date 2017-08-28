@@ -1,13 +1,11 @@
 module Changes where
 
-open import Cast
 open import Cat
 open import Prelude
 open import Prosets
 open import TreeSet
 
-
--- Prosets equipped with change structures
+ -- Prosets equipped with change structures
 record Change : Set1 where
   constructor Change:
   field {{𝑶}} : Proset          -- O for objects
@@ -18,9 +16,10 @@ record Change : Set1 where
   -- if we need it for any of the proofs we're doing.
   field Path : (da : Obj 𝑫) (a b : Obj 𝑶) -> Set
 
-  -- THIS IS IMPOSSIBLE AT EXPONENTIALS AGHHH
+  -- -- THIS IS IMPOSSIBLE AT EXPONENTIALS WITHOUT DEPENDENT TYPES
   -- -- Paths are consistent with the ordering on 𝑶.
   -- field path≤ : ∀{da a b} -> Path da a b -> a ≤ b
+  -- field get-path : a ≤ b -> ∃ λ da -> Path da a b
 
   -- This hack is needed to prove Change has coproducts. We need it for the
   -- derivative of case-analysis, [_,_], to invent values to use in the
@@ -55,12 +54,11 @@ change-bool = change-SL bools bool-sums
 change-tree : Change -> Change
 change-tree A = change-SL (trees (𝑶 A)) (tree-sums (𝑶 A))
 
-module _ (A : Change) where
-  change□ : Change
-  𝑶 change□ = isos (𝑶 A)
-  𝑫 change□ = isos (𝑫 A)
-  Path change□ da a b = Path A da a b ∧ (a ≈ b)
-  dummy change□ = dummy A
+change□ : Change -> Change
+change□ A .𝑶 = isos (𝑶 A)
+change□ A .𝑫 = isos (𝑫 A)
+change□ A .Path da a b = Path A da a b ∧ (a ≈ b)
+change□ A .dummy = dummy A
 
 module _ (A B : Change) where
   change× change+ change→ : Change
