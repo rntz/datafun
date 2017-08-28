@@ -28,21 +28,20 @@ singleton = Πi duh
  where duh : ∀{x} (v : Vars (hyp x)) -> ⟦ x ⟧₁ ≤ ⟦ v ⟧v
        duh (Var refl) = id
 
--- TODO: rename some of these functions.
-Π□ : ∀{A} P -> Π A (λ a -> change□ (P a)) ≤ change□ (Π A P)
+-- Lemmas for wipe≤□.
+Π/□ : ∀{A} P -> Π A (λ a -> change□ (P a)) ≤ change□ (Π A P)
 -- I find this slightly incomprehensible myself.
-Π□ _ = cfun (fun Π/∧) (π₂ • fun Π/∧) (Π/∧ • map∧ id Π/∧)
+Π/□ _ = cfun (fun Π/∧) (π₂ • fun Π/∧) (Π/∧ • map∧ id Π/∧)
 
-Πbox : ∀{A P} -> (∀ a -> P a ≤ change□ (P a)) -> Π A P ≤ change□ (Π A P)
-Πbox {P = P} F = suffixΠ F • Π□ P
+Π≤□ : ∀{A P} -> (∀ a -> P a ≤ change□ (P a)) -> Π A P ≤ change□ (Π A P)
+Π≤□ {P = P} F = suffixΠ F • Π/□ P
 
 wipevar : ∀{X} (v : Vars (wipe X)) -> ⟦ v ⟧v ≤ change□ ⟦ v ⟧v
 wipevar (Var {mono} ())
 wipevar (Var {disc} p) = dup Change□
 
 wipe≤□ : ∀{X} -> ⟦ wipe X ⟧ ≤ change□ ⟦ wipe X ⟧
-wipe≤□ = Πbox wipevar
--- end functions needing renaming
+wipe≤□ = Π≤□ wipevar
 
 lambda : ∀{c x} -> ⟦ hyp x ⟧ ⇨ c ≤ ⟦ x ⟧₁ ⇨ c
 lambda {c} = precompose {c = c} singleton
