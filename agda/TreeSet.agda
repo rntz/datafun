@@ -39,13 +39,14 @@ module Trees (C : Proset) where
   compo trees (split₁ x) (node≤ y z) = x • y
   compo trees (split₂ x) (node≤ y z) = x • z
 
-  tree-sums : Sums trees
-  _∨_ {{tree-sums}} = node
-  in₁ {{tree-sums}} = split₁ id
-  in₂ {{tree-sums}} = split₂ id
-  [_,_] {{tree-sums}} f g = node≤ f g
-  init {{tree-sums}} = empty
-  init≤ {{tree-sums}} = empty≤
+  instance
+    tree-sums : Sums trees
+    _∨_ {{tree-sums}} = node
+    in₁ {{tree-sums}} = split₁ id
+    in₂ {{tree-sums}} = split₂ id
+    [_,_] {{tree-sums}} f g = node≤ f g
+    init {{tree-sums}} = empty
+    init≤ {{tree-sums}} = empty≤
 
   -- Semilattice join / categorical sum lifted over trees, ⋁
   module _ (Sums : Sums C) where
