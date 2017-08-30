@@ -43,24 +43,25 @@ wipevar (Var {disc} p) = dup Change□
 wipe≤□ : ∀{X} -> ⟦ wipe X ⟧ ≤ change□ ⟦ wipe X ⟧
 wipe≤□ = Π≤□ wipevar
 
-lambda : ∀{c x} -> ⟦ hyp x ⟧ ⇨ c ≤ ⟦ x ⟧₁ ⇨ c
-lambda {c} = precompose {c = c} singleton
+lambda : ∀{x} c -> ⟦ hyp x ⟧ ⇨ type c ≤ ⟦ x ⟧₁ ⇨ type c
+lambda c = precompose {c = type c} singleton
 
--- this is wrong and should be destroyed
-module _ {A : Change} (f g : ⊤-change ≤ A) (d : Hom! (⊤-change ⇨ A) (funct f) (funct g)) where
-  private instance aaa = A; daa = 𝑫 A
-  from-bool : change-bool ≤ A
-  from-bool .funct = bool⇒ (Hom!.a≤b d _)
-  from-bool .deriv .ap (x , dx) =
-    (if x then g .deriv
-    else if dx then Hom!.path d
-    else f .deriv) .ap _
-  from-bool .deriv .map ((false<true , ()) , _)
-  from-bool .deriv .map ((, refl) , refl) = id
-  from-bool .deriv .map {true , _} ((, refl) , _) = id
-  -- gah! I need to know that (δf tt ≤ d)!
-  from-bool .deriv .map {false , _} ((refl , refl) , false<true) = {!!}
-  from-bool .is-id da:a→b = {!!}
+
+-- -- this is wrong and should be destroyed
+-- module _ {A : Change} (f g : ⊤-change ≤ A) (d : Hom! (⊤-change ⇨ A) (funct f) (funct g)) where
+--   private instance aaa = A; daa = 𝑫 A
+--   from-bool : change-bool ≤ A
+--   from-bool .funct = bool⇒ (Hom!.a≤b d _)
+--   from-bool .deriv .ap (x , dx) =
+--     (if x then g .deriv
+--     else if dx then Hom!.path d
+--     else f .deriv) .ap _
+--   from-bool .deriv .map ((false<true , ()) , _)
+--   from-bool .deriv .map ((, refl) , refl) = id
+--   from-bool .deriv .map {true , _} ((, refl) , _) = id
+--   -- gah! I need to know that (δf tt ≤ d)!
+--   from-bool .deriv .map {false , _} ((refl , refl) , false<true) = {!!}
+--   from-bool .is-id da:a→b = {!!}
 
 -- from-bool : ∀{A a b ida idb da} -> Hom (𝑶 A) a b
 --           -> Path A ida a a -> Path A idb b b -> Path A da a b
@@ -84,3 +85,53 @@ module _ {A : Change} (f g : ⊤-change ≤ A) (d : Hom! (⊤-change ⇨ A) (fun
 -- from-bool {a} S .map {false , x} (bool-refl , x≤y) = ident a
 -- from-bool S .map {true  , x} (bool-refl , x≤y) = x≤y
 -- from-bool S .map {false , x} (false<true , x≤y) = Sums.init≤ S
+
+
+-- Semantics of terms
+eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ≤ ⟦ P ⟧+
+eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ≤ type a
+
+eval tt = const-cfun (lift tt) (lift tt) tt
+eval (M , N) = ⟨ eval M , eval N ⟩
+eval (bind M) = curry (cons • eval M)
+-- what is the type of comap⟦ extract Wipe ⟧?
+-- is this the only place I use comap⟦_⟧?
+-- Can I specialize it for simpler code?
+eval (box M) = comap⟦ extract Wipe ⟧ • wipe≤□ • map Change□ (eval M)
+eval (form ! M) = eval M • eval⊩ form
+eval (var mono p) = lookup p
+eval (var disc p) = lookup p • extract Change□
+
+eval⊩ (lam {a}{b}) = lambda b
+eval⊩ app = apply
+eval⊩ box = id
+eval⊩ (letbox {a}{b}) = map∧ id (lambda b) • swapply
+eval⊩ pair = id
+eval⊩ (proj true) = π₁
+eval⊩ (proj false) = π₂
+eval⊩ (inj {a}{b} true) = in₁ {b = type b}
+eval⊩ (inj false) = in₂
+eval⊩ (case {a}{b}{c})
+      = distrib-∧/∨ {a = type a} {b = type b}
+           • [ map∧ singleton π₁ • swapply
+             , map∧ singleton (π₂ {a = ⟦ _ ⟧ ⇨ type c}) • swapply ]
+eval⊩ splitsum .funct = isos∨
+eval⊩ splitsum .deriv = π₂ • isos∨
+eval⊩ splitsum .is-id (rel₁ x , rel₁ y , rel₁ z) = rel₁ (x , y , z)
+eval⊩ splitsum .is-id (rel₂ x , rel₂ y , rel₂ z) = rel₂ (x , y , z)
+eval⊩ (bool x) = const-cfun x false a∨⊥≈a
+eval⊩ if = {!!}
+eval⊩ (when x) = {!!}
+eval⊩ (single p) .funct = Fun: leaf leaf≤
+eval⊩ (single p) .deriv = constant empty
+-- this is the functoriality of (- ∨ ⊥)! I think.
+-- this pattern comes up somewhere else, but I can't remember where...
+-- TODO: simplify
+eval⊩ (single {a} p) .is-id (da:a→b , a≈b) = [ leaf≤ a≈b , empty≤ ]
+                                           , leaf≤ (swap {{sets}} a≈b) • in₁
+  where instance x = trees (isos (type a .𝑶))
+eval⊩ (for-in p q) = {!!}
+eval⊩ (bottom sl) = eps (is! sl)
+eval⊩ (join sl) = vee (is! sl)
+eval⊩ (fix is-fix) = {!!}
+eval⊩ (fix≤ is-fix≤) = {!!}
