@@ -28,6 +28,16 @@ pattern fun {F} f = Fun: F f
 constant : ∀{i j k l C D} -> Obj D -> Fun {i}{j}{k}{l} C D
 constant {D = D} x = Fun: (λ _ -> x) (λ _ -> ident D)
 
+
+-- This isn't really an isomorphism, it's just a pair of arrows in both
+-- directions. But since we're lawless, we can't tell the difference.
+Iso : ∀ {i j} (C : Cat i j) (a b : Obj C) -> Set j
+Iso C a b = Hom C a b × Hom C b a
+
+infix 1 _≈_
+_≈_ : ∀{i j} {{C : Cat i j}} (a b : Obj C) -> Set j
+_≈_ {{C}} = Iso C
+
  -- Constructions on relations & categories
 rel× : ∀{a b c d r s} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
      -> (R : A -> C -> Set r) (S : B -> D -> Set s)
@@ -79,6 +89,9 @@ record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
 
   idem∨ : ∀{a} -> a ∨ a ≤ a
   idem∨ = [ id , id ]
+
+  a∨⊥≈a : ∀{a} -> a ∨ init ≈ a
+  a∨⊥≈a = [ id , init≤ ] , in₁
 
   map∨ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
   map∨ f g = [ f • in₁ , g • in₂ ]
