@@ -8,6 +8,30 @@ open import TreeSet
 open import Changes
 open import Monads
 
+-- There is a very simple pattern that comes up in many change functions, where
+-- the derivative is "boring" - it's the same as the function itself, but
+-- operating on the deltas. (The proof that it is a correct derivative is
+-- usually simple as well, but I haven't found a strict pattern that it obeys.)
+-- See the definition of boring-cfun, below.
+--
+-- We can in principle capture the type of this pattern, but the result is
+-- ludicrously complicated:
+
+-- boring-cfun : ∀ {j}{I : Set j} {F G : I -> Proset}
+--             -> (f : ∀{i : I} -> F i ⇒ G i)
+--             -> ∀ {A ΔA B ΔB : I} {PA PB}
+--             -> (∀{da a b} -> PA da a b -> PB (ap f da) (ap f a) (ap f b))
+--             -> ∀{d1 d2}
+--             -> ChangeFun (Change: {{F A}} (F ΔA) PA d1)
+--                          (Change: {{G A}} (G ΔA) PB d2)
+-- boring-cfun f x = cfun f (π₂ • f) x -- ========== <-- the pattern ==========
+
+-- Moreover, it's impossible to *use* boring-cfun without explicitly providing
+-- some of its many implicit arguments, which destroys any concision one might
+-- hope to gain. I note this here because it's a clear instance of types, even
+-- dependent types, not being powerful enough to allow even a very obvious
+-- refactoring without more pain than it's worth.
+
  -- Category of changes
 instance
   changes : Cat _ _
