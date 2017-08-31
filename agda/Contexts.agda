@@ -47,4 +47,4 @@ instance
   init≤ {{cx-sums}} _ ()
 
 ∪/⊆ : ∀ {X L R} -> L ⊆ R -> X ∪ L ⊆ X ∪ R
-∪/⊆ f = ∨-map id f
+∪/⊆ f = map∨ id f

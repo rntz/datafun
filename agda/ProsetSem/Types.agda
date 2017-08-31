@@ -1,5 +1,5 @@
 -- Denotational semantics for types in core Datafun.
-module TypeSem where
+module ProsetSem.Types where
 
 open import Cat
 open import Datafun
@@ -27,9 +27,10 @@ type (a + b) = type a ∨ type b
 ⟦ disc , a ⟧₁ = isos (type a)
 
 ⟦_⟧ : Cx -> Proset
-⟦_⟧+ : Premise -> Proset
 ⟦ X ⟧ = catΠ (Vars X) (λ v -> ⟦ proj₁ v ⟧₁)
-⟦ nil ⟧+    = ⊤-proset
+
+⟦_⟧+ : Premise -> Proset
+⟦ nil ⟧+    = ⊤-cat
 ⟦ P , Q ⟧+  = cat× ⟦ P ⟧+ ⟦ Q ⟧+
 ⟦ □ P ⟧+    = isos ⟦ P ⟧+
 ⟦ X ▷ P ⟧+  = ⟦ X ⟧ ⇨ ⟦ P ⟧+

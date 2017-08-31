@@ -1,3 +1,4 @@
+{-# OPTIONS --postfix-projections #-}
 module Prosets where
 
 open import Prelude
@@ -19,7 +20,7 @@ _⇒_ = Fun
 
 -- The proset of monotone maps between two prosets. Like the category of
 -- functors and natural transformations, but without the naturality condition.
-proset→ : (A B : Proset) -> Proset
+proset→ : ∀{i j} (A B : Cat i j) -> Cat (i ⊔ j) (i ⊔ j)
 proset→ A B .Obj = Fun A B
 -- We use this definition rather than the more usual pointwise definition
 -- because it makes more sense when generalized to categories.
@@ -29,7 +30,7 @@ proset→ A B .compo {F}{G}{H} F≤G G≤H {x}{y} x≤y = compo B (F≤G x≤y) 
 
 -- Now we can show that prosets is cartesian closed.
 instance
-  proset-cc : CC prosets
+  proset-cc : ∀{i} -> CC (cats {i}{i})
   CC.products proset-cc = cat-products
   _⇨_   {{proset-cc}} = proset→
   -- apply or eval
@@ -45,65 +46,96 @@ module _ {A B : Proset} (bs : Sums B) where
   private instance b' = B; bs' = bs
   proset→-sums : Sums (proset→ A B)
   _∨_ {{proset→-sums}} f g .ap x = ap f x ∨ ap g x
-  _∨_ {{proset→-sums}} f g .map x≤y = ∨-map (map f x≤y) (map g x≤y)
+  _∨_ {{proset→-sums}} f g .map x≤y = map∨ (map f x≤y) (map g x≤y)
   in₁ {{proset→-sums}} {f}{g} x≤y = map f x≤y • in₁
   in₂ {{proset→-sums}} {f}{g} x≤y = map g x≤y • in₂
   [_,_] {{proset→-sums}} {f}{g}{h} f≤h g≤h x≤y = [ f≤h x≤y , g≤h x≤y ]
-  init {{proset→-sums}} = const-fun init
+  init {{proset→-sums}} = constant init
   init≤ {{proset→-sums}} _ = init≤
 
 
 -- The "equivalence quotient" of a proset. Not actually a category of
--- isomorphisms, since we don't require that the arrows be inverses. But if we
+-- isomorphisms, since we don't require that the arrows be inverses. But *if* we
 -- were gonna put equations on arrows, that's what we'd require.
-Iso : (C : Proset) (a b : Obj C) -> Set
-Iso C a b = Hom C a b × Hom C b a
-
-infix 1 _≈_
-_≈_ : {{C : Proset}} (a b : Obj C) -> Set
-_≈_ {{C}} = Iso C
-
-isos : Proset -> Proset
+isos : ∀{i j} -> Cat i j -> Cat i j
 isos C .Obj = Obj C
 isos C .Hom x y = Iso C x y
 isos C .ident = ident C , ident C
 isos C .compo (f₁ , f₂) (g₁ , g₂) = compo C f₁ g₁ , compo C g₂ f₂
 
-isos≤? : ∀ A -> Decidable≤ A -> Decidable≤ (isos A)
+isos≤? : ∀{i j} (A : Cat i j) -> Decidable≤ A -> Decidable≤ (isos A)
 isos≤? _ test x y = dec× (test x y) (test y x)
 
 -- If (f : a -> b) is monotone, then (f : isos a -> isos b) is also monotone.
-Isos : prosets ≤ prosets
+Isos : ∀{i j} -> cats {i}{j} ≤ cats
 ap Isos = isos
 map Isos f = fun (λ { (x , y) -> map f x , map f y })
 
 instance
   -- This comonad factors into an adjunction to groupoids, I believe.
-  Isos-comonad : Comonad Isos
+  Isos-comonad : ∀{i j} -> Comonad (Isos {i}{j})
   Comonad.dup Isos-comonad = fun ⟨ id , swap ⟩
   Comonad.extract Isos-comonad = fun proj₁
 
-
--- The trivial proset.
-⊤-proset : Proset
-⊤-proset = record { Obj = ⊤ ; Hom = λ { tt tt → ⊤ } ; ident = tt ; compo = λ { tt tt → tt } }
+ -- Some lemmas about isos.
+juggle : ∀{i j k l} {A B C D}
+       -> Σ {i}{j} A C × Σ {k}{l} B D
+       -> Σ (A × B) λ { (a , b) -> C a × D b }
+juggle ((a , c) , (b , d)) = (a , b) , (c , d)
 
+isos∧ : ∀{A B} -> isos A ∧ isos B ⇒ isos (A ∧ B)
+isos∧ = fun juggle
+
+isos∨ : ∀{A B} -> isos (A ∨ B) ⇒ isos A ∨ isos B
+isos∨ .ap = id
+isos∨ .map (rel₁ p , rel₁ q) = rel₁ (p , q)
+isos∨ .map (rel₂ p , rel₂ q) = rel₂ (p , q)
+
+isojuggle : ∀{A B C D} -> (isos A ∧ B) ∧ (isos C ∧ D) ⇒ isos (A ∧ C) ∧ (B ∧ D)
+isojuggle = fun juggle • map∧ isos∧ id
+
+module _ {i j} {{A : Cat i j}} {{Prod : Products A}} where
+  ∧≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∧ b) ≈ (a' ∧ b')
+  ∧≈ f g = map Isos functor∧ .map (juggle (f , g))
+
+module _ {i j} {{A : Cat i j}} {{Sum : Sums A}} where
+  juggle∨≈ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≈ (a ∨ c) ∨ (b ∨ d)
+  juggle∨≈ = juggle∨ , juggle∨
+
+  ∨≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∨ b) ≈ (a' ∨ b')
+  ∨≈ f g = map Isos functor∨ .map (juggle (f , g))
+
+
+-- Lifts an arbitrary function over an antisymmetric domain into a monotone map
+-- over its discrete preorder.
+antisym⇒ : ∀{A B} -> Antisymmetric _≡_ (Hom A) -> (Obj A -> Obj B) -> isos A ⇒ B
+antisym⇒ {A}{B} antisym f = Fun: f helper
+  where helper : ∀{x y} -> Hom (isos A) x y -> Hom B (f x) (f y)
+        helper (x , y) with antisym x y
+        ... | refl = ident B
+
+
 -- The booleans, ordered false < true.
 data bool≤ : Rel Bool zero where
-  bool-refl : Reflexive bool≤
+  refl : Reflexive bool≤
   false<true : bool≤ false true
 
+-- TODO maybe replace this^ by:
+-- data bool≤ : Rel Bool zero where
+--   f≤* : ∀{a} -> bool≤ false a
+--   t≤t : bool≤ true true
+
 false≤ : ∀{a} -> bool≤ false a
-false≤ {false} = bool-refl
+false≤ {false} = refl
 false≤ {true}  = false<true
 
 instance
   bools : Cat _ _
   Obj bools = Bool
   Hom bools = bool≤
-  ident bools = bool-refl
-  compo bools bool-refl x = x
-  compo bools false<true bool-refl = false<true
+  ident bools = refl
+  compo bools refl x = x
+  compo bools false<true refl = false<true
 
   -- I never thought I'd commit a proof by exhaustive case analysis,
   -- but I was wrong.
@@ -112,28 +144,33 @@ instance
   _∨_ {{bool-sums}} _  true = true
   _∨_ {{bool-sums}} _ _ = false
   in₁ {{bool-sums}} {false} = false≤
-  in₁ {{bool-sums}} {true}  = bool-refl
+  in₁ {{bool-sums}} {true}  = refl
   in₂ {{bool-sums}} {_}    {false} = false≤
-  in₂ {{bool-sums}} {false} {true} = bool-refl
-  in₂ {{bool-sums}} {true}  {true} = bool-refl
+  in₂ {{bool-sums}} {false} {true} = refl
+  in₂ {{bool-sums}} {true}  {true} = refl
   [_,_] {{bool-sums}} {false} {false} x y = false≤
   [_,_] {{bool-sums}} {_}     {true}  {false} x ()
   [_,_] {{bool-sums}} {true}  {false} {false} () y
-  [_,_] {{bool-sums}} {false} {true}  {true}  x y = bool-refl
-  [_,_] {{bool-sums}} {true}  {false} {true}  x y = bool-refl
-  [_,_] {{bool-sums}} {true}  {true}  {true}  x y = bool-refl
+  [_,_] {{bool-sums}} {false} {true}  {true}  x y = refl
+  [_,_] {{bool-sums}} {true}  {false} {true}  x y = refl
+  [_,_] {{bool-sums}} {true}  {true}  {true}  x y = refl
   init {{bool-sums}} = false
   init≤ {{bool-sums}} = false≤
 
   bool≤? : Decidable bool≤
   bool≤? false true = yes false<true
   bool≤? true  false = no λ {()}
-  bool≤? false false = yes bool-refl
-  bool≤? true  true = yes bool-refl
+  bool≤? false false = yes refl
+  bool≤? true  true = yes refl
 
 antisym:bool≤ : Antisymmetric _≡_ bool≤
-antisym:bool≤ bool-refl _ = Eq.refl
+antisym:bool≤ refl _ = Eq.refl
 antisym:bool≤ false<true ()
+
+bool⇒ : ∀{A a b} -> Hom A a b -> bools ⇒ A
+bool⇒ {_}{a}{b} a≤b .ap x = if x then b else a
+bool⇒ {A} a≤b .map refl = ident A
+bool⇒ a≤b .map false<true = a≤b
 
 
 -- Natural numbers

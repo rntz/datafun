@@ -1,5 +1,5 @@
 -- Interpreting a modal typed lambda calculus into Preorder.
-module MTLC where
+module Examples.MTLC where
 
 open import Prelude
 open import Cat

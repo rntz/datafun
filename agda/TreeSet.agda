@@ -21,8 +21,8 @@ module Trees (C : Proset) where
 
   unsplit : ∀{l r t} -> node l r ⊑ t -> l ⊑ t × r ⊑ t
   unsplit (node≤ l r) = l , r
-  unsplit (split₁ p) = ∧-map split₁ split₁ (unsplit p)
-  unsplit (split₂ p) = ∧-map split₂ split₂ (unsplit p)
+  unsplit (split₁ p) = map∧ split₁ split₁ (unsplit p)
+  unsplit (split₂ p) = map∧ split₂ split₂ (unsplit p)
 
   trees : Proset
   private instance trees-auto : Proset; trees-auto = trees
@@ -39,13 +39,14 @@ module Trees (C : Proset) where
   compo trees (split₁ x) (node≤ y z) = x • y
   compo trees (split₂ x) (node≤ y z) = x • z
 
-  tree-sums : Sums trees
-  _∨_ {{tree-sums}} = node
-  in₁ {{tree-sums}} = split₁ id
-  in₂ {{tree-sums}} = split₂ id
-  [_,_] {{tree-sums}} f g = node≤ f g
-  init {{tree-sums}} = empty
-  init≤ {{tree-sums}} = empty≤
+  instance
+    tree-sums : Sums trees
+    _∨_ {{tree-sums}} = node
+    in₁ {{tree-sums}} = split₁ id
+    in₂ {{tree-sums}} = split₂ id
+    [_,_] {{tree-sums}} f g = node≤ f g
+    init {{tree-sums}} = empty
+    init≤ {{tree-sums}} = empty≤
 
   -- Semilattice join / categorical sum lifted over trees, ⋁
   module _ (Sums : Sums C) where
@@ -92,12 +93,12 @@ map Trees F .map (node≤ x y) = node≤ (map Trees F .map x) (map Trees F .map 
 map Trees F .map (split₁ x) = split₁ (map Trees F .map x)
 map Trees F .map (split₂ x) = split₂ (map Trees F .map x)
 
--- Is this... 2-Functoriality or something? I'm not sure.
+-- TODO: Is this... 2-Functoriality or something? I'm not sure.
 Tree-map : ∀{A B} -> A ⇨ B ⇒ trees A ⇨ trees B
 ap Tree-map = map Trees
+-- this proof looks suspiciously like the cases for `map Trees F .map`, above.
 map Tree-map f≤g empty≤ = empty≤
 map Tree-map f≤g (leaf≤ x≤y) = leaf≤ (f≤g x≤y)
 map Tree-map f≤g (node≤ t≤u t≤v) = node≤ (map Tree-map f≤g t≤u) (map Tree-map f≤g t≤v)
 map Tree-map f≤g (split₁ t≤u) = split₁ (map Tree-map f≤g t≤u)
 map Tree-map f≤g (split₂ t≤u) = split₂ (map Tree-map f≤g t≤u)
-

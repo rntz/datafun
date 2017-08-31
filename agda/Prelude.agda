@@ -33,5 +33,8 @@ pattern ,_ x = _ , x
 it : ∀{i}{A : Set i} {{x : A}} -> A
 it {{x}} = x
 
+∃-map : ∀{i j k A P Q} -> ((x : A) -> P x -> Q x) -> ∃ {i}{j} P -> ∃ {i}{k} Q
+∃-map f (, p) = , f _ p
+
 -- TODO: remove this once I think I've proved everything
 postulate TODO : ∀{i}{A : Set i} -> A
