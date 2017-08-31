@@ -118,6 +118,11 @@ data bool≤ : Rel Bool zero where
   refl : Reflexive bool≤
   false<true : bool≤ false true
 
+-- TODO maybe replace this^ by:
+-- data bool≤ : Rel Bool zero where
+--   f≤* : ∀{a} -> bool≤ false a
+--   t≤t : bool≤ true true
+
 false≤ : ∀{a} -> bool≤ false a
 false≤ {false} = refl
 false≤ {true}  = false<true

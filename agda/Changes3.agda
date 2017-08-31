@@ -32,8 +32,8 @@ open Change public
 
  -- Constructions on change structures
 ⊤-change ⊥-change : Change
-⊤-change = Change: {{⊤-cat}} ⊤-cat (λ _ _ → ⊤) (lift tt)
-⊥-change = Change: {{⊥-cat}} ⊤-cat (λ { {lift ()} }) (lift tt)
+⊤-change = Change: {{⊤-cat}} ⊤-cat (λ _ _ → ⊤) TT
+⊥-change = Change: {{⊥-cat}} ⊤-cat (λ { {lift ()} }) TT
 
 change-SL : (P : Proset) (S : Sums P) -> Change
 -- Hm, is this right? We don't use a≤b!

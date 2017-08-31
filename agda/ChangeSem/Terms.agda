@@ -91,7 +91,7 @@ lambda c = precompose {c = type c} singleton
 eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ≤ ⟦ P ⟧+
 eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ≤ type a
 
-eval tt = const-cfun (lift tt) (lift tt) tt
+eval tt = const-cfun TT TT tt
 eval (M , N) = ⟨ eval M , eval N ⟩
 eval (bind M) = curry (cons • eval M)
 -- what is the type of comap⟦ extract Wipe ⟧?

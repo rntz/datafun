@@ -13,6 +13,9 @@ record Cat i j : Set (suc (i ⊔ j)) where
   field ident : ∀{a} -> Hom a a
   field compo : ∀{a b c} -> Hom a b -> Hom b c -> Hom a c
 
+  ≡→ident : ∀{a b} -> a ≡ b -> Hom a b
+  ≡→ident refl = ident
+
 open Cat public
 open Cat {{...}} public using () renaming (Hom to _≤_; ident to id; compo to _•_)
 
@@ -198,9 +201,11 @@ record SetΠ k {i j} (C : Cat i j) : Set (i ⊔ j ⊔ suc k) where
 module _ {i j k} {{C : Cat i j}} {{Pi : SetΠ k C}} where open SetΠ Pi public
 
  -- Some useful categories & their structures.
+pattern TT = lift tt
+
 ⊤-cat ⊥-cat : ∀{i j} -> Cat i j
 ⊥-cat = Cat: (Lift ⊥) (λ { (lift ()) }) (λ { {lift ()} }) (λ { {lift ()} })
-⊤-cat = Cat: (Lift ⊤) (λ _ _ -> Lift ⊤) (lift tt) (λ _ _ → lift tt)
+⊤-cat = Cat: (Lift ⊤) (λ _ _ -> Lift ⊤) TT (λ _ _ → TT)
 
 instance
   sets : ∀{i} -> Cat (suc i) i

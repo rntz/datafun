@@ -67,7 +67,7 @@ lambda = precompose singleton
 eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ⇒ ⟦ P ⟧+
 eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ⇒ type a
 
-eval tt = fun (λ _ -> lift tt)
+eval tt = constant TT
 eval (M , N) = ⟨ eval M , eval N ⟩
 eval (bind M) = curry (cons • eval M)
 eval (box M) = comap⟦ extract Wipe ⟧ • wipe⇒isos • map Isos (eval M)
@@ -82,7 +82,7 @@ eval⊩ letbox = map∧ id lambda • swap • apply
 eval⊩ pair = id
 eval⊩ (proj true)  = π₁
 eval⊩ (proj false) = π₂
-eval⊩ (bool b) = Fun: (λ _ -> b) (λ _ → bool-refl)
+eval⊩ (bool b) = Fun: (λ _ -> b) (λ _ → refl)
 eval⊩ if = uncurry (antisym⇒ antisym:bool≤ (λ x -> if x then π₁ else π₂))
 eval⊩ (inj true)  = in₁
 eval⊩ (inj false) = in₂

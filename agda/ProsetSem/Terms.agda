@@ -48,7 +48,7 @@ from-bool S .map {false , x} (false<true , x≤y) = Sums.init≤ S
 eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ⇒ ⟦ P ⟧+
 eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ⇒ type a
 
-eval tt = constant (lift tt)
+eval tt = constant TT
 eval (M , N) = ⟨ eval M , eval N ⟩
 eval (bind M) = curry (cons • eval M)
 eval (box M) = comap⟦ extract Wipe ⟧ • wipe⇒isos • map Isos (eval M)
