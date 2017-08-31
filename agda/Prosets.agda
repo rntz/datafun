@@ -172,9 +172,6 @@ bool⇒ {_}{a}{b} a≤b .ap x = if x then b else a
 bool⇒ {A} a≤b .map refl = ident A
 bool⇒ a≤b .map false<true = a≤b
 
-boolπ : ∀{A} -> isos bools ⇒ (A ∧ A) ⇨ A
-boolπ = antisym⇒ antisym:bool≤ (λ x → if x then π₁ else π₂)
-
 
 -- Natural numbers
 open import Data.Nat as Nat using (ℕ; z≤n; s≤s) renaming (_≤_ to _≤'_; _⊔_ to _⊔'_)
