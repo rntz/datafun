@@ -76,27 +76,6 @@ instance
   Comonad.dup Isos-comonad = fun ⟨ id , swap ⟩
   Comonad.extract Isos-comonad = fun proj₁
 
- -- The discrete proset on a set.
-discrete : Set -> Proset
-discrete A .Obj = A
-discrete A .Hom a b = a ≡ b
-discrete A .ident = refl
-discrete A .compo refl refl = refl
-
-Discrete : sets ≤ prosets
-Discrete = Fun: discrete (λ f → fun (Eq.cong f))
-
-OBJ : prosets ≤ sets; OBJ = fun ap
-Disc : prosets ≤ prosets; Disc = OBJ • Discrete
-
-instance
-  Disc-comonad : Comonad Disc
-  Comonad.dup Disc-comonad = fun id
-  Comonad.extract Disc-comonad {A} = fun (≡→ident A)
-
-disc* : ∀{A B} -> (A -> Obj B) -> discrete A ⇒ B
-disc* f = map Discrete f • extract Disc
-
  -- Some lemmas about isos.
 juggle : ∀{i j k l} {A B C D}
        -> Σ {i}{j} A C × Σ {k}{l} B D
@@ -126,25 +105,13 @@ module _ {i j} {{A : Cat i j}} {{Sum : Sums A}} where
   ∨≈ f g = map Isos functor∨ .map (juggle (f , g))
 
 
--- An antisymmetric proset A admits an identity functor Isos A -> Disc A.
-Antisym : Proset -> Set
-Antisym A = isos A ⇒ ap Disc A
-
 -- Lifts an arbitrary function over an antisymmetric domain into a monotone map
 -- over its discrete preorder.
-antisym-lift : ∀{A B} -> Antisym A -> (Obj A -> Obj B) -> isos A ⇒ B
-antisym-lift antisym f = antisym • disc* f
-
--- Equivalent, using the standard library's Antisymmetric.
 antisym⇒ : ∀{A B} -> Antisymmetric _≡_ (Hom A) -> (Obj A -> Obj B) -> isos A ⇒ B
-antisym⇒ antisym = antisym-lift (Fun: id (uncurry antisym))
-
--- -- Old definition
--- antisym⇒' : ∀{A B} -> Antisymmetric _≡_ (Hom A) -> (Obj A -> Obj B) -> isos A ⇒ B
--- antisym⇒' {A}{B} antisym f = Fun: f helper
---   where helper : ∀{x y} -> Hom (isos A) x y -> Hom B (f x) (f y)
---         helper (x , y) with antisym x y
---         ... | refl = ident B
+antisym⇒ {A}{B} antisym f = Fun: f helper
+  where helper : ∀{x y} -> Hom (isos A) x y -> Hom B (f x) (f y)
+        helper (x , y) with antisym x y
+        ... | refl = ident B
 
 
 -- The booleans, ordered false < true.
@@ -199,16 +166,13 @@ antisym:bool≤ : Antisymmetric _≡_ bool≤
 antisym:bool≤ refl _ = Eq.refl
 antisym:bool≤ false<true ()
 
-bools-antisym : Antisym bools
-bools-antisym = fun (uncurry antisym:bool≤)
-
 bool⇒ : ∀{A a b} -> Hom A a b -> bools ⇒ A
 bool⇒ {_}{a}{b} a≤b .ap x = if x then b else a
 bool⇒ {A} a≤b .map refl = ident A
 bool⇒ a≤b .map false<true = a≤b
 
 boolπ : ∀{A} -> isos bools ⇒ (A ∧ A) ⇨ A
-boolπ = antisym-lift bools-antisym (λ x → if x then π₁ else π₂)
+boolπ = antisym⇒ antisym:bool≤ (λ x → if x then π₁ else π₂)
 
 
 -- Natural numbers
