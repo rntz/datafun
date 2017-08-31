@@ -96,3 +96,12 @@ instance
   -- agh.
   Comonad.dup Change□-comonad .is-id p@(da:a→b , a≈b) = p , a≈b , swap {{sets}} a≈b
   Comonad.extract Change□-comonad = cfun (extract Isos) (π₂ • extract Isos) proj₁
+
+
+-- Antisymmetry
+antisym□≤ : ∀{A B C : Change} -> Antisymmetric _≡_ (𝑶 A .Hom)
+          -> (𝑶 A .Obj -> B ≤ C) -> change□ A ≤ B ⇨ C
+antisym□≤ antisym f .funct = antisym⇒ antisym (λ a → f a .funct)
+antisym□≤ antisym f .deriv = π₁ • antisym⇒ (λ x≈y y≈x → uncurry antisym x≈y) (λ a → f a .deriv)
+antisym□≤ antisym f .is-id (da , a≈a') with uncurry antisym a≈a'
+... | refl = f _ .is-id
