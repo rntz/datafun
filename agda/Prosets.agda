@@ -27,6 +27,13 @@ proset→ A B .Hom F G = ∀ {x y} -> Hom A x y -> Hom B (ap F x) (ap G y)
 proset→ A B .ident {F} = map F
 proset→ A B .compo {F}{G}{H} F≤G G≤H {x}{y} x≤y = compo B (F≤G x≤y) (G≤H (ident A))
 
+-- -- FIXME not necessary
+-- -- However, sometimes the pointwise definition is easier to prove.
+-- pointwise : ∀{i j} {A B : Cat i j} {F G}
+--           -> (∀ a -> Hom B (ap F a) (ap G a))
+--           -> proset→ A B .Hom F G
+-- pointwise {B = B} {F}{G} pw {x} x≤y = compo B (pw x) (map G x≤y)
+
 -- Now we can show that prosets is cartesian closed.
 instance
   proset-cc : CC prosets
