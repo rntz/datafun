@@ -1,3 +1,4 @@
+{-# OPTIONS --postfix-projections #-}
 module Prosets where
 
 open import Prelude
@@ -19,7 +20,7 @@ _⇒_ = Fun
 
 -- The proset of monotone maps between two prosets. Like the category of
 -- functors and natural transformations, but without the naturality condition.
-proset→ : (A B : Proset) -> Proset
+proset→ : ∀{i j} (A B : Cat i j) -> Cat (i ⊔ j) (i ⊔ j)
 proset→ A B .Obj = Fun A B
 -- We use this definition rather than the more usual pointwise definition
 -- because it makes more sense when generalized to categories.
@@ -29,7 +30,7 @@ proset→ A B .compo {F}{G}{H} F≤G G≤H {x}{y} x≤y = compo B (F≤G x≤y) 
 
 -- Now we can show that prosets is cartesian closed.
 instance
-  proset-cc : CC prosets
+  proset-cc : ∀{i} -> CC (cats {i}{i})
   CC.products proset-cc = cat-products
   _⇨_   {{proset-cc}} = proset→
   -- apply or eval
