@@ -18,6 +18,7 @@ val out : exp -> exp expF t
 
 val lookup : string -> (tp * tone) t 
 val with_hyp : string * tp * tone -> 'a t -> 'a t 
+val hidemono  : 'a t -> 'a t 
 
 module Seq : sig
   val pair : 'a t * 'b t -> ('a * 'b) t 

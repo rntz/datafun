@@ -2,11 +2,36 @@ open Ast
 open Util 
 open Context
 
-let lam (u, e) = into (Abs(u, e)) >>= fun e' -> 
-                 into (Lam(PVar, e'))
+let rec replicate x = function
+  | 0 -> []
+  | n -> x :: replicate x (n - 1)
 
-let let_ (x, e1, e2) = into (Abs(x, e2)) >>= fun e2' -> 
-                       into (Case(e1, [PVar, e2']))
+let rec break n xs = 
+  match n, xs with
+  | 0, xs -> ([], xs)
+  | n, [] -> assert false
+  | n, x :: xs -> let (ys, zs) = break (n-1) xs in
+                  (x :: ys, zs)
+
+let rec mkAbs (us, e) = 
+  match us with
+  | [] -> e 
+  | u :: us -> Ast.into (loc e) (Abs(u, mkAbs(us, e)))
+
+let lam (u, e) = into (Lam(PVar, mkAbs([u], e)))
+
+let let_ (x, e1, e2) = into (Case(e1, [PVar, mkAbs([x], e2)]))
+
+let let_tuple xs e1 e2 = into (Case(e1, 
+                                    [PTuple (replicate PVar (List.length xs)), 
+                                     mkAbs(xs, e2)]))
+
+
+                        
+let unabs y e = 
+  match Ast.out e with
+  | Abs(x, e) -> rename x y e
+  | _ -> assert false 
 
 let expect sort tp = fail "Expected %s type, got '%s'" sort (print_type tp)
 let mismatch tp tp' = fail "Expected '%s' inferred '%s'" (print_type tp) (print_type tp')
@@ -22,15 +47,66 @@ let op_type (op : op) =
   | Geq -> (Int, Int, Bool)
   | Gt -> (Int, Int, Bool)
 
+let rec leading_var arms = 
+  List.for_all (function
+                | (PVar :: _, _) -> true
+                | _ -> false)
+               arms
 
-let rec find_var = function
-  | [] -> None 
-  | ((PVar :: ps), Abs(u, e)) :: arms -> Some u 
-  | ((PVar :: ps), e) :: arms -> assert false 
-  | arm :: arms -> find_var arms 
+let rec find_var default = function
+  | [] -> Printf.sprintf "%s$" default 
+  | ((PVar :: ps), e) :: arms -> 
+     (match Ast.out e with
+      | Abs(x, e) -> if String.contains x '$'then
+                       find_var default arms
+                     else
+                       x 
+      | _ -> assert false)
+  | ((p :: ps), e) :: arms -> find_var default arms 
+  | ([], e) :: arms -> assert false 
 
-  
-                           
+let rec split_on_var (arms : (pat list * exp) list) = 
+  gensym (find_var "u" arms) >>= fun u -> 
+  assert (leading_var arms);
+  return (u, List.map (Pair.map List.tl (unabs u)) arms) 
+
+let expand_arm_tuple n = function
+  | ((PTuple ps) :: ps', e) -> 
+     if List.length ps = n then 
+       return (ps @ ps', e)
+     else
+       fail "Tuple pattern expected with %d elements, got %d" n (List.length ps)
+  | (PVar :: ps, e) -> 
+     Context.Seq.list (replicate (gensym "p") n) >>= fun us -> 
+     return ((replicate PVar n) @ ps, mkAbs(us, e))
+  | (p :: ps, e) -> fail "Expected tuple pattern"
+  | ([], e) -> assert false 
+     
+let rec split_tuple n arms = 
+  gensym (find_var "tuple" arms) >>= fun u -> 
+  Context.Seq.list (List.map (expand_arm_tuple n) arms) >>= fun arms' ->
+  return (u, arms)  
+
+let expand_arm_sum u cs = function
+  | (PCon(c, p) :: ps, e) -> 
+     if List.mem c cs then
+       return ([c, (p :: ps, e)])
+     else
+       fail "Unexpected constructor '%s' in pattern" c 
+  | (PVar :: ps, e) ->
+     return (List.map (fun c -> (c, (ps, unabs u e))) cs)
+  | (p :: ps, e) -> 
+     fail "Expected constructor or variable pattern"
+  | ([], e) -> assert false 
+
+let tabulate cs choices = 
+  List.map (fun c -> (c, List.filter (List.mem_assoc c) choices)) cs  
+
+let split_sum cs arms = 
+  gensym (find_var "sum" arms) >>= fun u -> 
+  Context.Seq.list (List.map (expand_arm_sum u cs) arms) >>= fun choices -> 
+  return (u, tabulate cs choices)
+                   
 let rec check (exp : exp) tp = 
   out exp >>= fun e -> 
   match e, tp  with 
@@ -45,7 +121,7 @@ let rec check (exp : exp) tp =
                       check e3 tp >>= fun e3' -> 
                       into (If(e1', e2', e3'))
      | (e1', tp1) -> expect "boolean" tp1)
-  | Lam (p, e2), Arrow(tp1, tp2) -> (invert [[p], e2] [tp1] tp2 >>= function 
+  | Lam (p, e2), Arrow(tp1, tp2) -> (invert [[p], e2] [tp1, Mono] tp2 >>= function 
                                      | [u], e' -> lam(u, e')
                                      | us, e' -> assert false)
   | Lam (p, e2), tp -> expect "function" tp 
@@ -63,7 +139,7 @@ let rec check (exp : exp) tp =
   | Con (c, e), tp -> expect "sum" tp 
   | Case (e, arms), tp -> (synth e >>= fun (e', tp') ->
                            let cases : (Ast.pat list * Ast.exp) list = List.map (fun (p, e_arm) -> [p], e_arm) arms in
-                           invert cases [tp'] tp >>= function
+                           invert cases [tp', Mono] tp >>= function
                            | [u], ebody' -> into (Abs(u, ebody')) >>= fun ebody' -> 
                                             into (Case(e', [PVar, ebody']))
                            | us, ebody -> assert false)
@@ -76,9 +152,11 @@ let rec check (exp : exp) tp =
      check e2 tp >>= fun e2' -> 
      into (Join(e1', e2'))
   | Join(_,_), tp -> fail "Expected set type, got '%s'" (print_type tp)
+  | Box e1, Box tp1 ->  hidemono (check e1 tp1) >>= fun e1' -> 
+                        into (Box e1')
   | Bind (p,e1,e2), Set _ ->
      (synth e1 >>= function
-      | (e1', Set tp1) -> (invert [[p], e2] [tp1] tp >>= function
+      | (e1', Set tp1) -> (invert [[p], e2] [tp1, Mono] tp >>= function
                            | [u], e2' -> let_ (u, e1', e2')
                            | us, e2' -> assert false)
       | (e1', tp1) -> expect "set" tp1)
@@ -118,10 +196,20 @@ and invert arms tps tp =
   match arms, tps with
   | ([], e) :: rest, [] -> check e tp >>= fun e' -> 
                            return ([], e')
-  | arms, (Arrow(_, _) as tp) :: tps' -> split_var arms >>= fun (u, arms') -> 
-                                         invert arms' tps' >>= fun (us, ebody) -> 
-                                         return (u :: us, ebody)
-  | arms, tp :: tps' when leading_var arms -> split_var arms >>= fun (u, arms') -> 
-                                              invert arms' tps' >>= fun (us, ebody) -> 
-                                              return (u :: us, ebody)
-  | 
+  | arms, (tp, tone) :: tps' when leading_var arms -> 
+     split_on_var arms >>= fun (u, arms') -> 
+     with_hyp (u, tp, tone)   
+              (invert arms' tps' tp >>= fun (us, ebody) -> 
+               return (u :: us, ebody)
+  | arms, (Product tps, tone) :: tps' -> 
+     let n = List.length tps in 
+     split_tuple n arms >>= fun (u, arms') -> 
+     invert arms' (tps @ tps') tp >>= fun (us'', ebody) -> 
+     let (us_tuple, us_rest) = break n us'' in 
+     let_tuple us_rest (Ast.into (loc ebody) (Var u)) ebody >>= fun ebody -> 
+     return (us_rest, ebody)
+  | arms, (Sum ctps) :: tps' -> 
+     let cs = List.map fst ctps in 
+     split_sum cs arms >>= fun (u, arms) -> 
+     invert arms 
+

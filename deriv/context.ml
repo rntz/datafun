@@ -63,6 +63,15 @@ let with_hyp : var * tp * tone -> 'a t -> 'a t =
   | Error e -> Error e 
   | Ok(v, s'') -> Ok(v, {s'' with ctx = List.tl s''.ctx})
 
+let hidemono : 'a t -> 'a t = 
+  fun m -> 
+  gensym "hide" >>= fun x s -> 
+  let s' = {s with ctx = (x, HideMono) :: s.ctx} in
+  match m s' with
+  | Error e -> Error e 
+  | Ok(v, s'') -> Ok(v, {s'' with ctx = List.tl s''.ctx})
+                          
+
 
 
 module Seq : Util.SEQ with type 'a t := 'a t = 

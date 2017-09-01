@@ -69,6 +69,7 @@ type 'a expF =
   | Singleton of 'a 
   | Join of 'a * 'a 
   | Bind of pat * 'a * 'a 
+  | Box of 'a 
   | Annot of 'a * tp
 
 let map f = function 
@@ -87,6 +88,7 @@ let map f = function
   | Join(a, a') -> Join(f a, f a')
   | Bind(p, a, a') -> Bind(p, f a, f a')
   | Annot(a, tp) -> Annot(f a, tp)
+  | Box a -> Box (f a)
 
 module Seq(M : IDIOM) = struct
   open M 
@@ -110,6 +112,7 @@ module Seq(M : IDIOM) = struct
      | Join(e', e'') -> (e' ** e'') |> map (fun (a',a'') -> Join(a', a''))
      | Bind(p, e', e'') -> (e' ** e'') |> map (fun (a',a'') -> Bind(p, a', a''))
      | Annot(e, tp) -> e |> map (fun a -> Annot(a, tp))
+     | Box e -> e |> map (fun a -> Box a)
 end
 
 type exp = In of loc * V.t * exp expF 
@@ -141,6 +144,6 @@ let rec rename x y e =
                 | Abs(z, e) -> Abs(rename_id x y z, rename x y e)
                 | ebody -> map (rename x y) ebody)
            
-
+  
 
 
