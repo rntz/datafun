@@ -97,10 +97,8 @@ if⇒ N = map∧ id N • uncurry boolπ
 
 from-bool : ∀{{A}} {{S : Sums A}} -> bools ∧ A ⇒ A
 from-bool .ap (c , x) = if c then x else bot
-from-bool .map {false , _} (_ , _) = bot≤
-from-bool .map {true  , x} (refl , x≤y) = x≤y
--- from-bool .map {false , x} (refl , x≤y) = id
--- from-bool .map {false , x} (false<true , x≤y) = bot≤
+from-bool .map (f≤* , x≤y) = bot≤
+from-bool .map (t≤t , x≤y) = x≤y
 
 -- whenn = (x,y) ↦ when x then y
 -- δ(when x then y) = if x then δy else when δx then (y ∨ δy)

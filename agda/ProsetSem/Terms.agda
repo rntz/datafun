@@ -40,9 +40,8 @@ lambda = precompose singleton
 
 from-bool : ∀{a} (S : Sums a) -> bools ∧ a ⇒ a
 from-bool S .ap (c , x) = if c then x else Sums.bot S
-from-bool {a} S .map {false , x} (refl , x≤y) = ident a
-from-bool S .map {true  , x} (refl , x≤y) = x≤y
-from-bool S .map {false , x} (false<true , x≤y) = Sums.bot≤ S
+from-bool S .map (f≤* , x≤y) = Sums.bot≤ S
+from-bool S .map (t≤t , x≤y) = x≤y
 
  ---------- Denotations of terms, premises, and term formers ----------
 eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ⇒ ⟦ P ⟧+
@@ -63,7 +62,7 @@ eval⊩ letbox = map∧ id lambda • swapply
 eval⊩ pair = id
 eval⊩ (proj true)  = π₁
 eval⊩ (proj false) = π₂
-eval⊩ (bool b) = Fun: (λ _ -> b) (λ _ → refl)
+eval⊩ (bool b) = Fun: (λ _ -> b) (λ _ → id)
 eval⊩ if = uncurry (antisym⇒ antisym:bool≤ (λ x → if x then π₁ else π₂))
 eval⊩ (inj true)  = in₁
 eval⊩ (inj false) = in₂
