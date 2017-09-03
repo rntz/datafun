@@ -83,16 +83,19 @@ juggle : ∀{i j k l} {A B C D}
        -> Σ (A × B) λ { (a , b) -> C a × D b }
 juggle ((a , c) , (b , d)) = (a , b) , (c , d)
 
-isos∧ : ∀{A B} -> isos A ∧ isos B ⇒ isos (A ∧ B)
-isos∧ = fun juggle
+∧/isos : ∀{A B} -> isos A ∧ isos B ⇒ isos (A ∧ B)
+∧/isos = fun juggle
 
-isos∨ : ∀{A B} -> isos (A ∨ B) ⇒ isos A ∨ isos B
-isos∨ .ap = id
-isos∨ .map (rel₁ p , rel₁ q) = rel₁ (p , q)
-isos∨ .map (rel₂ p , rel₂ q) = rel₂ (p , q)
+isos/∧ : ∀{A B} -> isos (A ∧ B) ⇒ isos A ∧ isos B
+isos/∧ = fun juggle
+
+isos/∨ : ∀{A B} -> isos (A ∨ B) ⇒ isos A ∨ isos B
+isos/∨ .ap = id
+isos/∨ .map (rel₁ p , rel₁ q) = rel₁ (p , q)
+isos/∨ .map (rel₂ p , rel₂ q) = rel₂ (p , q)
 
 isojuggle : ∀{A B C D} -> (isos A ∧ B) ∧ (isos C ∧ D) ⇒ isos (A ∧ C) ∧ (B ∧ D)
-isojuggle = fun juggle • map∧ isos∧ id
+isojuggle = fun juggle • map∧ ∧/isos id
 
 module _ {i j} {{A : Cat i j}} {{Prod : Products A}} where
   ∧≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∧ b) ≈ (a' ∧ b')

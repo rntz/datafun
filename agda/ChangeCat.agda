@@ -55,8 +55,8 @@ instance
   [_,_] {{change-sums}} f g .funct = [ funct f , funct g ]
   -- isos (𝑶 a ∨ 𝑶 b) ∧ (𝑫 a ∨ 𝑫 b) ⇒ 𝑫 c
   -- this is the bit where I have to invent values.
-  [_,_] {{change-sums}} {A}{B}{C} f g .deriv = uncurry (isos∨ • [ flip [ use f , fail ]
-                                                                , flip [ fail , use g ] ])
+  [_,_] {{change-sums}} {A}{B}{C} f g .deriv = uncurry (isos/∨ • [ flip [ use f , fail ]
+                                                                 , flip [ fail , use g ] ])
     where use : ∀{A} -> A ≤ C -> 𝑫 A ⇒ isos (𝑶 A) ⇨ 𝑫 C
           fail : ∀{A B} -> A ⇒ B ⇨ 𝑫 C
           use f = curry (swap • deriv f)
@@ -87,7 +87,7 @@ instance
 Change□ : changes ≤ changes
 ap  Change□ = change□
 map Change□ (cfun f df ok) =
-  cfun (map Isos f) (isos∧ • map Isos df) (map∧ ok (map Isos f .map))
+  cfun (map Isos f) (∧/isos • map Isos df) (map∧ ok (map Isos f .map))
 
 instance
   Change□-comonad : Comonad Change□

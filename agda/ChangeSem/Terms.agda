@@ -87,6 +87,33 @@ lambda c = precompose {c = type c} singleton
 -- from-bool S .map {false , x} (false<true , x≤y) = Sums.init≤ S
 
 
+-- what
+boolπ : ∀{A} -> isos bools ⇒ ((A ∧ A) ⇨ A)
+boolπ = antisym⇒ antisym:bool≤ (λ x → if x then π₁ else π₂)
+
+from-bool : ∀{{A}} {{S : Sums A}} -> bools ∧ A ⇒ A
+from-bool .ap (c , x) = if c then x else init
+from-bool .map {false , _} (_ , _) = init≤
+from-bool .map {true  , x} (refl , x≤y) = x≤y
+-- from-bool .map {false , x} (refl , x≤y) = id
+-- from-bool .map {false , x} (false<true , x≤y) = init≤
+
+-- whenn = (x,y) ↦ when x then y
+-- δ(when x then y) = if x then δy else when δx then (y ∨ δy)
+whenn : ∀{A} -> class (DEC , SL) A -> (change-bool ∧ A) ≤ A
+whenn (dec , sl) .funct = from-bool
+whenn (dec , sl) .deriv = map∧ isos/∧ id • juggle∧ • uncurry {!plus dec!}
+
+-- whenn {A} (dec , sl) .deriv .ap ((false , v) , false , dv) = 𝑫-sums sl .Sums.init
+-- -- need A = ΔA. argh.
+-- whenn (dec , sl) .deriv .ap ((false , v) , true , dv) = 𝑫-sums sl .Sums._∨_ {!v!} dv
+-- whenn (dec , sl) .deriv .ap ((true , v) , _ , dv) = dv
+-- -- probably need something to do with antisymmetry or here.
+-- whenn (dec , sl) .deriv .map {(a , x) , (b , y)} {(a' , x') , b' , y'} (((a≤a' , x≤x') , a'≤a , x'≤x) , b≤b' , y≤y') = {!!}
+
+whenn (dec , sl) .is-id = {!!}
+
+
 -- Semantics of terms
 eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ≤ ⟦ P ⟧+
 eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ≤ type a
@@ -115,20 +142,20 @@ eval⊩ (case {a}{b}{c})
       = distrib-∧/∨ {a = type a} {b = type b}
            • [ map∧ singleton π₁ • swapply
              , map∧ singleton (π₂ {a = ⟦ _ ⟧ ⇨ type c}) • swapply ]
-eval⊩ splitsum .funct = isos∨
-eval⊩ splitsum .deriv = π₂ • isos∨
+eval⊩ splitsum .funct = isos/∨
+eval⊩ splitsum .deriv = π₂ • isos/∨
 eval⊩ splitsum .is-id (rel₁ x , rel₁ y , rel₁ z) = rel₁ (x , y , z)
 eval⊩ splitsum .is-id (rel₂ x , rel₂ y , rel₂ z) = rel₂ (x , y , z)
 eval⊩ (bool x) = const-cfun x false a∨⊥≈a
 eval⊩ if = uncurry (antisym□≤ antisym:bool≤ (λ x → if x then π₁ else π₂))
-eval⊩ (when x) = {!!}
+eval⊩ (when x) = whenn (is! x)
 eval⊩ (single p) .funct = Fun: leaf leaf≤
 eval⊩ (single p) .deriv = constant empty
 -- this is the functoriality of (- ∨ ⊥)! I think.
 -- this pattern comes up somewhere else, but I can't remember where...
 -- TODO: simplify
 eval⊩ (single {a} p) .is-id (da:a→b , a≈b) = [ leaf≤ a≈b , empty≤ ]
-                                           , leaf≤ (swap {{sets}} a≈b) • in₁
+                                             , leaf≤ (swap {{sets}} a≈b) • in₁
   where instance x = trees (isos (type a .𝑶))
 eval⊩ (for-in p q) = {!!}
 eval⊩ (bottom sl) = eps (is! sl)

@@ -50,8 +50,22 @@ tone disc = Change□
  -- What does it mean for a type's denotation to be decidable?
 record IsDEC (A : Change) : Set where
   constructor IsDEC:
+  private instance aa = A
   field decide≤ : Decidable (Hom (𝑶 A))
-  field find-zero : 𝑶 A ⇒ 𝑫 A
+
+  -- field find-zero : 𝑶 A ⇒ 𝑫 A
+  -- do we need this to be monotone?
+  field change : isos (𝑶 A) ∧ 𝑶 A ⇒ 𝑫 A
+  field is-change : ∀{a b} -> (a≤b : a ≤ b) -> Path A (ap change (a , b)) a b
+
+  field plus : isos (𝑶 A) ∧ 𝑫 A ⇒ 𝑶 A
+  field is-plus : ∀{da a b} (ok : Path A da a b) -> b ≈ ap plus (a , da)
+
+  -- for Datafun, this could probably be semantically monotone? but ugh.
+  find-zero : isos (𝑶 A) ⇒ 𝑫 A
+  find-zero = map Isos ∇ • isos/∧ • map∧ id (extract Isos) • change
+
+open IsDEC public
 
  -- What does it mean for a type's denotation to be a semilattice?
 -- 1. 𝑶 is a semilattice
@@ -107,7 +121,9 @@ class (c , d) A = class c A × class d A
 -- has a derivative, which shouldn't be hard to prove.
 --
 -- TODO FIXME: decidability also requires that we can compute zero-changes
-class DEC A  = Decidable (Hom (𝑶 A))
+-- don't we also need to compute (- ⊖ ⊥) at decidable semilattice types?
+class DEC A  = IsDEC A
+-- class DEC A  = Decidable (Hom (𝑶 A))
 class SL  A  = IsSL A
 class FIN A  = TODO
 class ACC A  = TODO
@@ -116,11 +132,22 @@ class ACC≤ A = TODO
 is! : ∀{C a} -> Is C a -> class C (type a)
 is! {c , d} (x , y) = is! x , is! y
 
-is! {DEC} bool = bool≤?
-is! {DEC} (set a p) = tree≤? _ (isos≤? (type a .𝑶) (is! p))
-is! {DEC} (□ a p) = isos≤? (type a .𝑶) (is! p)
-is! {DEC} (a * b) = decidable× (is! a) (is! b)
-is! {DEC} (a + b) = decidable+ (is! a) (is! b)
+-- is! {DEC} bool = bool≤?
+-- is! {DEC} (set a p) = tree≤? _ (isos≤? (type a .𝑶) (is! p))
+-- is! {DEC} (□ a p) = isos≤? (type a .𝑶) (is! p)
+-- is! {DEC} (a * b) = decidable× (is! a) (is! b)
+-- is! {DEC} (a + b) = decidable+ (is! a) (is! b)
+is! {DEC} bool .decide≤ = bool≤?
+-- could be smarter, but this works for now?
+is! {DEC} bool .change = π₂
+-- argh
+is! {DEC} bool .is-change {a}{b} a≤b = [ a≤b , id ] , in₂ {a = a}
+is! {DEC} bool .plus = map∧ (extract Isos) id • functor∨
+is! {DEC} bool .is-plus = TODO
+is! {DEC} (set a p) = TODO
+is! {DEC} (□ a p) = TODO
+is! {DEC} (a * b) = TODO
+is! {DEC} (a + b) = TODO
 
 is! {SL} bool = slSL it it
 is! {SL} (set a) = slSL (trees _) (tree-sums _)
