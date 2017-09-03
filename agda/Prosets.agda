@@ -78,6 +78,9 @@ instance
   Comonad.extract Isos-comonad = fun proj₁
 
  -- Some lemmas about isos.
+⊤⇒isos : top ⇒ isos top
+⊤⇒isos = fun (λ {TT  → TT , TT})
+
 juggle : ∀{i j k l} {A B C D}
        -> Σ {i}{j} A C × Σ {k}{l} B D
        -> Σ (A × B) λ { (a , b) -> C a × D b }
@@ -170,10 +173,10 @@ antisym:bool≤ : Antisymmetric _≡_ bool≤
 antisym:bool≤ refl _ = Eq.refl
 antisym:bool≤ false<true ()
 
-bool⇒ : ∀{A a b} -> Hom A a b -> bools ⇒ A
-bool⇒ {_}{a}{b} a≤b .ap x = if x then b else a
-bool⇒ {A} a≤b .map refl = ident A
-bool⇒ a≤b .map false<true = a≤b
+-- bool⇒ : ∀{A a b} -> Hom A a b -> bools ⇒ A
+-- bool⇒ {_}{a}{b} a≤b .ap x = if x then b else a
+-- bool⇒ {A} a≤b .map refl = ident A
+-- bool⇒ a≤b .map false<true = a≤b
 
 
 -- Natural numbers

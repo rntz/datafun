@@ -114,7 +114,7 @@ record IsDEC (A : Change) : Set where
 
   module _ (sl : IsSL A) where
     from-zero : 𝑶 A ⇒ 𝑫 A
-    from-zero = ⟨ {!!} , id ⟩ • change
+    from-zero = ⟨ ≤top • ⊤⇒isos • map Isos (eps sl .funct) , id ⟩ • change
 
 open IsDEC public
 

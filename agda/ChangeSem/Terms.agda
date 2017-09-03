@@ -96,25 +96,25 @@ if⇒ : ∀{Γ a} -> (N : Γ ≤ a ∧ a) -> isos bools ∧ Γ ⇒ a
 if⇒ N = map∧ id N • uncurry boolπ
 
 from-bool : ∀{{A}} {{S : Sums A}} -> bools ∧ A ⇒ A
-from-bool .ap (c , x) = if c then x else init
-from-bool .map {false , _} (_ , _) = init≤
+from-bool .ap (c , x) = if c then x else bot
+from-bool .map {false , _} (_ , _) = bot≤
 from-bool .map {true  , x} (refl , x≤y) = x≤y
 -- from-bool .map {false , x} (refl , x≤y) = id
--- from-bool .map {false , x} (false<true , x≤y) = init≤
+-- from-bool .map {false , x} (false<true , x≤y) = bot≤
 
 -- whenn = (x,y) ↦ when x then y
 -- δ(when x then y) = if x then δy else when δx then (y ∨ δy)
 whenn : ∀{A} -> class (DEC , SL) A -> (change-bool ∧ A) ≤ A
 whenn (dec , sl) .funct = from-bool
 whenn {A} (dec , sl) .deriv = map∧ isos/∧ id • juggle∧ • assoc∧r
-                            -- ARGH!!
-                            • if⇒ ⟨ π₂ • π₂ , map∧ id {!!} • from-bool {{A = 𝑫 A}} {{S = 𝑫-sums sl}} ⟩
+                            • if⇒ ⟨ π₂ • π₂ , map∧ id (plus dec • from-zero dec sl)
+                                            • from-bool {{A = 𝑫 A}} {{S = 𝑫-sums sl}} ⟩ -- argh!
 
 
 -- whenn (dec , sl) .deriv = ⟨ π₁ • isos/∧ • π₁ , π₂ ⟩
 --                         • if⇒ {!!} {!!}
 
--- whenn {A} (dec , sl) .deriv .ap ((false , v) , false , dv) = 𝑫-sums sl .Sums.init
+-- whenn {A} (dec , sl) .deriv .ap ((false , v) , false , dv) = 𝑫-sums sl .Sums.bot
 -- -- need A = ΔA. argh.
 -- whenn (dec , sl) .deriv .ap ((false , v) , true , dv) = 𝑫-sums sl .Sums._∨_ {!v!} dv
 -- whenn (dec , sl) .deriv .ap ((true , v) , _ , dv) = dv
