@@ -47,7 +47,7 @@ wipe⇒□ .is-id = id
 lambda : ∀{c x} -> ⟦ hyp x ⟧ ⇨ c ≤ ⟦ x ⟧₁ ⇨ c
 lambda {c} = precompose {c = c} singleton
 
-module _ {A : Change} (f g : ⊤-change ≤ A) (d : Hom! (⊤-change ⇨ A) (funct f) (funct g)) where
+module _ {A : Change} (f g : top ≤ A) (d : Hom! (top ⇨ A) (funct f) (funct g)) where
   private instance aaa = A; daa = 𝑫 A
   from-bool : change-bool ≤ A
   from-bool .funct = bool⇒ (Hom!.a≤b d _)

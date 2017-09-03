@@ -23,6 +23,8 @@ instance
   π₂ {{change-products}} = cfun π₂ (π₂ • π₂) π₂
   ⟨_,_⟩ {{change-products}} (cfun f df fok) (cfun g dg gok) =
     cfun ⟨ f , g ⟩ ⟨ df , dg ⟩ ⟨ fok , gok ⟩
+  top {{change-products}} = ⊤-change
+  ≤top {{change-products}} = cfun ≤top ≤top (λ _ → tt)
 
   change-sums : Sums changes
   _∨_ {{change-sums}} = change+
@@ -31,7 +33,7 @@ instance
   [_,_] {{change-sums}} f g .funct = [ funct f , funct g ]
   -- isos (𝑶 a ∨ 𝑶 b) ∧ (𝑫 a ∨ 𝑫 b) ⇒ 𝑫 c
   -- this is the bit where I have to invent values.
-  [_,_] {{change-sums}} {A}{B}{C} f g .deriv = uncurry (isos∨ • [ flip [ use f , fail ]
+  [_,_] {{change-sums}} {A}{B}{C} f g .deriv = uncurry (isos/∨ • [ flip [ use f , fail ]
                                                                 , flip [ fail , use g ] ])
     where use : ∀{A} -> A ≤ C -> 𝑫 A ⇒ isos (𝑶 A) ⇨ 𝑫 C
           fail : ∀{A B} -> A ⇒ B ⇨ 𝑫 C
@@ -39,8 +41,8 @@ instance
           fail = curry (constant (dummy C))
   [_,_] {{change-sums}} f g .is-id (rel₁ da) = is-id f da
   [_,_] {{change-sums}} f g .is-id (rel₂ db) = is-id g db
-  init {{change-sums}} = ⊥-change
-  init≤ {{change-sums}} = cfun init≤ (π₁ • Fun: init≤ λ { {lift ()} }) (λ { {_} {lift ()} })
+  bot {{change-sums}} = ⊥-change
+  bot≤ {{change-sums}} = cfun bot≤ (π₁ • Fun: bot≤ λ { {lift ()} }) (λ { {_} {lift ()} })
 
   change-cc : CC changes
   CC.products change-cc = change-products
@@ -62,7 +64,7 @@ instance
  -- Showing that □ is a comonad on the category of changes.
 Change□ : changes ≤ changes
 ap  Change□ = change□
-map Change□ {A}{B} (cfun f df ok) = cfun (map Isos f) (isos∧ • map Isos df) ok
+map Change□ {A}{B} (cfun f df ok) = cfun (map Isos f) (∧/isos • map Isos df) ok
 
 instance
   Change□-comonad : Comonad Change□

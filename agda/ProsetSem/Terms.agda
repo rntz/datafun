@@ -39,10 +39,10 @@ lambda : ∀{x c} -> ⟦ hyp x ⟧ ⇨ c ⇒ ⟦ x ⟧₁ ⇨ c
 lambda = precompose singleton
 
 from-bool : ∀{a} (S : Sums a) -> bools ∧ a ⇒ a
-from-bool S .ap (c , x) = if c then x else Sums.init S
+from-bool S .ap (c , x) = if c then x else Sums.bot S
 from-bool {a} S .map {false , x} (refl , x≤y) = ident a
 from-bool S .map {true  , x} (refl , x≤y) = x≤y
-from-bool S .map {false , x} (false<true , x≤y) = Sums.init≤ S
+from-bool S .map {false , x} (false<true , x≤y) = Sums.bot≤ S
 
  ---------- Denotations of terms, premises, and term formers ----------
 eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ⇒ ⟦ P ⟧+
@@ -67,9 +67,14 @@ eval⊩ (bool b) = Fun: (λ _ -> b) (λ _ → refl)
 eval⊩ if = uncurry (antisym⇒ antisym:bool≤ (λ x → if x then π₁ else π₂))
 eval⊩ (inj true)  = in₁
 eval⊩ (inj false) = in₂
+-- (a + b) × ((env a ⇨ c) × (env b ⇨ c)) ≤ c
+-- ?0: (env a ⇨ c × env b ⇨ c) × a
+-- eval⊩ case = cases π₁ (map∧ (π₂ • π₁) singleton • apply)
+--                       (map∧ (π₂ • π₂) singleton • apply)
+--   where open import Lambdas
 eval⊩ case = distrib-∧/∨
-           • [ map∧ singleton π₁ • swap • apply
-             , map∧ singleton π₂ • swap • apply ]
+           • [ map∧ singleton π₁ • swapply
+             , map∧ singleton π₂ • swapply ]
 eval⊩ splitsum .ap x = x
 eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
 eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)
@@ -80,7 +85,7 @@ eval⊩ (for-in _ (_ , b-sl)) =
   map∧ id (lambda • Tree-map)
   • swapply
   • tree-⋁ _ (is! b-sl)
-eval⊩ (bottom sl) = constant (Sums.init (is! sl))
+eval⊩ (bottom sl) = constant (Sums.bot (is! sl))
 eval⊩ (join sl) = functor∨ {{S = is! sl}}
 -- TODO
 eval⊩ (fix is-fix) = {!!}

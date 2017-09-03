@@ -87,14 +87,14 @@ record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   field in₁ : ∀{a b} -> a ≤ Either a b
   field in₂ : ∀{a b} -> b ≤ Either a b
   field either : ∀{a b c} -> a ≤ c -> b ≤ c -> Either a b ≤ c
-  field init : Obj C
-  field init≤ : ∀{a} -> init ≤ a
+  field bot : Obj C
+  field bot≤ : ∀{a} -> bot ≤ a
 
   idem∨ : ∀{a} -> Either a a ≤ a
   idem∨ = either id id
 
-  a∨⊥≈a : ∀{a} -> Either a init ≈ a
-  a∨⊥≈a = either id init≤ , in₁
+  a∨⊥≈a : ∀{a} -> Either a bot ≈ a
+  a∨⊥≈a = either id bot≤ , in₁
 
   map∨ : ∀{a b c d} -> a ≤ c -> b ≤ d -> Either a b ≤ Either c d
   map∨ f g = either (f • in₁) (g • in₂)
@@ -114,17 +114,22 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   field Pair : Op (Obj C)
   field π₁ : ∀{a b} -> Pair a b ≤ a
   field π₂ : ∀{a b} -> Pair a b ≤ b
-  field pair : ∀{a b Γ} -> Γ ≤ a -> Γ ≤ b -> Γ ≤ Pair a b
-  -- TODO: terminal object?
+  field make-pair : ∀{a b Γ} -> Γ ≤ a -> Γ ≤ b -> Γ ≤ Pair a b
+  field top : Obj C
+  field ≤top : ∀{a} -> a ≤ top
 
   map∧ : ∀{a b c d} -> a ≤ c -> b ≤ d -> Pair a b ≤ Pair c d
-  map∧ f g = pair (π₁ • f) (π₂ • g)
+  map∧ f g = make-pair (π₁ • f) (π₂ • g)
+
+  -- Maybe factor out associativity into a separate structure?
+  assoc∧r : ∀{a b c} -> Pair (Pair a b) c ≤ Pair a (Pair b c)
+  assoc∧r = make-pair (π₁ • π₁) (make-pair (π₁ • π₂) π₂)
 
   ∇ : ∀{a} -> a ≤ Pair a a
-  ∇ = pair id id
+  ∇ = make-pair id id
 
   swap : ∀{a b} -> Pair a b ≤ Pair b a
-  swap = pair π₂ π₁
+  swap = make-pair π₂ π₁
 
   -- This *could* be useful if cat× were an instance, but it's not.
   -- instance
@@ -132,14 +137,15 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   functor∧ = fun λ { (f , g) -> map∧ f g }
 
   juggle∧ : ∀{a b c d} -> Pair (Pair a b) (Pair c d) ≤ Pair (Pair a c) (Pair b d)
-  juggle∧ = pair (map∧ π₁ π₁) (map∧ π₂ π₂)
+  juggle∧ = make-pair (map∧ π₁ π₁) (map∧ π₂ π₂)
 
-open Products using (Pair; pair)
-open Sums using (Either; either)
+open Products public using (Pair; make-pair)
+open Sums public using (Either; either)
 
 module _ {i j} {{C : Cat i j}} where
   module _ {{S : Sums C}} where open Sums S renaming (Either to _∨_; either to [_,_]) public
-  module _ {{P : Products C}} where open Products P renaming (Pair to _∧_; pair to ⟨_,_⟩) public
+  module _ {{P : Products C}} where
+    open Products P renaming (Pair to _∧_; make-pair to ⟨_,_⟩) public
 
  --- CC means "cartesian closed".
 record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
@@ -221,7 +227,7 @@ instance
   compo sets f g x = g (f x)
 
   set-products : ∀{i} -> Products (sets {i})
-  set-products = Products: _×_ proj₁ proj₂ <_,_>
+  set-products = Products: _×_ proj₁ proj₂ <_,_> (Lift ⊤) (λ _ → TT)
     where open import Data.Product
 
   set-sums : ∀{i} -> Sums (sets {i})
@@ -240,11 +246,11 @@ instance
   compo cats (fun f) (fun g) = fun (f • g)
 
   cat-products : ∀{i j} -> Products (cats {i}{j})
-  cat-products {i}{j} = Products: cat× (fun π₁) (fun π₂)
-                        λ where (fun f) (fun g) → fun ⟨ f , g ⟩
+  cat-products = Products: cat× (fun π₁) (fun π₂) (λ { (fun f) (fun g) → fun ⟨ f , g ⟩ })
+                           ⊤-cat (fun ≤top)
 
   cat-sums : ∀{i j} -> Sums (cats {i}{j})
-  cat-sums {i}{j} = Sums: cat+ (fun rel₁) (fun rel₂) disj ⊥-cat (Fun: init≤ λ { {lift ()} })
+  cat-sums {i}{j} = Sums: cat+ (fun rel₁) (fun rel₂) disj ⊥-cat (Fun: bot≤ λ { {lift ()} })
     where disj : ∀ {a b c : Cat i j} -> a ≤ c -> b ≤ c -> cat+ a b ≤ c
           disj F G = Fun: [ ap F , ap G ] (λ { (rel₁ x) → map F x ; (rel₂ x) → map G x })
 
@@ -259,8 +265,8 @@ module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
   in₁ {{cat×-sums}} = in₁ , in₁
   in₂ {{cat×-sums}} = in₂ , in₂
   [_,_] {{cat×-sums}} (f₁ , f₂) (g₁ , g₂) = [ f₁ , g₁ ] , [ f₂ , g₂ ]
-  init {{cat×-sums}} = init , init
-  init≤ {{cat×-sums}} = init≤ , init≤
+  bot {{cat×-sums}} = bot , bot
+  bot≤ {{cat×-sums}} = bot≤ , bot≤
 
 -- -- This is correct, but not yet useful.
 -- module _ {i j k} (A : Set i) {B} (P : ∀ a -> Sums {j}{k} (B a)) where
@@ -269,5 +275,5 @@ module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
 --   Sums.in₁ catΠ-sums x = P x .Sums.in₁
 --   Sums.in₂ catΠ-sums x = P x .Sums.in₂
 --   Sums.[_,_] catΠ-sums f g x = P x .Sums.[_,_] (f x) (g x)
---   Sums.init catΠ-sums x = P x .Sums.init
---   Sums.init≤ catΠ-sums x = P x .Sums.init≤
+--   Sums.bot catΠ-sums x = P x .Sums.bot
+--   Sums.bot≤ catΠ-sums x = P x .Sums.bot≤

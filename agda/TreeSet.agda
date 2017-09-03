@@ -45,17 +45,17 @@ module Trees (C : Proset) where
     in₁ {{tree-sums}} = split₁ id
     in₂ {{tree-sums}} = split₂ id
     [_,_] {{tree-sums}} f g = node≤ f g
-    init {{tree-sums}} = empty
-    init≤ {{tree-sums}} = empty≤
+    bot {{tree-sums}} = empty
+    bot≤ {{tree-sums}} = empty≤
 
   -- Semilattice join / categorical sum lifted over trees, ⋁
   module _ (Sums : Sums C) where
     private instance s = Sums
     tree-⋁ : trees ⇒ C
-    ap tree-⋁ empty = init
+    ap tree-⋁ empty = bot
     ap tree-⋁ (leaf x) = x
     ap tree-⋁ (node l r) = ap tree-⋁ l ∨ ap tree-⋁ r
-    map tree-⋁ empty≤ = init≤
+    map tree-⋁ empty≤ = bot≤
     map tree-⋁ (leaf≤ x≤y) = x≤y
     map tree-⋁ (node≤ t≤u t≤v) = [ map tree-⋁ t≤u , map tree-⋁ t≤v ]
     map tree-⋁ (split₁ t≤u) = map tree-⋁ t≤u • in₁

@@ -10,6 +10,7 @@ open import Monads
 open import Prelude
 open import Prosets
 open import TreeSet
+open import Lambdas
 
  -- Lemmas for semantics of terms
 -- ⟦_⟧ is a functor, Cx^op -> Change
@@ -91,6 +92,9 @@ lambda c = precompose {c = type c} singleton
 boolπ : ∀{A} -> isos bools ⇒ ((A ∧ A) ⇨ A)
 boolπ = antisym⇒ antisym:bool≤ (λ x → if x then π₁ else π₂)
 
+if⇒ : ∀{Γ a} -> (N : Γ ≤ a ∧ a) -> isos bools ∧ Γ ⇒ a
+if⇒ N = map∧ id N • uncurry boolπ
+
 from-bool : ∀{{A}} {{S : Sums A}} -> bools ∧ A ⇒ A
 from-bool .ap (c , x) = if c then x else init
 from-bool .map {false , _} (_ , _) = init≤
@@ -102,7 +106,13 @@ from-bool .map {true  , x} (refl , x≤y) = x≤y
 -- δ(when x then y) = if x then δy else when δx then (y ∨ δy)
 whenn : ∀{A} -> class (DEC , SL) A -> (change-bool ∧ A) ≤ A
 whenn (dec , sl) .funct = from-bool
-whenn (dec , sl) .deriv = map∧ isos/∧ id • juggle∧ • uncurry {!plus dec!}
+whenn {A} (dec , sl) .deriv = map∧ isos/∧ id • juggle∧ • assoc∧r
+                            -- ARGH!!
+                            • if⇒ ⟨ π₂ • π₂ , map∧ id {!!} • from-bool {{A = 𝑫 A}} {{S = 𝑫-sums sl}} ⟩
+
+
+-- whenn (dec , sl) .deriv = ⟨ π₁ • isos/∧ • π₁ , π₂ ⟩
+--                         • if⇒ {!!} {!!}
 
 -- whenn {A} (dec , sl) .deriv .ap ((false , v) , false , dv) = 𝑫-sums sl .Sums.init
 -- -- need A = ΔA. argh.
@@ -111,7 +121,7 @@ whenn (dec , sl) .deriv = map∧ isos/∧ id • juggle∧ • uncurry {!plus de
 -- -- probably need something to do with antisymmetry or here.
 -- whenn (dec , sl) .deriv .map {(a , x) , (b , y)} {(a' , x') , b' , y'} (((a≤a' , x≤x') , a'≤a , x'≤x) , b≤b' , y≤y') = {!!}
 
-whenn (dec , sl) .is-id = {!!}
+whenn (dec , sl) .is-id {da}{a}{b} ok = {!ok!}
 
 
 -- Semantics of terms

@@ -43,8 +43,8 @@ instance
   in₁ {{cx-sums}} _ = inj₁
   in₂ {{cx-sums}} _ = inj₂
   [_,_] {{cx-sums}} f g _ = [ f _ , g _ ]
-  init {{cx-sums}} = ∅
-  init≤ {{cx-sums}} _ ()
+  bot {{cx-sums}} = ∅
+  bot≤ {{cx-sums}} _ ()
 
 ∪/⊆ : ∀ {X L R} -> L ⊆ R -> X ∪ L ⊆ X ∪ R
 ∪/⊆ f = map∨ id f

@@ -19,8 +19,8 @@ open Change public
 
  -- Constructions on change structures
 ⊤-change ⊥-change : Change
-⊤-change = Change: {{⊤-cat}} (λ _ _ → ⊤) ((λ _ → tt) , (λ _ → TT))
-⊥-change = Change: {{⊥-cat}} (λ { (lift ()) }) (λ { {lift ()} })
+⊤-change = Change: {{top}} (λ _ _ → ⊤) ((λ _ → tt) , (λ _ → TT))
+⊥-change = Change: {{bot}} (λ { (lift ()) }) (λ { {lift ()} })
 
 module _ (P : Proset) (S : Sums P) where
   private instance pp = P; ss = S

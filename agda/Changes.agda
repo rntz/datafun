@@ -43,11 +43,11 @@ data rel3+ {A A' B B' C C' : Set} (R : A -> B -> C -> Set) (S : A' -> B' -> C' -
   rel₂ : ∀{a b c} -> S a b c -> rel3+ R S (inj₂ a) (inj₂ b) (inj₂ c)
 
 ⊤-change ⊥-change : Change
-⊤-change = Change: {{⊤-cat}} ⊤-cat (λ da a b → ⊤) TT
-⊥-change = Change: {{⊥-cat}} ⊤-cat (λ { _ (lift ()) }) TT
+⊤-change = Change: {{top}} top (λ da a b → ⊤) TT
+⊥-change = Change: {{bot}} top (λ { _ (lift ()) }) TT
 
 change-SL : (P : Proset) (S : Sums P) -> Change
-change-SL P S = Change: {{P}} P (λ da a b → a ∨ da ≈ b) init
+change-SL P S = Change: {{P}} P (λ da a b → a ∨ da ≈ b) bot
   where instance p = P; s = S
 
 change-bool : Change

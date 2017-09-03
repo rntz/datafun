@@ -41,31 +41,11 @@ tone disc = Change□
 ⟦ X ⟧ = Π (Vars X) ⟦_⟧v
 
 ⟦_⟧+ : Premise -> Change
-⟦ nil ⟧+    = ⊤-change
+⟦ nil ⟧+    = top
 ⟦ P , Q ⟧+  = ⟦ P ⟧+ ∧ ⟦ Q ⟧+
 ⟦ □ P ⟧+    = change□ ⟦ P ⟧+
 ⟦ X ▷ P ⟧+  = ⟦ X ⟧ ⇨ ⟦ P ⟧+
 ⟦ term a ⟧+ = type a
-
- -- What does it mean for a type's denotation to be decidable?
-record IsDEC (A : Change) : Set where
-  constructor IsDEC:
-  private instance aa = A
-  field decide≤ : Decidable (Hom (𝑶 A))
-
-  -- field find-zero : 𝑶 A ⇒ 𝑫 A
-  -- do we need this to be monotone?
-  field change : isos (𝑶 A) ∧ 𝑶 A ⇒ 𝑫 A
-  field is-change : ∀{a b} -> (a≤b : a ≤ b) -> Path A (ap change (a , b)) a b
-
-  field plus : isos (𝑶 A) ∧ 𝑫 A ⇒ 𝑶 A
-  field is-plus : ∀{da a b} (ok : Path A da a b) -> b ≈ ap plus (a , da)
-
-  -- for Datafun, this could probably be semantically monotone? but ugh.
-  find-zero : isos (𝑶 A) ⇒ 𝑫 A
-  find-zero = map Isos ∇ • isos/∧ • map∧ id (extract Isos) • change
-
-open IsDEC public
 
  -- What does it mean for a type's denotation to be a semilattice?
 -- 1. 𝑶 is a semilattice
@@ -83,15 +63,15 @@ record IsSL (A : Change) : Set where
     vee-deriv = π₂ • Sums.functor∨ 𝑫-sums
 
     -- δ(⊥) = ⊥
-    eps-func : ⊤-cat ⇒ 𝑶 A
-    eps-func = constant init
-    eps-deriv : isos ⊤-cat ∧ ⊤-cat ⇒ 𝑫 A
-    eps-deriv = constant (Sums.init 𝑫-sums)
+    eps-func : top ⇒ 𝑶 A
+    eps-func = constant bot
+    eps-deriv : isos top ∧ top ⇒ 𝑫 A
+    eps-deriv = constant (Sums.bot 𝑫-sums)
 
-  field eps-ok : IdPath (change→ ⊤-change A) eps-deriv eps-func
+  field eps-ok : IdPath (change→ top A) eps-deriv eps-func
   field vee-ok : IdPath (change→ (A ∧ A) A) vee-deriv functor∨
 
-  eps : ⊤-change ≤ A
+  eps : top ≤ A
   eps = cfun eps-func eps-deriv eps-ok
   vee : A ∧ A ≤ A
   vee = cfun functor∨ vee-deriv vee-ok
@@ -113,6 +93,30 @@ sl→ A P .𝑶-sums = proset→-sums (𝑶-sums P)
 sl→ A P .𝑫-sums = proset→-sums (𝑫-sums P)
 sl→ A P .eps-ok tt _ = eps-ok P tt
 sl→ A P .vee-ok (df-ok , dg-ok) da-ok = vee-ok P (df-ok da-ok , dg-ok da-ok)
+
+ -- What does it mean for a type's denotation to be decidable?
+record IsDEC (A : Change) : Set where
+  constructor IsDEC:
+  private instance aa = A
+  field decide≤ : Decidable (Hom (𝑶 A))
+
+  -- field find-zero : 𝑶 A ⇒ 𝑫 A
+  -- do we need this to be monotone?
+  field change : isos (𝑶 A) ∧ 𝑶 A ⇒ 𝑫 A
+  field is-change : ∀{a b} -> (a≤b : a ≤ b) -> Path A (ap change (a , b)) a b
+
+  field plus : isos (𝑶 A) ∧ 𝑫 A ⇒ 𝑶 A
+  field is-plus : ∀{da a b} (ok : Path A da a b) -> b ≈ ap plus (a , da)
+
+  -- for Datafun, this could probably be semantically monotone? but ugh.
+  find-zero : isos (𝑶 A) ⇒ 𝑫 A
+  find-zero = map Isos ∇ • isos/∧ • map∧ id (extract Isos) • change
+
+  module _ (sl : IsSL A) where
+    from-zero : 𝑶 A ⇒ 𝑫 A
+    from-zero = ⟨ {!!} , id ⟩ • change
+
+open IsDEC public
 
  ---------- Semantics of type-classes ----------
 class : Class -> Change -> Set

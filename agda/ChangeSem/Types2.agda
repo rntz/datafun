@@ -35,7 +35,7 @@ type (a + b) = type a ∨ type b
 ⟦ X ⟧ = Π (Vars X) ⟦_⟧v
 
 ⟦_⟧+ : Premise -> Change
-⟦ nil ⟧+    = ⊤-change
+⟦ nil ⟧+    = top
 ⟦ P , Q ⟧+  = ⟦ P ⟧+ ∧ ⟦ Q ⟧+
 ⟦ □ P ⟧+    = change□ ⟦ P ⟧+
 ⟦ X ▷ P ⟧+  = ⟦ X ⟧ ⇨ ⟦ P ⟧+
@@ -63,15 +63,15 @@ record IsSL (A : Change) : Set where
     vee-deriv = π₂ • Sums.functor∨ 𝑫-sums
 
     -- δ(⊥) = ⊥
-    eps-func : ⊤-cat ⇒ 𝑶 A
-    eps-func = constant init
-    eps-deriv : isos ⊤-cat ∧ ⊤-cat ⇒ 𝑫 A
-    eps-deriv = constant (Sums.init 𝑫-sums)
+    eps-func : top ⇒ 𝑶 A
+    eps-func = constant bot
+    eps-deriv : isos top ∧ top ⇒ 𝑫 A
+    eps-deriv = constant (Sums.bot 𝑫-sums)
 
-  field eps-ok : IdPath (change→ ⊤-change A) eps-func eps-deriv
+  field eps-ok : IdPath (change→ top A) eps-func eps-deriv
   field vee-ok : IdPath (change→ (A ∧ A) A) functor∨ vee-deriv
 
-  eps : ⊤-change ≤ A
+  eps : top ≤ A
   eps = cfun eps-func eps-deriv eps-ok
   vee : A ∧ A ≤ A
   vee = cfun functor∨ vee-deriv vee-ok
