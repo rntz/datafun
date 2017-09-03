@@ -11,7 +11,7 @@ record Cat i j : Set (suc (i ⊔ j)) where
   field Obj : Set i
   field Hom : Rel Obj j
   field ident : ∀{a} -> Hom a a
-  field compo : ∀{a b c} -> Hom a b -> Hom b c -> Hom a c
+  field compo : ∀{a b c} (f : Hom a b) (g : Hom b c) -> Hom a c
 
   ≡→ident : ∀{a b} -> a ≡ b -> Hom a b
   ≡→ident refl = ident
@@ -82,61 +82,64 @@ record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Sums:
   private instance the-cat = C
   -- TODO: don't use an infix operator for this here.
-  infixr 2 _∨_
-  field _∨_ : Op (Obj C)
-  field in₁ : ∀{a b} -> a ≤ a ∨ b
-  field in₂ : ∀{a b} -> b ≤ a ∨ b
-  field [_,_] : ∀{a b c} -> a ≤ c -> b ≤ c -> a ∨ b ≤ c
+  infixr 2 Either
+  field Either : Op (Obj C)
+  field in₁ : ∀{a b} -> a ≤ Either a b
+  field in₂ : ∀{a b} -> b ≤ Either a b
+  field either : ∀{a b c} -> a ≤ c -> b ≤ c -> Either a b ≤ c
   field init : Obj C
   field init≤ : ∀{a} -> init ≤ a
 
-  idem∨ : ∀{a} -> a ∨ a ≤ a
-  idem∨ = [ id , id ]
+  idem∨ : ∀{a} -> Either a a ≤ a
+  idem∨ = either id id
 
-  a∨⊥≈a : ∀{a} -> a ∨ init ≈ a
-  a∨⊥≈a = [ id , init≤ ] , in₁
+  a∨⊥≈a : ∀{a} -> Either a init ≈ a
+  a∨⊥≈a = either id init≤ , in₁
 
-  map∨ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
-  map∨ f g = [ f • in₁ , g • in₂ ]
+  map∨ : ∀{a b c d} -> a ≤ c -> b ≤ d -> Either a b ≤ Either c d
+  map∨ f g = either (f • in₁) (g • in₂)
 
   functor∨ : Fun (cat× C C) C
   functor∨ = fun λ { (f , g) -> map∨ f g }
 
-  juggle∨ : ∀{a b c d} -> (a ∨ b) ∨ (c ∨ d) ≤ (a ∨ c) ∨ (b ∨ d)
-  juggle∨ = [ map∨ in₁ in₁ , map∨ in₂ in₂ ]
+  juggle∨ : ∀{a b c d} -> Either (Either a b) (Either c d) ≤ Either (Either a c) (Either b d)
+  juggle∨ = either (map∨ in₁ in₁) (map∨ in₂ in₂)
 
  --- Products
 record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Products:
   private instance the-cat = C
   -- TODO: don't use an infix operator for this here
-  infixr 2 _∧_
-  field _∧_ : Op (Obj C)
-  field π₁ : ∀{a b} -> (a ∧ b) ≤ a
-  field π₂ : ∀{a b} -> (a ∧ b) ≤ b
-  field ⟨_,_⟩ : ∀{a b Γ} -> Γ ≤ a -> Γ ≤ b -> Γ ≤ (a ∧ b)
+  infixr 2 Pair
+  field Pair : Op (Obj C)
+  field π₁ : ∀{a b} -> Pair a b ≤ a
+  field π₂ : ∀{a b} -> Pair a b ≤ b
+  field pair : ∀{a b Γ} -> Γ ≤ a -> Γ ≤ b -> Γ ≤ Pair a b
   -- TODO: terminal object?
 
-  map∧ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∧ b ≤ c ∧ d
-  map∧ f g = ⟨ π₁ • f , π₂ • g ⟩
+  map∧ : ∀{a b c d} -> a ≤ c -> b ≤ d -> Pair a b ≤ Pair c d
+  map∧ f g = pair (π₁ • f) (π₂ • g)
 
-  ∇ : ∀{a} -> a ≤ a ∧ a
-  ∇ = ⟨ id , id ⟩
+  ∇ : ∀{a} -> a ≤ Pair a a
+  ∇ = pair id id
 
-  swap : ∀{a b} -> a ∧ b ≤ b ∧ a
-  swap = ⟨ π₂ , π₁ ⟩
+  swap : ∀{a b} -> Pair a b ≤ Pair b a
+  swap = pair π₂ π₁
 
   -- This *could* be useful if cat× were an instance, but it's not.
   -- instance
   functor∧ : Fun (cat× C C) C
   functor∧ = fun λ { (f , g) -> map∧ f g }
 
-  juggle∧ : ∀{a b c d} -> (a ∧ b) ∧ (c ∧ d) ≤ (a ∧ c) ∧ (b ∧ d)
-  juggle∧ = ⟨ map∧ π₁ π₁ , map∧ π₂ π₂ ⟩
+  juggle∧ : ∀{a b c d} -> Pair (Pair a b) (Pair c d) ≤ Pair (Pair a c) (Pair b d)
+  juggle∧ = pair (map∧ π₁ π₁) (map∧ π₂ π₂)
+
+open Products using (Pair; pair)
+open Sums using (Either; either)
 
 module _ {i j} {{C : Cat i j}} where
-  module _ {{S : Sums C}} where open Sums S public
-  module _ {{P : Products C}} where open Products P public
+  module _ {{S : Sums C}} where open Sums S renaming (Either to _∨_; either to [_,_]) public
+  module _ {{P : Products C}} where open Products P renaming (Pair to _∧_; pair to ⟨_,_⟩) public
 
  --- CC means "cartesian closed".
 record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
@@ -144,31 +147,33 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   private instance the-cat = C
   field overlap {{products}} : Products C
   -- TODO FIXME: shouldn't bind tighter than ∧.
-  infixr 4 _⇨_
-  field _⇨_ : Op (Obj C)
-  field apply : ∀{a b} -> (a ⇨ b) ∧ a ≤ b
-  field curry : ∀{Γ a b} -> Γ ∧ a ≤ b -> Γ ≤ a ⇨ b
+  infixr 4 hom
+  field hom : Op (Obj C)
+  field apply : ∀{a b} -> hom a b ∧ a ≤ b
+  field curry : ∀{Γ a b} -> Γ ∧ a ≤ b -> Γ ≤ hom a b
 
-  call : ∀{Γ a b} -> Γ ≤ (a ⇨ b) -> Γ ≤ a -> Γ ≤ b
+  call : ∀{Γ a b} -> Γ ≤ hom a b -> Γ ≤ a -> Γ ≤ b
   call f a = ⟨ f , a ⟩ • apply
 
-  swapply : ∀{a b} -> a ∧ (a ⇨ b) ≤ b
+  swapply : ∀{a b} -> a ∧ hom a b ≤ b
   swapply = swap • apply
 
-  uncurry : ∀{a b c} -> a ≤ b ⇨ c -> a ∧ b ≤ c
+  uncurry : ∀{a b c} -> a ≤ hom b c -> a ∧ b ≤ c
   uncurry f = map∧ f id • apply
 
-  flip : ∀{a b c} -> a ≤ b ⇨ c -> b ≤ a ⇨ c
+  flip : ∀{a b c} -> a ≤ hom b c -> b ≤ hom a c
   flip f = curry (swap • uncurry f)
 
-  precompose : ∀{a b c} -> a ≤ b -> b ⇨ c ≤ a ⇨ c
+  precompose : ∀{a b c} -> a ≤ b -> hom b c ≤ hom a c
   precompose f = curry (map∧ id f • apply)
 
   module _ {{S : Sums C}} where
     distrib-∧/∨ : ∀{a b c} -> (a ∨ b) ∧ c ≤ (a ∧ c) ∨ (b ∧ c)
     distrib-∧/∨ = map∧ [ curry in₁ , curry in₂ ] id • apply
 
-module _ {i j} {{C : Cat i j}} {{Ccc : CC C}} where open CC Ccc public hiding (products)
+open CC public using (hom)
+module _ {i j} {{C : Cat i j}} {{cc : CC C}} where
+  open CC cc public renaming (hom to _⇨_) hiding (products)
 
  --- Possibly-infinitary products
 record SetΠ k {i j} (C : Cat i j) : Set (i ⊔ j ⊔ suc k) where

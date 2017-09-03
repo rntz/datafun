@@ -189,15 +189,15 @@ instance
 
   -- ℕ forms a semilattice with 0 and ⊔ (max).
   ℕ-sums : Sums ℕ≤
-  Sums._∨_ ℕ-sums = Nat._⊔_
-  Sums.in₁ ℕ-sums {ℕ.zero}  {_}       = z≤n
-  Sums.in₁ ℕ-sums {ℕ.suc a} {ℕ.zero}  = id
-  Sums.in₁ ℕ-sums {ℕ.suc a} {ℕ.suc b} = s≤s in₁
-  Sums.in₂ ℕ-sums {a}       {ℕ.zero}  = z≤n
-  Sums.in₂ ℕ-sums {ℕ.zero}  {ℕ.suc b} = id
-  Sums.in₂ ℕ-sums {ℕ.suc a} {ℕ.suc b} = s≤s (in₂ {a = a})
+  _∨_ {{ℕ-sums}} = Nat._⊔_
+  in₁ {{ℕ-sums}} {ℕ.zero}  {_}       = z≤n
+  in₁ {{ℕ-sums}} {ℕ.suc a} {ℕ.zero}  = id
+  in₁ {{ℕ-sums}} {ℕ.suc a} {ℕ.suc b} = s≤s in₁
+  in₂ {{ℕ-sums}} {a}       {ℕ.zero}  = z≤n
+  in₂ {{ℕ-sums}} {ℕ.zero}  {ℕ.suc b} = id
+  in₂ {{ℕ-sums}} {ℕ.suc a} {ℕ.suc b} = s≤s (in₂ {a = a})
   [_,_] {{ℕ-sums}} z≤n x = x
   [_,_] {{ℕ-sums}} (s≤s f) z≤n = s≤s f
   [_,_] {{ℕ-sums}} (s≤s f) (s≤s g) = s≤s [ f , g ]
-  Sums.init ℕ-sums  = 0
-  Sums.init≤ ℕ-sums = z≤n
+  init {{ℕ-sums}}  = 0
+  init≤ {{ℕ-sums}} = z≤n
