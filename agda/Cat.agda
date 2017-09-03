@@ -147,10 +147,11 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   infixr 4 _⇨_
   field _⇨_ : Op (Obj C)
   field apply : ∀{a b} -> (a ⇨ b) ∧ a ≤ b
-  field curry : ∀{a b c} -> a ∧ b ≤ c -> a ≤ b ⇨ c
+  field curry : ∀{Γ a b} -> Γ ∧ a ≤ b -> Γ ≤ a ⇨ b
 
-  call : ∀{a b c} -> a ≤ (b ⇨ c) -> a ≤ b -> a ≤ c
+  call : ∀{Γ a b} -> Γ ≤ (a ⇨ b) -> Γ ≤ a -> Γ ≤ b
   call f a = ⟨ f , a ⟩ • apply
+
   swapply : ∀{a b} -> a ∧ (a ⇨ b) ≤ b
   swapply = swap • apply
 
