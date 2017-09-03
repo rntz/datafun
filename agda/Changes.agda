@@ -16,6 +16,8 @@ record Change : Set1 where
   -- this needs to respect equivalence of objects & deltas, doesn't it? I think
   -- for all the ones we actually construct this will be the case; I'm not sure
   -- if we need it for any of the proofs we're doing.
+  --
+  -- EDIT: ... actually, I think we will! See ChangeSem/Terms.agda
   field Path : (da : Obj 𝑫) (a b : Obj 𝑶) -> Set
 
   -- -- THIS IS IMPOSSIBLE AT EXPONENTIALS WITHOUT DEPENDENT TYPES
