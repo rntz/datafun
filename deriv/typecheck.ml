@@ -20,18 +20,35 @@ let rec mkAbs (us, e) =
 
 let lam (u, e) = into (Lam(PVar, mkAbs([u], e)))
 
-let let_ (x, e1, e2) = into (Case(e1, [PVar, mkAbs([x], e2)]))
+let let_ (x, e1, e2) = into (Let(e1, mkAbs([x], e2)))
 
-let let_tuple xs e1 e2 = into (Case(e1, 
-                                    [PTuple (replicate PVar (List.length xs)), 
-                                     mkAbs(xs, e2)]))
+let bind_ (x, e1, e2) = into (Bind(PVar, e1, mkAbs([x], e2)))
+
+let let_tuple xs e1 e2 = into (LetTuple(List.length xs, e1, mkAbs(xs, e2)))
 
 
+let rec find_var = function
+  | (PVar :: ps, e) -> (match Ast.out e with
+                        | Abs(x, e) -> Some x
+                        | _ -> assert false)
+  | (p :: ps, e) -> None
+  | ([], e) -> assert false 
+
+let find_var_list arms : Ast.var option = 
+  let rec loop = function
+    | [] -> None
+    | (Some x) :: xs -> Option.return x 
+    | None :: xs -> loop xs 
+  in 
+  loop (List.map find_var arms)
                         
 let unabs y e = 
   match Ast.out e with
   | Abs(x, e) -> rename x y e
   | _ -> assert false 
+                              
+
+
 
 let expect sort tp = fail "Expected %s type, got '%s'" sort (print_type tp)
 let mismatch tp tp' = fail "Expected '%s' inferred '%s'" (print_type tp) (print_type tp')
@@ -53,59 +70,48 @@ let rec leading_var arms =
                 | _ -> false)
                arms
 
-let rec find_var default = function
-  | [] -> Printf.sprintf "%s$" default 
-  | ((PVar :: ps), e) :: arms -> 
-     (match Ast.out e with
-      | Abs(x, e) -> if String.contains x '$'then
-                       find_var default arms
-                     else
-                       x 
-      | _ -> assert false)
-  | ((p :: ps), e) :: arms -> find_var default arms 
-  | ([], e) :: arms -> assert false 
+let rebind u e = 
+  match Ast.out e with
+  | Abs(_, _) -> let into = Ast.into (Ast.loc e) in
+                 into (Let(into (Var u), e))
+  | _ -> assert false
 
-let rec split_on_var (arms : (pat list * exp) list) = 
-  gensym (find_var "u" arms) >>= fun u -> 
-  assert (leading_var arms);
-  return (u, List.map (Pair.map List.tl (unabs u)) arms) 
+let split_on_var u = 
+  let split = function
+    | (PVar :: ps, e) -> (ps, rebind u e)
+    | (PWild :: ps, e) -> (ps, e)
+    | (_, e) -> assert false
+  in
+  List.map split
 
-let expand_arm_tuple n = function
-  | ((PTuple ps) :: ps', e) -> 
-     if List.length ps = n then 
-       return (ps @ ps', e)
-     else
-       fail "Tuple pattern expected with %d elements, got %d" n (List.length ps)
-  | (PVar :: ps, e) -> 
-     Context.Seq.list (replicate (gensym "p") n) >>= fun us -> 
-     return ((replicate PVar n) @ ps, mkAbs(us, e))
-  | (p :: ps, e) -> fail "Expected tuple pattern"
-  | ([], e) -> assert false 
-     
-let rec split_tuple n arms = 
-  gensym (find_var "tuple" arms) >>= fun u -> 
-  Context.Seq.list (List.map (expand_arm_tuple n) arms) >>= fun arms' ->
-  return (u, arms)  
+let split_tuple u n arms = 
+  let split = function
+    | ((PTuple ps) :: ps', e) -> if List.length ps = n then 
+                                   return (ps @ ps', e)
+                                 else 
+                                   fail "Pattern has %d fields, expected %d" (List.length ps) n 
+    | (PVar :: ps', e) -> return (replicate PWild n @ ps', rebind u e)
+    | (PWild :: ps', e) -> return (replicate PWild n @ ps', e)
+    | (_ :: ps', e) -> fail "Expected tuple pattern"
+    | ([], e) -> assert false
+  in 
+  Context.Seq.list (List.map split arms)
 
-let expand_arm_sum u cs = function
-  | (PCon(c, p) :: ps, e) -> 
-     if List.mem c cs then
-       return ([c, (p :: ps, e)])
-     else
-       fail "Unexpected constructor '%s' in pattern" c 
-  | (PVar :: ps, e) ->
-     return (List.map (fun c -> (c, (ps, unabs u e))) cs)
-  | (p :: ps, e) -> 
-     fail "Expected constructor or variable pattern"
-  | ([], e) -> assert false 
-
-let tabulate cs choices = 
-  List.map (fun c -> (c, List.filter (List.mem_assoc c) choices)) cs  
-
-let split_sum cs arms = 
-  gensym (find_var "sum" arms) >>= fun u -> 
-  Context.Seq.list (List.map (expand_arm_sum u cs) arms) >>= fun choices -> 
-  return (u, tabulate cs choices)
+let split_sum u cs arms = 
+  let open List in 
+  let split = function
+    | (PCon(c, p) :: ps, e) -> if mem c cs then
+                                 return [c, (p :: ps, e)]
+                               else
+                                 fail "Constructor '%s' is not in the datatype" c 
+    | (PWild :: ps, e) -> return (map (fun c -> (c, (PWild :: ps, e))) cs)
+    | (PVar :: ps, e) -> return (map (fun c -> (c, (PWild :: ps, rebind u e))) cs)
+    | (_ :: ps, e) -> fail "Expected constructor pattern"
+    | ([], e) -> assert false
+  in
+  Context.Seq.list (List.map split arms) >>= fun branches -> 
+  return (map (fun c -> (c, map snd (filter (fun (c', _) -> c = c') (concat branches)))) cs)
+           
                    
 let rec check (exp : exp) tp = 
   out exp >>= fun e -> 
@@ -121,13 +127,13 @@ let rec check (exp : exp) tp =
                       check e3 tp >>= fun e3' -> 
                       into (If(e1', e2', e3'))
      | (e1', tp1) -> expect "boolean" tp1)
-  | Lam (p, e2), Arrow(tp1, tp2) -> (invert [[p], e2] [tp1, Mono] tp2 >>= function 
-                                     | [u], e' -> lam(u, e')
-                                     | us, e' -> assert false)
+  | Lam (p, e2), Arrow(tp1, tp2) -> gensym "arg$" >>= fun u -> 
+                                    invert [[p], e2] [u, tp1, Mono] tp2 >>= fun e2' -> 
+                                    lam(u, e2')
   | Lam (p, e2), tp -> expect "function" tp 
   | Tuple es, Product tps -> 
      if List.length es = List.length tps then 
-       Context.Seq.list (List.map2 check es tps) >>= fun es' -> 
+       List.map2 check es tps |> Context.Seq.list  >>= fun es' -> 
        into (Tuple es') 
      else 
        failwith "Tuple has wrong number of arguments"
@@ -137,12 +143,11 @@ let rec check (exp : exp) tp =
       | tp -> check e tp >>= fun e' -> into (Con(c, e'))
       | exception Not_found -> fail "constructor '%s' does not occur in type '%s'" c (print_type tp))
   | Con (c, e), tp -> expect "sum" tp 
-  | Case (e, arms), tp -> (synth e >>= fun (e', tp') ->
-                           let cases : (Ast.pat list * Ast.exp) list = List.map (fun (p, e_arm) -> [p], e_arm) arms in
-                           invert cases [tp', Mono] tp >>= function
-                           | [u], ebody' -> into (Abs(u, ebody')) >>= fun ebody' -> 
-                                            into (Case(e', [PVar, ebody']))
-                           | us, ebody -> assert false)
+  | Match (e, arms), tp -> synth e >>= fun (e', tp') ->
+                           let cases = List.map (fun (p, e_arm) -> [p], e_arm) arms in
+                           gensym "u$" >>= fun u -> 
+                           invert cases [u, tp', Mono] tp >>= fun ebody' -> 
+                           let_(u, e', ebody')
   | Singleton e, Set tp -> 
      check e tp >>= fun e' -> 
      into (Singleton e')
@@ -156,9 +161,9 @@ let rec check (exp : exp) tp =
                         into (Box e1')
   | Bind (p,e1,e2), Set _ ->
      (synth e1 >>= function
-      | (e1', Set tp1) -> (invert [[p], e2] [tp1, Mono] tp >>= function
-                           | [u], e2' -> let_ (u, e1', e2')
-                           | us, e2' -> assert false)
+      | (e1', Set tp1) ->  gensym "u$" >>= fun u -> 
+                           invert [[p], e2] [u, tp1, Mono] tp >>= fun e2' -> 
+                           bind_ (u, e1', e2')
       | (e1', tp1) -> expect "set" tp1)
   | Bind (p,e1,e2), tp -> expect "set" tp 
   | _, tp -> synth exp >>= fun (e', tp') ->
@@ -194,22 +199,36 @@ and synth exp =
 
 and invert arms tps tp = 
   match arms, tps with
-  | ([], e) :: rest, [] -> check e tp >>= fun e' -> 
-                           return ([], e')
-  | arms, (tp, tone) :: tps' when leading_var arms -> 
-     split_on_var arms >>= fun (u, arms') -> 
-     with_hyp (u, tp, tone)   
-              (invert arms' tps' tp >>= fun (us, ebody) -> 
-               return (u :: us, ebody)
-  | arms, (Product tps, tone) :: tps' -> 
+  | [], [] -> fail "Missing clauses"
+  | ([], e) :: rest, [] -> check e tp 
+  | ([], e) :: rest, tp :: tps -> assert false 
+  | (p :: ps, e) :: rest, [] -> assert false 
+  | arms, (u, tp, tone) :: tps' when leading_var arms -> 
+     with_hyp (u, tp, tone) (invert (split_on_var u arms) tps' tp)
+  | arms, (u, Product tps, tone) :: tps' -> 
      let n = List.length tps in 
-     split_tuple n arms >>= fun (u, arms') -> 
-     invert arms' (tps @ tps') tp >>= fun (us'', ebody) -> 
-     let (us_tuple, us_rest) = break n us'' in 
-     let_tuple us_rest (Ast.into (loc ebody) (Var u)) ebody >>= fun ebody -> 
-     return (us_rest, ebody)
-  | arms, (Sum ctps) :: tps' -> 
-     let cs = List.map fst ctps in 
-     split_sum cs arms >>= fun (u, arms) -> 
-     invert arms 
+     Context.Seq.list (replicate (gensym "u$") n) >>= fun us -> 
+     split_tuple u n arms >>= fun arms' -> 
+     let tps'' = (List.map2 (fun u tp -> u, tp, Mono) us tps) @ tps' in 
+     with_hyp (u, Product tps, tone) (invert arms' tps'' tp) >>= fun ebody -> 
+     let_tuple us (Ast.into (loc ebody) (Var u)) ebody
+  | arms, (u, Sum ctps, tone) :: tps' -> 
+     let (cs, tps) = List.split ctps in 
+     Context.Seq.list (replicate (gensym "u$") (List.length cs)) >>= fun us ->
+     split_sum u cs arms >>= fun carms -> 
+     with_hyp (u, Sum ctps, tone) 
+              (Context.Seq.list 
+                 ((List.combine carms (List.combine us tps))
+                  |> List.map (fun ((c, arms), (u_i, tp_i)) -> 
+                                 invert arms ((u_i, tp_i, tone) :: tps') tp >>= fun e -> 
+                                 return (c, e)))) >>= fun ces -> 
+     into (Var u) >>= fun u_exp -> 
+     into (Case(u_exp, ces))
+  | arms, (u, tp', tone) :: tps' -> 
+     fail "Expected leading variable pattern for type %s" (print_type tp')
 
+                              
+                             
+
+
+     
