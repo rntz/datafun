@@ -55,7 +55,7 @@ tone disc = Change□
 record IsSL (A : Change) : Set where
   constructor IsSL:
   field {{𝑶-sums}} : Sums (𝑶 A)
-  field 𝑫-sums : Sums (𝑫 A)
+  field {{𝑫-sums}} : Sums (𝑫 A)
 
   private
     -- δ(a ∨ b) = δa ∨ δb
@@ -79,7 +79,7 @@ record IsSL (A : Change) : Set where
 open IsSL public
 
 slSL : ∀ A S -> IsSL (change-SL A S)
-slSL A S = IsSL: S (λ _ → a∨⊥≈a) (λ { (p , q) → juggle∨≈ • ∨≈ p q })
+slSL A S = IsSL: (λ _ → a∨⊥≈a) (λ { (p , q) → juggle∨≈ • ∨≈ p q })
   where private instance aa = A; ss = S; isosaa = isos A
 
 sl× : ∀ {A B} (P : IsSL A) (Q : IsSL B) -> IsSL (A ∧ B)

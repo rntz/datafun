@@ -7,11 +7,11 @@ open import TreeSet
 
  -- Prosets equipped with change structures
 record Change : Set1 where
-  -- TODO: find a way to make no-eta-equality work:
+  -- TODO: find a way to make no-eta-equality work?
   -- no-eta-equality
   constructor Change:
   field {{𝑶}} : Proset          -- O for objects
-  field 𝑫 : Proset              -- D for deltas
+  field {{𝑫}} : Proset          -- D for deltas
 
   -- this needs to respect equivalence of objects & deltas, doesn't it? I think
   -- for all the ones we actually construct this will be the case; I'm not sure
@@ -45,11 +45,11 @@ data rel3+ {A A' B B' C C' : Set} (R : A -> B -> C -> Set) (S : A' -> B' -> C' -
   rel₂ : ∀{a b c} -> S a b c -> rel3+ R S (inj₂ a) (inj₂ b) (inj₂ c)
 
 ⊤-change ⊥-change : Change
-⊤-change = Change: {{top}} top (λ da a b → ⊤) TT
-⊥-change = Change: {{bot}} top (λ { _ (lift ()) }) TT
+⊤-change = Change: {{top}} {{top}} (λ da a b → ⊤) TT
+⊥-change = Change: {{bot}} {{top}} (λ { _ (lift ()) }) TT
 
 change-SL : (P : Proset) (S : Sums P) -> Change
-change-SL P S = Change: {{P}} P (λ da a b → a ∨ da ≈ b) bot
+change-SL P S = Change: {{P}} {{P}} (λ da a b → a ∨ da ≈ b) bot
   where instance p = P; s = S
 
 change-bool : Change
@@ -66,10 +66,10 @@ change□ A .dummy = dummy A
 
 module _ (A B : Change) where
   change× change+ change→ : Change
-  change× = Change: {{𝑶 A ∧ 𝑶 B}} (𝑫 A ∧ 𝑫 B) paths (dummy A , dummy B)
+  change× = Change: {{𝑶 A ∧ 𝑶 B}} {{(𝑫 A ∧ 𝑫 B)}} paths (dummy A , dummy B)
     where paths = λ { (da , db) → rel× (Path A da) (Path B db) }
 
-  change+ = Change: {{𝑶 A ∨ 𝑶 B}} (𝑫 A ∨ 𝑫 B) (rel3+ (Path A) (Path B)) (inj₁ (dummy A))
+  change+ = Change: {{𝑶 A ∨ 𝑶 B}} {{(𝑫 A ∨ 𝑫 B)}} (rel3+ (Path A) (Path B)) (inj₁ (dummy A))
 
   𝑶 change→ = 𝑶 A ⇨ 𝑶 B
   𝑫 change→ = (isos (𝑶 A) ∧ 𝑫 A) ⇨ 𝑫 B
