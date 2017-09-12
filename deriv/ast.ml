@@ -45,9 +45,9 @@ and print_type = function
 
                         
 type pat = 
+  | PWild 
   | PVar 
   | PBool of bool
-  | PString of string 
   | PBox of pat 
   | PTuple of pat list 
   | PCon of conid * pat 
@@ -65,13 +65,19 @@ type 'a expF =
   | App of 'a * 'a 
   | Tuple of 'a list 
   | Con of conid * 'a 
-  | Case of 'a * (pat * 'a) list 
+  | Match of 'a * (pat * 'a) list 
   | Singleton of 'a 
   | Join of 'a * 'a 
   | Bind of pat * 'a * 'a 
   | Box of 'a 
   | Annot of 'a * tp
-
+  (* For desugaring *)
+  | Let of 'a * 'a 
+  | Case of 'a * (conid * 'a) list 
+  | LetTuple of int * 'a * 'a 
+  | LetBox of 'a * 'a 
+  | LetSet of 'a * 'a 
+                    
 let map f = function 
   | Var x -> Var x
   | Abs(x, a) -> Abs(x, f a)
@@ -83,12 +89,18 @@ let map f = function
   | App(a, a') -> App(f a, f a')
   | Tuple as' -> Tuple (List.map f as')
   | Con(c, a) -> Con(c, f a)
-  | Case(a, pas) -> Case(f a, List.map (fun (p, a) -> (p, f a)) pas)
+  | Match(a, pas) -> Match(f a, List.map (fun (p, a) -> (p, f a)) pas)
   | Singleton a -> Singleton (f a)
   | Join(a, a') -> Join(f a, f a')
   | Bind(p, a, a') -> Bind(p, f a, f a')
   | Annot(a, tp) -> Annot(f a, tp)
   | Box a -> Box (f a)
+  | Let(a, b) -> Let(f a, f b)
+  | Case(a, pas) -> Case(f a, List.map (fun (p, a) -> (p, f a)) pas)
+  | LetTuple(n, a, b) -> LetTuple(n, f a, f b)
+  | LetBox(a, b) -> LetBox(f a, f b)
+  | LetSet(a, b) -> LetSet(f a, f b)
+
 
 module Seq(M : IDIOM) = struct
   open M 
@@ -106,13 +118,19 @@ module Seq(M : IDIOM) = struct
      | App (e1, e2) -> e1 ** e2 |> map (fun (a1, a2) -> App(a1, a2))
      | Tuple es' -> L.list es' |> map (fun as' -> Tuple as')
      | Con (c, e') -> e' |> map (fun a -> Con(c, a))
-     | Case (e, pes) -> let (ps, es) = List.split pes in 
-                        e ** L.list es |> map (fun (a, as') -> Case(a, List.combine ps as'))
+     | Match (e, pes) -> let (ps, es) = List.split pes in 
+                        e ** L.list es |> map (fun (a, as') -> Match(a, List.combine ps as'))
      | Singleton e' -> e' |> map (fun a -> Singleton a)
      | Join(e', e'') -> (e' ** e'') |> map (fun (a',a'') -> Join(a', a''))
      | Bind(p, e', e'') -> (e' ** e'') |> map (fun (a',a'') -> Bind(p, a', a''))
      | Annot(e, tp) -> e |> map (fun a -> Annot(a, tp))
      | Box e -> e |> map (fun a -> Box a)
+     | Let(e', e'') -> (e' ** e'') |> map (fun (a',a'') -> Let(a', a''))
+     | LetTuple(n, e', e'') -> (e' ** e'') |> map (fun (a',a'') -> LetTuple(n, a', a''))
+     | Case (e, pes) -> let (ps, es) = List.split pes in 
+                        e ** L.list es |> map (fun (a, as') -> Case(a, List.combine ps as'))
+     | LetBox(e', e'') -> (e' ** e'') |> map (fun (a',a'') -> LetBox(a', a''))
+     | LetSet(e', e'') -> (e' ** e'') |> map (fun (a',a'') -> LetSet(a', a''))
 end
 
 type exp = In of loc * V.t * exp expF 

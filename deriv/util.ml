@@ -56,7 +56,7 @@ module Monoidal(M : MONAD) : (IDIOM with type 'a t = 'a M.t) = struct
                  end)
 end
 
-module Seq(A : IDIOM) : SEQ with type 'a t = 'a A.t = struct
+module Seq(A : IDIOM) : SEQ with type 'a t := 'a A.t = struct
   type 'a t = 'a A.t
 
   open A
