@@ -1,6 +1,6 @@
-module type FUNCTOR = sig 
-  type 'a t 
-  val map : ('a -> 'b) -> 'a t -> 'b t 
+module type FUNCTOR = sig
+  type 'a t
+  val map : ('a -> 'b) -> 'a t -> 'b t
 end
 
 module type MONAD = sig
@@ -69,7 +69,7 @@ end
 
 module Option : sig
   type 'a t = 'a option
-  val some : 'a -> 'a t 
+  val some : 'a -> 'a t
   val none : 'a t
   val option : ('a -> 'b) -> 'b -> 'a t -> 'b
   val return : 'a -> 'a t

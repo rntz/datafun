@@ -16,9 +16,9 @@ let ptuple = function
    | p :: ps -> PTuple (p :: ps)
 
 
-let pos (p, _) = p 
+let pos (p, _) = p
 
-(*    
+(*
 
 let rec make_fun(pos, ps, e) =
   match ps with
@@ -39,20 +39,20 @@ let make_decl_list decls body =
 let make_pure_decl_list decls body =
   List.fold_left
     (fun acc (ppos, x, term, tp) ->
-      let annot (e, tp) = (pos term, EAnnot(e, tp)) in 
+      let annot (e, tp) = (pos term, EAnnot(e, tp)) in
       let elet(p, e1, e2) = (pos term, ELet(p, e1, e2)) in
       let bang e = (pos term, EBang e) in
-      let pbang x = (ppos, PBang x) in 
+      let pbang x = (ppos, PBang x) in
       elet(pbang x, annot(bang term, Pure tp), acc))
     body
     decls
 *)
 
 %}
-%token OF 
-%token DOT 
+%token OF
+%token DOT
 %token VAL
-%token REC 
+%token REC
 %token RPAREN
 %token LPAREN
 %token RBRACE
@@ -75,7 +75,7 @@ let make_pure_decl_list decls body =
 %token LT
 %token LEQ
 %token GT
-%token GEQ 
+%token GEQ
 %token IN
 %token FIX
 %token TRUE
@@ -91,13 +91,13 @@ let make_pure_decl_list decls body =
 %token WITH
 %token BEGIN
 %token END
-%token SET 
-%token BAR 
-%token DOUBLECOLON 
+%token SET
+%token BAR
+%token DOUBLECOLON
 %token <string> CONID
-%token <float> NUM 
-%token <string> STRING 
-%token <string> IDENT 
+%token <float> NUM
+%token <string> STRING
+%token <string> IDENT
 %token EOF
 
 
@@ -105,21 +105,21 @@ let make_pure_decl_list decls body =
 %nonassoc IN
 %nonassoc THEN ELSE
 %nonassoc IF
-%nonassoc LET 
-%right CONS 
+%nonassoc LET
+%right CONS
 %left COLON
 %right DOUBLECOLON
-%right OR 
+%right OR
 %right ANDAND
-%left EQUAL LT LEQ GEQ GT 
+%left EQUAL LT LEQ GEQ GT
 %left PLUS MINUS
-%left TIMES  
+%left TIMES
 
 
 
 
-%type <Ast.tp> tp 
-%type <Ast.tp> test_tp 
+%type <Ast.tp> tp
+%type <Ast.tp> test_tp
 
 %type <Ast.pat * Ast.var list> pat
 %type <Ast.pat * Ast.var list> test_pat
@@ -127,11 +127,11 @@ let make_pure_decl_list decls body =
 /*
 %type <Ast.exp> exp
 %type <Ast.decl> toplevel_decl
-%type <Ast.program> program 
+%type <Ast.program> program
 %type <Ast.signature> signature
 %type <Ast.signature_elt> signature_decl
 
-%type <Ast.exp> test_exp 
+%type <Ast.exp> test_exp
 %type <Ast.decl> test_toplevel_decl
 %type <Ast.program> test_program
 %type <Ast.signature> test_signature
@@ -149,22 +149,22 @@ let make_pure_decl_list decls body =
 
 tp_atom :
   UNIT                      { Product [] }
-| INT         	            { Int }
-| BOOL            	    { Bool }
-| STRING         	    { String }
+| INT			            { Int }
+| BOOL				    { Bool }
+| STRING			    { String }
 | LPAREN tp RPAREN          { $2 }
-| LBRACK ctps RBRACK        { Sum $2 }            
+| LBRACK ctps RBRACK        { Sum $2 }
 ;
 
 ctps :
-                          { [] }   
+                          { [] }
 | CONID COLON tp          { [$1, $3] }
 | CONID COLON tp BAR ctps { ($1, $3) :: $5 }
 ;
 
 tp_app :
 | tp_atom                { $1 }
-| BOX tp_atom      	 { Box $2 }
+| BOX tp_atom		 { Box $2 }
 | SET tp_atom	         { Set $2 }
 ;
 
@@ -173,7 +173,7 @@ and_tps :
 |  AND tp_app and_tps     { $2 :: $3 }
 ;
 
-product_tp : 
+product_tp :
   and_tps                 { product $1 }
 ;
 
@@ -184,24 +184,24 @@ tp :
 
 /* Syntax of patterns */
 
-pat_atom : 
+pat_atom :
   IDENT              { (PVar, [$1]) }
 | TRUE               { (PBool true, []) }
 | FALSE              { (PBool false, []) }
 | LPAREN comma_pat RPAREN  { let (ps, xs) = $2 in (ptuple ps, xs) }
 ;
 
-pat_app : 
+pat_app :
   pat_atom           { $1 }
-| BOX pat_atom       { let (p, xs) = $2 in 
+| BOX pat_atom       { let (p, xs) = $2 in
                        (PBox p, xs) }
-| CONID pat_atom     { let (p, xs) = $2 in 
+| CONID pat_atom     { let (p, xs) = $2 in
                        (PCon($1, p), xs) }
 ;
 
 comma_pat :
   pat_app                  { let (p, xs) = $1 in ([p], xs) }
-| pat_app COMMA comma_pat  { let (p, xs) = $1 in 
+| pat_app COMMA comma_pat  { let (p, xs) = $1 in
                              let (ps, ys) = $3 in
                              (p :: ps, xs @ ys) }
 ;
