@@ -184,9 +184,8 @@
 ;; of the text from i to j inclusive can be produced by the nonterminal P.
 
 ;; In (cyk-step text grammar chart),
-;;
 ;; - `text` is the string we are trying to parse;
-;; - `grammar` is the grammar (set of rules);
+;; - `grammar` is the grammar (set of rules); and
 ;; - `chart` is a set of derived CYK facts.
 (define (cyk-step text grammar chart)
   (union
@@ -228,7 +227,7 @@
 ;; respectable-but-slow worst case, but I think that to achieve that bound in
 ;; Datafun you'd need to index your set of facts carefully, which neither this
 ;; mini-Datafun nor the fuller-featured Datafun implementation we built for the
-;; ICFP 2016 paper can do.
+;; ICFP 2016 paper can do (yet).
 ;;
 ;; Moreover, if I recall correctly, CYK is not just O(n^3) in the worst case but
 ;; even in the best case. So, whether Datafun is a good language for writing
