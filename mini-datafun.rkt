@@ -36,8 +36,8 @@
 
  ;; ---------- Fixed points ----------
 ;; Given a function `f` and an initial value `init` (by default, the empty set),
-;; repeatedly applies `f` until it reaches a value `x` such that `(equal? x (f
-;; x))`, i.e. a fixed point of `f`.
+;; repeatedly applies `f` until it reaches a value `x` such that
+;; `(equal? x (f x))`, i.e. a fixed point of `f`.
 ;;
 ;; Of course, we may never find such an `x`. In Datafun proper, the type system
 ;; restricts uses of `fixed-point` in a way that ensures we always do.
