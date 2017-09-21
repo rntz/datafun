@@ -21,7 +21,7 @@
 ;; - The ICFP 2016 paper    http://www.rntz.net/files/datafun.pdf
 ;; - Our github repo        https://github.com/rntz/datafun/
 ;;
-;; September 2017, Michael Arntzenius <daekharel@gmail.com>
+;; September 2017, Michael Arntzenius, daekharel at gmail dot com
 
 (provide empty union fixed-point fix let*/set join setof)
 (require syntax/parse/define)
