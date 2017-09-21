@@ -136,8 +136,6 @@
     ((list (== y) z) <- S)  ;; for every tuple (y z) in S, where this y equals that previous y,
     (set (list x z))))      ;; yield the tuple (x z).
 
-;; The quasiquotations here are a feature of Racket's pattern matching system.
-
  ;; ---------- Example: transitive closure ----------
 ;; My favorite example program: transitive closure of a relation, or determining
 ;; reachability (by one or more edges) in a graph.
