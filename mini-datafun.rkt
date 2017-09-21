@@ -68,15 +68,15 @@
   #:datum-literals (<-) #:literals (when)
   ;; base case
   [(join body:expr) #'body]
-  ;; inline definitions
+  ;; mixing definitions into your comprehensions can be handy
   [(join d:definition ...+ body ...+) #'(local (d ...) (join body ...))]
   ;; a small optimization that gives nicer-looking macroexpansions
   [(join (x:id <- M:expr) ...+ L ...+) #'(let*/set ([x M] ...) (join L ...))]
-  ;; general case
+  ;; comprehending/looping across a set
   [(join (p <- M:expr) L ...+)
    #'(let*/set ([tmp M])
        (match tmp [p (join L ...)] [_ (set)]))]
-  ;; conditioning
+  ;; conditioning/filtering
   [(join (when condition:expr) L ...+)
    #'(if condition (join L ...) (set))])
 
