@@ -1,12 +1,14 @@
 #lang racket
 
-;; A "mini-Datafun" implemented as a collection of Racket functions and macros.
+;; A "mini-Datafun" implemented as a collection of Racket functions and macros,
+;; with a collection of commented examples. Hopefully a nice introduction to the
+;; core computational ideas of Datafun if you already know Racket or Scheme.
 ;;
-;; HAS:
+;; mini-Datafun HAS:
 ;; - fixed points
 ;; - set comprehensions
 ;;
-;; LACKS:
+;; mini-Datafun LACKS:
 ;; - any optimizations whatsoever
 ;; - type checking
 ;; - monotonicity
@@ -18,11 +20,17 @@
 ;; - Datafun's website      http://www.rntz.net/datafun/
 ;; - The ICFP 2016 paper    http://www.rntz.net/files/datafun.pdf
 ;; - Our github repo        https://github.com/rntz/datafun/
+;;
+;; September 2017, Michael Arntzenius <daekharel@gmail.com>
 
 (provide empty union fixed-point fix let*/set join setof)
 (require syntax/parse/define)
 
  ;; ---------- Basic functions ----------
+;; A finite set data structure is included in Racket's standard library. Racket
+;; makes sets as easy to work with as lists; the 'set function constructs sets,
+;; just like 'list constructs lists. (set 1 2 3) == (set 3 2 1) == (set 1 3 1 2)
+;; all construct the set containing 1, 2, and 3.
 (define empty (set))
 (define (union . xs) (apply set-union (set) xs))
 
@@ -38,6 +46,7 @@
   (if (equal? init next) init
       (fixed-point f #:init next)))
 
+;; (fix x some-expr) == (fixed-point (lambda (x) some-expr))
 (define-simple-macro (fix x:id M:expr)
   (fixed-point (lambda (x) M)))
 
@@ -90,7 +99,7 @@
 
 ;; Cross product of two sets.
 (define (cross A B)
-  (setof `(,a ,b)
+  (setof (list a b)
      (a <- A)
      (b <- B)))
 
@@ -105,27 +114,14 @@
     (y <- B)
     (when (equal? x y))))
 
-;; An equivalent, shorter definition that uses Racket's equality-test pattern
-;; matching feature `==`.
+;; An equivalent, shorter definition using equality-test patterns.
+;; Below, (== x) is a pattern that matches only if it receives a value equal to
+;; `x`. You can find documentation on pattern-matching in Racket at
+;; https://docs.racket-lang.org/reference/match.html
 (define (intersect-variant A B)
   (setof x
     (x <- A)
     ((== x) <- B)))
-
-;; The use of `==` here is a feature of Racket's pattern-matching macro `match`.
-;; If we omitted `==` and replaced this by:
-;;
-;;     (define (intersect A B)
-;;       (setof x
-;;         (x <- A)
-;;         (x <- B)))
-;;
-;; Then (x <- B) would shadow (x <- A), and intersect would behave as if we had
-;; written:
-;;
-;;     (define (intersect A B) B)
-;;
-;; which is wrong.
 
 ;; The composition of binary relations R and S; relates x to z iff ∃y such that
 ;; xRy and ySz.
@@ -177,10 +173,10 @@
 ;;
 ;; To put this in Chomsky normal form, we need a few auxiliary nonterminals.
 (define paren-grammar
-  (set `(term "")                       ;; term --> ""
-       `(term LP rest) `(rest term RP)  ;; term --> "(" term ")"
-       `(term term term)                ;; term --> term term
-       `(LP "(") `(RP ")")))            ;; nonterminals for parentheses
+  (set '(term "")                       ;; term --> ""
+       '(term LP rest) '(rest term RP)  ;; term --> "(" term ")"
+       '(term term term)                ;; term --> term term
+       '(LP "(") '(RP ")")))            ;; nonterminals for parentheses
 
 ;; The CYK algorithm can be viewed as a forward-chaining logic program which
 ;; repeatedly derives "facts" of the form (P i j), where P is a nonterminal, and
