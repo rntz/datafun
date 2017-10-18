@@ -46,9 +46,14 @@
   (if (equal? init next) init
       (fixed-point f #:init next)))
 
-;; (fix x some-expr) == (fixed-point (lambda (x) some-expr))
-(define-simple-macro (fix x:id M:expr)
-  (fixed-point (lambda (x) M)))
+;; Constructs a fixed point from a union of many possibly self-referential
+;; expressions.
+;;
+;; (fix (x) expr1 expr2 ... exprN)
+;; ==>
+;; (fixed-point (lambda (x) (union expr1 expr2 ... exprN)))
+(define-simple-macro (fix (x:id) M:expr ...)
+  (fixed-point (lambda (x) (union M ...))))
 
 ;; (let*/set ([x indices]) inner-set) computes the union of all `inner-set`s
 ;; for each x in `indices`. It's the monadic bind operator for sets.
@@ -141,7 +146,7 @@
 ;; reachability (by one or more edges) in a graph.
 (define (paths edges)
   ;; A path is either an edge or a composition of two paths.
-  (fix self (union edges (compo self self))))
+  (fix (self) edges (compo self self)))
 
 (define diamond-graph (set '(a b) '(a c) '(b d) '(c d)))
 (define line-graph (set '(0 1) '(1 2) '(2 3) '(3 4)))
@@ -181,31 +186,27 @@
 ;; i and j are indices with i <= j+1. The fact (P i j) means that the substring
 ;; of the text from i to j inclusive can be produced by the nonterminal P.
 
-;; In (cyk-step text grammar chart),
+;; In (cyk-run text grammar),
 ;; - `text` is the string we are trying to parse;
-;; - `grammar` is the grammar (set of rules); and
-;; - `chart` is a set of derived CYK facts.
-(define (cyk-step text grammar chart)
-  (union
-   ;; try to derive using rules of the form (P Q R)
-   ;; by concatenating already-derived facts for Q and R.
-   (join ((list P Q R)           <- grammar)
-         ((list (== Q) i j)      <- chart)
-         ((list (== R) (== j) k) <- chart)
-         (set (list P i k)))
-   ;; try to derive using rules of the form (P s)
-   ;; by matching `s` against every possible position in `text`.
-   (join ((list P s) <- grammar)
-         (define n (string-length s))
-         (i <- (range (+ 1 (- (string-length text) n))))
-         ;; (define _ (printf "substring ~v ~v ~v\n" text i n))
-         (when (equal? s (substring text i (+ i n))))
-         (set (list P i (+ i n))))))
-
-;; To find the chart (set of derived facts) for a given text, we just find the
-;; fixed-point of cyk-step.
+;; - `grammar` is the grammar (set of rules).
+;; and we produce a chart of derived CYK facts.
 (define (cyk-run text grammar)
-  (fix chart (cyk-step text grammar chart)))
+  ;; `chart` is a set of derived CYK facts.
+  (fix (chart)
+    ;; try to derive using rules of the form (P Q R)
+    ;; by concatenating already-derived facts for Q and R.
+    (join ((list P Q R)           <- grammar)
+          ((list (== Q) i j)      <- chart)
+          ((list (== R) (== j) k) <- chart)
+          (set (list P i k)))
+    ;; try to derive using rules of the form (P s)
+    ;; by matching `s` against every possible position in `text`.
+    (join ((list P s) <- grammar)
+          (define n (string-length s))
+          (i <- (range (+ 1 (- (string-length text) n))))
+          ;; (define _ (printf "substring ~v ~v ~v\n" text i n))
+          (when (equal? s (substring text i (+ i n))))
+          (set (list P i (+ i n))))))
 
 ;; Yields the set of nonterminals which can generate the given string.
 (define (cyk-parse text grammar)
