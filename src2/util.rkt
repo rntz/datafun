@@ -2,6 +2,7 @@
 
 (require racket syntax/parse/define (for-syntax racket/syntax))
 ;; re-export syntax/parse/define, it's fantastic.
+;; TODO: remove this.
 (provide (all-from-out syntax/parse/define))
 
 ;; (require (for-syntax syntax/parse))
@@ -117,11 +118,17 @@
   (or/c (struct/c name arg/c ...) ...))
 
 
+;;; Contract utilities
+(provide define-flat-contract)
+(define-syntax-rule (define-flat-contract name branches ...)
+  (define name (opt/c (flat-rec-contract name (or/c branches ...)))))
+
+
 ;;; Miscellaneous utilities
 (provide TODO assert! warn! flip print-error eta read-file)
 
 (define-syntax-parser TODO
-  [_:id #'(error "TODO: unimplemented")])
+  [_ #'(error "TODO: unimplemented")])
 
 (define (assert! t)
   (unless t (error "ASSERTION FAILURE")))
