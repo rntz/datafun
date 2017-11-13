@@ -53,8 +53,9 @@
 ;; and/c, but and/c doesn't actually act like an intersection type - it just
 ;; applies all the contracts in order). I could probably use a dependent
 ;; contract, but meh.
-(define/contract (fuzzy-type-merge A B)
-  (-> fuzzy-type? fuzzy-type? fuzzy-type?)
+(define/contract (fuzzy-type-merge A B [orelse #f])
+  (->* (fuzzy-type? fuzzy-type?) ((or/c #f (-> fuzzy-type? fuzzy-type? fuzzy-type?)))
+       fuzzy-type?)
   (match* (A B)
     [(A B) #:when (eq? A B) A]
     [(A '_) A]
@@ -67,6 +68,8 @@
      ;; sums must have *same* sets of tags. fuzzy type merging has nothing to do
      ;; with subtyping!
      #:when (equal? (hash-keyset h1) (hash-keyset h2))
-     `(+ ,(hash-map-vals fuzzy-type-merge h1 h2))]
+     ;; shit, this won't work! hash-map-vals takes only one hash argument!
+     `(+ ,(TODO (hash-map-vals fuzzy-type-merge h1 h2)))]
     ;; TODO: good error messages
-    [(_ _) (error (format "cannot unify ~s with ~s" A B))]))
+    [(_ _) (if orelse (orelse A B)
+               (error (format "cannot unify ~s with ~s" A B)))]))

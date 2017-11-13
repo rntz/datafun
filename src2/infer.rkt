@@ -31,17 +31,35 @@
 (define (infer expr [expected-type '_])
   (type-awarely (lambda (t x) t) expr expected-type))
 
+(define/contract (pat->env pat type)
+  (-> pat? exact-type? env?)
+  (match* (pat type)
+    [((? symbol? x) A) (hash x (hyp 'mono A))]
+    [(`(tag ,n ,(? symbol? x)) `(+ ,h)) #:when (hash-has-key? h n)
+     (hash x (hyp 'mono (hash-ref h n)))]
+    [(_ _) (error "invalid pattern for type:" type)]))
+
+
+;; It would be nice if our notion of fuzzy types was powerful enough to encode
+;; this directly.
+(define/contract (expect-sum type [orelse #f])
+  (-> fuzzy-type? (or/c '_ (hash/c symbol? fuzzy-type?)))
+  (match type
+    [`(+ ,h) h]
+    ['_ '_]
+    [_ (if orelse (orelse) (error "expected a sum type, got:" type))]))
+
 (define (type-awarely func expr [expected-type '_])
   ;; func : (-> exact-type? (expr-over X) X)
   (define env (make-parameter #f))
 
-  (define-syntax-rule (w/vars ([name tone type] ...) body ...)
-    (parameterize ([env (let ([E (env)])
-                          (set! E (hash-set E name (hyp tone type))) ...
-                          E)])
-      body ...))
+  (define-syntax-rule (with-env new-env body ...)
+    (parameterize ([env (hash-union-right (env) new-env)]) body ...))
 
-  (define-syntax-rule (w/tone tone body ...)
+  (define-syntax-rule (with-vars ([name tone type] ...) body ...)
+    (with-env (make-immutable-hash `((,name . ,(hyp tone type)) ...)) body ...))
+
+  (define-syntax-rule (with-tone tone body ...)
     (parameterize ([env (env-for-tone tone (env))]) body ...))
 
   (define ((infer expr) expected-type)
@@ -76,6 +94,11 @@
         ;; ----- base types & primitive ops -----
         [(app lit-type A) #:when A `(,(synth A) ,expr)]
 
+        [`(if ,Mf ,Nf ,Of)
+         (match-define `(bool ,Ma) (with-tone 'disc (Mf 'bool)))
+         (match-define `(,Nt ,Na) (Nf expected-type))
+         `(,Nt (if ,Ma ,Na ,(cadr (Of Nt))))]
+
         [`(when ,Mf ,Nf)
          (match-define `(,Nt ,Na) (Nf expected-type))
          (unless (semilattice-type? Nt)
@@ -87,7 +110,7 @@
          (match-define `(-> ,A ,B) (synth '(-> _ _)))
          (unless (exact-type? A)
            (error "cannot infer argument type for lambda expression"))
-         (match-define `(,Mt ,Ma) (w/vars ([x 'mono A]) (Mf B)))
+         (match-define `(,Mt ,Ma) (with-vars ([x 'mono A]) (Mf B)))
          `((-> ,A ,Mt) (lambda ,x ,Ma))]
 
         [`(call ,Mf ,Nf)
@@ -98,13 +121,24 @@
         ;; ----- discrete boxes -----
         [`(box ,Mf)
          (match-define `(box ,A) (synth `(box _)))
-         (match-define `(,Mt ,Ma) (w/tone 'disc (Mf A)))
+         (match-define `(,Mt ,Ma) (with-tone 'disc (Mf A)))
          `((box ,Mt) (box ,Ma))]
 
         [`(letbox ,x ,Mf ,Nf)
          (match-define `((box ,A) ,Ma) (Mf '(box _)))
-         (match-define `(,Nt ,Na) (w/vars ([x 'disc A]) (Nf expected-type)))
+         (match-define `(,Nt ,Na) (with-vars ([x 'disc A]) (Nf expected-type)))
          `(,Nt (letbox ,x ,Ma ,Na))]
+
+        ;;      M : [](A + B)
+        ;; ----------------------
+        ;; splitsum M : []A + []B
+        [`(splitsum ,Mf)
+         (match-define `((box ,A) ,Ma)
+           (Mf `(box ,(match (expect-sum expected-type)
+                        ['_ '_]
+                        [h `(+ ,(hash-map-vals (curry fuzzy-type-merge '(box _)) h))]))))
+         `(,(+ (hash-map-vals (lambda (x) `(box x)) (expect-sum A)))
+           (splitsum ,Ma))]
 
         ;; ----- sets, semilattices, fix -----
         [`(set ,Mf)
@@ -125,13 +159,18 @@
          (define Mas (for/list ([f Mfs]) (cadr (f Mt))))
          `(,Mt (lub ,Ma ,@Mas))]
 
-        [`(for ,x ,M ,N) TODO]
+        [`(for ,x ,Mf ,Nf)
+         (match-define `((set ,A) ,Ma) (Mf '(set _)))
+         (match-define `(,Nt ,Na) (with-vars ([x 'disc A]) (Nf expected-type)))
+         (unless (semilattice-type? Nt)
+           (error "Cannot take for-lub over non-semilattice type:" Nt))
+         `(,Nt (for ,x ,Ma ,Na))]
 
         [`(fix ,x ,Mf)
          (define A expected-type)
          (unless (exact-type? A) (error "Cannot infer type for fix expression" A))
          (unless (fixpoint-type? A) (error "Cannot use fix at non-semilattice type:" A))
-         (match-define `(,_ ,Ma) (w/vars ([x 'mono A]) (Mf A)))
+         (match-define `(,_ ,Ma) (with-vars ([x 'mono A]) (Mf A)))
          `(,A (fix ,x ,Ma))]
 
         ;; ----- tuples & sums -----
@@ -140,9 +179,62 @@
          (match-define `((,Mts ,Mas) ...) (for/list ([A As] [Mf Mfs]) (Mf A)))
          `((* ,@Mts) (cons ,@Mas))]
 
-        [`(proj ,i ,M) TODO]
-        [`(tag ,n ,M) TODO]
-        [`(case ,M (,ps ,Ns) ...) TODO]))
+        [`(proj ,i ,Mf)
+         ;; unfortunately it's not possible to propagate the information that M
+         ;; is a tuple whose i'th element has type expected-type here, because we
+         ;; don't know how *long* the tuple should be. if we had a more general
+         ;; notion of fuzzy type, maybe this could work.
+         (match (Mf '_)
+           [`((* ,@As) ,Ma) #:when (< i (length As))
+            `(,(synth (list-ref As i)) (proj ,i ,Ma))]
+           [`((* ,@As) ,_) (error "tuple too short:" As)]
+           [`(,Mt ,_) (error "projecting from non-tuple:" Mt)])]
+
+        [`(tag ,n ,Mf)
+         (define branches
+           (match expected-type
+             [`(+ ,h) h]
+             ['_ (error "cannot infer type for tag expression")]
+             [A (error "tag expression cannot have non-sum type:" A)]))
+         (define (fail)
+           (error "expression's tag is not a member of its type:" expected-type))
+         (match-define `(,Mt ,Ma) (Mf (hash-ref branches n fail)))
+         (define A (hash-set branches n Mt))
+         (unless (exact-type? A) (error "cannot infer other branches of sum type:" A))
+         `((+ ,A) (tag ,n ,Ma))]
+
+        [`(case ,Mf (,ps ,Nfs) ...)
+         ;; determine type of subject.
+         (match-define `(,Mt ,Ma) (Mf '_))
+
+         ;; TODO FIXME: check exhaustiveness
+         ;; (define summands
+         ;;   (match Mt [`(+ ,h) h]
+         ;;             [_ (error "cannot pattern-match on subject of type:" Mt)]))
+         ;; (define tags (hash-keyset summands))
+
+         (define type expected-type)
+         (define branches-anno
+           (for/list ([p ps] [Nf Nfs])
+             ;; find the types of the variables bound.
+             (with-env (pat->env p Mt)
+               (match-define `(,Nt ,Na) (Nf type))
+               (set! type Nt)
+               `(,p ,Na))))
+         `(,type (case ,Ma ,@branches-anno))
+         #;
+         (match ps
+           ;; if it ends with a catch-all case, OK.
+           [`(,(tag ,ns ,_) ... (? symbol?) ,@rest)
+            (unless (null? rest) (error "unreachable cases"))
+            ns]
+           ;; otherwise, has to be exhaustive
+           [`((tag ,ns ,_) ...)
+            (match* (subset? (list->set ns) tags)
+              [(#f _) (error "unreachable case branch for type:" Mt)]
+              [(_ #f) (error "non-exhaustive cases for type:" Mt)]
+              [(#t #t) (void)])])]))
+
     `(,type ,(func type expr-anno)))
 
   (parameterize ([env (hash)])

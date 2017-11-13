@@ -34,8 +34,8 @@
 
    ;; ---------- base types & primitive operations ----------
    lit?
-   ;; monotone boolean elimination.
-   (list/c 'when expr? expr?)
+   (list/c 'if expr? expr? expr?) ;; discrete boolean elimination
+   (list/c 'when expr? expr?)     ;; monotone boolean elimination.
 
    ;; ---------- functions ----------
    (list/c 'lambda symbol? expr?)
@@ -44,6 +44,7 @@
    ;; ----- discrete boxes -----
    (list/c 'box expr?)
    (list/c 'letbox symbol? expr? expr?)
+   (list/c 'splitsum expr?)
 
    ;; ---------- sets, semilattices, fixed points ----------
    (list/c 'set expr?) ;; singleton sets only.
@@ -81,7 +82,7 @@
     [`(case ,M (,ps ,Ns) ...)
      `(case ,(f M) ,@(for/list ([p ps] [N Ns]) `(,p ,(f N))))]
     ;; many forms just take a list of expressions.
-    [`(,(and oper (or 'set 'lub 'cons 'call 'when 'box)) ,@Ms)
+    [`(,(and oper (or 'set 'lub 'cons 'call 'when 'if 'box)) ,@Ms)
      `(,oper ,@(map f Ms))]))
 
 (define (expr-fold expr func)
