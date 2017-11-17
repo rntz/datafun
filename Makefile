@@ -1,25 +1,27 @@
-# TODO: bibliography file
-# pandoc --filter pandoc-citeproc $< --biblio BIBLIOFILE
-PANDOC:=pandoc --standalone
-PANDOC_TEX:=--include-in-header rntz.sty --variable=geometry:margin=1in
+LATEXRUN := ./latexrun/latexrun
 
-SOURCES:=$(wildcard system*.md)
-AUXIL:=$(wildcard *.sty) Makefile
-PDFS:=$(addsuffix .pdf,$(basename $(SOURCES)))
+TEXS  := tonality-inference.tex
+# other things which affect compilation result
+AUXIL := $(wildcard *.sty) Makefile
+PDFS  := $(addsuffix .pdf,$(basename $(TEXS)))
 
-.PHONY: all watch
+.PHONY: all watch clean FORCE
 all: $(PDFS)
 watch: all
-	@while inotifywait -e modify $(SOURCES) $(AUXIL); do make all; done
+	@while inotifywait -e modify $(TEXS) $(AUXIL) >/dev/null 2>&1; do \
+		echo; \
+		make --no-print-directory -j all; \
+	done
 
-%.pdf: %.md $(AUXIL)
-	$(PANDOC) $(PANDOC_TEX) $< -o $@
+%.pdf: %.tex FORCE
+	$(LATEXRUN) $<
 
 %.tex: %.md $(AUXIL)
 	$(PANDOC) $(PANDOC_TEX) $< -o $@
 
 clean:
-	rm -f *.pdf
+	$(LATEXRUN) --clean-all
+	rm -r latex.out
 
 # debugging: `make print-FOO` will print the value of $(FOO)
 .PHONY: print-%

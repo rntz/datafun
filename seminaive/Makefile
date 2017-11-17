@@ -4,7 +4,7 @@ TEXS    := seminaive.tex fixderiv.tex
 # other things which affect compilation result
 DEPENDS := Makefile $(wildcard *.sty)
 
-.PHONY: all watch view clean FORCE
+.PHONY: all watch clean FORCE
 all: $(TEXS:.tex=.pdf)
 
 watch: all

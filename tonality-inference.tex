@@ -1,0 +1,268 @@
+\documentclass{article}
+\usepackage[a4paper,margin=0.8in]{geometry}
+
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{latexsym}
+\usepackage{mathpartir}
+
+% for semantic brackets
+\usepackage{stmaryrd}
+
+%% for \dblcolon
+\usepackage{mathtools}
+
+%% uses the AMS Euler math font.
+%% \usepackage{euler}
+
+%% for \underaccent
+\usepackage{accents}
+
+%% for colors
+%% must be loaded before tikz in order for options to take effect :/
+\usepackage[dvipsnames]{xcolor}
+
+
+%% Commands
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{principle}{Principle}
+
+\newcommand{\todo}[1]{{\color{red}#1}}
+
+\newcommand{\bnfeq}{\dblcolon=}
+\newcommand{\defeq}{\overset{\ms{def}}{=}}
+
+\newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\mb}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\mi}[1]{\ensuremath{\mathit{#1}}}
+\newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}
+
+\newcommand{\GG}{\Gamma}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\fn}{\lambda}
+\newcommand{\binder}{.\,}
+\newcommand{\bind}[1]{{#1}\binder}
+\newcommand{\sub}[1]{\{{#1}\}}
+\newcommand{\Disc}[1]{\square{#1}}
+\newcommand{\fix}{\ms{fix}}
+
+\newcommand{\den}[1]{\llbracket{#1}\rrbracket}
+
+%% tones: mono, anti, discrete, bivariant
+\newcommand{\tm}{+}    \newcommand{\ta}{-}
+\newcommand{\ti}{\top} \newcommand{\tb}{\bot}
+
+\renewcommand{\tm}{1}   \renewcommand{\ta}{-1}
+\renewcommand{\ti}{{\star}} \renewcommand{\tb}{0}
+
+\newcommand{\h}[3]{#1 :^{#3}\! {#2}}
+\newcommand{\hm}[2]{\h{#1}{#2}{\tm}}
+\newcommand{\ha}[2]{\h{#1}{#2}{\ta}}
+\newcommand{\hi}[2]{\h{#1}{#2}{\ti}}
+\newcommand{\hb}[2]{\h{#1}{#2}{\tb}}
+
+\title{Tonality and inference}
+\author{Michael Robert Arntzenius}
+\date{16 November 2017}
+
+
+\begin{document}
+\maketitle
+
+\begin{mathpar}
+  \begin{array}{cccc}
+    \text{tones}
+    & s,t,u,v
+    & \bnfeq & \tm ~|~ \ta ~|~ \tb ~|~ \ti
+    \vspace{0.5em}\\
+    \text{contexts}
+    & \GG &\bnfeq& \cdot ~|~ \GG, \h{x}{A}{s}
+    \vspace{0.5em}\\
+    \text{types} & A,B,C \vspace{0.5em}\\
+    \text{terms} & M,N,O \vspace{0.5em}\\
+    \text{judgment}
+    & J &\bnfeq& \GG \vdash \h{M}{A}{s}
+  \end{array}
+\end{mathpar}
+
+Tones represent ways a function may respect or disrespect the orderings on its
+arguments. $\tm$ is monotone; $\ta$ is antitone (monotone in the opposite
+ordering); $\tb$ is bivariant (monotone and antitone); and $\ti$ is invariant
+(only respects equivalence).
+
+Formally, tones are properties of maps between preorders (sets equipped with
+reflexive, transitive relations):\,\footnote{It is probably possible to
+  generalize tones to properties of functors and categories, but we do not do
+  this here.}
+
+\[\begin{array}{cccc}
+  \textbf{Name}
+  & \textbf{Symbol}
+  & \textbf{As function property}
+  & \textbf{As functor, }\textsf{Preorder} \to \textsf{Preorder}\\
+  \text{Monotone} &
+  \tm & x \le y \implies f(x) \le f(y)
+  & \text{identity}\\
+  \text{Antitone} &
+  \ta & x \ge y \implies f(x) \le f(y)
+  & \text{opposite ordering}\\
+  \text{Bivariant} &
+  \tb & x \le y \vee y \le x \implies f(x) \le f(y)
+  & \text{equivalence closure}\\
+  \text{Invariant} &
+  \ti & x \le y \wedge y \le x \implies f(x) \le f(y)
+  & \text{induced equivalence}
+\end{array}\]
+
+In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
+\implies x = y \implies f(x) = f(y)$), so we sometimes call $\ti$ the
+``discrete'' tone, because it respects only the discrete ordering.
+
+We define two operators of interest on tones: join $s \vee t$ and composition $s
+\circ t$. Tone join $s \vee t$ is the join of the lattice ordered $\tb < \{\ta,
+\tm\} < \ti$. Tone composition $s \circ t$ gives the general tone of a composed
+function $f \circ g$ when $f$ has tone $s$ and $g$ has tone $t$:
+
+\begin{mathpar}
+  \begin{array}{c|rrrrr}
+    s \vee t & \tm & \tb & \ta & \ti\\\hline
+    \tm & \tm & \tm & \ti & \ti\\
+    \tb & \tm & \tb & \ta & \ti\\
+    \ta & \ti & \ta & \ta & \ti\\
+    \ti & \ti & \ti & \ti & \ti
+  \end{array}
+
+  \begin{array}{c|rrrr}
+    s \circ t & \tm & \tb & \ta & \ti\\\hline
+    \tm & \tm & \tb & \ta & \ti\\
+    \tb & \tb & \tb & \tb & \tb\\
+    \ta & \ta & \tb & \tm & \ti\\
+    \ti & \ti & \tb & \ti & \ti
+  \end{array}
+\end{mathpar}
+
+\emph{N.B.} Monotonicity Types by Clancy, Miller, and Meiklejohn has a diagram
+much like this! However, instead of bivariance they have constancy, a stricter
+condition. They write $\uparrow$ for our $\tm$, $\downarrow$ for our $\ta$, $?$
+for our $\ti$, and $\sim$ for constancy; they also add $=$ for the identity
+function.
+%%
+They also have a contraction operator (``+'') on tones (``qualifiers''). I'm not
+sure how or if contraction relates to tone join.
+
+Composition $\circ$ is a commutative monoid with $\tm$ as identity and $\tb$ as
+an absorbing (``zero'', ``annihilating'') element. $\ti$ absorbs all elements
+other than $\tb$, and $\ta$ is its own inverse. \todo{Does it interact with
+  $\vee$ in any interesting ways?}
+
+
+\section{Substitution as guiding principle}
+
+We wish to justify some variant of the following substitution principle:
+
+\begin{principle}[Substition]
+  If $\GG_1 \vdash \h{M}{A}{s}$ and $\GG_2,\, \h{x}{A}{s} \vdash \h{N}{B}{t}$,
+  then \(\GG_1 \cup \GG_2 \vdash \h{N\sub{x \mapsto M}}{B}{t}\).
+\end{principle}
+
+It's not yet clear what $\GG_1 \cup \GG_2$ should mean, exactly; we will return to
+this question.
+
+
+\section{Equality of judgments at different tones}
+
+\subsection{By example}
+
+We hold the following judgments to be equal:
+\begin{equation}\label{eqn:ex1}
+ \ha{x}{A} \vdash \hm{M}{B} ~=~ \hm{x}{A} \vdash \ha{M}{B}
+\end{equation}
+
+The first judgment says the sub-expression $M$, used monotonically, will use the
+variable $x$ anti-tonically. The second says that $M$, used anti-tonically, will
+use the variable $x$ monotonically.
+
+Let $f : \den{A} \to \den{B}$ be the denotation of $M$ as a single-argument
+function of $x$. The first judgment says that $f$ is a monotone map from
+$\den{A}$ to $\den{B}^{\ms{op}}$; the second that $f$ is monotone from
+$\den{A}^{\ms{op}}$ to $\den{B}$. These amount to the same thing: $f$ is
+antitone.
+
+We also consider these judgments to be equal:
+\begin{equation}
+  \hm{x}{A} \vdash \hi{M}{B}
+  ~=~
+  \ha{x}{A} \vdash \hi{M}{B}
+  ~=~
+  \hb{x}{A} \vdash \hi{M}{B}
+\end{equation}
+
+\todo{When the conclusion is invariant, the only tone distinction that matters
+  on the variables is between invariant and everything else; any two non-$\ti$
+  tones are interchangeable.}
+
+Finally, we consider these judgments to be equal:
+\begin{equation} \label{eqn:ex3}
+  \hb{x}{A} \vdash \hb{M}{B}
+  ~=~
+  \hb{x}{A} \vdash \hm{M}{B}
+  ~=~
+  \hb{x}{A} \vdash \ha{M}{B}
+  ~=~
+  \hb{x}{A} \vdash \hi{M}{B}
+\end{equation}
+
+\todo{When the hypotheses are all bivariant, the tone of the conclusion is
+  irrelevant.}
+
+
+\subsection{In general}
+The general pattern which unifies equations \ref{eqn:ex1}--\ref{eqn:ex3} is:
+
+\newcommand{\hilited}{\color{blue}}
+
+\begin{equation}
+  \overline{\h{x_i}{A_i}{\hilited s_i}}^i \vdash \h{M}{B}{\hilited t}
+  ~=~
+  \overline{\h{x_i}{A_i}{\hilited t \circ s_i}}^i
+  \vdash \h{M}{B}{\hilited\tm}
+\end{equation}
+
+\todo{TODO: doublecheck! triplecheck!}
+
+
+\section{Punchline}
+
+\todo{TODO}
+
+The declarative typing rule for \textbf{let}, which internalizes the
+substitution principle, is:
+\begin{mathpar}
+  \infer{
+    \GG \vdash \h{M}{B}{s}
+    \quad
+    \GG, \h{x}{B}{s} \vdash \h{N}{C}{t}
+  }{
+    \GG \vdash \textbf{let}~ x = M ~\textbf{in}~ \h{N}{C}{t}
+  }
+\end{mathpar}
+
+This can be bidirectionalized as follows, recalling that in a context, the
+variables' types are inputs, but their tones are outputs:
+\begin{mathpar}
+  \infer{
+    \overline{\h{x_i}{A_i}{\hilited s_i}}^i \vdash M \Rightarrow B
+    \quad
+    \overline{\h{x_i}{A_i}{\hilited t_i}}^i,\, \h{y}{B}{\hilited u}
+    \vdash N : C
+  }{
+    \overline{\h{x_i}{A_i}{\hilited (u \circ s_i) \vee t_i}}^i
+    \vdash \textbf{let}~ y = M ~\textbf{in}~ N : C
+  }
+\end{mathpar}
+
+\todo{TODO: explain what I mean by overline notation.}
+
+\end{document}
