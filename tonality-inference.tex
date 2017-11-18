@@ -1,9 +1,11 @@
 \documentclass{article}
 \usepackage[a4paper,margin=0.8in]{geometry}
 
-\usepackage{amssymb,amsmath,amsthm}
-\usepackage{latexsym}
+\usepackage{amssymb,amsmath,amsthm,latexsym}
 \usepackage{mathpartir}
+
+\usepackage{url}
+\usepackage{hyperref}
 
 % for semantic brackets
 \usepackage{stmaryrd}
@@ -51,11 +53,11 @@
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
 
 %% tones: mono, anti, discrete, bivariant
-\newcommand{\tm}{+}    \newcommand{\ta}{-}
-\newcommand{\ti}{\top} \newcommand{\tb}{\bot}
-
-\renewcommand{\tm}{1}   \renewcommand{\ta}{-1}
-\renewcommand{\ti}{{\star}} \renewcommand{\tb}{0}
+\newcommand{\tm}{1}             % monotone
+\newcommand{\ta}{-1}            % antitone
+\newcommand{\ti}{{\star}}       % invariant / discrete
+\newcommand{\tb}{0}             % bivariant
+\newcommand{\tc}{\cdot}         % tone composition
 
 \newcommand{\h}[3]{#1 :^{#3}\! {#2}}
 \newcommand{\hm}[2]{\h{#1}{#2}{\tm}}
@@ -121,9 +123,9 @@ In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
 ``discrete'' tone, because it respects only the discrete ordering.
 
 We define two operators of interest on tones: join $s \vee t$ and composition $s
-\circ t$. Tone join $s \vee t$ is the join of the lattice ordered $\tb < \{\ta,
-\tm\} < \ti$. Tone composition $s \circ t$ gives the general tone of a composed
-function $f \circ g$ when $f$ has tone $s$ and $g$ has tone $t$:
+\tc t$. Tone join $s \vee t$ is the join of the lattice ordered $\tb < \{\ta,
+\tm\} < \ti$. Tone composition $s \tc t$ gives the general tone of a composed
+function $f \circ g$ when $f$ has tone $t$ and $g$ has tone $s$:
 
 \begin{mathpar}
   \begin{array}{c|rrrrr}
@@ -135,7 +137,7 @@ function $f \circ g$ when $f$ has tone $s$ and $g$ has tone $t$:
   \end{array}
 
   \begin{array}{c|rrrr}
-    s \circ t & \tm & \tb & \ta & \ti\\\hline
+    s \tc t & \tm & \tb & \ta & \ti\\\hline
     \tm & \tm & \tb & \ta & \ti\\
     \tb & \tb & \tb & \tb & \tb\\
     \ta & \ta & \tb & \tm & \ti\\
@@ -152,7 +154,7 @@ function.
 They also have a contraction operator (``+'') on tones (``qualifiers''). I'm not
 sure how or if contraction relates to tone join.
 
-Composition $\circ$ is a commutative monoid with $\tm$ as identity and $\tb$ as
+Composition $\tc$ is a commutative monoid with $\tm$ as identity and $\tb$ as
 an absorbing (``zero'', ``annihilating'') element. $\ti$ absorbs all elements
 other than $\tb$, and $\ta$ is its own inverse. \todo{Does it interact with
   $\vee$ in any interesting ways?}
@@ -199,9 +201,9 @@ We also consider these judgments to be equal:
   \hb{x}{A} \vdash \hi{M}{B}
 \end{equation}
 
-\todo{When the conclusion is invariant, the only tone distinction that matters
-  on the variables is between invariant and everything else; any two non-$\ti$
-  tones are interchangeable.}
+This is because, when the conclusion is invariant, the only tone distinction
+that matters on the variables is between invariant and everything else; any two
+non-$\ti$ tones are interchangeable.
 
 Finally, we consider these judgments to be equal:
 \begin{equation} \label{eqn:ex3}
@@ -214,8 +216,8 @@ Finally, we consider these judgments to be equal:
   \hb{x}{A} \vdash \hi{M}{B}
 \end{equation}
 
-\todo{When the hypotheses are all bivariant, the tone of the conclusion is
-  irrelevant.}
+This is because, when the hypotheses are all bivariant, the tone of the
+conclusion is irrelevant.
 
 
 \subsection{In general}
@@ -224,13 +226,66 @@ The general pattern which unifies equations \ref{eqn:ex1}--\ref{eqn:ex3} is:
 \newcommand{\hilited}{\color{blue}}
 
 \begin{equation}
+  \overline{\h{x_i}{A_i}{\hilited s_i}}^i \vdash \h{M}{B}{\hilited t \tc u}
+  ~=~
+  \overline{\h{x_i}{A_i}{\hilited s_i \tc t}}^i
+  \vdash \h{M}{B}{\hilited u}
+\end{equation}
+
+Or, perhaps more simply:
+\begin{equation}
   \overline{\h{x_i}{A_i}{\hilited s_i}}^i \vdash \h{M}{B}{\hilited t}
   ~=~
-  \overline{\h{x_i}{A_i}{\hilited t \circ s_i}}^i
+  \overline{\h{x_i}{A_i}{\hilited s_i \tc t}}^i
   \vdash \h{M}{B}{\hilited\tm}
 \end{equation}
 
-\todo{TODO: doublecheck! triplecheck!}
+\todo{TODO: Justify in terms of semantics of substitution as function
+  composition.}
+
+\subsubsection{On overline notation}
+
+An overlined and superscripted meta-expression $\overline{X}^i$ represents a
+sequence (of unspecified length) with index variable $i$. The index variables
+clarify which bits are repeated \emph{with variation}, and which \emph{without}.
+Two examples:
+
+\begin{center}
+  \begin{tabular}{lcll}
+    $\overline{x_i : A_i}^i$ & stands for
+    & $x_1 : A_1,\, x_2 : A_2,\, ...,\, x_n : A_n$
+    \\
+    $\overline{x_i : A}^i$ & stands for
+    & $x_1 : A,\hspace{0.6em} x_2 : A,\hspace{0.6em} ...,\, x_n : A$
+    & ($A$ is unsubscripted, so stays the same)
+  \end{tabular}
+\end{center}
+
+This is inspired by {Guy Steele's talk on Computer Science
+  Metanotation.\footnote{There are videos of the talk at
+    \href{https://www.youtube.com/watch?v=dCuZkaaou0Q}{Clojure/conj 2017} (the
+    one I watched), \href{https://www.youtube.com/watch?v=7HKbjYqqPPQ}{PPoPP
+      2017}, and
+    \href{https://www.youtube.com/watch?v=8fCfkGFF7X8&feature=youtu.be&t=37m46s}{Harvard
+      University}. There are also
+    \href{http://s3.amazonaws.com/erlang-conferences-production/media/files/000/000/755/original/Guy_L._Steele_-_A_Cobbler's_Child.pdf?1510053539}{slides
+      from Code Mesh 2017}.}
+%%
+In the talk, Guy analyses ``overline notation'' --- the use of $\overline{x}$ to
+stand for a sequence $x_1, x_2, ..., x_n$.
+%% However, in a complicated overlined
+%% meta-expression, it can be unclear which parts are meant to be repeated
+%% \emph{with variation}, and which \emph{without}: Does $\overline{x : A}$ stand
+%% for $x_1 : A_1, x_2 : A_2, ..., x_n : A_n$, or for $x_1 : A, x_2 : A, ..., x_n :
+%% A$ (or even for $x : A_1, x : A_2, ..., x : A_n$)?
+Inspired by quasiquotation in Lisp, he proposes using underlines to indicate
+parts which are repeated \emph{without variation}. Thus $\overline{x : A}$
+stands for $x_1 : A_1, ..., x_n : A_n$, while $\overline{x : \underline{A}}$
+stands for $x_1 : A, ..., x_n : A$.
+%%
+In my Lisp experience, admittedly more limited than Guy's, quasiquotation is
+wonderful until you need to nest it. One level of nesting is difficult to read;
+two or more are unbearable. Therefore, I prefer explicit indices.
 
 
 \section{Punchline}
@@ -258,11 +313,9 @@ variables' types are inputs, but their tones are outputs:
     \overline{\h{x_i}{A_i}{\hilited t_i}}^i,\, \h{y}{B}{\hilited u}
     \vdash N : C
   }{
-    \overline{\h{x_i}{A_i}{\hilited (u \circ s_i) \vee t_i}}^i
+    \overline{\h{x_i}{A_i}{\hilited (s_i \tc u) \vee t_i}}^i
     \vdash \textbf{let}~ y = M ~\textbf{in}~ N : C
   }
 \end{mathpar}
-
-\todo{TODO: explain what I mean by overline notation.}
 
 \end{document}
