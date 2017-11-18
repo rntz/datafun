@@ -23,6 +23,9 @@
 %% must be loaded before tikz in order for options to take effect :/
 \usepackage[dvipsnames]{xcolor}
 
+%% for drawing Hasse diagram
+\usepackage{tikz}
+
 
 %% Commands
 \newtheorem{theorem}{Theorem}
@@ -122,12 +125,22 @@ In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
 \implies x = y \implies f(x) = f(y)$), so we sometimes call $\ti$ the
 ``discrete'' tone, because it respects only the discrete ordering.
 
-We define two operators of interest on tones: join $s \vee t$ and composition $s
-\tc t$. Tone join $s \vee t$ is the join of the lattice ordered $\tb < \{\ta,
-\tm\} < \ti$. Tone composition $s \tc t$ gives the general tone of a composed
-function $f \circ g$ when $f$ has tone $t$ and $g$ has tone $s$:
+We define two operators of interest on tones: Tone join $s \vee t$ is the join
+of the lattice ordered $\tb < \{\tm, \ta\} < \ti$; tone composition $s \tc t$
+gives the general tone of a composed function $f \circ g$ when $f$ has tone $t$
+and $g$ has tone $s$:
 
 \begin{mathpar}
+  %% TODO: get tikz hasse diagram to vertically align with the tables.
+
+  %% \begin{tikzpicture}[scale=0.9]
+  %%   \node (top)  at ( 0, 1) {$\ti$};
+  %%   \node (bot)  at ( 0,-1) {$\tb$};
+  %%   \node (-1)   at (-1, 0) {$\tm$};
+  %%   \node (1)    at ( 1, 0) {$\ta$};
+  %%   \draw (top) -- (-1) -- (bot) -- (1) -- (top);
+  %% \end{tikzpicture}
+
   \begin{array}{c|rrrrr}
     s \vee t & \tm & \tb & \ta & \ti\\\hline
     \tm & \tm & \tm & \ti & \ti\\
@@ -137,11 +150,11 @@ function $f \circ g$ when $f$ has tone $t$ and $g$ has tone $s$:
   \end{array}
 
   \begin{array}{c|rrrr}
-    s \tc t & \tm & \tb & \ta & \ti\\\hline
-    \tm & \tm & \tb & \ta & \ti\\
-    \tb & \tb & \tb & \tb & \tb\\
-    \ta & \ta & \tb & \tm & \ti\\
-    \ti & \ti & \tb & \ti & \ti
+    s \tc t & \tm & \ta & \ti & \tb\\\hline
+    \tm & \tm & \ta & \ti & \tb\\
+    \ta & \ta & \tm & \ti & \tb\\
+    \ti & \ti & \ti & \ti & \tb\\
+    \tb & \tb & \tb & \tb & \tb
   \end{array}
 \end{mathpar}
 
@@ -169,8 +182,8 @@ We wish to justify some variant of the following substitution principle:
   then \(\GG_1 \cup \GG_2 \vdash \h{N\sub{x \mapsto M}}{B}{t}\).
 \end{principle}
 
-It's not yet clear what $\GG_1 \cup \GG_2$ should mean, exactly; we will return to
-this question.
+It's not yet clear what $\GG_1 \cup \GG_2$ should mean, exactly; \todo{we will
+  return to this question.}
 
 
 \section{Equality of judgments at different tones}
