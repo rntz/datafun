@@ -56,10 +56,10 @@
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
 
 %% tones: mono, anti, discrete, bivariant
-\newcommand{\tm}{1}             % monotone
-\newcommand{\ta}{-1}            % antitone
-\newcommand{\ti}{{\star}}       % invariant / discrete
-\newcommand{\tb}{0}             % bivariant
+\newcommand{\tm}{\ensuremath{1}}     % monotone
+\newcommand{\ta}{\ensuremath{-1}}    % antitone
+\newcommand{\ti}{\ensuremath{\star}} % invariant / discrete
+\newcommand{\tb}{\ensuremath{0}}     % bivariant
 \newcommand{\tc}{\cdot}         % tone composition
 
 \newcommand{\h}[3]{#1 :^{#3}\! {#2}}
@@ -102,24 +102,30 @@ reflexive, transitive relations):\,\footnote{It is probably possible to
   generalize tones to properties of functors and categories, but we do not do
   this here.}
 
-\[\begin{array}{cccc}
-  \textbf{Name}
-  & \textbf{Symbol}
-  & \textbf{As function property}
-  & \textbf{As functor, }\textsf{Preorder} \to \textsf{Preorder}\\
-  \text{Monotone} &
-  \tm & x \le y \implies f(x) \le f(y)
-  & \text{identity}\\
-  \text{Antitone} &
-  \ta & x \ge y \implies f(x) \le f(y)
-  & \text{opposite ordering}\\
-  \text{Bivariant} &
-  \tb & x \le y \vee y \le x \implies f(x) \le f(y)
-  & \text{equivalence closure}\\
-  \text{Invariant} &
-  \ti & x \le y \wedge y \le x \implies f(x) \le f(y)
-  & \text{induced equivalence}
-\end{array}\]
+\begin{center}
+  \begin{tabular}{lclccc}
+    \multicolumn{1}{c}{\textbf{Name}}
+    & \multicolumn{1}{c}{\textbf{Symbol}}
+    & \multicolumn{1}{c}{\textbf{Respects}}
+    & \multicolumn{3}{c}{\textbf{As property of $f$}}
+    \\\hline
+    \text{Monotone} & \tm
+    & \text{ordering}
+    & $x \le y$ &$\implies$& $f(x) \le f(y)$
+    \\
+    \text{Antitone} & \ta
+    & \text{opposite ordering}
+    & $x \ge y$ &$\implies$& $f(x) \le f(y)$
+    \\
+    \text{Bivariant} & \tb
+    & \text{equivalence closure}
+    & $x \le y \vee y \le x$ &$\implies$& $f(x) \le f(y)$
+    \\
+    \text{Invariant} & \ti
+    & \text{induced equivalence}
+    & $x \le y \wedge y \le x$ &$\implies$& $f(x) \le f(y)$
+  \end{tabular}
+\end{center}
 
 In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
 \implies x = y \implies f(x) = f(y)$), so we sometimes call $\ti$ the
@@ -274,23 +280,20 @@ Two examples:
   \end{tabular}
 \end{center}
 
-This is inspired by {Guy Steele's talk on Computer Science
-  Metanotation.\footnote{There are videos of the talk at
-    \href{https://www.youtube.com/watch?v=dCuZkaaou0Q}{Clojure/conj 2017} (the
-    one I watched), \href{https://www.youtube.com/watch?v=7HKbjYqqPPQ}{PPoPP
-      2017}, and
-    \href{https://www.youtube.com/watch?v=8fCfkGFF7X8&feature=youtu.be&t=37m46s}{Harvard
-      University}. There are also
-    \href{http://s3.amazonaws.com/erlang-conferences-production/media/files/000/000/755/original/Guy_L._Steele_-_A_Cobbler's_Child.pdf?1510053539}{slides
-      from Code Mesh 2017}.}
+This is inspired by Guy Steele's talk on Computer Science Metanotation.%
+%%
+\footnote{There are videos of the talk at
+  \href{https://www.youtube.com/watch?v=dCuZkaaou0Q}{Clojure/conj 2017} (the one
+  I watched), \href{https://www.youtube.com/watch?v=7HKbjYqqPPQ}{PPoPP 2017},
+  and
+  \href{https://www.youtube.com/watch?v=8fCfkGFF7X8&feature=youtu.be&t=37m46s}{Harvard
+    University}. There are also
+  \href{http://s3.amazonaws.com/erlang-conferences-production/media/files/000/000/755/original/Guy_L._Steele_-_A_Cobbler's_Child.pdf?1510053539}{slides
+    from Code Mesh 2017}.}
 %%
 In the talk, Guy analyses ``overline notation'' --- the use of $\overline{x}$ to
 stand for a sequence $x_1, x_2, ..., x_n$.
-%% However, in a complicated overlined
-%% meta-expression, it can be unclear which parts are meant to be repeated
-%% \emph{with variation}, and which \emph{without}: Does $\overline{x : A}$ stand
-%% for $x_1 : A_1, x_2 : A_2, ..., x_n : A_n$, or for $x_1 : A, x_2 : A, ..., x_n :
-%% A$ (or even for $x : A_1, x : A_2, ..., x : A_n$)?
+%%
 Inspired by quasiquotation in Lisp, he proposes using underlines to indicate
 parts which are repeated \emph{without variation}. Thus $\overline{x : A}$
 stands for $x_1 : A_1, ..., x_n : A_n$, while $\overline{x : \underline{A}}$
