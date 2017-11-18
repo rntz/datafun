@@ -26,6 +26,9 @@
 %% for drawing Hasse diagram
 \usepackage{tikz}
 
+%% for aligning tikz diagrams vertically with tables
+\usepackage{adjustbox}
+
 
 %% Commands
 \newtheorem{theorem}{Theorem}
@@ -137,15 +140,15 @@ gives the general tone of a composed function $f \circ g$ when $f$ has tone $t$
 and $g$ has tone $s$:
 
 \begin{mathpar}
-  %% TODO: get tikz hasse diagram to vertically align with the tables.
-
-  %% \begin{tikzpicture}[scale=0.9]
-  %%   \node (top)  at ( 0, 1) {$\ti$};
-  %%   \node (bot)  at ( 0,-1) {$\tb$};
-  %%   \node (-1)   at (-1, 0) {$\tm$};
-  %%   \node (1)    at ( 1, 0) {$\ta$};
-  %%   \draw (top) -- (-1) -- (bot) -- (1) -- (top);
-  %% \end{tikzpicture}
+  %% "baseline=(current bounding box.center)" incantation taken from
+  %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
+  \begin{tikzpicture}[scale=1,baseline=(current bounding box.center)]
+    \node (top)  at ( 0, 1) {$\ti$};
+    \node (bot)  at ( 0,-1) {$\tb$};
+    \node (-1)   at (-1, 0) {$\tm$};
+    \node (1)    at ( 1, 0) {$\ta$};
+    \draw (top) -- (-1) -- (bot) -- (1) -- (top);
+  \end{tikzpicture}
 
   \begin{array}{c|rrrrr}
     s \vee t & \tm & \tb & \ta & \ti\\\hline
