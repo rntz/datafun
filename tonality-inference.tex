@@ -60,7 +60,7 @@
 
 %% tones: mono, anti, discrete, bivariant
 \newcommand{\tm}{\ensuremath{1}}     % monotone
-\newcommand{\ta}{\ensuremath{-1}}    % antitone
+\newcommand{\ta}{\ensuremath{{-1}}}    % antitone
 \newcommand{\ti}{\ensuremath{\star}} % invariant / discrete
 \newcommand{\tb}{\ensuremath{0}}     % bivariant
 \newcommand{\tc}{\cdot}         % tone composition
@@ -101,9 +101,12 @@ ordering); $\tb$ is bivariant (monotone and antitone); and $\ti$ is invariant
 (only respects equivalence).
 
 Formally, tones are properties of maps between preorders (sets equipped with
-reflexive, transitive relations):\,\footnote{It is probably possible to
-  generalize tones to properties of functors and categories, but we do not do
-  this here.}
+reflexive, transitive relations):\,\footnote{It is possible to generalize tones
+  to properties of functors and categories. In this case, invariance corresponds
+  to a functor over the \emph{core} of a category, formed by throwing away all
+  morphisms except the isomorphisms; while bivariance corresponds to a functor
+  over its \emph{localization}, formed by freely adding inverses for every
+  morphism.}
 
 \begin{center}
   \begin{tabular}{lclccc}
@@ -176,10 +179,20 @@ function.
 They also have a contraction operator (``+'') on tones (``qualifiers''). I'm not
 sure how or if contraction relates to tone join.
 
-Composition $\tc$ is a commutative monoid with $\tm$ as identity and $\tb$ as
-an absorbing (``zero'', ``annihilating'') element. $\ti$ absorbs all elements
-other than $\tb$, and $\ta$ is its own inverse. \todo{Does it interact with
-  $\vee$ in any interesting ways?}
+Note that $s \vee t$ and $s \tc t$ together form a commutative semiring
+
+Composition $\tc$ is a commutative monoid with $\tm$ as identity and $\tb$ as an
+absorbing (``zero'', ``annihilating'') element. $\ti$ absorbs all elements other
+than $\tb$, and $\ta$ is its own inverse. \todo{Does it interact with $\vee$ in
+  any interesting ways?} Moreover, $\tc$ and $\vee$ obey the following
+distributivity law:
+\begin{eqnarray}
+  s \tc (t \vee u) &=& (s \tc t) \vee (s \tc u)\\
+  s \vee (t \tc u) &=?& (s \vee t) \tc (s \vee u)\\
+  1 \vee (0 \tc u) &=?& (1 \vee 0) \tc (1 \vee u)
+\end{eqnarray}
+
+\todo{REFERENCE ``I Got Plenty o' Nuttin'{}'' paper - this is a semiring!}
 
 
 \section{Substitution as guiding principle}
@@ -309,8 +322,6 @@ two or more are unbearable. Therefore, I prefer explicit indices.
 
 \section{Punchline}
 
-\todo{TODO}
-
 The declarative typing rule for \textbf{let}, which internalizes the
 substitution principle, is:
 \begin{mathpar}
@@ -335,6 +346,35 @@ variables' types are inputs, but their tones are outputs:
     \overline{\h{x_i}{A_i}{\hilited (s_i \tc u) \vee t_i}}^i
     \vdash \textbf{let}~ y = M ~\textbf{in}~ N : C
   }
+\end{mathpar}
+
+\todo{TODO}
+
+
+\section{As a sequent calculus}
+
+Let $F_t$ be the type constructor
+corresponding to the tone $t$; so:
+\begin{eqnarray*}
+  F_{\tm} A &=& A\\
+  F_{\ta} A &=& A^{\ms{op}}\\
+  F_{\ti} A &=& \square{} A\\
+  F_{\tb} A &=& \lozenge A
+\end{eqnarray*}
+
+These rules sent to me by Jason Reed:
+\begin{mathpar}
+  (A_1^{t_1}, ..., A_n^{t_n}) = (A_1^{t_1 \tc u}, ..., A_n^{t_n \tc u})\\
+
+  \infer{\GG \vdash A}{\GG^t \vdash F_t A}
+
+  \infer{\GG,A^{t\tc u} \vdash C}{\GG, (F_t A)^u \vdash C}
+
+  \infer[weakening]{\GG, A^t \vdash C \quad t \le u}{\GG,A^u \vdash C}
+
+  \infer[contraction]{\GG,A^t, A^u \vdash C}{\GG, A^{t \vee u} \vdash C}
+
+  \infer[cut]{\GG \vdash A \quad \Delta,A^t \vdash C}{\GG,\Delta^t \vdash C}
 \end{mathpar}
 
 \end{document}
