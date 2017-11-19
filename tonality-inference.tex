@@ -83,7 +83,7 @@
   \begin{array}{cccc}
     \text{tones}
     & s,t,u,v
-    & \bnfeq & \tm ~|~ \ta ~|~ \tb ~|~ \ti
+    & \bnfeq & \tb ~|~ \tm ~|~ \ta ~|~ \ti
     \vspace{0.5em}\\
     \text{contexts}
     & \GG &\bnfeq& \cdot ~|~ \GG, \h{x}{A}{s}
@@ -103,10 +103,9 @@ ordering); $\tb$ is bivariant (monotone and antitone); and $\ti$ is invariant
 Formally, tones are properties of maps between preorders (sets equipped with
 reflexive, transitive relations):\,\footnote{It is possible to generalize tones
   to properties of functors and categories. In this case, invariance corresponds
-  to a functor over the \emph{core} of a category, formed by throwing away all
-  morphisms except the isomorphisms; while bivariance corresponds to a functor
-  over its \emph{localization}, formed by freely adding inverses for every
-  morphism.}
+  to the \emph{core} of a category, formed by throwing away all morphisms except
+  the isomorphisms; while bivariance corresponds its \emph{localization}, formed
+  by freely adding inverses for every morphism.}
 
 \begin{center}
   \begin{tabular}{lclccc}
@@ -179,20 +178,39 @@ function.
 They also have a contraction operator (``+'') on tones (``qualifiers''). I'm not
 sure how or if contraction relates to tone join.
 
-Note that $s \vee t$ and $s \tc t$ together form a commutative semiring
+Together, $\vee$ and $\tc$ form an idempotent commutative semiring, with $\vee$
+as ``addition'' and $\tc$ as ``multiplication''. (\todo{TODO: Reference ``I Got
+  Plenty o' Nuttin'{}'' --- another use (the first?) of variable annotations
+  drawn from a semiring, and with similar (the same?) behavior of those
+  annotations in the inference rules.}) This is because the following panopoly
+of laws holds (laws that hold here, but not in all semirings, are in
+{\color{ForestGreen}green}):
 
-Composition $\tc$ is a commutative monoid with $\tm$ as identity and $\tb$ as an
-absorbing (``zero'', ``annihilating'') element. $\ti$ absorbs all elements other
-than $\tb$, and $\ta$ is its own inverse. \todo{Does it interact with $\vee$ in
-  any interesting ways?} Moreover, $\tc$ and $\vee$ obey the following
-distributivity law:
-\begin{eqnarray}
-  s \tc (t \vee u) &=& (s \tc t) \vee (s \tc u)\\
-  s \vee (t \tc u) &=?& (s \vee t) \tc (s \vee u)\\
-  1 \vee (0 \tc u) &=?& (1 \vee 0) \tc (1 \vee u)
-\end{eqnarray}
+\begin{mathpar}
+  \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
+    \multicolumn{4}{c}{\textbf{Properties of } \vee}
+    \vspace{0.1em}\\
+    \textbf{Associativity} & (s \vee t) \vee u &=& s \vee (t \vee u)\\
+    \textbf{Commutativity} & s \vee t &=& t \vee s\\
+    \textbf{Identity} & s \vee \tb &=& s\\
+    \textbf{\color{ForestGreen} Idempotence} & s \vee s &=& s\\
+    \textbf{\color{ForestGreen} Absorption} & s \vee \ti &=& \ti
+  \end{array}
 
-\todo{REFERENCE ``I Got Plenty o' Nuttin'{}'' paper - this is a semiring!}
+  \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
+    \multicolumn{4}{c}{\textbf{Properties of } \tc}
+    \vspace{0.1em}\\
+    \textbf{Associativity} & (s \tc t) \tc u &=& s \tc (t \tc u)\\
+    \textbf{Identity} & s &=& s \tc \tm\\
+    \textbf{Absorption} & s \tc \tb &=& \tb\\
+    \textbf{\color{ForestGreen} Commutativity} & s \tc t &=& t \tc s\\
+    \textbf{\color{ForestGreen} Inverse} & \ta \tc \ta &=& \tm
+  \end{array}
+
+  \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
+    \textbf{Distribution} & s \tc (t \vee u) &=& (s \tc t) \vee (s \tc u)
+  \end{array}
+\end{mathpar}
 
 
 \section{Substitution as guiding principle}
