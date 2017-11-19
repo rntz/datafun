@@ -53,14 +53,17 @@
 \newcommand{\binder}{.\,}
 \newcommand{\bind}[1]{{#1}\binder}
 \newcommand{\sub}[1]{\{{#1}\}}
-\newcommand{\Disc}[1]{\square{#1}}
 \newcommand{\fix}{\ms{fix}}
+
+\newcommand{\op}{\ms{op}}
+\newcommand{\Disc}{\square}
+\newcommand{\Codisc}{\lozenge}
 
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
 
 %% tones: mono, anti, discrete, bivariant
 \newcommand{\tm}{\ensuremath{1}}     % monotone
-\newcommand{\ta}{\ensuremath{{-1}}}    % antitone
+\newcommand{\ta}{\ensuremath{{-1}}}  % antitone
 \newcommand{\ti}{\ensuremath{\star}} % invariant / discrete
 \newcommand{\tb}{\ensuremath{0}}     % bivariant
 \newcommand{\tc}{\cdot}         % tone composition
@@ -71,16 +74,25 @@
 \newcommand{\hi}[2]{\h{#1}{#2}{\ti}}
 \newcommand{\hb}[2]{\h{#1}{#2}{\tb}}
 
-\title{Tonality and inference}
+\newcommand{\mto}{\overset{\tm}{\to}}
+\newcommand{\ato}{\overset{\ta}{\to}}
+\newcommand{\ito}{\overset{\ti}{\to}}
+\newcommand{\bto}{\overset{\tb}{\to}}
+
+\title{Tones and types}
+%% \title{Tonality and inference}
+%% alternate title: Tones and types
 \author{Michael Robert Arntzenius}
-\date{16 November 2017}
+\date{\todo{16 November 2017 -- ???}}
 
 
 \begin{document}
 \maketitle
 
 \begin{mathpar}
-  \begin{array}{cccc}
+  \begin{array}{cccl}
+    \text{types} & A,B,C \vspace{0.5em}\\
+    \text{terms} & M,N,O \vspace{0.5em}\\
     \text{tones}
     & s,t,u,v
     & \bnfeq & \tb ~|~ \tm ~|~ \ta ~|~ \ti
@@ -88,8 +100,6 @@
     \text{contexts}
     & \GG &\bnfeq& \cdot ~|~ \GG, \h{x}{A}{s}
     \vspace{0.5em}\\
-    \text{types} & A,B,C \vspace{0.5em}\\
-    \text{terms} & M,N,O \vspace{0.5em}\\
     \text{judgment}
     & J &\bnfeq& \GG \vdash \h{M}{A}{s}
   \end{array}
@@ -136,11 +146,30 @@ In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
 \implies x = y \implies f(x) = f(y)$), so we sometimes call $\ti$ the
 ``discrete'' tone, because it respects only the discrete ordering.
 
-We define two operators of interest on tones: Tone join $s \vee t$ is the join
-of the lattice ordered $\tb < \{\tm, \ta\} < \ti$; tone composition $s \tc t$
-gives the general tone of a composed function $f \circ g$ when $f$ has tone $t$
-and $g$ has tone $s$:
+\todo{Some further properties (TODO: explain, and check):}
+\begin{mathpar}
+  \begin{array}{ccccc}
+    A \mto B &=& A \to B\\
+    A \ato B &=& A^\op \to B &=& A \to B^\op\\
+    A \ito B &=& \Disc A \to B &=?& A \to \Codisc B\\
+    A \bto B &=& \Codisc A \to B &=?& A \to \Disc B
+  \end{array}
+\end{mathpar}
 
+
+\subsection{Tone operators}
+
+We define two operators of interest on tones:
+\begin{enumerate}
+\item Join $s \vee t$ is the join of the lattice ordered $\tb < \{\tm, \ta\} <
+  \ti$;
+  \todo{(is this the general tone of $\langle f, g\rangle$?)}
+
+\item Composition $s \tc t$ gives the general tone of a composed function $f
+  \circ g$ when $f$ has tone $t$ and $g$ has tone $s$.
+\end{enumerate}
+
+These are defined by:
 \begin{mathpar}
   %% "baseline=(current bounding box.center)" incantation taken from
   %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
@@ -241,8 +270,8 @@ use the variable $x$ monotonically.
 
 Let $f : \den{A} \to \den{B}$ be the denotation of $M$ as a single-argument
 function of $x$. The first judgment says that $f$ is a monotone map from
-$\den{A}$ to $\den{B}^{\ms{op}}$; the second that $f$ is monotone from
-$\den{A}^{\ms{op}}$ to $\den{B}$. These amount to the same thing: $f$ is
+$\den{A}$ to $\den{B}^{\op}$; the second that $f$ is monotone from
+$\den{A}^{\op}$ to $\den{B}$. These amount to the same thing: $f$ is
 antitone.
 
 We also consider these judgments to be equal:
@@ -375,7 +404,7 @@ Let $F_t$ be the type constructor
 corresponding to the tone $t$; so:
 \begin{eqnarray*}
   F_{\tm} A &=& A\\
-  F_{\ta} A &=& A^{\ms{op}}\\
+  F_{\ta} A &=& A^{\op}\\
   F_{\ti} A &=& \square{} A\\
   F_{\tb} A &=& \lozenge A
 \end{eqnarray*}
