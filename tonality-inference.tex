@@ -14,7 +14,7 @@
 \usepackage{mathtools}
 
 %% uses the AMS Euler math font.
-%% \usepackage{euler}
+\usepackage{euler}
 
 %% for \underaccent
 \usepackage{accents}
@@ -62,10 +62,10 @@
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
 
 %% tones: mono, anti, discrete, bivariant
-\newcommand{\tm}{\ensuremath{1}}     % monotone
-\newcommand{\ta}{\ensuremath{{-1}}}  % antitone
-\newcommand{\ti}{\ensuremath{\star}} % invariant / discrete
-\newcommand{\tb}{\ensuremath{0}}     % bivariant
+\newcommand{\tm}{{\ensuremath{1}}}     % monotone
+\newcommand{\ta}{{\ensuremath{-1}}}    % antitone
+\newcommand{\ti}{{\ensuremath{\star}}} % invariant / discrete
+\newcommand{\tb}{{\ensuremath{0}}}     % bivariant
 \newcommand{\tc}{\cdot}         % tone composition
 
 \newcommand{\h}[3]{#1 :^{#3}\! {#2}}
@@ -109,7 +109,7 @@ Tones represent ways a function may respect or disrespect the orderings on its
 arguments. $\tm$ is monotone; $\ta$ is antitone (monotone in the opposite
 ordering); $\tb$ is bivariant (monotone and antitone); and $\ti$ is invariant
 (only respects equivalence).
-
+%
 Formally, tones are properties of maps between preorders (sets equipped with
 reflexive, transitive relations):\,\footnote{It is possible to generalize tones
   to properties of functors and categories. In this case, invariance corresponds
@@ -118,11 +118,11 @@ reflexive, transitive relations):\,\footnote{It is possible to generalize tones
   by freely adding inverses for every morphism.}
 
 \begin{center}
-  \begin{tabular}{lclccc}
+  \begin{tabular}{lclc@{\hskip 0.25em}c@{\hskip 0.25em}c}
     \multicolumn{1}{c}{\textbf{Name}}
     & \multicolumn{1}{c}{\textbf{Symbol}}
     & \multicolumn{1}{c}{\textbf{Respects}}
-    & \multicolumn{3}{c}{\textbf{As property of $f$}}
+    & \multicolumn{3}{c}{\textbf{Property of $f$}}
     \\\hline
     \text{Monotone} & \tm
     & \text{ordering}
@@ -141,19 +141,54 @@ reflexive, transitive relations):\,\footnote{It is possible to generalize tones
     & $x \le y \wedge y \le x$ &$\implies$& $f(x) \le f(y)$
   \end{tabular}
 \end{center}
-
 In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
 \implies x = y \implies f(x) = f(y)$), so we sometimes call $\ti$ the
 ``discrete'' tone, because it respects only the discrete ordering.
 
-\todo{Some further properties (TODO: explain, and check):}
+Another view of tones is as functors $T_s : \mb{Preorder} \to \mb{Preorder}$,
+namely:
+\[\begin{array}{r@{\hskip 0.5em}c@{\hskip 0.5em}l
+  @{\hskip 2em}c@{\hskip 2em}
+  l@{\hskip 0.5em}c@{\hskip 0.5em}l}
+  T_\tm(A) &=& A
+  &\text{where}& x \le_A y &\iff& x \le_A y
+  \\
+  T_\ta(A) &=& A^\op
+  &\text{where}& x \le_{A^\op} y &\iff& y \le_A x
+  \\
+  T_\ti(A) &=& \Disc A
+  &\text{where}& x \le_{\Disc A} y &\iff& x \le_A y \wedge y \le_A x
+  \\
+  T_\tb(A) &=& \Codisc A
+  &\text{where}& x \le_{\Codisc A} y &\iff&
+  \exists\bind{\vec{a}} a_0 = x \wedge a_n = y \wedge {}
+  \\
+  &&&&&& \phantom{\exists\bind{\vec{a}}}
+  \forall\bind{i} a_i \le_A a_{i+1} \vee a_{i+1} \le_A a_i
+\end{array}\]
+
+These views fit together neatly. A map $f : A \overset{s}{\to} B$ with tone $s$
+is the same as a monotone map $T_s(A) \to B$:
+\[\begin{array}{ccccc}
+  A \mto B &=& A \to B\\
+  A \ato B &=& A^\op \to B &=& A \to B^\op\\
+  A \ito B &=& \Disc A \to B &=?& A \to \Codisc B\\
+  A \bto B &=& \Codisc A \to B &=?& A \to \Disc B
+\end{array}\]
+
+\newcommand{\tdual}[1]{\widehat{#1}}
+
+Generalizing the second of each pair of equations above, we have
+\begin{equation}
+  T_s(A) \to B = A \to T_{\tdual{s}}(B)
+\end{equation}
+
+Where the ``dual'' $\tdual{s}$ of a tone is given by:
 \begin{mathpar}
-  \begin{array}{ccccc}
-    A \mto B &=& A \to B\\
-    A \ato B &=& A^\op \to B &=& A \to B^\op\\
-    A \ito B &=& \Disc A \to B &=?& A \to \Codisc B\\
-    A \bto B &=& \Codisc A \to B &=?& A \to \Disc B
-  \end{array}
+  {\tdual{\tm} = \tm} \quad
+  {\tdual{\ta} = \ta} \quad
+  {\tdual{\ti} = \tb} \quad
+  {\tdual{\tb} = \ti}
 \end{mathpar}
 
 
@@ -223,7 +258,7 @@ of laws holds (laws that hold here, but not in all semirings, are in
     \textbf{Commutativity} & s \vee t &=& t \vee s\\
     \textbf{Identity} & s \vee \tb &=& s\\
     \textbf{\color{ForestGreen} Idempotence} & s \vee s &=& s\\
-    \textbf{\color{ForestGreen} Absorption} & s \vee \ti &=& \ti
+    %% \textbf{\color{ForestGreen} Absorption} & s \vee \ti &=& \ti
   \end{array}
 
   \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
@@ -233,7 +268,7 @@ of laws holds (laws that hold here, but not in all semirings, are in
     \textbf{Identity} & s &=& s \tc \tm\\
     \textbf{Absorption} & s \tc \tb &=& \tb\\
     \textbf{\color{ForestGreen} Commutativity} & s \tc t &=& t \tc s\\
-    \textbf{\color{ForestGreen} Inverse} & \ta \tc \ta &=& \tm
+    %% \textbf{\color{ForestGreen} Inverse} & \ta \tc \ta &=& \tm
   \end{array}
 
   \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
@@ -324,6 +359,15 @@ Or, perhaps more simply:
 
 \todo{TODO: Justify in terms of semantics of substitution as function
   composition.}
+
+%% %% In Guy Steele's overline-underline notation:
+%% Or, perhaps more simply:
+%% \begin{equation}
+%%   \overline{\h{x}{A}{\hilited s}} \vdash \h{M}{B}{\hilited t}
+%%   ~=~
+%%   \overline{\h{x}{A}{\hilited s \tc \underline{t}}}
+%%   \vdash \h{M}{B}{\hilited\tm}
+%% \end{equation}
 
 \subsubsection{On overline notation}
 
