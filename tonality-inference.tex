@@ -151,7 +151,7 @@ namely:
   @{\hskip 2em}c@{\hskip 2em}
   l@{\hskip 0.5em}c@{\hskip 0.5em}l}
   T_\tm(A) &=& A
-  &\text{where}& x \le_A y &\iff& x \le_A y
+  %% &\text{where}& x \le_A y &\iff& x \le_A y
   \\
   T_\ta(A) &=& A^\op
   &\text{where}& x \le_{A^\op} y &\iff& y \le_A x
@@ -169,32 +169,33 @@ namely:
 
 These views fit together neatly. A map $f : A \overset{s}{\to} B$ with tone $s$
 is the same as a monotone map $T_s(A) \to B$:
-\[\begin{array}{ccccc}
-  A \mto B &=& A \to B\\
-  A \ato B &=& A^\op \to B &=& A \to B^\op\\
-  A \ito B &=& \Disc A \to B &=?& A \to \Codisc B\\
-  A \bto B &=& \Codisc A \to B &=?& A \to \Disc B
-\end{array}\]
+\begin{mathpar}
+  {A \mto B = A \to B}
+  \qquad
+  {A \ato B = A^\op \to B}
+  \qquad
+  {A \ito B = \Disc A \to B}
+  \qquad
+  {A \bto B = \Codisc A \to B}
+\end{mathpar}
 
 \newcommand{\tdual}[1]{\widehat{#1}}
 
-Generalizing the second of each pair of equations above, we have
-\begin{equation}
-  T_s(A) \to B = A \to T_{\tdual{s}}(B)
-\end{equation}
+Also of note is that each tone $s$ has a dual $\tdual{s}$ such that $T_s(A) \to
+B = A \to T_{\tdual{s}}(B)$:
+\[\begin{array}{c@{\hskip 2em}c}
+    \tdual{\tm} = \tm & A \to B = A \to B\\
+    \tdual{\ta} = \ta & A^\op \to B = A \to B^\op\\
+    \tdual{\ti} = \tb & \Disc A \to B = A \to \Codisc B\\
+    \tdual{\tb} = \ti & \Codisc A \to B = A \to \Disc B\\
+\end{array}\]
 
-Where the ``dual'' $\tdual{s}$ of a tone is given by:
-\begin{mathpar}
-  {\tdual{\tm} = \tm} \quad
-  {\tdual{\ta} = \ta} \quad
-  {\tdual{\ti} = \tb} \quad
-  {\tdual{\tb} = \ti}
-\end{mathpar}
+\todo{TODO: Check this.}
 
 
 \subsection{Tone operators}
 
-We define two operators of interest on tones:
+Besides dual $\tdual{s}$, we define two operators of interest on tones:
 \begin{enumerate}
 \item Join $s \vee t$ is the join of the lattice ordered $\tb < \{\tm, \ta\} <
   \ti$;
@@ -242,13 +243,11 @@ function.
 They also have a contraction operator (``+'') on tones (``qualifiers''). I'm not
 sure how or if contraction relates to tone join.
 
-Together, $\vee$ and $\tc$ form an idempotent commutative semiring, with $\vee$
-as ``addition'' and $\tc$ as ``multiplication''. (\todo{TODO: Reference ``I Got
-  Plenty o' Nuttin'{}'' --- another use (the first?) of variable annotations
+Together, $\vee$ and $\tc$ form a semiring, with $\vee$ as an idempotent
+addition and $\tc$ as a commutative multiplication. (\todo{TODO: Reference ``I
+  Got Plenty o' Nuttin'{}'' --- another use (the first?) of variable annotations
   drawn from a semiring, and with similar (the same?) behavior of those
-  annotations in the inference rules.}) This is because the following panoply
-of laws holds (laws that hold here, but not in all semirings, are in
-{\color{ForestGreen}green}):
+  annotations in the inference rules.}) The following panoply of laws holds:
 
 \begin{mathpar}
   \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
@@ -257,7 +256,7 @@ of laws holds (laws that hold here, but not in all semirings, are in
     \textbf{Associativity} & (s \vee t) \vee u &=& s \vee (t \vee u)\\
     \textbf{Commutativity} & s \vee t &=& t \vee s\\
     \textbf{Identity} & s \vee \tb &=& s\\
-    \textbf{\color{ForestGreen} Idempotence} & s \vee s &=& s\\
+    \textbf{Idempotence} & s \vee s &=& s\\
     %% \textbf{\color{ForestGreen} Absorption} & s \vee \ti &=& \ti
   \end{array}
 
@@ -267,7 +266,7 @@ of laws holds (laws that hold here, but not in all semirings, are in
     \textbf{Associativity} & (s \tc t) \tc u &=& s \tc (t \tc u)\\
     \textbf{Identity} & s &=& s \tc \tm\\
     \textbf{Absorption} & s \tc \tb &=& \tb\\
-    \textbf{\color{ForestGreen} Commutativity} & s \tc t &=& t \tc s\\
+    \textbf{Commutativity} & s \tc t &=& t \tc s\\
     %% \textbf{\color{ForestGreen} Inverse} & \ta \tc \ta &=& \tm
   \end{array}
 
