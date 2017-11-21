@@ -67,6 +67,7 @@
 \newcommand{\ti}{{\ensuremath{\star}}} % invariant / discrete
 \newcommand{\tb}{{\ensuremath{0}}}     % bivariant
 \newcommand{\tc}{\cdot}         % tone composition
+\newcommand{\tdual}[1]{\widehat{#1}}
 
 \newcommand{\h}[3]{#1 :^{#3}\! {#2}}
 \newcommand{\hm}[2]{\h{#1}{#2}{\tm}}
@@ -179,18 +180,17 @@ is the same as a monotone map $T_s(A) \to B$:
   {A \bto B = \Codisc A \to B}
 \end{mathpar}
 
-\newcommand{\tdual}[1]{\widehat{#1}}
-
 Also of note is that each tone $s$ has a dual $\tdual{s}$ such that $T_s(A) \to
 B = A \to T_{\tdual{s}}(B)$:
-\[\begin{array}{c@{\hskip 2em}c}
+\[\begin{array}{c@{\hskip 2em}l}
     \tdual{\tm} = \tm & A \to B = A \to B\\
     \tdual{\ta} = \ta & A^\op \to B = A \to B^\op\\
     \tdual{\ti} = \tb & \Disc A \to B = A \to \Codisc B\\
-    \tdual{\tb} = \ti & \Codisc A \to B = A \to \Disc B\\
+    \tdual{\tb} = \ti & \Codisc A \to B\todo{{} = A \to \Disc B}\\
 \end{array}\]
 
-\todo{TODO: Check this.}
+\todo{TODO: Check these! Also, doesn't this mean everything is both left- and
+  right-adjoint to its dual? Is that possible?}
 
 
 \subsection{Tone operators}
@@ -276,6 +276,29 @@ addition and $\tc$ as a commutative multiplication. (\todo{TODO: Reference ``I
 \end{mathpar}
 
 
+\section{A tonal sequent calculus}
+
+These rules sent to me by Jason Reed:
+\begin{mathpar}
+  (A_1^{t_1}, ..., A_n^{t_n})^u = (A_1^{t_1 \tc u}, ..., A_n^{t_n \tc u})\\
+
+  \infer{\GG \vdash A}{\GG^t \vdash T_t A}
+
+  \infer{\GG{},A^{t\tc u} \vdash C}{\GG{}, (T_t A)^u \vdash C}
+
+  \infer[weakening]{\GG{}, A^t \vdash C \quad t \le u}{\GG{}, A^u \vdash C}
+
+  \infer[contraction]{\GG{},A^t, A^u \vdash C}{\GG{}, A^{t \vee u} \vdash C}
+
+  \infer[cut]{\GG \vdash A \quad \Delta,A^t \vdash C}{\GG^t,\Delta \vdash C}
+\end{mathpar}
+
+\todo{TODO: check this!}
+
+We aim to adapt this into a natural-deduction-style system with proof terms,
+i.e. a simply typed $\lambda$-calculus.
+
+
 \section{Substitution as guiding principle}
 
 We wish to justify some variant of the following substitution principle:
@@ -342,7 +365,7 @@ The general pattern which unifies equations \ref{eqn:ex1}--\ref{eqn:ex3} is:
 \newcommand{\hilited}{\color{blue}}
 
 \begin{equation}
-  \overline{\h{x_i}{A_i}{\hilited s_i}}^i \vdash \h{M}{B}{\hilited t \tc u}
+  \overline{\h{x_i}{A_i}{\hilited s_i}}^i \vdash \h{M}{B}{\hilited \tdual{t} \tc u}
   ~=~
   \overline{\h{x_i}{A_i}{\hilited s_i \tc t}}^i
   \vdash \h{M}{B}{\hilited u}
@@ -350,14 +373,22 @@ The general pattern which unifies equations \ref{eqn:ex1}--\ref{eqn:ex3} is:
 
 Or, perhaps more simply:
 \begin{equation}
-  \overline{\h{x_i}{A_i}{\hilited s_i}}^i \vdash \h{M}{B}{\hilited t}
+  \overline{\h{x_i}{A_i}{\hilited s_i}}^i \vdash \h{M}{B}{\hilited \tdual{t}}
   ~=~
   \overline{\h{x_i}{A_i}{\hilited s_i \tc t}}^i
   \vdash \h{M}{B}{\hilited\tm}
 \end{equation}
 
+\todo{TODO: CHECK THIS! I THINK IT'S WRONG!}
+
 \todo{TODO: Justify in terms of semantics of substitution as function
   composition.}
+
+This can be written as a rule of inference rather than an equality:
+
+\begin{mathpar}
+  \text{\todo{TODO}}
+\end{mathpar}
 
 %% %% In Guy Steele's overline-underline notation:
 %% Or, perhaps more simply:
@@ -439,32 +470,5 @@ variables' types are inputs, but their tones are outputs:
 \end{mathpar}
 
 \todo{TODO}
-
-
-\section{As a sequent calculus}
-
-Let $F_t$ be the type constructor
-corresponding to the tone $t$; so:
-\begin{eqnarray*}
-  F_{\tm} A &=& A\\
-  F_{\ta} A &=& A^{\op}\\
-  F_{\ti} A &=& \square{} A\\
-  F_{\tb} A &=& \lozenge A
-\end{eqnarray*}
-
-These rules sent to me by Jason Reed:
-\begin{mathpar}
-  (A_1^{t_1}, ..., A_n^{t_n})^u = (A_1^{t_1 \tc u}, ..., A_n^{t_n \tc u})\\
-
-  \infer{\GG \vdash A}{\GG^t \vdash F_t A}
-
-  \infer{\GG,A^{t\tc u} \vdash C}{\GG, (F_t A)^u \vdash C}
-
-  \infer[weakening]{\GG, A^t \vdash C \quad t \le u}{\GG,A^u \vdash C}
-
-  \infer[contraction]{\GG,A^t, A^u \vdash C}{\GG, A^{t \vee u} \vdash C}
-
-  \infer[cut]{\GG \vdash A \quad \Delta,A^t \vdash C}{\GG^t,\Delta \vdash C}
-\end{mathpar}
 
 \end{document}
