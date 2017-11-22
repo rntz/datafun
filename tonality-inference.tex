@@ -479,62 +479,65 @@ variables' types are inputs, but their tones are outputs:
 \newcommand{\core}{\ms{core}}
 \newcommand{\loc}{\ms{loc}}
 
+%% ``localization path''
+\newcommand{\pth}{\leftrightarrow}
+\newcommand{\iso}{\simeq}
+
 \[
-\begin{array}{llll}
-  \multicolumn{1}{l}{\textbf{Functor}}
+\begin{array}{clll}
+  \multicolumn{1}{l}{\textbf{Notation}}
   & \multicolumn{1}{l}{\textbf{Name}}
   & \multicolumn{1}{l}{\textbf{How to make it}}
   & \multicolumn{1}{l}{\textbf{In $\mb{Preorder}$}}
   \\\hline
-  C^\core
-  & \text{``core of $C$''}
-  & \text{keep only the isomorphisms}
-  & \text{induced equivalence}
-  \\
   C^\loc
   & \text{``localization of $C$''}
   & \text{freely add inverses for every morphism}
   & \text{equivalence closure}
+  \\
+  C^\core
+  & \text{``core of $C$''}
+  & \text{keep only the isomorphisms}
+  & \text{induced equivalence}
 \end{array}
 \]
 
-$C^\core$ and $C^\loc$ are always groupoids --- categories where every morphism
-is an isomorphism. I assert but do not prove that $-^\core$ and $-^\loc$ are
+$C^\loc$ and $C^\core$ are groupoids --- categories where every morphism is an
+isomorphism. I assert but do not prove that $-^\loc$ and $-^\core$ are
 functorial, $\mb{Cat} \to \mb{Groupoid}$. If we restrict the domain to
 $\mb{Preorder}$, the codomain restricts to $\mb{Setoid}$.
 
 Diagramatically, leaving inclusion functors unlabeled:
-\[
-\begin{tikzcd}[row sep=4.5em]
-\mb{Cat}
-  \arrow[r,bend left=35,"\core"]
-  \arrow[r,bend right=35,"\loc"']
-& \mb{Groupoid} \lar
-\\
-\mb{Preorder}
-  \arrow[r,bend left=35,"\core"]
-  \arrow[r,bend right=35,"\loc"']
-  \arrow[u]
-& \mb{Setoid} \arrow[u] \arrow[l]
-\end{tikzcd}\]
+{\large\[
+  \tikzset{
+    no line/.style={draw=none,
+      commutative diagrams/every label/.append style={/tikz/auto=false}}}
+  \begin{tikzcd}[row sep=5em,column sep=4em]
+    \mb{Cat}
+    \arrow[d,bend right=40,"\textstyle\loc"'{name=A}]
+    \arrow[d,bend left=40,"\textstyle\core"{name=C}]
+    & \mb{Preorder}
+    \arrow[d,bend right=40,"\textstyle\loc"'{name=A2}]
+    \arrow[d,bend left=40,"\textstyle\core"{name=C2}]
+    \arrow[l]
+    \\
+    \mb{Groupoid} \arrow[u,""{name=B}]
+    & \mb{Setoid} \arrow{u}[name=B2]{} \arrow[l]
+    %% the \dashv's between adjoint arrows
+    \arrow[to path={(A) -- (B)\tikztonodes}, no line, near end]{}{\displaystyle\dashv}
+    \arrow[to path={(B) -- (C)\tikztonodes}, no line]{}{\displaystyle\dashv}
+    \arrow[to path={(A2) -- (B2)\tikztonodes}, no line, near end]{}{\displaystyle\dashv}
+    \arrow[to path={(B2) -- (C2)\tikztonodes}, no line]{}{\displaystyle\dashv}
+  \end{tikzcd}
+\]}
 
-\todo{Unanswered questions:}
-\begin{eqnarray*}
-  \mb{Gpd}(A^\core, B) &{\cong}?& \mb{Cat}(A, \mc{U}B)
-  \qquad\text{\color{red} unlikely!}\\
-  \mb{Cat}(\mc{U}A, B) &{\cong}?& \mb{Grpd}(A, B^\core)
-  \qquad\text{\color{ForestGreen} this looks promising!}\\
-  \mb{Grpd}(A^\loc, B) &{\cong}?& \mb{Cat}(A, \mc{U}B)
-  \qquad\text{\color{blue} maybe?}\\
-  \mb{Cat}(\mc{U}A, B) &{\cong}?& \mb{Grpd}(A, B^\loc)
-  \qquad\text{\color{red} I don't think so...}
-\end{eqnarray*}
-
-\todo{I think \loc{} and \core{} form an adjoint triple!}
-
-%% ``localization path''
-\newcommand{\pth}{\leftrightarrow}
-\newcommand{\iso}{\simeq}
+$-^\loc \dashv \mc{U} \dashv -^\core$ form an \emph{adjoint triple}, where
+$\mc{U}$ is the inclusion $\mb{Groupoid} \to \mb{Cat}$. \todo{TODO:
+  Prove this, and explain what adjoint triples are.}
+%
+Let $\lozenge = \mc{U}(-^\loc)$ and $\square = \mc{U}(-^\core)$. This adjoint
+triple implies that $\lozenge$ is a monad, $\square$ a comonad, and that
+$\lozenge \dashv \square$.
 
 Some useful notation:
 \[\begin{array}{lcl@{\hskip 2em}l}
