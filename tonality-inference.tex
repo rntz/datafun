@@ -23,8 +23,9 @@
 %% must be loaded before tikz in order for options to take effect :/
 \usepackage[dvipsnames]{xcolor}
 
-%% for drawing Hasse diagram
+%% for drawing Hasse diagrams and commutative diagrams.
 \usepackage{tikz}
+\usepackage{tikz-cd}
 
 %% for aligning tikz diagrams vertically with tables
 \usepackage{adjustbox}
@@ -33,6 +34,7 @@
 %% Commands
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}{Corollary}
+\newtheorem{conjecture}{Conjecture}
 \newtheorem{lemma}{Lemma}
 \newtheorem{principle}{Principle}
 
@@ -470,5 +472,169 @@ variables' types are inputs, but their tones are outputs:
 \end{mathpar}
 
 \todo{TODO}
+
+
+\section{Category and preorder theory}
+
+\newcommand{\core}{\ms{core}}
+\newcommand{\loc}{\ms{loc}}
+
+\[
+\begin{array}{llll}
+  \multicolumn{1}{l}{\textbf{Functor}}
+  & \multicolumn{1}{l}{\textbf{Name}}
+  & \multicolumn{1}{l}{\textbf{How to make it}}
+  & \multicolumn{1}{l}{\textbf{In $\mb{Preorder}$}}
+  \\\hline
+  C^\core
+  & \text{``core of $C$''}
+  & \text{keep only the isomorphisms}
+  & \text{induced equivalence}
+  \\
+  C^\loc
+  & \text{``localization of $C$''}
+  & \text{freely add inverses for every morphism}
+  & \text{equivalence closure}
+\end{array}
+\]
+
+$C^\core$ and $C^\loc$ are always groupoids --- categories where every morphism
+is an isomorphism. I assert but do not prove that $-^\core$ and $-^\loc$ are
+functorial, $\mb{Cat} \to \mb{Groupoid}$. If we restrict the domain to
+$\mb{Preorder}$, the codomain restricts to $\mb{Setoid}$.
+
+Diagramatically, leaving inclusion functors unlabeled:
+\[
+\begin{tikzcd}[row sep=4.5em]
+\mb{Cat}
+  \arrow[r,bend left=35,"\core"]
+  \arrow[r,bend right=35,"\loc"']
+& \mb{Groupoid} \lar
+\\
+\mb{Preorder}
+  \arrow[r,bend left=35,"\core"]
+  \arrow[r,bend right=35,"\loc"']
+  \arrow[u]
+& \mb{Setoid} \arrow[u] \arrow[l]
+\end{tikzcd}\]
+
+\todo{Unanswered questions:}
+\begin{eqnarray*}
+  \mb{Gpd}(A^\core, B) &{\cong}?& \mb{Cat}(A, \mc{U}B)
+  \qquad\text{\color{red} unlikely!}\\
+  \mb{Cat}(\mc{U}A, B) &{\cong}?& \mb{Grpd}(A, B^\core)
+  \qquad\text{\color{ForestGreen} this looks promising!}\\
+  \mb{Grpd}(A^\loc, B) &{\cong}?& \mb{Cat}(A, \mc{U}B)
+  \qquad\text{\color{blue} maybe?}\\
+  \mb{Cat}(\mc{U}A, B) &{\cong}?& \mb{Grpd}(A, B^\loc)
+  \qquad\text{\color{red} I don't think so...}
+\end{eqnarray*}
+
+\todo{I think \loc{} and \core{} form an adjoint triple!}
+
+%% ``localization path''
+\newcommand{\pth}{\leftrightarrow}
+\newcommand{\iso}{\simeq}
+
+Some useful notation:
+\[\begin{array}{lcl@{\hskip 2em}l}
+  f : x \to y : A &\iff& f \in A(x,y)
+  & \text{``$f$ is an $A$-morphism from $x$ to $y$''}\\
+  f : x \simeq y : A &\iff& f \in A^\core(x,y)
+  & \text{``$f$ is an $A$-isomorphism from $x$ to $y$''}\\
+  f : x \pth y : A &\iff& f \in A^\loc(x,y)
+  & \text{``$f$ is an $A$-path from $x$ to $y$''}
+\end{array}\]
+
+In $\mb{Preorder}$ and $\mb{Setoid}$, we can ignore the names of morphisms:
+\[\begin{array}{lclcl}
+  x \le y : A &\iff& \exists f \in A(x,y)\\
+  x \iso y : A &\iff& x \le y : A^\core &\iff& x \le y \wedge y \le x : A\\
+  x \pth y : A &\iff& x \le y : A^\loc
+  &\iff& \exists\bind{\vec{a}} a_0 = x \wedge a_n = y
+  \wedge \forall\bind{i} (a_i \le a_{i+1} \vee a_{i+1} \le a_i : A)
+\end{array}\]
+
+I may omit annotations ``$: A$'' when the intended category (groupoid, preorder,
+setoid) is clear. I \emph{never} omit it in cases such as $x \le y : A^\core$ or
+$x \le y : A^\loc$ --- that is, where the intended category is the result of
+applying a functor.
+
+\begin{theorem}\label{thm:loccore} For any two preorders $A$, $B$,
+  \begin{equation}
+    A^\loc \to B = A \to B^\core
+  \end{equation}
+
+  Where $A \to B$ is the preorder of monotone maps between $A$ and $B$.
+\end{theorem}
+
+\begin{proof} By Lemmas \ref{lem:loccore-1} and \ref{lem:loccore-2}.
+\end{proof}
+
+\begin{lemma}\label{lem:loccore-1}
+  Every monotone map $A^\loc \to B$ is a monotone map $A \to B^\core$ and
+  vice-versa, i.e.
+  \[ \mb{Preorder}(A^\loc, B) = \mb{Preorder}(A, B^\core) \]
+\end{lemma}
+
+\begin{proof} We prove each direction:
+  \begin{enumerate}
+  \item Fix $F : A^\loc \to B$ and suppose $x \le y : A$; we wish to show $F(x)
+    \equiv F(y)$. By the definition of $A^\loc$, from $x \le y$ we know $x
+    \equiv y : A^\loc$. Then by monotonicity of $F$ we have $F(x) \equiv F(y) :
+    B$.
+
+  \item Fix $F : A \to B^\core$ and suppose $x \pth y : A$; we wish to show
+    $F(x) \le F(y)$. Since $x \pth y$ there is a sequence $\vec{a}$ such that
+    $a_0 = x$, $a_n = y$, and $a_i \le a_{i+1} \vee a_{i+1} \le a_i$ for $i$
+    from 1 to $n-1$. From either case of this last disjunction and the
+    monotonicity of $F$ we have $F(a_i) \equiv F(a_{i+1})$; by transitivity
+    $F(x) \equiv F(y)$ and so $F(x) \le F(y)$.
+  \end{enumerate}
+\end{proof}
+
+\begin{lemma}\label{lem:loccore-2}
+  \[f \le g : A^\loc \to B \iff f \le g : A \to B^\core \]
+\end{lemma}
+
+\begin{proof}
+  Expanding definitions, it suffices to show:
+  \[ (\forall(a \pth b)\ f(a) \le g(b))
+  \iff
+  (\forall(a \le b)\ f(a) \equiv g(b))
+  \]
+
+  We prove each direction:
+  \begin{enumerate}
+  \item Suppose $\forall(a \pth b)\ f(a) \le g(b)$ and $x \le y$. From $x \le y$
+    we have $x \pth y$ and $y \pth x$; applying our first assumption we have
+    $f(x) \equiv f(y)$.
+
+  \item Suppose $\forall(a \le b)\ f(a) \equiv g(b)$ and $x \pth y$. We wish to
+    show $f(x) \le g(y)$. Since $x \pth y$ there is a sequence $\vec{a}$ such
+    that $a_0 = x$, $a_n = y$, and $a_i \le a_{i+1} \vee a_{i+1} \le a_i$ for
+    $i$ from 1 to $n-1$. From either case of this last disjunction and the
+    monotonicity of $f : A \to B^\core$ we have $f(a_i) \equiv f(a_{i+1})$. By
+    transitivity $f(x) \equiv f(y)$, and from our first assumption and
+    reflexivity $f(y) \equiv g(y)$, so transitively $f(x) \equiv g(y)$, which
+    implies $f(x) \le g(y)$.
+  \end{enumerate}
+\end{proof}
+
+\begin{conjecture} \label{cnj:loccore} Moreover,
+  \[ A^\loc \to B = {\color{ForestGreen} A^\loc \to B^\core} = A \to B^\core \]
+  because
+  \[ \forall(a \pth b)\ f(a) \equiv f(b) \]
+  is equivalent to each of the conditions in lemma \ref{lem:loccore-2}.
+\end{conjecture}
+
+
+\begin{conjecture}
+  Theorem \ref{thm:loccore} and Conjecture \ref{cnj:loccore} extend to
+  categories, so that $-^\loc \dashv -^\core$ because
+  \begin{equation}
+    \mb{Cat}(C^\loc, D) \cong \mb{Cat}(C^\loc, D^\core) \cong \mb{Cat}(C, D^\core)
+  \end{equation}
+\end{conjecture}
 
 \end{document}
