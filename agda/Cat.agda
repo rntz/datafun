@@ -83,7 +83,7 @@ record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   private instance the-cat = C
   -- TODO: don't use an infix operator for this here.
   infixr 2 Either
-  field Either : Op (Obj C)
+  field Either : BinOp (Obj C)
   field in₁ : ∀{a b} -> a ≤ Either a b
   field in₂ : ∀{a b} -> b ≤ Either a b
   field either : ∀{a b c} -> a ≤ c -> b ≤ c -> Either a b ≤ c
@@ -111,7 +111,7 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   private instance the-cat = C
   -- TODO: don't use an infix operator for this here
   infixr 2 Pair
-  field Pair : Op (Obj C)
+  field Pair : BinOp (Obj C)
   field π₁ : ∀{a b} -> Pair a b ≤ a
   field π₂ : ∀{a b} -> Pair a b ≤ b
   field make-pair : ∀{a b Γ} -> Γ ≤ a -> Γ ≤ b -> Γ ≤ Pair a b
@@ -154,7 +154,7 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   field overlap {{products}} : Products C
   -- TODO FIXME: shouldn't bind tighter than ∧.
   infixr 4 hom
-  field hom : Op (Obj C)
+  field hom : BinOp (Obj C)
   field apply : ∀{a b} -> hom a b ∧ a ≤ b
   field curry : ∀{Γ a b} -> Γ ∧ a ≤ b -> Γ ≤ hom a b
 

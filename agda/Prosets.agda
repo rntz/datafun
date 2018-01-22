@@ -68,8 +68,7 @@ isos≤? _ test x y = dec× (test x y) (test y x)
 
 -- If (f : a -> b) is monotone, then (f : isos a -> isos b) is also monotone.
 Isos : ∀{i j} -> cats {i}{j} ≤ cats
-ap Isos = isos
-map Isos f = fun (λ { (x , y) -> map f x , map f y })
+Isos = Fun: isos (λ f → fun (λ { (x , y) -> map f x , map f y }))
 
 instance
   -- This comonad factors into an adjunction to groupoids, I believe.

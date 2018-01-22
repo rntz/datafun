@@ -5,6 +5,7 @@ open import Cat
 
 -- TODO: do we need this?
 record Monad {i j C} (□ : Fun {i}{j} C C) : Set (i ⊔ j) where
+  constructor Monad:
   private instance cc = C
   field join : ∀{x} -> ap □ (ap □ x) ≤ ap □ x
   field pure : ∀{x} -> x ≤ ap □ x
@@ -14,6 +15,7 @@ record Monad {i j C} (□ : Fun {i}{j} C C) : Set (i ⊔ j) where
   bind f = map □ f • join
 
 record Comonad {i j C} (□ : Fun {i}{j} C C) : Set (i ⊔ j) where
+  constructor Comonad:
   private instance cc = C
   field dup : ∀{x} -> ap □ x ≤ ap □ (ap □ x)
   field extract : ∀{x} -> ap □ x ≤ x

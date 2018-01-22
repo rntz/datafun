@@ -20,8 +20,8 @@ open Eq public using (_≡_; refl)
 
 
 -- MY STUFF
-Op : ∀{i} -> Set i -> Set i
-Op A = A -> A -> A
+BinOp : ∀{i} -> Set i -> Set i
+BinOp A = A -> A -> A
 
 Function : ∀{i j} -> Set i -> Set j -> Set _
 Function A B = A -> B

@@ -19,7 +19,7 @@ mono ≺? disc = no (λ ())
 disc ≺? _ = yes tone-disc
 
 data Class : Set where
-  _,_ : Op Class
+  _,_ : BinOp Class
   DEC SL FIN ACC ACC≤ : Class
 
 FIX FIX≤ : Class
