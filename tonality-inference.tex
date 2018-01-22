@@ -209,14 +209,14 @@ is the same as a monotone map $T_s(A) \to B$:
 We define two operators of interest on tones:
 \begin{enumerate}
 \item Meet $s \wedge t$ is the meet of the lattice ordered $\ti < \{\tm, \ta\} <
-  \tb$. This gives the general tone of the pairing of two functions: given $f :
-  A \overset{s}{\to} B$ and $g : A \overset{t}{\to} C$, we have $\langle f,
-  g\rangle : A \overset{s \wedge t}{\to} B \times C$.
+  \tb$. This gives the general tone of the pairing $\langle f, g\rangle : A
+  \overset{s \wedge t}{\to} B \times C$ of two functions $f : A \overset{s}{\to}
+  B$ and $g : A \overset{t}{\to} C$.
 
 \item Composition $s \tc t$ gives the general tone of a composed function $f
-  \circ g$ when $f : B \overset{s}{\to} C$ and $g : A \overset{t}{\to} B$;
-  equivalently, $T_{s \tc t}\, A = T_t\,T_s\, A$ (note that the relative order
-  of $s,t$ swaps in this formulation).
+  \circ g : A \overset{s\tc t}{\to} C$ when $f : B \overset{s}{\to} C$ and $g :
+  A \overset{t}{\to} B$; equivalently, $T_{s \tc t}\, A = T_t\,T_s\, A$ (note
+  that the relative order of $s,t$ swaps in this formulation).
 \end{enumerate}
 
 These are defined by:
@@ -224,15 +224,15 @@ These are defined by:
   %% "baseline=(current bounding box.center)" incantation taken from
   %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
   \begin{tikzpicture}[scale=1,baseline=(current bounding box.center)]
-    \node (top)  at ( 0, 1) {$\ti$};
-    \node (bot)  at ( 0,-1) {$\tb$};
+    \node (top)  at ( 0, 1) {$\tb$};
+    \node (bot)  at ( 0,-1) {$\ti$};
     \node (-1)   at (-1, 0) {$\tm$};
     \node (1)    at ( 1, 0) {$\ta$};
     \draw (top) -- (-1) -- (bot) -- (1) -- (top);
   \end{tikzpicture}
 
   \begin{array}{c|rrrrr}
-    s \vee t & \tm & \tb & \ta & \ti\\\hline
+    s \wedge t & \tm & \tb & \ta & \ti\\\hline
     \tm & \tm & \tm & \ti & \ti\\
     \tb & \tm & \tb & \ta & \ti\\
     \ta & \ti & \ta & \ta & \ti\\
@@ -291,8 +291,8 @@ The following collection of laws holds:
   \end{array}
 
   \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
-    \textbf{Left-distribution} & s \tc (t \vee u) &=& (s \tc t) \vee (s \tc u)\\
-    \textbf{Right-distribution} & (s \vee t) \tc u &=& (s \tc u) \vee (t \tc u)
+    \textbf{Left-distribution} & s \tc (t \wedge u) &=& (s \tc t) \wedge (s \tc u)\\
+    \textbf{Right-distribution} & (s \wedge t) \tc u &=& (s \tc u) \wedge (t \tc u)
   \end{array}
 \end{mathpar}
 
@@ -311,7 +311,7 @@ These rules sent to me by Jason Reed:
 
   \infer[Weakening]{\GG{}, A^t \vdash C \quad t \le u}{\GG{}, A^u \vdash C}
 
-  \infer[Contraction]{\GG{},A^t, A^u \vdash C}{\GG{}, A^{t \vee u} \vdash C}
+  \infer[Contraction]{\GG{},A^t, A^u \vdash C}{\GG{}, A^{t \wedge u} \vdash C}
 
   \infer[Cut]{\GG \vdash A \quad \Delta,A^t \vdash C}{\GG^t,\Delta \vdash C}
 \end{mathpar}
