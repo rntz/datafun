@@ -51,6 +51,7 @@
 \newcommand{\GG}{\Gamma}
 
 \newcommand{\N}{\mathbb{N}}
+\newcommand{\x}{\times}
 \newcommand{\fn}{\lambda}
 \newcommand{\binder}{.\,}
 \newcommand{\bind}[1]{{#1}\binder}
@@ -63,13 +64,20 @@
 
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
 
+%% Category & preorder theory
+\newcommand{\core}{\ms{core}}
+\newcommand{\loc}{\ms{loc}}
+%% ``localization path''
+\newcommand{\pth}{\sim}
+\newcommand{\iso}{\simeq}
+
 %% tones: mono, anti, discrete, bivariant
 \newcommand{\tm}{{\ensuremath{1}}}     % monotone
 \newcommand{\ta}{{\ensuremath{-1}}}    % antitone
 \newcommand{\ti}{{\ensuremath{\star}}} % invariant / discrete
-\newcommand{\tb}{{\ensuremath{0}}}     % bivariant
+\newcommand{\tb}{{\ensuremath{\top}}}  % bivariant
 \newcommand{\tc}{\cdot}         % tone composition
-\newcommand{\tdual}[1]{\widehat{#1}}
+\newcommand{\tdual}[1]{{\color{red}\widehat{#1}}}
 
 \newcommand{\h}[3]{#1 :^{#3}\! {#2}}
 \newcommand{\hm}[2]{\h{#1}{#2}{\tm}}
@@ -148,7 +156,8 @@ In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
 \implies x = y \implies f(x) = f(y)$), so we sometimes call $\ti$ the
 ``discrete'' tone, because it respects only the discrete ordering.
 
-Another view of tones is as functors $T_s : \mb{Preorder} \to \mb{Preorder}$,
+Another view of tones is as functors $T_s : \mb{Preorder} \to \mb{Preorder}$
+which change the ordering on a preordered set without changing its elements,
 namely:
 \[\begin{array}{r@{\hskip 0.5em}c@{\hskip 0.5em}l
   @{\hskip 2em}c@{\hskip 2em}
@@ -182,29 +191,32 @@ is the same as a monotone map $T_s(A) \to B$:
   {A \bto B = \Codisc A \to B}
 \end{mathpar}
 
-Also of note is that each tone $s$ has a dual $\tdual{s}$ such that $T_s(A) \to
-B = A \to T_{\tdual{s}}(B)$:
-\[\begin{array}{c@{\hskip 2em}l}
-    \tdual{\tm} = \tm & A \to B = A \to B\\
-    \tdual{\ta} = \ta & A^\op \to B = A \to B^\op\\
-    \tdual{\ti} = \tb & \Disc A \to B = A \to \Codisc B\\
-    \tdual{\tb} = \ti & \Codisc A \to B\todo{{} = A \to \Disc B}\\
-\end{array}\]
+%% Also of note is that each tone $s$ has a dual $\tdual{s}$ such that $T_s(A) \to
+%% B = A \to T_{\tdual{s}}(B)$:
+%% \[\begin{array}{c@{\hskip 2em}l}
+%%     \tdual{\tm} = \tm & A \to B = A \to B\\
+%%     \tdual{\ta} = \ta & A^\op \to B = A \to B^\op\\
+%%     \tdual{\ti} = \tb & \Disc A \to B = A \to \Codisc B\\
+%%     \tdual{\tb} = \ti & \Codisc A \to B\todo{{} = A \to \Disc B}\\
+%% \end{array}\]
 
-\todo{TODO: Check these! Also, doesn't this mean everything is both left- and
-  right-adjoint to its dual? Is that possible?}
+%% \todo{TODO: Check these! Also, doesn't this mean everything is both left- and
+%%   right-adjoint to its dual? Is that possible?}
 
 
 \subsection{Tone operators}
 
-Besides dual $\tdual{s}$, we define two operators of interest on tones:
+We define two operators of interest on tones:
 \begin{enumerate}
-\item Join $s \vee t$ is the join of the lattice ordered $\tb < \{\tm, \ta\} <
-  \ti$;
-  \todo{(is this the general tone of $\langle f, g\rangle$?)}
+\item Meet $s \wedge t$ is the meet of the lattice ordered $\ti < \{\tm, \ta\} <
+  \tb$. This gives the general tone of the pairing of two functions: given $f :
+  A \overset{s}{\to} B$ and $g : A \overset{t}{\to} C$, we have $\langle f,
+  g\rangle : A \overset{s \wedge t}{\to} B \times C$.
 
 \item Composition $s \tc t$ gives the general tone of a composed function $f
-  \circ g$ when $f$ has tone $t$ and $g$ has tone $s$.
+  \circ g$ when $f : B \overset{s}{\to} C$ and $g : A \overset{t}{\to} B$;
+  equivalently, $T_{s \tc t}\, A = T_t\,T_s\, A$ (note that the relative order
+  of $s,t$ swaps in this formulation).
 \end{enumerate}
 
 These are defined by:
@@ -231,10 +243,12 @@ These are defined by:
     s \tc t & \tm & \ta & \ti & \tb\\\hline
     \tm & \tm & \ta & \ti & \tb\\
     \ta & \ta & \tm & \ti & \tb\\
-    \ti & \ti & \ti & \ti & \tb\\
+    \ti & \ti & \ti & \ti & \ti\\
     \tb & \tb & \tb & \tb & \tb
   \end{array}
 \end{mathpar}
+
+\todo{TODO: clarify that left column is $s$ and top row is $t$}
 
 \emph{N.B.} Monotonicity Types by Clancy, Miller, and Meiklejohn has a diagram
 much like this! However, instead of bivariance they have constancy, a stricter
@@ -245,21 +259,24 @@ function.
 They also have a contraction operator (``+'') on tones (``qualifiers''). I'm not
 sure how or if contraction relates to tone join.
 
-Together, $\vee$ and $\tc$ form a semiring, with $\vee$ as an idempotent
-addition and $\tc$ as a commutative multiplication. (\todo{TODO: Reference ``I
-  Got Plenty o' Nuttin'{}'' --- another use (the first?) of variable annotations
-  drawn from a semiring, and with similar (the same?) behavior of those
-  annotations in the inference rules.}) The following panoply of laws holds:
+Together, $\wedge$ and $\tc$ form a semiring, with $\wedge$ as an idempotent
+addition and $\tc$ as multiplication. Multiplication has $\tm$ as identity, but
+lacks an absorbing zero element. (\todo{TODO: Reference ``I Got Plenty o'
+  Nuttin'{}'' --- another use of variable annotations drawn from a semiring, and
+  with similar (the same?) behavior of those annotations in the inference
+  rules.})
+
+The following collection of laws holds:
 
 \begin{mathpar}
   \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
-    \multicolumn{4}{c}{\textbf{Properties of } \vee}
+    \multicolumn{4}{c}{\textbf{Properties of } \wedge}
     \vspace{0.1em}\\
-    \textbf{Associativity} & (s \vee t) \vee u &=& s \vee (t \vee u)\\
-    \textbf{Commutativity} & s \vee t &=& t \vee s\\
-    \textbf{Identity} & s \vee \tb &=& s\\
-    \textbf{Idempotence} & s \vee s &=& s\\
-    %% \textbf{\color{ForestGreen} Absorption} & s \vee \ti &=& \ti
+    \textbf{Associativity} & (s \wedge t) \wedge u &=& s \wedge (t \wedge u)\\
+    \textbf{Commutativity} & s \wedge t &=& t \wedge s\\
+    \textbf{Identity} & s \wedge \tb &=& s\\
+    \textbf{Idempotence} & s \wedge s &=& s\\
+    %% \textbf{\color{ForestGreen} Absorption} & s \wedge \ti &=& \ti
   \end{array}
 
   \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
@@ -267,15 +284,19 @@ addition and $\tc$ as a commutative multiplication. (\todo{TODO: Reference ``I
     \vspace{0.1em}\\
     \textbf{Associativity} & (s \tc t) \tc u &=& s \tc (t \tc u)\\
     \textbf{Identity} & s &=& s \tc \tm\\
-    \textbf{Absorption} & s \tc \tb &=& \tb\\
-    \textbf{Commutativity} & s \tc t &=& t \tc s\\
-    %% \textbf{\color{ForestGreen} Inverse} & \ta \tc \ta &=& \tm
+    \tb~ \textbf{left-absorbs} & \tb \tc s &=& \tb\\
+    \ti~ \textbf{left-absorbs} & \ti \tc s &=& \ti\\
+    %% \textbf{Commutativity} & s \tc t &=& t \tc s\\
+    $\ta$~ \textbf{is self-inverse} & \ta \tc \ta &=& \tm
   \end{array}
 
   \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
-    \textbf{Distribution} & s \tc (t \vee u) &=& (s \tc t) \vee (s \tc u)
+    \textbf{Left-distribution} & s \tc (t \vee u) &=& (s \tc t) \vee (s \tc u)\\
+    \textbf{Right-distribution} & (s \vee t) \tc u &=& (s \tc u) \vee (t \tc u)
   \end{array}
 \end{mathpar}
+
+\todo{TODO: check the distribution laws hold!}
 
 
 \section{A tonal sequent calculus}
@@ -284,21 +305,19 @@ These rules sent to me by Jason Reed:
 \begin{mathpar}
   (A_1^{t_1}, ..., A_n^{t_n})^u = (A_1^{t_1 \tc u}, ..., A_n^{t_n \tc u})\\
 
-  \infer{\GG \vdash A}{\GG^t \vdash T_t A}
+  \infer[$T$-Right]{\GG \vdash A}{\GG^t \vdash T_t A}
 
-  \infer{\GG{},A^{t\tc u} \vdash C}{\GG{}, (T_t A)^u \vdash C}
+  \infer[$T$-Left]{\GG{},A^{t\tc u} \vdash C}{\GG{}, (T_t A)^u \vdash C}
 
-  \infer[weakening]{\GG{}, A^t \vdash C \quad t \le u}{\GG{}, A^u \vdash C}
+  \infer[Weakening]{\GG{}, A^t \vdash C \quad t \le u}{\GG{}, A^u \vdash C}
 
-  \infer[contraction]{\GG{},A^t, A^u \vdash C}{\GG{}, A^{t \vee u} \vdash C}
+  \infer[Contraction]{\GG{},A^t, A^u \vdash C}{\GG{}, A^{t \vee u} \vdash C}
 
-  \infer[cut]{\GG \vdash A \quad \Delta,A^t \vdash C}{\GG^t,\Delta \vdash C}
+  \infer[Cut]{\GG \vdash A \quad \Delta,A^t \vdash C}{\GG^t,\Delta \vdash C}
 \end{mathpar}
 
-\todo{TODO: check this!}
-
 We aim to adapt this into a natural-deduction-style system with proof terms,
-i.e. a simply typed $\lambda$-calculus.
+i.e.\! a simply typed $\lambda$-calculus.
 
 
 \section{Substitution as guiding principle}
@@ -476,13 +495,6 @@ variables' types are inputs, but their tones are outputs:
 
 \section{Category and preorder theory}
 
-\newcommand{\core}{\ms{core}}
-\newcommand{\loc}{\ms{loc}}
-
-%% ``localization path''
-\newcommand{\pth}{\leftrightarrow}
-\newcommand{\iso}{\simeq}
-
 \[
 \begin{array}{clll}
   \multicolumn{1}{l}{\textbf{Notation}}
@@ -597,7 +609,12 @@ applying a functor.
 \end{proof}
 
 \begin{lemma}\label{lem:loccore-2}
+  \color{red}
   \[f \le g : A^\loc \to B \iff f \le g : A \to B^\core \]
+
+  \emph{FIXME: THIS IS WRONG! I HAVE A COUNTEREXAMPLE! Namely, $A = \{\star\}$
+  and $B = \{\bot < \top\}$. Let $f(\star) = \bot$ and $g(\star) = \top$. Then
+  $f \le g : A^\loc \to B$ but $f \not\le g : A \to B^\core$.}
 \end{lemma}
 
 \begin{proof}
@@ -610,8 +627,8 @@ applying a functor.
   We prove each direction:
   \begin{enumerate}
   \item Suppose $\forall(a \pth b)\ f(a) \le g(b)$ and $x \le y$. From $x \le y$
-    we have $x \pth y$ and $y \pth x$; applying our first assumption we have
-    $f(x) \equiv f(y)$.
+    we have $x \pth y$ and $y \pth x$; {\color{red} applying our first
+      assumption we have $f(x) \equiv f(y)$. \emph{FIXME: This is wrong!}}
 
   \item Suppose $\forall(a \le b)\ f(a) \equiv g(b)$ and $x \pth y$. We wish to
     show $f(x) \le g(y)$. Since $x \pth y$ there is a sequence $\vec{a}$ such
