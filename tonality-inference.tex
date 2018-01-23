@@ -249,7 +249,7 @@ These are defined by:
   \end{tikzpicture}
 
   \begin{array}{c|rrrrr}
-    \color{MidnightBlue} s \wedge t & \tm & \tb & \ta & \ti\\\hline
+    s \wedge t & \tm & \tb & \ta & \ti\\\hline
     \tm & \tm & \tm & \ti & \ti\\
     \tb & \tm & \tb & \ta & \ti\\
     \ta & \ti & \ta & \ta & \ti\\
@@ -257,10 +257,10 @@ These are defined by:
   \end{array}
 
   \begin{array}{cc|rrrr}
-    \multicolumn{2}{c|}{\multirow{2}{*}{\color{MidnightBlue} $s \tc t$}}
-    & \multicolumn{4}{c}{\color{MidnightBlue} t}\\
+    \multicolumn{2}{c|}{\multirow{2}{*}{$s \tc t$}}
+    & \multicolumn{4}{c}{t}\\
     && \tm & \ta & \ti & \tb\\\hline
-    \multirow{4}{*}{\color{MidnightBlue} $s$}
+    \multirow{4}{*}{$s$}
     & \tm & \tm & \ta & \ti & \tb\\
     & \ta & \ta & \tm & \ti & \tb\\
     & \ti & \ti & \ti & \ti & \ti\\
@@ -270,12 +270,21 @@ These are defined by:
 
 \emph{N.B.} Monotonicity Types by Clancy, Miller, and Meiklejohn has a diagram
 much like this! However, instead of bivariance they have constancy, a stricter
-condition. They write $\uparrow$ for our $\tm$, $\downarrow$ for our $\ta$, $?$
-for our $\ti$, and $\sim$ for constancy; they also add $=$ for the identity
-function.
+condition.
 %%
-They also have a contraction operator (``+'') on tones (``qualifiers''). I'm not
-sure how or if contraction relates to tone join.
+In \mb{Preorder}, constancy corresponds to respecting the \emph{indiscrete
+  ordering} (which sets $a \le b$ for all $a,b$) on one's argument.
+%%
+Interestingly, because constancy is so much stricter than bivariance, their
+composition operator is commutative.
+%%
+They write $\uparrow$ for our $\tm$, $\downarrow$ for our $\ta$, $?$ for our
+$\ti$, and $\sim$ for constancy. They also add $=$ for the ``tone'' that
+\emph{only the identity function} respects (this does not fit into our semantic
+framework, as it does not correspond to a functor on \mb{Preorder}).
+
+They also have a contraction operator (``+'') on tones, which corresponds to our
+$\wedge$.
 
 Together, $\wedge$ and $\tc$ form a semiring, with $\wedge$ as an idempotent
 addition and $\tc$ as multiplication. Multiplication has $\tm$ as identity, but
@@ -284,7 +293,7 @@ lacks an absorbing zero element. (\todo{TODO: Reference ``I Got Plenty o'
   with similar (the same?) behavior of those annotations in the inference
   rules.})
 
-The following collection of laws holds:
+The following panoply of laws holds:
 
 \begin{mathpar}
   \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
@@ -292,9 +301,9 @@ The following collection of laws holds:
     \vspace{0.1em}\\
     \textbf{Associativity} & (s \wedge t) \wedge u &=& s \wedge (t \wedge u)\\
     \textbf{Commutativity} & s \wedge t &=& t \wedge s\\
-    \textbf{Identity} & \tb \wedge s &=& s\\
     \textbf{Idempotence} & s \wedge s &=& s\\
-    %% \textbf{\color{ForestGreen} Absorption} & s \wedge \ti &=& \ti
+    \textbf{Identity} & \tb \wedge s &=& s\\
+    \textbf{Absorption} & \ti \wedge s &=& \ti\\
   \end{array}
 
   \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
@@ -302,9 +311,9 @@ The following collection of laws holds:
     \vspace{0.1em}\\
     \textbf{Associativity} & (s \tc t) \tc u &=& s \tc (t \tc u)\\
     \textbf{Identity} & \multicolumn{3}{c}{\tm \tc s = s = s \tc \tm}\\
-    \ta~ \textbf{self-inverts} & \ta \tc \ta &=& \tm\\
     \tb~ \textbf{left-absorbs} & \tb \tc s &=& \tb\\
-    \ti~ \textbf{left-absorbs} & \ti \tc s &=& \ti
+    \ti~ \textbf{left-absorbs} & \ti \tc s &=& \ti\\
+    \ta~ \textbf{self-inverts} & \ta \tc \ta &=& \tm\\
   \end{array}
 
   \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
@@ -352,17 +361,19 @@ It's not yet clear what $\GG_1 \cup \GG_2$ should mean, exactly; \todo{we will
 
 \section{An aside on overline notation}
 
-An overlined and superscripted meta-expression $\overline{X}^i$ represents a
+\newcommand{\xbar}[2]{\overline{#2}^{#1}}
+
+An overlined and superscripted meta-expression $\xbar{i}{X}$ represents a
 sequence (of unspecified length) with index variable $i$. The index variables
 clarify which bits are repeated \emph{with variation}, and which \emph{without}.
 Two examples:
 
 \begin{center}
   \begin{tabular}{lcll}
-    $\overline{x_i : A_i}^i$ & stands for
+    $\xbar{i}{x_i : A_i}$ & stands for
     & $x_1 : A_1,\, x_2 : A_2,\, ...,\, x_n : A_n$
     \\
-    $\overline{x_i : A}^i$ & stands for
+    $\xbar{i}{x_i : A}$ & stands for
     & $x_1 : A,\hspace{0.6em} x_2 : A,\hspace{0.6em} ...,\, x_n : A$
     & ($A$ is unsubscripted, so stays the same)
   \end{tabular}
@@ -414,22 +425,57 @@ This can be bidirectionalized as follows, recalling that in a context, the
 variables' types are inputs, but their tones are outputs:
 \begin{mathpar}
   \infer{
-    \overline{\h{x_i}{A_i}{\hilited s_i}}^i \vdash M \Rightarrow B
+    \xbar{i}{\h{x_i}{A_i}{\hilited s_i}} \vdash M \Rightarrow B
     \quad
-    \overline{\h{x_i}{A_i}{\hilited t_i}}^i,\, \h{y}{B}{\hilited u}
+    \xbar{i}{\h{x_i}{A_i}{\hilited t_i}},\, \h{y}{B}{\hilited u}
     \vdash N : C
   }{
-    \overline{\h{x_i}{A_i}{\hilited (s_i \tc u) \wedge t_i}}^i
+    \xbar{i}{\h{x_i}{A_i}{\hilited (s_i \tc u) \wedge t_i}}
     \vdash \textbf{let}~ y = M ~\textbf{in}~ N : C
   }
 \end{mathpar}
 
-\todo{TODO: More inference rules. E.g. pairing.}
+Some more bidirectionalized inference rules:
+
+\begin{mathpar}
+  \infer{
+    \xbar{i}{\h{x_i}{A_i}{s_i}} \vdash M : A
+    \quad
+    \xbar{i}{\h{x_i}{A_i}{t_i}} \vdash N : B
+  }{\xbar{i}{\h{x_i}{A_i}{s_i \wedge t_i}} \vdash (M,N) : A \x B}
+
+  \infer{\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash M : B_1 \x B_2}
+        {\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash \pi_i\;M : B_i}
+  \\
+
+  \infer{\xbar{i}{\h{x_i}{A_i}{s_i}}, \h{y}{B}{t} \vdash M : C}
+        {\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash \fn\bind{x} M : B \overset{t}{\to} C}
+
+  \infer{\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash M : B \overset{u}{\to} C
+         \quad
+         \xbar{i}{\h{x_i}{A_i}{t_i}} \vdash N : B}
+        {\xbar{i}{\h{x_i}{A_i}{s_i \wedge (t_i \tc u)}} \vdash M\;N : C}
+  \\
+
+  \infer{\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash M : C}
+        {\xbar{i}{\h{x_i}{A_i}{s_i \tc \ti}} \vdash \textbf{box}\;M : \square C}
+
+  \infer{\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash M : \square B
+         \quad
+         \xbar{i}{\h{x_i}{A_i}{t_i}, \h{y}{B}{u}} \vdash N : C
+         \quad \iso \le u}
+        {\xbar{i}{\h{x_i}{A_i}{(s_i \tc \tb) \wedge t_i}} \vdash
+          \textbf{let box}~ x = M ~\textbf{in}~ N : C}
+\end{mathpar}
+
+\todo{TODO: Even more inference rules. Case analysis, in particular.}
 
 
 \section{Equality of judgments at different tones}
 
-\todo{This entire section is either outright wrong or needs much correction.}
+\todo{CAVEAT LECTOR! This entire section is somewhere between mostly and
+  completely incorrect. I have not had time to mark exactly which bits are
+  mistaken. }
 
 \subsection{By example}
 
