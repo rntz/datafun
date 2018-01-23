@@ -3,6 +3,7 @@
 
 \usepackage{amssymb,amsmath,amsthm,latexsym}
 \usepackage{mathpartir}
+\usepackage{multirow}
 
 \usepackage{url}
 \usepackage{hyperref}
@@ -58,26 +59,42 @@
 \newcommand{\sub}[1]{\{{#1}\}}
 \newcommand{\fix}{\ms{fix}}
 
-\newcommand{\op}{\ms{op}}
-\newcommand{\Disc}{\square}
-\newcommand{\Codisc}{\lozenge}
+%% TODO: get rid of \Disc, \Codisc.
+\newcommand{\Disc}{{\color{red}\square}}
+\newcommand{\Codisc}{{\color{red}\lozenge}}
 
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
 
 %% Category & preorder theory
-\newcommand{\core}{\ms{core}}
-\newcommand{\loc}{\ms{loc}}
-%% ``localization path''
-\newcommand{\pth}{\sim}
-\newcommand{\iso}{\simeq}
+\newcommand{\op}{\ms{op}}
+\newcommand{\iso}{\ms{iso}}
+\renewcommand{\path}{\ms{path}}
+\newcommand{\isoto}{\simeq}
+\newcommand{\pathto}{\sim}
 
 %% tones: mono, anti, discrete, bivariant
-\newcommand{\tm}{{\ensuremath{1}}}     % monotone
-\newcommand{\ta}{{\ensuremath{-1}}}    % antitone
-\newcommand{\ti}{{\ensuremath{\star}}} % invariant / discrete
-\newcommand{\tb}{{\ensuremath{\top}}}  % bivariant
+%% \newcommand{\tm}{{\ensuremath{1}}}     % monotone
+%% \newcommand{\ta}{{\ensuremath{-1}}}    % antitone
+%% \newcommand{\ti}{{\ensuremath{\bot}}} % invariant / discrete
+%% \newcommand{\tb}{{\ensuremath{\top}}}  % bivariant
+
+%% %% \renewcommand{\ti}{{\ensuremath{\star}}} % invariant / discrete
+%% %% \renewcommand{\tb}{{\ensuremath{\top}}}  % bivariant
+
+%% \renewcommand{\ti}{{\ensuremath{\square}}} % invariant / discrete
+%% \renewcommand{\tb}{{\ensuremath{\lozenge}}}  % bivariant
+
+%% \renewcommand{\tm}{{\ensuremath{+}}}   % monotone
+%% \renewcommand{\ta}{{\ensuremath{-}}}   % antitone
+%% %% \renewcommand{\tb}{{\ensuremath{\pm}}} % bivariant
+%% %% \renewcommand{\ti}{{\ensuremath{!}}}   % invariant/discrete
+
+\newcommand{\tm}{{\ms{id}}}     % monotone
+\newcommand{\ta}{{\color{ForestGreen}\ensuremath{\op}}}    % antitone
+\newcommand{\ti}{{\color{NavyBlue}\ensuremath{\iso}}} % invariant / discrete
+\newcommand{\tb}{{\color{Bittersweet}\ensuremath{\path}}}  % bivariant
+
 \newcommand{\tc}{\cdot}         % tone composition
-\newcommand{\tdual}[1]{{\color{red}\widehat{#1}}}
 
 \newcommand{\h}[3]{#1 :^{#3}\! {#2}}
 \newcommand{\hm}[2]{\h{#1}{#2}{\tm}}
@@ -105,8 +122,8 @@
     \text{types} & A,B,C \vspace{0.5em}\\
     \text{terms} & M,N,O \vspace{0.5em}\\
     \text{tones}
-    & s,t,u,v
-    & \bnfeq & \tb ~|~ \tm ~|~ \ta ~|~ \ti
+    & s,t,u
+    & \bnfeq & \tm ~|~ \ta ~|~ \tb ~|~ \ti
     \vspace{0.5em}\\
     \text{contexts}
     & \GG &\bnfeq& \cdot ~|~ \GG, \h{x}{A}{s}
@@ -117,9 +134,9 @@
 \end{mathpar}
 
 Tones represent ways a function may respect or disrespect the orderings on its
-arguments. $\tm$ is monotone; $\ta$ is antitone (monotone in the opposite
-ordering); $\tb$ is bivariant (monotone and antitone); and $\ti$ is invariant
-(only respects equivalence).
+arguments. $\tm$ is monotone; $\ta$ is antitone (monotone in the
+opposite ordering); $\tb$ is bivariant (monotone and antitone); and $\ti$ is
+invariant (only respects equivalence).
 %
 Formally, tones are properties of maps between preorders (sets equipped with
 reflexive, transitive relations):\,\footnote{It is possible to generalize tones
@@ -143,12 +160,12 @@ reflexive, transitive relations):\,\footnote{It is possible to generalize tones
     & \text{opposite ordering}
     & $x \ge y$ &$\implies$& $f(x) \le f(y)$
     \\
-    \text{Bivariant} & \tb
-    & \text{equivalence closure}
+    \text{Bivariant} & \tb{}
+    & \text{equivalence closure or ``paths''}
     & $x \le y \vee y \le x$ &$\implies$& $f(x) \le f(y)$
     \\
-    \text{Invariant} & \ti
-    & \text{induced equivalence}
+    \text{Invariant} & \ti{}
+    & \text{induced equivalence or ``isomorphisms''}
     & $x \le y \wedge y \le x$ &$\implies$& $f(x) \le f(y)$
   \end{tabular}
 \end{center}
@@ -156,9 +173,8 @@ In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
 \implies x = y \implies f(x) = f(y)$), so we sometimes call $\ti$ the
 ``discrete'' tone, because it respects only the discrete ordering.
 
-Another view of tones is as functors $T_s : \mb{Preorder} \to \mb{Preorder}$
-which change the ordering on a preordered set without changing its elements,
-namely:
+Another view of tones is as functors $-^s : \mb{Preorder} \to \mb{Preorder}$
+which modify a preordered set's ordering without changing its elements, namely:
 \[\begin{array}{r@{\hskip 0.5em}c@{\hskip 0.5em}l
   @{\hskip 2em}c@{\hskip 2em}
   l@{\hskip 0.5em}c@{\hskip 0.5em}l}
@@ -168,11 +184,11 @@ namely:
   T_\ta(A) &=& A^\op
   &\text{where}& x \le_{A^\op} y &\iff& y \le_A x
   \\
-  T_\ti(A) &=& \Disc A
-  &\text{where}& x \le_{\Disc A} y &\iff& x \le_A y \wedge y \le_A x
+  T_\ti(A) &=& A^\iso
+  &\text{where}& x \le_{A^\ti} y &\iff& x \le_A y \wedge y \le_A x
   \\
-  T_\tb(A) &=& \Codisc A
-  &\text{where}& x \le_{\Codisc A} y &\iff&
+  T_\tb(A) &=& A^\path
+  &\text{where}& x \le_{A^\path} y &\iff&
   \exists\bind{\vec{a}} a_0 = x \wedge a_n = y \wedge {}
   \\
   &&&&&& \phantom{\exists\bind{\vec{a}}}
@@ -186,9 +202,9 @@ is the same as a monotone map $T_s(A) \to B$:
   \qquad
   {A \ato B = A^\op \to B}
   \qquad
-  {A \ito B = \Disc A \to B}
+  {A \ito B = A^\iso \to B}
   \qquad
-  {A \bto B = \Codisc A \to B}
+  {A \bto B = A^\path \to B}
 \end{mathpar}
 
 %% Also of note is that each tone $s$ has a dual $\tdual{s}$ such that $T_s(A) \to
@@ -208,15 +224,16 @@ is the same as a monotone map $T_s(A) \to B$:
 
 We define two operators of interest on tones:
 \begin{enumerate}
-\item Meet $s \wedge t$ is the meet of the lattice ordered $\ti < \{\tm, \ta\} <
-  \tb$. This gives the general tone of the pairing $\langle f, g\rangle : A
-  \overset{s \wedge t}{\to} B \times C$ of two functions $f : A \overset{s}{\to}
-  B$ and $g : A \overset{t}{\to} C$.
+\item Meet $s \wedge t$ is greatest lower bound in the lattice ordered $\ti <
+  \{\tm, \ta\} < \tb$. This gives the general tone of the pairing $\langle f,
+  g\rangle : A \overset{s \wedge t}{\to} B \times C$ of two functions $f : A
+  \overset{s}{\to} B$ and $g : A \overset{t}{\to} C$.
 
 \item Composition $s \tc t$ gives the general tone of a composed function $f
   \circ g : A \overset{s\tc t}{\to} C$ when $f : B \overset{s}{\to} C$ and $g :
-  A \overset{t}{\to} B$; equivalently, $T_{s \tc t}\, A = T_t\,T_s\, A$ (note
-  that the relative order of $s,t$ swaps in this formulation).
+  A \overset{t}{\to} B$; equivalently, $A^{(s\tc t)} = (A^s)^t$ for any preorder
+  $A$, and $T_{s \tc t} = T_t\,T_s$ (note that the relative order of $s,t$ swaps
+  in the last equation).
 \end{enumerate}
 
 These are defined by:
@@ -232,23 +249,24 @@ These are defined by:
   \end{tikzpicture}
 
   \begin{array}{c|rrrrr}
-    s \wedge t & \tm & \tb & \ta & \ti\\\hline
+    \color{MidnightBlue} s \wedge t & \tm & \tb & \ta & \ti\\\hline
     \tm & \tm & \tm & \ti & \ti\\
     \tb & \tm & \tb & \ta & \ti\\
     \ta & \ti & \ta & \ta & \ti\\
     \ti & \ti & \ti & \ti & \ti
   \end{array}
 
-  \begin{array}{c|rrrr}
-    s \tc t & \tm & \ta & \ti & \tb\\\hline
-    \tm & \tm & \ta & \ti & \tb\\
-    \ta & \ta & \tm & \ti & \tb\\
-    \ti & \ti & \ti & \ti & \ti\\
-    \tb & \tb & \tb & \tb & \tb
+  \begin{array}{cc|rrrr}
+    \multicolumn{2}{c|}{\multirow{2}{*}{\color{MidnightBlue} $s \tc t$}}
+    & \multicolumn{4}{c}{\color{MidnightBlue} t}\\
+    && \tm & \ta & \ti & \tb\\\hline
+    \multirow{4}{*}{\color{MidnightBlue} $s$}
+    & \tm & \tm & \ta & \ti & \tb\\
+    & \ta & \ta & \tm & \ti & \tb\\
+    & \ti & \ti & \ti & \ti & \ti\\
+    & \tb & \tb & \tb & \tb & \tb
   \end{array}
 \end{mathpar}
-
-\todo{TODO: clarify that left column is $s$ and top row is $t$}
 
 \emph{N.B.} Monotonicity Types by Clancy, Miller, and Meiklejohn has a diagram
 much like this! However, instead of bivariance they have constancy, a stricter
@@ -274,7 +292,7 @@ The following collection of laws holds:
     \vspace{0.1em}\\
     \textbf{Associativity} & (s \wedge t) \wedge u &=& s \wedge (t \wedge u)\\
     \textbf{Commutativity} & s \wedge t &=& t \wedge s\\
-    \textbf{Identity} & s \wedge \tb &=& s\\
+    \textbf{Identity} & \tb \wedge s &=& s\\
     \textbf{Idempotence} & s \wedge s &=& s\\
     %% \textbf{\color{ForestGreen} Absorption} & s \wedge \ti &=& \ti
   \end{array}
@@ -283,11 +301,10 @@ The following collection of laws holds:
     \multicolumn{4}{c}{\textbf{Properties of } \tc}
     \vspace{0.1em}\\
     \textbf{Associativity} & (s \tc t) \tc u &=& s \tc (t \tc u)\\
-    \textbf{Identity} & s &=& s \tc \tm\\
+    \textbf{Identity} & \multicolumn{3}{c}{\tm \tc s = s = s \tc \tm}\\
+    \ta~ \textbf{self-inverts} & \ta \tc \ta &=& \tm\\
     \tb~ \textbf{left-absorbs} & \tb \tc s &=& \tb\\
-    \ti~ \textbf{left-absorbs} & \ti \tc s &=& \ti\\
-    %% \textbf{Commutativity} & s \tc t &=& t \tc s\\
-    $\ta$~ \textbf{is self-inverse} & \ta \tc \ta &=& \tm
+    \ti~ \textbf{left-absorbs} & \ti \tc s &=& \ti
   \end{array}
 
   \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
@@ -333,7 +350,86 @@ It's not yet clear what $\GG_1 \cup \GG_2$ should mean, exactly; \todo{we will
   return to this question.}
 
 
+\section{An aside on overline notation}
+
+An overlined and superscripted meta-expression $\overline{X}^i$ represents a
+sequence (of unspecified length) with index variable $i$. The index variables
+clarify which bits are repeated \emph{with variation}, and which \emph{without}.
+Two examples:
+
+\begin{center}
+  \begin{tabular}{lcll}
+    $\overline{x_i : A_i}^i$ & stands for
+    & $x_1 : A_1,\, x_2 : A_2,\, ...,\, x_n : A_n$
+    \\
+    $\overline{x_i : A}^i$ & stands for
+    & $x_1 : A,\hspace{0.6em} x_2 : A,\hspace{0.6em} ...,\, x_n : A$
+    & ($A$ is unsubscripted, so stays the same)
+  \end{tabular}
+\end{center}
+
+This is inspired by Guy Steele's talk on Computer Science Metanotation.%
+%%
+\footnote{There are videos of the talk at
+  \href{https://www.youtube.com/watch?v=dCuZkaaou0Q}{Clojure/conj 2017} (the one
+  I watched), \href{https://www.youtube.com/watch?v=7HKbjYqqPPQ}{PPoPP 2017},
+  and
+  \href{https://www.youtube.com/watch?v=8fCfkGFF7X8&feature=youtu.be&t=37m46s}{Harvard
+    University}. There are also
+  \href{http://s3.amazonaws.com/erlang-conferences-production/media/files/000/000/755/original/Guy_L._Steele_-_A_Cobbler's_Child.pdf?1510053539}{slides
+    from Code Mesh 2017}.}
+%%
+In the talk, Guy analyses ``overline notation'' --- the use of $\overline{x}$ to
+stand for a sequence $x_1, x_2, ..., x_n$.
+%%
+Inspired by quasiquotation in Lisp, he proposes using underlines to indicate
+parts which are repeated \emph{without variation}. Thus $\overline{x : A}$
+stands for $x_1 : A_1, ..., x_n : A_n$, while $\overline{x : \underline{A}}$
+stands for $x_1 : A, ..., x_n : A$.
+%%
+In my Lisp experience, admittedly more limited than Guy's, quasiquotation is
+wonderful until you need to nest it. One level of nesting is difficult to read;
+two or more are unbearable. Therefore, I prefer explicit indices.
+
+
+\section{Typing rules for tone synthesis}
+
+\newcommand{\hilited}{\color{blue}}
+\renewcommand{\hilited}{\color{Rhodamine}}
+\renewcommand{\hilited}{\color{Emerald}}
+
+The declarative typing rule for \textbf{let}, which internalizes the
+substitution principle, is:
+\begin{mathpar}
+  \infer{
+    \GG \vdash \h{M}{B}{s}
+    \quad
+    \GG, \h{x}{B}{s} \vdash \h{N}{C}{t}
+  }{
+    \GG \vdash \textbf{let}~ x = M ~\textbf{in}~ \h{N}{C}{t}
+  }
+\end{mathpar}
+
+This can be bidirectionalized as follows, recalling that in a context, the
+variables' types are inputs, but their tones are outputs:
+\begin{mathpar}
+  \infer{
+    \overline{\h{x_i}{A_i}{\hilited s_i}}^i \vdash M \Rightarrow B
+    \quad
+    \overline{\h{x_i}{A_i}{\hilited t_i}}^i,\, \h{y}{B}{\hilited u}
+    \vdash N : C
+  }{
+    \overline{\h{x_i}{A_i}{\hilited (s_i \tc u) \wedge t_i}}^i
+    \vdash \textbf{let}~ y = M ~\textbf{in}~ N : C
+  }
+\end{mathpar}
+
+\todo{TODO: More inference rules. E.g. pairing.}
+
+
 \section{Equality of judgments at different tones}
+
+\todo{This entire section is either outright wrong or needs much correction.}
 
 \subsection{By example}
 
@@ -379,11 +475,11 @@ Finally, we consider these judgments to be equal:
 This is because, when the hypotheses are all bivariant, the tone of the
 conclusion is irrelevant.
 
-
 \subsection{In general}
 The general pattern which unifies equations \ref{eqn:ex1}--\ref{eqn:ex3} is:
 
-\newcommand{\hilited}{\color{blue}}
+%% TODO: remove \tdual.
+\newcommand{\tdual}[1]{{\color{red}{\widehat{#1}}}}
 
 \begin{equation}
   \overline{\h{x_i}{A_i}{\hilited s_i}}^i \vdash \h{M}{B}{\hilited \tdual{t} \tc u}
@@ -400,16 +496,7 @@ Or, perhaps more simply:
   \vdash \h{M}{B}{\hilited\tm}
 \end{equation}
 
-\todo{TODO: CHECK THIS! I THINK IT'S WRONG!}
-
-\todo{TODO: Justify in terms of semantics of substitution as function
-  composition.}
-
-This can be written as a rule of inference rather than an equality:
-
-\begin{mathpar}
-  \text{\todo{TODO}}
-\end{mathpar}
+\todo{TODO: This is wrong. In particular, $\tdual{t}$ does not in general exist.}
 
 %% %% In Guy Steele's overline-underline notation:
 %% Or, perhaps more simply:
@@ -419,78 +506,6 @@ This can be written as a rule of inference rather than an equality:
 %%   \overline{\h{x}{A}{\hilited s \tc \underline{t}}}
 %%   \vdash \h{M}{B}{\hilited\tm}
 %% \end{equation}
-
-\subsubsection{On overline notation}
-
-An overlined and superscripted meta-expression $\overline{X}^i$ represents a
-sequence (of unspecified length) with index variable $i$. The index variables
-clarify which bits are repeated \emph{with variation}, and which \emph{without}.
-Two examples:
-
-\begin{center}
-  \begin{tabular}{lcll}
-    $\overline{x_i : A_i}^i$ & stands for
-    & $x_1 : A_1,\, x_2 : A_2,\, ...,\, x_n : A_n$
-    \\
-    $\overline{x_i : A}^i$ & stands for
-    & $x_1 : A,\hspace{0.6em} x_2 : A,\hspace{0.6em} ...,\, x_n : A$
-    & ($A$ is unsubscripted, so stays the same)
-  \end{tabular}
-\end{center}
-
-This is inspired by Guy Steele's talk on Computer Science Metanotation.%
-%%
-\footnote{There are videos of the talk at
-  \href{https://www.youtube.com/watch?v=dCuZkaaou0Q}{Clojure/conj 2017} (the one
-  I watched), \href{https://www.youtube.com/watch?v=7HKbjYqqPPQ}{PPoPP 2017},
-  and
-  \href{https://www.youtube.com/watch?v=8fCfkGFF7X8&feature=youtu.be&t=37m46s}{Harvard
-    University}. There are also
-  \href{http://s3.amazonaws.com/erlang-conferences-production/media/files/000/000/755/original/Guy_L._Steele_-_A_Cobbler's_Child.pdf?1510053539}{slides
-    from Code Mesh 2017}.}
-%%
-In the talk, Guy analyses ``overline notation'' --- the use of $\overline{x}$ to
-stand for a sequence $x_1, x_2, ..., x_n$.
-%%
-Inspired by quasiquotation in Lisp, he proposes using underlines to indicate
-parts which are repeated \emph{without variation}. Thus $\overline{x : A}$
-stands for $x_1 : A_1, ..., x_n : A_n$, while $\overline{x : \underline{A}}$
-stands for $x_1 : A, ..., x_n : A$.
-%%
-In my Lisp experience, admittedly more limited than Guy's, quasiquotation is
-wonderful until you need to nest it. One level of nesting is difficult to read;
-two or more are unbearable. Therefore, I prefer explicit indices.
-
-
-\section{Punchline}
-
-The declarative typing rule for \textbf{let}, which internalizes the
-substitution principle, is:
-\begin{mathpar}
-  \infer{
-    \GG \vdash \h{M}{B}{s}
-    \quad
-    \GG, \h{x}{B}{s} \vdash \h{N}{C}{t}
-  }{
-    \GG \vdash \textbf{let}~ x = M ~\textbf{in}~ \h{N}{C}{t}
-  }
-\end{mathpar}
-
-This can be bidirectionalized as follows, recalling that in a context, the
-variables' types are inputs, but their tones are outputs:
-\begin{mathpar}
-  \infer{
-    \overline{\h{x_i}{A_i}{\hilited s_i}}^i \vdash M \Rightarrow B
-    \quad
-    \overline{\h{x_i}{A_i}{\hilited t_i}}^i,\, \h{y}{B}{\hilited u}
-    \vdash N : C
-  }{
-    \overline{\h{x_i}{A_i}{\hilited (s_i \tc u) \vee t_i}}^i
-    \vdash \textbf{let}~ y = M ~\textbf{in}~ N : C
-  }
-\end{mathpar}
-
-\todo{TODO}
 
 
 \section{Category and preorder theory}
@@ -502,20 +517,20 @@ variables' types are inputs, but their tones are outputs:
   & \multicolumn{1}{l}{\textbf{How to make it}}
   & \multicolumn{1}{l}{\textbf{In $\mb{Preorder}$}}
   \\\hline
-  C^\loc
+  C^\path
   & \text{``localization of $C$''}
   & \text{freely add inverses for every morphism}
   & \text{equivalence closure}
   \\
-  C^\core
+  C^\iso
   & \text{``core of $C$''}
   & \text{keep only the isomorphisms}
   & \text{induced equivalence}
 \end{array}
 \]
 
-$C^\loc$ and $C^\core$ are groupoids --- categories where every morphism is an
-isomorphism. I assert but do not prove that $-^\loc$ and $-^\core$ are
+$C^\path$ and $C^\iso$ are groupoids --- categories where every morphism is an
+isomorphism. I assert but do not prove that $-^\path$ and $-^\iso$ are
 functorial, $\mb{Cat} \to \mb{Groupoid}$. If we restrict the domain to
 $\mb{Preorder}$, the codomain restricts to $\mb{Setoid}$.
 
@@ -526,11 +541,11 @@ Diagramatically, leaving inclusion functors unlabeled:
       commutative diagrams/every label/.append style={/tikz/auto=false}}}
   \begin{tikzcd}[row sep=5em,column sep=4em]
     \mb{Cat}
-    \arrow[d,bend right=40,"\textstyle\loc"'{name=A}]
-    \arrow[d,bend left=40,"\textstyle\core"{name=C}]
+    \arrow[d,bend right=40,"\textstyle\path"'{name=A}]
+    \arrow[d,bend left=40,"\textstyle\iso"{name=C}]
     & \mb{Preorder}
-    \arrow[d,bend right=40,"\textstyle\loc"'{name=A2}]
-    \arrow[d,bend left=40,"\textstyle\core"{name=C2}]
+    \arrow[d,bend right=40,"\textstyle\path"'{name=A2}]
+    \arrow[d,bend left=40,"\textstyle\iso"{name=C2}]
     \arrow[l]
     \\
     \mb{Groupoid} \arrow[u,""{name=B}]
@@ -543,11 +558,11 @@ Diagramatically, leaving inclusion functors unlabeled:
   \end{tikzcd}
 \]}
 
-$-^\loc \dashv \mc{U} \dashv -^\core$ form an \emph{adjoint triple}, where
+$-^\path \dashv \mc{U} \dashv -^\iso$ form an \emph{adjoint triple}, where
 $\mc{U}$ is the inclusion $\mb{Groupoid} \to \mb{Cat}$. \todo{TODO:
   Prove this, and explain what adjoint triples are.}
 %
-Let $\lozenge = \mc{U}(-^\loc)$ and $\square = \mc{U}(-^\core)$. This adjoint
+Let $\lozenge = \mc{U}(-^\path)$ and $\square = \mc{U}(-^\iso)$. This adjoint
 triple implies that $\lozenge$ is a monad, $\square$ a comonad, and that
 $\lozenge \dashv \square$.
 
@@ -555,29 +570,29 @@ Some useful notation:
 \[\begin{array}{lcl@{\hskip 2em}l}
   f : x \to y : A &\iff& f \in A(x,y)
   & \text{``$f$ is an $A$-morphism from $x$ to $y$''}\\
-  f : x \simeq y : A &\iff& f \in A^\core(x,y)
+  f : x \simeq y : A &\iff& f \in A^\iso(x,y)
   & \text{``$f$ is an $A$-isomorphism from $x$ to $y$''}\\
-  f : x \pth y : A &\iff& f \in A^\loc(x,y)
+  f : x \pathto y : A &\iff& f \in A^\path(x,y)
   & \text{``$f$ is an $A$-path from $x$ to $y$''}
 \end{array}\]
 
 In $\mb{Preorder}$ and $\mb{Setoid}$, we can ignore the names of morphisms:
 \[\begin{array}{lclcl}
   x \le y : A &\iff& \exists f \in A(x,y)\\
-  x \iso y : A &\iff& x \le y : A^\core &\iff& x \le y \wedge y \le x : A\\
-  x \pth y : A &\iff& x \le y : A^\loc
+  x \isoto y : A &\iff& x \le y : A^\iso &\iff& x \le y \wedge y \le x : A\\
+  x \pathto y : A &\iff& x \le y : A^\path
   &\iff& \exists\bind{\vec{a}} a_0 = x \wedge a_n = y
   \wedge \forall\bind{i} (a_i \le a_{i+1} \vee a_{i+1} \le a_i : A)
 \end{array}\]
 
 I may omit annotations ``$: A$'' when the intended category (groupoid, preorder,
-setoid) is clear. I \emph{never} omit it in cases such as $x \le y : A^\core$ or
-$x \le y : A^\loc$ --- that is, where the intended category is the result of
+setoid) is clear. I \emph{never} omit it in cases such as $x \le y : A^\iso$ or
+$x \le y : A^\path$ --- that is, where the intended category is the result of
 applying a functor.
 
 \begin{theorem}\label{thm:loccore} For any two preorders $A$, $B$,
   \begin{equation}
-    A^\loc \to B = A \to B^\core
+    A^\path \to B = A \to B^\iso
   \end{equation}
 
   Where $A \to B$ is the preorder of monotone maps between $A$ and $B$.
@@ -587,20 +602,20 @@ applying a functor.
 \end{proof}
 
 \begin{lemma}\label{lem:loccore-1}
-  Every monotone map $A^\loc \to B$ is a monotone map $A \to B^\core$ and
+  Every monotone map $A^\path \to B$ is a monotone map $A \to B^\iso$ and
   vice-versa, i.e.
-  \[ \mb{Preorder}(A^\loc, B) = \mb{Preorder}(A, B^\core) \]
+  \[ \mb{Preorder}(A^\path, B) = \mb{Preorder}(A, B^\iso) \]
 \end{lemma}
 
 \begin{proof} We prove each direction:
   \begin{enumerate}
-  \item Fix $F : A^\loc \to B$ and suppose $x \le y : A$; we wish to show $F(x)
-    \equiv F(y)$. By the definition of $A^\loc$, from $x \le y$ we know $x
-    \equiv y : A^\loc$. Then by monotonicity of $F$ we have $F(x) \equiv F(y) :
+  \item Fix $F : A^\path \to B$ and suppose $x \le y : A$; we wish to show $F(x)
+    \equiv F(y)$. By the definition of $A^\path$, from $x \le y$ we know $x
+    \equiv y : A^\path$. Then by monotonicity of $F$ we have $F(x) \equiv F(y) :
     B$.
 
-  \item Fix $F : A \to B^\core$ and suppose $x \pth y : A$; we wish to show
-    $F(x) \le F(y)$. Since $x \pth y$ there is a sequence $\vec{a}$ such that
+  \item Fix $F : A \to B^\iso$ and suppose $x \pathto y : A$; we wish to show
+    $F(x) \le F(y)$. Since $x \pathto y$ there is a sequence $\vec{a}$ such that
     $a_0 = x$, $a_n = y$, and $a_i \le a_{i+1} \vee a_{i+1} \le a_i$ for $i$
     from 1 to $n-1$. From either case of this last disjunction and the
     monotonicity of $F$ we have $F(a_i) \equiv F(a_{i+1})$; by transitivity
@@ -610,31 +625,31 @@ applying a functor.
 
 \begin{lemma}\label{lem:loccore-2}
   \color{red}
-  \[f \le g : A^\loc \to B \iff f \le g : A \to B^\core \]
+  \[f \le g : A^\path \to B \iff f \le g : A \to B^\iso \]
 
   \emph{FIXME: THIS IS WRONG! I HAVE A COUNTEREXAMPLE! Namely, $A = \{\star\}$
   and $B = \{\bot < \top\}$. Let $f(\star) = \bot$ and $g(\star) = \top$. Then
-  $f \le g : A^\loc \to B$ but $f \not\le g : A \to B^\core$.}
+  $f \le g : A^\path \to B$ but $f \not\le g : A \to B^\iso$.}
 \end{lemma}
 
 \begin{proof}
   Expanding definitions, it suffices to show:
-  \[ (\forall(a \pth b)\ f(a) \le g(b))
+  \[ (\forall(a \pathto b)\ f(a) \le g(b))
   \iff
   (\forall(a \le b)\ f(a) \equiv g(b))
   \]
 
   We prove each direction:
   \begin{enumerate}
-  \item Suppose $\forall(a \pth b)\ f(a) \le g(b)$ and $x \le y$. From $x \le y$
-    we have $x \pth y$ and $y \pth x$; {\color{red} applying our first
+  \item Suppose $\forall(a \pathto b)\ f(a) \le g(b)$ and $x \le y$. From $x \le
+    y$ we have $x \pathto y$ and $y \pathto x$; {\color{red} applying our first
       assumption we have $f(x) \equiv f(y)$. \emph{FIXME: This is wrong!}}
 
-  \item Suppose $\forall(a \le b)\ f(a) \equiv g(b)$ and $x \pth y$. We wish to
-    show $f(x) \le g(y)$. Since $x \pth y$ there is a sequence $\vec{a}$ such
-    that $a_0 = x$, $a_n = y$, and $a_i \le a_{i+1} \vee a_{i+1} \le a_i$ for
-    $i$ from 1 to $n-1$. From either case of this last disjunction and the
-    monotonicity of $f : A \to B^\core$ we have $f(a_i) \equiv f(a_{i+1})$. By
+  \item Suppose $\forall(a \le b)\ f(a) \equiv g(b)$ and $x \pathto y$. We wish
+    to show $f(x) \le g(y)$. Since $x \pathto y$ there is a sequence $\vec{a}$
+    such that $a_0 = x$, $a_n = y$, and $a_i \le a_{i+1} \vee a_{i+1} \le a_i$
+    for $i$ from 1 to $n-1$. From either case of this last disjunction and the
+    monotonicity of $f : A \to B^\iso$ we have $f(a_i) \equiv f(a_{i+1})$. By
     transitivity $f(x) \equiv f(y)$, and from our first assumption and
     reflexivity $f(y) \equiv g(y)$, so transitively $f(x) \equiv g(y)$, which
     implies $f(x) \le g(y)$.
@@ -642,18 +657,18 @@ applying a functor.
 \end{proof}
 
 \begin{conjecture} \label{cnj:loccore} Moreover,
-  \[ A^\loc \to B = {\color{ForestGreen} A^\loc \to B^\core} = A \to B^\core \]
+  \[ A^\path \to B = {\color{ForestGreen} A^\path \to B^\iso} = A \to B^\iso \]
   because
-  \[ \forall(a \pth b)\ f(a) \equiv f(b) \]
+  \[ \forall(a \pathto b)\ f(a) \equiv f(b) \]
   is equivalent to each of the conditions in lemma \ref{lem:loccore-2}.
 \end{conjecture}
 
 
 \begin{conjecture}
   Theorem \ref{thm:loccore} and Conjecture \ref{cnj:loccore} extend to
-  categories, so that $-^\loc \dashv -^\core$ because
+  categories, so that $-^\path \dashv -^\iso$ because
   \begin{equation}
-    \mb{Cat}(C^\loc, D) \cong \mb{Cat}(C^\loc, D^\core) \cong \mb{Cat}(C, D^\core)
+    \mb{Cat}(C^\path, D) \cong \mb{Cat}(C^\path, D^\iso) \cong \mb{Cat}(C, D^\iso)
   \end{equation}
 \end{conjecture}
 
