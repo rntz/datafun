@@ -335,7 +335,7 @@ These rules sent to me by Jason Reed:
 
   \infer[$T$-Left]{\GG{},A^{t\tc u} \vdash C}{\GG{}, (T_t A)^u \vdash C}
 
-  \infer[Weakening]{\GG{}, A^t \vdash C \quad t \le u}{\GG{}, A^u \vdash C}
+  \infer[Weakening]{\GG{}, A^t \vdash C \quad u \le t}{\GG{}, A^u \vdash C}
 
   \infer[Contraction]{\GG{},A^t, A^u \vdash C}{\GG{}, A^{t \wedge u} \vdash C}
 
@@ -469,6 +469,9 @@ Some more bidirectionalized inference rules:
 \end{mathpar}
 
 \todo{TODO: Even more inference rules. Case analysis, in particular.}
+
+\todo{TODO?: Some way of giving tone annotations that doesn't need so many
+  overlines?}
 
 
 \section{Equality of judgments at different tones}
