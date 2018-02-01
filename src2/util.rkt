@@ -154,13 +154,14 @@
             (loop (read) (cons line acc)))))))
 
 ;;; List utilities
-(provide index-of length=? map? foldl1 foldr1 rev-append let*/list)
+(provide length=? map? foldl1 foldr1 rev-append let*/list)
 
-(define (index-of v lst [eq equal?])
-  (let loop ([i 0] [l lst])
-    (match l
-      ['() #f]
-      [(cons x xs) (if (eq x v) i (loop (+ 1 i) xs))])))
+;; argh. exists in racket 6.7.0.3, but with v/lst arguments swapped.
+;; (define (index-of v lst [eq equal?])
+;;   (let loop ([i 0] [l lst])
+;;     (match l
+;;       ['() #f]
+;;       [(cons x xs) (if (eq x v) i (loop (+ 1 i) xs))])))
 
 (define (length=? l . lsts)
   (define len (length l))
@@ -243,6 +244,8 @@
 
 
 ;;; Hash utilities
+;; NB. racket/hash now provides hash-union, maybe I can rewrite or drop some of
+;; these?
 (provide freeze-hash
          hash-union-with hash-union-right hashes-union-right
          hash-intersection-with
