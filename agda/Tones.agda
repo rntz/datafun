@@ -1,4 +1,3 @@
-{-# OPTIONS --postfix-projections #-}
 module Tones where
 
 open import Prelude
@@ -18,6 +17,16 @@ data _≺_ : (o p : Tone) -> Set where
   ISOS≺ : ∀{o} -> ISOS ≺ o
   ≺PATHS : ∀{o} -> o ≺ PATHS
 
+tone-lub : ∀ x y -> Σ[ z ∈ Tone ] (x ≺ z × y ≺ z × (∀ q → x ≺ q → y ≺ q → z ≺ q))
+tone-lub ID ID = ID , ≺refl , ≺refl , λ q x _ → x
+tone-lub OP OP = OP , ≺refl , ≺refl , λ q x _ → x
+tone-lub ID OP = PATHS , ≺PATHS , ≺PATHS , λ { _ ≺refl () ; _ ≺PATHS ≺PATHS → ≺refl }
+tone-lub OP ID = PATHS , ≺PATHS , ≺PATHS , λ { _ ≺refl () ; _ ≺PATHS ≺PATHS → ≺refl }
+tone-lub x ISOS = x , ≺refl , ISOS≺ , λ q y≺q ISOS≺q → y≺q
+tone-lub x PATHS = PATHS , ≺PATHS , ≺refl , λ q x₁ x₂ → x₂
+tone-lub ISOS y = y , ISOS≺ , ≺refl , λ q ISOS≺q y≺q → y≺q
+tone-lub PATHS y = PATHS , ≺refl , ≺PATHS , λ q PATHS≺q y≺q → PATHS≺q
+
 instance
   tones : Cat _ _
   Obj tones = Tone
@@ -29,12 +38,12 @@ instance
   compo tones ≺PATHS ≺PATHS = ≺PATHS
 
   tone-sums : Sums tones
-  Either tone-sums s t = {!!}
-  Sums.in₁ tone-sums = {!!}
-  Sums.in₂ tone-sums = {!!}
-  either tone-sums = {!!}
-  Sums.bot tone-sums = {!!}
-  Sums.bot≤ tone-sums = {!!}
+  Either tone-sums s t = tone-lub s t .proj₁
+  Sums.in₁ tone-sums = tone-lub _ _ .proj₂ .proj₁
+  Sums.in₂ tone-sums {s}{t} = tone-lub s t .proj₂ .proj₂ .proj₁
+  either tone-sums = tone-lub _ _ .proj₂ .proj₂ .proj₂ _
+  Sums.bot tone-sums = ISOS
+  Sums.bot≤ tone-sums = ISOS≺
 
 opp : ∀{i j} -> Cat i j -> Cat i j
 opp C = Cat: (Obj C) (λ a b → Hom C b a) (ident C) (λ f g → compo C g f)
@@ -69,10 +78,12 @@ ap den ID = id
 ap den OP = Opp
 ap den ISOS = Isos
 ap den PATHS = Paths
--- if (a ⇒ b), then (F a ⇒ F b), where F is the functor associated with some
--- tone. this is just functoriality!
+-- if (a ⇒ b), then (F_s a ⇒ F_s b), where F_s is the functor associated with
+-- the tone s. this is just functoriality!
 map den {i} ≺refl = map (ap den i)
--- if (a ⇒ b), then (isos a ⇒ F b). initiality?
-map den {.ISOS} {j} ISOS≺ A⇒B = {!!}
--- if (a ⇒ b), then (F a ⇒ paths b). finality?
-map den {i} {.PATHS} ≺PATHS A⇒B = {!!}
+-- if (a ⇒ b), then (isos a ⇒ F_t b). initiality?
+--
+-- oh shit, I need that (ap den t .ap) == id!
+map den {.ISOS} {t} ISOS≺ {A} {B} A⇒B = Fun: (λ a → {!!}) {!!}
+-- if (a ⇒ b), then (F_s a ⇒ paths b). finality?
+map den {s} {.PATHS} ≺PATHS A⇒B = {!!} • map Paths A⇒B
