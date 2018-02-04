@@ -5,7 +5,7 @@ type conid = string
 type var = string
 
 (* Sets of variables *)
-module V = Set.Make(String)
+module Vars = Set.Make(String)
 
 
 (* ---------- types ---------- *)
@@ -136,7 +136,7 @@ module Seq(M : IDIOM) = struct
      | LetSet(e', e'') -> (e' ** e'') |> map (fun (a',a'') -> LetSet(a', a''))
 end
 
-type exp = In of loc * V.t * exp expF
+type exp = In of loc * Vars.t * exp expF
 
 let out (In(_, _, e)) = e
 let fvs (In(_, vs, _)) = vs
@@ -145,16 +145,16 @@ let loc (In(loc, _, _)) = loc
 let rename_id x y z = if x = z then y else z
 
 module VarMonoid = struct
-  type 'a t = V.t
+  type 'a t = Vars.t
   let map f x = x
-  let unit () = V.empty
-  let ( ** ) = V.union
+  let unit () = Vars.empty
+  let ( ** ) = Vars.union
 end
 
 let into loc e =
   match e with
-  | Var x -> In(loc, V.singleton x, Var x)
-  | Abs(x, e) -> In(loc, V.remove x (fvs e), Abs(x, e))
+  | Var x -> In(loc, Vars.singleton x, Var x)
+  | Abs(x, e) -> In(loc, Vars.remove x (fvs e), Abs(x, e))
   | e -> let module M = Seq(MkIdiom(VarMonoid))  in
          In(loc, M.seq (map fvs e), e)
 
