@@ -17,38 +17,34 @@ end
 
 module type IDIOM = sig
   include MONOIDAL
-
   val return : 'a -> 'a t
   val app : ('a -> 'b) t -> 'a t -> 'b t
 end
 
-
+(* Computations that can be sequenced in various ways. *)
 module type SEQ = sig
   type 'a t
-
   val pair : 'a t * 'b t -> ('a * 'b) t
   val option : 'a t option -> 'a option t
   val result : ('a t, 'b) result -> ('a,'b) result t
   val list : 'a t list -> 'a list t
 end
 
+
+(* ---------- Mixins ---------- *)
+(* Monoidal functors are idioms/applicatives *)
 module MkIdiom(M : MONOIDAL) : (IDIOM with type 'a t = 'a M.t) = struct
   include M
-
   let return x = map (fun () -> x) (unit())
   let app f x = map (fun (f, x) -> f x) (f ** x)
 end
 
-
-
+(* Monads are always monidal and thus idioms *)
 module Monoidal(M : MONAD) : (IDIOM with type 'a t = 'a M.t) = struct
   include MkIdiom(struct
     type 'a t = 'a M.t
-
     let map = M.map
-
     let unit () = M.return ()
-
     let ( ** ) m1 m2 = let open M in
                        m1 >>= fun v1 ->
                        m2 >>= fun v2 ->
@@ -56,9 +52,9 @@ module Monoidal(M : MONAD) : (IDIOM with type 'a t = 'a M.t) = struct
                  end)
 end
 
+(* Any idiom can be sequenced. *)
 module Seq(A : IDIOM) : SEQ with type 'a t := 'a A.t = struct
   type 'a t = 'a A.t
-
   open A
 
   let option = function
@@ -78,6 +74,8 @@ module Seq(A : IDIOM) : SEQ with type 'a t := 'a A.t = struct
     | m :: ms -> map cons (m ** (list ms))
 end
 
+
+(* ---------- Utilities for pairs, results, options & functions ---------- *)
 module Pair = struct
   type ('a, 'b) t = 'a * 'b
   let fst = fst
@@ -91,9 +89,7 @@ module Pair = struct
 
   let unit (a, ()) = a
   let unit' ((), a) = a
-
 end
-
 
 module Result = struct
   type ('a, 'b) t = ('a, 'b) result
@@ -153,7 +149,3 @@ module Fn = struct
   let (@) f g x = g (f x)
   let map f g h x = g (h (f x))
 end
-
-
-
-

@@ -4,8 +4,11 @@ type loc = {start : Lexing.position; finish : Lexing.position}
 type conid = string
 type var = string
 
+(* Sets of variables *)
 module V = Set.Make(String)
 
+
+(* ---------- types ---------- *)
 type tp =
   | Int
   | Bool
@@ -16,16 +19,17 @@ type tp =
   | Product of tp list
   | Sum of (conid * tp) list
 
-
 let rec print_closed = function
   | Int -> "int"
   | String -> "string"
   | Bool -> "bool"
-  | Sum ctps -> String.concat "" ["[";
-                                  String.concat " | " (List.map (fun (c, tp) ->
-                                                                   Printf.sprintf "%s : %s" c (print_type tp))
-                                                                ctps);
-                                  "]"]
+  | Sum ctps ->
+     String.concat ""
+       ["[";
+        String.concat " | "
+          (List.map (fun (c, tp) -> Printf.sprintf "%s : %s" c (print_type tp))
+             ctps);
+        "]"]
   | tp -> String.concat "" ["("; print_type tp; ")"]
 and print_unary tp =
   match tp with
@@ -40,10 +44,8 @@ and print_type = function
   | Arrow(tp1, tp2) -> String.concat " -> " [print_product tp1; print_type tp2]
   | tp -> print_product tp
 
-
-
-
-
+
+(* ---------- expression constructors ---------- *)
 type pat =
   | PWild
   | PVar
@@ -101,7 +103,8 @@ let map f = function
   | LetBox(a, b) -> LetBox(f a, f b)
   | LetSet(a, b) -> LetSet(f a, f b)
 
-
+
+(* ---------- expressions, recursively ---------- *)
 module Seq(M : IDIOM) = struct
   open M
   module L = Util.Seq(M)
@@ -142,11 +145,11 @@ let loc (In(loc, _, _)) = loc
 let rename_id x y z = if x = z then y else z
 
 module VarMonoid = struct
-    type 'a t = V.t
-    let map f x = x
-    let unit () = V.empty
-    let ( ** ) = V.union
-  end
+  type 'a t = V.t
+  let map f x = x
+  let unit () = V.empty
+  let ( ** ) = V.union
+end
 
 let into loc e =
   match e with
@@ -155,13 +158,9 @@ let into loc e =
   | e -> let module M = Seq(MkIdiom(VarMonoid))  in
          In(loc, M.seq (map fvs e), e)
 
-
 let rec rename x y e =
-  into (loc e) (match out e with
-                | Var z -> Var (rename_id x y z)
-                | Abs(z, e) -> Abs(rename_id x y z, rename x y e)
-                | ebody -> map (rename x y) ebody)
-
-
-
-
+  into (loc e)
+    (match out e with
+     | Var z -> Var (rename_id x y z)
+     | Abs(z, e) -> Abs(rename_id x y z, rename x y e)
+     | ebody -> map (rename x y) ebody)
