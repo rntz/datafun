@@ -2,7 +2,7 @@
 all: datafun.top
 
 datafun.top: FORCE
-	ocamlbuild -verbose 1 $@
+	ocamlbuild $@
 
 clean:
 	rm -f datafun.top
