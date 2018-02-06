@@ -1,7 +1,8 @@
 open Sigs
 open Util
 
-type loc = {start: Lexing.position; finish: Lexing.position}
+(* loc ::= (start_pos, end_pos) *)
+type loc = Lexing.position * Lexing.position
 type var = string
 type tag = string
 type prim = string
@@ -12,9 +13,9 @@ module Prim = struct let show p = p end
 
 (* ---------- types ---------- *)
 type tone = Mono | Anti | Isos | Path
-type base = Bool | Nat | Str
+type base = Bool | Int | Str
 module Base = struct
-  let show = function | Bool -> "bool" | Nat -> "nat" | Str -> "str"
+  let show = function | Bool -> "bool" | Int -> "int" | Str -> "str"
 end
 
 type tp =
@@ -31,10 +32,10 @@ module Type = struct
   type t = tp
 
   let rec show = function
-    | Sum ctors ->
+    | Sum (_::_ as ctors) ->
        let show_ctor (tag, tp) = match tp with
          | Product [] -> Tag.show tag
-         | tp -> Tag.show tag ^ " " ^ show_unary tp
+         | tp -> Tag.show tag ^ " " ^ show_atom tp
        in String.concat " | " (List.map show_ctor ctors)
     | tp -> show_arrow tp
   and show_arrow = function
@@ -42,17 +43,18 @@ module Type = struct
     | Arrow(a, b) -> show_product a ^ " => " ^ show b
     | tp -> show_product tp
   and show_product = function
+    | Product (_::_ as tps) -> String.concat ", " (List.map show_atom tps)
+    | tp -> show_atom tp
+  and show_atom = function
     | Product [] -> "()"
-    | Product tps -> String.concat ", " (List.map show_unary tps)
-    | tp -> show_unary tp
-  and show_unary = function
+    | Sum [] -> "<void>"
     | Set tp -> "{" ^ show tp ^ "}"
-    | Box tp -> "!" ^ show_unary tp
+    | Box tp -> "!" ^ show_atom tp
     | Base b -> Base.show b
     | tp -> "(" ^ show tp ^ ")"
 
   let bool = Base Bool
-  let nat = Base Nat
+  let int = Base Int
   let str = Base Str
   let unit = Product []
 
@@ -67,7 +69,7 @@ end
 
 
 (* ---------- patterns ----------*)
-type lit = LBool of bool | LNat of int | LStr of string
+type lit = LBool of bool | LInt of int | LStr of string
 type pat =
   | PWild
   | PVar of var
@@ -77,18 +79,18 @@ type pat =
 
 module Lit = struct
   let show = function | LBool true -> "true" | LBool false -> "false"
-                      | LNat n -> raise TODO
+                      | LInt n -> raise TODO
                       | LStr s -> raise TODO
 end
 module Pat = struct
   let rec show = function
-    | PTuple ps -> String.concat ", " (List.map show_unary ps)
-    | p -> show_unary p
-  and show_unary = function
-    | PTag (n,p) -> n ^ " " ^ show_unary p
-    | PBox p -> "!" ^ show_unary p
-    | p -> show_atomic p
-  and show_atomic = function
+    | PTuple ps -> String.concat ", " (List.map show_app ps)
+    | p -> show_app p
+  and show_app = function
+    | PBox p -> "!" ^ show_app p
+    | PTag (n,p) -> n ^ " " ^ show_atom p
+    | p -> show_atom p
+  and show_atom = function
     | PVar v -> Var.show v
     | PLit l -> Lit.show l
     | PWild -> "_"
@@ -110,7 +112,7 @@ type 'a expF =
   | Lit of lit
   | Prim of prim                (* builtin functions *)
   | Lub of 'a list
-  | Fix of var * 'a
+  | Fix of pat * 'a
   | Let of 'a decl list * 'a
   (* Introductions *)
   | Box of 'a
@@ -189,42 +191,42 @@ module Exp = struct
   include Traverse(ExpT)
 
   let rec show (E(_, e) as expr) = match e with
-    | The (a,x) -> "the " ^ Type.show_unary a ^ " " ^ show x
-    | Fix (x,e) -> Var.show x ^ " as " ^ show e
+    | The (a,x) -> "the " ^ Type.show_atom a ^ " " ^ show x
+    | Fix (x,e) -> Pat.show_atom x ^ " as " ^ show e
     | Let (ds,e) ->
        let show_decl = function
          | Type (x,tp) -> "type " ^ Var.show x ^ " = " ^ Type.show tp
          | Ascribe (xs, tp) -> String.concat " " xs ^ " : " ^ Type.show tp
          | Define (x,ps,body) ->
-            [Var.show x] @ List.map Pat.show_atomic ps @ ["="; show body]
+            [Var.show x] @ List.map Pat.show_atom ps @ ["="; show body]
             |> String.concat " "
          | Decons (p,e) -> Pat.show p ^ " = " ^ show e
        in "let " ^ String.concat " " (List.map show_decl ds) ^ " in " ^ show e
     (* introductions *)
     | Lam (ps, e) ->
-       ["fn"] @ List.map Pat.show_atomic ps @ ["->"; show e]
+       ["fn"] @ List.map Pat.show_atom ps @ ["->"; show e]
        |> String.concat " "
     (* eliminations *)
     | For (cs, e) ->
        let show_comp = function
          | When e -> "when " ^ show_app e
-         | In (p,e) -> Pat.show_unary p ^ " in " ^ show_app e
+         | In (p,e) -> Pat.show_app p ^ " in " ^ show_app e
        in "for (" ^ String.concat ", " (List.map show_comp cs) ^ ") " ^ show e
     | Case (e, pes) ->
-       let show_branch (p,e) = Pat.show p ^ " -> " ^ show_disj e
-       in "case " ^ show_disj e ^ String.concat "| " (List.map show_branch pes)
-    | _ -> show_disj expr
-  and show_disj (E (_,e) as expr) = match e with
+       let show_branch (p,e) = Pat.show p ^ " -> " ^ show_infix e
+       in "case " ^ show_infix e ^ String.concat "| " (List.map show_branch pes)
+    | _ -> show_infix expr
+  and show_infix (E (_,e) as expr) = match e with
     | Tuple es -> List.map show_app es |> String.concat ", "
     | Lub (_::_ as es) -> List.map (fun x -> "or " ^ show_app x) es |> String.concat " "
     | _ -> show_app expr
   and show_app (E (_,e) as expr) = match e with
-    | App (e1,e2) -> show_app e1 ^ show_atomic e2
-    | Tag (n,e) -> Tag.show n ^ " " ^ show_atomic e
-    | Box e -> "box " ^ show_atomic e
-    | Unbox e -> "unbox " ^ show_atomic e
-    | _ -> show_atomic expr
-  and show_atomic (E (_,e) as expr) = match e with
+    | App (e1,e2) -> show_app e1 ^ show_atom e2
+    | Tag (n,e) -> Tag.show n ^ " " ^ show_atom e
+    | Box e -> "box " ^ show_atom e
+    | Unbox e -> "unbox " ^ show_atom e
+    | _ -> show_atom expr
+  and show_atom (E (_,e) as expr) = match e with
     | Var x -> Var.show x
     | Lit l -> Lit.show l
     | Prim p -> Prim.show p
