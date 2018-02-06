@@ -6,11 +6,11 @@
 ;; ---------- Literals & primitives ----------
 (define (lit? x) (if (lit-type x) #t #f))
 (define/contract (lit-type l)
-  (-> any/c (or/c #f exact-type?))
+  (-> any/c (or/c #f type?))
   (match l
     [(? boolean?) 'bool]
     [(? exact-nonnegative-integer?) 'nat]
-    [(? string?) 'str]
+    #;[(? string?) 'str]
     #;[(? null?) '(tuple)]
     [_ #f]))
 
@@ -26,11 +26,11 @@
 (define (expr-over expr?)
   (or/c
    ;; ---------- miscellanea ----------
-   symbol?                       ;; variables
-   (list/c 'the fuzzy-type? expr?) ;; type annotation
+   symbol?                   ;; variables
+   (list/c 'the type? expr?) ;; type annotation
    ;;(list/c 'trustme expr?)
    ;; ;; do I need type definitions?
-   ;;(list/c 'let-type symbol? exact-type? expr?)
+   ;;(list/c 'let-type symbol? type? expr?)
 
    ;; ---------- base types & primitive operations ----------
    lit?

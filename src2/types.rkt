@@ -20,56 +20,26 @@
    (list/c '+ (hash/c symbol? type? #:immutable #t))
    (list/c 'set type?)))
 
+;; TODO: Do I ever use type-map and type-fold?
 (define (type-map f t)
   (parametric->/c [X Y]
     (-> (-> X Y) (type-over X) (type-over Y)))
   (match t
-    [(or '_ `(var ,_) (? base-type?)) t]
+    [(or `(var ,_) (? base-type?)) t]
     [`(,(and form (or 'box '-> '* 'set)) ,@as) `(,form ,@(map f as))]
     [`(+ ,h) `(+ ,(hash-map-vals f h))]))
 
 (define (type-fold t f)
   (f (type-map (lambda (x) (type-fold x f)) t)))
 
-(define-flat-contract exact-type? (type-over exact-type?))
-(define-flat-contract fuzzy-type? '_ (type-over fuzzy-type?))
+(define-flat-contract type? (type-over type?))
 
 ;; only exact types without free type variables can be lattice types.
 (define-flat-contract semilattice-type?
   'bool
-  (list/c '-> exact-type? semilattice-type?)
+  (list/c '-> type? semilattice-type?)
   (cons/c '* (listof semilattice-type?))
-  (list/c 'set exact-type?))
+  (list/c 'set type?))
 
 ;; TODO: put actual restrictions on fixed points here.
 (define-flat-contract fixpoint-type? semilattice-type?)
-
-
-;; Merges two fuzzy types, if they're compatible. Otherwise, errors.
-;; If any argument is exact, the result will be exact and equal to the argument[*],
-;; or else an exception will be thrown.
-;;
-;; [*] It's hard to express this property using Racket contracts (I tried using
-;; and/c, but and/c doesn't actually act like an intersection type - it just
-;; applies all the contracts in order). I could probably use a dependent
-;; contract, but meh.
-(define/contract (fuzzy-type-merge A B [orelse #f])
-  (->* (fuzzy-type? fuzzy-type?) ((or/c #f (-> fuzzy-type? fuzzy-type? fuzzy-type?)))
-       fuzzy-type?)
-  (match* (A B)
-    [(A B) #:when (eq? A B) A]
-    [(A '_) A]
-    [('_ B) B]
-    ;; most type forms just take a list of types as arguments
-    [(`(,(and form (or '-> '* 'set 'box)) ,@as) `(,form2 ,@bs))
-     #:when (and (eq? form form2) (length=? as bs))
-     `(,form ,@(map fuzzy-type-merge as bs))]
-    [(`(+ ,h1) `(+ ,h2))
-     ;; sums must have *same* sets of tags. fuzzy type merging has nothing to do
-     ;; with subtyping!
-     #:when (equal? (hash-keyset h1) (hash-keyset h2))
-     ;; shit, this won't work! hash-map-vals takes only one hash argument!
-     `(+ ,(TODO (hash-map-vals fuzzy-type-merge h1 h2)))]
-    ;; TODO: good error messages
-    [(_ _) (if orelse (orelse A B)
-               (error (format "cannot unify ~s with ~s" A B)))]))

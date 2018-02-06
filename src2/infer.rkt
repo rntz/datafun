@@ -27,8 +27,37 @@
   (hash-map-vals update env))
 
 
-;; work in progress.
-(define (infer expr [expected-type '_])
+;; turning code from tree into graph
+;; the root node id is always 0.
+(define node-id? exact-nonnegative-integer?)
+(define expr-graph? (hash/c node-id? (expr-over node-id?) #:immutable #t))
+
+(define/contract (expr->graph expr)
+  (-> expr? expr-graph?)
+  (define next-id 0)
+  (define graph (make-hash))
+  (define (visit! e)
+    (define node-id next-id)
+    (set! next-id (+ 1 next-id))
+    (hash-set! graph node-id (expr-map visit! e))
+    node-id)
+  (match-define 0 (visit! expr))
+  (freeze-hash graph))
+
+(define/contract (graph->expr graph)
+  (-> expr-graph? expr?)
+  (define (visit n) (expr-map visit (hash-ref graph n)))
+  (visit 0))
+
+
+;; TODO: rewrite this all to use bidirectional inference instead of
+;; unidirectional.
+;;
+;; options:
+;; - generate a hasheq from expressions to their types
+;; - do a type-aware fold, as code currently does
+;; - first turn code into an graph w/ numbered nodes, then annotate the graph?
+(define (infer expr [expected-type #f])
   (type-awarely (lambda (t x) t) expr expected-type))
 
 (define/contract (pat->env pat type)
