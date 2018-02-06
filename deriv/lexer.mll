@@ -69,8 +69,9 @@ rule token = parse
   | "_"                 {UNDERSCORE}
   | number as n         {NUM(float_of_string n)}
   | '\"' (string_literal as s) '\"'
-    {repeat (count_newlines s) (fun () -> Lexing.new_line lexbuf); STRING s}
+    {repeat (count_newlines s) (fun () -> Lexing.new_line lexbuf); STRINGLITERAL s}
   | "bool"              {BOOL}
+  | "string"            {STRING}
   | "unit"              {UNIT}
   | "begin"             {BEGIN}
   | "end"               {END}

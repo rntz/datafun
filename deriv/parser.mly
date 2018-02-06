@@ -85,6 +85,7 @@ let make_pure_decl_list decls body =
 %token ELSE
 %token INT
 %token AND
+%token STRING
 %token BOOL
 %token UNIT
 %token MATCH
@@ -96,7 +97,7 @@ let make_pure_decl_list decls body =
 %token DOUBLECOLON
 %token <string> CONID
 %token <float> NUM
-%token <string> STRING
+%token <string> STRINGLITERAL
 %token <string> IDENT
 %token EOF
 
