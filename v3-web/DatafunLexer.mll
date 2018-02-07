@@ -2,17 +2,6 @@
   open Util
   open Ast
   open DatafunParser
-
-  let stringfold f init s =
-    let n = String.length s in
-    let r = ref init in
-    for i = 0 to n-1 do r := f s.[i] (!r) done;
-    !r
-
-  let count_newlines s =
-    stringfold (fun c n -> if c = '\n' then n+1 else n) 0 s
-
-  let repeat n thunk = for i = 0 to n-1 do thunk() done
 }
 let comment = "#" [^'\n']* "\n"
 let digit  = ['0'-'9']
@@ -60,9 +49,12 @@ rule token = parse
   | "true" {LITERAL(LBool true)}
   | "false" {LITERAL(LBool false)}
   | integer as n         {LITERAL(LInt (int_of_string n))}
-    (* this produces bad string literals! NOOOOOOOOOOOOO. *)
+  (* TODO: this produces incorrect strings!
+   * it needs to unescape! *)
   | '\"' (string_literal as s) '\"'
-    {repeat (count_newlines s) (fun () -> Lexing.new_line lexbuf);
+    {for i = 0 to String.length s - 1 do
+       if s.[i] = '\n' then Lexing.new_line lexbuf else ()
+     done;
      LITERAL(LStr s)}
 
   (* identifiers*)
