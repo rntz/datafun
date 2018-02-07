@@ -1,7 +1,7 @@
 {
   open Util
   open Ast
-  open Parser
+  open DatafunParser
 
   let stringfold f init s =
     let n = String.length s in

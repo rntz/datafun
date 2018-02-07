@@ -69,7 +69,6 @@ let rangepos n m = (Parsing.rhs_start_pos n, Parsing.rhs_end_pos m)
 
 %token EOF
 
-
 /* ---------- Associativity / fixity ---------- */
 /* %nonassoc IN
  * %nonassoc THEN ELSE
@@ -84,7 +83,6 @@ let rangepos n m = (Parsing.rhs_start_pos n, Parsing.rhs_end_pos m)
  * %left PLUS MINUS
  * %left TIMES */
 
-
 /* ---------- Types for nonterminals ---------- */
 %type <Ast.tp> tp
 %type <Ast.tp> test_tp
@@ -97,7 +95,6 @@ let rangepos n m = (Parsing.rhs_start_pos n, Parsing.rhs_end_pos m)
 
 %start tp test_tp pat test_pat exp test_exp
 
-
 %%
 /* ---------- Syntax of types ---------- */
 test_tp : tp EOF {$1};
@@ -127,7 +124,6 @@ tp_atom :
 | LBRACE tp RBRACE  { Set $2 }
 | LPAREN tp RPAREN  { $2 };
 
-
 /* ---------- Syntax of patterns ---------- */
 test_pat : pat EOF {$1};
 
@@ -148,7 +144,6 @@ pat_atom :
 | LITERAL            { PLit $1 }
 | LPAREN pat RPAREN  { $2 };
 
-
 /* ---------- Syntax of expressions ---------- */
 test_exp : exp EOF {$1};
 exp : expr { E(getpos(), $1) };
