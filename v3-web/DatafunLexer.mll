@@ -49,13 +49,11 @@ rule token = parse
   | "true" {LITERAL(LBool true)}
   | "false" {LITERAL(LBool false)}
   | integer as n         {LITERAL(LInt (int_of_string n))}
-  (* TODO: this produces incorrect strings!
-   * it needs to unescape! *)
   | '\"' (string_literal as s) '\"'
     {for i = 0 to String.length s - 1 do
        if s.[i] = '\n' then Lexing.new_line lexbuf else ()
      done;
-     LITERAL(LStr s)}
+     LITERAL(LStr (Scanf.unescaped s))}
 
   (* identifiers*)
   | lident as s {ID s} | uident as s {CAPID s}
