@@ -84,18 +84,26 @@ let rangepos n m = (Parsing.rhs_start_pos n, Parsing.rhs_end_pos m)
  * %left TIMES */
 
 /* ---------- Types for nonterminals ---------- */
-%type <Ast.tp> tp
-%type <Ast.tp> test_tp
+%start <Ast.tp> tp
+%start <Ast.tp> test_tp
 
-%type <Ast.pat> pat
-%type <Ast.pat> test_pat
+%start <Ast.pat> pat
+%start <Ast.pat> test_pat
 
-%type <Ast.loc Ast.exp> exp
-%type <Ast.loc Ast.exp> test_exp
+%start <Ast.loc Ast.exp> exp
+%start <Ast.loc Ast.exp> test_exp
 
-%start tp test_tp pat test_pat exp test_exp
+%start <Ast.loc Ast.exp Ast.decl list> test_decls
+%start <Ast.loc Ast.exp Ast.decl list> decls
+%type <Ast.loc Ast.exp Ast.decl> decl
+
+%start <unit> unused
 
 %%
+/* ARHGSDHLKFJDSLKFJSLKDJFLKJDSKFLKJDSLKFLKSJDF */
+unused : ASTERISK DASH DOT ELSE END EQEQ FN GE GT IF IN LBRACK LE LET LT PLUS
+RBRACK SEMI SLASH THEN UNDER COLON TYPE {()};
+
 /* ---------- Syntax of types ---------- */
 test_tp : tp EOF {$1};
 
@@ -135,16 +143,37 @@ pat_apps :                  { [] }
 | pat_app COMMA pat_apps    { $1::$3 };
 
 pat_app : pat_atom { $1 }
-| CAPID pat_atom { PTag($1, $2) };
+| CAPID pat_atom { PTag($1, $2) }
+| BANG pat_atom      { PBox $2 }
+;
 
 pat_atom :
-| BANG pat_atom      { PBox $2 }
 | UNDER              { PWild }
 | ID                 { PVar $1 }
 | LITERAL            { PLit $1 }
-| LPAREN pat RPAREN  { $2 };
+| LPAREN pat RPAREN  { $2 }
+;
+
+/* ---------- Syntax of declarations ---------- */
+test_decls: decls EOF {$1};
+decls : { [] } | decl decls { $1::$2 };
+
+decl :
+| TYPE ID EQ tp { Type($2,$4) }
+| DEF pat_atom optional_tp def_exp { Def($2,$3,$4) }
+;
+
+optional_tp : { None } | COLON tp { Some $2 };
+
+def_exp :
+| EQ exp { $2 }
+| FN args DBLARROW exp { E(getpos(), Lam($2,$4)) }
+;
+
+args : pat_atom {[$1]} | pat_atom args {$1::$2};
 
 /* ---------- Syntax of expressions ---------- */
+/* TODO: if-then-else */
 test_exp : exp EOF {$1};
 exp : expr { E(getpos(), $1) };
 exp_infix: expr_infix { E(getpos(), $1) };
@@ -156,7 +185,7 @@ exps : {[]} | exp_app {[$1]} | exp_app COMMA exps; {$1::$3};
 expr : expr_infix { $1 }
 | THE tp_atom exp { The($2,$3) }
 | pat_atom AS exp { Fix($1,$3) }
-/* TODO: let-expressions */
+| LET decls IN exp { Let($2,$4) }
 | FN args DBLARROW exp { Lam($2,$4) }
 | FOR LPAREN comps RPAREN exp { For($3, $5) }
 | CASE exp_infix branches { Case($2,$3) }
@@ -185,10 +214,23 @@ expr_atom :
 | ID        { Var $1 }
 | LITERAL   { Lit $1 }
 | EMPTY     { Lub [] }
+/* TODO: set comprehensions! */
 | LBRACE exps RBRACE { MkSet $2 }
 ;
 
-/* TODO: args, comps, branches */
-args : | pat { [$1] } ;
-comps : { [] };
-branches: { [] };
+/* TODO: comps */
+comps : {[]} | comp {[$1]} | comp COMMA comps {$1::$3};
+
+comp :
+/* fucking shift-reduce conflicts, argh */
+| exp_app { When $1 }
+| pat_app IN exp_app { In($1,$3) }
+| exp_app LBRACK pat RBRACK { In($3,$1) }
+;
+
+branches: { [] }
+/* FIXME: want `exp` here, not `exp_infix`!
+ * but, then I have the dangling else problem! */
+/* | BAR pat DBLARROW exp branches { ($2,$4)::$5 } */
+| BAR pat DBLARROW exp_infix branches { ($2,$4)::$5 }
+;

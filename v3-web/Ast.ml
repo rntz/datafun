@@ -102,9 +102,7 @@ end
 type 'a comp = When of 'a | In of pat * 'a
 type 'a decl =
   | Type of var * tp
-  | Ascribe of var list * tp
-  | Define of var * pat list * 'a
-  | Decons of pat * 'a
+  | Def of pat * tp option * 'a
 
 type 'a expF =
   | Var of var
@@ -140,17 +138,33 @@ module Comp = Traverse(struct
   end
 end)
 
-module Decl = Traverse(struct
-  type 'a t = 'a decl
-  module Seq(M: IDIOM) = struct
-    open M
-    let traverse f = function
-      | Type(x,t) -> pure (Type(x,t))
-      | Ascribe(xs,t) -> pure (Ascribe(xs,t))
-      | Define(x,args,body) -> map (fun body' -> Define(x, args, body')) (f body)
-      | Decons(p,e) -> map (fun x -> Decons(p,x)) (f e)
-  end
-end)
+module Decl = struct
+  include Traverse(struct
+    type 'a t = 'a decl
+    module Seq(M: IDIOM) = struct
+      open M
+      let traverse f = function
+        | Type(x,t) -> pure (Type(x,t))
+        | Def(p,t,e) -> map (fun x -> Def(p,t,x)) (f e)
+        (* | Ascribe(xs,t) -> pure (Ascribe(xs,t))
+         * | Define(x,args,body) -> map (fun body' -> Define(x, args, body')) (f body)
+         * | Decons(p,e) -> map (fun x -> Decons(p,x)) (f e) *)
+    end
+  end)
+
+  let show (f: 'a -> string): 'a decl -> string = function
+    | Type (v, tp) ->
+       Printf.sprintf "type %s = %s" (Var.show v) (Type.show tp)
+    | Def (p, None, x) ->
+       Printf.sprintf "def %s = %s" (Pat.show_atom p) (f x)
+    | Def (p, Some tp, x) ->
+       Printf.sprintf "def %s: %s = %s" (Pat.show_atom p) (Type.show tp) (f x)
+    (* | Ascribe (xs, tp) -> String.concat " " xs ^ " : " ^ Type.show tp
+     * | Define (x,ps,body) ->
+     *    [Var.show x] @ List.map Pat.show_atom ps @ ["="; show body]
+     *    |> String.concat " "
+     * | Decons (p,e) -> Pat.show p ^ " = " ^ show e *)
+end
 
 module ExpT: TRAVERSABLE with type 'a t = 'a expF = struct
   type 'a t = 'a expF
@@ -190,18 +204,14 @@ end
 module Exp = struct
   include Traverse(ExpT)
 
+  (* TODO: use Format module to write a pretty-printer.
+   * https://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html *)
   let rec show (E(_, e) as expr) = match e with
     | The (a,x) -> "the " ^ Type.show_atom a ^ " " ^ show x
     | Fix (x,e) -> Pat.show_atom x ^ " as " ^ show e
     | Let (ds,e) ->
-       let show_decl = function
-         | Type (x,tp) -> "type " ^ Var.show x ^ " = " ^ Type.show tp
-         | Ascribe (xs, tp) -> String.concat " " xs ^ " : " ^ Type.show tp
-         | Define (x,ps,body) ->
-            [Var.show x] @ List.map Pat.show_atom ps @ ["="; show body]
-            |> String.concat " "
-         | Decons (p,e) -> Pat.show p ^ " = " ^ show e
-       in "let " ^ String.concat " " (List.map show_decl ds) ^ " in " ^ show e
+       let show_decls = List.map (Decl.show show)
+       in ["let"] @ show_decls ds @ ["in"; show e] |> String.concat " "
     (* introductions *)
     | Lam (ps, e) ->
        ["fn"] @ List.map Pat.show_atom ps @ ["->"; show e]
@@ -209,7 +219,7 @@ module Exp = struct
     (* eliminations *)
     | For (cs, e) ->
        let show_comp = function
-         | When e -> "when " ^ show_app e
+         | When e -> show_app e
          | In (p,e) -> Pat.show_app p ^ " in " ^ show_app e
        in "for (" ^ String.concat ", " (List.map show_comp cs) ^ ") " ^ show e
     | Case (e, pes) ->
