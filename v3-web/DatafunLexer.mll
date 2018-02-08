@@ -39,7 +39,7 @@ rule token = parse
   | "the" {THE}
   | "let" {LET} | "in" {IN} | "end" {END}
   | "empty" {EMPTY} | "or" {OR} | "for" {FOR}
-  | "as" {AS}
+  | "fix" {FIX} | "as" {AS}
   | "fn" {FN}
   | "case" {CASE}
   | "box" {BOX} | "unbox" {UNBOX}

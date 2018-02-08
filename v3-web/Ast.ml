@@ -51,6 +51,7 @@ module Type = struct
     | Set tp -> "{" ^ show tp ^ "}"
     | Box tp -> "!" ^ show_atom tp
     | Base b -> Base.show b
+    | Name n -> Var.show n
     | tp -> "(" ^ show tp ^ ")"
 
   let bool = Base Bool
@@ -79,8 +80,8 @@ type pat =
 
 module Lit = struct
   let show = function | LBool true -> "true" | LBool false -> "false"
-                      | LInt n -> raise TODO
-                      | LStr s -> raise TODO
+                      | LInt n -> Printf.sprintf "%d" n
+                      | LStr s -> Printf.sprintf "%S" s
 end
 module Pat = struct
   let rec show = function
@@ -227,7 +228,7 @@ module Exp = struct
        in "case " ^ show_infix e ^ String.concat "| " (List.map show_branch pes)
     | _ -> show_infix expr
   and show_infix (E (_,e) as expr) = match e with
-    | Tuple es -> List.map show_app es |> String.concat ", "
+    | Tuple (_::_::_ as es) -> List.map show_app es |> String.concat ", "
     | Lub (_::_ as es) -> List.map (fun x -> "or " ^ show_app x) es |> String.concat " "
     | _ -> show_app expr
   and show_app (E (_,e) as expr) = match e with
@@ -241,6 +242,8 @@ module Exp = struct
     | Lit l -> Lit.show l
     | Prim p -> Prim.show p
     | Lub [] -> "empty"
+    | Tuple [e] -> "(" ^ show_app e ^ ",)"
+    | Tuple [] -> "()"
     | MkSet es -> "{" ^ String.concat ", " (List.map show es) ^ "}"
     | _ -> "(" ^ show expr ^ ")"
 end

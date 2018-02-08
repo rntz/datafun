@@ -1,0 +1,5 @@
+(jbuild_version 1)
+
+(menhir ((modules (DatafunParser))))
+(ocamllex (DatafunLexer))
+(library ((name datafun)))

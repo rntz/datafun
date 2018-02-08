@@ -3,6 +3,11 @@ open Sigs
 open Util
 open Ast
 
+(* I don't think this works with menhir! Only ocamlyacc!
+ * Aha, they don't! need to use $symbolstartpos, $endpos
+ * argh. probably need to use %inline or something.
+ * or I could just use ocamlyacc.
+ *)
 let getpos () = (Parsing.symbol_start_pos (), Parsing.symbol_end_pos ())
 let rangepos n m = (Parsing.rhs_start_pos n, Parsing.rhs_end_pos m)
 %}
@@ -52,6 +57,7 @@ let rangepos n m = (Parsing.rhs_start_pos n, Parsing.rhs_end_pos m)
 %token EMPTY
 %token OR
 %token FOR
+%token FIX
 %token AS
 %token FN
 %token CASE
@@ -84,20 +90,21 @@ let rangepos n m = (Parsing.rhs_start_pos n, Parsing.rhs_end_pos m)
  * %left TIMES */
 
 /* ---------- Types for nonterminals ---------- */
-%start <Ast.tp> tp
-%start <Ast.tp> test_tp
+%type <Ast.tp> tp
+%type <Ast.tp> test_tp
 
-%start <Ast.pat> pat
-%start <Ast.pat> test_pat
+%type <Ast.pat> pat
+%type <Ast.pat> test_pat
 
-%start <Ast.loc Ast.exp> exp
-%start <Ast.loc Ast.exp> test_exp
+%type <Ast.loc Ast.exp> exp
+%type <Ast.loc Ast.exp> test_exp
 
-%start <Ast.loc Ast.exp Ast.decl list> test_decls
-%start <Ast.loc Ast.exp Ast.decl list> decls
-%type <Ast.loc Ast.exp Ast.decl> decl
+%type <Ast.loc Ast.exp Ast.decl list> decls
+%type <Ast.loc Ast.exp Ast.decl list> test_decls
 
-%start <unit> unused
+%type <unit> unused
+
+%start tp test_tp pat test_pat exp test_exp decls test_decls unused
 
 %%
 /* ARHGSDHLKFJDSLKFJSLKDJFLKJDSKFLKJDSLKFLKSJDF */
@@ -128,6 +135,7 @@ tp_factors :               { [] }
 tp_atom :
 | LPAREN RPAREN     { Product [] }
 | BASE              { Base $1 }
+| ID                { Name $1 }
 | BANG tp_atom      { Box $2 }
 | LBRACE tp RBRACE  { Set $2 }
 | LPAREN tp RPAREN  { $2 };
@@ -152,6 +160,7 @@ pat_atom :
 | ID                 { PVar $1 }
 | LITERAL            { PLit $1 }
 | LPAREN pat RPAREN  { $2 }
+| LPAREN RPAREN      { PTuple [] }
 ;
 
 /* ---------- Syntax of declarations ---------- */
@@ -174,17 +183,17 @@ args : pat_atom {[$1]} | pat_atom args {$1::$2};
 
 /* ---------- Syntax of expressions ---------- */
 /* TODO: if-then-else */
-test_exp : exp EOF {$1};
-exp : expr { E(getpos(), $1) };
+test_exp: exp EOF {$1};
+exp: expr { E(getpos(), $1) };
 exp_infix: expr_infix { E(getpos(), $1) };
 exp_app: expr_app { E(getpos(), $1) };
 exp_atom: expr_atom { E(getpos(), $1) };
 
-exps : {[]} | exp_app {[$1]} | exp_app COMMA exps; {$1::$3};
-
 expr : expr_infix { $1 }
 | THE tp_atom exp { The($2,$3) }
-| pat_atom AS exp { Fix($1,$3) }
+/* FIXME: I want to omit the "FIX" here, but it causes conflicts.  */
+/* | pat_atom AS exp { Fix($1,$3) } */
+| FIX pat_atom AS exp { Fix($2,$4) }
 | LET decls IN exp { Let($2,$4) }
 | FN args DBLARROW exp { Lam($2,$4) }
 | FOR LPAREN comps RPAREN exp { For($3, $5) }
@@ -215,14 +224,21 @@ expr_atom :
 | LITERAL   { Lit $1 }
 | EMPTY     { Lub [] }
 /* TODO: set comprehensions! */
-| LBRACE exps RBRACE { MkSet $2 }
+| LBRACE exp_apps RBRACE { MkSet $2 }
+| LBRACE exp_app BAR comps RBRACE { For($4,$2) }
+| LPAREN expr_atom RPAREN { $2 }
+| LPAREN RPAREN { Tuple [] }
 ;
 
-/* TODO: comps */
-comps : {[]} | comp {[$1]} | comp COMMA comps {$1::$3};
+exp_apps : {[]} | exp_app {[$1]} | exp_app COMMA exp_apps; {$1::$3};
 
+comps : {[]} | comp {[$1]} | comp COMMA comps {$1::$3};
 comp :
-/* fucking shift-reduce conflicts, argh */
+/* "exp_app | pat_app IN exp_app"
+ * causes 6 reduce-reduce conflicts w/ ocamlyacc
+ * and only 3 w/ menhir
+ * let's try learning jbuilder, it will let me pass --explain to menhir.
+ */
 | exp_app { When $1 }
 | pat_app IN exp_app { In($1,$3) }
 | exp_app LBRACK pat RBRACK { In($3,$1) }
