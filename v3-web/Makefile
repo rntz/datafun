@@ -1,14 +1,13 @@
 .PHONY: all watch clean sparkling remake FORCE
-all: datafun.top
 
-datafun.top: FORCE
-	ocamlbuild $@
+all: FORCE
+	opam config exec -- ocamlbuild datafun.top datafun.cma
 
 clean:
 	rm -f datafun.top
 
 sparkling: clean
-	rm -r _build
+	rm -rf _build
 
 remake: sparkling
 	make
