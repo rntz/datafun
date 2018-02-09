@@ -31,7 +31,6 @@ end
 
 (* Some monads & monad transformers *)
 module Id = Monad(struct type 'a t = 'a let pure = id let map = id let concat = id end)
-module Lists = Monad(struct include List type 'a t = 'a list let pure x = [x] end)
 
 module WriterT(M: MONAD)(W: MONOID) = Monad(struct
   open W
@@ -56,4 +55,34 @@ struct
   end
   module TId = T.Seq(Id)
   let map = TId.traverse
+end
+
+(* Lists & Options are both Monad and Traversable. *)
+module Lists = struct
+  include Monad(struct include List type 'a t = 'a list let pure x = [x] end)
+  include (Traverse(struct
+    type 'a t = 'a list
+    module Seq(M: IDIOM) = struct
+      let rec traverse f = function
+        | [] -> M.pure []
+        | x::xs -> M.(map cons (f x ** traverse f xs))
+    end
+  end) : TRAVERSE with type 'a t := 'a list)
+end
+
+module Option = struct
+  include Monad(struct
+    type 'a t = 'a option
+    let pure x = Some x
+    let map f = function Some x -> Some (f x) | None -> None
+    let concat = function Some (Some x) -> Some x | _ -> None
+  end)
+  include (Traverse(struct
+    type 'a t = 'a option
+    module Seq(M: IDIOM) = struct
+      let traverse f = function
+        | Some x -> M.map (fun x -> Some x) (f x)
+        | None -> M.pure None
+    end
+  end) : TRAVERSE with type 'a t := 'a option)
 end

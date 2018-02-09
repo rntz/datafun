@@ -1,7 +1,10 @@
-.PHONY: all watch clean sparkling remake FORCE
+.PHONY: all repl clean sparkling remake FORCE
 
 all: FORCE
 	jbuilder build datafun.cma
+
+repl: FORCE
+	jbuilder utop .
 
 clean:
 

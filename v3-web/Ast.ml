@@ -62,9 +62,9 @@ module Type = struct
   (* TODO: type equality, join, meet. *)
   let rec discrete = function
     | Base Str | Box _ -> true
-    | Arrow (a,b) -> discrete b
+    | Arrow (_,b) -> discrete b
     | Product ts -> List.for_all discrete ts
-    | Sum cs -> List.for_all (fun (c,tp) -> discrete tp) cs
+    | Sum cs -> List.for_all (fun (_,tp) -> discrete tp) cs
     | _ -> false
 end
 
@@ -126,6 +126,7 @@ type 'a expF =
   | Case of 'a * (pat * 'a) list
 
 type 'a exp = E of 'a * 'a exp expF
+type expr = loc exp
 
 
 (* ----- Traversing expressions ----- *)
@@ -232,7 +233,7 @@ module Exp = struct
     | Lub (_::_ as es) -> List.map (fun x -> "or " ^ show_app x) es |> String.concat " "
     | _ -> show_app expr
   and show_app (E (_,e) as expr) = match e with
-    | App (e1,e2) -> show_app e1 ^ show_atom e2
+    | App (e1,e2) -> show_app e1 ^ " " ^ show_atom e2
     | Tag (n,e) -> Tag.show n ^ " " ^ show_atom e
     | Box e -> "box " ^ show_atom e
     | Unbox e -> "unbox " ^ show_atom e

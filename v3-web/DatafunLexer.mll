@@ -1,5 +1,4 @@
 {
-  open Util
   open Ast
   open DatafunParser
 }
@@ -38,7 +37,7 @@ rule token = parse
   (* expression keywords *)
   | "the" {THE}
   | "let" {LET} | "in" {IN} | "end" {END}
-  | "empty" {EMPTY} | "or" {OR} | "for" {FOR}
+  | "empty" {EMPTY} | "or" {OR} | "for" {FOR} | "do" {DO}
   | "fix" {FIX} | "as" {AS}
   | "fn" {FN}
   | "case" {CASE}

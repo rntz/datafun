@@ -1,252 +1,160 @@
 %{
-open Sigs
 open Util
 open Ast
 
-(* I don't think this works with menhir! Only ocamlyacc!
- * Aha, they don't! need to use $symbolstartpos, $endpos
- * argh. probably need to use %inline or something.
- * or I could just use ocamlyacc.
- *)
-let getpos () = (Parsing.symbol_start_pos (), Parsing.symbol_end_pos ())
-let rangepos n m = (Parsing.rhs_start_pos n, Parsing.rhs_end_pos m)
+let map f g (x,y) = (Option.map f x, Option.map g y)
 %}
 
-/* punctuation */
-%token DOT
-%token COMMA
-%token UNDER
-%token SEMI
-%token COLON
-%token BANG
-%token PLUS
-%token DASH
-%token ASTERISK
-%token SLASH
-%token ARROW                    /* -> */
-%token DBLARROW                 /* => */
-%token BAR
+%token
+/* punctuation */ DOT COMMA UNDER SEMI COLON BANG PLUS DASH ASTERISK SLASH ARROW
+DBLARROW BAR LE LT GE GT EQ EQEQ RPAREN LPAREN RBRACE LBRACE RBRACK LBRACK
+/* keywords */ TYPE DEF THE LET IN END EMPTY OR FOR DO FIX AS FN CASE BOX UNBOX
+IF THEN ELSE
+/* end of file */ EOF
 
-%token LE                       /* <= */
-%token LT                       /* < */
-%token GE                       /* >= */
-%token GT                       /* > */
-%token EQ                       /* = */
-%token EQEQ                     /* == */
-
-/* brackets */
-%token RPAREN
-%token LPAREN
-%token RBRACE
-%token LBRACE
-%token RBRACK
-%token LBRACK
-
-/* type tokens */
-%token <Ast.base> BASE
-
-/* decl tokens */
-%token TYPE
-%token DEF
-
-/* expression tokens */
-%token THE
-%token LET
-%token IN
-%token END
-%token EMPTY
-%token OR
-%token FOR
-%token FIX
-%token AS
-%token FN
-%token CASE
-%token BOX
-%token UNBOX
-%token IF
-%token THEN
-%token ELSE
-
-/* atoms */
-%token <Ast.lit> LITERAL
-/* lowercase & uppercase identifiers */
-%token <string> ID
-%token <string> CAPID
-
-%token EOF
+%token <Ast.base> BASE          /* base types */
+%token <Ast.lit> LITERAL        /* literals */
+%token <string> ID CAPID        /* lower/uppercase identifiers */
 
 /* ---------- Associativity / fixity ---------- */
-/* %nonassoc IN
- * %nonassoc THEN ELSE
- * %nonassoc IF
- * %nonassoc LET
- * %right CONS
- * %left COLON
- * %right DOUBLECOLON
- * %right OR
- * %right ANDAND
- * %left EQUAL LT LEQ GEQ GT
- * %left PLUS MINUS
- * %left TIMES */
+// This seems to force "Foo x" (and similar) to parse as
+//
+//     Tag "Foo" (Var "x")
+//
+// rather than
+//
+//     App (Tag "Foo" (Tuple [])) (Var "x")
+//
+%right CAPID UNDER LPAREN LITERAL LBRACE ID EMPTY
 
 /* ---------- Types for nonterminals ---------- */
-%type <Ast.tp> tp
-%type <Ast.tp> test_tp
-
-%type <Ast.pat> pat
-%type <Ast.pat> test_pat
-
-%type <Ast.loc Ast.exp> exp
-%type <Ast.loc Ast.exp> test_exp
-
-%type <Ast.loc Ast.exp Ast.decl list> decls
-%type <Ast.loc Ast.exp Ast.decl list> test_decls
-
-%type <unit> unused
-
-%start tp test_tp pat test_pat exp test_exp decls test_decls unused
+%start <unit> unused
+%start <Ast.tp> tp test_tp
+%start <Ast.pat> pat test_pat
+%start <Ast.expr> exp test_exp
+%start <Ast.pat option * Ast.expr option> patexp test_patexp
+%start <Ast.expr Ast.decl list> decls test_decls
 
 %%
-/* ARHGSDHLKFJDSLKFJSLKDJFLKJDSKFLKJDSLKFLKSJDF */
-unused : ASTERISK DASH DOT ELSE END EQEQ FN GE GT IF IN LBRACK LE LET LT PLUS
-RBRACK SEMI SLASH THEN UNDER COLON TYPE {()};
+/* Argh. */
+unused: ARROW BANG BAR BASE BOX CAPID COMMA DBLARROW DEF EOF EQ ID LBRACE
+LITERAL LPAREN RBRACE RPAREN UNBOX ASTERISK DASH DOT ELSE END EQEQ FN GE GT IF
+IN LBRACK LE LET LT PLUS RBRACK SEMI SLASH THEN UNDER COLON TYPE AS CASE EMPTY
+FIX FOR OR THE DO {()};
 
-/* ---------- Syntax of types ---------- */
-test_tp : tp EOF {$1};
+/* ---------- Types ---------- */
+test_tp: tp EOF { $1 }
+tp:
+| tp_arrow {$1}
+| separated_nonempty_list(BAR, CAPID tp_atom {$1,$2}) {Sum $1}
 
-tp : tp_arrow { $1 } | tp_summands { Sum $1 };
-
-/* currently there is no way to write the empty sum type */
-tp_summands :
-| CAPID tp_atom                 { [$1,$2] }
-| CAPID tp_atom BAR tp_summands { ($1,$2)::$4 };
-
-tp_arrow : tp_product           { $1 }
+tp_arrow: tp_product            { $1 }
 | tp_product DBLARROW tp_arrow  { Arrow($1, $3) }
-| tp_product ARROW tp_arrow     { Arrow(Box $1, $3) };
+| tp_product ARROW tp_arrow     { Arrow(Box $1, $3) }
 
-tp_product : tp_atom       { $1 }
-| tp_atom COMMA tp_factors { Product ($1 :: $3) };
+tp_product: tp_atom { $1 }
+| tp_atom COMMA { Product [$1] }
+| tp_atom nonempty_list(COMMA tp_atom { $2 }) { Product($1::$2) }
 
-tp_factors :               { [] }
-| tp_atom                  { [$1] }
-| tp_atom COMMA tp_factors { $1 :: $3 };
-
-tp_atom :
+tp_atom:
 | LPAREN RPAREN     { Product [] }
 | BASE              { Base $1 }
 | ID                { Name $1 }
 | BANG tp_atom      { Box $2 }
 | LBRACE tp RBRACE  { Set $2 }
-| LPAREN tp RPAREN  { $2 };
+| LPAREN tp RPAREN  { $2 }
 
-/* ---------- Syntax of patterns ---------- */
-test_pat : pat EOF {$1};
+/* ---------- Decls ---------- */
+test_decls: decls EOF {$1}
+decls: list(decl) {$1}
+decl:
+| TYPE ID EQ tp {Type($2,$4) }
+| DEF pat_atom option(COLON tp {$2}) def_exp { Def($2,$3,$4) }
 
-pat : pat_app            { $1 }
-| pat_app COMMA pat_apps { PTuple($1::$3) };
-
-pat_apps :                  { [] }
-| pat_app                   { [$1] }
-| pat_app COMMA pat_apps    { $1::$3 };
-
-pat_app : pat_atom { $1 }
-| CAPID pat_atom { PTag($1, $2) }
-| BANG pat_atom      { PBox $2 }
-;
-
-pat_atom :
-| UNDER              { PWild }
-| ID                 { PVar $1 }
-| LITERAL            { PLit $1 }
-| LPAREN pat RPAREN  { $2 }
-| LPAREN RPAREN      { PTuple [] }
-;
-
-/* ---------- Syntax of declarations ---------- */
-test_decls: decls EOF {$1};
-decls : { [] } | decl decls { $1::$2 };
-
-decl :
-| TYPE ID EQ tp { Type($2,$4) }
-| DEF pat_atom optional_tp def_exp { Def($2,$3,$4) }
-;
-
-optional_tp : { None } | COLON tp { Some $2 };
-
-def_exp :
+def_exp:
 | EQ exp { $2 }
-| FN args DBLARROW exp { E(getpos(), Lam($2,$4)) }
-;
+| fnexpr { E(($symbolstartpos,$endpos), $1) }
 
-args : pat_atom {[$1]} | pat_atom args {$1::$2};
+fnexpr: FN args DBLARROW exp { Lam($2,$4) }
+args: list(pat_atom) {$1}
 
-/* ---------- Syntax of expressions ---------- */
-/* TODO: if-then-else */
-test_exp: exp EOF {$1};
-exp: expr { E(getpos(), $1) };
-exp_infix: expr_infix { E(getpos(), $1) };
-exp_app: expr_app { E(getpos(), $1) };
-exp_atom: expr_atom { E(getpos(), $1) };
-
-expr : expr_infix { $1 }
-| THE tp_atom exp { The($2,$3) }
-/* FIXME: I want to omit the "FIX" here, but it causes conflicts.  */
-/* | pat_atom AS exp { Fix($1,$3) } */
-| FIX pat_atom AS exp { Fix($2,$4) }
-| LET decls IN exp { Let($2,$4) }
-| FN args DBLARROW exp { Lam($2,$4) }
-| FOR LPAREN comps RPAREN exp { For($3, $5) }
-| CASE exp_infix branches { Case($2,$3) }
-;
-
-expr_infix : expr_app { $1 }
-| expr_disjuncts { Lub($1) }
-| exp_app expr_disjuncts { Lub($1::$2) }
-| expr_tuple { Tuple($1) }
-;
-
-expr_disjuncts : OR exp_app expr_disjuncts_empty { $2::$3 };
-expr_disjuncts_empty : {[]} | expr_disjuncts {$1};
-
-expr_tuple : exp_app COMMA expr_tuple_empty { $1::$3 };
-expr_tuple_empty : {[]} | exp_app {[$1]} | expr_tuple {$1};
-
-expr_app : expr_atom { $1 }
-| exp_app exp_atom { App($1,$2) }
-| CAPID exp_atom { Tag($1,$2) }
-| BOX exp_atom { Box($2) }
-| UNBOX exp_atom { Unbox($2) }
-;
-
-expr_atom :
-| ID        { Var $1 }
-| LITERAL   { Lit $1 }
-| EMPTY     { Lub [] }
-/* TODO: set comprehensions! */
-| LBRACE exp_apps RBRACE { MkSet $2 }
-| LBRACE exp_app BAR comps RBRACE { For($4,$2) }
-| LPAREN expr_atom RPAREN { $2 }
-| LPAREN RPAREN { Tuple [] }
-;
-
-exp_apps : {[]} | exp_app {[$1]} | exp_app COMMA exp_apps; {$1::$3};
-
-comps : {[]} | comp {[$1]} | comp COMMA comps {$1::$3};
-comp :
-/* "exp_app | pat_app IN exp_app"
- * causes 6 reduce-reduce conflicts w/ ocamlyacc
- * and only 3 w/ menhir
- * let's try learning jbuilder, it will let me pass --explain to menhir.
- */
+/* ---------- Comprehensions ---------- */
+comps: separated_list(COMMA, comp) {$1}
+comp:
 | exp_app { When $1 }
 | pat_app IN exp_app { In($1,$3) }
 | exp_app LBRACK pat RBRACK { In($3,$1) }
-;
 
-branches: { [] }
-/* FIXME: want `exp` here, not `exp_infix`!
- * but, then I have the dangling else problem! */
-/* | BAR pat DBLARROW exp branches { ($2,$4)::$5 } */
-| BAR pat DBLARROW exp_infix branches { ($2,$4)::$5 }
-;
+/* ---------- Patterns/expressions ----------
+ *
+ * We collapse these as an awful hack to make parsing comprehensions LR(0).
+ * In particular, both `PAT in EXPR` and `EXPR` are valid comprehensions.
+ * With PAT and EXPR as separate productions, menhir complains and gives us
+ * a reduce/reduce conflict. This way it Just Works, at the expense of having
+ * to manually "parse both ways at once", so to speak.
+ */
+%inline annot(X): X
+    { match $1 with
+      | None, None -> $syntaxerror
+      | x, None    -> x, None
+      | x, Some y  -> x, Some (E(($symbolstartpos,$endpos), y)) }
+%inline getPat(X): X { match fst $1 with | Some x -> x | None -> $syntaxerror }
+%inline getExp(X): X { match snd $1 with | Some x -> x | None -> $syntaxerror }
+
+test_patexp: patexp EOF {$1}; test_exp: exp EOF {$1}; test_pat: pat EOF {$1}
+patexp: annot(pe) {$1}
+patexp_infix: annot(pe_infix) {$1}
+patexp_app: annot(pe_app) {$1}
+patexp_atom: annot(pe_atom) {$1}
+
+pat: getPat(patexp) {$1}; exp: getExp(patexp) {$1}
+pat_infix: getPat(patexp_infix) {$1}; exp_infix: getExp(patexp_infix) {$1}
+pat_app: getPat(patexp_app) {$1}; exp_app: getExp(patexp_app) {$1}
+pat_atom: getPat(patexp_atom) {$1}; exp_atom: getExp(patexp_atom) {$1}
+
+pe: pe_infix {$1} | e {None, Some $1}
+e:
+| THE tp_atom exp    { The($2,$3) }
+| pat_infix AS exp   { Fix($1,$3) }
+| fnexpr             { $1 }
+| LET decls IN exp   { Let($2,$4) }
+| FOR LPAREN c=comps RPAREN e=exp { For(c,e) }
+/* TODO: "DBLARROW exp_infix" should be "DBLARROW exp" */
+/* TODO: use precedence to resolve the shift/reduce conflict here */
+| CASE exp_infix nonempty_list(BAR pat DBLARROW exp {$2,$4})
+  { Case($2,$3) }
+| IF exp THEN exp ELSE exp
+  { Case($2, [PLit (LBool true), $4; PLit (LBool false), $6]) }
+
+pe_infix: pe_app {$1}
+| patexp_app nonempty_list(COMMA patexp_app {$2})
+  { let (xs,ys) = List.split ($1::$2) in
+    map (fun x -> PTuple x) (fun x -> Tuple x)
+        (Option.list xs, Option.list ys) }
+/* expressions only */
+| ioption(OR) exp_app nonempty_list(OR exp_app {$2})
+  { None, Some (Lub ($2::$3)) }
+
+pe_app: pe_atom {$1}
+| CAPID patexp_atom { map (fun x -> PTag($1,x)) (fun x -> Tag($1,x)) $2 }
+| BOX patexp_atom { map (fun x -> PBox x) (fun x -> Box x) $2 }
+/* expressions only */
+| UNBOX exp_atom { None, Some (Unbox $2) }
+| exp_app exp_atom { None, Some (App ($1,$2)) }
+
+pe_atom:
+| CAPID { Some (PTag ($1, PTuple [])),
+          Some (Tag ($1, E(($symbolstartpos,$endpos), Tuple []))) }
+| ID        { Some (PVar $1), Some (Var $1) }
+| LITERAL   { Some (PLit $1), Some (Lit $1) }
+| LPAREN RPAREN { Some (PTuple []), Some (Tuple []) }
+| LPAREN patexp_app COMMA RPAREN
+  { map (fun x -> PTuple [x]) (fun x -> Tuple [x]) $2 }
+| LPAREN pe RPAREN { $2 }
+/* patterns only */
+| UNDER     { Some PWild, None }
+/* expressions only */
+| EMPTY     { None, Some (Lub []) }
+| LBRACE separated_list(COMMA, exp_app) RBRACE { None, Some (MkSet $2) }
+| LBRACE exp_app BAR comps RBRACE
+  { None, Some (For ($4, E(($symbolstartpos,$endpos), MkSet([$2])))) }

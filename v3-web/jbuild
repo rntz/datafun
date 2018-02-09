@@ -1,5 +1,7 @@
 (jbuild_version 1)
 
-(menhir ((modules (DatafunParser))))
-(ocamllex (DatafunLexer))
 (library ((name datafun)))
+(menhir
+ ((flags (--explain))
+  (modules (DatafunParser))))
+(ocamllex (DatafunLexer))
