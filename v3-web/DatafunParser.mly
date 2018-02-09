@@ -87,7 +87,7 @@ comp:
 
 /* ---------- Patterns/expressions ----------
  *
- * We collapse these as an awful hack to make parsing comprehensions LR(0).
+ * We collapse these as an awful hack to make parsing comprehensions LR(1).
  * In particular, both `PAT in EXPR` and `EXPR` are valid comprehensions.
  * With PAT and EXPR as separate productions, menhir complains and gives us
  * a reduce/reduce conflict. This way it Just Works, at the expense of having
@@ -119,10 +119,8 @@ e:
 | fnexpr             { $1 }
 | LET decls IN exp   { Let($2,$4) }
 | FOR LPAREN c=comps RPAREN e=exp { For(c,e) }
-/* TODO: "DBLARROW exp_infix" should be "DBLARROW exp" */
-/* TODO: use precedence to resolve the shift/reduce conflict here */
-| CASE exp_infix nonempty_list(BAR pat DBLARROW exp {$2,$4})
-  { Case($2,$3) }
+/* TODO: use precedence(?) to resolve the shift/reduce conflict here */
+| CASE exp_infix nonempty_list(BAR pat DBLARROW exp {$2,$4}) { Case($2,$3) }
 | IF exp THEN exp ELSE exp
   { Case($2, [PLit (LBool true), $4; PLit (LBool false), $6]) }
 
