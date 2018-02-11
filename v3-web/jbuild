@@ -4,7 +4,4 @@
 (menhir
  ((flags (--explain))
   (modules (DatafunParser))))
-(menhir
- ((flags (--explain))
-  (modules (NewParser))))
 (ocamllex (DatafunLexer))
