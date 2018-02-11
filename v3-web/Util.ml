@@ -9,6 +9,7 @@ let flip f x y = f y x
 let pair x y = (x,y)
 let apply (f,x) = f x
 let cons (x,xs) = x :: xs
+let compose f g x = f (g x)
 
 module Idiom(A: IDIOMATIC): IDIOM with type 'a t = 'a A.t = struct
   include A

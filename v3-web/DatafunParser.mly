@@ -37,10 +37,7 @@ IF THEN ELSE
 
 %%
 /* Argh. */
-unused: ARROW BANG BAR BASE BOX CAPID COMMA DBLARROW DEF EOF EQ ID LBRACE
-LITERAL LPAREN RBRACE RPAREN UNBOX ASTERISK DASH DOT ELSE END EQEQ FN GE GT IF
-IN LBRACK LE LET LT PLUS RBRACK SEMI SLASH THEN UNDER COLON TYPE AS CASE EMPTY
-FIX FOR OR THE DO {()};
+unused: ASTERISK DASH DO DOT END EQEQ FIX GE GT LE LT PLUS SLASH {()};
 
 /* ---------- Types ---------- */
 test_tp: tp EOF { $1 }
@@ -66,7 +63,7 @@ tp_atom:
 
 /* ---------- Decls ---------- */
 test_decls: decls EOF {$1}
-decls: list(decl) {$1}
+decls: SEMI* separated_list(SEMI*,decl) {$2}
 decl:
 | TYPE ID EQ tp {Type($2,$4) }
 | DEF pat_atom option(COLON tp {$2}) def_exp { Def($2,$3,$4) }
