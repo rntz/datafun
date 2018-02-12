@@ -29,7 +29,7 @@ rule token = parse
   | "[" {LBRACK} | "]" {RBRACK}
 
   (* type keywords *)
-  | "bool" {BASE Bool} | "int" {BASE Int} | "str" {BASE Str}
+  | "bool" {BASE `Bool} | "int" {BASE `Int} | "str" {BASE `Str}
 
   (* decl keywords *)
   | "type" {TYPE} | "def" {DEF}
@@ -45,14 +45,14 @@ rule token = parse
   | "if" {IF} | "then" {THEN} | "else" {ELSE}
 
   (* literals *)
-  | "true" {LITERAL(LBool true)}
-  | "false" {LITERAL(LBool false)}
-  | integer as n         {LITERAL(LInt (int_of_string n))}
+  | "true" {LITERAL(`Bool true)}
+  | "false" {LITERAL(`Bool false)}
+  | integer as n         {LITERAL(`Int (int_of_string n))}
   | '\"' (string_literal as s) '\"'
     {for i = 0 to String.length s - 1 do
        if s.[i] = '\n' then Lexing.new_line lexbuf else ()
      done;
-     LITERAL(LStr (Scanf.unescaped s))}
+     LITERAL(`Str (Scanf.unescaped s))}
 
   (* identifiers*)
   | lident as s {ID s} | uident as s {CAPID s}
