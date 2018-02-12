@@ -1,21 +1,20 @@
 open Ast
 
+(* type pointed =
+ *   [ `Bool | `Set | `Tuple of pointed list ] *)
+
+type semilat =
+  [ `Bool | `Set
+  | `Tuple of semilat list
+  | `Func of semilat ]
+
+type equal =
+  [ `Base of base
+  | `Set of equal
+  | `Tuple of equal list
+  | `Sum of (tag * equal) list ]
+
 module type BACKEND = sig
-
-  type pointed =
-    | PBool | PSet
-    | PTuple of pointed list
-
-  type semilat =
-    | SBool | SSet
-    | STuple of semilat list
-    | SFunc of semilat
-
-  type equal =
-    | EqBase of base
-    | EqSet of equal
-    | EqTuple of equal list
-    | EqSum of (string * equal) list
 
   type var
   type exp
@@ -45,7 +44,8 @@ module type BACKEND = sig
     | PatTuple of pattern list | PatTag of tag * pattern
 
   (* Basic forms *)
-  val var: var -> exp
+  (* give both debruijn index and name of variable *)
+  val var: int * var -> exp
   val lit: lit -> exp
 
   val stuck: string -> exp        (* unrecoverable error *)
@@ -56,7 +56,7 @@ module type BACKEND = sig
   (* our typeclasses *)
   val eq: equal -> exp -> exp -> exp
   val lub: semilat -> exp list -> exp
-  val point: pointed -> exp
+  (* val point: pointed -> exp *)
 
   (* introductions *)
   val tuple: exp list -> exp
