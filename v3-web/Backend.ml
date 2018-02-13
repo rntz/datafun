@@ -1,11 +1,4 @@
-type pointed =
-  [ `Bool | `Set | `Tuple of pointed list ]
-
-type semilat =
-  [ `Bool | `Set
-  | `Tuple of semilat list
-  | `Func of semilat ]
-
+type semilat = [ `Bool | `Set | `Tuple of semilat list | `Func of semilat ]
 type equal =
   [ Ast.base
   | `Set of equal
@@ -47,7 +40,8 @@ and exp =
   | `For of semilat * exp * (name * exp)
   | `Case of exp * (pat * exp) list ]
 
-let rec point: pointed -> exp = function
+let rec zeroExp: semilat -> exp = function
   | `Bool -> `Bool false
   | `Set -> `MkSet []
-  | `Tuple ts -> `Tuple (List.map point ts)
+  | `Tuple ts -> `Tuple (List.map zeroExp ts)
+  | `Func p -> `Lam(None, zeroExp p)
