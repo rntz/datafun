@@ -1,7 +1,5 @@
-open Ast
-
-(* type pointed =
- *   [ `Bool | `Set | `Tuple of pointed list ] *)
+type pointed =
+  [ `Bool | `Set | `Tuple of pointed list ]
 
 type semilat =
   [ `Bool | `Set
@@ -9,66 +7,47 @@ type semilat =
   | `Func of semilat ]
 
 type equal =
-  [ `Base of base
+  [ Ast.base
   | `Set of equal
   | `Tuple of equal list
-  | `Sum of (tag * equal) list ]
+  | `Sum of (Ast.tag * equal) list ]
 
-module type BACKEND = sig
+(* Names are merely hints, to increase readability. For binding purposes
+ * we use DeBruijn indices. *)
+type name = string option
 
-  type var
-  type exp
-  type expFun = string * (var -> exp)
+(* TODO: think about how I would compile pattern-matching to JS.
+ * hmmmm. *)
+type pat =
+  [ `Wild                       (* does not bind! no DeBruijn index! *)
+  | `Var of name
+  | `Tuple of pat list | `Tag of Ast.tag * pat
+  (* binding order is left-to-right; this `exp` sees all variables
+   * preceding it in the pattern. *)
+  | `Eq of equal * exp
+  (* | `When of pat * exp *)
+  ]
 
-  (* There is a problem with my clever scheme:
-   * how can I get debruijn indices out of this?
-   * or even avoid alpha-conflicts except via global gensym?
-   * maybe global gensym is the solution.
-   * but that doesn't help if I'm writing an interpreter!
-   *)
-
-  (* BIGGER PROBLEM:
-   *
-   * patterns in Ast.ml allow nonlinearity, with "test equality" semantics!
-   * but I don't want this to be the semantics in the backend;
-   * the type-checker is the bit that handles nonlinearity-as-equality.
-   * fix this.
-   *)
-  type pattern =
-    (* shit, how does the scoping for PatEq work?
-     * in e.g. PatTuple [PatVar "x", PatEq (var "x")]
-     * this seems wrong. *)
-    | PatEq of exp
-    | PatWild | PatVar of var
-    | PatWhere of pattern * exp
-    | PatTuple of pattern list | PatTag of tag * pattern
-
-  (* Basic forms *)
-  (* give both debruijn index and name of variable *)
-  val var: int * var -> exp
-  val lit: lit -> exp
-
-  val stuck: string -> exp        (* unrecoverable error *)
-  val bind: exp -> expFun -> exp
-  val fix: exp -> expFun -> exp
-
-  (* TODO: primitive functions? *)
-  (* our typeclasses *)
-  val eq: equal -> exp -> exp -> exp
-  val lub: semilat -> exp list -> exp
-  (* val point: pointed -> exp *)
-
+and exp =
+  [ Ast.lit
+  | `Stuck of string            (* unrecoverable error *)
+  | `Var of int                 (* debruijn index *)
+  (* Let(x, e, body): "let x = e in body" *)
+  | `Let of name * exp * exp
+  | `Lub of semilat * exp list | `Eq of equal * exp * exp
+  (* Fix(init, x, step): fixed point of (\x.step) starting from init *)
+  | `Fix of exp * name * exp
   (* introductions *)
-  val tuple: exp list -> exp
-  val tag: tag -> exp -> exp
-  val mkSet: exp list -> exp
+  | `Lam of name * exp | `Tuple of exp list | `Tag of Ast.tag * exp
+  | `MkSet of exp list
+  (* eliminations *)
+  | `App of exp * exp
+  | `IfThenElse of exp * exp * exp
+  (* For(howToJoin, setExp, (x, bodyExp)) *)
+  | `For of semilat * exp * (name * exp)
+  | `Case of exp * (pat * exp) list ]
 
-  (* eliminators *)
-  val app: exp -> exp -> exp
-  val ifThenElse: exp -> exp -> exp -> exp
-  val forSet: semilat -> exp -> string * (var -> exp) -> exp
-  (* destruct subject (pat, matchCase) failCase *)
-  val destruct: exp -> pat * (var list -> exp) -> exp -> exp
-  val destructOrDie: exp -> pat * (var list -> exp) -> exp
-
-end
+let rec point: pointed -> exp = function
+  | `Bool -> `Bool false
+  | `Set -> `MkSet []
+  | `Tuple ts -> `Tuple (List.map point ts)
