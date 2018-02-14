@@ -1,0 +1,14 @@
+#!/bin/bash
+cd "$(dirname "$0")"
+
+filter() {
+    egrep --no-filename -v '^ *(//.*|\(\*.*\*\))? *$' "$@"
+}
+
+files="*.ml *.mll *.mly"
+
+for name in $files; do
+    printf "%5d %s\n" $(filter "$name" | wc -l) "$name"
+done | sort -n
+
+printf "%5d total\n" $(filter $files | wc -l)
