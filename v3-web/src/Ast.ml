@@ -11,7 +11,7 @@ module Tag = struct let show n = n end
 module Prim = struct let show p = p end
 
 
-(* ---------- types ---------- *)
+(* ----- Tones ----- *)
 type tone = [`Id | `Op | `Iso | `Path]
 module Tone = struct
   let show: tone -> string = function
@@ -23,12 +23,9 @@ module Tone = struct
     | `Id, `Id | `Op, `Op -> a
 end
 
+
+(* ---------- Types ---------- *)
 type base = [`Bool | `Int | `Str]
-module Base = struct
-  let show: base -> string = function
-    | `Bool -> "bool" | `Int -> "int" | `Str -> "str"
-end
-
 type tp =
   [ base
   | `Name of var
@@ -39,9 +36,12 @@ type tp =
   (* TODO: use hashtable? *)
   | `Sum of (tag * tp) list ]
 
-module Type = struct
-  type t = tp
+module Base = struct
+  let show: base -> string = function
+    | `Bool -> "bool" | `Int -> "int" | `Str -> "str"
+end
 
+module Type = struct
   let rec show: tp -> string = function
     | `Sum (_::_ as ctors) ->
        let show_ctor (tag, tp) = match tp with
@@ -80,13 +80,8 @@ module Type = struct
 end
 
 
-(* ---------- patterns ----------*)
+(* ---------- Literals ---------- *)
 type lit = [ `Bool of bool | `Int of int | `Str of string ]
-type pat =
-  [ lit
-  | `Wild | `Var of var
-  | `Box of pat | `Tuple of pat list | `Tag of tag * pat ]
-
 module Lit = struct
   let show: lit -> string = function
     | `Bool true -> "true" | `Bool false -> "false"
@@ -96,6 +91,13 @@ module Lit = struct
   let typeOf: lit -> tp = function
     | `Bool _ -> `Bool | `Int _ -> `Int | `Str _ -> `Str
 end
+
+
+(* ---------- Patterns ----------*)
+type pat =
+  [ lit
+  | `Wild | `Var of var
+  | `Box of pat | `Tuple of pat list | `Tag of tag * pat ]
 
 module Pat = struct
   let rec show: pat -> string = function
@@ -113,7 +115,7 @@ module Pat = struct
 end
 
 
-(* ---------- expressions & declarations ---------- *)
+(* ---------- Expressions & declarations ---------- *)
 type 'a comp = When of 'a | In of pat * 'a
 type 'a decl =
   | Type of var * tp

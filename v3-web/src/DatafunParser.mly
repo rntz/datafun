@@ -1,7 +1,6 @@
 %{
 open Util
 open Ast
-
 let map f g (x,y) = (Option.map f x, Option.map g y)
 %}
 
