@@ -34,7 +34,10 @@ module type IDIOM = sig
   val option: 'a t option -> 'a option t
   val result: ('a t, 'b) result -> ('a, 'b) result t
   val list: 'a t list -> 'a list t
-  val forEach : 'a list -> ('a -> 'b t) -> 'b list t
+  val forEach: 'a list -> ('a -> 'b t) -> 'b list t
+  val ( *> ): 'a t -> 'b t -> 'b t
+  val (<*): 'a t -> 'b t -> 'a t
+  val (=>): 'a t -> ('a -> 'b) -> 'b t
 end
 
 

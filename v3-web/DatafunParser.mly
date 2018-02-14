@@ -50,11 +50,11 @@ tp_arrow: tp_product            { $1 }
 | tp_product ARROW tp_arrow     { `Arrow(`Box $1, $3) }
 
 tp_product: tp_atom { $1 }
-| tp_atom COMMA { `Product [$1] }
-| tp_atom nonempty_list(COMMA tp_atom { $2 }) { `Product($1::$2) }
+| tp_atom COMMA { `Tuple [$1] }
+| tp_atom nonempty_list(COMMA tp_atom { $2 }) { `Tuple($1::$2) }
 
 tp_atom:
-| LPAREN RPAREN     { `Product [] }
+| LPAREN RPAREN     { `Tuple [] }
 | BASE              { $1 :> tp }
 | ID                { `Name $1 }
 | BANG tp_atom      { `Box $2 }
@@ -150,6 +150,6 @@ pe_atom:
 | UNDER     { Some `Wild, None }
 /* expressions only */
 | EMPTY     { None, Some (`Lub []) }
-| LBRACE separated_list(COMMA, exp_app) RBRACE { None, Some (`MkSet $2) }
+| LBRACE separated_list(COMMA, exp_app) RBRACE { None, Some (`Set $2) }
 | LBRACE exp_app BAR comps RBRACE
-  { None, Some (`For ($4, (($symbolstartpos,$endpos), `MkSet([$2])))) }
+  { None, Some (`For ($4, (($symbolstartpos,$endpos), `Set([$2])))) }

@@ -10,6 +10,8 @@ let pair x y = (x,y)
 let apply (f,x) = f x
 let cons (x,xs) = x :: xs
 let compose f g x = f (g x)
+let (<@) f g = compose f g
+let (@>) g f = compose f g
 
 module Idiom(A: IDIOMATIC): IDIOM with type 'a t = 'a A.t = struct
   include A
@@ -19,6 +21,9 @@ module Idiom(A: IDIOMATIC): IDIOM with type 'a t = 'a A.t = struct
   let result = function | Error v -> pure (Error v) | Ok c -> map (fun x -> Ok x) c
   let rec list = function | [] -> pure [] | m::ms -> map cons (m ** list ms)
   let forEach lst f = list (List.map f lst)
+  let (=>) x f = map f x
+  let ( *> ) x y = map snd (x ** y)
+  let ( <* ) x y = map fst (x ** y)
 end
 
 module Monad(M: MONADIC): MONAD with type 'a t = 'a M.t = struct
@@ -29,21 +34,8 @@ module Monad(M: MONADIC): MONAD with type 'a t = 'a M.t = struct
            : IDIOM with type 'a t := 'a M.t)
 end
 
-
-(* Some monads & monad transformers *)
-module Id = Monad(struct type 'a t = 'a let pure = id let map = id let concat = id end)
-
-module WriterT(M: MONAD)(W: MONOID) = Monad(struct
-  open W
-  type 'a t = (W.t * 'a) M.t
-  let pure x = M.pure (monoid.empty, x)
-  let map f = M.map (fun (w,x) -> (w, f x))
-  let concat (c: 'a t t): 'a t =
-    M.(c >>= fun (u,d) -> d >>= fun (v,x) ->
-       pure (monoid.append u v, x))
-end)
-
-module Writer = WriterT(Id)
+(* The identity monad. More useful in OCaml than it is in Haskell. *)
+module Identity = Monad(struct type 'a t = 'a let pure = id let map = id let concat = id end)
 
 
 (* Traversables *)
@@ -54,7 +46,7 @@ struct
     include T.Seq(M)
     let seq x = traverse id x
   end
-  module TId = T.Seq(Id)
+  module TId = T.Seq(Identity)
   let map = TId.traverse
 end
 
@@ -86,4 +78,7 @@ module Option = struct
         | None -> M.pure None
     end
   end) : TRAVERSE with type 'a t := 'a option)
+
+  let elim ifNone ifSome = function | None -> ifNone | Some x -> ifSome x
+  let default ifNone = elim ifNone id
 end

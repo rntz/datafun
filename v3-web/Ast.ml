@@ -12,7 +12,17 @@ module Prim = struct let show p = p end
 
 
 (* ---------- types ---------- *)
-type tone = [`Mono | `Anti | `Isos | `Path]
+type tone = [`Id | `Op | `Iso | `Path]
+module Tone = struct
+  let show: tone -> string = function
+    | `Id -> "id" | `Op -> "op" | `Iso -> "iso" | `Path -> "path"
+
+  let meet (a: tone) (b: tone): tone = match a, b with
+    | `Iso, _ | _, `Iso | `Id, `Op | `Op, `Id -> `Iso
+    | x, `Path | `Path, x -> x
+    | `Id, `Id | `Op, `Op -> a
+end
+
 type base = [`Bool | `Int | `Str]
 module Base = struct
   let show: base -> string = function
@@ -25,7 +35,7 @@ type tp =
   | `Set of tp
   | `Box of tp
   | `Arrow of tp * tp
-  | `Product of tp list
+  | `Tuple of tp list
   (* TODO: use hashtable? *)
   | `Sum of (tag * tp) list ]
 
@@ -35,7 +45,7 @@ module Type = struct
   let rec show: tp -> string = function
     | `Sum (_::_ as ctors) ->
        let show_ctor (tag, tp) = match tp with
-         | `Product [] -> Tag.show tag
+         | `Tuple [] -> Tag.show tag
          | tp -> Tag.show tag ^ " " ^ show_atom tp
        in String.concat " | " (List.map show_ctor ctors)
     | tp -> show_arrow tp
@@ -44,11 +54,11 @@ module Type = struct
     | `Arrow(a, b) -> show_product a ^ " => " ^ show b
     | tp -> show_product tp
   and show_product: tp -> string = function
-    | `Product (_::_ as tps) -> String.concat ", " (List.map show_atom tps)
+    | `Tuple (_::_ as tps) -> String.concat ", " (List.map show_atom tps)
     | tp -> show_atom tp
   and show_atom: tp -> string = function
     | #base as b -> Base.show b
-    | `Product [] -> "()"
+    | `Tuple [] -> "()"
     | `Sum [] -> "<void>"
     | `Set tp -> "{" ^ show tp ^ "}"
     | `Box tp -> "!" ^ show_atom tp
@@ -58,13 +68,13 @@ module Type = struct
   let bool: tp = `Bool
   let int: tp = `Int
   let str: tp = `Str
-  let unit: tp = `Product []
+  let unit: tp = `Tuple []
 
   (* TODO: type equality, join, meet. *)
   let rec discrete: tp -> bool = function
     | `Str | `Box _ -> true
     | `Arrow (_,b) -> discrete b
-    | `Product ts -> List.for_all discrete ts
+    | `Tuple ts -> List.for_all discrete ts
     | `Sum cs -> List.for_all (fun (_,tp) -> discrete tp) cs
     | `Bool | `Int | `Name _ | `Set _ -> false
 end
@@ -82,6 +92,9 @@ module Lit = struct
     | `Bool true -> "true" | `Bool false -> "false"
     | `Int n -> Printf.sprintf "%d" n
     | `Str s -> Printf.sprintf "%S" s
+
+  let typeOf: lit -> tp = function
+    | `Bool _ -> `Bool | `Int _ -> `Int | `Str _ -> `Str
 end
 
 module Pat = struct
@@ -118,7 +131,7 @@ type 'a expF =
   | `Box of 'a
   | `Lam of pat list * 'a
   | `Tuple of 'a list | `Tag of tag * 'a
-  | `MkSet of 'a list
+  | `Set of 'a list
   (* Eliminations *)
   | `Unbox of 'a
   | `App of 'a * 'a
@@ -181,27 +194,27 @@ module ExpT: TRAVERSABLE with type 'a t = 'a expF = struct
     let traverse (f: 'a -> 'b M.t) = function
       | #lit as l -> pure l
       | `Var x -> pure (`Var x)
-      | `The(t,e) -> f e |> map (fun x -> `The (t, x))
+      | `The(t,e) -> f e => fun x -> `The (t, x)
       | `Prim s -> pure (`Prim s)
-      | `Lub es -> forEach es f |> map (fun x -> `Lub x)
-      | `Fix (x,e) -> f e |> map (fun e -> `Fix (x,e))
+      | `Lub es -> forEach es f => fun x -> `Lub x
+      | `Fix (x,e) -> f e => fun e -> `Fix (x,e)
       | `Let (ds, e) -> forEach ds (DeclSeq.traverse f) ** f e
-                        |> map (fun(ds,e) -> `Let(ds,e))
+                        => fun(ds,e) -> `Let(ds,e)
       (* introductions *)
-      | `Box e -> f e |> map (fun x -> `Box x)
-      | `Lam(x,e) -> f e |> map (fun e -> `Lam (x, e))
-      | `Tuple es -> forEach es f |> map (fun xs -> `Tuple xs)
-      | `Tag(n,e) -> f e |> map (fun e -> `Tag(n,e))
-      | `MkSet es -> forEach es f |> map (fun xs -> `MkSet xs)
+      | `Box e -> f e => fun x -> `Box x
+      | `Lam(x,e) -> f e => fun e -> `Lam (x, e)
+      | `Tuple es -> forEach es f => fun xs -> `Tuple xs
+      | `Tag(n,e) -> f e => fun e -> `Tag(n,e)
+      | `Set es -> forEach es f => fun xs -> `Set xs
       (* eliminations *)
-      | `Unbox e -> f e |> map (fun x -> `Unbox x)
-      | `App (e1, e2) -> f e1 ** f e2 |> map (fun (x,y) -> `App(x,y))
+      | `Unbox e -> f e => fun x -> `Unbox x
+      | `App (e1, e2) -> f e1 ** f e2 => fun (x,y) -> `App(x,y)
       | `For (cs, e) ->
          forEach cs (CompSeq.traverse f) ** f e
-         |> map (fun (cs,e) -> `For(cs,e))
+         => fun (cs,e) -> `For(cs,e)
       | `Case (e, arms) ->
          f e ** forEach arms (fun(p,x) -> pure p ** f x)
-         |> map (fun(e,arms) -> `Case(e,arms))
+         => fun(e,arms) -> `Case(e,arms)
   end
 end
 
@@ -247,6 +260,6 @@ module Exp = struct
     | `Lub [] -> "empty"
     | `Tuple [e] -> "(" ^ show_app e ^ ",)"
     | `Tuple [] -> "()"
-    | `MkSet es -> "{" ^ String.concat ", " (List.map show es) ^ "}"
+    | `Set es -> "{" ^ String.concat ", " (List.map show es) ^ "}"
     | _ -> "(" ^ show expr ^ ")"
 end
