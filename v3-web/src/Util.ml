@@ -18,7 +18,7 @@ module Idiom(A: IDIOMATIC): IDIOM with type 'a t = 'a A.t = struct
   let app fc ac = map apply (fc ** ac)
   let pair (x,y) = x ** y
   let option = function | None -> pure None | Some c -> map (fun x -> Some x) c
-  let result = function | Error v -> pure (Error v) | Ok c -> map (fun x -> Ok x) c
+  (* let result = function | Error v -> pure (Error v) | Ok c -> map (fun x -> Ok x) c *)
   let rec list = function | [] -> pure [] | m::ms -> map cons (m ** list ms)
   let forEach lst f = list (List.map f lst)
   let (=>) x f = map f x

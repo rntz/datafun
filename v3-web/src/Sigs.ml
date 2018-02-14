@@ -1,8 +1,3 @@
-(* TODO: use "result" package instead *)
-type ('a, 'b) result =
-  | Ok of 'a
-  | Error of 'b
-
 type 'a monoid = {empty: 'a; append: 'a -> 'a -> 'a}
 module type MONOID = sig type t val monoid: t monoid end
 
@@ -32,7 +27,7 @@ module type IDIOM = sig
   val app: ('a -> 'b) t -> 'a t -> 'b t
   val pair: 'a t * 'b t -> ('a * 'b) t
   val option: 'a t option -> 'a option t
-  val result: ('a t, 'b) result -> ('a, 'b) result t
+  (* val result: ('a t, 'b) result -> ('a, 'b) result t *)
   val list: 'a t list -> 'a list t
   val forEach: 'a list -> ('a -> 'b t) -> 'b list t
   val ( *> ): 'a t -> 'b t -> 'b t
