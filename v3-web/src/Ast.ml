@@ -135,8 +135,15 @@ module Type = struct
     (* all rules tried, no solution found *)
     | _, _ -> fail ""
 
+  let join unroll = merge unroll `Join
+  let meet unroll = merge unroll `Meet
   let eq unroll a b =
     try ignore (merge unroll `Eq a b); true
+    with Incompatible _ -> false
+
+  (* Lattice law: (a ≤ b) iff (a ∨ b) = b. *)
+  let subtype unroll a b =
+    try eq unroll b (join unroll a b)
     with Incompatible _ -> false
 end
 
