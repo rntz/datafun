@@ -1,15 +1,15 @@
 .PHONY: all repl clean sparkling remake FORCE
 
 all: FORCE
-	jbuilder build datafun.cma
+	jbuilder build --root=src datafun.cma
 
 repl: FORCE
-	jbuilder utop .
+	jbuilder utop src
 
 clean:
 
 sparkling: clean
-	rm -rf _build
+	rm -rf src/_build
 
 remake: sparkling
 	make

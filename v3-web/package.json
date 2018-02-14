@@ -1,0 +1,12 @@
+{
+  "name": "datafun-web",
+  "author": "Michael Arntzenius",
+  "scripts": {
+    "clean": "bsb -clean-world",
+    "build": "bsb -make-world",
+    "watch": "bsb -make-world -w"
+  },
+  "devDependencies": {
+    "bs-platform": "^2.2.1"
+  }
+}
