@@ -28,15 +28,15 @@ end
 type base = [`Bool | `Int | `Str]
 type tp =
   [ base
-  | `Name of var
+  | `Name of string
   | `Set of tp
   | `Box of tp
   | `Arrow of tp * tp
   | `Tuple of tp list
-  (* TODO: use hashtable? *)
   | `Sum of (tag * tp) list ]
 
 module Base = struct
+  let eq: base -> base -> bool = (=)
   let show: base -> string = function
     | `Bool -> "bool" | `Int -> "int" | `Str -> "str"
 end
@@ -65,18 +65,79 @@ module Type = struct
     | `Name n -> Var.show n
     | tp -> "(" ^ show tp ^ ")"
 
-  let bool: tp = `Bool
-  let int: tp = `Int
-  let str: tp = `Str
-  let unit: tp = `Tuple []
-
-  (* TODO: type equality, join, meet. *)
   let rec discrete: tp -> bool = function
     | `Str | `Box _ -> true
     | `Arrow (_,b) -> discrete b
     | `Tuple ts -> List.for_all discrete ts
     | `Sum cs -> List.for_all (fun (_,tp) -> discrete tp) cs
     | `Bool | `Int | `Name _ | `Set _ -> false
+
+  (* a sum type shouldn't use the same tag twice. *)
+  exception Malformed of string * tp
+  let well_formed: tp -> unit = function
+    | _ -> raise TODO
+
+  (* ---------- The type lattice: equality, subtyping, join/meet ---------- *)
+  type how = [ `Join | `Meet | `Eq ]
+  let op: how -> how = function | `Join -> `Meet | `Meet -> `Join | `Eq -> `Eq
+  (* Incompatible (message, how, tp1, tp2)
+   * message can be "", meaning "they're just plain incompatible"
+   * eg. a sum type & a product type.
+   *)
+  exception Incompatible of string * how * tp * tp
+  module StringMap = Map.Make(String)
+
+  let rec merge (unroll: var -> tp) (how: how) (tp1: tp) (tp2: tp): tp =
+    let fail msg = raise (Incompatible (msg, how, tp1, tp2)) in
+    let recur = merge unroll how in
+    let recurOp = merge unroll (op how) in
+
+    match tp1,tp2 with
+    (* handling named types *)
+    | `Name n, `Name m when n = m -> tp1
+    | `Name n, b -> recur (unroll n) b
+    | a, `Name m -> recur a (unroll m)
+
+    (* congruence rules *)
+    | #base, #base -> if tp1 = tp2 then tp1 else fail ""
+    | `Set a, `Set b -> `Set (recur a b)
+    | `Box a, `Box b -> `Box (recur a b)
+    | `Arrow(a1,b1), `Arrow(a2,b2) -> `Arrow (recurOp a1 a2, recur b1 b2)
+    | `Tuple tps1, `Tuple tps2 ->
+       (try `Tuple (List.map2 recur tps1 tps2)
+        with Invalid_argument _ -> fail "these tuples have different lengths")
+    (* oh god sums *)
+    | `Sum tps1, `Sum tps2 ->
+       (* tag-set union if `Join, intersection if `Meet, equality if `Eq *)
+       let open StringMap in
+       let toMap = List.fold_left (fun map (tag,tp) -> add tag tp map) empty in
+       let combine tag a b = match a,b with
+         | Some a, Some b -> Some (recur a b)
+         | None, None -> None
+         | Some tp, None | None, Some tp ->
+            match how with
+            | `Eq -> fail ("tag " ^ tag
+                           ^ " is present in one type but not the other")
+            | `Join -> Some tp   (* union *)
+            | `Meet -> None      (* intersection *)
+       in `Sum (bindings (StringMap.merge combine (toMap tps1) (toMap tps2)))
+
+    (* (`Box a <: a), so `Box can be dropped when joining or added when meeting.
+     * There are many more semantic equalities/subtypings we could try to
+     * handle here, but for simplicity's sake we don't.
+     *
+     * For example, we do NOT handle box-tuple distributivity,
+     *     `Box (`Tuple [a;b]) == `Tuple [`Box a; `Box b]
+     *)
+    | `Box a, b | a, `Box b when how = `Join -> recur a b
+    | `Box a, b | a, `Box b when how = `Meet -> `Box (recur a b)
+
+    (* all rules tried, no solution found *)
+    | _, _ -> fail ""
+
+  let eq unroll a b =
+    try ignore (merge unroll `Eq a b); true
+    with Incompatible _ -> false
 end
 
 
