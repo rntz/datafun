@@ -10,7 +10,7 @@ end
  * 1. minimal, eg. IDIOMATIC, MONADIC, TRAVERSABLE
  * 2. batteries-included, eg. IDIOM, MONAD, TRAVERSE
  *
- * In general, prefer the batteries-included version. util.ml provides functors
+ * In general, prefer the batteries-included version. Util.ml provides functors
  * that turn minimal modules into batteries-included ones.
  *)
 
