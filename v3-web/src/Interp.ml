@@ -87,10 +87,9 @@ let rec eval (env: env): exp -> value = function
   | `Tag(n,e) -> Tag(n, eval env e)
   | `MkSet es -> Set (Values.of_list (List.map (eval env) es))
   (* eliminations *)
-  | `App(e1,e2) ->
-     (match eval env e1 with
-      | Func f -> f (eval env e2)
-      | _ -> raise (Stuck "applying non-function"))
+  | `App(e1,e2) -> (match eval env e1 with
+                    | Func f -> f (eval env e2)
+                    | _ -> raise (Stuck "applying non-function"))
   | `IfThenElse(cnd,thn,els) ->
      eval env (match eval env cnd with
                | Bool b -> if b then thn else els
@@ -112,14 +111,16 @@ let rec eval (env: env): exp -> value = function
 and matches (env: env) (scrut: value): pat -> env option = function
   | `Wild -> Some env
   | `Var x -> Some (scrut :: env)
-  | `Tuple ps -> (match scrut with
-    | Tuple vs ->
-       let rec recur env i = function
-         | [] -> Some env
-         | p::ps -> (match matches env (Array.get vs i) p with
-                     | Some env' -> recur env' (i+1) ps
-                     | None -> None)
-       in recur env 0 ps
-    | _ -> None)
-  | `Tag(n,p) -> (match scrut with | Tag(m,v) when n = m -> matches env v p | _ -> None)
+  | `Tuple ps ->
+     (match scrut with
+      | Tuple vs ->
+         let rec recur env i = function
+           | [] -> Some env
+           | p::ps -> (match matches env (Array.get vs i) p with
+                       | Some env' -> recur env' (i+1) ps
+                       | None -> None)
+         in recur env 0 ps
+      | _ -> None)
+  | `Tag(n,p) -> (match scrut with | Tag(m,v) when n = m -> matches env v p
+                                   | _ -> None)
   | `Eq(_,exp) -> if Value.eq scrut (eval env exp) then Some env else None
