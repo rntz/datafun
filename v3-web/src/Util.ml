@@ -24,8 +24,8 @@ module Idiom(A: IDIOMATIC): IDIOM with type 'a t = 'a A.t = struct
   let rec list = function | [] -> pure [] | m::ms -> map cons (m ** list ms)
   let forEach lst f = list (List.map f lst)
   let (=>) x f = map f x
-  let ( *> ) x y = map snd (x ** y)
-  let ( <* ) x y = map fst (x ** y)
+  let (>>) x y = map snd (x ** y)
+  let (<*) x y = map fst (x ** y)
 end
 
 module Monad(M: MONADIC): MONAD with type 'a t = 'a M.t = struct
