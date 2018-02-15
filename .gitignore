@@ -2,6 +2,7 @@
 *.aux
 *.bbl
 *.blg
+*.bs.js
 *.dep
 *.dvi
 *.fdb_latexmk
@@ -20,4 +21,6 @@
 \#*\#
 _build
 node_modules
+v3-web/.merlin
+v3-web/lib/
 v3-web/src/.merlin
