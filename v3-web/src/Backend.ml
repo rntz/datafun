@@ -51,6 +51,6 @@ let rec semilattice (unroll: string -> Ast.tp): Ast.tp -> semilat = function
   | `Name n -> semilattice unroll (unroll n)
   | `Bool -> `Bool
   | `Set _ -> `Set
-  | `Arrow (a,b) -> `Func (semilattice unroll b)
+  | `Arrow (_,b) -> `Func (semilattice unroll b)
   | `Tuple ts -> `Tuple (List.map (semilattice unroll) ts)
   | `Box _ | `Sum _ | `Int | `Str -> raise NotSemilattice
