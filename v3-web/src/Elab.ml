@@ -35,7 +35,7 @@ module Infer = struct
   let getContext: cx t = fun cx -> (Tones.empty, cx)
   let withContext cx (k: 'a t): 'a t = fun _ -> k cx
 end
-module ExpInf = Exp.Seq(Infer)  (* TODO: do I need this? *)
+(* module ExpInf = Exp.Seq(Infer) *)  (* TODO: do I need this? *)
 
 type result = tp * Backend.exp
 type 'a infer = 'a Infer.t
@@ -44,18 +44,19 @@ let use (v: var): result infer = fun cx ->
   let (depth,tp) = Vars.find v cx.vars in
   Vars.singleton v `Id, (tp, `Var (cx.depth - depth))
 
-let withVarAs (v: var) (tp: tp) (tone: tone) (k: 'a infer): 'a infer = todo()
-let withVar v tp = withVarAs v tp `Id
+let withVarAs (tone:tone) (v: var) (tp: tp) (k: 'a infer): 'a infer = todo()
+let withVar v = withVarAs `Id v
 
 
 (* ---------- Checking pattern types & exhaustiveness ---------- *)
 module InferPat = struct
   include Monad(struct
-    type 'a t = (cx * 'a) infer
-    let pure x = Infer.(getContext ** pure x)
-    let map f = Infer.map (fun (cx,x) -> (cx,f x))
-    let concat a = Infer.(a >>= fun (cx,b) -> withContext cx b)
+    type 'a t = ((tone * var * tp) list * 'a) infer
+    let pure x = Infer.(pure ([], x))
+    let map f = Infer.map (fun (l,x) -> (l,f x))
+    let concat a = Infer.(a >>= fun (l1,b) -> b => fun (l2,x) -> (l1 @ l2, x))
   end)
+  let tell xs: unit t = Infer.pure (xs, ())
 end
 
 exception IncompatiblePattern of pat * tp
@@ -86,39 +87,34 @@ exception IncompatiblePattern of pat * tp
  * maybe [ `Id | `Op | `Iso ] in future?
  * but we never need to bind variables at `Path, do we?
  * (though we may infer that they are used at `Path!) *)
-let rec elabPat: pat -> tp -> tone -> (Backend.pat -> 'a infer) -> 'a infer =
-  fun pat tp tone k ->
+let rec elabPat: tone -> pat -> tp -> Backend.pat InferPat.t =
+  fun tone pat tp ->
+  let open InferPat in
   let fail() = raise (IncompatiblePattern (pat, tp)) in
   match pat, tp with
   (* need tone composition! *)
   (* Explicit box unwrapping. *)
-  | `Box p, `Box a -> elabPat pat a Tone.(tone * `Iso) k
+  | `Box p, `Box a -> elabPat Tone.(tone * `Iso) pat a
   | `Box _, _ -> fail()
   (* Box auto-unwrapping. Must try this case before others. *)
   (* need tone composition! *)
-  | pat, `Box a -> elabPat pat a Tone.(tone * `Iso) k
+  | pat, `Box a -> elabPat Tone.(tone * `Iso) pat a
   | #lit as l, tp -> if tp <> Lit.typeOf l then fail()
-                     else k (`Eq (Lit.typeOf l, l))
-  | `Wild, tp -> k `Wild
-  (* TODO: check whether tp is discrete. if so, bind discretely! *)
-  | `Var v, tp -> withVarAs v tp tone (k (`Var (Some v)))
-  (* argh, this is wrong. want IDIOM.list here. *)
-  | `Tuple ps, `Tuple tps -> todo()
-  (* | `Tuple [], `Tuple [] -> k (`Tuple [])
-   * | `Tuple (p::ps), `Tuple (tp::tps) -> todo() *)
-  | `Tuple _, _ -> todo()
+                     else pure (`Eq (Lit.typeOf l, l))
+  | `Wild, tp -> pure `Wild
+  | `Var v, tp ->
+     (* TODO: check whether tp is discrete. if so, bind discretely! *)
+     tell [tone,v,tp]
+     >> withVarAs tone v tp (pure (`Var (Some v)))
+  | `Tuple ps, `Tuple tps ->
+     list (try List.map2 (elabPat tone) ps tps
+           with Invalid_argument _ -> fail())
+     => fun ps -> `Tuple ps
+  | `Tuple _, _ -> fail()
   | `Tag(n,p), `Sum tps ->
      let tp = try List.assoc n tps with Not_found -> fail() in
-     elabPat p tp tone (fun p -> k (`Tag(n,p)))
+     elabPat tone p tp => fun p -> `Tag(n,p)
   | `Tag _, _ -> fail()
-
-(* Alternatively, and more reusably, I could have
- *
- * elabPat: pat -> tp -> tone -> ((var * tp * tone) list * Backend.pat) infer
- *
- * and I could probably simplify this by using a Writer monad to generate
- * the ((var * tp * tone) list).
- *)
 
 
 (* ---------- Error handling ---------- *)
