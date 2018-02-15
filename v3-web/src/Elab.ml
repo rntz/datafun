@@ -128,6 +128,7 @@ type why = AppNonFunction
          | TupleWrongLength
          | Inferred of tp
          | NotSemilattice of tp
+         | CanOnlyCheck
          | Because of string
 exception Nope of why
 
@@ -164,9 +165,9 @@ let elabExp (e: alg expF) (expect: expect): result infer =
   let semilattice tp =
     try Backend.semilattice unroll tp
     with Backend.NotSemilattice -> nope (NotSemilattice tp) in
-  let checkOnly (f: tp -> Backend.exp infer): result infer =
-    raise TODO
-  in
+  let checkOnly (f: tp -> Backend.exp infer): result infer = match expect with
+    | Some tp -> pure tp ** f tp
+    | None -> nope CanOnlyCheck in
   let patName: pat -> Backend.name = function | `Var v -> Some v | _ -> None in
   match e with
   | #lit as l -> pure (Lit.typeOf l, l)
@@ -182,7 +183,8 @@ let elabExp (e: alg expF) (expect: expect): result infer =
      (* need the pattern to be irrefutable!
       * hm, how will exhaustiveness work? *)
      (* TODO: munge environment! check synthesized tones! *)
-     pure (`Fix (Backend.zeroExp (semilattice tp), patName pat,
+     pure (`Fix (Backend.zeroExp (semilattice tp),
+                 patName pat,
                  (* need to case-analyse! *)
                  raise TODO))
   | `Let (ds, body) -> raise TODO
