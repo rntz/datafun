@@ -1,6 +1,7 @@
 open Sigs
 
 exception TODO
+let todo() = raise TODO
 
 let id x = x
 let curry f x y = f (x,y)
@@ -12,6 +13,7 @@ let cons (x,xs) = x :: xs
 let compose f g x = f (g x)
 let (<@) f g = compose f g
 let (@>) g f = compose f g
+let (@@) f x = f x
 
 module Idiom(A: IDIOMATIC): IDIOM with type 'a t = 'a A.t = struct
   include A

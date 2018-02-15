@@ -45,3 +45,12 @@ let rec zeroExp: semilat -> exp = function
   | `Set -> `MkSet []
   | `Tuple ts -> `Tuple (List.map zeroExp ts)
   | `Func p -> `Lam(None, zeroExp p)
+
+exception NotSemilattice
+let rec semilattice (unroll: string -> Ast.tp): Ast.tp -> semilat = function
+  | `Name n -> semilattice unroll (unroll n)
+  | `Bool -> `Bool
+  | `Set _ -> `Set
+  | `Arrow (a,b) -> `Func (semilattice unroll b)
+  | `Tuple ts -> `Tuple (List.map (semilattice unroll) ts)
+  | `Box _ | `Sum _ | `Int | `Str -> raise NotSemilattice

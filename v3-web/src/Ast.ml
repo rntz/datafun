@@ -21,6 +21,19 @@ module Tone = struct
     | `Iso, _ | _, `Iso | `Id, `Op | `Op, `Id -> `Iso
     | x, `Path | `Path, x -> x
     | `Id, `Id | `Op, `Op -> a
+
+  (* Order of composition: T_(compose s t) == (T_s . T_t)
+   *
+   * This is the opposite of the order I usually use in my notes,
+   * where tone application is postfix, A^{s . t} == (A^s)^t.
+   *)
+  let compose (a: tone) (b: tone): tone = match a,b with
+    | x, `Id | `Id, x -> x
+    | `Op, `Op -> `Id
+    | _, `Iso | _, `Path -> b   (* hi priority, must come first *)
+    | `Iso, _ | `Path, _ -> a   (* lo priority, comes later *)
+
+  let ( * ) = compose
 end
 
 
@@ -156,7 +169,7 @@ module Lit = struct
     | `Int n -> Printf.sprintf "%d" n
     | `Str s -> Printf.sprintf "%S" s
 
-  let typeOf: lit -> tp = function
+  let typeOf: lit -> [> base ] = function
     | `Bool _ -> `Bool | `Int _ -> `Int | `Str _ -> `Str
 end
 
@@ -206,7 +219,7 @@ type 'a expF =
   | `Unbox of 'a
   | `App of 'a * 'a
   | `For of 'a comp list * 'a
-  (* (if M then N else O) is parsed as (case M of true -> N | false -> O) *)
+  (* (if M then N else O) is parsed as (case M of true => N | false => O) *)
   | `Case of 'a * (pat * 'a) list ]
 
 (* NB. An equirecursive type! *)
