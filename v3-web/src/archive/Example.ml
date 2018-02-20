@@ -51,11 +51,11 @@ module Exp = struct
       open M
       let traverse(f: 'a -> 'b M.t): 'a expF -> 'b expF M.t = function
         | `Var x -> pure (`Var x)
-        | `The(t,e) -> Tag.the t $ f e
-        | `Lam(x,e) -> Tag.lam x $ f e
-        | `App(e1,e2) -> Tag.app $ f e1 ** f e2
-        | `Tuple es -> Tag.tuple $ forEach es f
-        | `Case (e,arms) -> Tag.case $ f e ** forEach arms (onSnd f)
+        | `The(t,e) -> C.the t $ f e
+        | `Lam(x,e) -> C.lam x $ f e
+        | `App(e1,e2) -> C.app $ f e1 ** f e2
+        | `Tuple es -> C.tuple $ forEach es f
+        | `Case (e,arms) -> C.case $ f e ** forEach arms (onSnd f)
     end
   end)
 
@@ -134,7 +134,7 @@ module ThisParameterIsRigidDammit(X: sig type t end) = struct
                  with Not_found -> fail "unbound variable")
     | `The(tp,x) -> check tp x >>= fun (tp, e) -> synthed (tp, `The(tp,e))
     | `Lam(v,x) -> checkOnly **> begin function
-       | `Fn(a,b) -> withVar (v,a) (check b x => snd => Tag.lam v)
+       | `Fn(a,b) -> withVar (v,a) (check b x => snd => C.lam v)
        | _ -> fail "lambdas are functions"
        end
     | `App(x,y) ->

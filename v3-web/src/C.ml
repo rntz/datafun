@@ -1,3 +1,4 @@
+(* "C" for "Constructor" *)
 let app x = `App x
 let bool x = `Bool x
 let box x = `Box x

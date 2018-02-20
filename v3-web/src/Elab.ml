@@ -219,7 +219,7 @@ let elabExp (e: alg expF): alg = fun expect ->
      let rec loop pats (tp:tp) = match pats, tp with
        | [], tp -> (check tp body => snd)
        | pat::pats, `Fn(tp_in, tp_out) ->
-          map (fun x -> `Lam (patName pat, x)) **> underBinder begin
+          map (C.lam (patName pat)) **> underBinder begin
             elabPat `Id pat tp_in >>= fun (vars, backendPat) ->
             map (fun exp -> `Case (`Var 0, [backendPat, exp]))
               (withVars vars (loop pats tp_out))
