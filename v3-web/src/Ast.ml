@@ -22,6 +22,11 @@ module Tone = struct
     | x, `Path | `Path, x -> x
     | `Id, `Id | `Op, `Op -> a
 
+  let (<=) (a: tone) (b: tone): bool = match a,b with
+    | `Iso, _ | _, `Path -> true
+    | `Id, `Id | `Op, `Op -> true
+    | _, `Iso | `Path, _ | `Op, `Id | `Id, `Op -> false
+
   (* Order of composition: T_(compose s t) == (T_s . T_t)
    *
    * This is the opposite of the order I usually use in my notes,
@@ -225,6 +230,48 @@ type 'a expF =
 (* NB. An equirecursive type! *)
 type 'a exp = 'a * 'a exp expF
 type expr = loc exp
+
+type 'a expAlgebra = 'a expF -> 'a
+
+(* (\* Expression algebras.
+ *  * I could use objects for this, but don't.*\)
+ * type 'a expAlg =
+ *   { lit: lit -> 'a
+ *   ; var: var -> 'a
+ *   ; the: tp * 'a -> 'a
+ *   ; prim: prim -> 'a
+ *   ; lub: 'a list -> 'a
+ *   ; fix: pat * 'a -> 'a
+ *   ; let_: 'a decl list * 'a -> 'a
+ *   ; box: 'a -> 'a
+ *   ; lam: pat list * 'a -> 'a
+ *   ; tuple: 'a list -> 'a
+ *   ; tag: tag * 'a -> 'a
+ *   ; set: 'a list -> 'a
+ *   ; unbox: 'a -> 'a
+ *   ; app: 'a * 'a -> 'a
+ *   ; for_: 'a comp list * 'a -> 'a
+ *   ; case: 'a * (pat * 'a) list -> 'a }
+ * 
+ * (\* this makes using expression algebras more convenient. *\)
+ * let algebra (alg: 'a expAlgebra): 'a expAlg =
+ *   { lit   = (fun l -> alg (l :> 'a expF))
+ *   ; var   = (fun l -> alg (`Var l))
+ *   ; the   = (fun x -> alg (`The x))
+ *   ; prim  = (fun x -> alg (`Prim x))
+ *   ; lub   = (fun x -> alg (`Lub x))
+ *   ; fix   = (fun x -> alg (`Fix x))
+ *   ; let_  = (fun x -> alg (`Let x))
+ *   ; box   = (fun x -> alg (`Box x))
+ *   ; lam   = (fun x -> alg (`Lam x))
+ *   ; tuple = (fun x -> alg (`Tuple x))
+ *   ; tag   = (fun x -> alg (`Tag x))
+ *   ; set   = (fun x -> alg (`Set x))
+ *   ; unbox = (fun x -> alg (`Unbox x))
+ *   ; app   = (fun x -> alg (`App x))
+ *   ; for_  = (fun x -> alg (`For x))
+ *   ; case  = (fun x -> alg (`Case x))
+ *   } *)
 
 
 (* ----- Traversing expressions ----- *)
