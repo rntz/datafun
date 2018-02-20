@@ -4,12 +4,12 @@ all: FORCE
 	jbuilder build datafun.cma
 
 repl: FORCE
-	jbuilder utop src
+	jbuilder utop .
 
 clean:
 
 sparkling: clean
-	rm -rf src/_build
+	rm -rf _build
 
 remake: sparkling
 	make
