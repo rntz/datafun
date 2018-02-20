@@ -45,8 +45,8 @@ tp:
 | separated_nonempty_list(BAR, CAPID tp_atom {$1,$2}) {`Sum $1}
 
 tp_arrow: tp_product            { $1 }
-| tp_product DBLARROW tp_arrow  { `Arrow($1, $3) }
-| tp_product ARROW tp_arrow     { `Arrow(`Box $1, $3) }
+| tp_product DBLARROW tp_arrow  { `Fn($1, $3) }
+| tp_product ARROW tp_arrow     { `Fn(`Box $1, $3) }
 
 tp_product: tp_atom { $1 }
 | tp_atom COMMA { `Tuple [$1] }

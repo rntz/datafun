@@ -218,7 +218,7 @@ let elabExp (e: alg expF): alg = fun expect ->
      (* TODO: frickin' TESTING!!!! *)
      let rec loop pats (tp:tp) = match pats, tp with
        | [], tp -> (check tp body => snd)
-       | pat::pats, `Arrow(tp_in, tp_out) ->
+       | pat::pats, `Fn(tp_in, tp_out) ->
           map (fun x -> `Lam (patName pat, x)) **> underBinder begin
             elabPat `Id pat tp_in >>= fun (vars, backendPat) ->
             map (fun exp -> `Case (`Var 0, [backendPat, exp]))
@@ -250,7 +250,7 @@ let elabExp (e: alg expF): alg = fun expect ->
   (* eliminations *)
   | `Unbox e -> raise TODO      (* need to consult my notes for this one *)
   | `App (e1,e2) -> e1 None >>= fun (ftp, fexp) ->
-                    let (a,b) = match ftp with `Arrow x -> x
+                    let (a,b) = match ftp with `Fn x -> x
                                              | _ -> nope AppNonFunction
                     in check a e2 => fun (_,aexp) -> (got b, `App (fexp,aexp))
   | `For (comps, body) -> raise TODO

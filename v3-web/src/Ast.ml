@@ -49,7 +49,7 @@ type tp =
   | `Name of string
   | `Set of tp
   | `Box of tp
-  | `Arrow of tp * tp
+  | `Fn of tp * tp
   | `Tuple of tp list
   | `Sum of (tag * tp) list ]
 
@@ -68,8 +68,8 @@ module Type = struct
        in String.concat " | " (List.map show_ctor ctors)
     | tp -> show_arrow tp
   and show_arrow: tp -> string = function
-    | `Arrow(`Box a, b) -> show_product a ^ " -> " ^ show b
-    | `Arrow(a, b) -> show_product a ^ " => " ^ show b
+    | `Fn(`Box a, b) -> show_product a ^ " -> " ^ show b
+    | `Fn(a, b) -> show_product a ^ " => " ^ show b
     | tp -> show_product tp
   and show_product: tp -> string = function
     | `Tuple (_::_ as tps) -> String.concat ", " (List.map show_atom tps)
@@ -85,7 +85,7 @@ module Type = struct
 
   let rec discrete: tp -> bool = function
     | `Str | `Box _ -> true
-    | `Arrow (_,b) -> discrete b
+    | `Fn(_,b) -> discrete b
     | `Tuple ts -> List.for_all discrete ts
     | `Sum cs -> List.for_all (fun (_,tp) -> discrete tp) cs
     | `Bool | `Int | `Name _ | `Set _ -> false
@@ -120,7 +120,7 @@ module Type = struct
     | #base, #base -> if tp1 = tp2 then tp1 else fail ""
     | `Set a, `Set b -> `Set (recur a b)
     | `Box a, `Box b -> `Box (recur a b)
-    | `Arrow(a1,b1), `Arrow(a2,b2) -> `Arrow (recurOp a1 a2, recur b1 b2)
+    | `Fn(a1,b1), `Fn(a2,b2) -> `Fn (recurOp a1 a2, recur b1 b2)
     | `Tuple tps1, `Tuple tps2 ->
        (try `Tuple (List.map2 recur tps1 tps2)
         with Invalid_argument _ -> fail "these tuples have different lengths")
