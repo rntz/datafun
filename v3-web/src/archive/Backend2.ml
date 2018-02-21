@@ -143,6 +143,7 @@ let rec elabPat: tone -> pat -> tp -> Backend.pat InferPat.t =
                      else pure (`Eq (Lit.typeOf l, l))
   | `Wild, tp -> pure `Wild
   | `Var v, tp ->
+     (* TODO: need to check if we're producing an equality pat! *)
      (* TODO?: check whether tp is discrete & if so, bind discretely! *)
      tell [tone,v,tp]
      >> withVarAs tone v tp (pure (`Var (Some v)))
