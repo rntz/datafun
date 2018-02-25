@@ -6,9 +6,10 @@ let map f g (x,y) = (Option.map f x, Option.map g y)
 
 %token
 /* punctuation */ DOT COMMA UNDER SEMI COLON BANG PLUS DASH ASTERISK SLASH ARROW
-DBLARROW BAR LE LT GE GT EQ EQEQ RPAREN LPAREN RBRACE LBRACE RBRACK LBRACK
-/* keywords */ TYPE DEF THE LET IN END EMPTY OR FOR DO FIX AS FN CASE BOX UNBOX
-IF THEN ELSE
+DBLARROW DBLARROWMINUS BAR LE LT GE GT EQ EQEQ RPAREN LPAREN RBRACE LBRACE
+RBRACK LBRACK
+/* keywords */ TYPE DEF THE LET IN END EMPTY OR FOR DO FIX AS FN CASE IF THEN
+ELSE
 /* end of file */ EOF
 
 %token <Ast.base> BASE          /* base types */
@@ -44,9 +45,10 @@ tp:
 | tp_arrow {$1}
 | separated_nonempty_list(BAR, CAPID tp_atom {$1,$2}) {`Sum $1}
 
-tp_arrow: tp_product            { $1 }
-| tp_product DBLARROW tp_arrow  { `Fn($1, $3) }
-| tp_product ARROW tp_arrow     { `Fn(`Box $1, $3) }
+tp_arrow: tp_product                { $1 }
+| tp_product DBLARROW tp_arrow      { `Fn(`Id, $1, $3) }
+| tp_product DBLARROWMINUS tp_arrow { `Fn(`Op, $1, $3) }
+| tp_product ARROW tp_arrow         { `Fn(`Iso, $1, $3) }
 
 tp_product: tp_atom { $1 }
 | tp_atom COMMA { `Tuple [$1] }
@@ -56,7 +58,6 @@ tp_atom:
 | LPAREN RPAREN     { `Tuple [] }
 | BASE              { $1 :> tp }
 | ID                { `Name $1 }
-| BANG tp_atom      { `Box $2 }
 | LBRACE tp RBRACE  { `Set $2 }
 | LPAREN tp RPAREN  { $2 }
 
@@ -65,7 +66,9 @@ test_decls: decls EOF {$1}
 decls: SEMI* separated_list(SEMI*,decl) {$2}
 decl:
 | TYPE ID EQ tp {Type($2,$4) }
-| DEF pat_atom option(COLON tp {$2}) def_exp { Def($2,$3,$4) }
+| DEF option(tone_char) pat_atom option(COLON tp {$2}) def_exp { Def($3,$2,$4,$5) }
+
+tone_char: PLUS { `Id } | DASH { `Op } | BANG { `Iso }
 
 def_exp:
 | EQ exp { $2 }
@@ -131,9 +134,7 @@ pe_infix: pe_app {$1}
 
 pe_app: pe_atom {$1}
 | CAPID patexp_atom { map (fun x -> `Tag($1,x)) (fun x -> `Tag($1,x)) $2 }
-| BOX patexp_atom { map (fun x -> `Box x) (fun x -> `Box x) $2 }
 /* expressions only */
-| UNBOX exp_atom { None, Some (`Unbox $2) }
 | exp_app exp_atom { None, Some (`App ($1,$2)) }
 
 pe_atom:

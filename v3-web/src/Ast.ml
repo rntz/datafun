@@ -12,20 +12,19 @@ module Prim = struct let show p = p end
 
 
 (* ----- Tones ----- *)
-type tone = [`Id | `Op | `Iso | `Path]
+type tone = [`Id | `Op | `Iso]
 module Tone = struct
   let show: tone -> string = function
-    | `Id -> "id" | `Op -> "op" | `Iso -> "iso" | `Path -> "path"
+    | `Id -> "id" | `Op -> "op" | `Iso -> "iso"
 
   let meet (a: tone) (b: tone): tone = match a, b with
     | `Iso, _ | _, `Iso | `Id, `Op | `Op, `Id -> `Iso
-    | x, `Path | `Path, x -> x
     | `Id, `Id | `Op, `Op -> a
 
   let (<=) (a: tone) (b: tone): bool = match a,b with
-    | `Iso, _ | _, `Path -> true
+    | `Iso, _
     | `Id, `Id | `Op, `Op -> true
-    | _, `Iso | `Path, _ | `Op, `Id | `Id, `Op -> false
+    | _, `Iso | `Op, `Id | `Id, `Op -> false
 
   (* Order of composition: T_(compose s t) == (T_s . T_t)
    *
@@ -35,8 +34,7 @@ module Tone = struct
   let compose (a: tone) (b: tone): tone = match a,b with
     | x, `Id | `Id, x -> x
     | `Op, `Op -> `Id
-    | _, `Iso | _, `Path -> b   (* hi priority, must come first *)
-    | `Iso, _ | `Path, _ -> a   (* lo priority, comes later *)
+    | _, `Iso | `Iso, _ -> `Iso
 
   let ( * ) = compose
 end
@@ -48,8 +46,7 @@ type tp =
   [ base
   | `Name of string
   | `Set of tp
-  | `Box of tp
-  | `Fn of tp * tp
+  | `Fn of tone * tp * tp
   | `Tuple of tp list
   | `Sum of (tag * tp) list ]
 
@@ -68,8 +65,9 @@ module Type = struct
        in String.concat " | " (List.map show_ctor ctors)
     | tp -> show_arrow tp
   and show_arrow: tp -> string = function
-    | `Fn(`Box a, b) -> show_product a ^ " -> " ^ show b
-    | `Fn(a, b) -> show_product a ^ " => " ^ show b
+    | `Fn(`Id, a ,b) -> show_product a ^ " => " ^ show_arrow b
+    | `Fn(`Iso, a, b) -> show_product a ^ " -> " ^ show_arrow b
+    | `Fn(`Op, a, b) -> show_product a ^ " =>- " ^ show_arrow b
     | tp -> show_product tp
   and show_product: tp -> string = function
     | `Tuple (_::_ as tps) -> String.concat ", " (List.map show_atom tps)
@@ -79,16 +77,8 @@ module Type = struct
     | `Tuple [] -> "()"
     | `Sum [] -> "<void>"
     | `Set tp -> "{" ^ show tp ^ "}"
-    | `Box tp -> "!" ^ show_atom tp
     | `Name n -> Var.show n
     | tp -> "(" ^ show tp ^ ")"
-
-  let rec discrete: tp -> bool = function
-    | `Str | `Box _ -> true
-    | `Fn(_,b) -> discrete b
-    | `Tuple ts -> List.for_all discrete ts
-    | `Sum cs -> List.for_all (fun (_,tp) -> discrete tp) cs
-    | `Bool | `Int | `Name _ | `Set _ -> false
 
   (* a sum type shouldn't use the same tag twice. *)
   exception Malformed of string * tp
@@ -119,8 +109,8 @@ module Type = struct
     (* congruence rules *)
     | #base, #base -> if tp1 = tp2 then tp1 else fail ""
     | `Set a, `Set b -> `Set (recur a b)
-    | `Box a, `Box b -> `Box (recur a b)
-    | `Fn(a1,b1), `Fn(a2,b2) -> `Fn (recurOp a1 a2, recur b1 b2)
+    | `Fn(s,a1,b1), `Fn(t,a2,b2) when s = t ->
+       `Fn (s, recurOp a1 a2, recur b1 b2)
     | `Tuple tps1, `Tuple tps2 ->
        (try `Tuple (List.map2 recur tps1 tps2)
         with Invalid_argument _ -> fail "these tuples have different lengths")
@@ -139,16 +129,6 @@ module Type = struct
             | `Join -> Some tp   (* union *)
             | `Meet -> None      (* intersection *)
        in `Sum (bindings (StringMap.merge combine (toMap tps1) (toMap tps2)))
-
-    (* (`Box a <: a), so `Box can be dropped when joining or added when meeting.
-     * There are many more semantic equalities/subtypings we could try to
-     * handle here, but for simplicity's sake we don't.
-     *
-     * For example, we do NOT handle box-tuple distributivity,
-     *     `Box (`Tuple [a;b]) == `Tuple [`Box a; `Box b]
-     *)
-    | `Box a, b | a, `Box b when how = `Join -> recur a b
-    | `Box a, b | a, `Box b when how = `Meet -> `Box (recur a b)
 
     (* all rules tried, no solution found *)
     | _, _ -> fail ""
@@ -183,14 +163,13 @@ end
 type pat =
   [ lit
   | `Wild | `Var of var
-  | `Box of pat | `Tuple of pat list | `Tag of tag * pat ]
+  | `Tuple of pat list | `Tag of tag * pat ]
 
 module Pat = struct
   let rec show: pat -> string = function
     | `Tuple ps -> String.concat ", " (List.map show_app ps)
     | p -> show_app p
   and show_app: pat -> string = function
-    | `Box p -> "!" ^ show_app p
     | `Tag (n,p) -> n ^ " " ^ show_atom p
     | p -> show_atom p
   and show_atom: pat -> string = function
@@ -205,7 +184,7 @@ end
 type 'a comp = When of 'a | In of pat * 'a
 type 'a decl =
   | Type of var * tp
-  | Def of pat * tp option * 'a
+  | Def of pat * tone option * tp option * 'a
 
 type 'a expF =
   [ lit
@@ -216,12 +195,10 @@ type 'a expF =
   | `Fix of pat * 'a
   | `Let of 'a decl list * 'a
   (* Introductions *)
-  | `Box of 'a
   | `Lam of pat list * 'a
   | `Tuple of 'a list | `Tag of tag * 'a
   | `Set of 'a list
   (* Eliminations *)
-  | `Unbox of 'a
   | `App of 'a * 'a
   | `For of 'a comp list * 'a
   (* (if M then N else O) is parsed as (case M of true => N | false => O) *)
@@ -232,46 +209,6 @@ type 'a exp = 'a * 'a exp expF
 type expr = loc exp
 
 type 'a expAlgebra = 'a expF -> 'a
-
-(* (\* Expression algebras.
- *  * I could use objects for this, but don't.*\)
- * type 'a expAlg =
- *   { lit: lit -> 'a
- *   ; var: var -> 'a
- *   ; the: tp * 'a -> 'a
- *   ; prim: prim -> 'a
- *   ; lub: 'a list -> 'a
- *   ; fix: pat * 'a -> 'a
- *   ; let_: 'a decl list * 'a -> 'a
- *   ; box: 'a -> 'a
- *   ; lam: pat list * 'a -> 'a
- *   ; tuple: 'a list -> 'a
- *   ; tag: tag * 'a -> 'a
- *   ; set: 'a list -> 'a
- *   ; unbox: 'a -> 'a
- *   ; app: 'a * 'a -> 'a
- *   ; for_: 'a comp list * 'a -> 'a
- *   ; case: 'a * (pat * 'a) list -> 'a }
- * 
- * (\* this makes using expression algebras more convenient. *\)
- * let algebra (alg: 'a expAlgebra): 'a expAlg =
- *   { lit   = (fun l -> alg (l :> 'a expF))
- *   ; var   = (fun l -> alg (`Var l))
- *   ; the   = (fun x -> alg (`The x))
- *   ; prim  = (fun x -> alg (`Prim x))
- *   ; lub   = (fun x -> alg (`Lub x))
- *   ; fix   = (fun x -> alg (`Fix x))
- *   ; let_  = (fun x -> alg (`Let x))
- *   ; box   = (fun x -> alg (`Box x))
- *   ; lam   = (fun x -> alg (`Lam x))
- *   ; tuple = (fun x -> alg (`Tuple x))
- *   ; tag   = (fun x -> alg (`Tag x))
- *   ; set   = (fun x -> alg (`Set x))
- *   ; unbox = (fun x -> alg (`Unbox x))
- *   ; app   = (fun x -> alg (`App x))
- *   ; for_  = (fun x -> alg (`For x))
- *   ; case  = (fun x -> alg (`Case x))
- *   } *)
 
 
 (* ----- Traversing expressions ----- *)
@@ -292,7 +229,7 @@ module Decl = struct
       open M
       let traverse f = function
         | Type(x,t) -> pure (Type(x,t))
-        | Def(p,t,e) -> map (fun x -> Def(p,t,x)) (f e)
+        | Def(p,s,t,e) -> map (fun x -> Def(p,s,t,x)) (f e)
         (* | Ascribe(xs,t) -> pure (Ascribe(xs,t))
          * | Define(x,args,body) -> map (fun body' -> Define(x, args, body')) (f body)
          * | Decons(p,e) -> map (fun x -> Decons(p,x)) (f e) *)
@@ -302,15 +239,11 @@ module Decl = struct
   let show (f: 'a -> string): 'a decl -> string = function
     | Type (v, tp) ->
        Printf.sprintf "type %s = %s" (Var.show v) (Type.show tp)
-    | Def (p, None, x) ->
-       Printf.sprintf "def %s = %s" (Pat.show_atom p) (f x)
-    | Def (p, Some tp, x) ->
-       Printf.sprintf "def %s: %s = %s" (Pat.show_atom p) (Type.show tp) (f x)
-    (* | Ascribe (xs, tp) -> String.concat " " xs ^ " : " ^ Type.show tp
-     * | Define (x,ps,body) ->
-     *    [Var.show x] @ List.map Pat.show_atom ps @ ["="; show body]
-     *    |> String.concat " "
-     * | Decons (p,e) -> Pat.show p ^ " = " ^ show e *)
+    | Def (p, tone, tp, x) ->
+       let showTone = function `Id -> "+" | `Iso -> "!" | `Op -> "-" in
+       let tone = Option.elim "" showTone tone in
+       let tp = Option.elim "" (fun a -> ": " ^ Type.show a) tp in
+       Printf.sprintf "def%s %s%s = %s" tone tp (Pat.show_atom p) (f x)
 end
 
 module ExpT: TRAVERSABLE with type 'a t = 'a expF = struct
@@ -331,13 +264,11 @@ module ExpT: TRAVERSABLE with type 'a t = 'a expF = struct
       | `Let (ds, e) -> forEach ds (DeclSeq.traverse f) ** f e
                         => fun(ds,e) -> `Let(ds,e)
       (* introductions *)
-      | `Box e -> f e => fun x -> `Box x
       | `Lam(x,e) -> f e => fun e -> `Lam (x, e)
       | `Tuple es -> forEach es f => fun xs -> `Tuple xs
       | `Tag(n,e) -> f e => fun e -> `Tag(n,e)
       | `Set es -> forEach es f => fun xs -> `Set xs
       (* eliminations *)
-      | `Unbox e -> f e => fun x -> `Unbox x
       | `App (e1, e2) -> f e1 ** f e2 => fun (x,y) -> `App(x,y)
       | `For (cs, e) ->
          forEach cs (CompSeq.traverse f) ** f e
@@ -380,8 +311,6 @@ module Exp = struct
   and show_app ((_,e) as expr: 'a exp) = match e with
     | `App (e1,e2) -> show_app e1 ^ " " ^ show_atom e2
     | `Tag (n,e) -> Tag.show n ^ " " ^ show_atom e
-    | `Box e -> "box " ^ show_atom e
-    | `Unbox e -> "unbox " ^ show_atom e
     | _ -> show_atom expr
   and show_atom ((_,e) as expr: 'a exp) = match e with
     | #lit as l -> Lit.show l

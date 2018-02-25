@@ -139,13 +139,6 @@ let rec elabPat: tone -> pat -> tp -> Backend.pat InferPat.t =
   let open InferPat in
   let fail() = raise (IncompatiblePattern (pat, tp)) in
   match pat, tp with
-  (* need tone composition! *)
-  (* Explicit box unwrapping. *)
-  | `Box p, `Box a -> elabPat Tone.(tone * `Iso) pat a
-  | `Box _, _ -> fail()
-  (* Box auto-unwrapping. Must try this case before others. *)
-  (* need tone composition! *)
-  | pat, `Box a -> elabPat Tone.(tone * `Iso) pat a
   | #lit as l, tp -> if tp <> Lit.typeOf l then fail()
                      else pure (`Eq (Lit.typeOf l, l))
   | `Wild, tp -> pure `Wild
@@ -212,7 +205,6 @@ let elabExp (e: alg expF): alg = fun expect ->
      end
   | `Let (ds, body) -> raise TODO
   (* introductions *)
-  | `Box e -> raise TODO
   | `Lam (pats, body) ->
      (* TODO: refactor this & `Fix; they have much in common. *)
      (* TODO: frickin' TESTING!!!! *)
@@ -248,7 +240,6 @@ let elabExp (e: alg expF): alg = fun expect ->
                 | None -> nope (raise TODO))
   | `Set es -> raise TODO
   (* eliminations *)
-  | `Unbox e -> raise TODO      (* need to consult my notes for this one *)
   | `App (e1,e2) -> e1 None >>= fun (ftp, fexp) ->
                     let (a,b) = match ftp with `Fn x -> x
                                              | _ -> nope AppNonFunction

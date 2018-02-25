@@ -17,7 +17,7 @@ rule token = parse
   | "," {COMMA} | "." {DOT} | "!" {BANG}
   | ":" {COLON} | ";" {SEMI}
   | "+" {PLUS}  | "-" {DASH} | "*" {ASTERISK} | "/" {SLASH}
-  | "->" {ARROW} | "=>" {DBLARROW}
+  | "->" {ARROW} | "=>" {DBLARROW} | "=>-" {DBLARROWMINUS}
   | "|" {BAR}
 
   | "<=" {LE} | "<" {LT} | ">=" {GE} | ">" {GT}
@@ -41,7 +41,6 @@ rule token = parse
   | "fix" {FIX} | "as" {AS}
   | "fn" {FN}
   | "case" {CASE}
-  | "box" {BOX} | "unbox" {UNBOX}
   | "if" {IF} | "then" {THEN} | "else" {ELSE}
 
   (* literals *)
