@@ -1,0 +1,17 @@
+- make ExampleFinal generate tones as well, and see whether not using monads
+  is still cleaner.
+
+- write ExampleFinal with monads.
+
+- see how difficult it is to set up ppx. can bucklescript work with ppx?
+
+
+the whole issue of equality and patterns and tonality could be simplified if I
+did a desugaring pass that rewrote nonlinear patterns into (pat * exp) "PAT when
+EXP" pairs.
+
+but then how does (fn (x,x) => ...) desugar?
+it should probably error
+("nonlinear pattern used in irrefutable context", find better error message)
+
+what about type error reporting?
