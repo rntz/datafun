@@ -208,16 +208,17 @@ let elabExp (e: alg expF): alg = fun expect ->
   | `Lam (pats, body) ->
      (* TODO: refactor this & `Fix; they have much in common. *)
      (* TODO: frickin' TESTING!!!! *)
-     let rec loop pats (tp:tp) = match pats, tp with
-       | [], tp -> (check tp body => snd)
-       | pat::pats, `Fn(tp_in, tp_out) ->
-          map (C.lam (patName pat)) **> underBinder begin
-            elabPat `Id pat tp_in >>= fun (vars, backendPat) ->
-            map (fun exp -> `Case (`Var 0, [backendPat, exp]))
-              (withVars vars (loop pats tp_out))
-          end
-       | (_::_), _ -> nope LamNonFunction
-     in checkOnly (loop pats)
+     todo()
+     (* let rec loop pats (tp:tp) = match pats, tp with
+      *   | [], tp -> (check tp body => snd)
+      *   | pat::pats, `Fn(tp_in, tp_out) ->
+      *      map (C.lam (patName pat)) **> underBinder begin
+      *        elabPat `Id pat tp_in >>= fun (vars, backendPat) ->
+      *        map (fun exp -> `Case (`Var 0, [backendPat, exp]))
+      *          (withVars vars (loop pats tp_out))
+      *      end
+      *   | (_::_), _ -> nope LamNonFunction
+      * in checkOnly (loop pats) *)
   (* | `Lam (pats, body) -> raise TODO (\* checking only! *\) *)
   | `Tuple es ->
      map (List.split @> fun (tps,es) -> `Tuple tps, `Tuple es)
@@ -240,10 +241,12 @@ let elabExp (e: alg expF): alg = fun expect ->
                 | None -> nope (raise TODO))
   | `Set es -> raise TODO
   (* eliminations *)
-  | `App (e1,e2) -> e1 None >>= fun (ftp, fexp) ->
-                    let (a,b) = match ftp with `Fn x -> x
-                                             | _ -> nope AppNonFunction
-                    in check a e2 => fun (_,aexp) -> (got b, `App (fexp,aexp))
+  | `App (e1,e2) ->
+     e1 None >>= fun (ftp, fexp) ->
+     let (tone,a,b) = match ftp with `Fn x -> x
+                                   | _ -> nope AppNonFunction in
+     (* TODO: tone check! *)
+     check a e2 => fun (_,aexp) -> (got b, `App (fexp,aexp))
   | `For (comps, body) -> raise TODO
   (* TODO: exhaustiveness checking *)
   | `Case (subject, arms) -> raise TODO
