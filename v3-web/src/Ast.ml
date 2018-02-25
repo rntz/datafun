@@ -12,29 +12,26 @@ module Prim = struct let show p = p end
 
 
 (* ----- Tones ----- *)
-type tone = [`Id | `Op | `Iso]
+type tone = [`Id | `Op | `Iso | `Path]
 module Tone = struct
   let show: tone -> string = function
-    | `Id -> "id" | `Op -> "op" | `Iso -> "iso"
+    | `Id -> "id" | `Op -> "op" | `Iso -> "iso" | `Path -> "path"
 
   let meet (a: tone) (b: tone): tone = match a, b with
     | `Iso, _ | _, `Iso | `Id, `Op | `Op, `Id -> `Iso
+    | x, `Path | `Path, x -> x
     | `Id, `Id | `Op, `Op -> a
 
   let (<=) (a: tone) (b: tone): bool = match a,b with
-    | `Iso, _
-    | `Id, `Id | `Op, `Op -> true
-    | _, `Iso | `Op, `Id | `Id, `Op -> false
+    | `Iso, _ | _, `Path | `Id, `Id | `Op, `Op -> true
+    | _, `Iso | `Path, _ | `Op, `Id | `Id, `Op -> false
 
-  (* Order of composition: T_(compose s t) == (T_s . T_t)
-   *
-   * This is the opposite of the order I usually use in my notes,
-   * where tone application is postfix, A^{s . t} == (A^s)^t.
-   *)
+  (* Order of composition is postfix: A^(compose s t) == (A^s)^t *)
   let compose (a: tone) (b: tone): tone = match a,b with
     | x, `Id | `Id, x -> x
     | `Op, `Op -> `Id
-    | _, `Iso | `Iso, _ -> `Iso
+    | `Iso, _ | `Path, _ -> a   (* hi priority, must come first *)
+    | _, `Iso | _, `Path -> b   (* lo priority, comes later *)
 
   let ( * ) = compose
 end
@@ -240,7 +237,7 @@ module Decl = struct
     | Type (v, tp) ->
        Printf.sprintf "type %s = %s" (Var.show v) (Type.show tp)
     | Def (p, tone, tp, x) ->
-       let showTone = function `Id -> "+" | `Iso -> "!" | `Op -> "-" in
+       let showTone = function `Id -> "+" | `Iso -> "!" | `Op -> "-" | `Path -> "~" in
        let tone = Option.elim "" showTone tone in
        let tp = Option.elim "" (fun a -> ": " ^ Type.show a) tp in
        Printf.sprintf "def%s %s%s = %s" tone tp (Pat.show_atom p) (f x)
