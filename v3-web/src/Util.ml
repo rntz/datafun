@@ -3,6 +3,8 @@ open Sigs
 exception TODO
 let todo() = raise TODO
 
+exception Bug of string
+
 let id x = x
 let const x y = x
 let curry f x y = f (x,y)
