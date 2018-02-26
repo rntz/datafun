@@ -22,12 +22,12 @@ and exp =
   [ lit
   (* | `Stuck of string            (\* do we need this? *\) *)
   | `Var of var
-  | `Let of var * exp * exp
+  | `Let of pat * exp * exp
   | `Lub of semilat * exp list | `Eq of equal * exp * exp
   (* Fix(how, x, step): fixed point of (\x.step) starting from init *)
   | `Fix of fix * var * exp
   (* introductions *)
-  | `Lam of pat list * exp | `Tuple of exp list | `Tag of tag * exp
+  | `Lam of pat * exp | `Tuple of exp list | `Tag of tag * exp
   | `Set of exp list
   (* eliminations *)
   | `App of exp * exp

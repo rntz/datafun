@@ -50,13 +50,14 @@ let rec elabPat: loc -> cx ref -> tone -> tp -> pat -> IL.pat =
      `Tag(n, elabPat loc cx tone tp p)
   | `Tag _, _ -> fail()
 
-let rec elab: cx -> expect -> expr -> tp * IL.exp =
+let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
   fun cx expect (loc, exp) ->
   let fail msg = raise (TypeError (loc, msg)) in
   let unroll tpname = try find_type cx tpname
                       with Not_found -> fail "type not defined" in
-  let infer = elab cx None in
-  let check tp = elab cx (Some tp) in
+  let infer = elabExp cx None in
+  let check tp = elabExp cx (Some tp) in
+  let checkAt tp e = snd (check tp e) in
   let needType () = match expect with
     | None -> fail "I can't infer the type here; could you annotate it for me?"
     | Some tp -> tp in
@@ -81,13 +82,25 @@ let rec elab: cx -> expect -> expr -> tp * IL.exp =
   (* for now, Lub is checking-only *)
   | `Lub es ->
      let tp = needType() in
-     (tp, `Lub (IL.semilattice unroll tp, List.map (snd <@ check tp) es))
+     (tp, `Lub (IL.semilattice unroll tp, List.map (checkAt tp) es))
 
   | `Fix (pat, body) -> todo()
 
-  | `Let (ds, body) -> todo()
+  | `Let (decls, body) ->
+     let cx = ref cx in
+     let bindings = elabDecls `Id loc cx decls in
+     let bind (p,e) body = `Let(p,e,body) in
+     let (tp, body) = elabExp !cx expect body in
+     (tp, List.fold_right bind bindings body)
 
-  | `Lam (ps, body) -> todo()
+  | `Lam(ps,body) ->
+     let cx = ref cx in
+     let rec lam ps tp = match ps, tp with
+       | [], _ -> checkAt tp body
+       | p::ps, `Fn(tone,a,b) -> let p = elabPat loc cx tone a p in
+                                 `Lam(p, lam ps b)
+       | p::ps, _ -> fail "too few arguments to lambda"
+     in checking (lam ps)
 
   | `Tuple es ->
      let (tps,es) = List.split **> match expect with
@@ -101,25 +114,45 @@ let rec elab: cx -> expect -> expr -> tp * IL.exp =
        | `Sum nts -> (try List.assoc n nts
                       with Not_found -> fail "tag not present in type")
        | _ -> fail "tagged expression must have sum type" in
-     let (xt,xe) = elab cx (Option.map get_type expect) x in
+     let (xt,xe) = elabExp cx (Option.map get_type expect) x in
      (Option.default (`Sum [n,xt]) expect, `Tag(n,xe))
 
   | `Set es ->
      let f = function `Set a -> a
                     | _ -> fail "set literal must have set type" in
-     let (tps, es) = List.split (List.map (elab cx Option.(expect => f)) es) in
-     (match expect, tps with
-      | Some tp, _ -> tp
-      | None, [] -> fail "cannot infer type of empty set literal"
-      | None, tp::tps -> `Set (List.fold_left (Type.join unroll) tp tps)),
-     `Set es
+     let (tps, es) = List.split (List.map (elabExp cx Option.(expect => f)) es)
+     in (match expect, tps with
+         | Some tp, _ -> tp
+         | None, [] -> fail "cannot infer type of empty set literal"
+         | None, tp::tps -> `Set (List.fold_left (Type.join unroll) tp tps)),
+        `Set es
 
   | `App (x,y) ->
      let (tone, a, b, xe) = match infer x with
        | `Fn(tone,a,b), xe -> (tone,a,b,xe)
        | _ -> fail "applying non-function" in
-     let (_, ye) = elab (withTone tone cx) (Some a) y in
+     let (_, ye) = elabExp (withTone tone cx) (Some a) y in
      synthesize (b, `App(xe,ye))
 
   | `For (comps, body) -> todo()
-  | `Case (subj, arms) -> todo()
+
+  | `Case (subj, arms) ->
+     let (subjt, subje) = elabExp (withTone `Iso cx) None subj in
+     todo()
+
+and elabDecls: tone -> loc -> cx ref -> expr decl list -> (IL.pat * IL.exp) list =
+  fun defaultTone loc cx decls ->
+  Lists.(decls >>= elabDecl defaultTone loc cx)
+
+and elabDecl: tone -> loc -> cx ref -> expr decl -> (IL.pat * IL.exp) list =
+  fun defaultTone loc cx decl ->
+  match decl with
+  (* TODO: check well-formedness of type! *)
+  | Type (name, tp) ->
+     cx := {!cx with types = Cx.add name tp !cx.types};
+     []
+
+  | Def (pat, tone, tp, exp) ->
+     let (tp, exp) = elabExp !cx tp exp in
+     let pat = elabPat loc cx (Option.default defaultTone tone) tp pat in
+     [pat,exp]
