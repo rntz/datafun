@@ -15,6 +15,9 @@ module type VALUE = sig
     | Fn of (t -> t)
   val compare: t -> t -> int
   val eq: t -> t -> bool
+  val show: t -> string
+  val show_app: t -> string
+  val show_atom: t -> string
 end
 
 module rec Values: Set.S with type elt = Value.t = Set.Make(Value)
@@ -51,6 +54,23 @@ and Value : VALUE with type set = Values.t = struct
     | _, _ -> raise (Stuck "cannot compare those values")
 
   let eq x y = 0 = compare x y
+
+  let rec show: t -> string = function
+    | Tuple xs -> String.concat "," (Array.(map show_app xs |> to_list))
+    | e -> show_app e
+  and show_app = function
+    | Tag (n,x) -> Printf.sprintf "%s %s" n (show_atom x)
+    | e -> show_atom e
+  and show_atom = function
+    | Bool true -> "true"
+    | Bool false -> "false"
+    | Int i -> Printf.sprintf "%d" i
+    | Str s -> Printf.sprintf "%S" s
+    | Set xs ->
+       let f e strs = show_app e :: strs in
+       "{" ^ (Values.fold f xs [] |> String.concat ", ") ^ "}"
+    | Fn _ -> "<fn>"
+    | e -> "(" ^ show e ^ ")"
 end
 
 type value = Value.t
@@ -59,6 +79,7 @@ open Value
 (* Environments *)
 module Vars = Map.Make(String)
 type env = value Vars.t
+let emptyEnv = Vars.empty
 let lookup var env = Vars.find var env
 let extend var value env = Vars.add var value env
 

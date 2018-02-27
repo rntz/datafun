@@ -9,6 +9,8 @@ exception TypeError of loc * string
 type cx = {types: tp Cx.t; vars: (tone * tp) Cx.t}
 type expect = tp option
 
+let emptyCx: cx = {types = Cx.empty; vars = Cx.empty}
+
 let withTone tone cx =
   (* ugh, is there a cleaner way to do this? *)
   let f s = match tone with
