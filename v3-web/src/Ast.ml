@@ -325,6 +325,6 @@ module Exp = struct
     | `Lub [] -> "empty"
     | `Tuple [e] -> "(" ^ show_app e ^ ",)"
     | `Tuple [] -> "()"
-    | `Set es -> "{" ^ String.concat ", " (List.map show es) ^ "}"
+    | `Set es -> "{" ^ String.concat ", " (List.map show_app es) ^ "}"
     | _ -> "(" ^ show expr ^ ")"
 end
