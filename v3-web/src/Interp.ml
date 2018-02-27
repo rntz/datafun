@@ -10,7 +10,7 @@ module type VALUE = sig
     | Set of set
     | Tuple of t array
     | Tag of Ast.tag * t
-    | Func of (t -> t)
+    | Fn of (t -> t)
   val compare: t -> t -> int
   val eq: t -> t -> bool
 end
@@ -23,9 +23,9 @@ and Value : VALUE with type set = Values.t = struct
     | Set of set
     | Tuple of t array
     | Tag of Ast.tag * t
-    | Func of (t -> t)
+    | Fn of (t -> t)
 
-  (* We'll never actually end up comparing Funcs because Datafun's
+  (* We'll never actually end up comparing Fns because Datafun's
    * type system prohibits sets of non-first-order types.
    *
    * But we WILL end up comparing Sets, which means we can't use
@@ -60,14 +60,14 @@ type env = value list
 let rec zero: semilat -> value = function
   | `Bool -> Bool false
   | `Tuple ts -> Tuple Array.(of_list ts |> map zero)
-  | `Func s -> Func (fun _ -> zero s)
+  | `Func s -> Fn (fun _ -> zero s)
   | `Set -> Set Values.empty
 
 let rec join (x: value) (y: value): value = match x,y with
   | Bool x, Bool y -> Bool (x || y)
   | Tuple xs, Tuple ys -> Tuple (Array.map2 join xs ys)
   | Set x, Set y -> Set (Values.union x y)
-  | Func f, Func g -> Func (fun x -> join (f x) (g x))
+  | Fn f, Fn g -> Fn (fun x -> join (f x) (g x))
   | _ -> raise (Stuck "runtime type mismatch")
 
 let rec eval (env: env): exp -> value = function
@@ -82,13 +82,13 @@ let rec eval (env: env): exp -> value = function
                    if Value.eq x next then x else f next
      in f (eval env init)
   (* introductions *)
-  | `Lam(n,body) -> Func (fun arg -> eval (arg::env) body)
+  | `Lam(n,body) -> Fn (fun arg -> eval (arg::env) body)
   | `Tuple ts -> Tuple Array.(of_list ts |> map (eval env))
   | `Tag(n,e) -> Tag(n, eval env e)
   | `MkSet es -> Set (Values.of_list (List.map (eval env) es))
   (* eliminations *)
   | `App(e1,e2) -> (match eval env e1 with
-                    | Func f -> f (eval env e2)
+                    | Fn f -> f (eval env e2)
                     | _ -> raise (Stuck "applying non-function"))
   | `IfThenElse(cnd,thn,els) ->
      eval env (match eval env cnd with

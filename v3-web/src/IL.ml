@@ -25,15 +25,19 @@ and exp =
   | `Let of pat * exp * exp
   | `Lub of semilat * exp list | `Eq of equal * exp * exp
   (* Fix(how, x, step): fixed point of (\x.step) starting from init *)
-  | `Fix of fix * var * exp
+  | `Fix of fix * pat * exp
   (* introductions *)
   | `Lam of pat * exp | `Tuple of exp list | `Tag of tag * exp
   | `Set of exp list
   (* eliminations *)
   | `App of exp * exp
-  (* For(howToJoin, setExp, (x, bodyExp)) *)
-  | `For of semilat * exp * (var * exp)
+  (* For(howToJoin, comps, bodyExp) *)
+  | `For of semilat * comp list * exp
   | `Case of exp * (pat * exp) list ]
+
+and comp =
+  [ `When of exp
+  | `In of pat * exp ]
 
 exception NoEquality of Ast.tp
 let rec equal (unroll: string -> Ast.tp): Ast.tp -> equal = function
@@ -52,3 +56,11 @@ let rec semilattice (unroll: string -> Ast.tp): Ast.tp -> semilat = function
   | `Fn (_,_,b) -> `Fn (semilattice unroll b)
   | `Tuple ts -> `Tuple (List.map (semilattice unroll) ts)
   | `Sum _ | `Int | `Str as tp -> raise (NotSemilattice tp)
+
+exception NotFix of Ast.tp
+let rec fix (unroll: string -> Ast.tp): Ast.tp -> fix = function
+  | `Name n -> fix unroll (unroll n)
+  | `Bool -> `Bool
+  | `Set _ -> `Set
+  | `Tuple ts -> `Tuple (List.map (fix unroll) ts)
+  | `Fn _ | `Sum _ | `Int | `Str as tp -> raise (NotFix tp)

@@ -79,12 +79,18 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
 
   | `Prim p -> todo()
 
-  (* for now, Lub is checking-only *)
   | `Lub es ->
+     (* TODO: allow inferring lubs. *)
      let tp = needType() in
      (tp, `Lub (IL.semilattice unroll tp, List.map (checkAt tp) es))
 
-  | `Fix (pat, body) -> todo()
+  | `Fix (pat, body) ->
+     let tp = needType() in
+     let cx = ref cx in
+     (* TODO: check exhaustiveness *)
+     let pat = elabPat loc cx `Id tp pat in
+     let _, body = elabExp !cx (Some tp) body in
+     tp, `Fix (IL.fix unroll tp, pat, body)
 
   | `Let (decls, body) ->
      let cx = ref cx in
@@ -94,6 +100,7 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
      (tp, List.fold_right bind bindings body)
 
   | `Lam(ps,body) ->
+     (* TODO: check irrefutability *)
      let cx = ref cx in
      let rec lam ps tp = match ps, tp with
        | [], _ -> checkAt tp body
@@ -134,11 +141,41 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
      let (_, ye) = elabExp (withTone tone cx) (Some a) y in
      synthesize (b, `App(xe,ye))
 
-  | `For (comps, body) -> todo()
+  | `For (comps, body) ->
+     let cx, comps = elabComps loc cx comps in
+     let (bodyt, bodye) = elabExp cx expect body in
+     (try bodyt, `For (IL.semilattice unroll bodyt, comps, bodye)
+      with IL.NotSemilattice _ -> fail "comprehension at non-semilattice type")
 
+  (* NB. only discrete `Case is allowed for now. *)
   | `Case (subj, arms) ->
+     (* TODO: exhaustiveness checking *)
      let (subjt, subje) = elabExp (withTone `Iso cx) None subj in
-     todo()
+     (* TODO: allow inferring `Case expressions *)
+     let tp = needType() in
+     let doArm (pat,exp) =
+       let cx = ref cx in
+       let pat = elabPat loc cx `Iso subjt pat in
+       (pat, snd (elabExp !cx (Some tp) exp))
+     in tp, `Case (subje, List.map doArm arms)
+
+and elabComps (loc: loc) (cx: cx) (comps: expr comp list): cx * IL.comp list =
+  let cx = ref cx in
+  let comps = List.map (elabComp loc cx) comps in
+  !cx, comps
+
+and elabComp: loc -> cx ref -> expr comp -> IL.comp =
+  fun loc cx comp ->
+  let fail msg = raise (TypeError (loc, msg)) in
+  match comp with
+  | When x -> let (_, e) = elabExp !cx (Some `Bool) x in `When e
+  | In (p, x) ->
+     let (elemt, xe) = match elabExp !cx None x with
+       | `Set a, xe -> a,xe
+       | _, _ -> fail "for-loop over something that isn't a set" in
+     (* TODO: check irrefutability. *)
+     let p = elabPat loc cx `Iso elemt p in
+     `In (p, xe)
 
 and elabDecls: tone -> loc -> cx ref -> expr decl list -> (IL.pat * IL.exp) list =
   fun defaultTone loc cx decls ->
