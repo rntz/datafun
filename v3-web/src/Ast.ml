@@ -17,9 +17,15 @@ module Tone = struct
   let show: tone -> string = function
     | `Id -> "id" | `Op -> "op" | `Iso -> "iso" | `Path -> "path"
 
+  (* TODO: factor out the repetition in meet, join, (<=) *)
   let meet (a: tone) (b: tone): tone = match a, b with
     | `Iso, _ | _, `Iso | `Id, `Op | `Op, `Id -> `Iso
     | x, `Path | `Path, x -> x
+    | `Id, `Id | `Op, `Op -> a
+
+  let join (a: tone) (b: tone): tone = match a, b with
+    | _, `Path | `Path, _ | `Id, `Op | `Op, `Id -> `Path
+    | `Iso, x | x, `Iso -> x
     | `Id, `Id | `Op, `Op -> a
 
   let (<=) (a: tone) (b: tone): bool = match a,b with
@@ -106,8 +112,11 @@ module Type = struct
     (* congruence rules *)
     | #base, #base -> if tp1 = tp2 then tp1 else fail ""
     | `Set a, `Set b -> `Set (recur a b)
-    | `Fn(s,a1,b1), `Fn(t,a2,b2) when s = t ->
-       `Fn (s, recurOp a1 a2, recur b1 b2)
+    | `Fn(s,a1,b1), `Fn(t,a2,b2) ->
+       let combine = match how with
+         | `Meet -> Tone.join | `Join -> Tone.meet
+         | `Eq -> fun s t -> if s = t then s else fail "different tones"
+       in `Fn (combine s t, recurOp a1 a2, recur b1 b2)
     | `Tuple tps1, `Tuple tps2 ->
        (try `Tuple (List.map2 recur tps1 tps2)
         with Invalid_argument _ -> fail "these tuples have different lengths")
