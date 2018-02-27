@@ -20,7 +20,6 @@ type pat =
 
 and exp =
   [ lit
-  (* | `Stuck of string            (\* do we need this? *\) *)
   | `Var of var
   | `Let of pat * exp * exp
   | `Lub of semilat * exp list | `Eq of equal * exp * exp

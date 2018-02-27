@@ -1,7 +1,9 @@
 open Util
-open Backend
+open IL
 
 exception Stuck of string
+(* Internal error *)
+exception NoMatch
 
 module type VALUE = sig
   type set
@@ -54,13 +56,16 @@ end
 type value = Value.t
 open Value
 
-(* A stack of variables. *)
-type env = value list
+(* Environments *)
+module Vars = Map.Make(String)
+type env = value Vars.t
+let lookup var env = Vars.find var env
+let extend var value env = Vars.add var value env
 
 let rec zero: semilat -> value = function
   | `Bool -> Bool false
   | `Tuple ts -> Tuple Array.(of_list ts |> map zero)
-  | `Func s -> Fn (fun _ -> zero s)
+  | `Fn s -> Fn (fun _ -> zero s)
   | `Set -> Set Values.empty
 
 let rec join (x: value) (y: value): value = match x,y with
@@ -72,55 +77,64 @@ let rec join (x: value) (y: value): value = match x,y with
 
 let rec eval (env: env): exp -> value = function
   | `Bool b -> Bool b | `Int i -> Int i | `Str s -> Str s
-  | `Stuck msg -> raise (Stuck msg)
-  | `Var ix -> List.nth env ix
-  | `Let(x,e,body) -> eval (eval env e :: env) body
+  | `Var v -> lookup v env
+  | `Let(p,e,body) ->
+     eval (destruct env p (eval env e)) body
   | `Lub(how,es) -> List.(map (eval env) es |> fold_left join (zero how))
   | `Eq(_,e1,e2) -> Bool (Value.eq (eval env e1) (eval env e2))
-  | `Fix(init, x, step) ->
-     let rec f x = let next = eval (x::env) step in
-                   if Value.eq x next then x else f next
-     in f (eval env init)
+  | `Fix(fix, pat, step) ->
+     let rec iter x =
+       let next = eval (destruct env pat x) step in
+       if Value.eq x next then x else iter next
+     in iter (zero (fix :> semilat))
   (* introductions *)
-  | `Lam(n,body) -> Fn (fun arg -> eval (arg::env) body)
+  | `Lam(pat,body) -> Fn (fun arg -> eval (destruct env pat arg) body)
   | `Tuple ts -> Tuple Array.(of_list ts |> map (eval env))
   | `Tag(n,e) -> Tag(n, eval env e)
-  | `MkSet es -> Set (Values.of_list (List.map (eval env) es))
+  | `Set es -> Set (Values.of_list (List.map (eval env) es))
   (* eliminations *)
   | `App(e1,e2) -> (match eval env e1 with
                     | Fn f -> f (eval env e2)
                     | _ -> raise (Stuck "applying non-function"))
-  | `IfThenElse(cnd,thn,els) ->
-     eval env (match eval env cnd with
-               | Bool b -> if b then thn else els
-               | _ -> raise (Stuck "not a boolean"))
-  | `For(how, setExp, (x, bodyExp)) ->
-     let s = match eval env setExp with | Set vs -> vs
-                                        | _ -> raise (Stuck "not a set")
-     in Values.fold join s (zero how)
+  | `For(semilat, comps, body) ->
+     let accum = ref (zero semilat) in
+     let rec loop env = function
+       | [] -> accum := join !accum (eval env body)
+       | `When exp :: cs -> (match eval env exp with
+                             | Bool b -> if b then loop env cs else ()
+                             | _ -> raise (Stuck "runtime type error"))
+       | `In (pat, exp) :: cs ->
+          let visit elem = match matches env pat elem with
+            | Some env -> loop env cs
+            | None -> () in
+          Values.iter visit (match eval env exp with
+                             | Set es -> es
+                             | _ -> raise (Stuck "runtime type error"))
+     in loop env comps; !accum
   | `Case(subj, arms) ->
      let scrut = eval env subj in
      let rec examine = function
        | [] -> raise (Stuck "no pattern matched")
        | (pat, ifMatch) :: arms ->
-          (match matches env scrut pat with
+          (match matches env pat scrut with
            | Some new_env -> eval new_env ifMatch
            | None -> examine arms)
      in examine arms
 
-and matches (env: env) (scrut: value): pat -> env option = function
-  | `Wild -> Some env
-  | `Var x -> Some (scrut :: env)
-  | `Tuple ps ->
-     (match scrut with
-      | Tuple vs ->
-         let rec recur env i = function
-           | [] -> Some env
-           | p::ps -> (match matches env (Array.get vs i) p with
-                       | Some env' -> recur env' (i+1) ps
-                       | None -> None)
-         in recur env 0 ps
-      | _ -> None)
-  | `Tag(n,p) -> (match scrut with | Tag(m,v) when n = m -> matches env v p
-                                   | _ -> None)
-  | `Eq(_,exp) -> if Value.eq scrut (eval env exp) then Some env else None
+and destruct (env: env) (pat: pat) (subj: value): env =
+  try doMatch env pat subj
+  with NoMatch -> raise (Stuck "pattern failed to match")
+
+and matches (env: env) (pat: pat) (subj: value): env option =
+  try Some (doMatch env pat subj)
+  with NoMatch -> None
+
+and doMatch (env:env) (pat:pat) (subj: value) = match pat, subj with
+  | `Wild, _ -> env
+  | `Var v, _ -> extend v subj env
+  | `Tuple ps, Tuple xs ->
+     (try List.fold_left2 doMatch env ps (Array.to_list xs)
+      with Invalid_argument _ -> raise NoMatch)
+  | `Tag(n,p), Tag(m,x) -> if n == m then doMatch env p x else raise NoMatch
+  | `Eq(_,exp), _ -> if Value.eq subj (eval env exp) then env else raise NoMatch
+  | (`Tuple _ | `Tag _), _ -> raise (Stuck "type error in pattern match")
