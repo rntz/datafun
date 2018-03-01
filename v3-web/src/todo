@@ -1,17 +1,34 @@
-- make ExampleFinal generate tones as well, and see whether not using monads
-  is still cleaner.
+* figure out approach to shadowing & equality testing.
+  "everything checks for equality" is not workable,
+  leads to extremely unintuitive behavior.
 
-- write ExampleFinal with monads.
+* inference for
+  - lub
+  - case
 
-- see how difficult it is to set up ppx. can bucklescript work with ppx?
+* primitives:
+  - =, <=, >=
+  - in?
+  - +, -, *, /
 
+* irrefutability & exhaustiveness checking.
 
-the whole issue of equality and patterns and tonality could be simplified if I
-did a desugaring pass that rewrote nonlinear patterns into (pat * exp) "PAT when
-EXP" pairs.
+* consider using monads. an update monad would make various things easier.
+  how difficult is it to set up ppx? so I can use ppx_let.
+  ASK LEVI
+  can bucklescript work with ppx?
 
-but then how does (fn (x,x) => ...) desugar?
-it should probably error
-("nonlinear pattern used in irrefutable context", find better error message)
+* parse error messages.
+  - simplest way: error productions in DatafunParser.mly;
+    throw errors w/ useful messages.
 
-what about type error reporting?
+* better type error messages in Elab.ml.
+  - use loc in error reporting.
+
+* add loc annotations to pats, decls.
+
+* implement loading files at repl.
+
+* implement standalone repl executable.
+
+* [LONG TERM] figure out tone inference

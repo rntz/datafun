@@ -67,7 +67,8 @@ and Value : VALUE with type set = Values.t = struct
     | Str s -> Printf.sprintf "%S" s
     | Set xs ->
        let f e strs = show_app e :: strs in
-       "{" ^ (Values.fold f xs [] |> String.concat ", ") ^ "}"
+       (* List.rev so they're listed in ascending order *)
+       "{" ^ (Values.fold f xs [] |> List.rev |> String.concat ", ") ^ "}"
     | Fn _ -> "<fn>"
     | e -> "(" ^ show e ^ ")"
 end

@@ -64,6 +64,12 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
     | None -> (got, e)
     | Some want when Type.subtype unroll got want -> (want, e)
     | Some _want -> fail "inferred type not a subtype of expected type" in
+  let typejoin tps msg = match tps with
+    | [] -> fail msg
+    | tp::tps -> List.fold_left (Type.join unroll) tp tps in
+  let semilattice msg tp =
+    try IL.semilattice unroll tp
+    with IL.NotSemilattice _tp -> fail msg in
 
   match exp with
   | #lit as l -> synthesize (Lit.typeOf l, l)
@@ -78,9 +84,13 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
   | `Prim _p -> todo()
 
   | `Lub es ->
-     (* TODO: allow inferring lubs. *)
-     let tp = needType() in
-     (tp, `Lub (IL.semilattice unroll tp, List.map (snd <@ check tp) es))
+     let (tps, es) = List.(map (elabExp cx expect) es |> split) in
+     (* TODO: factor out what's shared between this & `Set. *)
+     let tp = match expect, tps with
+       | Some tp, _ -> tp
+       | None, tps -> typejoin tps "cannot infer type of empty or-expression" in
+     let msg = "or-expression must have semilattice type" in
+     (tp, `Lub (semilattice msg tp, es))
 
   | `Fix (pat, body) ->
      let tp = needType() in
@@ -124,12 +134,11 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
   | `Set es ->
      let f = function `Set a -> a
                     | _ -> fail "set literal must have set type" in
-     let (tps, es) = List.split (List.map (elabExp cx (Option.map f expect)) es)
-     in (match expect, tps with
-         | Some tp, _ -> tp
-         | None, [] -> fail "cannot infer type of empty set literal"
-         | None, tp::tps -> `Set (List.fold_left (Type.join unroll) tp tps)),
-        `Set es
+     let (tps, es) = List.(split (map (elabExp cx (Option.map f expect)) es)) in
+     let msg = "cannot infer type of empty set literal" in
+     (match expect, tps with Some tp, _ -> tp
+                           | None, tps -> `Set (typejoin tps msg)),
+     `Set es
 
   | `App (x,y) ->
      let (tone, a, b, xe) = match infer x with
@@ -141,8 +150,8 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
   | `For (comps, body) ->
      let cx, comps = elabComps loc cx comps in
      let (bodyt, bodye) = elabExp cx expect body in
-     (try bodyt, `For (IL.semilattice unroll bodyt, comps, bodye)
-      with IL.NotSemilattice _ -> fail "comprehension at non-semilattice type")
+     let msg = "comprehension at non-semilattice type" in
+     bodyt, `For (semilattice msg bodyt, comps, bodye)
 
   (* NB. only discrete `Case is allowed for now. *)
   | `Case (subj, arms) ->
@@ -153,7 +162,7 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
      let doArm (pat,exp) =
        let cx = ref cx in
        let pat = elabPat loc cx `Iso subjt pat in
-       (pat, snd (elabExp !cx (Some tp) exp))
+       (pat, snd (elabExp !cx expect exp))
      in tp, `Case (subje, List.map doArm arms)
 
 and elabComps (loc: loc) (cx: cx) (comps: comp list): cx * IL.comp list =
