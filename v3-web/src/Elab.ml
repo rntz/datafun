@@ -24,8 +24,8 @@ let find_type cx name = Dict.find name cx.types
 let rec elabPat: loc -> cx ref -> tone -> tp -> pat -> IL.pat =
   fun loc cx tone tp pat ->
   let fail () = raise (TypeError (loc, "bad type for pattern")) in
-  let unroll name = try find_type !cx name
-                    with Not_found -> fail() in
+  let unroll name = try find_type !cx name with
+                      Not_found -> fail() in
   match pat, tp with
   | #lit as l, tp -> if tp <> Lit.typeOf l then fail()
                      else `Eq (Lit.typeOf l, l)
