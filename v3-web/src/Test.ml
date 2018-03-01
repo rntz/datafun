@@ -7,10 +7,10 @@ type 'a test = ('a -> string) * (Lexing.lexbuf -> 'a)
 
 let pat = Pat.show, Parse.test_pat Lex.token
 let decls: decl list test =
-  (fun ds -> List.map Exp.show_decl ds |> String.concat " "),
+  (fun ds -> List.map Expr.show_decl ds |> String.concat " "),
   Parse.test_decls Lex.token
 let tp = Type.show, Parse.test_tp Lex.token
-let exp: expr test = Exp.show, Parse.test_exp Lex.token
+let exp: expr test = Expr.show, Parse.test_exp Lex.token
 let cmd: Repl.cmd test = Repl.Cmd.show, Parse.replcmd Lex.token
 
 let parse ((show,parse): 'a test) (input: string): 'a =

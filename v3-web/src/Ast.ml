@@ -212,7 +212,7 @@ and decl =
 
 
 (* ----- Traversing expressions ----- *)
-module Exp = struct
+module Expr = struct
   (* TODO: use Format module to write a pretty-printer.
    * https://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html *)
   let rec show ((_, e) as expr: expr): string = match e with

@@ -12,8 +12,8 @@ type cmd = [ `Expr of expr
 
 module Cmd = struct
   let show: cmd -> string = function
-    | `Expr e -> Exp.show e
-    | `Decls ds -> Exp.show_decls ds
+    | `Expr e -> Expr.show e
+    | `Decls ds -> Expr.show_decls ds
     | `Cmd s -> "%" ^ s
 end
 
