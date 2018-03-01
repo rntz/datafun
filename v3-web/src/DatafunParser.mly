@@ -45,6 +45,7 @@ replcmd:
 | decls SEMI { `Decls($1) }
 | exp SEMI { `Expr($1) }
 | PERCENT ID SEMI { `Cmd($2) }
+| EOF { `Cmd("quit") }
 
 /* ---------- Types ---------- */
 test_tp: tp EOF { $1 }
