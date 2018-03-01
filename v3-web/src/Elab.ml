@@ -56,7 +56,6 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
                       with Not_found -> fail "type not defined" in
   let infer = elabExp cx None in
   let check tp = elabExp cx (Some tp) in
-  let checkAt tp e = snd (check tp e) in
   let needType () = match expect with
     | None -> fail "I can't infer the type here; could you annotate it for me?"
     | Some tp -> tp in
@@ -70,7 +69,7 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
   | #lit as l -> synthesize (Lit.typeOf l, l)
   | `Var v ->
      let (tone, tp) = try Dict.find v cx.vars
-                      with Not_found -> fail "unbound variable" in
+                      with Not_found -> fail ("unbound variable " ^ v) in
      if Tone.(tone <= `Id) then synthesize (tp, `Var v)
      else fail "I can't be sure that your use of this variable is safe"
 
@@ -81,7 +80,7 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
   | `Lub es ->
      (* TODO: allow inferring lubs. *)
      let tp = needType() in
-     (tp, `Lub (IL.semilattice unroll tp, List.map (checkAt tp) es))
+     (tp, `Lub (IL.semilattice unroll tp, List.map (snd <@ check tp) es))
 
   | `Fix (pat, body) ->
      let tp = needType() in
@@ -101,7 +100,7 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
      (* TODO: check irrefutability *)
      let cx = ref cx in
      let rec lam ps tp = match ps, tp with
-       | [], _ -> checkAt tp body
+       | [], _ -> snd (elabExp !cx (Some tp) body)
        | p::ps, `Fn(tone,a,b) -> let p = elabPat loc cx tone a p in
                                  `Lam(p, lam ps b)
        | _::_, _ -> fail "too few arguments to lambda"

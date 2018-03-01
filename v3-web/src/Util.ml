@@ -13,9 +13,9 @@ let id x = x
 let pair x y = (x,y)
 (* let apply (f,x) = f x *)
 let cons (x,xs) = x :: xs
-(* let compose f g x = f (g x)
- * let (<@) f g = compose f g
- * let (@>) g f = compose f g *)
+let compose f g x = f (g x)
+let (<@) f g = compose f g
+let (@>) g f = compose f g
 (* Like $ in haskell. Needs wonky name for right-associativity.
  * Apparently this is "@@" in the standard library since 4.01?
  * TODO: check that it's in bucklescript & use "@@" instead. *)
