@@ -189,6 +189,7 @@ type 'a comp = When of 'a | In of pat * 'a
 type 'a decl =
   | Type of var * tp
   | Def of pat * tone option * tp option * 'a
+  | Shadow of var list
 
 type 'a expF =
   [ lit
@@ -225,6 +226,9 @@ module Decl = struct
        let tone = Option.elim "" showTone tone in
        let tp = Option.elim "" (fun a -> ": " ^ Type.show a) tp in
        Printf.sprintf "def%s %s%s = %s" tone tp (Pat.show_atom p) (f x)
+    | Shadow vars -> "shadow " ^ String.concat " " vars
+
+  let show_list f decls = List.map (show f) decls |> String.concat " "
 end
 
 module Exp = struct

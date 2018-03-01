@@ -191,3 +191,7 @@ and elabDecl: loc -> cx ref -> tone -> expr decl -> (IL.pat * IL.exp) list =
      let (tp, exp) = elabExp !cx tp exp in
      let pat = elabPat loc cx (Option.default defaultTone tone) tp pat in
      [pat,exp]
+
+  | Shadow vars ->
+     cx := {!cx with vars = Dict.remove_all vars !cx.vars};
+     []

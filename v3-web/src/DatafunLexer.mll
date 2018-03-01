@@ -31,7 +31,7 @@ rule token = parse
   | "bool" {BASE `Bool} | "int" {BASE `Int} | "str" {BASE `Str}
 
   (* decl keywords *)
-  | "type" {TYPE} | "def" {DEF}
+  | "type" {TYPE} | "def" {DEF} | "shadow" {SHADOW}
 
   (* expression keywords *)
   | "the" {THE}

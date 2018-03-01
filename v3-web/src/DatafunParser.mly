@@ -9,7 +9,7 @@ let map f g (x,y) = Option.(x => f, y => g)
 PERCENT ARROW DBLARROW DBLARROWMINUS BAR LE LT GE GT EQ EQEQ RPAREN LPAREN
 RBRACE LBRACE RBRACK LBRACK
 /* keywords */ TYPE DEF THE LET IN END EMPTY OR FOR DO FIX AS FN CASE IF THEN
-ELSE
+ELSE SHADOW
 /* end of file */ EOF
 
 %token <Ast.base> BASE          /* base types */
@@ -75,6 +75,7 @@ decls: list(decl) {$1}
 decl:
 | TYPE ID EQ tp {Type($2,$4) }
 | DEF option(tone_char) pat_atom option(COLON tp {$2}) def_exp { Def($3,$2,$4,$5) }
+| SHADOW list(ID) { Shadow $2 }
 
 tone_char: PLUS { `Id } | DASH { `Op } | BANG { `Iso }
 
