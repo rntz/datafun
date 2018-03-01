@@ -41,8 +41,10 @@ let repl ?repl:(repl=top) () =
   let rec loop () =
     Printf.printf "> %!";
     (* TODO: catch parse errors and display them usefully. *)
-    let cmd = read () in
-    let continue = try Repl.perform repl cmd; true
-                   with Repl.Quit -> false
+    let continue =
+      try Repl.perform repl (read ()); true
+      with Repl.Quit -> false
+         | Parse.Error ->
+            print_endline "Sorry, I don't know how to parse that."; true
     in if continue then loop() else ()
   in loop ()
