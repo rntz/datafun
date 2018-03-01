@@ -77,11 +77,10 @@ type value = Value.t
 open Value
 
 (* Environments *)
-module Vars = Map.Make(String)
-type env = value Vars.t
-let emptyEnv = Vars.empty
-let lookup var env = Vars.find var env
-let extend var value env = Vars.add var value env
+type env = value Dict.t
+let emptyEnv = Dict.empty
+let lookup var env = Dict.find var env
+let extend var value env = Dict.add var value env
 
 let rec zero: semilat -> value = function
   | `Bool -> Bool false

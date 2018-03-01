@@ -96,7 +96,6 @@ module Type = struct
    * eg. a sum type & a product type.
    *)
   exception Incompatible of string * how * tp * tp
-  module StringMap = Map.Make(String)
 
   let rec merge (unroll: var -> tp) (how: how) (tp1: tp) (tp2: tp): tp =
     let fail msg = raise (Incompatible (msg, how, tp1, tp2)) in
@@ -123,8 +122,6 @@ module Type = struct
     (* oh god sums *)
     | `Sum tps1, `Sum tps2 ->
        (* tag-set union if `Join, intersection if `Meet, equality if `Eq *)
-       let open StringMap in
-       let toMap = List.fold_left (fun map (tag,tp) -> add tag tp map) empty in
        let combine tag a b = match a,b with
          | Some a, Some b -> Some (recur a b)
          | None, None -> None
@@ -134,7 +131,7 @@ module Type = struct
                            ^ " is present in one type but not the other")
             | `Join -> Some tp   (* union *)
             | `Meet -> None      (* intersection *)
-       in `Sum (bindings (StringMap.merge combine (toMap tps1) (toMap tps2)))
+       in `Sum Dict.(bindings (merge combine (of_list tps1) (of_list tps2)))
 
     (* all rules tried, no solution found *)
     | _, _ -> fail ""

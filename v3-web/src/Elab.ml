@@ -2,14 +2,12 @@ open Sigs
 open Util
 open Ast
 
-module Cx = Map.Make(String)
-
 exception TypeError of loc * string
 
-type cx = {types: tp Cx.t; vars: (tone * tp) Cx.t}
+type cx = {types: tp Dict.t; vars: (tone * tp) Dict.t}
 type expect = tp option
 
-let emptyCx: cx = {types = Cx.empty; vars = Cx.empty}
+let emptyCx: cx = {types = Dict.empty; vars = Dict.empty}
 
 let withTone tone cx =
   (* ugh, is there a cleaner way to do this? *)
@@ -18,9 +16,9 @@ let withTone tone cx =
     | `Op -> Tone.(s * `Op)
     | `Iso -> Tone.(s * `Path)
     | `Path -> raise (Bug "this should never happen")
-  in {cx with vars = Cx.map (fun (tone,tp) -> (f tone, tp)) cx.vars}
+  in {cx with vars = Dict.map (fun (tone,tp) -> (f tone, tp)) cx.vars}
 
-let find_type cx name = Cx.find name cx.types
+let find_type cx name = Dict.find name cx.types
 
 (* if I ever add disjunction/conjunction patterns, modifying cx
  * in place will cause me trouble; I'll need to rewrite this. *)
@@ -34,8 +32,8 @@ let rec elabPat: loc -> cx ref -> tone -> tp -> pat -> IL.pat =
                      else `Eq (Lit.typeOf l, l)
   | `Wild, _ -> `Wild
   | `Var v, tp ->
-     begin match Cx.find_opt v !cx.vars with
-     | None -> cx := {!cx with vars = Cx.add v (tone, tp) !cx.vars}; `Var v
+     begin match Dict.find_opt v !cx.vars with
+     | None -> cx := {!cx with vars = Dict.add v (tone, tp) !cx.vars}; `Var v
      | Some (`Iso,tp) ->
         (try `Eq (IL.equal unroll tp, `Var v)
          with IL.NoEquality a -> fail())
@@ -72,7 +70,7 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
   match exp with
   | #lit as l -> synthesize (Lit.typeOf l, l)
   | `Var v ->
-     let (tone, tp) = try Cx.find v cx.vars
+     let (tone, tp) = try Dict.find v cx.vars
                       with Not_found -> fail "unbound variable" in
      if Tone.(tone <= `Id) then synthesize (tp, `Var v)
      else fail "I can't be sure that your use of this variable is safe"
@@ -188,7 +186,7 @@ and elabDecl: tone -> loc -> cx ref -> expr decl -> (IL.pat * IL.exp) list =
   match decl with
   (* TODO: check well-formedness of type! *)
   | Type (name, tp) ->
-     cx := {!cx with types = Cx.add name tp !cx.types};
+     cx := {!cx with types = Dict.add name tp !cx.types};
      []
 
   | Def (pat, tone, tp, exp) ->
