@@ -31,7 +31,9 @@ let tryPerform repl: cmd -> unit = function
      let patexps = Elab.elabDecls dummy_loc cx `Iso decls in
      let new_env = Interp.evalDecls repl.env patexps in
      (* TODO: It would be nice to print a list of the vars bound
-      * & their types. *)
+      * & their types. unfortunately, "shadow" complicates this.
+      * if we used an update/writer monad, this would be easy. argh.
+      *)
      (* swap in the changes atomically; if elaboration succeeds but
       * evaluation errors, we shouldn't update the context. *)
      repl.cx <- !cx; repl.env <- new_env
