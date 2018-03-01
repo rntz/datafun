@@ -93,7 +93,7 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
 
   | `Let (decls, body) ->
      let cx = ref cx in
-     let decls = elabDecls `Id loc cx decls in
+     let decls = elabDecls loc cx `Id decls in
      let (tp, body) = elabExp !cx expect body in
      (tp, `Let(decls, body))
 
@@ -175,12 +175,12 @@ and elabComp: loc -> cx ref -> expr comp -> IL.comp =
      let p = elabPat loc cx `Iso elemt p in
      `In (p, xe)
 
-and elabDecls: tone -> loc -> cx ref -> expr decl list -> (IL.pat * IL.exp) list =
-  fun defaultTone loc cx decls ->
-  Lists.(decls >>= elabDecl defaultTone loc cx)
+and elabDecls: loc -> cx ref -> tone -> expr decl list -> (IL.pat * IL.exp) list =
+  fun loc cx defaultTone decls ->
+  Lists.(decls >>= elabDecl loc cx defaultTone)
 
-and elabDecl: tone -> loc -> cx ref -> expr decl -> (IL.pat * IL.exp) list =
-  fun defaultTone loc cx decl ->
+and elabDecl: loc -> cx ref -> tone -> expr decl -> (IL.pat * IL.exp) list =
+  fun loc cx defaultTone decl ->
   match decl with
   (* TODO: check well-formedness of type! *)
   | Type (name, tp) ->

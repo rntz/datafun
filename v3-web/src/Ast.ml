@@ -9,6 +9,8 @@ module Var = struct let show x = x end
 module Tag = struct let show n = n end
 module Prim = struct let show p = p end
 
+let dummy_loc = Lexing.(dummy_pos, dummy_pos)
+
 
 (* ----- Tones ----- *)
 type tone = [`Id | `Op | `Iso | `Path]
