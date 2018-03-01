@@ -1,7 +1,7 @@
 .PHONY: all repl clean sparkling remake FORCE
 
 all: FORCE
-	jbuilder build datafun.cma
+	jbuilder build --dev datafun.cma
 
 repl: FORCE
 	jbuilder utop .
