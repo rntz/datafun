@@ -1,7 +1,7 @@
 %{
 open Util
 open Ast
-let map f g (x,y) = (Option.map f x, Option.map g y)
+let map f g (x,y) = Option.(x => f, y => g)
 %}
 
 %token
@@ -127,7 +127,7 @@ pe_infix: pe_app {$1}
 | patexp_app nonempty_list(COMMA patexp_app {$2})
   { let (xs,ys) = List.split ($1::$2) in
     let tuple x = `Tuple x in   (* we need let-generalization here *)
-    map tuple tuple (Option.list xs, Option.list ys) }
+    map tuple tuple Option.(list xs, list ys) }
 /* expressions only */
 | ioption(OR) exp_app nonempty_list(OR exp_app {$2})
   { None, Some (`Lub ($2::$3)) }

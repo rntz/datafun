@@ -1,9 +1,9 @@
 open Sigs
 
+exception Bug of string
 exception TODO
 let todo() = raise TODO
-
-exception Bug of string
+let bug msg = raise (Bug msg)
 
 let id x = x
 let const x _y = x

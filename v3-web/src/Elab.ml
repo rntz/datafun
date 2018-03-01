@@ -14,7 +14,7 @@ let withTone tone cx =
     | `Id -> s
     | `Op -> Tone.(s * `Op)
     | `Iso -> Tone.(s * `Path)
-    | `Path -> raise (Bug "this should never happen")
+    | `Path -> bug "this should never happen"
   in {cx with vars = Dict.map (fun (tone,tp) -> (f tone, tp)) cx.vars}
 
 let find_type cx name = Dict.find name cx.types
@@ -120,13 +120,13 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
        | `Sum nts -> (try List.assoc n nts
                       with Not_found -> fail "tag not present in type")
        | _ -> fail "tagged expression must have sum type" in
-     let (xt,xe) = elabExp cx (Option.map get_type expect) x in
+     let (xt,xe) = elabExp cx Option.(expect => get_type) x in
      (Option.default (`Sum [n,xt]) expect, `Tag(n,xe))
 
   | `Set es ->
      let f = function `Set a -> a
                     | _ -> fail "set literal must have set type" in
-     let (tps, es) = List.split (List.map (elabExp cx Option.(expect => f)) es)
+     let (tps, es) = List.split (List.map (elabExp cx (Option.map f expect)) es)
      in (match expect, tps with
          | Some tp, _ -> tp
          | None, [] -> fail "cannot infer type of empty set literal"
