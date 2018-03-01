@@ -5,6 +5,7 @@ all: FORCE
 
 repl: FORCE
 	jbuilder utop .
+	# opam config exec -- jbuilder utop .
 
 clean:
 
