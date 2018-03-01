@@ -4,10 +4,8 @@ open Util
 type loc = Lexing.position * Lexing.position
 type var = string
 type tag = string
-type prim = string
 module Var = struct let show x = x end
 module Tag = struct let show n = n end
-module Prim = struct let show p = p end
 
 let dummy_loc = Lexing.(dummy_pos, dummy_pos)
 
@@ -190,7 +188,7 @@ and exp =
   [ lit
   | `Var of var
   | `The of tp * expr              (* type annotation *)
-  | `Prim of prim                (* builtin functions *)
+  | `Prim of Prim.prim             (* builtin functions *)
   | `Lub of expr list
   | `Fix of pat * expr
   | `Let of decl list * expr
