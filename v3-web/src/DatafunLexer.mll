@@ -1,5 +1,4 @@
 {
-  open Ast
   open DatafunParser
 }
 let comment = "#" [^'\n']* "\n"

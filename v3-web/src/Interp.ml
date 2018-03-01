@@ -1,4 +1,3 @@
-open Util
 open IL
 
 exception Stuck of string

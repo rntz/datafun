@@ -6,7 +6,7 @@ let todo() = raise TODO
 exception Bug of string
 
 let id x = x
-let const x y = x
+let const x _y = x
 let curry f x y = f (x,y)
 let uncurry f (x,y) = f x y
 let flip f x y = f y x
@@ -48,7 +48,7 @@ module Monad(M: MONADIC): MONAD with type 'a t = 'a M.t = struct
 end
 
 (* The identity monad. More useful in OCaml than it is in Haskell. *)
-module Identity = Monad(struct type 'a t = 'a let pure = id let map = id let (>>=) = (|>) end)
+module Identity = Monad(struct type 'a t = 'a let pure = id let (>>=) = (|>) end)
 
 
 (* Traversables *)

@@ -1,5 +1,3 @@
-open Sigs
-open Util
 open Ast
 
 type equal =

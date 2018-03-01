@@ -1,4 +1,3 @@
-open Sigs
 open Util
 open Ast
 
@@ -36,8 +35,8 @@ let rec elabPat: loc -> cx ref -> tone -> tp -> pat -> IL.pat =
      | None -> cx := {!cx with vars = Dict.add v (tone, tp) !cx.vars}; `Var v
      | Some (`Iso,tp) ->
         (try `Eq (IL.equal unroll tp, `Var v)
-         with IL.NoEquality a -> fail())
-     | Some (_, tp) -> fail()
+         with IL.NoEquality _ -> fail())
+     | Some (_, _) -> fail()
      end
   (* tuples *)
   | `Tuple ps, `Tuple tps ->
@@ -64,8 +63,8 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
   let checking f = let t = needType() in (t, f t) in
   let synthesize (got, e) = match expect with
     | None -> (got, e)
-    | Some want when Type.(got <= want) -> (want, e)
-    | Some want -> fail "inferred type not a subtype of expected type" in
+    | Some want when Type.subtype unroll got want -> (want, e)
+    | Some _want -> fail "inferred type not a subtype of expected type" in
 
   match exp with
   | #lit as l -> synthesize (Lit.typeOf l, l)
@@ -77,7 +76,7 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
 
   | `The (tp, e) -> synthesize (check tp e)
 
-  | `Prim p -> todo()
+  | `Prim _p -> todo()
 
   | `Lub es ->
      (* TODO: allow inferring lubs. *)
@@ -106,7 +105,7 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
        | [], _ -> checkAt tp body
        | p::ps, `Fn(tone,a,b) -> let p = elabPat loc cx tone a p in
                                  `Lam(p, lam ps b)
-       | p::ps, _ -> fail "too few arguments to lambda"
+       | _::_, _ -> fail "too few arguments to lambda"
      in checking (lam ps)
 
   | `Tuple es ->
