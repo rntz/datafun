@@ -1,3 +1,11 @@
+* do well-formedness checking!
+  otherwise
+
+      def map: (xyz -> xyz) -> {xyz} => {xyz}
+      fn f a => {f x | x in a};
+
+  typechecks!
+
 * figure out approach to shadowing & equality testing.
   "everything checks for equality" is not workable,
   leads to extremely unintuitive behavior.

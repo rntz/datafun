@@ -34,14 +34,14 @@ let rec elabPat: loc -> cx ref -> tone -> tp -> pat -> IL.pat =
      begin match Dict.find_opt v !cx.vars with
      | None -> cx := {!cx with vars = Dict.add v (tone, tp) !cx.vars}; `Var v
      | Some (`Iso,tp) ->
-        (try `Eq (IL.equal unroll tp, `Var v)
-         with IL.NoEquality _ -> fail())
+        (try `Eq (IL.equal unroll tp, `Var v) with
+           IL.NoEquality _ -> fail())
      | Some (_, _) -> fail()
      end
   (* tuples *)
   | `Tuple ps, `Tuple tps ->
-     `Tuple (try List.map2 (elabPat loc cx tone) tps ps
-             with Invalid_argument _ -> fail())
+     `Tuple (try List.map2 (elabPat loc cx tone) tps ps with
+               Invalid_argument _ -> fail())
   | `Tuple _, _ -> fail()
   (* sums *)
   | `Tag(n,p), `Sum tps ->
@@ -52,8 +52,8 @@ let rec elabPat: loc -> cx ref -> tone -> tp -> pat -> IL.pat =
 let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
   fun cx expect (loc, exp) ->
   let fail msg = raise (TypeError (loc, msg)) in
-  let unroll tpname = try find_type cx tpname
-                      with Not_found -> fail "type not defined" in
+  let unroll tpname = try find_type cx tpname with
+                        Not_found -> fail ("type not defined: " ^ tpname) in
   let infer = elabExp cx None in
   let check tp = elabExp cx (Some tp) in
   let needType () = match expect with
@@ -68,20 +68,36 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
     | [] -> fail msg
     | tp::tps -> List.fold_left (Type.join unroll) tp tps in
   let semilattice msg tp =
-    try IL.semilattice unroll tp
-    with IL.NotSemilattice _tp -> fail msg in
+    try IL.semilattice unroll tp with
+      IL.NotSemilattice _tp -> fail msg in
 
   match exp with
   | #lit as l -> synthesize (Lit.typeOf l, l)
   | `Var v ->
-     let (tone, tp) = try Dict.find v cx.vars
-                      with Not_found -> fail ("unbound variable " ^ v) in
+     let (tone, tp) = try Dict.find v cx.vars with
+                        Not_found -> fail ("unbound variable " ^ v) in
      if Tone.(tone <= `Id) then synthesize (tp, `Var v)
      else fail "I can't be sure that your use of this variable is safe"
 
   | `The (tp, e) -> synthesize (check tp e)
 
+  (* -- primitives -- *)
+  | `App ((_, `Prim (#Prim.cmp as op)), arg) ->
+     let (s,t) = Prim.tone op in
+     let (tp, arg) = elabExp (withTone s cx) None arg in
+     (try ignore (IL.equal unroll tp) with
+        IL.NoEquality _ -> fail "not an equality type");
+     synthesize (`Fn(t, tp, `Bool), `App (`Prim op, arg))
+
+  | `App ((_, `Prim `ElemOf), _arg) -> todo()
+
+  | `Prim `Not -> synthesize (`Fn(`Op, `Bool, `Bool), `Prim `Not)
+  | `Prim (#Prim.arith as op) ->
+     let (s, t) = Prim.tone op in
+     synthesize (`Fn(s, `Int, `Fn(t, `Int, `Int)), `Prim op)
+
   | `Prim _p -> todo()
+  (* -- end primitives -- *)
 
   | `Lub es ->
      let (tps, es) = List.(map (elabExp cx expect) es |> split) in
@@ -125,8 +141,8 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
 
   | `Tag (n,x) ->
      let get_type = function
-       | `Sum nts -> (try List.assoc n nts
-                      with Not_found -> fail "tag not present in type")
+       | `Sum nts -> (try List.assoc n nts with
+                        Not_found -> fail "tag not present in type")
        | _ -> fail "tagged expression must have sum type" in
      let (xt,xe) = elabExp cx Option.(expect => get_type) x in
      (Option.default (`Sum [n,xt]) expect, `Tag(n,xe))

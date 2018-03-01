@@ -1,0 +1,37 @@
+> {"larry", "curly", "moe"};
+{"curly", "larry", "moe"} : {str}
+
+> def nums = {1,2,3};
+> nums;
+{1, 2, 3} : {int}
+
+> {1,2,3} or {3,4,5};
+{1, 2, 3, 4, 5}
+
+> def map: (int -> int) -> {int} => {int}
+fn f a => {f x | x in a};
+
+> map (fn x => x + 1) {1,2,3};
+{2, 3, 4} : {int}
+
+> def intersect: {int} => {int} => {int}
+fn a b => {x | x in a, x in b};
+
+> intersect {1,2,3} {3,4,5};
+{3} : int
+
+> def edges = {("Tokyo", "SF"), ("SF", "NYC")};
+> edges;
+
+> def reachable = reachable as
+   edges
+or {(x,z) | (x,y) in reachable, (y,z) in reachable};
+Sorry, I can't typecheck that!
+Reason: ..
+
+> def reachable: {str, str} = reachable as
+edges
+or {(x,z) | (x,y) in reachable, (y,z) in reachable};
+
+> edges;
+> reachable;

@@ -27,6 +27,11 @@ ELSE SHADOW
 //
 %right CAPID UNDER LPAREN LITERAL LBRACE ID EMPTY
 
+// Operator precedence
+%left ASTERISK SLASH PERCENT
+%left PLUS DASH
+%nonassoc EQ LE LT GE GT
+
 /* ---------- Types for nonterminals ---------- */
 %start <unit> unused
 %start <Ast.tp> tp test_tp
@@ -141,6 +146,13 @@ pe_infix: pe_app {$1}
 /* expressions only */
 | ioption(OR) exp_app nonempty_list(OR exp_app {$2})
   { None, Some (`Lub ($2::$3)) }
+| exp_infix oper exp_infix
+    { let ann x = (($symbolstartpos, $endpos), x) in
+      None, Some (`App (ann (`App (ann (`Prim $2), $1)), $3)) }
+
+%inline oper:
+| PLUS {`Add} | DASH {`Sub} | ASTERISK {`Mul} | SLASH {`Div} | PERCENT {`Mod}
+| EQ {`EQ} | LE {`LE} | LT {`LT} | GE {`GE} | GT {`GT}
 
 pe_app: pe_atom {$1}
 | CAPID patexp_atom { map (fun x -> `Tag($1,x)) (fun x -> `Tag($1,x)) $2 }

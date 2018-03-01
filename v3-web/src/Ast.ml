@@ -4,42 +4,11 @@ open Util
 type loc = Lexing.position * Lexing.position
 type var = string
 type tag = string
+type tone = Tone.tone
 module Var = struct let show x = x end
 module Tag = struct let show n = n end
 
 let dummy_loc = Lexing.(dummy_pos, dummy_pos)
-
-
-(* ----- Tones ----- *)
-type tone = [`Id | `Op | `Iso | `Path]
-module Tone = struct
-  let show: tone -> string = function
-    | `Id -> "id" | `Op -> "op" | `Iso -> "iso" | `Path -> "path"
-
-  (* TODO: factor out the repetition in meet, join, (<=) *)
-  let meet (a: tone) (b: tone): tone = match a, b with
-    | `Iso, _ | _, `Iso | `Id, `Op | `Op, `Id -> `Iso
-    | x, `Path | `Path, x -> x
-    | `Id, `Id | `Op, `Op -> a
-
-  let join (a: tone) (b: tone): tone = match a, b with
-    | _, `Path | `Path, _ | `Id, `Op | `Op, `Id -> `Path
-    | `Iso, x | x, `Iso -> x
-    | `Id, `Id | `Op, `Op -> a
-
-  let (<=) (a: tone) (b: tone): bool = match a,b with
-    | `Iso, _ | _, `Path | `Id, `Id | `Op, `Op -> true
-    | _, `Iso | `Path, _ | `Op, `Id | `Id, `Op -> false
-
-  (* Order of composition is postfix: A^(compose s t) == (A^s)^t *)
-  let compose (a: tone) (b: tone): tone = match a,b with
-    | x, `Id | `Id, x -> x
-    | `Op, `Op -> `Id
-    | `Iso, _ | `Path, _ -> a   (* hi priority, must come first *)
-    | _, `Iso | _, `Path -> b   (* lo priority, comes later *)
-
-  let ( * ) = compose
-end
 
 
 (* ---------- Types ---------- *)
@@ -233,6 +202,7 @@ module Expr = struct
        in "case " ^ show_infix e ^ String.concat "| " (List.map show_branch pes)
     | _ -> show_infix expr
   and show_infix ((_,e) as expr: expr) = match e with
+    (* TODO: show applications of infix operators nicely *)
     | `Tuple (_::_::_ as es) -> List.map show_app es |> String.concat ", "
     | `Lub (_::_ as es) -> List.map (fun x -> "or " ^ show_app x) es |> String.concat " "
     | _ -> show_app expr

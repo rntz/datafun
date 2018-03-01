@@ -1,3 +1,4 @@
+open Util
 open IL
 
 exception Stuck of string
@@ -82,6 +83,27 @@ let emptyEnv = Dict.empty
 let lookup var env = Dict.find var env
 let extend var value env = Dict.add var value env
 
+let primitive: Prim.prim -> value =
+  let fun2 f = Fn (fun x -> Fn (fun y -> f x y)) in
+  let elemOf elem set = match set with
+    | Set set -> Bool (Values.mem elem set)
+    | _ -> stuck "not a set" in
+  let primNot = function Bool b -> Bool (not b)
+                       | _ -> stuck "not a boolean" in
+  let arith op x y = match op with
+    | `Add -> x+y | `Sub -> x-y | `Mul -> x*y | `Div -> x/y
+    | `Mod -> x mod y in
+  function
+  | `EQ -> fun2 (fun x y -> Bool (Value.eq x y))
+  (* TODO: LE, LT, GE, GT *)
+  | #Prim.cmp as _op -> fun2 (fun _x _y -> todo())
+  | #Prim.arith as op ->
+     fun2 (fun x y -> match x,y with
+                      | Int i, Int j -> Int (arith op i j)
+                      | _ -> stuck "not an integer")
+  | `Not -> Fn primNot
+  | `ElemOf -> fun2 elemOf
+
 let rec zero: semilat -> value = function
   | `Bool -> Bool false
   | `Tuple ts -> Tuple Array.(of_list ts |> map zero)
@@ -100,6 +122,7 @@ let rec eval (env: env): exp -> value = function
   | `Var v -> lookup v env
   | `Let(decls,body) -> eval (evalDecls env decls) body
   | `Lub(how,es) -> List.(map (eval env) es |> fold_left join (zero how))
+  | `Prim p -> primitive p
   (* | `Eq(_,e1,e2) -> Bool (Value.eq (eval env e1) (eval env e2)) *)
   | `Fix(fix, pat, step) ->
      let rec iter x =
