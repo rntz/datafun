@@ -236,13 +236,13 @@ module Exp = struct
    * https://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html *)
   let rec show ((_, e) as expr: 'a exp) = match e with
     | `The (a,x) -> "the " ^ Type.show_atom a ^ " " ^ show x
-    | `Fix (x,e) -> Pat.show_atom x ^ " as " ^ show e
+    | `Fix (x,e) -> Pat.show_app x ^ " as " ^ show e
     | `Let (ds,e) ->
        let show_decls = List.map (Decl.show show) in
        ["let"] @ show_decls ds @ ["in"; show e] |> String.concat " "
     (* introductions *)
     | `Lam (ps, e) ->
-       ["fn"] @ List.map Pat.show_atom ps @ ["->"; show e]
+       ["fn"] @ List.map Pat.show_atom ps @ ["=>"; show e]
        |> String.concat " "
     (* eliminations *)
     | `For (cs, e) ->

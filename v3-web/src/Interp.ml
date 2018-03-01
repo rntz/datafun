@@ -1,8 +1,8 @@
 open IL
 
 exception Stuck of string
-(* Internal error *)
-exception NoMatch
+exception NoMatch            (* internal error, should not escape this module *)
+let stuck msg = raise (Stuck msg)
 
 module type VALUE = sig
   type set
@@ -50,7 +50,7 @@ and Value : VALUE with type set = Values.t = struct
     | Tag (n,x), Tag (m,y)  ->
        let cmp1 = String.compare n m in
        if cmp1 <> 0 then cmp1 else compare x y
-    | _, _ -> raise (Stuck "cannot compare those values")
+    | _, _ -> stuck "cannot compare those values"
 
   let eq x y = 0 = compare x y
 
@@ -92,14 +92,14 @@ let rec join (x: value) (y: value): value = match x,y with
   | Tuple xs, Tuple ys -> Tuple (Array.map2 join xs ys)
   | Set x, Set y -> Set (Values.union x y)
   | Fn f, Fn g -> Fn (fun x -> join (f x) (g x))
-  | _ -> raise (Stuck "runtime type mismatch")
+  | _ -> stuck "runtime type mismatch"
 
 let rec eval (env: env): exp -> value = function
   | `Bool b -> Bool b | `Int i -> Int i | `Str s -> Str s
   | `Var v -> lookup v env
   | `Let(decls,body) -> eval (evalDecls env decls) body
   | `Lub(how,es) -> List.(map (eval env) es |> fold_left join (zero how))
-  | `Eq(_,e1,e2) -> Bool (Value.eq (eval env e1) (eval env e2))
+  (* | `Eq(_,e1,e2) -> Bool (Value.eq (eval env e1) (eval env e2)) *)
   | `Fix(fix, pat, step) ->
      let rec iter x =
        let next = eval (destruct env pat x) step in
@@ -113,26 +113,26 @@ let rec eval (env: env): exp -> value = function
   (* eliminations *)
   | `App(e1,e2) -> (match eval env e1 with
                     | Fn f -> f (eval env e2)
-                    | _ -> raise (Stuck "applying non-function"))
+                    | _ -> stuck "applying non-function")
   | `For(semilat, comps, body) ->
      let accum = ref (zero semilat) in
      let rec loop env = function
        | [] -> accum := join !accum (eval env body)
        | `When exp :: cs -> (match eval env exp with
                              | Bool b -> if b then loop env cs else ()
-                             | _ -> raise (Stuck "runtime type error"))
+                             | _ -> stuck "runtime type error")
        | `In (pat, exp) :: cs ->
           let visit elem = match matches env pat elem with
             | Some env -> loop env cs
             | None -> () in
           Values.iter visit (match eval env exp with
                              | Set es -> es
-                             | _ -> raise (Stuck "runtime type error"))
+                             | _ -> stuck "runtime type error")
      in loop env comps; !accum
   | `Case(subj, arms) ->
      let scrut = eval env subj in
      let rec examine = function
-       | [] -> raise (Stuck "no pattern matched")
+       | [] -> stuck "no pattern matched"
        | (pat, ifMatch) :: arms ->
           (match matches env pat scrut with
            | Some new_env -> eval new_env ifMatch
