@@ -55,7 +55,7 @@ and Value : VALUE with type set = Values.t = struct
   let eq x y = 0 = compare x y
 
   let rec show: t -> string = function
-    | Tuple xs -> String.concat "," (Array.(map show_app xs |> to_list))
+    | Tuple xs -> String.concat ", " (Array.(map show_app xs |> to_list))
     | e -> show_app e
   and show_app = function
     | Tag (n,x) -> Printf.sprintf "%s %s" n (show_atom x)
