@@ -1,4 +1,3 @@
-open Sigs
 open Util
 
 (* loc ::= (start_pos, end_pos) *)
@@ -215,30 +214,7 @@ type 'a expAlgebra = 'a expF -> 'a
 
 
 (* ----- Traversing expressions ----- *)
-module Comp = Traverse(struct
-  type 'a t = 'a comp
-  module Seq(M: IDIOM) = struct
-    open M
-    let traverse (f : 'a -> 'b M.t) : 'a comp -> 'b comp M.t = function
-      | When a -> map (fun x -> When x) (f a)
-      | In (p,a) -> map (fun x -> In (p,x)) (f a)
-  end
-end)
-
 module Decl = struct
-  include Traverse(struct
-    type 'a t = 'a decl
-    module Seq(M: IDIOM) = struct
-      open M
-      let traverse f = function
-        | Type(x,t) -> pure (Type(x,t))
-        | Def(p,s,t,e) -> map (fun x -> Def(p,s,t,x)) (f e)
-        (* | Ascribe(xs,t) -> pure (Ascribe(xs,t))
-         * | Define(x,args,body) -> map (fun body' -> Define(x, args, body')) (f body)
-         * | Decons(p,e) -> map (fun x -> Decons(p,x)) (f e) *)
-    end
-  end)
-
   let show (f: 'a -> string): 'a decl -> string = function
     | Type (v, tp) ->
        Printf.sprintf "type %s = %s" (Var.show v) (Type.show tp)
@@ -249,42 +225,7 @@ module Decl = struct
        Printf.sprintf "def%s %s%s = %s" tone tp (Pat.show_atom p) (f x)
 end
 
-module ExpT: TRAVERSABLE with type 'a t = 'a expF = struct
-  type 'a t = 'a expF
-  module Seq(M: IDIOM) = struct
-    open M
-    module DeclSeq = Decl.Seq(M)
-    module CompSeq = Comp.Seq(M)
-
-    (* I find myself wanting lenses. *)
-    let traverse (f: 'a -> 'b M.t) = function
-      | #lit as l -> pure l
-      | `Var x -> pure (`Var x)
-      | `The(t,e) -> f e => fun x -> `The (t, x)
-      | `Prim s -> pure (`Prim s)
-      | `Lub es -> forEach es f => fun x -> `Lub x
-      | `Fix (x,e) -> f e => fun e -> `Fix (x,e)
-      | `Let (ds, e) -> forEach ds (DeclSeq.traverse f) ** f e
-                        => fun(ds,e) -> `Let(ds,e)
-      (* introductions *)
-      | `Lam(x,e) -> f e => fun e -> `Lam (x, e)
-      | `Tuple es -> forEach es f => fun xs -> `Tuple xs
-      | `Tag(n,e) -> f e => fun e -> `Tag(n,e)
-      | `Set es -> forEach es f => fun xs -> `Set xs
-      (* eliminations *)
-      | `App (e1, e2) -> f e1 ** f e2 => fun (x,y) -> `App(x,y)
-      | `For (cs, e) ->
-         forEach cs (CompSeq.traverse f) ** f e
-         => fun (cs,e) -> `For(cs,e)
-      | `Case (e, arms) ->
-         f e ** forEach arms (fun(p,x) -> pure p ** f x)
-         => fun(e,arms) -> `Case(e,arms)
-  end
-end
-
 module Exp = struct
-  include Traverse(ExpT)
-
   (* TODO: use Format module to write a pretty-printer.
    * https://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html *)
   let rec show ((_, e) as expr: 'a exp) = match e with

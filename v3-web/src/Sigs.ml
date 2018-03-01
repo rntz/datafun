@@ -25,20 +25,20 @@ end
 module type IDIOM = sig
   include IDIOMATIC
   (* val apply: ('a -> 'b) t -> 'a t -> 'b t *)
-  val pair: 'a t * 'b t -> ('a * 'b) t
-  val option: 'a t option -> 'a option t
+  (* val pair: 'a t * 'b t -> ('a * 'b) t *)
+  (* val option: 'a t option -> 'a option t *)
   (* val result: ('a t, 'b) result -> ('a, 'b) result t *)
   val list: 'a t list -> 'a list t
-  val forEach: 'a list -> ('a -> 'b t) -> 'b list t
-  val (>>): 'a t -> 'b t -> 'b t
-  val (<*): 'a t -> 'b t -> 'a t
+  (* val forEach: 'a list -> ('a -> 'b t) -> 'b list t *)
+  (* val (>>): 'a t -> 'b t -> 'b t *)
+  (* val (<*\): 'a t -> 'b t -> 'a t *)
   val (=>): 'a t -> ('a -> 'b) -> 'b t
   (* should go in Functor, but whatever. *)
-  val ($): ('a -> 'b) -> 'a t -> 'b t
+  (* val ($): ('a -> 'b) -> 'a t -> 'b t *)
 
-  val onPair: ('a1 -> 'a2 t) -> ('b1 -> 'b2 t) -> 'a1 * 'b1 -> ('a2 * 'b2) t
-  val onFst: ('a1 -> 'a2 t) -> 'a1 * 'b -> ('a2 * 'b) t
-  val onSnd: ('b1 -> 'b2 t) -> 'a * 'b1 -> ('a * 'b2) t
+  (* val onPair: ('a1 -> 'a2 t) -> ('b1 -> 'b2 t) -> 'a1 * 'b1 -> ('a2 * 'b2) t *)
+  (* val onFst: ('a1 -> 'a2 t) -> 'a1 * 'b -> ('a2 * 'b) t *)
+  (* val onSnd: ('b1 -> 'b2 t) -> 'a * 'b1 -> ('a * 'b2) t *)
 end
 
 
@@ -53,21 +53,4 @@ module type MONAD = sig
   include MONADIC
   include IDIOM with type 'a t := 'a t
   val concat: 'a t t -> 'a t
-end
-
-
-(* Traversables. *)
-module type TRAVERSABLE = sig
-  type 'a t
-  module Seq(M: IDIOM): sig
-    val traverse: ('a -> 'b M.t) -> 'a t -> 'b t M.t
-  end
-end
-
-module type TRAVERSE = sig
-  include FUNCTOR
-  module Seq(M: IDIOM): sig
-    val traverse: ('a -> 'b M.t) -> 'a t -> 'b t M.t
-    val seq: 'a M.t t -> 'a t M.t
-  end
 end
