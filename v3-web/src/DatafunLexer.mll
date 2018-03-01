@@ -15,7 +15,7 @@ rule token = parse
   | "_" {UNDER}
   | "," {COMMA} | "." {DOT} | "!" {BANG}
   | ":" {COLON} | ";" {SEMI}
-  | "+" {PLUS}  | "-" {DASH} | "*" {ASTERISK} | "/" {SLASH}
+  | "+" {PLUS}  | "-" {DASH} | "*" {ASTERISK} | "/" {SLASH}  | "%" {PERCENT}
   | "->" {ARROW} | "=>" {DBLARROW} | "=>-" {DBLARROWMINUS}
   | "|" {BAR}
 

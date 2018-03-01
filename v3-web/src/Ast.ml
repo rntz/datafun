@@ -234,8 +234,8 @@ module Exp = struct
     | `The (a,x) -> "the " ^ Type.show_atom a ^ " " ^ show x
     | `Fix (x,e) -> Pat.show_atom x ^ " as " ^ show e
     | `Let (ds,e) ->
-       let show_decls = List.map (Decl.show show)
-       in ["let"] @ show_decls ds @ ["in"; show e] |> String.concat " "
+       let show_decls = List.map (Decl.show show) in
+       ["let"] @ show_decls ds @ ["in"; show e] |> String.concat " "
     (* introductions *)
     | `Lam (ps, e) ->
        ["fn"] @ List.map Pat.show_atom ps @ ["->"; show e]

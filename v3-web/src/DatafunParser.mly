@@ -5,9 +5,9 @@ let map f g (x,y) = Option.(x => f, y => g)
 %}
 
 %token
-/* punctuation */ DOT COMMA UNDER SEMI COLON BANG PLUS DASH ASTERISK SLASH ARROW
-DBLARROW DBLARROWMINUS BAR LE LT GE GT EQ EQEQ RPAREN LPAREN RBRACE LBRACE
-RBRACK LBRACK
+/* punctuation */ DOT COMMA UNDER SEMI COLON BANG PLUS DASH ASTERISK SLASH
+PERCENT ARROW DBLARROW DBLARROWMINUS BAR LE LT GE GT EQ EQEQ RPAREN LPAREN
+RBRACE LBRACE RBRACK LBRACK
 /* keywords */ TYPE DEF THE LET IN END EMPTY OR FOR DO FIX AS FN CASE IF THEN
 ELSE
 /* end of file */ EOF
@@ -34,10 +34,17 @@ ELSE
 %start <Ast.expr> exp test_exp
 %start <Ast.pat option * Ast.expr option> patexp test_patexp
 %start <Ast.expr Ast.decl list> decls test_decls
+%start <Repl.cmd> replcmd
 
 %%
 /* Argh. */
-unused: ASTERISK DASH DO DOT END EQEQ FIX GE GT LE LT PLUS SLASH {()};
+unused: ASTERISK DO DOT END EQEQ FIX GE GT LE LT SLASH {()};
+
+/* ---------- The repl ---------- */
+replcmd:
+| decls SEMI { `Decls($1) }
+| exp SEMI { `Expr($1) }
+| PERCENT ID SEMI { `Cmd($2) }
 
 /* ---------- Types ---------- */
 test_tp: tp EOF { $1 }
@@ -63,7 +70,8 @@ tp_atom:
 
 /* ---------- Decls ---------- */
 test_decls: decls EOF {$1}
-decls: SEMI* separated_list(SEMI*,decl) {$2}
+/* decls: SEMI* separated_list(SEMI*,decl) {$2} */
+decls: list(decl) {$1}
 decl:
 | TYPE ID EQ tp {Type($2,$4) }
 | DEF option(tone_char) pat_atom option(COLON tp {$2}) def_exp { Def($3,$2,$4,$5) }
