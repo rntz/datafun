@@ -156,12 +156,12 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
        (pat, snd (elabExp !cx (Some tp) exp))
      in tp, `Case (subje, List.map doArm arms)
 
-and elabComps (loc: loc) (cx: cx) (comps: expr comp list): cx * IL.comp list =
+and elabComps (loc: loc) (cx: cx) (comps: comp list): cx * IL.comp list =
   let cx = ref cx in
   let comps = List.map (elabComp loc cx) comps in
   !cx, comps
 
-and elabComp: loc -> cx ref -> expr comp -> IL.comp =
+and elabComp: loc -> cx ref -> comp -> IL.comp =
   fun loc cx comp ->
   let fail msg = raise (TypeError (loc, msg)) in
   match comp with
@@ -174,11 +174,11 @@ and elabComp: loc -> cx ref -> expr comp -> IL.comp =
      let p = elabPat loc cx `Iso elemt p in
      `In (p, xe)
 
-and elabDecls: loc -> cx ref -> tone -> expr decl list -> (IL.pat * IL.exp) list =
+and elabDecls: loc -> cx ref -> tone -> decl list -> (IL.pat * IL.exp) list =
   fun loc cx defaultTone decls ->
   Lists.(decls >>= elabDecl loc cx defaultTone)
 
-and elabDecl: loc -> cx ref -> tone -> expr decl -> (IL.pat * IL.exp) list =
+and elabDecl: loc -> cx ref -> tone -> decl -> (IL.pat * IL.exp) list =
   fun loc cx defaultTone decl ->
   match decl with
   (* TODO: check well-formedness of type! *)

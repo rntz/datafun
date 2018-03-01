@@ -185,61 +185,41 @@ end
 
 
 (* ---------- Expressions & declarations ---------- *)
-type 'a comp = When of 'a | In of pat * 'a
-type 'a decl =
-  | Type of var * tp
-  | Def of pat * tone option * tp option * 'a
-  | Shadow of var list
-
-type 'a expF =
+type expr = loc * exp
+and exp =
   [ lit
   | `Var of var
-  | `The of tp * 'a              (* type annotation *)
+  | `The of tp * expr              (* type annotation *)
   | `Prim of prim                (* builtin functions *)
-  | `Lub of 'a list
-  | `Fix of pat * 'a
-  | `Let of 'a decl list * 'a
+  | `Lub of expr list
+  | `Fix of pat * expr
+  | `Let of decl list * expr
   (* Introductions *)
-  | `Lam of pat list * 'a
-  | `Tuple of 'a list | `Tag of tag * 'a
-  | `Set of 'a list
+  | `Lam of pat list * expr
+  | `Tuple of expr list | `Tag of tag * expr
+  | `Set of expr list
   (* Eliminations *)
-  | `App of 'a * 'a
-  | `For of 'a comp list * 'a
+  | `App of expr * expr
+  | `For of comp list * expr
   (* (if M then N else O) is parsed as (case M of true => N | false => O) *)
-  | `Case of 'a * (pat * 'a) list ]
+  | `Case of expr * (pat * expr) list ]
 
-(* NB. An equirecursive type! *)
-type 'a exp = 'a * 'a exp expF
-type expr = loc exp
-
-type 'a expAlgebra = 'a expF -> 'a
+and comp = When of expr | In of pat * expr
+and decl =
+  | Type of var * tp
+  | Def of pat * tone option * tp option * expr
+  | Shadow of var list
 
 
 (* ----- Traversing expressions ----- *)
-module Decl = struct
-  let show (f: 'a -> string): 'a decl -> string = function
-    | Type (v, tp) ->
-       Printf.sprintf "type %s = %s" (Var.show v) (Type.show tp)
-    | Def (p, tone, tp, x) ->
-       let showTone = function `Id -> "+" | `Iso -> "!" | `Op -> "-" | `Path -> "~" in
-       let tone = Option.elim "" showTone tone in
-       let tp = Option.elim "" (fun a -> ": " ^ Type.show a) tp in
-       Printf.sprintf "def%s %s%s = %s" tone tp (Pat.show_atom p) (f x)
-    | Shadow vars -> "shadow " ^ String.concat " " vars
-
-  let show_list f decls = List.map (show f) decls |> String.concat " "
-end
-
 module Exp = struct
   (* TODO: use Format module to write a pretty-printer.
    * https://caml.inria.fr/pub/docs/manual-ocaml/libref/Format.html *)
-  let rec show ((_, e) as expr: 'a exp) = match e with
+  let rec show ((_, e) as expr: expr): string = match e with
     | `The (a,x) -> "the " ^ Type.show_atom a ^ " " ^ show x
     | `Fix (x,e) -> Pat.show_app x ^ " as " ^ show e
     | `Let (ds,e) ->
-       let show_decls = List.map (Decl.show show) in
-       ["let"] @ show_decls ds @ ["in"; show e] |> String.concat " "
+       ["let"] @ List.map show_decl ds @ ["in"; show e] |> String.concat " "
     (* introductions *)
     | `Lam (ps, e) ->
        ["fn"] @ List.map Pat.show_atom ps @ ["=>"; show e]
@@ -254,15 +234,15 @@ module Exp = struct
        let show_branch (p,e) = Pat.show p ^ " -> " ^ show_infix e
        in "case " ^ show_infix e ^ String.concat "| " (List.map show_branch pes)
     | _ -> show_infix expr
-  and show_infix ((_,e) as expr: 'a exp) = match e with
+  and show_infix ((_,e) as expr: expr) = match e with
     | `Tuple (_::_::_ as es) -> List.map show_app es |> String.concat ", "
     | `Lub (_::_ as es) -> List.map (fun x -> "or " ^ show_app x) es |> String.concat " "
     | _ -> show_app expr
-  and show_app ((_,e) as expr: 'a exp) = match e with
+  and show_app ((_,e) as expr: expr) = match e with
     | `App (e1,e2) -> show_app e1 ^ " " ^ show_atom e2
     | `Tag (n,e) -> Tag.show n ^ " " ^ show_atom e
     | _ -> show_atom expr
-  and show_atom ((_,e) as expr: 'a exp) = match e with
+  and show_atom ((_,e) as expr: expr) = match e with
     | #lit as l -> Lit.show l
     | `Var x -> Var.show x
     | `Prim p -> Prim.show p
@@ -271,4 +251,16 @@ module Exp = struct
     | `Tuple [] -> "()"
     | `Set es -> "{" ^ String.concat ", " (List.map show_app es) ^ "}"
     | _ -> "(" ^ show expr ^ ")"
+
+  and show_decl: decl -> string = function
+    | Type (v, tp) ->
+       Printf.sprintf "type %s = %s" (Var.show v) (Type.show tp)
+    | Def (p, tone, tp, x) ->
+       let showTone = function `Id -> "+" | `Iso -> "!" | `Op -> "-" | `Path -> "~" in
+       let tone = Option.elim "" showTone tone in
+       let tp = Option.elim "" (fun a -> ": " ^ Type.show a) tp in
+       Printf.sprintf "def%s %s%s = %s" tone tp (Pat.show_atom p) (show x)
+    | Shadow vars -> "shadow " ^ String.concat " " vars
+
+  and show_decls decls = List.map show_decl decls |> String.concat " "
 end

@@ -33,7 +33,7 @@ ELSE SHADOW
 %start <Ast.pat> pat test_pat
 %start <Ast.expr> exp test_exp
 %start <Ast.pat option * Ast.expr option> patexp test_patexp
-%start <Ast.expr Ast.decl list> decls test_decls
+%start <Ast.decl list> decls test_decls
 %start <Repl.cmd> replcmd
 
 %%
@@ -151,7 +151,7 @@ pe_atom:
 | CAPID { Some (`Tag ($1, `Tuple [])),
           Some (`Tag ($1, (($symbolstartpos,$endpos), `Tuple []))) }
 | ID        { Some (`Var $1), Some (`Var $1) }
-| LITERAL   { Some ($1 :> pat), Some ($1: lit :> expr expF) }
+| LITERAL   { Some ($1 :> pat), Some ($1: lit :> exp) }
 | LPAREN RPAREN { Some (`Tuple []), Some (`Tuple []) }
 | LPAREN patexp_app COMMA RPAREN
   { map (fun x -> `Tuple [x]) (fun x -> `Tuple [x]) $2 }

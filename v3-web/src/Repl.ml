@@ -7,13 +7,13 @@ type repl = { mutable cx: Elab.cx
             ; mutable env: Interp.env }
 
 type cmd = [ `Expr of expr
-           | `Decls of expr decl list
+           | `Decls of decl list
            | `Cmd of string ]
 
 module Cmd = struct
   let show: cmd -> string = function
     | `Expr e -> Exp.show e
-    | `Decls ds -> Decl.show_list Exp.show ds
+    | `Decls ds -> Exp.show_decls ds
     | `Cmd s -> "%" ^ s
 end
 
