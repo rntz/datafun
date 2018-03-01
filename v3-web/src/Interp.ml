@@ -97,8 +97,7 @@ let rec join (x: value) (y: value): value = match x,y with
 let rec eval (env: env): exp -> value = function
   | `Bool b -> Bool b | `Int i -> Int i | `Str s -> Str s
   | `Var v -> lookup v env
-  | `Let(p,e,body) ->
-     eval (destruct env p (eval env e)) body
+  | `Let(decls,body) -> eval (evalDecls env decls) body
   | `Lub(how,es) -> List.(map (eval env) es |> fold_left join (zero how))
   | `Eq(_,e1,e2) -> Bool (Value.eq (eval env e1) (eval env e2))
   | `Fix(fix, pat, step) ->
@@ -139,6 +138,9 @@ let rec eval (env: env): exp -> value = function
            | Some new_env -> eval new_env ifMatch
            | None -> examine arms)
      in examine arms
+
+and evalDecls env = List.fold_left evalDecl env
+and evalDecl env (p,e) = destruct env p (eval env e)
 
 and destruct (env: env) (pat: pat) (subj: value): env =
   try doMatch env pat subj

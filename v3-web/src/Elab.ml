@@ -93,10 +93,9 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
 
   | `Let (decls, body) ->
      let cx = ref cx in
-     let bindings = elabDecls `Id loc cx decls in
-     let bind (p,e) body = `Let(p,e,body) in
+     let decls = elabDecls `Id loc cx decls in
      let (tp, body) = elabExp !cx expect body in
-     (tp, List.fold_right bind bindings body)
+     (tp, `Let(decls, body))
 
   | `Lam(ps,body) ->
      (* TODO: check irrefutability *)

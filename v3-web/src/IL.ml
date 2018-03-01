@@ -19,7 +19,7 @@ type pat =
 and exp =
   [ lit
   | `Var of var
-  | `Let of pat * exp * exp
+  | `Let of (pat * exp) list * exp
   | `Lub of semilat * exp list | `Eq of equal * exp * exp
   (* Fix(how, x, step): fixed point of (\x.step) starting from init *)
   | `Fix of fix * pat * exp
