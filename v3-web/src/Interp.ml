@@ -144,7 +144,10 @@ and evalDecl env (p,e) = destruct env p (eval env e)
 
 and destruct (env: env) (pat: pat) (subj: value): env =
   try doMatch env pat subj
-  with NoMatch -> raise (Stuck "pattern failed to match")
+  with NoMatch ->
+    stuck (Printf.sprintf "pattern %s failed to match value %s"
+             (Pat.show_atom pat)
+             (Value.show_atom subj))
 
 and matches (env: env) (pat: pat) (subj: value): env option =
   try Some (doMatch env pat subj)

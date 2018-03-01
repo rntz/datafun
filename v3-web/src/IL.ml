@@ -62,3 +62,19 @@ let rec fix (unroll: string -> Ast.tp): Ast.tp -> fix = function
   | `Set _ -> `Set
   | `Tuple ts -> `Tuple (List.map (fix unroll) ts)
   | `Fn _ | `Sum _ | `Int | `Str as tp -> raise (NotFix tp)
+
+module Pat = struct
+  let rec show p = show_infix p
+  and show_infix = function
+    | `Tuple ps -> List.map show_app ps |> String.concat ","
+    | p -> show_app p
+  and show_app = function
+    | `Tag (n,p) -> n ^ " " ^ show_atom p
+    | p -> show_atom p
+  and show_atom = function
+    | `Wild -> "_"
+    | `Var v -> v
+    | `Eq (_, `Var v) -> "=" ^ v
+    | `Eq (_, _) -> "=<expr>"
+    | p -> "(" ^ show p ^ ")"
+end
