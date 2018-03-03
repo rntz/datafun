@@ -242,7 +242,7 @@ module Expr = struct
        let tone = Option.elim "" showTone tone in
        let tp = Option.elim "" (fun a -> ": " ^ Type.show a) tp in
        Printf.sprintf "def%s %s%s = %s" tone tp (Pat.show_atom p) (show x)
-    | Shadow vars -> "shadow " ^ String.concat " " vars
+    | Shadow vars -> String.concat " " ("shadow":: vars)
 
   and show_decls decls = List.map show_decl decls |> String.concat " "
 end

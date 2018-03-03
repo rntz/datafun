@@ -4,14 +4,10 @@
   "everything checks for equality" is not workable,
   leads to extremely unintuitive behavior.
 
-* inference for
-  - lub
+* synthesizing inference for
   - case
 
-* primitives:
-  - =, <=, >=
-  - in?
-  - +, -, *, /
+* evaluation for primitive comparison operators
 
 * irrefutability & exhaustiveness checking.
 

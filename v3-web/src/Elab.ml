@@ -68,6 +68,8 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
     | tp::tps -> List.fold_left (Type.join unroll) tp tps in
   let semilattice msg tp =
     try IL.semilattice unroll tp with IL.NotSemilattice _tp -> fail msg in
+  let equalType msg tp =
+    try IL.equal unroll tp with IL.NoEquality _ -> fail msg in
 
   match exp with
   | #lit as l -> synthesize (Lit.typeOf l, l)
@@ -86,18 +88,22 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
   | `App ((_, `Prim (#Prim.cmp as op)), arg) ->
      let (s,t) = Prim.tone op in
      let (tp, arg) = elabExp (withTone s cx) None arg in
-     (try ignore (IL.equal unroll tp) with
-        IL.NoEquality _ -> fail "not an equality type");
+     ignore (equalType "not an equality type" tp);
      synthesize (`Fn(t, tp, `Bool), `App (`Prim op, arg))
 
-  | `App ((_, `Prim `ElemOf), _arg) -> todo()
+  | `App ((_, `Prim `ElemOf), arg) ->
+     let (elemt, arg) = elabExp (withTone `Iso cx) None arg in
+     ignore (equalType "cannot test membership at non-equality type" elemt);
+     synthesize (`Fn(`Id, `Set elemt, `Bool), `App(`Prim `ElemOf, arg))
 
   | `Prim `Not -> synthesize (`Fn(`Op, `Bool, `Bool), `Prim `Not)
   | `Prim (#Prim.arith as op) ->
      let (s, t) = Prim.tone op in
      synthesize (`Fn(s, `Int, `Fn(t, `Int, `Int)), `Prim op)
 
-  | `Prim _p -> todo()
+  | `Prim (#Prim.cmp | `ElemOf) ->
+     fail ("Sorry, I can't infer a type for this primitive operation.\n"
+           ^ "Try applying it to something, or adding a type annotation.")
   (* -- end primitives -- *)
 
   | `Lub es ->
