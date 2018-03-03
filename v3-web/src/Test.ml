@@ -40,7 +40,6 @@ let repl ?repl:(repl=top) () =
   let read () = Parse.replcmd Lex.token buf in
   let rec loop () =
     Printf.printf "> %!";
-    (* TODO: catch parse errors and display them usefully. *)
     let continue =
       try Repl.perform repl (read ()); true
       with Repl.Quit -> false
