@@ -7,8 +7,6 @@
 * synthesizing inference for
   - case
 
-* evaluation for primitive comparison operators
-
 * irrefutability & exhaustiveness checking.
 
 * consider using monads. an update monad would make various things easier.

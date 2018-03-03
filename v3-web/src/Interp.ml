@@ -15,6 +15,8 @@ module type VALUE = sig
     | Fn of (t -> t)
   val compare: t -> t -> int
   val eq: t -> t -> bool
+  val partial_leq: t -> t -> bool
+  val partial_lt: t -> t -> bool
   val show: t -> string
   val show_app: t -> string
   val show_atom: t -> string
@@ -39,8 +41,7 @@ and Value : VALUE with type set = Values.t = struct
    * If I used Jane Street's Base and %ppx_compare, this would all
    * sort itself out. *)
   let rec compare x y = match x,y with
-    | (Bool _, Bool _) | (Int _, Int _) | (Str _, Str _)
-      -> Pervasives.compare x y
+    | (Bool _, Bool _)|(Int _, Int _)|(Str _, Str _) -> Pervasives.compare x y
     | Set xs,    Set ys     -> Values.compare xs ys
     | Tuple xs,  Tuple ys   ->
        let n = Array.length xs in
@@ -51,9 +52,27 @@ and Value : VALUE with type set = Values.t = struct
     | Tag (n,x), Tag (m,y)  ->
        let cmp1 = String.compare n m in
        if cmp1 <> 0 then cmp1 else compare x y
-    | _, _ -> stuck "cannot compare those values"
+    | (Bool _|Int _|Str _|Set _|Tuple _|Tag _|Fn _), _ ->
+       stuck "cannot compare those values"
 
   let eq x y = 0 = compare x y
+
+  (* `compare` computes some arbitrary total ordering on first-order Datafun
+   * values. In contrast, this decides the *partial* ordering determined by
+   * their type. PROBLEM: what about when we add box/discrete types?!?!
+   *)
+  let rec partial_leq x y = match x,y with
+    | Bool a,   Bool b -> not a || b
+    | Int x,    Int y -> x <= y
+    | Str x,    Str y -> x = y
+    | Set xs,   Set ys -> Values.subset xs ys
+    | Tuple xs, Tuple ys ->
+       Array.(List.for_all2 partial_leq (to_list xs) (to_list ys))
+    | Tag(n,x), Tag(m,y) -> n = m && partial_leq x y
+    | (Bool _|Int _|Str _|Set _|Tuple _|Tag _|Fn _), _ ->
+       stuck "cannot compare those values"
+
+  let partial_lt x y = partial_leq x y && not (eq x y)
 
   let rec show: t -> string = function
     | Tuple xs -> String.concat ", " (Array.(map show_app xs |> to_list))
@@ -93,10 +112,12 @@ let primitive: Prim.prim -> value =
   let arith op x y = match op with
     | `Add -> x+y | `Sub -> x-y | `Mul -> x*y | `Div -> x/y
     | `Mod -> x mod y in
+  let cmp (op: Prim.cmp) = match op with
+    | `EQ -> eq
+    | `LE -> partial_leq      | `LT -> partial_lt
+    | `GE -> flip partial_leq | `GT -> flip partial_lt in
   function
-  | `EQ -> fun2 (fun x y -> Bool (Value.eq x y))
-  (* TODO: LE, LT, GE, GT *)
-  | #Prim.cmp as _op -> fun2 (fun _x _y -> todo())
+  | #Prim.cmp as op -> fun2 (fun x y -> Bool (cmp op x y))
   | #Prim.arith as op ->
      fun2 (fun x y -> match x,y with
                       | Int i, Int j -> Int (arith op i j)
