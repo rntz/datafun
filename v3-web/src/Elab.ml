@@ -79,7 +79,10 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
      if Tone.(tone <= `Id) then synthesize (tp, `Var v)
      else fail "I can't be sure that your use of this variable is safe"
 
-  | `The (tp, e) -> synthesize (check tp e)
+  | `The (tp, e) ->
+     (try Type.typeOk unroll ~deep:false tp with
+        Type.Malformed _ -> fail "malformed type annotation");
+     synthesize (check tp e)
 
   (* -- primitives -- *)
   | `App ((_, `Prim (#Prim.cmp as op)), arg) ->
@@ -205,9 +208,13 @@ and elabDecls: loc -> cx ref -> tone -> decl list -> (IL.pat * IL.exp) list =
 
 and elabDecl: loc -> cx ref -> tone -> decl -> (IL.pat * IL.exp) list =
   fun loc cx defaultTone decl ->
+  let fail msg = raise (TypeError (loc, msg)) in
+  let unroll tpname = try find_type !cx tpname with
+                        Not_found -> fail ("type not defined: " ^ tpname) in
   match decl with
-  (* TODO: check well-formedness of type! *)
   | Type (name, tp) ->
+     (try Type.typeOk unroll ~deep:false tp with
+      | Type.Malformed _ -> fail "Type is not well-formed.");
      cx := {!cx with types = Dict.add name tp !cx.types};
      []
 

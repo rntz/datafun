@@ -51,10 +51,24 @@ module Type = struct
     | `Name n -> Var.show n
     | tp -> "(" ^ show tp ^ ")"
 
-  (* a sum type shouldn't use the same tag twice. *)
-  exception Malformed of string * tp
-  let well_formed: tp -> unit = function
-    | _ -> raise TODO
+  (* Well-formedness means:
+   * - A sum type shouldn't use the same tag twice.
+   *
+   * - All type names are bound. If `deep` is true, we also check the types
+   *   they're bound to are well-formed. If we keep the invariant that all
+   *   types in the context are well-formed, then it's safe to let "deep" be
+   *   false.
+   *)
+  type malformed = [ `RepeatedTag of tag ]
+  exception Malformed of tp * malformed
+  let rec typeOk (unroll: var -> tp) ~deep:deep (tp: tp): unit =
+    let kids = match tp with
+      | #base -> [] | `Set tp -> [tp] | `Fn(_,a,b) -> [a;b] | `Tuple tps -> tps
+      |  `Name n -> let tp = unroll n in if deep then [tp] else []
+      | `Sum tagtps -> let (_tags,tps) = List.split tagtps in
+                       (* TODO: check uniqueness of tags *)
+                       tps
+    in List.iter (typeOk unroll ~deep: deep) kids
 
   (* ---------- The type lattice: equality, subtyping, join/meet ---------- *)
   type how = [ `Join | `Meet | `Eq ]

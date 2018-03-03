@@ -1,10 +1,4 @@
-* do well-formedness checking!
-  otherwise
-
-      def map: (xyz -> xyz) -> {xyz} => {xyz}
-      fn f a => {f x | x in a};
-
-  typechecks!
+* improve well-formedness checking: check for duplicate tags in sum types.
 
 * figure out approach to shadowing & equality testing.
   "everything checks for equality" is not workable,
