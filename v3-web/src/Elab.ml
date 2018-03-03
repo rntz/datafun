@@ -24,8 +24,7 @@ let find_type cx name = Dict.find name cx.types
 let rec elabPat: loc -> cx ref -> tone -> tp -> pat -> IL.pat =
   fun loc cx tone tp pat ->
   let fail () = raise (TypeError (loc, "bad type for pattern")) in
-  let unroll name = try find_type !cx name with
-                      Not_found -> fail() in
+  let unroll name = try find_type !cx name with Not_found -> fail() in
   match pat, tp with
   | #lit as l, tp -> if tp <> Lit.typeOf l then fail()
                      else `Eq (Lit.typeOf l, l)
@@ -68,8 +67,7 @@ let rec elabExp: cx -> expect -> expr -> tp * IL.exp =
     | [] -> fail msg
     | tp::tps -> List.fold_left (Type.join unroll) tp tps in
   let semilattice msg tp =
-    try IL.semilattice unroll tp with
-      IL.NotSemilattice _tp -> fail msg in
+    try IL.semilattice unroll tp with IL.NotSemilattice _tp -> fail msg in
 
   match exp with
   | #lit as l -> synthesize (Lit.typeOf l, l)
