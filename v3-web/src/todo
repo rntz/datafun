@@ -1,3 +1,7 @@
+* implement loading files at repl.
+
+* implement standalone repl executable.
+
 * improve well-formedness checking: check for duplicate tags in sum types.
 
 * figure out approach to shadowing & equality testing.
@@ -23,8 +27,6 @@
 
 * add loc annotations to pats, decls.
 
-* implement loading files at repl.
-
-* implement standalone repl executable.
+* GET IT WORKING ON THE WEB.
 
 * [LONG TERM] figure out tone inference
