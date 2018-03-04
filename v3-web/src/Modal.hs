@@ -102,6 +102,9 @@ instance Monoid (Cx Tone) where
 
 type Infer = WriterT (Cx Tone) (Reader (Cx Type))
 
+extend :: Var -> a -> Cx a -> Cx a
+extend k v = coerce $ Map.insert k v
+
 (!) :: Cx a -> Var -> a
 (!) = (Map.!) . coerce
 
@@ -109,9 +112,8 @@ at :: Tone -> Infer a -> Infer a
 at tone = censor (coerce (Map.map (<> tone)))
 
 bind :: Var -> Type -> Infer a -> Infer (a, Tone)
-bind v tp action = censor drop $ listens (!v) $ local extend action
-  where extend = coerce $ Map.insert v tp
-        drop (Cx a) = Cx (Map.delete v a)
+bind v tp action = censor drop $ listens (!v) $ local (extend v tp) action
+  where drop (Cx a) = Cx (Map.delete v a)
 
 bindAt :: Tone -> Var -> Type -> Infer a -> Infer a
 bindAt allow v tp action = do
@@ -124,6 +126,7 @@ synth :: Synth -> Infer Type
 check (Fn a b) (CFn v body) = bindAt Id v a $ check b body
 check (Tuple tps) (CTuple es) | length tps == length es = zipWithM_ check tps es
 check (Sum tagtps) (CTag tag e) | Just tp <- lookup tag tagtps = check tp e
+-- TODO: Need `tp` to be an equality type!
 check (Set tp) (CSet es) = at Iso $ mapM_ (check tp) es
 check (Box tp) (CBox e) = at Iso $ check tp e
 check (Opp tp) (COp e) = at Op $ check tp e
@@ -149,3 +152,50 @@ synth (SApp func arg) = do Fn a b <- synth func; b <$ check a arg
 synth (SProj exp i) = do Tuple tps <- synth exp; pure (tps !! i)
 synth (SUnbox e) = do Box tp <- synth e; pure tp
 synth (SUnop e) = do Opp tp <- synth e; pure tp
+
+
+---------- EVALUATION ----------
+data Value
+  = VInt Int
+  | VTuple [Value]
+  | VTag Tag Value
+  | VFn (Value -> Value)
+  | VSet (Set Value)
+    deriving Show
+
+instance Show (a -> b) where show _ = "<fn>"
+instance Eq Value where a == b = EQ == compare a b
+instance Ord Value where
+  compare (VInt i) (VInt j) = compare i j
+  compare (VTuple x) (VTuple y) = compare x y
+  compare (VTag n x) (VTag m y) = compare (n,x) (m,y)
+  compare (VSet x) (VSet y) = compare x y
+  compare (VFn _) (VFn _) = error "impossible to compare"
+  compare _ _ = error "runtime type error"
+
+type Env = Cx Value
+
+evalC :: Check -> Reader Env Value
+evalC (CFn x body) = reader $ \env -> VFn $ \a -> evalC body `runReader` extend x a env
+evalC (CTuple xs) = VTuple <$> mapM evalC xs
+evalC (CTag n x) = VTag n <$> evalC x
+evalC (CSet xs) = VSet . Set.fromList <$> mapM evalC xs
+evalC (CBox x) = evalC x
+evalC (COp x) = evalC x
+evalC (CCase subj arms) = undefined
+evalC (CFor v set body) = do
+  elems <- Set.toList . deset <$> evalS set
+  sets <- forM elems $ \e -> local (extend v e) (evalC body)
+  pure $ VSet $ Set.unions $ map deset sets
+
+evalS :: Synth -> Reader Env Value
+evalS (SVar v) = asks (!v)
+evalS (SCheck _ e) = evalC e
+evalS (SApp func arg) = defn <$> evalS func <*> evalC arg
+evalS (SProj exp i) = (!! i) . detuple <$> evalS exp
+evalS (SUnbox e) = evalS e
+evalS (SUnop e) = evalS e
+
+defn (VFn f) = f; defn _ = error "runtime type error"
+deset (VSet s) = s; deset _ = error "runtime type error"
+detuple (VTuple xs) = xs; detuple _ = error "runtime type error"

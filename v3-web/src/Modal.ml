@@ -250,6 +250,7 @@ let rec check (cx: tp cx) (tp: tp) (tm: tm): tone cx = match tp, tm with
 
   | `Tuple tps, `Tuple tms -> List.map2 (check cx) tps tms |> cxMeet
   | `Sum tagtps, `Tag (n, tm) -> check cx (List.assoc n tagtps) tm
+  (* TODO: need `tp` to be an equality type! *)
   | `Set tp, `Set tms -> List.map (check cx tp) tms |> cxMeet |> at Iso
   | `Box tp, `Box tm -> check cx tp tm |> at Iso
   | `Op tp, `Op tm -> check cx tp tm |> at Op
