@@ -23,7 +23,7 @@ module type VALUE = sig
 end
 
 module rec Values: Set.S with type elt = Value.t = Set.Make(Value)
-and Value : VALUE with type set = Values.t = struct
+and Value: VALUE with type set = Values.t = struct
   type set = Values.t
   type t
     = Bool of bool | Int of int | Str of string
