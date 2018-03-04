@@ -135,9 +135,7 @@ type tp =
   | `Sum of (tag * tp) list     (* sums *)
   | `Set of tp                  (* finite sets *)
   | `Box of tp                  (* internalizes Iso / the discrete ordering *)
-  | `Op of tp                   (* internalizes Op / the opposite ordering *)
-  ]
-             
+  | `Op of tp ]                 (* internalizes Op / the opposite ordering *)
 
 (* Internalizing Id is trivial; it's the identity function on types.
  * Internalizing Path is... nontrivial.
@@ -292,4 +290,64 @@ and synth (cx: tp cx) (tm: synthTm): tp * tone cx = match tm with
      end
 
 
-(* TODO: tests! *)
+(* TODO: Type checker tests! *)
+       
+
+(* ========== EVALUATION ========== *)
+module rec Values: Set.S with type elt = Value.t = Set.Make(Value)
+and Value: sig
+  type t = Base of int | Set of Values.t | Tuple of t list
+         | Tag of tag * t | Fn of (t -> t)
+  val compare: t -> t -> int
+end = struct
+  type t = Base of int
+         | Set of Values.t
+         | Tuple of t list
+         | Tag of tag * t
+         | Fn of (t -> t)
+
+  let rec compare x y = match x,y with
+    | Base x, Base y -> Pervasives.compare x y
+    | Set x, Set y -> Values.compare x y
+    | Tuple [], Tuple [] -> 0
+    | Tuple (x::xs), Tuple (y::ys) ->
+       let c = compare x y in
+       if c <> 0 then c else compare (Tuple xs) (Tuple ys)
+    | Tag(n,x), Tag(m,y) ->
+       let c = Pervasives.compare n m in
+       if c <> 0 then c else compare x y
+    | (Base _|Set _|Tuple _|Tag _|Fn _), _ -> failwith "runtime type error"
+end
+
+open Value
+type value = Value.t
+type env = value Cx.t
+
+let deFn = function Fn f -> f | _ -> failwith "runtime type error"
+let deSet = function Set s -> s | _ -> failwith "runtime type error"
+let deTuple = function Tuple xs -> xs | _ -> failwith "runtime type error"
+
+let rec eval (env: env): tm -> value = function
+  | `Var v -> Cx.find v env
+  (* introductions *)
+  | `Fn(v,body) -> Fn (fun arg -> eval (Cx.add v arg env) body)
+  | `Tuple xs -> Tuple (List.map (eval env) xs)
+  | `Tag(n,x) -> Tag (n, eval env x)
+  | `Set xs -> Set (Values.of_list (List.map (eval env) xs))
+  (* eliminations *)
+  | `Proj(x,i) -> List.nth (deTuple (evalS env x)) i
+  | `For(v, set, body) ->
+     let elems = deSet (evalS env set) in
+     let union elem = Values.union (deSet (eval (Cx.add v elem env) body)) in
+     Set (Values.fold union elems Values.empty)
+  | `App(func, arg) -> deFn (evalS env func) (eval env arg)
+  (* type erasure *)
+  | `Check (_, x) -> eval env x
+  (* modal erasure *)
+  | `Box x | `Op x -> eval env x
+  | `Unbox x | `Unop x -> eval env (x :> tm)
+
+and evalS (env: env) (tm: synthTm): value = eval env (tm :> tm)
+
+
+(* TODO: evaluator tests *)
