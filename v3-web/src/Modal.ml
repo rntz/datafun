@@ -87,7 +87,7 @@ let ( ** ) (a: tone) (b: tone): tone = match a,b with
 
 (* Tone composition is associative, with Id as identity. Further laws:
  *
- *      Op ** Op  = Op
+ *      Op ** Op  = Id
  *      Path ** s = Path
  *      Iso  ** s = Iso
  *
@@ -215,8 +215,10 @@ type ('check, 'synth) checkF =
   [ `Fn of var * 'check
   | `Tuple of 'check list | `Tag of tag * 'check | `Set of 'check list
   | `Box of 'check | `Op of 'check
-  (* Large eliminations. *)
+  (* Large eliminations.
+   * TODO: case-elimination for sums. *)
   (* `For (x, M, N) means: union for (x in M) of N *)
+  | `Case of 'synth * (tag * var * 'check) list
   | `For of var * 'synth * 'check ]
 
 (* Synthesis forms. *)
@@ -257,6 +259,8 @@ let rec check (cx: tp cx) (tp: tp) (tm: tm): tone cx = match tp, tm with
        | `Set tp, tones -> tp, tones
        | _ -> error "looping over non-set" in
      tones1 & Cx.remove x (check (Cx.add x elemtp cx) tp bodyTm)
+
+  | _tp, `Case (_subj, _arms) -> Util.todo()
 
   (* Incongruous cases. *)
   | _, (`Fn _|`Tuple _|`Tag _|`Set _|`Box _|`Op _|`For _) ->
@@ -336,11 +340,12 @@ let rec eval (env: env): tm -> value = function
   | `Set xs -> Set (Values.of_list (List.map (eval env) xs))
   (* eliminations *)
   | `Proj(x,i) -> List.nth (deTuple (evalS env x)) i
+  | `App(func, arg) -> deFn (evalS env func) (eval env arg)
   | `For(v, set, body) ->
      let elems = deSet (evalS env set) in
      let union elem = Values.union (deSet (eval (Cx.add v elem env) body)) in
      Set (Values.fold union elems Values.empty)
-  | `App(func, arg) -> deFn (evalS env func) (eval env arg)
+  | `Case(_subj, _arms) -> Util.todo()
   (* type erasure *)
   | `Check (_, x) -> eval env x
   (* modal erasure *)
