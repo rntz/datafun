@@ -1,13 +1,11 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses, DeriveFunctor, TypeSynonymInstances,
+    FlexibleInstances #-}
 module ModalDatafun where
 
-import Control.Applicative
-import Control.Monad
 import Control.Monad.Reader
 import Control.Monad.Writer.Strict hiding (Sum)
 import Data.Coerce
+import Data.List (foldl')
 import Data.Map.Strict (Map)
 import Data.Monoid hiding (Sum, Product)
 import Data.Set (Set)
@@ -32,7 +30,7 @@ s & t | s <: t = t
       | otherwise = Iso
 
 meet :: [Tone] -> Tone
-meet = foldr (&) Path
+meet = foldl' (&) Path
 
 -- Tone composition.
 instance Monoid Tone where
