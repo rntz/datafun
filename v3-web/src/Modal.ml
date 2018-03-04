@@ -112,10 +112,12 @@ let subtone (a: tone) (b: tone): bool = match a,b with
   | _, Iso | Path, _ | Op, Id | Id, Op -> false
 
 (* "meet" means "greatest lower bound"; we'll need this for subtyping. *)
-let meet (a: tone) (b: tone): tone = match a, b with
+let meet2 (a: tone) (b: tone): tone = match a, b with
   | Iso, _ | _, Iso | Id, Op | Op, Id -> Iso
   | x, Path | Path, x -> x
   | Id, Id | Op, Op -> a
+
+let meet: tone list -> tone = List.fold_left meet2 Path
 
 
 (* ========== TYPES ========== *)
@@ -129,6 +131,8 @@ type tp
   = Base                        (* some arbitrary type *)
   | Fn of tp * tp               (* functions *)
   | Tuple of tp list            (* tuples *)
+  | Sum of (string * tp) list   (* sums *)
+  | Set of tp                   (* finite sets *)
   | Box of tp                   (* internalizes Iso / the discrete ordering *)
   | Opp of tp                   (* internalizes Op / the opposite ordering *)
 
@@ -159,8 +163,6 @@ exception Incompatible of tp * tp
 let rec subtype (a: tp) (b: tp): tone =
   let fail () = raise (Incompatible (a,b)) in
   match a,b with
-  | Base, Base -> Id           (* base type not assumed to be discrete *)
-
   (* I believe the order of these two Box rules doesn't matter.
    * But I haven't proven this. *)
   | x, Box y -> subtype x y ** Iso
@@ -168,9 +170,21 @@ let rec subtype (a: tp) (b: tp): tone =
 
   | Opp x, y | x, Opp y -> Op ** subtype x y (* NB. Op ** s = s ** Op *)
 
+  (* If we assumed Base was discrete, we could return Path here. *)
+  | Base, Base -> Id
+
+  (* (Set a <: Set b) iff (a is a subset of b); that's why we can safely ignore
+   * the result of (subtype a b) here. *)
+  | Set a, Set b -> ignore (subtype a b); Id
+
   | Tuple xs, Tuple ys ->
-     (try List.(map2 subtype xs ys |> fold_left meet Path)
-      with Invalid_argument _ -> fail())
+     meet (try List.map2 subtype xs ys
+           with Invalid_argument _ -> fail())
+
+  | Sum tps1, Sum tps2 ->
+     let f (tag, tp1) = try subtype tp1 (List.assoc tag tps2)
+                        with Not_found -> fail() in
+     meet (List.map f tps1)
 
   | Fn(a1,b1), Fn(a2,b2) ->
      let t = subtype b1 b2 in
@@ -181,4 +195,4 @@ let rec subtype (a: tp) (b: tp): tone =
      end
 
   (* Incongruous cases. *)
-  | (Base|Tuple _|Fn _), (Base|Tuple _|Fn _) -> fail()
+  | (Base|Tuple _|Sum _|Fn _|Set _), (Base|Tuple _|Sum _|Fn _|Set _) -> fail()
