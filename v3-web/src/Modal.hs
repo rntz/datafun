@@ -11,33 +11,28 @@ import Data.Coerce
 import Data.Map.Strict (Map)
 import Data.Monoid hiding (Sum, Product)
 import Data.Set (Set)
-import Prelude hiding ((&&))
 import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
-
-class Preorder a where
-  (<:) :: a -> a -> Bool
-
-class Meets a where
-  top :: a
-  (&&) :: a -> a -> a
-  meet :: [a] -> a
-  meet = foldr (&&) top
 
 
 ---------- TONES ----------
 data Tone = Id | Op | Iso | Path deriving (Eq, Show)
 
-instance Preorder Tone where
-  Iso <: _ = True
-  _ <: Path = True
-  x <: y = x == y
+-- Tones ordered by pointwise subtyping:
+-- (s <: t) iff (forall A. A^s <: A^t).
+(<:) :: Tone -> Tone -> Bool
+Iso <: _ = True
+_ <: Path = True
+x <: y = x == y
 
-instance Meets Tone where
-  top = Path
-  s && t | s <: t = t
-         | s <: t = s
-         | otherwise = Iso
+-- Greatest lower bound on tones.
+(&) :: Tone -> Tone -> Tone
+s & t | s <: t = t
+      | s <: t = s
+      | otherwise = Iso
+
+meet :: [Tone] -> Tone
+meet = foldr (&) Path
 
 -- Tone composition.
 instance Monoid Tone where
@@ -59,9 +54,6 @@ data Type
   | Sum [(Tag, Type)]
   | Set Type | Box Type | Opp Type
     deriving Show
-
-instance Preorder Type where
-  a <: b = case subtype a b of Right _ -> True; Left _ -> False
 
 subtype :: Type -> Type -> Either (Type, Type) Tone
 subtype a (Box b) = (<> Iso) <$> subtype a b
@@ -106,7 +98,7 @@ data Synth
 newtype Cx a = Cx (Map Var a) deriving (Show, Eq, Ord)
 instance Monoid (Cx Tone) where
   mempty = Cx Map.empty
-  Cx a `mappend` Cx b = Cx (Map.unionWith (&&) a b)
+  Cx a `mappend` Cx b = Cx (Map.unionWith (&) a b)
 
 type Infer = WriterT (Cx Tone) (Reader (Cx Type))
 
