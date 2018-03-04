@@ -5,10 +5,11 @@
  * 2. Transitivity: if a ≤ b and b ≤ c then a ≤ c.
  *
  * A good example of a preorder is "lists under containment":
- * let (a ≤ b) if every element of the list a is also in b.
+ * let (X ≤ Y) if every element of the list X is also in Y.
  *
  * Preorders are like partial orders, but without requiring antisymmetry.
- * For example, [0,1] ≤ [1,0] under "containment", but [0,1] ≠ [1,0].
+ * For example, under "containment" we have [0,1] ≤ [1,0] and [1,0] ≤ [0,1],
+ * but [0,1] ≠ [1,0].
  *
  * If you're a category theorist, a preorder is a "thin" category, where between
  * any two objects there is at most one morphism. I believe much of the "tone
@@ -147,10 +148,11 @@ type tp
  * a more general problem, namely:
  *
  *     Given types A, B, what is the greatest tone s such that A^s <: B?
+ *     Or does no such tone exist?
  *
- * And that's what I /hope/ this code does. I have sketches of the cases for a
- * proof that, if (s = subtype a b), then (A^s <: B). I also have, for many of
- * my subtyping rules, counterexamples that show that their conclusions can't be
+ * And that's what I /hope/ this code does. I have sketched cases of a proof
+ * that, if (s = subtype A B), then (A^s <: B). I also have, for many of my
+ * subtyping rules, counterexamples that show that their conclusions can't be
  * safely strengthened. However, that's as far as I've gotten, proof-wise.
  *)
 exception Incompatible of tp * tp
@@ -171,10 +173,10 @@ let rec subtype (a: tp) (b: tp): tone =
       with Invalid_argument _ -> fail())
 
   | Fn(a1,b1), Fn(a2,b2) ->
-     (* TODO: failure messages should mention the tones as the issue. *)
      let s,t = subtype a2 a1, subtype b1 b2 in
      begin match t, s with
      | Iso, Path | Id, (Id|Path) | Op, (Op|Path) | Path, (Id|Op|Path) -> t
+     (* TODO: failure messages should mention the tones as the issue. *)
      | Iso, _    | Id, _         | Op, _         | Path, _            -> fail()
      end
 
