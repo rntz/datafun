@@ -234,12 +234,12 @@ and synthTm = (tm, synthTm) synthF
 
 let (&): tone cx -> tone cx -> tone cx = Cx.union (fun _ s t -> Some (s ** t))
 let cxMeet: tone cx list -> tone cx = List.fold_left (&) Cx.empty
-let useAt (tone: tone): tone cx -> tone cx = Cx.map (fun s -> s ** tone)
+let at (tone: tone): tone cx -> tone cx = Cx.map (fun s -> s ** tone)
 
 let rec check (cx: tp cx) (tp: tp) (tm: tm): tone cx = match tp, tm with
   | want, (#synthF as tm) ->
      let (got, tones) = synth cx tm in
-     useAt (subtype got want) tones
+     at (subtype got want) tones
 
   | `Fn(a,b), `Fn(x,body) ->
      let tones = check (Cx.add x a cx) b body in
@@ -250,9 +250,9 @@ let rec check (cx: tp cx) (tp: tp) (tm: tm): tone cx = match tp, tm with
 
   | `Tuple tps, `Tuple tms -> List.map2 (check cx) tps tms |> cxMeet
   | `Sum tagtps, `Tag (n, tm) -> check cx (List.assoc n tagtps) tm
-  | `Set tp, `Set tms -> List.map (check cx tp) tms |> cxMeet |> useAt Iso
-  | `Box tp, `Box tm -> check cx tp tm |> useAt Iso
-  | `Op tp, `Op tm -> check cx tp tm |> useAt Op
+  | `Set tp, `Set tms -> List.map (check cx tp) tms |> cxMeet |> at Iso
+  | `Box tp, `Box tm -> check cx tp tm |> at Iso
+  | `Op tp, `Op tm -> check cx tp tm |> at Op
 
   | `Set _, `For (x, setTm, bodyTm) ->
      let (elemtp, tones1) = match synth cx setTm with
@@ -261,6 +261,10 @@ let rec check (cx: tp cx) (tp: tp) (tm: tm): tone cx = match tp, tm with
      tones1 & Cx.remove x (check (Cx.add x elemtp cx) tp bodyTm)
 
   | _tp, `Case (_subj, _arms) -> Util.todo()
+
+  (* Auto-introductions. *)
+  | `Box tp, tm -> check cx tp tm |> at Iso
+  | `Op tp,  tm -> check cx tp tm |> at Iso
 
   (* Incongruous cases. *)
   | _, (`Fn _|`Tuple _|`Tag _|`Set _|`Box _|`Op _|`For _) ->
@@ -283,13 +287,13 @@ and synth (cx: tp cx) (tm: synthTm): tp * tone cx = match tm with
 
   | `Unbox tm ->
      begin match synth cx tm with
-     | `Box tp, tones -> tp, useAt Path tones
+     | `Box tp, tones -> tp, at Path tones
      | _ -> error "unboxing a non-box"
      end
 
   | `Unop tm ->
      begin match synth cx tm with
-     | `Op tp, tones -> tp, useAt Op tones
+     | `Op tp, tones -> tp, at Op tones
      | _ -> error "unopping a non-op"
      end
 

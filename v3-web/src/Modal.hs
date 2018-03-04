@@ -139,7 +139,7 @@ check tp (CCase subj arms) = undefined -- TODO
 check tp@(Set a) (CFor v set body) =
   do Set a <- synth set; bindAt Iso v a $ check tp body
 
--- "Auto-introductions"
+-- Auto-introductions.
 check (Box tp) e = at Iso $ check tp e
 check (Opp tp) e = at Op $ check tp e
 
