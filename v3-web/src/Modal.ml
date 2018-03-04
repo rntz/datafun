@@ -173,8 +173,8 @@ let rec subtype (a: tp) (b: tp): tone =
       with Invalid_argument _ -> fail())
 
   | Fn(a1,b1), Fn(a2,b2) ->
-     let s,t = subtype a2 a1, subtype b1 b2 in
-     begin match t, s with
+     let t = subtype b1 b2 in
+     begin match t, subtype a2 a1 with
      | Iso, Path | Id, (Id|Path) | Op, (Op|Path) | Path, (Id|Op|Path) -> t
      (* TODO: failure messages should mention the tones as the issue. *)
      | Iso, _    | Id, _         | Op, _         | Path, _            -> fail()
