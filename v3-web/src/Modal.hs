@@ -182,7 +182,7 @@ evalC (CTag n x) = VTag n <$> evalC x
 evalC (CSet xs) = VSet . Set.fromList <$> mapM evalC xs
 evalC (CBox x) = evalC x
 evalC (COp x) = evalC x
-evalC (CCase subj arms) = undefined
+evalC (CCase subj arms) = undefined -- TODO
 evalC (CFor v set body) = do
   elems <- Set.toList . deset <$> evalS set
   sets <- forM elems $ \e -> local (extend v e) (evalC body)
