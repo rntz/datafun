@@ -2,6 +2,7 @@
 
 all: FORCE
 	jbuilder build --dev datafun.cma
+	# jbuilder build datafun.cma
 
 repl: FORCE
 	jbuilder utop .

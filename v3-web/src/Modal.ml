@@ -127,14 +127,17 @@ let meet: tone list -> tone = List.fold_left meet2 Path
  * but one where types are interpreted as /preorders/, not sets; and where
  * all functions are monotone.
  *)
-type tp
-  = Base                        (* some arbitrary type *)
-  | Fn of tp * tp               (* functions *)
-  | Tuple of tp list            (* tuples *)
-  | Sum of (string * tp) list   (* sums *)
-  | Set of tp                   (* finite sets *)
-  | Box of tp                   (* internalizes Iso / the discrete ordering *)
-  | Opp of tp                   (* internalizes Op / the opposite ordering *)
+type tag = string
+type tp =
+  [ `Base                       (* some arbitrary type *)
+  | `Fn of tp * tp              (* functions *)
+  | `Tuple of tp list           (* tuples *)
+  | `Sum of (tag * tp) list     (* sums *)
+  | `Set of tp                  (* finite sets *)
+  | `Box of tp                  (* internalizes Iso / the discrete ordering *)
+  | `Op of tp                   (* internalizes Op / the opposite ordering *)
+  ]
+             
 
 (* Internalizing Id is trivial; it's the identity function on types.
  * Internalizing Path is... nontrivial.
@@ -165,28 +168,28 @@ let rec subtype (a: tp) (b: tp): tone =
   match a,b with
   (* I believe the order of these two Box rules doesn't matter.
    * But I haven't proven this. *)
-  | x, Box y -> subtype x y ** Iso
-  | Box x, y -> Path ** subtype x y
+  | x, `Box y -> subtype x y ** Iso
+  | `Box x, y -> Path ** subtype x y
 
-  | Opp x, y | x, Opp y -> Op ** subtype x y (* NB. Op ** s = s ** Op *)
+  | `Op x, y | x, `Op y -> Op ** subtype x y (* NB. Op ** s = s ** Op *)
 
   (* If we assumed Base was discrete, we could return Path here. *)
-  | Base, Base -> Id
+  | `Base, `Base -> Id
 
   (* (Set a <: Set b) iff (a is a subset of b); that's why we can safely ignore
    * the result of (subtype a b) here. *)
-  | Set a, Set b -> ignore (subtype a b); Id
+  | `Set a, `Set b -> ignore (subtype a b); Id
 
-  | Tuple xs, Tuple ys ->
+  | `Tuple xs, `Tuple ys ->
      meet (try List.map2 subtype xs ys
            with Invalid_argument _ -> fail())
 
-  | Sum tps1, Sum tps2 ->
+  | `Sum tps1, `Sum tps2 ->
      let f (tag, tp1) = try subtype tp1 (List.assoc tag tps2)
                         with Not_found -> fail() in
      meet (List.map f tps1)
 
-  | Fn(a1,b1), Fn(a2,b2) ->
+  | `Fn(a1,b1), `Fn(a2,b2) ->
      let t = subtype b1 b2 in
      begin match t, subtype a2 a1 with
      | Iso, Path | Id, (Id|Path) | Op, (Op|Path) | Path, (Id|Op|Path) -> t
@@ -195,4 +198,98 @@ let rec subtype (a: tp) (b: tp): tone =
      end
 
   (* Incongruous cases. *)
-  | (Base|Tuple _|Sum _|Fn _|Set _), (Base|Tuple _|Sum _|Fn _|Set _) -> fail()
+  | (`Base|`Tuple _|`Sum _|`Fn _|`Set _),
+    (`Base|`Tuple _|`Sum _|`Fn _|`Set _) -> fail()
+
+
+(* ========== TERMS, TYPE CHECKING, and TONE INFERENCE ========== *)
+module Cx = Map.Make(String)
+type var = string
+type 'a cx = 'a Cx.t
+
+(* Our typechecker is written for clarity rather than for good error messages;
+ * it can throw many exceptions when it fails, not just TypeError. *)
+exception TypeError of string
+let error msg = raise (TypeError msg)
+
+(* Checking forms. *)
+type ('check, 'synth) checkF =
+  [ `Fn of var * 'check
+  | `Tuple of 'check list | `Tag of tag * 'check | `Set of 'check list
+  | `Box of 'check | `Op of 'check
+  (* Large eliminations. *)
+  (* `For (x, M, N) means: union for (x in M) of N *)
+  | `For of var * 'synth * 'check ]
+
+(* Synthesis forms. *)
+type ('check, 'synth) synthF
+  = [ `Check of tp * 'check
+    | `Var of var
+    (* Small eliminations. *)
+    | `App of 'synth * 'check | `Proj of 'synth * int
+    | `Unbox of 'synth | `Unop of 'synth ]
+
+type tm = [ (tm, synthTm) synthF | (tm, synthTm) checkF ]
+and synthTm = (tm, synthTm) synthF
+
+let (&): tone cx -> tone cx -> tone cx = Cx.union (fun _ s t -> Some (s ** t))
+let cxMeet: tone cx list -> tone cx = List.fold_left (&) Cx.empty
+let useAt (tone: tone): tone cx -> tone cx = Cx.map (fun s -> s ** tone)
+
+let rec check (cx: tp cx) (tp: tp) (tm: tm): tone cx = match tp, tm with
+  | want, (#synthF as tm) ->
+     let (got, tones) = synth cx tm in
+     useAt (subtype got want) tones
+
+  | `Fn(a,b), `Fn(x,body) ->
+     let tones = check (Cx.add x a cx) b body in
+     begin match Cx.find_opt x tones with
+     | Some s when not (subtone s Id) -> error "non-monotone function"
+     | _ -> Cx.remove x tones
+     end
+
+  | `Tuple tps, `Tuple tms -> List.map2 (check cx) tps tms |> cxMeet
+  | `Sum tagtps, `Tag (n, tm) -> check cx (List.assoc n tagtps) tm
+  | `Set tp, `Set tms -> List.map (check cx tp) tms |> cxMeet |> useAt Iso
+  | `Box tp, `Box tm -> check cx tp tm |> useAt Iso
+  | `Op tp, `Op tm -> check cx tp tm |> useAt Op
+
+  | `Set _, `For (x, setTm, bodyTm) ->
+     let (elemtp, tones1) = match synth cx setTm with
+       | `Set tp, tones -> tp, tones
+       | _ -> error "looping over non-set" in
+     tones1 & Cx.remove x (check (Cx.add x elemtp cx) tp bodyTm)
+
+  (* Incongruous cases. *)
+  | _, (`Fn _|`Tuple _|`Tag _|`Set _|`Box _|`Op _|`For _) ->
+     error "cannot give that type to that term"
+
+and synth (cx: tp cx) (tm: synthTm): tp * tone cx = match tm with
+  | `Check (tp, tm) -> (tp, check cx tp tm)
+  | `Var x -> (Cx.find x cx, Cx.singleton x Id)
+  | `App (func, arg) ->
+     begin match synth cx func with
+     | `Fn(a,b), tones1 -> (b, tones1 & check cx a arg)
+     | _ -> error "expected a function"
+     end
+
+  | `Proj (tm, i) ->
+     begin match synth cx tm with
+     | `Tuple tps, tones -> List.nth tps i, tones
+     | _ -> error "projecting from a non-tuple"
+     end
+
+  | `Unbox tm ->
+     begin match synth cx tm with
+     | `Box tp, tones -> tp, useAt Path tones
+     | _ -> error "unboxing a non-box"
+     end
+
+  | `Unop tm ->
+     begin match synth cx tm with
+     | `Op tp, tones -> tp, useAt Op tones
+     | _ -> error "unopping a non-op"
+     end
+
+
+(* TODO: tests! *)
