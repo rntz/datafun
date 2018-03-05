@@ -96,7 +96,7 @@
 
 \newcommand{\tc}{\cdot}         % tone composition
 
-\newcommand{\h}[3]{#1 :^{#3}\! {#2}}
+\newcommand{\h}[3]{#1 : {#2}}
 \newcommand{\hm}[2]{\h{#1}{#2}{\tm}}
 \newcommand{\ha}[2]{\h{#1}{#2}{\ta}}
 \newcommand{\hi}[2]{\h{#1}{#2}{\ti}}
@@ -108,116 +108,221 @@
 \newcommand{\bto}{\overset{\tb}{\to}}
 
 \title{Tones and types}
-%% \title{Tonality and inference}
-%% alternate title: Tones and types
+%% alternate title: Tone theory
+%% alternate title: Tonality inference
 \author{Michael Robert Arntzenius}
 \date{\todo{16 November 2017 -- ???}}
+
+%% \setlength{\parskip}{0.4em}
+%% \setlength{\parindent}{0em}
 
 
 \begin{document}
 \maketitle
 
-\begin{mathpar}
-  \begin{array}{cccl}
-    \text{types} & A,B,C \vspace{0.5em}\\
-    \text{terms} & M,N,O \vspace{0.5em}\\
-    \text{tones}
-    & s,t,u
-    & \bnfeq & \tm ~|~ \ta ~|~ \tb ~|~ \ti
-    \vspace{0.5em}\\
-    \text{contexts}
-    & \GG &\bnfeq& \cdot ~|~ \GG, \h{x}{A}{s}
-    \vspace{0.5em}\\
-    \text{judgment}
-    & J &\bnfeq& \GG \vdash \h{M}{A}{s}
-  \end{array}
-\end{mathpar}
+%% \begin{mathpar}
+%%   \begin{array}{cccl}
+%%     \text{types} & A,B,C \vspace{0.5em}\\
+%%     \text{terms} & M,N,O \vspace{0.5em}\\
+%%     \text{tones}
+%%     & s,t,u
+%%     & \bnfeq & \tm ~|~ \ta ~|~ \tb ~|~ \ti
+%%     \vspace{0.5em}\\
+%%     \text{contexts}
+%%     & \GG &\bnfeq& \cdot ~|~ \GG, \h{x}{A}{s}
+%%     \vspace{0.5em}\\
+%%     \text{judgment}
+%%     & J &\bnfeq& \GG\ \vec{s} \vdash M : A
+%%   \end{array}
+%% \end{mathpar}
 
-Tones represent ways a function may respect or disrespect the orderings on its
-arguments. $\tm$ is monotone; $\ta$ is antitone (monotone in the
-opposite ordering); $\tb$ is bivariant (monotone and antitone); and $\ti$ is
-invariant (only respects equivalence).
-%
-Formally, tones are properties of maps between preorders (sets equipped with
-reflexive, transitive relations):\,\footnote{It is possible to generalize tones
-  to properties of functors and categories. In this case, invariance corresponds
-  to the \emph{core} of a category, formed by throwing away all morphisms except
-  the isomorphisms; while bivariance corresponds its \emph{localization}, formed
-  by freely adding inverses for every morphism.}
+\section{A preamble on preorders}
+
+A preorder is a set equipped with a relation $a \le b$ satisfying: 
+\begin{enumerate}
+\item \textbf{Reflexivity:} $a \le a$.
+\item \textbf{Transitivity:} If $a \le b$ and $b \le c$ then $a \le c$.
+\end{enumerate}
+
+A good example of a preorder is ``lists under containment'', where $a \le b$ iff
+every element of $a$ is also in $b$.
+
+Preorders are like partial orders without antisymmetry. Let $a \equiv b$ iff $a
+\le b$ and $b \le a$. Then antisymmetry becomes: $a \equiv b \implies a = b$.
+However, under list containment, $[0,1] \equiv [1,0]$, but $[0,1] \ne [1,0]$.
+
+If you're a category theorist, a preorder is a ``thin'' category, where between
+any two objects there is at most one morphism. I believe much of the ``tone
+theory'' in this document, ostensibly about maps between preorders, can be
+extended to functors between categories.
+
+
+
+\section{Tones}
 
 \begin{center}
-  \begin{tabular}{lclc@{\hskip 0.25em}c@{\hskip 0.25em}c}
-    \multicolumn{1}{c}{\textbf{Name}}
-    & \multicolumn{1}{c}{\textbf{Symbol}}
-    & \multicolumn{1}{c}{\textbf{Respects}}
+  \begin{tabular}{clc@{\hskip 0.25em}c@{\hskip 0.25em}c}
+    \multicolumn{1}{c}{\textbf{Tone}}
+    & \multicolumn{1}{c}{\textbf{Name}}
+    %% & \multicolumn{1}{c}{\textbf{Respects}}
     & \multicolumn{3}{c}{\textbf{Property of $f$}}
     \\\hline
-    \text{Monotone} & \tm
-    & \text{ordering}
+    \tm & \text{Monotone}
+    %% & \text{ordering}
     & $x \le y$ &$\implies$& $f(x) \le f(y)$
     \\
-    \text{Antitone} & \ta
-    & \text{opposite ordering}
+    \ta & \text{Antitone}
+    %% & \text{opposite ordering}
     & $x \ge y$ &$\implies$& $f(x) \le f(y)$
     \\
-    \text{Bivariant} & \tb{}
-    & \text{equivalence closure or ``paths''}
+    \tb & \text{Bivariant}
+    %% & \text{equivalence closure or ``paths''}
     & $x \le y \vee y \le x$ &$\implies$& $f(x) \le f(y)$
     \\
-    \text{Invariant} & \ti{}
-    & \text{induced equivalence or ``isomorphisms''}
+    \ti & \text{Invariant}
+    %% & \text{induced equivalence or ``isomorphisms''}
     & $x \le y \wedge y \le x$ &$\implies$& $f(x) \le f(y)$
   \end{tabular}
 \end{center}
+
+Tones are ways a function $f$ may respect a preordering on its
+arguments. I will consider four tones: \tm, \ta, \tb, and \ti.
+
+\begin{enumerate}
+\item $\tm$ is monotone (order-preserving).
+\item $\ta$ is antitone (order-inverting).
+\item $\tb$ is bivariant: both monotone and antitone.
+\item $\ti$ is invariant, respecting only equivalence.
+\end{enumerate}
+
 In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
 \implies x = y \implies f(x) = f(y)$), so we sometimes call $\ti$ the
 ``discrete'' tone, because it respects only the discrete ordering.
 
-Another view of tones is as functors $-^s : \mb{Preorder} \to \mb{Preorder}$
-which modify a preordered set's ordering without changing its elements, namely:
-\[\begin{array}{r@{\hskip 0.5em}c@{\hskip 0.5em}l
-  @{\hskip 2em}c@{\hskip 2em}
-  l@{\hskip 0.5em}c@{\hskip 0.5em}l}
-  T_\tm(A) &=& A
-  %% &\text{where}& x \le_A y &\iff& x \le_A y
-  \\
-  T_\ta(A) &=& A^\op
-  &\text{where}& x \le_{A^\op} y &\iff& y \le_A x
-  \\
-  T_\ti(A) &=& A^\iso
-  &\text{where}& x \le_{A^\ti} y &\iff& x \le_A y \wedge y \le_A x
-  \\
-  T_\tb(A) &=& A^\path
-  &\text{where}& x \le_{A^\path} y &\iff&
-  \exists\bind{\vec{a}} a_0 = x \wedge a_n = y \wedge {}
-  \\
-  &&&&&& \phantom{\exists\bind{\vec{a}}}
-  \forall\bind{i} a_i \le_A a_{i+1} \vee a_{i+1} \le_A a_i
-\end{array}\]
+
+\subsection{Tones transform preorders}
 
-These views fit together neatly. A map $f : A \overset{s}{\to} B$ with tone $s$
-is the same as a monotone map $T_s(A) \to B$:
-\begin{mathpar}
-  {A \mto B = A \to B}
-  \qquad
-  {A \ato B = A^\op \to B}
-  \qquad
-  {A \ito B = A^\iso \to B}
-  \qquad
-  {A \bto B = A^\path \to B}
-\end{mathpar}
+Consider preorders $A, B$. Let $A^\op$ be $A$, ordered oppositely. Now, observe
+that
 
-%% Also of note is that each tone $s$ has a dual $\tdual{s}$ such that $T_s(A) \to
-%% B = A \to T_{\tdual{s}}(B)$:
-%% \[\begin{array}{c@{\hskip 2em}l}
-%%     \tdual{\tm} = \tm & A \to B = A \to B\\
-%%     \tdual{\ta} = \ta & A^\op \to B = A \to B^\op\\
-%%     \tdual{\ti} = \tb & \Disc A \to B = A \to \Codisc B\\
-%%     \tdual{\tb} = \ti & \Codisc A \to B\todo{{} = A \to \Disc B}\\
+\begin{center}
+  $f : A \to B$ is antitone\vspace{0.5em}\\
+  \emph{iff}\vspace{0.5em}\\
+  $f : A^\op \to B$ is monotone
+\end{center}
+
+So ``antitone'' is a special case of ``monotone''! This observation generalizes:
+every tone is really monotonicity with a transformation applied to the domain's
+ordering. So \textbf{tones transform preorderings.}
+%
+I write $A^s$ for the preorder $A$ transformed by the tone $s$, defined as
+follows:
+
+\begin{center}
+  \begin{tabular}{cll@{\hskip 0.25em}c@{\hskip 0.25em}l}
+    {\textbf{Tone}}
+    & {\textbf{Meaning}}
+    & \multicolumn{3}{c}{\textbf{Transformation on $A$}}
+    \\\hline
+    \tm & \text{ordering}
+    & $a \le b : A^\tm$ & $\iff$ & $a \le b : A$
+    \\
+    \ta
+    & \text{opposite ordering}
+    & $a \le b : A^\op$ & $\iff$ & $a \ge b : A$
+    \\
+    \tb{}
+    & \text{equivalence closure or ``paths''}
+    & $a \le b : A^\path$ &$\Longleftarrow\ $&
+    $a \le b \vee b \le a : A$ \emph{\small (see note)}$^\dagger$\\
+    \ti
+    & \text{induced equivalence or ``core''}
+    & $a \le b : A^\iso$ & $\iff$ & $a \le b \wedge b \le a : A$
+  \end{tabular}
+\end{center}
+
+With this, we can state the theorem generalizing our observation:
+\begin{theorem} Given a function $f : A \to B$ between preorders $A$, $B$:
+  \begin{center}
+    $f : A \to B$ has tone $s$\vspace{0.5em}\\
+    \emph{iff}\vspace{0.5em}\\
+    $f : A^s \to B$ is monotone
+  \end{center}
+\end{theorem}
+
+\begin{proof} Exercise for the reader. \end{proof}
+
+\subsubsection{$\dagger$ Note on defining $\path$}
+
+$A^\path$ is the smallest preorder satisfying
+\[ a \le b \vee b \le a : A \implies a \le b : A^\path \]
+
+Recall that $a \le b: A^\iso$ iff $a \le b \wedge b \le a : A$.
+%
+Unfortunately, $A^\path$ is not so easy to define \emph{directly}, without
+language like ``the smallest preorder satisfying''.
+%
+In particular, $a \le b \vee b \le a : A$ implies $a \le b : A^\path$, but the
+reverse does not always hold. A good counterexample is the \ms{fencepost}
+ordering:
+
+\todo{TODO: Diagram}.
+
+That is, $a \le a+1$ for even $a$, and $a \ge a+1$ for odd $a$. In
+$\ms{fencepost}^\path$, everything is equivalent:
+\[ 0 \equiv 1 \equiv 2 \equiv 3 \equiv 4 \equiv ... \]
+
+But $a \le b \vee b \le a : \ms{fencepost}$ is equivalent to $|a-b| \le 1$,
+which isn't even transitive!
+
+However, a direct definition of $A^\path$ is possible, using \emph{paths}:
+``zig-zagging'' lists $a_0, a_1, ..., a_n$ such that $a_i \le a_{i+1} \vee a_i
+\ge a_{i+1} : A$. Then $a \le b : A^\path$ if there is a path starting from $a$
+and ending at $b$.
+
+%% \begin{enumerate}
+%% \item $A^{\ms{id}}$ is just $A$, unchanged.
+%% \item $A^\op$ is $A$ with the opposite order: \[ a \le b : A^\op \iff a \le b : A \]
+%% \item $A^\path$ gives the equivalence closure --- the smallest preorder such that
+%%   \[(a \le b \vee b \le a) : A \implies a \le b : A^\path\]
+%% \item $A^\iso$ gives the induced equivalence --- the smallest preorder such that
+%%   \[(a \le b \wedge b \le a) : A \implies a \le b : A^\iso \]
+%% \end{enumerate}
+
+%% Another view of tones is as transformations $-^s : \mb{Preorder} \to
+%% \mb{Preorder}$ which modify a preordered set's ordering without changing its
+%% elements, namely:
+%% \[\begin{array}{r@{\hskip 0.5em}c@{\hskip 0.5em}l
+%%   @{\hskip 2em}c@{\hskip 2em}
+%%   l@{\hskip 0.5em}c@{\hskip 0.5em}l}
+%%   T_\tm(A) &=& A
+%%   %% &\text{where}& x \le_A y &\iff& x \le_A y
+%%   \\
+%%   T_\ta(A) &=& A^\op
+%%   &\text{where}& x \le_{A^\op} y &\iff& y \le_A x
+%%   \\
+%%   T_\ti(A) &=& A^\iso
+%%   &\text{where}& x \le_{A^\ti} y &\iff& x \le_A y \wedge y \le_A x
+%%   \\
+%%   T_\tb(A) &=& A^\path
+%%   &\text{where}& x \le_{A^\path} y &\iff&
+%%   \exists\bind{\vec{a}} a_0 = x \wedge a_n = y \wedge {}
+%%   \\
+%%   &&&&&& \phantom{\exists\bind{\vec{a}}}
+%%   \forall\bind{i} a_i \le_A a_{i+1} \vee a_{i+1} \le_A a_i
 %% \end{array}\]
 
-%% \todo{TODO: Check these! Also, doesn't this mean everything is both left- and
-%%   right-adjoint to its dual? Is that possible?}
+%% These views fit together neatly. A map $f : A \overset{s}{\to} B$ with tone $s$
+%% is the same as a monotone map $T_s(A) \to B$:
+%% \begin{mathpar}
+%%   {A \mto B = A \to B}
+%%   \qquad
+%%   {A \ato B = A^\op \to B}
+%%   \qquad
+%%   {A \ito B = A^\iso \to B}
+%%   \qquad
+%%   {A \bto B = A^\path \to B}
+%% \end{mathpar}
 
 
 \subsection{Tone operators}

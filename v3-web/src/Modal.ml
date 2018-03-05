@@ -8,8 +8,8 @@
  * let (X ≤ Y) if every element of the list X is also in Y.
  *
  * Preorders are like partial orders, but without requiring antisymmetry.
- * For example, under "containment" we have [0,1] ≤ [1,0] and [1,0] ≤ [0,1],
- * but [0,1] ≠ [1,0].
+ * Let a ≡ b iff a ≤ b ∧ b ≤ a. Antisymmetry says: a ≡ b ⊃ a = b.
+ * Under "list containment" [0,1] ≡ [1,0], even though [0,1] ≠ [1,0]
  *
  * If you're a category theorist, a preorder is a "thin" category, where between
  * any two objects there is at most one morphism. I believe much of the "tone
@@ -27,10 +27,10 @@
  * Let's focus on the first definition for now.
  *)
 type tone
-  = Id    (* monotone/covariant; respects the ordering *)
-  | Op    (* antitone/contravariant; respects the opposite order *)
-  | Iso   (* invariant; respects only equivalence *)
-  | Path  (* bivariant; respects both the order & its opposite *)
+  = Id    (* monotone:  x ≤ y           implies f(x) ≤ f(y) *)
+  | Op    (* antitone:  x ≥ y           implies f(x) ≤ f(y) *)
+  | Iso   (* invariant: (x ≤ y ∧ x ≥ y) implies f(x) ≤ f(y) *)
+  | Path  (* bivariant: (x ≤ y ∨ x ≥ y) implies f(x) ≤ f(y) *)
 
 (* Consider an arbitrary preorder A. Let A^op be A, ordered oppositely.
  * Now, observe that
@@ -57,15 +57,34 @@ type tone
  *
  * Of course, we still need to define A^s:
  * 
- * 1. Id leaves the order unchanged.
+ * 1. id leaves the order unchanged.
  *
- * 2. Op inverts it: (a ≤ b at A^op) iff (b ≤ a at A).
+ * 2. op inverts it: (a ≤ b): A^op iff (b ≤ a): A.
  *
- * 3. Iso gives the induced equivalence:
- *    (a ≡ b at A^iso) iff (a ≤ b and b ≤ a at A).
+ * 3. iso gives the induced equivalence, the smallest preorder such that
+ *    (a ≤ b ∧ b ≤ a): A implies a ≤ b : A^iso.
  *
- * 4. Path gives the equivalence closure, the smallest equivalence such that
- *    (a ≤ b at A) implies (a ≡ b at A^path).
+ * 4. path gives the equivalence closure, the smallest preorder such that
+ *    (a ≤ b ∨ b ≤ a): A implies a ≤ b : A^path.
+ *)
+
+(* Note that (a ≤ b): A^iso iff (a ≤ b ∧ b ≤ a): A.
+ *
+ * A^path, the dual of A^iso, is not so easy to define directly. In particular,
+ * (a ≤ b ∨ b ≤ a): A implies, but isn't always implied by, (a ≤ b): A^path.
+ * A good counterexample is the "fencepost ordering", Fencepost:
+ *
+ *       1   3   5   7   ...
+ *      / \ / \ / \ / \ /
+ *     0   2   4   6   8 ...
+ *
+ * That is, (x ≤ x+1 iff x even) and (x ≥ x+1 iff x odd).
+ * In Fencepost^path, everything is equivalent:
+ *
+ *     0 ≡ 1 ≡ 2 ≡ 3 ≡ 4 ...
+ *
+ * But in Fencepost, (a ≤ b ∨ b ≤ a) is equivalent to |a-b| ≤ 1, which isn't
+ * even transitive!
  *)
 
 
