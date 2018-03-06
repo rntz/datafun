@@ -96,7 +96,7 @@
 
 \newcommand{\tc}{\cdot}         % tone composition
 
-\newcommand{\h}[3]{#1 : {#2}}
+\newcommand{\h}[3]{#1 : {#2}\,{#3}}
 \newcommand{\hm}[2]{\h{#1}{#2}{\tm}}
 \newcommand{\ha}[2]{\h{#1}{#2}{\ta}}
 \newcommand{\hi}[2]{\h{#1}{#2}{\ti}}
@@ -397,6 +397,7 @@ i.e.\! a simply typed $\lambda$-calculus.
 \section{A bidirectional $\lambda$-calculus with tone inference}
 
 \newcommand{\subtype}[3]{{#2}\ {#1}<: {#3}}
+\newcommand{\isfn}[4]{{#2}\ {#1}<: {#3} \Rightarrow {#4}}
 
 \newcommand{\infers}[3]{{#1}\,\vdash {#2} ~\mb{infers}~ {#3}}
 \newcommand{\checks}[3]{{#1}\,\vdash {#2} ~\mb{checks}~ {#3}}
@@ -406,7 +407,7 @@ i.e.\! a simply typed $\lambda$-calculus.
     \text{tones} & s,t,u & \bnfeq & \tm ~|~ \ta ~|~ \tb ~|~ \ti
     \vspace{0.5em}\\
     \text{types} & A,B,C
-    &\bnfeq& \star ~|~ A \to B ~|~ A \x B ~|~ \Box A ~|~ \op\;A
+    &\bnfeq& \ms{base} ~|~ A \to B ~|~ A \x B ~|~ \Box A ~|~ \op\;A
     \vspace{0.5em}\\
     \text{checking terms} & M
     &\bnfeq& N ~|~ \fn\bind{x} M ~|~ (M, M)
@@ -423,6 +424,7 @@ i.e.\! a simply typed $\lambda$-calculus.
     \checks{\GG\,s}{M}{A}
     \\&&|& \infers{\GG\,s}{N}{A}
     \\&&|& \subtype{s}{A}{B}
+    \\&&|& \isfn{s}{A}{B}{C}
   \end{array}
 \end{mathpar}
 
@@ -435,15 +437,18 @@ i.e.\! a simply typed $\lambda$-calculus.
   \infer{\quad}{\infers{\GG\,\tb,~x : A\,\tm}{x}{A}}
 
   %% functions & function application
+  %% TODO: need ``coerce to a function'' subtyping rule!
   \infer{\checks{\GG\,s,~x : A\,t}{M}{B} \quad \tm \le t}
         {\checks{\GG\,s}{\fn\bind{x} M}{A \to B}}
 
-  \infer{\infers{\GG\,s}{N}{A \to B} \quad \checks{\GG\,t}{M}{A}}
-        {\infers{\GG\,(s \wedge t)}{N\; M}{B}}
+  \infer{\infers{\GG\,s}{N}{A}
+         \quad \isfn{u}{A}{B}{C}
+         \quad \checks{\GG\,t}{M}{B}}
+        {\infers{\GG\,((s \tc u) \wedge t)}{N\; M}{C}}
 
   %% pairs
   \infer{\checks{\GG\,s}{M_1}{A_1} \quad \checks{\GG\,t}{M_2}{A_2}}
-        {\checks{\GG\,s \wedge t}{(M_1,M_2)}{A_1 \x A_2}}
+        {\checks{\GG\,(s \wedge t)}{(M_1,M_2)}{A_1 \x A_2}}
 
   \infer{\infers{\GG\,s}{N}{A_1 \x A_2}}
         {\infers{\GG\,s}{\pi_i\;N}{A_i}}
@@ -456,8 +461,8 @@ i.e.\! a simply typed $\lambda$-calculus.
         {\checks{\GG\,s \tc \ta}{M}{\op\; A}}
 \end{mathpar}
 
+
 \subsection{Subtyping}
-
 \begin{mathpar}
   \infer{\quad}{\subtype{\tm}{A}{A}}
   
@@ -490,6 +495,19 @@ i.e.\! a simply typed $\lambda$-calculus.
 
   \infer{\subtype{\tb}{A_1}{A_2} \quad \subtype{\ti}{B_1}{B_2}}
         {\subtype{\ti}{A_1 \to B_1}{A_2 \to B_2}}
+\end{mathpar}
+
+
+\subsection{Function application subtyping}
+
+\begin{mathpar}
+  \infer{\quad}{\isfn{\tm}{A \to B}{A}{B}}
+
+  \infer{\isfn{s}{A}{B}{C}}
+        {\isfn{\tb \tc s}{\Box A}{B}{C}}
+
+  \infer{\isfn{s}{A}{B}{C}}
+        {\isfn{\ta \tc s}{\op\; A}{\op\;B}{\op\;C}}
 \end{mathpar}
 
 
