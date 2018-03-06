@@ -96,7 +96,7 @@
 
 \newcommand{\tc}{\cdot}         % tone composition
 
-\newcommand{\h}[3]{#1 : {#2}\,{#3}}
+\newcommand{\h}[3]{#1 : {#2}^{#3}}
 \newcommand{\hm}[2]{\h{#1}{#2}{\tm}}
 \newcommand{\ha}[2]{\h{#1}{#2}{\ta}}
 \newcommand{\hi}[2]{\h{#1}{#2}{\ti}}
@@ -396,8 +396,9 @@ i.e.\! a simply typed $\lambda$-calculus.
 
 \section{A bidirectional $\lambda$-calculus with tone inference}
 
-\newcommand{\subtype}[3]{{#2}\ {#1}\sqsubset {#3}}
-\newcommand{\isfn}[4]{{#2}\ {#1}\sqsubset {#3} \Rightarrow {#4}}
+\newcommand{\isfn}[4]{{#2}^{#1}\sqsubset {#3} \Rightarrow {#4}}
+\newcommand{\subtype}[3]{{#2}^{#1}\sqsubset {#3}}
+\newcommand{\converts}[3]{{#2}^{#1} \prec {#3}}
 
 \newcommand{\infers}[3]{{#1}\vdash {#2} ~\mb{infers}~ {#3}}
 \newcommand{\checks}[3]{{#1}\vdash {#2} ~\mb{checks}~ {#3}}
@@ -426,57 +427,57 @@ i.e.\! a simply typed $\lambda$-calculus.
     & J &\bnfeq&
     \checks{\GG}{M}{A}
     \\&&|& \infers{\GG}{N}{A}
-    \\&&|& \subtype{s}{A}{B}
-    \\&&|& \isfn{s}{A}{B}{C}
+    \\&&|& \subtype{s}{A}{B} ~|~ \converts{s}{A}{B}
   \end{array}
 \end{mathpar}
 
 \todo{TODO: explain my various abuses of notation, e.g. $\GG\,t$ and $\GG_1
   \wedge \GG_2$}
 
-\todo{TODO: the rule for synthesizing projections is wrong; what if I'm
-  projecting from $\Box (A \x B)$? I think I need to generalize the
-  ``spine-like'' subtyping rule.}
+\todo{TODO: patterns and pattern inference}
 
 \begin{mathpar}
+  \infer{\quad}{\infers{\h{x}{A}{\tm}}{x}{A}}
+
   \infer{\checks{\GG}{M}{A}}{\infers{\GG}{M : A}{A}}
 
   \infer{\infers{\GG}{N}{A} \quad \subtype{t}{A}{B}}
-        {\checks{\GG\,t}{N}{B}}
+        {\checks{\GG^t}{N}{B}}
 
-  \infer{\quad}{\infers{x : A\,\tm}{x}{A}}
+  %% type-driven subtyping for checking
+  \infer{\checks{\GG}{M}{A}}
+        {\checks{\GG^\ti}{M}{\Box A}}
+
+  \infer{\checks{\GG}{M}{A}}
+        {\checks{\GG^\ta}{M}{\op\; A}}
 
   %% let-binding
-  \infer{\infers{\GG_1}{N}{A} \quad \checks{\GG_2,~ x : A\,s}{M}{C}}
-        {\checks{\GG_1 s \wedge \GG_2}{\mb{let}~x = N~\mb{in}~M}{C}}
+  \infer{\infers{\GG_1}{N}{A} \quad \checks{\GG_2,~ \h{x}{A}{s}}{M}{C}}
+        {\checks{\GG_1^s \wedge \GG_2}{\mb{let}~x = N~\mb{in}~M}{C}}
 
   %% functions & function application
   %% TODO: need ``coerce to a function'' subtyping rule!
-  \infer{\checks{\GG{},~ x : A\,t}{M}{B} \quad \tm \le t}
+  \infer{\checks{\GG{},~ \h{x}{A}{t}}{M}{B} \quad \tm \le t}
         {\checks{\GG}{\fn\bind{x} M}{A \to B}}
 
   \infer{\infers{\GG_1}{N}{A}
-         \quad \isfn{u}{A}{B}{C}
+         \quad \converts{u}{A}{B \to C}
          \quad \checks{\GG_2}{M}{B}}
-        {\infers{\GG_1\,u \wedge \GG_2}{N\; M}{C}}
+        {\infers{\GG_1^u \wedge \GG_2}{N\; M}{C}}
 
   %% pairs
   \infer{\checks{\GG_1}{M_1}{A_1} \quad \checks{\GG_2}{M_2}{A_2}}
         {\checks{\GG_1 \wedge \GG_2}{(M_1,M_2)}{A_1 \x A_2}}
 
-  \infer{\infers{\GG}{N}{A_1 \x A_2}}
-        {\infers{\GG}{\pi_i\;N}{A_i}}
-
-  %% type-driven subtyping for checking
-  \infer{\checks{\GG}{M}{A}}
-        {\checks{\GG\,\ti}{M}{\Box A}}
-
-  \infer{\checks{\GG}{M}{A}}
-        {\checks{\GG\,\ta}{M}{\op\; A}}
+  \infer{\infers{\GG}{N}{A} \quad \converts{s}{A}{B_1 \x B_2}}
+        {\infers{\GG^s}{\pi_i\;N}{B_i}}
 \end{mathpar}
 
 
 \subsection{Subtyping}
+In $\subtype{s}{A}{B}$, the types $A$ and $B$ are inputs, and the tone $s$ is
+output.
+
 \begin{mathpar}
   \infer{\quad}{\subtype{\tm}{A}{A}}
   
@@ -489,40 +490,54 @@ i.e.\! a simply typed $\lambda$-calculus.
         {\subtype{\tb \tc s}{\Box A}{B}}
 
   \infer{\subtype{s}{A}{B}}
-        {\subtype{\ta \tc s}{\op\; A}{B}}
+        {\subtype{\ta \tc s}{(\op\; A)}{B}}
 
   \infer{\subtype{s}{A}{B}}
         {\subtype{s \tc \ta}{A}{\op\; B}}
 
   \infer{\subtype{s}{A_1}{A_2} \quad \subtype{t}{B_1}{B_2}}
-        {\subtype{s \wedge t}{A_1 \x B_1}{A_2 \x B_2}}
+        {\subtype{s \wedge t}{(A_1 \x B_1)}{A_2 \x B_2}}
 
   %% The function rules!
   \infer{\subtype{s}{A_1}{A_2} \quad \subtype{\tm}{B_1}{B_2} \quad \tm \le s}
-        {\subtype{\tm}{A_1 \to B_1}{A_2 \to B_2}}
+        {\subtype{\tm}{(A_1 \to B_1)}{A_2 \to B_2}}
 
   \infer{\subtype{s}{A_1}{A_2} \quad \subtype{\ta}{B_1}{B_2} \quad \ta \le s}
-        {\subtype{\ta}{A_1 \to B_1}{A_2 \to B_2}}
+        {\subtype{\ta}{(A_1 \to B_1)}{A_2 \to B_2}}
 
   \infer{\subtype{s}{A_1}{A_2} \quad \subtype{\tb}{B_1}{B_2} \quad \ti < s}
-        {\subtype{\tb}{A_1 \to B_1}{A_2 \to B_2}}
+        {\subtype{\tb}{(A_1 \to B_1)}{A_2 \to B_2}}
 
   \infer{\subtype{\tb}{A_1}{A_2} \quad \subtype{\ti}{B_1}{B_2}}
-        {\subtype{\ti}{A_1 \to B_1}{A_2 \to B_2}}
+        {\subtype{\ti}{(A_1 \to B_1)}{A_2 \to B_2}}
 \end{mathpar}
 
 
-\subsection{Function application subtyping}
+\subsection{Spine subtyping}
 
+In $\converts{s}{A}{B}$, the type $A$ is input, the \emph{shape} of $B$ (some
+nesting of $- \to -$ and $- \x -$) is input, the actual types in $B$ are
+outputs, and the tone $s$ is output.
 \begin{mathpar}
-  \infer{\quad}{\isfn{\tm}{A \to B}{A}{B}}
+  \infer{\quad}{\converts{\tm}{A}{A}}
 
-  \infer{\isfn{s}{A}{B}{C}}
-        {\isfn{\tb \tc s}{\Box A}{B}{C}}
+  \infer{\converts{s}{A}{B}}{\converts{\tb\tc s}{\Box A}{B}}
 
-  \infer{\isfn{s}{A}{B}{C}}
-        {\isfn{\ta \tc s}{\op\; A}{\op\;B}{\op\;C}}
+  \infer{\converts{s}{A}{B}}{\converts{\ta\tc s}{(\op\; A)}{B}}
+
+  %% \infer{\isfn{s}{A}{B}{C}}
+  %%       {\isfn{s}{\op\; A}{\op\;B}{\op\;C}}
 \end{mathpar}
+
+\textbf{Q:} Aren't these just a subset of the subtyping rules?
+
+\textbf{A:} Yes, but with a change of mode! If we let $B$ be an output, the
+rules for $\subtype{s}{A}{B}$ are nondeterministic! So $\converts{s}{A}{B}$ is a
+specialisation of $\subtype{s}{A}{B}$ chosen to be deterministic when $B$ is an
+output.
+
+\textbf{Todo:} Prove this ``determinisation'' is in some sense
+correct/complete for our use-case.
 
 
 \section{Substitution as guiding principle}
