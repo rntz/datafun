@@ -122,7 +122,7 @@
 
 \section{A preamble on preorders}
 
-A preorder is a set equipped with a relation $a \le b$ satisfying: 
+A preorder is a relation $a \le b$ satisfying:
 \begin{enumerate}
 \item \textbf{Reflexivity:} $a \le a$.
 \item \textbf{Transitivity:} If $a \le b$ and $b \le c$ then $a \le c$.
@@ -144,6 +144,17 @@ extended to functors between categories.
 
 \section{Tones}
 
+Tones are ways a function $f$ may respect a preordering. I will consider four
+tones: \tm, \ta, \tb, and \ti.
+
+\begin{enumerate}
+\item $\tm$ is monotone (order-preserving).
+\item $\ta$ is antitone (order-inverting).
+\item $\tb$ is bivariant: both monotone and antitone.
+\item $\ti$ is invariant, respecting only equivalence.
+\end{enumerate}
+
+Formally:
 \begin{center}
   \begin{tabular}{clc@{\hskip 0.25em}c@{\hskip 0.25em}c}
     \multicolumn{1}{c}{\textbf{Tone}}
@@ -169,22 +180,12 @@ extended to functors between categories.
   \end{tabular}
 \end{center}
 
-Tones are ways a function $f$ may respect a preordering on its
-arguments. I will consider four tones: \tm, \ta, \tb, and \ti.
-
-\begin{enumerate}
-\item $\tm$ is monotone (order-preserving).
-\item $\ta$ is antitone (order-inverting).
-\item $\tb$ is bivariant: both monotone and antitone.
-\item $\ti$ is invariant, respecting only equivalence.
-\end{enumerate}
-
 %% In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
 %% \implies x = y \implies f(x) = f(y)$), so we sometimes call $\ti$ the
 %% ``discrete'' tone, because it respects only the discrete ordering.
 
 
-\subsection{Tones transform preorders}
+\subsection{Tones transform orders}
 
 Consider preorders $A, B$. Let $A^\op$ be $A$, ordered oppositely. Now, observe
 that
@@ -197,7 +198,7 @@ that
 
 So ``antitone'' is a special case of ``monotone''! This observation generalizes:
 every tone is really monotonicity with a transformation applied to the domain's
-ordering. So \textbf{tones transform preorderings.}
+ordering. So \textbf{tones transform orders.}
 %
 I write $A^s$ for the preorder $A$ transformed by the tone $s$, defined as
 follows:
@@ -292,15 +293,14 @@ composition operator is commutative.
 
 They write $\uparrow$ for $\tm$, $\downarrow$ for $\ta$, $?$ for $\ti$, and
 $\sim$ for constancy. They also add $=$ for the ``tone'' that \emph{only the
-  identity function} respects. This doesn't fit my framework; it cannot be
-phrased as a transformation on orderings. However, it seems related to
-subtyping, which I discuss later.}
+  identity function} has. This doesn't fit my framework; it cannot be phrased as
+a transformation on orderings. However, it seems related to subtyping.}
 %
 \footnotetext{Indiscreteness (and its dual, discreteness) are also tones ---
   that is, functorial transformations on the ordering component of a preorder
   --- but they complicate things and are unused in Datafun, so I omit them. It
   is worth noting that discreteness and $\ti$ coincide when restricted to
-  posets, and many intuitions transfer from one to the other.}
+  posets, so many intuitions transfer from one to the other.}
 %
 \begin{mathpar}
   %% "baseline=(current bounding box.center)" incantation taken from
@@ -479,7 +479,7 @@ output.
 
 \begin{mathpar}
   \infer{\quad}{\subtype{\tm}{A}{A}}
-  
+
   \infer{A~\ms{equiv}}{\subtype{\ti}{A}{A}}
 
   \infer{\subtype{s}{A}{B}}
@@ -514,9 +514,9 @@ output.
 
 \subsection{Spine subtyping}
 
-In $\converts{s}{A}{B}$, the type $A$ is input, the \emph{shape} of $B$ (some
-nesting of $- \to -$ and $- \x -$) is input, the actual types in $B$ are
-outputs, and the tone $s$ is output.
+In $\converts{s}{A}{B}$, the type $A$ is input, the \emph{shape} of $B$ (either
+$- \to -$ or $- \x -$) is input, the actual types in $B$ are outputs, and the
+tone $s$ is output.
 \begin{mathpar}
   \infer{\quad}{\converts{\tm}{A}{A}}
 
@@ -537,6 +537,9 @@ output.
 
 \textbf{Todo:} Prove this ``determinisation'' is in some sense
 correct/complete for our use-case.
+
+\textbf{Observation:} $\converts{s}{A}{B}$ ``strips off'' modal operators on
+$A$, turning them into transformations on $s$.
 
 
 \section{Substitution as guiding principle}
