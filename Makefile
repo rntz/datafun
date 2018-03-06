@@ -1,6 +1,6 @@
 LATEXRUN := ./latexrun/latexrun
 
-TEXS  := tonality-inference.tex
+TEXS  := tones.tex
 # other things which affect compilation result
 AUXIL := $(wildcard *.sty) Makefile
 PDFS  := $(addsuffix .pdf,$(basename $(TEXS)))
