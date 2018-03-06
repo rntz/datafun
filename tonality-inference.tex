@@ -455,19 +455,18 @@ i.e.\! a simply typed $\lambda$-calculus.
   \infer{\infers{\GG_1}{N}{A} \quad \checks{\GG_2,~ \h{x}{A}{s}}{M}{C}}
         {\checks{\GG_1^s \wedge \GG_2}{\mb{let}~x = N~\mb{in}~M}{C}}
 
-  %% functions & function application
-  %% TODO: need ``coerce to a function'' subtyping rule!
+  %% introductions
   \infer{\checks{\GG{},~ \h{x}{A}{t}}{M}{B} \quad \tm \le t}
         {\checks{\GG}{\fn\bind{x} M}{A \to B}}
 
+  \infer{\checks{\GG_1}{M_1}{A_1} \quad \checks{\GG_2}{M_2}{A_2}}
+        {\checks{\GG_1 \wedge \GG_2}{(M_1,M_2)}{A_1 \x A_2}}
+
+  %% eliminations
   \infer{\infers{\GG_1}{N}{A}
          \quad \converts{u}{A}{B \to C}
          \quad \checks{\GG_2}{M}{B}}
         {\infers{\GG_1^u \wedge \GG_2}{N\; M}{C}}
-
-  %% pairs
-  \infer{\checks{\GG_1}{M_1}{A_1} \quad \checks{\GG_2}{M_2}{A_2}}
-        {\checks{\GG_1 \wedge \GG_2}{(M_1,M_2)}{A_1 \x A_2}}
 
   \infer{\infers{\GG}{N}{A} \quad \converts{s}{A}{B_1 \x B_2}}
         {\infers{\GG^s}{\pi_i\;N}{B_i}}
