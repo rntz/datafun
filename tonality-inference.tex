@@ -67,7 +67,7 @@
 
 %% Category & preorder theory
 \newcommand{\op}{\ms{op}}
-\newcommand{\iso}{\ms{iso}}
+\newcommand{\iso}{\ms{core}}
 \renewcommand{\path}{\ms{path}}
 \newcommand{\isoto}{\simeq}
 \newcommand{\pathto}{\sim}
@@ -195,9 +195,9 @@ arguments. I will consider four tones: \tm, \ta, \tb, and \ti.
 \item $\ti$ is invariant, respecting only equivalence.
 \end{enumerate}
 
-In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
-\implies x = y \implies f(x) = f(y)$), so we sometimes call $\ti$ the
-``discrete'' tone, because it respects only the discrete ordering.
+%% In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
+%% \implies x = y \implies f(x) = f(y)$), so we sometimes call $\ti$ the
+%% ``discrete'' tone, because it respects only the discrete ordering.
 
 
 \subsection{Tones transform preorders}
@@ -224,20 +224,21 @@ follows:
     & {\textbf{Meaning}}
     & \multicolumn{3}{c}{\textbf{Transformation on $A$}}
     \\\hline
-    \tm & \text{ordering}
-    & $a \le b : A^\tm$ & $\iff$ & $a \le b : A$
+    \tm & \text{same ordering}
+    & $a \le b : A$ &$\iff$& $a \le b : A^\tm$
     \\
     \ta
     & \text{opposite ordering}
-    & $a \le b : A^\op$ & $\iff$ & $a \ge b : A$
+    & $a \ge b : A$ &$\iff$& $a \le b : A^\op$
     \\
     \tb{}
-    & \text{equivalence closure or ``paths''}
-    & $a \le b : A^\path$ &$\Longleftarrow\ $&
-    $a \le b \vee b \le a : A$ \emph{\small (see note)}$^\dagger$\\
+    & \text{equivalence closure}
+    & $a \le b \vee b \le a : A$ &$\ \implies$& $a \le b : A^\path$
+    \quad \emph{\small (see \ref{sec:defining-path})}
+    \\
     \ti
-    & \text{induced equivalence or ``core''}
-    & $a \le b : A^\iso$ & $\iff$ & $a \le b \wedge b \le a : A$
+    & \text{induced equivalence}
+    & $a \le b \wedge b \le a : A$ &$\iff$& $a \le b : A^\iso$
   \end{tabular}
 \end{center}
 
@@ -252,77 +253,30 @@ With this, we can state the theorem generalizing our observation:
 
 \begin{proof} Exercise for the reader. \end{proof}
 
-\subsubsection{$\dagger$ Note on defining $\path$}
+\subsubsection{On defining \ms{path} directly} \label{sec:defining-path}
 
 $A^\path$ is the smallest preorder satisfying
 \[ a \le b \vee b \le a : A \implies a \le b : A^\path \]
 
-Recall that $a \le b: A^\iso$ iff $a \le b \wedge b \le a : A$.
-%
 Unfortunately, $A^\path$ is not so easy to define \emph{directly}, without
 language like ``the smallest preorder satisfying''.
 %
-In particular, $a \le b \vee b \le a : A$ implies $a \le b : A^\path$, but the
-reverse does not always hold. A good counterexample is the \ms{fencepost}
-ordering:
+In particular, the reverse implication, from $a \le b : A^\path$ to $a \le b
+\vee b \le a : A$, does not always hold. A good counterexample is the
+\ms{fencepost} ordering:
 
 \todo{TODO: Diagram}.
 
-That is, $a \le a+1$ for even $a$, and $a \ge a+1$ for odd $a$. In
-$\ms{fencepost}^\path$, everything is equivalent:
+That is, $a \le a+1$ for even $a$, and $a \ge a+1$ for odd $a$. Note that $a \le
+b \vee b \le a : \ms{fencepost}$ is equivalent to $|a-b| \le 1$, which isn't
+transitive! $\ms{fencepost}^\path$ corresponds to the \emph{transitive closure}
+of this, which makes everything equivalent:
 \[ 0 \equiv 1 \equiv 2 \equiv 3 \equiv 4 \equiv ... \]
-
-But $a \le b \vee b \le a : \ms{fencepost}$ is equivalent to $|a-b| \le 1$,
-which isn't even transitive!
 
 However, a direct definition of $A^\path$ is possible, using \emph{paths}:
 ``zig-zagging'' lists $a_0, a_1, ..., a_n$ such that $a_i \le a_{i+1} \vee a_i
-\ge a_{i+1} : A$. Then $a \le b : A^\path$ if there is a path starting from $a$
+\ge a_{i+1} : A$. Then $a \le b : A^\path$ iff there is a path starting from $a$
 and ending at $b$.
-
-%% \begin{enumerate}
-%% \item $A^{\ms{id}}$ is just $A$, unchanged.
-%% \item $A^\op$ is $A$ with the opposite order: \[ a \le b : A^\op \iff a \le b : A \]
-%% \item $A^\path$ gives the equivalence closure --- the smallest preorder such that
-%%   \[(a \le b \vee b \le a) : A \implies a \le b : A^\path\]
-%% \item $A^\iso$ gives the induced equivalence --- the smallest preorder such that
-%%   \[(a \le b \wedge b \le a) : A \implies a \le b : A^\iso \]
-%% \end{enumerate}
-
-%% Another view of tones is as transformations $-^s : \mb{Preorder} \to
-%% \mb{Preorder}$ which modify a preordered set's ordering without changing its
-%% elements, namely:
-%% \[\begin{array}{r@{\hskip 0.5em}c@{\hskip 0.5em}l
-%%   @{\hskip 2em}c@{\hskip 2em}
-%%   l@{\hskip 0.5em}c@{\hskip 0.5em}l}
-%%   T_\tm(A) &=& A
-%%   %% &\text{where}& x \le_A y &\iff& x \le_A y
-%%   \\
-%%   T_\ta(A) &=& A^\op
-%%   &\text{where}& x \le_{A^\op} y &\iff& y \le_A x
-%%   \\
-%%   T_\ti(A) &=& A^\iso
-%%   &\text{where}& x \le_{A^\ti} y &\iff& x \le_A y \wedge y \le_A x
-%%   \\
-%%   T_\tb(A) &=& A^\path
-%%   &\text{where}& x \le_{A^\path} y &\iff&
-%%   \exists\bind{\vec{a}} a_0 = x \wedge a_n = y \wedge {}
-%%   \\
-%%   &&&&&& \phantom{\exists\bind{\vec{a}}}
-%%   \forall\bind{i} a_i \le_A a_{i+1} \vee a_{i+1} \le_A a_i
-%% \end{array}\]
-
-%% These views fit together neatly. A map $f : A \overset{s}{\to} B$ with tone $s$
-%% is the same as a monotone map $T_s(A) \to B$:
-%% \begin{mathpar}
-%%   {A \mto B = A \to B}
-%%   \qquad
-%%   {A \ato B = A^\op \to B}
-%%   \qquad
-%%   {A \ito B = A^\iso \to B}
-%%   \qquad
-%%   {A \bto B = A^\path \to B}
-%% \end{mathpar}
 
 
 \subsection{Tone operators}
@@ -331,17 +285,39 @@ We define two operators of interest on tones:
 \begin{enumerate}
 \item Meet $s \wedge t$ is greatest lower bound in the lattice ordered $\ti <
   \{\tm, \ta\} < \tb$. This gives the general tone of the pairing $\langle f,
-  g\rangle : A \overset{s \wedge t}{\to} B \times C$ of two functions $f : A
-  \overset{s}{\to} B$ and $g : A \overset{t}{\to} C$.
+  g\rangle : A^{s \wedge t} \to B \times C$ of two functions $f : A^s \to B$ and
+  $g : A^{t} \to C$.
 
-\item Composition $s \tc t$ gives the general tone of a composed function $f
-  \circ g : A \overset{s\tc t}{\to} C$ when $f : B \overset{s}{\to} C$ and $g :
-  A \overset{t}{\to} B$; equivalently, $A^{(s\tc t)} = (A^s)^t$ for any preorder
-  $A$, and $T_{s \tc t} = T_t\,T_s$ (note that the relative order of $s,t$ swaps
-  in the last equation).
+\item Composition $s \tc t$ gives the tone of a composed function $g \circ f : A
+  \overset{s\tc t}{\to} C$ when $f : A \overset{s}{\to} B$ and $g : B
+  \overset{t}{\to} C$. Equivalently, $A^{s\tc t} = (A^s)^t$ for any preorder
+  $A$.
 \end{enumerate}
 
-These are defined by:
+These are defined by:\footnote{\textbf{NB.}
+  \href{https://infoscience.epfl.ch/record/231867/files/monotonicity-types.pdf}{\emph{Monotonicity
+      Types}} by Clancy, Miller, and Meiklejohn has similar tables for their
+  composition $\circ$ and ``contraction'' $+$ operators! However, instead of
+  bivariance they have constancy, a stricter condition.
+%
+Constancy corresponds to respecting the \emph{indiscrete ordering} (which sets
+$a \le b$ for all $a,b$).\footnotemark{}
+%
+Interestingly, because constancy is so much stricter than bivariance, their
+composition operator is commutative.
+
+They write $\uparrow$ for $\tm$, $\downarrow$ for $\ta$, $?$ for $\ti$, and
+$\sim$ for constancy. They also add $=$ for the ``tone'' that \emph{only the
+  identity function} respects. This doesn't fit my framework; it cannot be
+phrased as a transformation on orderings. However, it seems related to
+subtyping, which I discuss later.}
+%
+\footnotetext{Indiscreteness (and its dual, discreteness) are also tones ---
+  that is, functorial transformations on the ordering component of a preorder
+  --- but they complicate things and are unused in Datafun, so I omit them. It
+  is worth noting that discreteness and $\ti$ coincide when restricted to
+  posets, and many intuitions transfer from one to the other.}
+%
 \begin{mathpar}
   %% "baseline=(current bounding box.center)" incantation taken from
   %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
@@ -373,24 +349,6 @@ These are defined by:
   \end{array}
 \end{mathpar}
 
-\emph{N.B.} Monotonicity Types by Clancy, Miller, and Meiklejohn has a diagram
-much like this! However, instead of bivariance they have constancy, a stricter
-condition.
-%%
-In \mb{Preorder}, constancy corresponds to respecting the \emph{indiscrete
-  ordering} (which sets $a \le b$ for all $a,b$) on one's argument.
-%%
-Interestingly, because constancy is so much stricter than bivariance, their
-composition operator is commutative.
-%%
-They write $\uparrow$ for our $\tm$, $\downarrow$ for our $\ta$, $?$ for our
-$\ti$, and $\sim$ for constancy. They also add $=$ for the ``tone'' that
-\emph{only the identity function} respects (this does not fit into our semantic
-framework, as it does not correspond to a functor on \mb{Preorder}).
-
-They also have a contraction operator (``+'') on tones, which corresponds to our
-$\wedge$.
-
 Together, $\wedge$ and $\tc$ form a semiring, with $\wedge$ as an idempotent
 addition and $\tc$ as multiplication. Multiplication has $\tm$ as identity, but
 lacks an absorbing zero element. (\todo{TODO: Reference ``I Got Plenty o'
@@ -407,8 +365,8 @@ The following panoply of laws holds:
     \textbf{Associativity} & (s \wedge t) \wedge u &=& s \wedge (t \wedge u)\\
     \textbf{Commutativity} & s \wedge t &=& t \wedge s\\
     \textbf{Idempotence} & s \wedge s &=& s\\
-    \textbf{Identity} & \tb \wedge s &=& s\\
-    \textbf{Absorption} & \ti \wedge s &=& \ti\\
+    \tb~\textbf{is identity} & \tb \wedge s &=& s\\
+    \ti~\textbf{absorbs} & \ti \wedge s &=& \ti\\
   \end{array}
 
   \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
@@ -432,7 +390,8 @@ The following panoply of laws holds:
 
 \section{A tonal sequent calculus}
 
-These rules sent to me by Jason Reed:
+These rules sent to me by Jason Reed. $T_s$ is the connective to internalizing
+$-^s$.
 \begin{mathpar}
   (A_1^{t_1}, ..., A_n^{t_n})^u = (A_1^{t_1 \tc u}, ..., A_n^{t_n \tc u})\\
 
@@ -447,7 +406,7 @@ These rules sent to me by Jason Reed:
   \infer[Cut]{\GG \vdash A \quad \Delta,A^t \vdash C}{\GG^t,\Delta \vdash C}
 \end{mathpar}
 
-We aim to adapt this into a natural-deduction-style system with proof terms,
+I aim to adapt this into a natural-deduction-style system with proof terms,
 i.e.\! a simply typed $\lambda$-calculus.
 
 
