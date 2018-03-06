@@ -120,22 +120,6 @@
 \begin{document}
 \maketitle
 
-%% \begin{mathpar}
-%%   \begin{array}{cccl}
-%%     \text{types} & A,B,C \vspace{0.5em}\\
-%%     \text{terms} & M,N,O \vspace{0.5em}\\
-%%     \text{tones}
-%%     & s,t,u
-%%     & \bnfeq & \tm ~|~ \ta ~|~ \tb ~|~ \ti
-%%     \vspace{0.5em}\\
-%%     \text{contexts}
-%%     & \GG &\bnfeq& \cdot ~|~ \GG, \h{x}{A}{s}
-%%     \vspace{0.5em}\\
-%%     \text{judgment}
-%%     & J &\bnfeq& \GG\ \vec{s} \vdash M : A
-%%   \end{array}
-%% \end{mathpar}
-
 \section{A preamble on preorders}
 
 A preorder is a set equipped with a relation $a \le b$ satisfying: 
@@ -408,6 +392,105 @@ $-^s$.
 
 I aim to adapt this into a natural-deduction-style system with proof terms,
 i.e.\! a simply typed $\lambda$-calculus.
+
+
+\section{A bidirectional $\lambda$-calculus with tone inference}
+
+\newcommand{\subtype}[3]{{#2}\ {#1}<: {#3}}
+
+\newcommand{\infers}[3]{{#1}\,\vdash {#2} ~\mb{infers}~ {#3}}
+\newcommand{\checks}[3]{{#1}\,\vdash {#2} ~\mb{checks}~ {#3}}
+
+\begin{mathpar}
+  \begin{array}{cccl}
+    \text{tones} & s,t,u & \bnfeq & \tm ~|~ \ta ~|~ \tb ~|~ \ti
+    \vspace{0.5em}\\
+    \text{types} & A,B,C
+    &\bnfeq& \star ~|~ A \to B ~|~ A \x B ~|~ \Box A ~|~ \op\;A
+    \vspace{0.5em}\\
+    \text{checking terms} & M
+    &\bnfeq& N ~|~ \fn\bind{x} M ~|~ (M, M)
+    ~|~ \mb{let}~x = N~\mb{in}~ M
+    \vspace{0.5em}\\
+    \text{inferring terms} & N
+    &\bnfeq& M : A ~|~ x ~|~ N\;M ~|~ \pi_i\;N
+    \vspace{0.5em}\\
+    \text{contexts}
+    & \GG &\bnfeq& \cdot ~|~ \GG{}, \h{x}{A}{s}
+    \vspace{0.5em}\\
+    \text{judgments}
+    & J &\bnfeq&
+    \checks{\GG\,s}{M}{A}
+    \\&&|& \infers{\GG\,s}{N}{A}
+    \\&&|& \subtype{s}{A}{B}
+  \end{array}
+\end{mathpar}
+
+\begin{mathpar}
+  \infer{\checks{\GG\,s}{M}{A}}{\infers{\GG\,s}{M : A}{A}}
+
+  \infer{\infers{\GG\,s}{N}{A} \quad \subtype{t}{A}{B}}
+        {\checks{\GG\,s \tc t}{N}{B}}
+
+  \infer{\quad}{\infers{\GG\,\tb,~x : A\,\tm}{x}{A}}
+
+  %% functions & function application
+  \infer{\checks{\GG\,s,~x : A\,t}{M}{B} \quad \tm \le t}
+        {\checks{\GG\,s}{\fn\bind{x} M}{A \to B}}
+
+  \infer{\infers{\GG\,s}{N}{A \to B} \quad \checks{\GG\,t}{M}{A}}
+        {\infers{\GG\,(s \wedge t)}{N\; M}{B}}
+
+  %% pairs
+  \infer{\checks{\GG\,s}{M_1}{A_1} \quad \checks{\GG\,t}{M_2}{A_2}}
+        {\checks{\GG\,s \wedge t}{(M_1,M_2)}{A_1 \x A_2}}
+
+  \infer{\infers{\GG\,s}{N}{A_1 \x A_2}}
+        {\infers{\GG\,s}{\pi_i\;N}{A_i}}
+
+  %% type-driven subtyping for checking
+  \infer{\checks{\GG\,s}{M}{A}}
+        {\checks{\GG\,s \tc \ti}{M}{\Box A}}
+
+  \infer{\checks{\GG\,s}{M}{A}}
+        {\checks{\GG\,s \tc \ta}{M}{\op\; A}}
+\end{mathpar}
+
+\subsection{Subtyping}
+
+\begin{mathpar}
+  \infer{\quad}{\subtype{\tm}{A}{A}}
+  
+  \infer{A~\ms{equiv}}{\subtype{\ti}{A}{A}}
+
+  \infer{\subtype{s}{A}{B}}
+        {\subtype{s \tc \ti}{A}{\Box B}}
+
+  \infer{\subtype{s}{A}{B}}
+        {\subtype{\tb \tc s}{\Box A}{B}}
+
+  \infer{\subtype{s}{A}{B}}
+        {\subtype{\ta \tc s}{\op\; A}{B}}
+
+  \infer{\subtype{s}{A}{B}}
+        {\subtype{s \tc \ta}{A}{\op\; B}}
+
+  \infer{\subtype{s}{A_1}{A_2} \quad \subtype{t}{B_1}{B_2}}
+        {\subtype{s \wedge t}{A_1 \x B_1}{A_2 \x B_2}}
+
+  %% The function rules!
+  \infer{\subtype{s}{A_1}{A_2} \quad \subtype{\tm}{B_1}{B_2} \quad \tm \le s}
+        {\subtype{\tm}{A_1 \to B_1}{A_2 \to B_2}}
+
+  \infer{\subtype{s}{A_1}{A_2} \quad \subtype{\ta}{B_1}{B_2} \quad \ta \le s}
+        {\subtype{\ta}{A_1 \to B_1}{A_2 \to B_2}}
+
+  \infer{\subtype{s}{A_1}{A_2} \quad \subtype{\tb}{B_1}{B_2} \quad \ti < s}
+        {\subtype{\tb}{A_1 \to B_1}{A_2 \to B_2}}
+
+  \infer{\subtype{\tb}{A_1}{A_2} \quad \subtype{\ti}{B_1}{B_2}}
+        {\subtype{\ti}{A_1 \to B_1}{A_2 \to B_2}}
+\end{mathpar}
 
 
 \section{Substitution as guiding principle}
