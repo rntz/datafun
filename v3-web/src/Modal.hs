@@ -72,6 +72,13 @@ subtype a@(Fn a1 b1) b@(Fn a2 b2) = do
 -- incongruous types
 subtype a b = Left (a,b)
 
+-- Strips the modes off a type. Useful when typechecking an elimination form for
+-- a non-modal type. Currently called "spine subtyping" in tones.tex.
+demode :: Type -> (Type, Tone)
+demode (Box a) = (b, Path <> s) where (b,s) = demode a
+demode (Opp a) = (b, Op <> s) where (b,s) = demode a
+demode a = (a, Id)
+
 
 ---------- TERMS, TYPE CHECKING, and TONE INFERENCE ----------
 type Var = String
@@ -106,8 +113,11 @@ extend k v = coerce $ Map.insert k v
 (!) :: Cx a -> Var -> a
 (!) = (Map.!) . coerce
 
+withTone :: Tone -> Cx Tone -> Cx Tone
+withTone tone = coerce (Map.map (<> tone))
+
 at :: Tone -> Infer a -> Infer a
-at tone = censor (coerce (Map.map (<> tone)))
+at tone = censor (withTone tone)
 
 bind :: Var -> Type -> Infer a -> Infer (a, Tone)
 bind v tp action = censor drop $ listens (!v) $ local (extend v tp) action
@@ -120,6 +130,9 @@ bindAt allow v tp action = do
 
 check :: Type -> Check -> Infer ()
 synth :: Synth -> Infer Type
+synthDestruct :: Synth -> Infer Type
+synthDestruct s = pass (remode . demode <$> synth s)
+  where remode (a, s) = (a, withTone s)
 
 check (Fn a b) (CFn v body) = bindAt Id v a $ check b body
 check (Tuple tps) (CTuple es) | length tps == length es = zipWithM_ check tps es
@@ -146,10 +159,11 @@ check _ CFor{} = error "invalid type for for-expression"
 
 synth (SCheck tp e) = tp <$ check tp e
 synth (SVar v) = asks (! v)
-synth (SApp func arg) = do Fn a b <- synth func; b <$ check a arg
-synth (SProj exp i) = do Tuple tps <- synth exp; pure (tps !! i)
+synth (SApp func arg) = do Fn a b <- synthDestruct func; b <$ check a arg
+synth (SProj exp i) = do Tuple tps <- synthDestruct exp; pure (tps !! i)
 synth (SUnbox e) = do Box tp <- synth e; pure tp
 synth (SUnop e) = do Opp tp <- synth e; pure tp
+
 
 
 ---------- EVALUATION ----------
