@@ -36,6 +36,7 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}{Corollary}
 \newtheorem{conjecture}{Conjecture}
+\newtheorem{definition}{Definition}
 \newtheorem{lemma}{Lemma}
 \newtheorem{principle}{Principle}
 
@@ -126,6 +127,38 @@ any two objects there is at most one morphism. I believe much of the ``tone
 theory'' in this document, ostensibly about maps between preorders, can be
 extended to functors between categories.
 
+
+\subsection{Tones (categorically)}
+
+\todo{TODO: this note is useful, but should go somewhere else}
+
+\newcommand{\elemset}[1]{\ensuremath{\mc{U}({#1})}}
+\newcommand{\elemsetfn}[0]{\mc{U}}
+\renewcommand{\elemset}[1]{\ensuremath{|{#1}|}}
+\renewcommand{\elemsetfn}[0]{\elemset{-}}
+
+Let $\elemsetfn{} : \mb{Preorder} \to \mb{Set}$ be the forgetful functor which
+takes a preorder to its set of elements.
+
+\begin{definition}
+  A tone $s$ is a functor $-^s : \mb{Preorder} \to \mb{Preorder}$ such that
+  $\elemset{-^s} = \elemsetfn$.
+\end{definition}
+
+In particular, this means that:
+\begin{enumerate}
+\item $|A^s| = |A|$, i.e. a tone functor only transforms the \emph{ordering}
+  component, not the elements, of a preorder;
+\item $\forall f \in \mb{Preorder}(A, B).\ |f^s| = |f|$, i.e. a tone functor
+  does not change the behavior of functions.
+\end{enumerate}
+
+A more ``categorical'' definition might only require a natural isomorphism
+$\iota : \elemsetfn \isoto \elemset{-^s}$. I'm not comfortable generalizing that
+far yet.
+
+It's also unclear how to generalize this definition to tones of functors on
+\mb{Cat}.
 
 
 \section{Tones}
@@ -553,7 +586,8 @@ output.
 correct/complete for our use-case.
 
 \textbf{Observation:} $\converts{s}{A}{B}$ ``strips off'' modal operators on
-$A$, turning them into transformations on $s$.
+$A$, turning them into transformations on $s$. Maybe this is a better
+specification for it than having ``the \emph{shape} of $B$'' be an input.
 
 
 \subsection{About the $\fn$ rule}
@@ -585,8 +619,9 @@ So the crucial question is: \emph{can we always substitute $\h{x}{\Box A}{\tm}$
   for $\h{x}{A}{\ti}$?}
 
 More generally, \emph{what is the substitution principle here, and how do we
-  prove it?} It should have something to do with the subtyping rule,
-$\subtype{s}{A}{B}$.
+  prove it?} It should have something to do with a subtyping rule, like
+$\subtype{s}{A}{B}$. Only probably I want a declarative subtyping rule with
+tones on both sides; $A^s <: B^t$ or similar.
 
 
 %% \section{Substitution as guiding principle}
