@@ -394,7 +394,7 @@ Figure \ref{fig:tone-ops} defines two operators of interest on tones:
 \end{enumerate}
 
 %% \noindent These are defined by:
-\begin{figure}[t]
+\begin{figure*}[t]
   \begin{mathpar}
     %% "baseline=(current bounding box.center)" incantation taken from
     %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
@@ -425,10 +425,9 @@ Figure \ref{fig:tone-ops} defines two operators of interest on tones:
       & \tb & \tb & \tb & \tb & \tb
     \end{array}
   \end{mathpar}
-  \vspace{0.5em}
   \caption{Tone meet and composition}
   \label{fig:tone-ops}
-\end{figure}
+\end{figure*}
 
 Together, $\wedge$ and $\tc$ form a semiring, with $\wedge$ as an idempotent
 addition and $\tc$ as multiplication. Multiplication has $\tm$ as identity, but
@@ -440,6 +439,7 @@ lacks an absorbing zero element. (\todo{TODO: Reference ``I Got Plenty o'
 \todo{TODO: check the distribution laws hold!}
 
 \begin{figure*}
+  \small
   \begin{mathpar}
     \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
       \multicolumn{4}{c}{\textbf{Properties of } \wedge}
