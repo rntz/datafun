@@ -1,8 +1,8 @@
 LATEXRUN := ./latexrun/latexrun
 
-TEXS  := tones.tex
+TEXS  := tones.tex wub.tex
 # other things which affect compilation result
-AUXIL := $(wildcard *.sty) Makefile
+AUXIL := $(wildcard *.sty *.cls) Makefile
 PDFS  := $(addsuffix .pdf,$(basename $(TEXS)))
 
 .PHONY: all watch clean FORCE

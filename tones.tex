@@ -1,43 +1,47 @@
-\documentclass{article}
-\usepackage[a4paper,margin=0.8in]{geometry}
+\documentclass[acmsmall, screen, dvipsnames]{acmart}
+%% Suppress _everything_.
+\pagestyle{plain}
+\renewcommand\footnotetextcopyrightpermission[1]{}
+
+%% \acmISBN{}
+%% \acmDOI{}
+\authorsaddresses{}
+%% \setcopyright{none}
+\settopmatter{printacmref=false,printccs=false,printfolios=false}
+%% \acmPrice{}
+
+\acmVolume{$\infty$}
+\acmNumber{$\infty$}
+\acmArticle{$\infty$}
+\acmYear{$\infty$}
+\acmMonth{0}
+
+
+%% %% alternatively
+%% \documentclass[dvipsnames]{article}
+%% %% \usepackage[papersize={6.75in,8.75in},margin=1.5cm]{geometry}
+%% %% \usepackage[papersize={6.75in,10in},margin=1.5cm]{geometry}
+%% \usepackage[a5paper,margin=1cm]{geometry}
+%% \usepackage{libertine}
+%% \usepackage{euler} % the AMS Euler math font. Not compatible with acmart.cls.
 
 \usepackage{amssymb,amsmath,amsthm,latexsym}
 \usepackage{mathpartir}
 \usepackage{multirow}
-
-\usepackage{url}
-\usepackage{hyperref}
-
-% for semantic brackets
-\usepackage{stmaryrd}
-
-%% for \dblcolon
-\usepackage{mathtools}
-
-%% uses the AMS Euler math font.
-\usepackage{euler}
-
-%% for \underaccent
-\usepackage{accents}
-
-%% for colors
-%% must be loaded before tikz in order for options to take effect :/
-\usepackage[dvipsnames]{xcolor}
-
-%% for drawing Hasse diagrams and commutative diagrams.
-\usepackage{tikz}
-\usepackage{tikz-cd}
-
-%% for aligning tikz diagrams vertically with tables
-\usepackage{adjustbox}
+\usepackage{url,hyperref}
+\usepackage{stmaryrd}           % for semantic brackets
+\usepackage{mathtools}          % for \dblcolon
+\usepackage{accents}            % for \underaccent
+\usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
+\usepackage{adjustbox}          % aligning tikz diagrams vertically w/ tables.p
 
 
 %% Commands
-\newtheorem{theorem}{Theorem}
-\newtheorem{corollary}{Corollary}
-\newtheorem{conjecture}{Conjecture}
-\newtheorem{definition}{Definition}
-\newtheorem{lemma}{Lemma}
+%% \newtheorem{theorem}{Theorem}
+%% \newtheorem{definition}{Definition}
+%% \newtheorem{corollary}{Corollary}
+%% \newtheorem{conjecture}{Conjecture}
+%% \newtheorem{lemma}{Lemma}
 \newtheorem{principle}{Principle}
 
 \newcommand{\todo}[1]{{\color{red}#1}}
@@ -94,11 +98,15 @@
 \newcommand{\ito}{\overset{\ti}{\to}}
 \newcommand{\bto}{\overset{\tb}{\to}}
 
-\title{Tones and types}
+
+%% ---- Front matter ----
+\title{Tones and Types}
 %% alternate title: Tone theory
 %% alternate title: Tonality inference
-\author{Michael Robert Arntzenius}
+\author{Michael Arntzenius}
+%% \email{daekharel@gmail.com}
 \date{\todo{16 November 2017 -- ???}}
+
 
 %% \setlength{\parskip}{0.4em}
 %% \setlength{\parindent}{0em}
@@ -118,14 +126,14 @@ A preorder is a relation $a \le b$ satisfying:
 A good example of a preorder is ``lists under containment'', where $a \le b$ iff
 every element of $a$ is also in $b$.
 
-Preorders are like partial orders without antisymmetry. Let $a \equiv b$ iff $a
-\le b$ and $b \le a$. Then antisymmetry becomes: $a \equiv b \implies a = b$.
-However, under list containment, $[0,1] \equiv [1,0]$, but $[0,1] \ne [1,0]$.
+Preorders are partial orders, sans antisymmetry. Let $a \equiv b$ iff $a \le b$
+and $b \le a$. Antisymmetry means $a \equiv b$ implies $a = b$. However, under
+list containment, $[0,1] \equiv [1,0]$, but $[0,1] \ne [1,0]$.
 
-If you're a category theorist, a preorder is a ``thin'' category, where between
-any two objects there is at most one morphism. I believe much of the ``tone
-theory'' in this document, ostensibly about maps between preorders, can be
-extended to functors between categories.
+To a category theorist, a preorder is a ``thin'' category, where between any two
+objects there is at most one morphism. I suspect much of the ``tone theory'' in
+this document, ostensibly about maps between preorders, extends to functors
+between categories.
 
 
 \subsection{Tones (categorically)}
@@ -145,18 +153,18 @@ takes a preorder to its set of elements.
   $\elemset{-^s} = \elemsetfn$.
 \end{definition}
 
-In particular, this means that:
+In particular, for any preorder $A$ and monotone map $f$,
 \begin{enumerate}
-\item $|A^s| = |A|$, i.e. a tone functor only transforms the \emph{ordering}
-  component, not the elements, of a preorder;
-\item $\forall f \in \mb{Preorder}(A, B).\ |f^s| = |f|$, i.e. a tone functor
-  does not change the behavior of functions.
+\item $|A^s| = |A|$, i.e. a tone functor transforms only the \emph{ordering},
+  not the elements, of a preorder.
+\item $|f^s| = |f|$, i.e. a tone functor does not change the behavior of
+  functions.
 \end{enumerate}
 
-A more ``categorical'' definition might only require a natural isomorphism
+A more ``categorical'' definition might require only a natural isomorphism
 $\iota : \elemsetfn \isoto \elemset{-^s}$. I'm not comfortable generalizing that
 far yet.
-
+%
 It's also unclear how to generalize this definition to tones of functors on
 \mb{Cat}.
 
@@ -209,8 +217,12 @@ Consider preorders $A, B$. Let $A^\op$ be $A$, ordered oppositely. Now, observe
 that
 
 \begin{center}
-  $f : A \to B$ is antitone\vspace{0.5em}\\
-  \emph{iff}\vspace{0.5em}\\
+  $f : A \to B$ is antitone
+
+  \nopagebreak
+  \emph{iff}
+  \nopagebreak
+
   $f : A^\op \to B$ is monotone
 \end{center}
 
@@ -247,15 +259,16 @@ follows:
 
 With this, we can state the theorem generalizing our observation:
 \begin{theorem}[Tones transform orders]\label{thm:tones-transform-orders}
-  Given a function $f : A \to B$ between preorders $A$, $B$:
+  %% Given a function $f : A \to B$ between preorders $A$, $B$:
+  ~
   \begin{center}
-    $f : A \to B$ has tone $s$\vspace{0.5em}\\
-    \emph{iff}\vspace{0.5em}\\
+    $f : A \to B$ has tone $s$\\
+    iff\\
     $f : A^s \to B$ is monotone
   \end{center}
 \end{theorem}
 
-\begin{proof} Exercise for the reader. \end{proof}
+%% \begin{proof} Exercise for the reader. \end{proof}
 
 From this point on, when I write $f : A \to B$, I mean implicitly that $f$ is
 monotone; and therefore $f : A^s \to B$ means that $f$ has tone $s$.
@@ -263,11 +276,10 @@ monotone; and therefore $f : A^s \to B$ means that $f$ has tone $s$.
 Also, there is one more property of tones we will need:
 
 \begin{theorem}[Functoriality of tones]\label{thm:tone-functoriality}
-  \[\text{If}~ f : A \to B ~\text{then}~ f : A^s \to B^s\text{.}\]
+  If $f : A \to B$ then $f : A^s \to B^s$.
+  %% \[\text{If}~ f : A \to B ~\text{then}~ f : A^s \to B^s\text{.}\]
 \end{theorem}
-\begin{proof}
-  Exercise for the reader.
-\end{proof}
+%% \begin{proof} Exercise for the reader. \end{proof}
 
 Together, these theorems define a more general notion of tone: a tone $s$ is a
 transformation $-^s$ on the ordering component of a preorder (i.e. $A^s$ must
@@ -275,7 +287,7 @@ have the same elements as $A$) satisfying Theorem \ref{thm:tone-functoriality},
 whose interpretation as a property of functions is given by Theorem
 \ref{thm:tones-transform-orders}.
 
-\subsubsection{On defining \ms{path} directly} \label{sec:defining-path}
+\subsection{On defining \ms{path} directly} \label{sec:defining-path}
 
 $A^\path$ is the smallest preorder satisfying
 \[ a \le b \vee b \le a : A \implies a \le b : A^\path \]
@@ -290,9 +302,9 @@ In particular, the reverse implication, from $a \le b : A^\path$ to $a \le b
 
 \todo{TODO: Diagram}.
 
-Note that $a \le b \vee b \le a : \ms{fencepost}$ is equivalent to $|a-b| \le
-1$, which isn't transitive! $\ms{fencepost}^\path$ corresponds to the
-\emph{transitive closure} of this, which makes everything equivalent:
+Note that $a \le b \vee b \le a : \ms{fencepost} \iff |a-b| \le 1$, which isn't
+transitive! Instead, $\ms{fencepost}^\path$ is the \emph{transitive closure} of
+$|a - b| \le 1$, which makes everything equivalent:
 \[ 0 \equiv 1 \equiv 2 \equiv 3 \equiv 4 \equiv ... \]
 
 However, a direct definition of $A^\path$ is possible, using \emph{paths}:
@@ -303,7 +315,52 @@ and ending at $b$.
 
 \subsection{Tone operators}
 
-We define two operators of interest on tones:
+\begin{figure*}
+  \begin{mathpar}
+    %% "baseline=(current bounding box.center)" incantation taken from
+    %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
+    \begin{tikzpicture}[scale=0.8,baseline=(current bounding box.center)]
+      \node (top)  at ( 0, 1) {$\tb$};
+      \node (bot)  at ( 0,-1) {$\ti$};
+      \node (-1)   at (-1, 0) {$\tm$};
+      \node (1)    at ( 1, 0) {$\ta$};
+      \draw (top) -- (-1) -- (bot) -- (1) -- (top);
+    \end{tikzpicture}
+
+    %% \begin{array}{cc|rrrrr}
+    %%   \multicolumn{2}{c|}{\multirow{2}{*}{$s \wedge t$}}
+    %%   & \multicolumn{4}{c}{t}\\
+    %%   && \tm & \tb & \ta & \ti\\\hline
+    %%   \multirow{4}{*}{$s$}
+    %%   & \tm & \tm & \tm & \ti & \ti\\
+    %%   & \tb & \tm & \tb & \ta & \ti\\
+    %%   & \ta & \ti & \ta & \ta & \ti\\
+    %%   & \ti & \ti & \ti & \ti & \ti
+    %% \end{array}
+    \begin{array}{c|rrrrr}
+      s \wedge t & \tm & \tb & \ta & \ti\\\hline
+      \tm & \tm & \tm & \ti & \ti\\
+      \tb & \tm & \tb & \ta & \ti\\
+      \ta & \ti & \ta & \ta & \ti\\
+      \ti & \ti & \ti & \ti & \ti
+    \end{array}
+
+    \begin{array}{cc|rrrr}
+      \multicolumn{2}{c|}{\multirow{2}{*}{$s \tc t$}}
+      & \multicolumn{4}{c}{t}\\
+      && \tm & \ta & \ti & \tb\\\hline
+      \multirow{4}{*}{$s$}
+      & \tm & \tm & \ta & \ti & \tb\\
+      & \ta & \ta & \tm & \ti & \tb\\
+      & \ti & \ti & \ti & \ti & \ti\\
+      & \tb & \tb & \tb & \tb & \tb
+    \end{array}
+  \end{mathpar}
+  \caption{Tone lattice, meet, and composition}
+  \label{fig:tone-ops}
+\end{figure*}
+
+Figure~\ref{fig:tone-ops} defines two operators on tones:
 \begin{enumerate}
 \item Meet $s \wedge t$ is greatest lower bound in the lattice ordered $\ti <
   \{\tm, \ta\} < \tb$. This gives the general tone of the pairing $\langle f,
@@ -324,68 +381,12 @@ We define two operators of interest on tones:
     definition of $s \tc t$?}
 \end{enumerate}
 
-These are defined by:\footnote{\textbf{NB.}
-  \href{https://infoscience.epfl.ch/record/231867/files/monotonicity-types.pdf}{\emph{Monotonicity
-      Types}} by Clancy, Miller, and Meiklejohn has similar tables for their
-  composition $\circ$ and ``contraction'' $+$ operators! However, instead of
-  bivariance they have constancy, a stricter condition.
-%
-Constancy corresponds to respecting the \emph{indiscrete ordering} (which sets
-$a \le b$ for all $a,b$).\footnotemark{}
-%
-Interestingly, because constancy is so much stricter than bivariance, their
-composition operator is commutative.
 
-They write $\uparrow$ for $\tm$, $\downarrow$ for $\ta$, $?$ for $\ti$, and
-$\sim$ for constancy. They also add $=$ for the ``tone'' that \emph{only the
-  identity function} has. This doesn't fit my framework; it cannot be phrased as
-a transformation on orderings. However, it seems related to subtyping.}
-%
-\footnotetext{Indiscreteness (and its dual, discreteness) are also tones ---
-  that is, functorial transformations on the ordering component of a preorder
-  --- but they complicate things and are unused in Datafun, so I omit them. It
-  is worth noting that discreteness and $\ti$ coincide when restricted to
-  posets, so many intuitions transfer from one to the other.}
-%
-\begin{mathpar}
-  %% "baseline=(current bounding box.center)" incantation taken from
-  %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
-  \begin{tikzpicture}[scale=1,baseline=(current bounding box.center)]
-    \node (top)  at ( 0, 1) {$\tb$};
-    \node (bot)  at ( 0,-1) {$\ti$};
-    \node (-1)   at (-1, 0) {$\tm$};
-    \node (1)    at ( 1, 0) {$\ta$};
-    \draw (top) -- (-1) -- (bot) -- (1) -- (top);
-  \end{tikzpicture}
 
-  \begin{array}{c|rrrrr}
-    s \wedge t & \tm & \tb & \ta & \ti\\\hline
-    \tm & \tm & \tm & \ti & \ti\\
-    \tb & \tm & \tb & \ta & \ti\\
-    \ta & \ti & \ta & \ta & \ti\\
-    \ti & \ti & \ti & \ti & \ti
-  \end{array}
-
-  \begin{array}{cc|rrrr}
-    \multicolumn{2}{c|}{\multirow{2}{*}{$s \tc t$}}
-    & \multicolumn{4}{c}{t}\\
-    && \tm & \ta & \ti & \tb\\\hline
-    \multirow{4}{*}{$s$}
-    & \tm & \tm & \ta & \ti & \tb\\
-    & \ta & \ta & \tm & \ti & \tb\\
-    & \ti & \ti & \ti & \ti & \ti\\
-    & \tb & \tb & \tb & \tb & \tb
-  \end{array}
-\end{mathpar}
-
-Together, $\wedge$ and $\tc$ form a semiring, with $\wedge$ as an idempotent
-addition and $\tc$ as multiplication. Multiplication has $\tm$ as identity, but
-lacks an absorbing zero element. (\todo{TODO: Reference ``I Got Plenty o'
-  Nuttin'{}'' --- another use of variable annotations drawn from a semiring, and
-  with similar (the same?) behavior of those annotations in the inference
-  rules.})
-
-The following panoply of laws holds:
+Together, $\wedge$ and $\tc$ form a semiring, with the following panoply of
+laws:\footnote{\todo{TODO: Reference ``I Got Plenty o' Nuttin'{}'' --- another
+    use of variable annotations drawn from a semiring, and with similar (the
+    same?) behavior of those annotations in the inference rules.}}
 
 \begin{mathpar}
   \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
@@ -417,6 +418,29 @@ The following panoply of laws holds:
 \todo{TODO: check the distribution laws hold!}
 
 
+\subsection{Relation to Monotonicity Types}
+\href{https://infoscience.epfl.ch/record/231867/files/monotonicity-types.pdf}{\emph{Monotonicity
+    Types}} by Clancy, Miller, and Meiklejohn has similar tables for their
+composition $\circ$ and ``contraction'' $+$ operators! However, instead of
+bivariance they have constancy, a stricter condition.
+%
+Constancy corresponds to respecting the \emph{indiscrete ordering} (which sets
+$a \le b$ for all $a,b$).\footnote{Indiscreteness (and its dual, discreteness)
+  are also tones --- that is, functorial transformations on the ordering
+  component of a preorder --- but they complicate things and are unused in
+  Datafun, so I omit them. It is worth noting that discreteness and $\ti$
+  coincide when restricted to posets, so many intuitions transfer from one to
+  the other.}
+%
+Interestingly, because constancy is so much stricter than bivariance, their
+composition operator is commutative.
+
+They write $\uparrow$ for $\tm$, $\downarrow$ for $\ta$, $?$ for $\ti$, and
+$\sim$ for constancy. They also add $=$ for the ``tone'' that \emph{only the
+  identity function} has. This doesn't fit my framework; it cannot be phrased as
+a transformation on orderings. However, it seems related to subtyping.
+
+
 \section{A tonal sequent calculus}
 
 These rules sent to me by Jason Reed. $T_s$ is the connective to internalizing
@@ -437,6 +461,10 @@ $-^s$.
 
 I aim to adapt this into a natural-deduction-style system with proof terms,
 i.e.\! a simply typed $\lambda$-calculus.
+
+\todo{TODO: Revisit this. Think about what $T$-Left means, and Kevin Clancy's
+  phrasing of the eliminator for his type as requiring tones compose to
+  something $\le \tm$.}
 
 
 \section{A bidirectional $\lambda$-calculus with tone inference}
@@ -476,10 +504,11 @@ i.e.\! a simply typed $\lambda$-calculus.
   \end{array}
 \end{mathpar}
 
+
+\subsection{Typing rules}
+
 \todo{TODO: explain my various abuses of notation, e.g. $\GG^t$ and $\GG_1
   \wedge \GG_2$}
-
-\todo{TODO: patterns and pattern inference}
 
 \begin{mathpar}
   \infer{\quad}{\infers{\h{x}{A}{\tm}}{x}{A}}
@@ -558,6 +587,9 @@ output.
         {\subtype{\ti}{(A_1 \to B_1)}{A_2 \to B_2}}
 \end{mathpar}
 
+\todo{Can these $t \le s$ constraints be turned into ``composing with $u$ is
+  $\ge \tm$'', for some choice of $u$ depending on $t$?}
+
 
 \subsection{Spine subtyping}
 
@@ -588,6 +620,13 @@ correct/complete for our use-case.
 \textbf{Observation:} $\converts{s}{A}{B}$ ``strips off'' modal operators on
 $A$, turning them into transformations on $s$. Maybe this is a better
 specification for it than having ``the \emph{shape} of $B$'' be an input.
+
+
+\subsection{Patterns}
+
+Judgment: $p : \GG \vdash A \dashv \GG$.
+
+\todo{TODO: patterns and pattern inference}
 
 
 \subsection{About the $\fn$ rule}
@@ -635,6 +674,56 @@ tones on both sides; $A^s <: B^t$ or similar.
 
 %% It's not yet clear what $\GG_1 \cup \GG_2$ should mean, exactly; \todo{we will
 %%   return to this question.}
+
+
+\section{Declarative rules}
+\subsection{Weakening and substitution principles}
+
+We wish to validate the following tone-weakening and substitution rules:
+
+\begin{mathpar}
+  \infer[weakening]
+        {A^s \le B^t \quad \checks{\GG, \h{x}{A}{s}}{M}{C}}
+        {\checks{\GG, \h{x}{B}{t}}{M}{C}}
+
+  \infer[substitution]
+        {A^s \le B^t
+         \quad \infers{\GG_1}{N}{A}
+         \quad \checks{\GG_2, \h{x}{B}{t}}{M}{C}}
+        {\checks{\GG_1{}^s \wedge \GG_2}{M[N/x]}{C}}
+\end{mathpar}
+
+\subsection{Subtyping and type equivalence}
+
+Type equivalence $A^s \equiv B^t$ is identical to two-way subtyping $A^s \le B^t
+\wedge B^t \le A^s$.
+
+\begin{mathpar}
+  \infer{s \le t}{A^s \le A^t}
+
+  \infer{A^s \le B^t \quad B^t \le C^u}{A^s \le C^u}
+
+  \infer{A^s \le B^t}{A^{s\tc u} \le B^{s \tc u}}
+
+  \infer{A_1^s \le B_1^t \quad A_2^s \le B_2^t}
+        {(A_1 \x A_2)^s \le (B_1 \x B_2)^t}
+
+  \\
+
+  \infer{}{\Box A^\tm \equiv A^\ti}
+
+  \infer{}{(\op\;A)^\tm \equiv A^\ta}
+
+  \infer{}{(A \to B)^\ta \equiv (\op\;A \to \op\;B)^\tm}
+
+  \infer{}{(A \to \Box B)^\tm \equiv (A \to \Box B)^\ti}
+
+  \infer{}{(A \to B)^\ti \le (\Box A \to \Box B)^\tm}
+\end{mathpar}
+
+\todo{TODO: function subtyping rules}
+
+\todo{What's the right way to prove $\Box(A \to B) \le \Box A \to \Box B$?}
 
 
 %% \section{An aside on overline notation}
