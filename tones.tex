@@ -452,11 +452,11 @@ $-^s$.
 
   \infer[$T$-Left]{\GG{},A^{t\tc u} \vdash C}{\GG{}, (T_t A)^u \vdash C}
 
-  \infer[Weakening]{\GG{}, A^t \vdash C \quad u \le t}{\GG{}, A^u \vdash C}
+  \infer[Weakening]{\GG{}, A^t \vdash C \\ u \le t}{\GG{}, A^u \vdash C}
 
   \infer[Contraction]{\GG{},A^t, A^u \vdash C}{\GG{}, A^{t \wedge u} \vdash C}
 
-  \infer[Cut]{\GG \vdash A \quad \Delta,A^t \vdash C}{\GG^t,\Delta \vdash C}
+  \infer[Cut]{\GG \vdash A \\ \Delta,A^t \vdash C}{\GG^t,\Delta \vdash C}
 \end{mathpar}
 
 I aim to adapt this into a natural-deduction-style system with proof terms,
@@ -473,11 +473,8 @@ i.e.\! a simply typed $\lambda$-calculus.
 \newcommand{\subtype}[3]{{#2}^{#1}\sqsubset {#3}}
 \newcommand{\converts}[3]{{#2}^{#1} \prec {#3}}
 
-\newcommand{\infers}[3]{{#1}\vdash {#2} ~\mb{infers}~ {#3}}
-\newcommand{\checks}[3]{{#1}\vdash {#2} ~\mb{checks}~ {#3}}
-
-\renewcommand{\infers}[3]{{#2} \Rightarrow {#1} \vdash {#3}}
-\renewcommand{\checks}[3]{{#2} \Leftarrow {#1} \vdash {#3}}
+\newcommand{\infers}[3]{{#1} \Rightarrow {#2} \vdash {#3}}
+\newcommand{\checks}[3]{{#1} \Leftarrow {#2} \vdash {#3}}
 
 \begin{mathpar}
   \begin{array}{cccl}
@@ -498,54 +495,52 @@ i.e.\! a simply typed $\lambda$-calculus.
     \vspace{0.5em}\\
     \text{judgments}
     & J &\bnfeq&
-    \checks{\GG}{M}{A}
-    \\&&|& \infers{\GG}{N}{A}
+    \checks{M}{\GG}{A}
+    \\&&|& \infers{N}{\GG}{A}
     \\&&|& \subtype{s}{A}{B} ~|~ \converts{s}{A}{B}
   \end{array}
 \end{mathpar}
 
-
-\subsection{Typing rules}
-
 \todo{TODO: explain my various abuses of notation, e.g. $\GG^t$ and $\GG_1
   \wedge \GG_2$}
 
+
+\subsection{Typing rules}
+
 \begin{mathpar}
-  \infer{\quad}{\infers{\h{x}{A}{\tm}}{x}{A}}
+  \infer{ }{\infers{x}{\h{x}{A}{\tm}}{A}}
 
-  \infer{\checks{\GG}{M}{A}}{\infers{\GG}{M : A}{A}}
+  \infer{\checks{M}{\GG}{A}}{\infers{M : A}{\GG}{A}}
 
-  \infer{\infers{\GG}{N}{A} \quad \subtype{t}{A}{B}}
-        {\checks{\GG^t}{N}{B}}
+  \infer{\infers{N}{\GG}{A} \\ \subtype{t}{A}{B}}
+        {\checks{N}{\GG^t}{B}}
 
   %% type-driven subtyping for checking
-  \infer{\checks{\GG}{M}{A}}
-        {\checks{\GG^\ti}{M}{\Box A}}
+  \infer{\checks{M}{\GG}{A}}
+        {\checks{M}{\GG^\ti}{\Box A}}
 
-  \infer{\checks{\GG}{M}{A}}
-        {\checks{\GG^\ta}{M}{\op\; A}}
+  \infer{\checks{M}{\GG}{A}}
+        {\checks{M}{\GG^\ta}{\op\; A}}
 
   %% let-binding
-  \infer{\infers{\GG_1}{N}{A} \quad \checks{\GG_2,\, \h{x}{A}{s}}{M}{C}}
-        {\checks{\GG_1^s \wedge \GG_2}{\mb{let}~x = N~\mb{in}~M}{C}}
+  \infer{\infers{N}{\GG_1}{A} \\ \checks{M}{\GG_2,\, \h{x}{A}{s}}{C}}
+        {\checks{\mb{let}~x = N~\mb{in}~M}{\GG_1{}^s \wedge \GG_2}{C}}
 
   %% introductions
-  \infer{\checks{\GG{},\, \h{x}{A}{t}}{M}{B}
-         \quad \subtype{s}{A}{A}
-         \quad \tm \le s \tc t}
-        {\checks{\GG}{\fn\bind{x} M}{A \to B}}
+  \infer{\checks{M}{\GG{},\, \h{x}{A}{s}}{B} \\ \tm \le s}
+        {\checks{\fn\bind{x} M}{\GG}{A \to B}}
 
-  \infer{\checks{\GG_1}{M_1}{A_1} \quad \checks{\GG_2}{M_2}{A_2}}
-        {\checks{\GG_1 \wedge \GG_2}{(M_1,M_2)}{A_1 \x A_2}}
+  \infer{\checks{M_1}{\GG_1}{A_1} \\ \checks{M_2}{\GG_2}{A_2}}
+        {\checks{(M_1,M_2)}{\GG_1 \wedge \GG_2}{A_1 \x A_2}}
 
   %% eliminations
-  \infer{\infers{\GG_1}{N}{A}
-         \quad \converts{u}{A}{B \to C}
-         \quad \checks{\GG_2}{M}{B}}
-        {\infers{\GG_1^u \wedge \GG_2}{N\; M}{C}}
+  \infer{\infers{N}{\GG_1}{A}
+         \\ \converts{u}{A}{B \to C}
+         \\ \checks{M}{\GG_2}{B}}
+        {\infers{N\; M}{\GG_1{}^u \wedge \GG_2}{C}}
 
-  \infer{\infers{\GG}{N}{A} \quad \converts{s}{A}{B_1 \x B_2}}
-        {\infers{\GG^s}{\pi_i\;N}{B_i}}
+  \infer{\infers{N}{\GG}{A} \\ \converts{s}{A}{B_1 \x B_2}}
+        {\infers{\pi_i\;N}{\GG^s}{B_i}}
 \end{mathpar}
 
 
@@ -554,7 +549,7 @@ In $\subtype{s}{A}{B}$, the types $A$ and $B$ are inputs, and the tone $s$ is
 output.
 
 \begin{mathpar}
-  \infer{\quad}{\subtype{\tm}{A}{A}}
+  \infer{ }{\subtype{\tm}{A}{A}}
 
   \infer{A~\ms{equiv}}{\subtype{\ti}{A}{A}}
 
@@ -570,20 +565,20 @@ output.
   \infer{\subtype{s}{A}{B}}
         {\subtype{s \tc \ta}{A}{\op\; B}}
 
-  \infer{\subtype{s}{A_1}{A_2} \quad \subtype{t}{B_1}{B_2}}
+  \infer{\subtype{s}{A_1}{A_2} \\ \subtype{t}{B_1}{B_2}}
         {\subtype{s \wedge t}{(A_1 \x B_1)}{A_2 \x B_2}}
 
   %% The function rules!
-  \infer{\subtype{s}{A_1}{A_2} \quad \subtype{\tm}{B_1}{B_2} \quad \tm \le s}
+  \infer{\subtype{s}{A_1}{A_2} \\ \subtype{\tm}{B_1}{B_2} \\ \tm \le s}
         {\subtype{\tm}{(A_1 \to B_1)}{A_2 \to B_2}}
 
-  \infer{\subtype{s}{A_1}{A_2} \quad \subtype{\ta}{B_1}{B_2} \quad \ta \le s}
+  \infer{\subtype{s}{A_1}{A_2} \\ \subtype{\ta}{B_1}{B_2} \\ \ta \le s}
         {\subtype{\ta}{(A_1 \to B_1)}{A_2 \to B_2}}
 
-  \infer{\subtype{s}{A_1}{A_2} \quad \subtype{\tb}{B_1}{B_2} \quad \ti < s}
+  \infer{\subtype{s}{A_1}{A_2} \\ \subtype{\tb}{B_1}{B_2} \\ \ti < s}
         {\subtype{\tb}{(A_1 \to B_1)}{A_2 \to B_2}}
 
-  \infer{\subtype{\tb}{A_1}{A_2} \quad \subtype{\ti}{B_1}{B_2}}
+  \infer{\subtype{\tb}{A_1}{A_2} \\ \subtype{\ti}{B_1}{B_2}}
         {\subtype{\ti}{(A_1 \to B_1)}{A_2 \to B_2}}
 \end{mathpar}
 
@@ -597,7 +592,7 @@ In $\converts{s}{A}{B}$, the type $A$ is input, the \emph{shape} of $B$ (either
 $- \to -$ or $- \x -$) is input, the actual types in $B$ are outputs, and the
 tone $s$ is output.
 \begin{mathpar}
-  \infer{\quad}{\converts{\tm}{A}{A}}
+  \infer{ }{\converts{\tm}{A}{A}}
 
   \infer{\converts{s}{A}{B}}{\converts{\tb\tc s}{\Box A}{B}}
 
@@ -629,68 +624,64 @@ Judgment: $p : \GG \vdash A \dashv \GG$.
 \todo{TODO: patterns and pattern inference}
 
 
-\subsection{About the $\fn$ rule}
-I think the $\fn$ rule is justified, but a more obviously correct rule would be
-something like:
+\subsection{Tones and the $\fn$ rule}
 
+Here are two more general variations on the $\fn$ rule I've considered:
 \begin{mathpar}
-  \infer{\checks{\GG{},\, \h{x}{A}{s}}{M}{B} \quad A \sqsubset A^s}
-        {\checks{\GG}{\fn\bind{x}{M}}{A \to B}}
+  \infer[Fn-1]
+        {\checks{M}{\GG{},\, \h{x}{A}{s}}{B} \\ A \sqsubset A^s}
+        {\checks{\fn\bind{x}{M}}{\GG}{A \to B}}
+
+  \infer[Fn-2]
+        {\checks{M}{\GG{},\, \h{x}{A}{t}}{B}
+         \\ \subtype{s}{A}{A}
+         \\ \tm \le s \tc t}
+        {\checks{\fn\bind{x} M}{\GG}{A \to B}}
 \end{mathpar}
 
-I don't have a judgment for $A \sqsubset B^s$, where $A$,$B$,$s$ are all inputs.
-I probably could. But is it necessary?
+\textsc{Fn-1} requires a new judgment, $A \sqsubset B^s$, where $A,B,s$ are all
+inputs; this doesn't seem difficult to define, but it's Yet Another Subtyping
+Judgment. \textsc{Fn-2} avoids this, but is much less easy to explain.
 
-Actually, it's not clear to me I need to mess around with tones in $\fn$ at all.
-The reason I thought we did was to justify something like the following:
+However, it's not clear to me I need to generalize the $\fn$ rule. The reason I
+thought I did was to justify something like the following:
 \begin{mathpar}
-  \infer{{\GG{},\, \h{x}{A}{\ti}} \vdash {M} : {B}}
-        {{\GG} \vdash {\fn\bind{x}{M}} : {\Box A \to B}}
+  \infer*{\infer*{\vdots}
+           {{\GG{},\, \h{x}{A}{\ti}} \vdash {M} : {B}}}
+         {{\GG} \vdash {\fn\bind{x}{M}} : {\Box A \to B}}
 \end{mathpar}
 
-But actually, this will check as follows:
+But this \emph{could} check as follows:
 \begin{mathpar}
-  \infer{\checks{\GG{},\, \h{x}{\Box A}{s}}{M}{B} \quad \tm \le s}
-        {\checks{\GG}{\fn\bind{x}{M}}{\Box A \to B}}
+  \infer*{\infer*{\vdots}{\checks{M}{\GG{},\, \h{x}{\Box A}{s}}{B}}
+          \\ \tm \le s}
+         {\checks{\fn\bind{x}{M}}{\GG}{\Box A \to B}}
 \end{mathpar}
 
-So the crucial question is: \emph{can we always substitute $\h{x}{\Box A}{\tm}$
-  for $\h{x}{A}{\ti}$?}
-
-More generally, \emph{what is the substitution principle here, and how do we
-  prove it?} It should have something to do with a subtyping rule, like
-$\subtype{s}{A}{B}$. Only probably I want a declarative subtyping rule with
-tones on both sides; $A^s <: B^t$ or similar.
-
-
-%% \section{Substitution as guiding principle}
-
-%% We wish to justify some variant of the following substitution principle:
-
-%% \begin{principle}[Substition]
-%%   If $\GG_1 \vdash \h{M}{A}{s}$ and $\GG_2,\, \h{x}{A}{s} \vdash \h{N}{B}{t}$,
-%%   then \(\GG_1 \cup \GG_2 \vdash \h{N\sub{x \mapsto M}}{B}{t}\).
-%% \end{principle}
-
-%% It's not yet clear what $\GG_1 \cup \GG_2$ should mean, exactly; \todo{we will
-%%   return to this question.}
+So the crucial question is: can we always substitute $\h{x}{\Box A}{\tm}$ for
+$\h{x}{A}{\ti}$?
+%
+It would suffice to prove the weakening and substitution principles given in
+subsection~\ref{subsec:weakening-substitution}. Can we prove these with our
+original, subtyping-less $\lambda$ rule?
 
 
 \section{Declarative rules}
 \subsection{Weakening and substitution principles}
+\label{subsec:weakening-substitution}
 
-We wish to validate the following tone-weakening and substitution rules:
+We wish to prove admissible the following tone-weakening and substitution rules:
 
 \begin{mathpar}
   \infer[weakening]
-        {A^s \le B^t \quad \checks{\GG, \h{x}{A}{s}}{M}{C}}
-        {\checks{\GG, \h{x}{B}{t}}{M}{C}}
+        {\checks{M}{\GG, \h{x}{A}{s}}{C} \quad A^s \le B^t}
+        {\checks{M}{\GG, \h{x}{B}{t}}{C}}
 
   \infer[substitution]
-        {A^s \le B^t
-         \quad \infers{\GG_1}{N}{A}
-         \quad \checks{\GG_2, \h{x}{B}{t}}{M}{C}}
-        {\checks{\GG_1{}^s \wedge \GG_2}{M[N/x]}{C}}
+        {\infers{N}{\GG_1}{A}
+         \quad A^s \le B^t
+         \quad \checks{M}{\GG_2, \h{x}{B}{t}}{C}}
+        {\checks{M[N/x]}{\GG_1{}^s \wedge \GG_2}{C}}
 \end{mathpar}
 
 \subsection{Subtyping and type equivalence}
@@ -708,7 +699,8 @@ Type equivalence $A^s \equiv B^t$ is identical to two-way subtyping $A^s \le B^t
   \infer{A_1^s \le B_1^t \quad A_2^s \le B_2^t}
         {(A_1 \x A_2)^s \le (B_1 \x B_2)^t}
 
-  \\
+  \infer{A_2^\tm \le A_1^\tm \quad B_1^\tm \le B_2^\tm}
+        {(A_1 \to B_1)^\tm \le (A_2 \to B_2)^\tm}
 
   \infer{}{\Box A^\tm \equiv A^\ti}
 
@@ -721,9 +713,9 @@ Type equivalence $A^s \equiv B^t$ is identical to two-way subtyping $A^s \le B^t
   \infer{}{(A \to B)^\ti \le (\Box A \to \Box B)^\tm}
 \end{mathpar}
 
-\todo{TODO: function subtyping rules}
-
-\todo{What's the right way to prove $\Box(A \to B) \le \Box A \to \Box B$?}
+\todo{TODO: check the function subtyping rules. $(A \to B)^\ti \le (\Box A \to
+  \Box B)^\tm$ handles one of the cases; $(A \to B)^\ta \equiv (\op\;A \to
+  \op\;B)^\tm$ handles another; what about the last one?}
 
 
 %% \section{An aside on overline notation}
