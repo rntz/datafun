@@ -1,74 +1,10 @@
-\documentclass[dvipsnames]{article}
-\usepackage[a5paper,margin=1cm,bottom=1.75cm]{geometry}
-
-\usepackage{libertine}
-\linespread{1.05}
-\usepackage[libertine]{newtxmath}
-
-%% \usepackage{eulervm}            % AMS Euler math font.
-
-
-%% ---- Section & subsection titles ----
-\usepackage{textcase,titlesec}
-
-\titlespacing*{\section}{0pt}{0.75\baselineskip}{.5em}
-\titlespacing*{\subsection}{0pt}{0.75\baselineskip}{.33em}
-
-% \titleformat{\section}{format}{label}{sep}{before}[after]
-\titleformat{\section}%
-  {\normalsize\sffamily\bfseries}% format applied to label+text
-  {\llap{\parbox{1cm}{\hfill\thesection}\hspace*{0.3cm}}}% label
-  {0pt}% horizontal separation between label and title body
-  {\MakeTextUppercase}% before the title body
-  []% after the title body
-
-\titleformat{\section}%
-  {\large\itshape\sffamily}% format applied to label+text
-  {\llap{\parbox{1cm}{\hfill\thesection}\hspace*{0.3cm}}}% label
-  {0pt}% horizontal separation between label and title body
-  {}% before the title body
-  []% after the title body
-
-\titleformat{\subsection}
-  {\normalsize\itshape\sffamily}
-  {\llap{\parbox{1cm}{\hfill\thesubsection}\hspace*{0.3cm}}}
-  {0pt}
-  {}
-
-%% \titleformat{\subsection}%
-%%   {\normalsize\sffamily\bfseries}
-%%   {\llap{\parbox{1cm}{\hfill\normalsize\sffamily\bfseries\thesubsection}\hspace*{0.25cm}}}
-%%   {0pt}
-%%   {}
-
-%% titlesec < 2.10.2 has a bug that prevents showing section numbers. This fixes
-%% it. Taken from
-%% https://tex.stackexchange.com/questions/96090/formatting-subsections-and-chapters-in-tufte-book/96125
-\usepackage{etoolbox}
-\makeatletter
-\patchcmd{\ttlh@hang}{\parindent\z@}{\parindent\z@\leavevmode}{}{}
-\patchcmd{\ttlh@hang}{\noindent}{}{}{}
-\makeatother
-
-%% \titleformat{\section}[shape]{format}{label}{sep}{before}[after]
-%% \usepackage{titlesec}
-%% \titleformat{\section}
-%%   [block]{\large\sffamily\bfseries}{\thesection}{1em}{}
-%% \titleformat{\subsection}
-%%   [block]{\sffamily\bfseries}{\thesubsection}{1em}{}
-
-
-%% ---- Paragraph & list styling ----
-\usepackage{enumitem}
-\setlist{noitemsep,topsep=\smallskipamount}
-\setlength{\parindent}{1.0pc}
+\documentclass{rntznotes}
 
 
 %% ---- Packages ----
 \usepackage{amssymb,amsmath,latexsym}
 \usepackage{mathpartir}
 \usepackage{multirow}
-\usepackage{url,hyperref}
 \usepackage{stmaryrd}           % for semantic brackets
 \usepackage{mathtools}          % for \dblcolon
 \usepackage{accents}            % for \underaccent
@@ -99,11 +35,6 @@
 \newcommand{\bind}[1]{{#1}\binder}
 \newcommand{\sub}[1]{\{{#1}\}}
 \newcommand{\fix}{\ms{fix}}
-
-%% TODO: get rid of \Disc, \Codisc.
-\newcommand{\Disc}{{\color{red}\square}}
-\newcommand{\Codisc}{{\color{red}\lozenge}}
-
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
 
 %% Category & preorder theory
@@ -117,9 +48,12 @@
 
 %% tones: mono, anti, discrete, bivariant
 \newcommand{\tm}{\id}                        % monotone / id
-\newcommand{\ta}{{\color{ForestGreen}\op}}   % antitone / op
-\newcommand{\ti}{{\color{NavyBlue}\iso}}     % invariant/ core
-\newcommand{\tb}{{\color{Bittersweet}\path}} % bivariant/ path
+%% \newcommand{\ta}{{\color{ForestGreen}\op}}   % antitone / op
+%% \newcommand{\ti}{{\color{NavyBlue}\iso}}     % invariant/ core
+%% \newcommand{\tb}{{\color{Bittersweet}\path}} % bivariant/ path
+\newcommand{\ta}{{\color{ACMGreen}\op}}   % antitone / op
+\newcommand{\ti}{{\color{ACMBlue}\iso}}     % invariant/ core
+\newcommand{\tb}{{\color{ACMRed}\path}} % bivariant/ path
 
 \newcommand{\tc}{\cdot}         % tone composition
 
@@ -129,10 +63,10 @@
 \newcommand{\hi}[2]{\h{#1}{#2}{\ti}}
 \newcommand{\hb}[2]{\h{#1}{#2}{\tb}}
 
-\newcommand{\mto}{\overset{\tm}{\to}}
-\newcommand{\ato}{\overset{\ta}{\to}}
-\newcommand{\ito}{\overset{\ti}{\to}}
-\newcommand{\bto}{\overset{\tb}{\to}}
+%% \newcommand{\mto}{\overset{\tm}{\to}}
+%% \newcommand{\ato}{\overset{\ta}{\to}}
+%% \newcommand{\ito}{\overset{\ti}{\to}}
+%% \newcommand{\bto}{\overset{\tb}{\to}}
 
 
 %% ---- Front matter ----
@@ -143,11 +77,9 @@
 %% \email{daekharel@gmail.com}
 \date{16 November 2017 -- ???}
 
-
 
 \begin{document}
 \maketitle
-
 
 \section{A preamble on preorders}
 
@@ -161,13 +93,14 @@ A good example of a preorder is ``lists under containment'', where $a \le b$ iff
 every element of $a$ is also in $b$.
 
 Preorders are partial orders, sans antisymmetry. Let $a \equiv b$ iff $a \le b$
-and $b \le a$. Antisymmetry means $a \equiv b$ implies $a = b$. However,
-under list containment, $[0,1] \equiv [1,0]$, but $[0,1] \ne [1,0]$.
+and $b \le a$. Antisymmetry means $a \equiv b$ implies $a = b$. However, under
+list containment, $[0,1] \equiv [1,0]$, but $[0,1] \ne [1,0]$.
 
 To a category theorist, a preorder is a ``thin'' category: between any two
 objects there is at most one morphism. I suspect much of the ``tone theory'' in
 this document, ostensibly about maps between preorders, extends to functors
 between categories.
+
 
 
 \subsection{Tones (categorically)}
@@ -205,6 +138,9 @@ yet.
 
 \section{Tones}
 
+Tones are ways a function $f$ may respect a preordering. I will consider four
+tones, \tm, \ta, \tb, and \ti:
+
 \begin{center}
   \begin{tabular}{clc@{\hskip 0.25em}c@{\hskip 0.25em}c}
     \multicolumn{1}{c}{\textbf{Tone}}
@@ -230,9 +166,7 @@ yet.
   \end{tabular}
 \end{center}
 
-Tones are ways a function $f$ may respect a preordering. I will consider four
-tones: \tm, \ta, \tb, and \ti.
-
+Informally,
 \begin{enumerate}
 \item $\tm$ is monotone (order-preserving).
 \item $\ta$ is antitone (order-inverting).
@@ -262,10 +196,10 @@ So ``antitone'' is a special case of ``monotone''! This observation generalizes:
 every tone is really monotonicity with a transformation applied to the domain's
 ordering. So \textbf{tones transform orders.}
 %
-I write $A^s$ for the preorder $A$ transformed by the tone $s$, defined in
-Figure \ref{fig:tone-functors}.
+I write $A^s$ for the preorder $A$ transformed by the tone $s$, defined:
+%% in Figure \ref{fig:tone-functors}.
 
-\begin{figure*}[t]
+\begin{center}
   \begin{tabular}{clc@{\hskip 0.25em}c@{\hskip 0.25em}l}
     {\textbf{Tone}}
     & {\textbf{Meaning}}
@@ -287,11 +221,7 @@ Figure \ref{fig:tone-functors}.
     & \text{induced equivalence}
     & $a \le b \wedge b \le a : A$ &$\iff$& $a \le b : A^\iso$
   \end{tabular}
-  \vspace{0.5em}
-
-  \caption{Tones as preorder transformations}
-  \label{fig:tone-functors}
-\end{figure*}
+\end{center}
 
 With this, we can state the theorem generalizing our observation:
 \begin{theorem}[Tones transform orders]\label{thm:tones-transform-orders}
@@ -482,7 +412,7 @@ $a \le b$ for all $a,b$).\footnote{Indiscreteness and its dual, discreteness,
   are also tones --- that is, functorial transformations on the ordering
   component of a preorder --- but they complicate things, so I omit them.
 
-  Also worth noting is that discreteness and $\ti$ coincide when restricted to
+  It's also worth noting that discreteness and $\ti$ coincide when restricted to
   posets; many intuitions transfer from one to the other.}
 %
 Interestingly, because constancy is so much stricter than bivariance, their

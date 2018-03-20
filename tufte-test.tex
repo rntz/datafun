@@ -1,8 +1,10 @@
 \documentclass[a4paper]{tufte-handout}
 \setcounter{secnumdepth}{1}
+
+%% Remove margin space to make it more readable on screens.
 \geometry{paperwidth=186mm,paperheight=297mm,left=12.8mm,top=27.4mm,headsep=2\baselineskip,textwidth=107mm,marginparsep=8.2mm,marginparwidth=49.4mm,textheight=49\baselineskip,headheight=\baselineskip}
 
-%% \usepackage{biolinum}
+%% \usepackage[osf]{biolinum}
 %% \usepackage{eulervm}     % AMS Euler math font.
 
 %% Tufte uses titlesec. titlesec < 2.10.2 has a bug that prevents showing
@@ -14,12 +16,12 @@
 \patchcmd{\ttlh@hang}{\noindent}{}{}{}
 \makeatother
 
-\titleformat{\section}%
-  {\normalfont\Large\itshape}% format applied to label+text
-  {\llap{\parbox{1cm}{\hfill\itshape\Large\thesection}\hspace*{0.5cm}}}% label
-  {2pt}% horizontal separation between label and title body
-  {}% before the title body
-  []% after the title body
+%% \titleformat{\section}%
+%%   {\normalfont\Large\itshape}% format applied to label+text
+%%   {\llap{\parbox{1cm}{\hfill\itshape\Large\thesection}\hspace*{0.5cm}}}% label
+%%   {2pt}% horizontal separation between label and title body
+%%   {}% before the title body
+%%   []% after the title body
 
 %% \titleformat{\subsection}%
 %%   {\normalfont\large\itshape}% format applied to label+text
@@ -453,15 +455,16 @@ of laws:
 \href{https://infoscience.epfl.ch/record/231867/files/monotonicity-types.pdf}{\emph{Monotonicity
     Types}} by Clancy, Miller, and Meiklejohn has similar tables for their
 composition $\circ$ and ``contraction'' $+$ operators! However, instead of
-bivariance they have constancy, a stricter condition.
-%
-Constancy corresponds to respecting the \emph{indiscrete ordering} (which sets
-$a \le b$ for all $a,b$).\marginnote{Indiscreteness and its dual, discreteness,
-  are also tones --- that is, functorial transformations on the ordering
-  component of a preorder --- but they complicate things, so I omit them.
+bivariance they have constancy, a stricter condition.\marginnote{Indiscreteness
+  and its dual, discreteness, are also tones --- that is, functorial
+  transformations on the ordering component of a preorder --- but they
+  complicate things, so I omit them.
 
   Also worth noting is that discreteness and $\ti$ coincide when restricted to
   posets; many intuitions transfer from one to the other.}
+%
+Constancy corresponds to respecting the \emph{indiscrete ordering} (which sets $a \le b$
+for all $a,b$).
 %
 Interestingly, because constancy is so much stricter than bivariance, their
 composition operator is commutative.
@@ -475,20 +478,19 @@ a transformation on orderings. However, it seems related to subtyping.
 
 \section{A tonal sequent calculus}
 
+\begin{mathpar}
+  (A_1^{t_1}, ..., A_n^{t_n})^u = (A_1^{t_1 \tc u}, ..., A_n^{t_n \tc u})\\
 
-  \begin{mathpar}
-    (A_1^{t_1}, ..., A_n^{t_n})^u = (A_1^{t_1 \tc u}, ..., A_n^{t_n \tc u})\\
+  \infer[$T$-Right]{\GG \vdash A}{\GG^t \vdash T_t A}
 
-    \infer[$T$-Right]{\GG \vdash A}{\GG^t \vdash T_t A}
+  \infer[$T$-Left]{\GG{},A^{t\tc u} \vdash C}{\GG{}, (T_t A)^u \vdash C}
 
-    \infer[$T$-Left]{\GG{},A^{t\tc u} \vdash C}{\GG{}, (T_t A)^u \vdash C}
+  \infer[Weakening]{\GG{}, A^t \vdash C \quad u \le t}{\GG{}, A^u \vdash C}
 
-    \infer[Weakening]{\GG{}, A^t \vdash C \quad u \le t}{\GG{}, A^u \vdash C}
+  \infer[Contraction]{\GG{},A^t, A^u \vdash C}{\GG{}, A^{t \wedge u} \vdash C}
 
-    \infer[Contraction]{\GG{},A^t, A^u \vdash C}{\GG{}, A^{t \wedge u} \vdash C}
-
-    \infer[Cut]{\GG \vdash A \quad \Delta,A^t \vdash C}{\GG^t,\Delta \vdash C}
-  \end{mathpar}
+  \infer[Cut]{\GG \vdash A \quad \Delta,A^t \vdash C}{\GG^t,\Delta \vdash C}
+\end{mathpar}
 
 Jason Reed sent me these rules for a tonal sequent calculus. $T_s$ is the
 connective to internalizing $-^s$. I aim to adapt this into a
