@@ -5,8 +5,9 @@
 \newtoggle{colorheaders}
 
 %% ---- Options ----
+%% TODO: use kvoptions package.
 \DeclareOption{a5}{\def\rntz@ptsize{10}
-  \PassOptionsToPackage{a5paper,margin=12mm,bottom=17.5mm}{geometry}}
+  \PassOptionsToPackage{a5paper,margin=11mm,top=12mm,bottom=17.5mm}{geometry}}
 \DeclareOption{b5}{\def\rntz@ptsize{11}
   \PassOptionsToPackage{b5paper,margin=15mm,bottom=17.5mm}{geometry}}
 \DeclareOption{a4}{\def\rntz@ptsize{12}
@@ -15,7 +16,7 @@
 \DeclareOption{colorheaders}{\toggletrue{colorheaders}}
 \DeclareOption{nocolorheaders}{\togglefalse{colorheaders}}
 
-\ExecuteOptions{b5}   % defaults.
+\ExecuteOptions{b5,colorheaders}   % defaults.
 \ProcessOptions\relax
 \PassOptionsToClass{\rntz@ptsize pt}{article}
 
@@ -23,9 +24,19 @@
 \LoadClass{article}
 \RequirePackage{geometry}
 
+%% ---- AMS stuff and theorem styles ----
+%% This must precede \RequirePackage{newtxmath}; otherwise newtxmath defines
+%% \openbox and amsthm crashes complaining \openbox is already defined.
+\RequirePackage{amsthm,amsmath,amssymb}
+
+\theoremstyle{theorem}
+\newtheorem{theorem}{Theorem}
+\theoremstyle{remark}
+\newtheorem{definition}{Definition}
+
 %% ---- Fonts ----
-\RequirePackage[osf]{libertine}       % osf = old-style figures
-\RequirePackage[libertine]{newtxmath} % makes math look prettier
+\RequirePackage[mono=false,osf]{libertine} % osf = old-style figures
+\RequirePackage[libertine]{newtxmath}      % makes math look prettier
 \linespread{1.05}
 
 %% %% Alternative: mathpazo for Palatino
@@ -43,6 +54,7 @@
 \renewcommand*{\maketitle}{
   \begingroup%
   \setlength{\parindent}{0pt}%
+  %% \setlength{\parskip}{0.5ex}%
   \itshape
   {\LARGE\@title\vspace{0.5ex}\par}
   {\@author\vspace{0.5ex}\par}

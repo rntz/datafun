@@ -1,8 +1,7 @@
-\documentclass[b5,colorheaders]{rntznotes}
+\documentclass[b5]{rntznotes}
 
 
 %% ---- Packages ----
-\usepackage{amssymb,amsmath,latexsym}
 \usepackage{mathpartir}
 \usepackage{multirow}
 \usepackage{stmaryrd}           % for semantic brackets
@@ -13,10 +12,6 @@
 
 
 %% ---- Commands ----
-\newtheorem{theorem}{Theorem}
-\newtheorem{definition}{Definition}
-\newtheorem{principle}{Principle}
-
 \newcommand{\todo}[1]{{\color{red}#1}}
 
 \newcommand{\bnfeq}{\dblcolon=}
@@ -47,13 +42,14 @@
 \newcommand{\pathto}{\sim}
 
 %% tones: mono, anti, discrete, bivariant
-\newcommand{\tm}{\id}                        % monotone / id
+\newcommand{\tm}{\id}                   % monotone / id
+\newcommand{\ta}{{\color{ACMGreen}\op}} % antitone / op
+\newcommand{\ti}{{\color{ACMBlue}\iso}} % invariant/ core
+\newcommand{\tb}{{\color{ACMRed}\path}} % bivariant/ path
+
 %% \newcommand{\ta}{{\color{ForestGreen}\op}}   % antitone / op
 %% \newcommand{\ti}{{\color{NavyBlue}\iso}}     % invariant/ core
 %% \newcommand{\tb}{{\color{Bittersweet}\path}} % bivariant/ path
-\newcommand{\ta}{{\color{ACMGreen}\op}}   % antitone / op
-\newcommand{\ti}{{\color{ACMBlue}\iso}}     % invariant/ core
-\newcommand{\tb}{{\color{ACMRed}\path}} % bivariant/ path
 
 \newcommand{\tc}{\cdot}         % tone composition
 
@@ -63,25 +59,18 @@
 \newcommand{\hi}[2]{\h{#1}{#2}{\ti}}
 \newcommand{\hb}[2]{\h{#1}{#2}{\tb}}
 
-%% \newcommand{\mto}{\overset{\tm}{\to}}
-%% \newcommand{\ato}{\overset{\ta}{\to}}
-%% \newcommand{\ito}{\overset{\ti}{\to}}
-%% \newcommand{\bto}{\overset{\tb}{\to}}
-
 
 %% ---- Front matter ----
 \title{Tones and Types}
-%% alternate title: Tone theory
-%% alternate title: Tonality inference
-\author{Michael Arntzenius}
-%% \email{daekharel@gmail.com}
-\date{16 November 2017 -- ???}
+\author{Michael Arntzenius, %
+  \href{mailto:daekharel@gmail.com}{daekharel@gmail.com}}
+\date{20 March 2018}
 
 
 \begin{document}
 \maketitle
 
-\section{A preamble on preorders}
+\section{Preorders}
 
 A preorder is a relation $a \le b$ satisfying:
 \begin{enumerate}
@@ -105,12 +94,12 @@ between categories.
 
 \subsection{Tones (categorically)}
 
-\todo{TODO: this note is useful, but should go somewhere else}
-
 \newcommand{\elemset}[1]{\ensuremath{\mc{U}({#1})}}
 \newcommand{\elemsetfn}[0]{\mc{U}}
 \renewcommand{\elemset}[1]{\ensuremath{|{#1}|}}
 \renewcommand{\elemsetfn}[0]{\elemset{-}}
+
+\todo{TODO: this note is useful, but should go somewhere else}
 
 Let $\elemsetfn{} : \mb{Preorder} \to \mb{Set}$ be the forgetful functor that
 takes a preorder to its set of elements.
@@ -142,10 +131,10 @@ tones, \tm, \ta, \tb, and \ti:
 
 \begin{center}
   \begin{tabular}{clc@{\hskip 0.25em}c@{\hskip 0.25em}c}
-    \multicolumn{1}{c}{\textbf{Tone}}
-    & \multicolumn{1}{c}{\textbf{Name}}
+    \multicolumn{1}{c}{\textit{Tone}}
+    & \multicolumn{1}{c}{\textit{Name}}
     %% & \multicolumn{1}{c}{\textbf{Respects}}
-    & \multicolumn{3}{c}{\textbf{Property of $f$}}
+    & \multicolumn{3}{c}{\textit{Property of $f$}}
     \\\hline
     \tm & \text{Monotone}
     %% & \text{ordering}
@@ -200,9 +189,9 @@ I write $A^s$ for the preorder $A$ transformed by the tone $s$, defined:
 
 \begin{center}
   \begin{tabular}{clc@{\hskip 0.25em}c@{\hskip 0.25em}l}
-    {\textbf{Tone}}
-    & {\textbf{Meaning}}
-    & \multicolumn{3}{c}{\textbf{Transformation on $A$}}
+    {\textit{Tone}}
+    & {\textit{Meaning}}
+    & \multicolumn{3}{c}{\textit{Transformation on $A$}}
     \\\hline
     \tm & \text{same ordering}
     & $a \le b : A$ &$\iff$& $a \le b : A^\tm$
@@ -371,28 +360,28 @@ lacks an absorbing zero element. (\todo{TODO: Reference ``I Got Plenty o'
   \small
   \begin{mathpar}
     \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
-      \multicolumn{4}{c}{\textbf{Properties of } \wedge}
+      \multicolumn{4}{c}{\normalsize\textit{Properties of }{}\wedge{}}
       \vspace{0.1em}\\
-      \textbf{Associativity} & (s \wedge t) \wedge u &=& s \wedge (t \wedge u)\\
-      \textbf{Commutativity} & s \wedge t &=& t \wedge s\\
-      \textbf{Idempotence} & s \wedge s &=& s\\
-      \tb~\textbf{is identity} & \tb \wedge s &=& s\\
-      \ti~\textbf{absorbs} & \ti \wedge s &=& \ti\\
+      \text{Associativity} & (s \wedge t) \wedge u &=& s \wedge (t \wedge u)\\
+      \text{Commutativity} & s \wedge t &=& t \wedge s\\
+      \text{Idempotence} & s \wedge s &=& s\\
+      \tb~\text{is identity} & \tb \wedge s &=& s\\
+      \ti~\text{absorbs} & \ti \wedge s &=& \ti\\
     \end{array}
 
     \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
-      \multicolumn{4}{c}{\textbf{Properties of } \tc}
+      \multicolumn{4}{c}{\normalsize\textit{Properties of }{}\tc{}}
       \vspace{0.1em}\\
-      \textbf{Associativity} & (s \tc t) \tc u &=& s \tc (t \tc u)\\
-      \textbf{Identity} & \multicolumn{3}{c}{\tm \tc s = s = s \tc \tm}\\
-      \tb~ \textbf{left-absorbs} & \tb \tc s &=& \tb\\
-      \ti~ \textbf{left-absorbs} & \ti \tc s &=& \ti\\
-      \ta~ \textbf{self-inverts} & \ta \tc \ta &=& \tm\\
+      \text{Associativity} & (s \tc t) \tc u &=& s \tc (t \tc u)\\
+      \text{Identity} & \multicolumn{3}{c}{\tm \tc s = s = s \tc \tm}\\
+      \tb~ \text{left-absorbs} & \tb \tc s &=& \tb\\
+      \ti~ \text{left-absorbs} & \ti \tc s &=& \ti\\
+      \ta~ \text{self-inverts} & \ta \tc \ta &=& \tm\\
     \end{array}
 
     \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
-      \textbf{Left-distribution} & s \tc (t \wedge u) &=& (s \tc t) \wedge (s \tc u)\\
-      \textbf{Right-distribution} & (s \wedge t) \tc u &=& (s \tc u) \wedge (t \tc u)
+      \text{Left-distribution} & s \tc (t \wedge u) &=& (s \tc t) \wedge (s \tc u)\\
+      \text{Right-distribution} & (s \wedge t) \tc u &=& (s \tc u) \wedge (t \tc u)
     \end{array}
   \end{mathpar}
   \caption{Properties of tone operators}
@@ -529,6 +518,7 @@ $\lambda$-calculus.
 
 
 \subsection{Subtyping}
+
 In $\subtype{s}{A}{B}$, the types $A$ and $B$ are inputs, and the tone $s$ is
 output.
 
@@ -575,6 +565,7 @@ output.
 In $\converts{s}{A}{B}$, the type $A$ is input, the \emph{shape} of $B$ (either
 $- \to -$ or $- \x -$) is input, the actual types in $B$ are outputs, and the
 tone $s$ is output.
+
 \begin{mathpar}
   \infer{ }{\converts{\tm}{A}{A}}
 
@@ -622,7 +613,6 @@ Here are two more general variations on the $\fn$ rule I've considered:
          \\ \tm \le s \tc t}
         {\checks{\fn\bind{x} M}{\GG}{A \to B}}
 \end{mathpar}
-
 \textsc{Fn-1} requires a new judgment, $A \sqsubset B^s$, where $A,B,s$ are all
 inputs; this doesn't seem difficult to define, but it's Yet Another Subtyping
 Judgment. \textsc{Fn-2} avoids this, but is much less easy to explain.
@@ -655,7 +645,7 @@ original, subtyping-less $\lambda$ rule?
 \label{subsec:weakening-substitution}
 
 We wish to prove admissible the following tone-weakening and substitution rules:
-
+%
 \begin{mathpar}
   \infer[weakening]
         {\checks{M}{\GG, \h{x}{A}{s}}{C} \quad A^s \le B^t}
