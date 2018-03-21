@@ -34,13 +34,13 @@
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
 
 %% Category & preorder theory
+\newcommand{\isoto}{\simeq}
+\newcommand{\pathto}{\sim}
+
 \newcommand{\id}{\ms{id}}
 \newcommand{\op}{\ms{op}}
 \newcommand{\iso}{\ms{core}}
 \renewcommand{\path}{\ms{path}}
-
-\newcommand{\isoto}{\simeq}
-\newcommand{\pathto}{\sim}
 
 %% tones: mono, anti, discrete, bivariant
 \newcommand{\tc}{\cdot}                 % tone composition
@@ -344,6 +344,10 @@ a transformation on orderings. However, it seems related to subtyping.
 
 \section{Tones, categorically}
 
+\newcommand{\cat}[1]{\textsc{#1}} %category name
+\newcommand{\Pre}{\cat{preord}}
+\newcommand{\Set}{\cat{set}}
+
 \newcommand{\elemset}[1]{\ensuremath{\mc{U}({#1})}}
 \newcommand{\elemsetfn}[0]{\mc{U}}
 \renewcommand{\elemset}[1]{\ensuremath{|{#1}|}}
@@ -351,20 +355,23 @@ a transformation on orderings. However, it seems related to subtyping.
 
 %% TODO: adapt this prose as an intro to this section.
 
-%% Together, these theorems define a more general notion of tone: a tone $s$ is a
-%% transformation $-^s$ on the ordering component of a preorder (i.e. $A^s$ must
-%% have the same elements as $A$) satisfying Theorem \ref{thm:tone-functoriality},
-%% whose interpretation as a property of functions is given by Theorem
-%% \ref{thm:tones-transform-orders}.
+This section gives a more ``semantic'', categorical account of tones. It may be
+safely skipped.
 
-In this section I sketch a semantic understanding of tones as functors on
-preorders.
-%
-Let $\elemsetfn{} : \mb{Preorder} \to \mb{Set}$ be the forgetful functor that
-takes a preorder to its set of elements.
+Let's change perspective. I defined tones $s$ as function properties, and showed
+they correspond to certain preorder transformations $-^s$. Now, let's
+reinterpret Theorems \ref{thm:tones-transform-orders} and
+\ref{thm:tone-functoriality} as \emph{definitions}: A tone $s$ is a
+transformation $-^s$ such that if $f : A \to B$ is monotone, so is $f : A^s \to
+B^s$.
 
 \begin{definition}
-  A tone $s$ is a functor $-^s : \mb{Preorder} \to \mb{Preorder}$ such that
+  $\elemsetfn : \Pre \to \Set$ is the functor taking a preorder to its set of
+  elements.
+\end{definition}
+
+\begin{definition}\label{def:tone}
+  A tone $s$ is a functor $-^s : \Pre \to \Pre$ such that
   $\elemset{-^s} = \elemsetfn$.
 \end{definition}
 
@@ -379,7 +386,9 @@ A more categorical approach might require only a natural isomorphism \(\iota :
 \elemset{-^s} \isoto \elemsetfn\). I'm not yet comfortable generalizing that
 far.
 %% It's also unclear how to generalize this definition to tones of functors on
-%% \mb{Cat}.
+%% \cat{Cat}.
+
+\subsection{Tone operators}
 
 Tone meet $\wedge$ and composition $\tc$ also have semantic versions. Meet $s
 \wedge t$ corresponds to intersection of relations (noting that the intersection
@@ -402,7 +411,7 @@ Tone composition $s \tc t$ corresponds to functor composition:
   The composition $(-^s)^t$ of two tones is itself a tone.
 \end{theorem}
 
-\begin{proof} Use the tone-ness of $-^t$ and $-^s$ in succession:
+\begin{proof} Use Definition~\ref{def:tone} on $-^t$ and $-^s$ in succession:
   \[ \elemset{(-^s)^t} = \elemset{-^s} = \elemsetfn \]
 \end{proof}
 
@@ -816,7 +825,7 @@ Type equivalence $A^s \equiv B^t$ is identical to two-way subtyping $A^s \le B^t
 %%   \multicolumn{1}{l}{\textbf{Notation}}
 %%   & \multicolumn{1}{l}{\textbf{Name}}
 %%   & \multicolumn{1}{l}{\textbf{How to make it}}
-%%   & \multicolumn{1}{l}{\textbf{In $\mb{Preorder}$}}
+%%   & \multicolumn{1}{l}{\textbf{In $\Pre$}}
 %%   \\\hline
 %%   C^\path
 %%   & \text{``localization of $C$''}
@@ -832,8 +841,8 @@ Type equivalence $A^s \equiv B^t$ is identical to two-way subtyping $A^s \le B^t
 
 %% $C^\path$ and $C^\iso$ are groupoids --- categories where every morphism is an
 %% isomorphism. I assert but do not prove that $-^\path$ and $-^\iso$ are
-%% functorial, $\mb{Cat} \to \mb{Groupoid}$. If we restrict the domain to
-%% $\mb{Preorder}$, the codomain restricts to $\mb{Setoid}$.
+%% functorial, $\cat{Cat} \to \cat{Groupoid}$. If we restrict the domain to
+%% $\Pre$, the codomain restricts to $\cat{Setoid}$.
 
 %% Diagramatically, leaving inclusion functors unlabeled:
 %% {\large\[
@@ -841,16 +850,16 @@ Type equivalence $A^s \equiv B^t$ is identical to two-way subtyping $A^s \le B^t
 %%     no line/.style={draw=none,
 %%       commutative diagrams/every label/.append style={/tikz/auto=false}}}
 %%   \begin{tikzcd}[row sep=5em,column sep=4em]
-%%     \mb{Cat}
+%%     \cat{Cat}
 %%     \arrow[d,bend right=40,"\textstyle\path"'{name=A}]
 %%     \arrow[d,bend left=40,"\textstyle\iso"{name=C}]
-%%     & \mb{Preorder}
+%%     & \Pre
 %%     \arrow[d,bend right=40,"\textstyle\path"'{name=A2}]
 %%     \arrow[d,bend left=40,"\textstyle\iso"{name=C2}]
 %%     \arrow[l]
 %%     \\
-%%     \mb{Groupoid} \arrow[u,""{name=B}]
-%%     & \mb{Setoid} \arrow{u}[name=B2]{} \arrow[l]
+%%     \cat{Groupoid} \arrow[u,""{name=B}]
+%%     & \cat{Setoid} \arrow{u}[name=B2]{} \arrow[l]
 %%     %% the \dashv's between adjoint arrows
 %%     \arrow[to path={(A) -- (B)\tikztonodes}, no line, near end]{}{\displaystyle\dashv}
 %%     \arrow[to path={(B) -- (C)\tikztonodes}, no line]{}{\displaystyle\dashv}
@@ -860,7 +869,7 @@ Type equivalence $A^s \equiv B^t$ is identical to two-way subtyping $A^s \le B^t
 %% \]}
 
 %% $-^\path \dashv \mc{U} \dashv -^\iso$ form an \emph{adjoint triple}, where
-%% $\mc{U}$ is the inclusion $\mb{Groupoid} \to \mb{Cat}$. \todo{TODO:
+%% $\mc{U}$ is the inclusion $\cat{Groupoid} \to \cat{Cat}$. \todo{TODO:
 %%   Prove this, and explain what adjoint triples are.}
 %% %
 %% Let $\lozenge = \mc{U}(-^\path)$ and $\square = \mc{U}(-^\iso)$. This adjoint
@@ -877,7 +886,7 @@ Type equivalence $A^s \equiv B^t$ is identical to two-way subtyping $A^s \le B^t
 %%   & \text{``$f$ is an $A$-path from $x$ to $y$''}
 %% \end{array}\]
 
-%% In $\mb{Preorder}$ and $\mb{Setoid}$, we can ignore the names of morphisms:
+%% In $\Pre$ and $\cat{Setoid}$, we can ignore the names of morphisms:
 %% \[\begin{array}{lclcl}
 %%   x \le y : A &\iff& \exists f \in A(x,y)\\
 %%   x \isoto y : A &\iff& x \le y : A^\iso &\iff& x \le y \wedge y \le x : A\\
@@ -894,7 +903,7 @@ Type equivalence $A^s \equiv B^t$ is identical to two-way subtyping $A^s \le B^t
 %% \begin{lemma}\label{lem:loccore-1}
 %%   Every monotone map $A^\path \to B$ is a monotone map $A \to B^\iso$ and
 %%   vice-versa, i.e.
-%%   \[ \mb{Preorder}(A^\path, B) = \mb{Preorder}(A, B^\iso) \]
+%%   \[ \Pre(A^\path, B) = \Pre(A, B^\iso) \]
 %% \end{lemma}
 
 %% \begin{proof} We prove each direction:

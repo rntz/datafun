@@ -34,7 +34,7 @@
 \newtheorem{conjecture}[theorem]{Conjecture}
 \newtheorem{corollary}[theorem]{Conjecture}
 \newtheorem{lemma}[theorem]{Conjecture}
-\theoremstyle{remark}
+\theoremstyle{definition}
 \newtheorem{definition}{Definition}
 
 %% ---- Fonts ----
