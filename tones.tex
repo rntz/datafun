@@ -861,17 +861,6 @@ Type equivalence $A^s \equiv B^t$ is identical to two-way subtyping $A^s \le B^t
 %% $x \le y : A^\path$ --- that is, where the intended category is the result of
 %% applying a functor.
 
-%% \begin{theorem}\label{thm:loccore} For any two preorders $A$, $B$,
-%%   \begin{equation}
-%%     A^\path \to B = A \to B^\iso
-%%   \end{equation}
-
-%%   Where $A \to B$ is the preorder of monotone maps between $A$ and $B$.
-%% \end{theorem}
-
-%% \begin{proof} By Lemmas \ref{lem:loccore-1} and \ref{lem:loccore-2}.
-%% \end{proof}
-
 %% \begin{lemma}\label{lem:loccore-1}
 %%   Every monotone map $A^\path \to B$ is a monotone map $A \to B^\iso$ and
 %%   vice-versa, i.e.
@@ -893,54 +882,5 @@ Type equivalence $A^s \equiv B^t$ is identical to two-way subtyping $A^s \le B^t
 %%     $F(x) \equiv F(y)$ and so $F(x) \le F(y)$.
 %%   \end{enumerate}
 %% \end{proof}
-
-%% \begin{lemma}\label{lem:loccore-2}
-%%   \color{red}
-%%   \[f \le g : A^\path \to B \iff f \le g : A \to B^\iso \]
-
-%%   \emph{FIXME: THIS IS WRONG! I HAVE A COUNTEREXAMPLE! Namely, $A = \{\star\}$
-%%   and $B = \{\bot < \top\}$. Let $f(\star) = \bot$ and $g(\star) = \top$. Then
-%%   $f \le g : A^\path \to B$ but $f \not\le g : A \to B^\iso$.}
-%% \end{lemma}
-
-%% \begin{proof}
-%%   Expanding definitions, it suffices to show:
-%%   \[ (\forall(a \pathto b)\ f(a) \le g(b))
-%%   \iff
-%%   (\forall(a \le b)\ f(a) \equiv g(b))
-%%   \]
-
-%%   We prove each direction:
-%%   \begin{enumerate}
-%%   \item Suppose $\forall(a \pathto b)\ f(a) \le g(b)$ and $x \le y$. From $x \le
-%%     y$ we have $x \pathto y$ and $y \pathto x$; {\color{red} applying our first
-%%       assumption we have $f(x) \equiv f(y)$. \emph{FIXME: This is wrong!}}
-
-%%   \item Suppose $\forall(a \le b)\ f(a) \equiv g(b)$ and $x \pathto y$. We wish
-%%     to show $f(x) \le g(y)$. Since $x \pathto y$ there is a sequence $\vec{a}$
-%%     such that $a_0 = x$, $a_n = y$, and $a_i \le a_{i+1} \vee a_{i+1} \le a_i$
-%%     for $i$ from 1 to $n-1$. From either case of this last disjunction and the
-%%     monotonicity of $f : A \to B^\iso$ we have $f(a_i) \equiv f(a_{i+1})$. By
-%%     transitivity $f(x) \equiv f(y)$, and from our first assumption and
-%%     reflexivity $f(y) \equiv g(y)$, so transitively $f(x) \equiv g(y)$, which
-%%     implies $f(x) \le g(y)$.
-%%   \end{enumerate}
-%% \end{proof}
-
-%% \begin{conjecture} \label{cnj:loccore} Moreover,
-%%   \[ A^\path \to B = {\color{ForestGreen} A^\path \to B^\iso} = A \to B^\iso \]
-%%   because
-%%   \[ \forall(a \pathto b)\ f(a) \equiv f(b) \]
-%%   is equivalent to each of the conditions in lemma \ref{lem:loccore-2}.
-%% \end{conjecture}
-
-
-%% \begin{conjecture}
-%%   Theorem \ref{thm:loccore} and Conjecture \ref{cnj:loccore} extend to
-%%   categories, so that $-^\path \dashv -^\iso$ because
-%%   \begin{equation}
-%%     \mb{Cat}(C^\path, D) \cong \mb{Cat}(C^\path, D^\iso) \cong \mb{Cat}(C, D^\iso)
-%%   \end{equation}
-%% \end{conjecture}
 
 \end{document}
