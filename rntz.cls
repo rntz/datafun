@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{rntznotes}[2018/03/19]
+\ProvidesClass{rntz}[2018/03/19]
 
 \RequirePackage{etoolbox}       %useful tools.
 \newtoggle{colorheaders}
