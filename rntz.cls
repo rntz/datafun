@@ -31,6 +31,9 @@
 
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Conjecture}
+\newtheorem{lemma}[theorem]{Conjecture}
 \theoremstyle{remark}
 \newtheorem{definition}{Definition}
 

@@ -85,37 +85,6 @@ this document, ostensibly about maps between preorders, extends to functors
 between categories.
 
 
-\subsection{Tones (categorically)}
-
-\newcommand{\elemset}[1]{\ensuremath{\mc{U}({#1})}}
-\newcommand{\elemsetfn}[0]{\mc{U}}
-\renewcommand{\elemset}[1]{\ensuremath{|{#1}|}}
-\renewcommand{\elemsetfn}[0]{\elemset{-}}
-
-\todo{TODO: this note is useful, but should go somewhere else}
-
-Let $\elemsetfn{} : \mb{Preorder} \to \mb{Set}$ be the forgetful functor that
-takes a preorder to its set of elements.
-
-\begin{definition}
-  A tone $s$ is a functor $-^s : \mb{Preorder} \to \mb{Preorder}$ such that
-  $\elemset{-^s} = \elemsetfn$.
-\end{definition}
-
-In particular, for any preorder $A$ and monotone map $f$,
-\begin{enumerate}
-\item $|A^s| = |A|$: tone functors change a preorder's \emph{ordering}, not its
-  elements.
-\item $|f^s| = |f|$: tone functors do not change functions' behavior.
-\end{enumerate}
-
-A more categorical approach might require only a natural isomorphism \(\iota :
-\elemsetfn \isoto \elemset{-^s}\). I'm not yet comfortable generalizing that
-far.
-%% It's also unclear how to generalize this definition to tones of functors on
-%% \mb{Cat}.
-
-
 \section{Tones}
 
 Tones are ways a function $f$ may respect a preordering. I will consider four
@@ -226,12 +195,6 @@ Also, there is one more property of tones we will need:
 \end{theorem}
 %% \begin{proof} Exercise for the reader. \end{proof}
 
-%% Together, these theorems define a more general notion of tone: a tone $s$ is a
-%% transformation $-^s$ on the ordering component of a preorder (i.e. $A^s$ must
-%% have the same elements as $A$) satisfying Theorem \ref{thm:tone-functoriality},
-%% whose interpretation as a property of functions is given by Theorem
-%% \ref{thm:tones-transform-orders}.
-
 \subsection{On defining \ms{path} directly} \label{sec:defining-path}
 
 $A^\path$ is the smallest preorder satisfying
@@ -302,18 +265,9 @@ Figure~\ref{fig:tone-ops} defines two operators on tones:
   g\rangle : A^{s \wedge t} \to B \times C$ of two functions $f : A^s \to B$ and
   $g : A^{t} \to C$.
 
-  \todo{TODO: isn't this just intersection of the relations? if $R(a,b)$ and
-    $S(a,b)$ are preorders, is $R(a,b) \wedge S(a,b)$ reflexive and transitive?
-    Yes (even though $R(a,b) \vee S(a,b)$ isn't always)! So then $x \le y : A^{s
-      \wedge t} \iff x \le y : A^s \wedge x \le y : A^t$?}
-
 \item Composition $s \tc t$ gives the tone of a composed function $g \circ f :
   A^{s\tc t} \to C$ when $f : A^s \to B$ and $g : B^t \to C$. Equivalently,
   $A^{s\tc t} = (A^s)^t$ for any preorder $A$.
-
-  \todo{TODO: Likewise, this is just observing that tones compose to tones,
-    right? But does this semantic operation match up with our syntactic
-    definition of $s \tc t$?}
 \end{enumerate}
 
 Together, $\wedge$ and $\tc$ form a semiring whose properties are given in
@@ -385,6 +339,82 @@ They write $\uparrow$ for $\tm$, $\downarrow$ for $\ta$, $?$ for $\ti$, and
 $\sim$ for constancy. They also add $=$ for the ``tone'' that \emph{only the
   identity function} has. This doesn't fit my framework; it cannot be phrased as
 a transformation on orderings. However, it seems related to subtyping.
+
+
+
+\section{Tones, categorically}
+
+\newcommand{\elemset}[1]{\ensuremath{\mc{U}({#1})}}
+\newcommand{\elemsetfn}[0]{\mc{U}}
+\renewcommand{\elemset}[1]{\ensuremath{|{#1}|}}
+\renewcommand{\elemsetfn}[0]{\elemset{-}}
+
+%% TODO: adapt this prose as an intro to this section.
+
+%% Together, these theorems define a more general notion of tone: a tone $s$ is a
+%% transformation $-^s$ on the ordering component of a preorder (i.e. $A^s$ must
+%% have the same elements as $A$) satisfying Theorem \ref{thm:tone-functoriality},
+%% whose interpretation as a property of functions is given by Theorem
+%% \ref{thm:tones-transform-orders}.
+
+In this section I sketch a semantic understanding of tones as functors on
+preorders.
+%
+Let $\elemsetfn{} : \mb{Preorder} \to \mb{Set}$ be the forgetful functor that
+takes a preorder to its set of elements.
+
+\begin{definition}
+  A tone $s$ is a functor $-^s : \mb{Preorder} \to \mb{Preorder}$ such that
+  $\elemset{-^s} = \elemsetfn$.
+\end{definition}
+
+In particular, for any preorder $A$ and monotone map $f$,
+\begin{enumerate}
+\item $|A^s| = |A|$: tone functors change a preorder's \emph{ordering}, not its
+  elements.
+\item $|f^s| = |f|$: tone functors do not change functions' behavior.
+\end{enumerate}
+
+A more categorical approach might require only a natural isomorphism \(\iota :
+\elemset{-^s} \isoto \elemsetfn\). I'm not yet comfortable generalizing that
+far.
+%% It's also unclear how to generalize this definition to tones of functors on
+%% \mb{Cat}.
+
+Tone meet $\wedge$ and composition $\tc$ also have semantic versions. Meet $s
+\wedge t$ corresponds to intersection of relations (noting that the intersection
+of two reflexive, transitive relations is itself reflexive and transitive):
+%
+\[ a \le b : A^{s \wedge t}
+%% \iff a \le b : A^s \cap A^t
+\iff a \le b : A^s \wedge a \le b : A^t \]
+
+\begin{conjecture}
+  The intersection of two tones is a tone.
+\end{conjecture}
+\begin{proof}
+  \todo{TODO}
+\end{proof}
+
+Tone composition $s \tc t$ corresponds to functor composition:
+
+\begin{theorem}
+  The composition $(-^s)^t$ of two tones is itself a tone.
+\end{theorem}
+
+\begin{proof} Use the tone-ness of $-^t$ and $-^s$ in succession:
+  \[ \elemset{(-^s)^t} = \elemset{-^s} = \elemsetfn \]
+\end{proof}
+
+\begin{conjecture}
+  The definitions of $\wedge$ and $\tc$ in Figure~\ref{fig:tone-ops} coincide
+  with their semantic definitions, applied to the semantic interpretation of
+  $\tm$, $\ta$, $\tb$, and $\ti$.
+\end{conjecture}
+
+\todo{TODO: Don't tones have a natural semantic partial ordering? Isn't $\wedge$
+  the greatest lower bound of this ordering? (In fact, perhaps they form a
+  functor category with products? Do they have coproducts, too?)}
 
 
 \section{A tonal sequent calculus}
@@ -497,7 +527,7 @@ output.
 \begin{mathpar}
   \infer{ }{\subtype{\tm}{A}{A}}
 
-  \infer{A~\ms{equiv}}{\subtype{\ti}{A}{A}}
+  \infer{A~\text{equiv}}{\subtype{\ti}{A}{A}}
 
   \infer{\subtype{s}{A}{B}}
         {\subtype{s \tc \ti}{A}{\Box B}}
