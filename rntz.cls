@@ -1,8 +1,8 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{rntz}[2018/03/19]
 
-\RequirePackage{etoolbox}       %useful tools.
-\newtoggle{colorheaders}
+\RequirePackage{etoolbox}       % toggles; fixing titlesec.
+\newtoggle{colorheaders}        % option: colorize headers, or no?
 
 %% ---- Options ----
 %% TODO: use kvoptions package.
@@ -29,7 +29,7 @@
 %% \openbox and amsthm crashes complaining \openbox is already defined.
 \RequirePackage{amsthm,amsmath,amssymb}
 
-\theoremstyle{theorem}
+\theoremstyle{plain}
 \newtheorem{theorem}{Theorem}
 \theoremstyle{remark}
 \newtheorem{definition}{Definition}
@@ -54,11 +54,10 @@
 \renewcommand*{\maketitle}{
   \begingroup%
   \setlength{\parindent}{0pt}%
-  %% \setlength{\parskip}{0.5ex}%
-  \itshape
-  {\LARGE\@title\vspace{0.5ex}\par}
-  {\@author\vspace{0.5ex}\par}
-  {\@date\par}
+  \itshape%
+  {\LARGE\@title\vspace{0.5ex}\par}%
+  {\@author\vspace{0.5ex}\par}%
+  {\@date\par}%
   \endgroup}
 
 %% ---- Colors ----

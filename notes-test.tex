@@ -5,6 +5,7 @@
 \usepackage{mathpartir}
 \usepackage{multirow}
 \usepackage{stmaryrd}           % for semantic brackets
+\usepackage{anyfontsize}        % avoid font size warnings from stmaryrd
 \usepackage{mathtools}          % for \dblcolon
 \usepackage{accents}            % for \underaccent
 \usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
@@ -42,6 +43,7 @@
 \newcommand{\pathto}{\sim}
 
 %% tones: mono, anti, discrete, bivariant
+\newcommand{\tc}{\cdot}                 % tone composition
 \newcommand{\tm}{\id}                   % monotone / id
 \newcommand{\ta}{{\color{ACMGreen}\op}} % antitone / op
 \newcommand{\ti}{{\color{ACMBlue}\iso}} % invariant/ core
@@ -50,14 +52,6 @@
 %% \newcommand{\ta}{{\color{ForestGreen}\op}}   % antitone / op
 %% \newcommand{\ti}{{\color{NavyBlue}\iso}}     % invariant/ core
 %% \newcommand{\tb}{{\color{Bittersweet}\path}} % bivariant/ path
-
-\newcommand{\tc}{\cdot}         % tone composition
-
-\newcommand{\h}[3]{#1 : {#2}^{#3}}
-\newcommand{\hm}[2]{\h{#1}{#2}{\tm}}
-\newcommand{\ha}[2]{\h{#1}{#2}{\ta}}
-\newcommand{\hi}[2]{\h{#1}{#2}{\ti}}
-\newcommand{\hb}[2]{\h{#1}{#2}{\tb}}
 
 
 %% ---- Front matter ----
@@ -360,7 +354,7 @@ lacks an absorbing zero element. (\todo{TODO: Reference ``I Got Plenty o'
   \small
   \begin{mathpar}
     \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
-      \multicolumn{4}{c}{\normalsize\textit{Properties of }{}\wedge{}}
+      \multicolumn{4}{c}{\textit{\normalsize Properties of ${}\wedge{}$}}
       \vspace{0.1em}\\
       \text{Associativity} & (s \wedge t) \wedge u &=& s \wedge (t \wedge u)\\
       \text{Commutativity} & s \wedge t &=& t \wedge s\\
@@ -370,7 +364,7 @@ lacks an absorbing zero element. (\todo{TODO: Reference ``I Got Plenty o'
     \end{array}
 
     \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
-      \multicolumn{4}{c}{\normalsize\textit{Properties of }{}\tc{}}
+      \multicolumn{4}{c}{\textit{\normalsize Properties of ${}\tc{}$}}
       \vspace{0.1em}\\
       \text{Associativity} & (s \tc t) \tc u &=& s \tc (t \tc u)\\
       \text{Identity} & \multicolumn{3}{c}{\tm \tc s = s = s \tc \tm}\\
@@ -440,12 +434,13 @@ $\lambda$-calculus.
   something $\le \tm$.}
 
 
-\section{A bidirectional $\lambda$-calculus with tone inference}
+\section{A bidirectional \texorpdfstring{$\lambda$}{lambda}-calculus with tone inference}
 
 \newcommand{\isfn}[4]{{#2}^{#1}\sqsubset {#3} \Rightarrow {#4}}
 \newcommand{\subtype}[3]{{#2}^{#1}\sqsubset {#3}}
 \newcommand{\converts}[3]{{#2}^{#1} \prec {#3}}
 
+\newcommand{\h}[3]{#1 : {#2}^{#3}} % hypotheses
 \newcommand{\infers}[3]{{#1} \Rightarrow {#2} \vdash {#3}}
 \newcommand{\checks}[3]{{#1} \Leftarrow {#2} \vdash {#3}}
 
@@ -599,7 +594,7 @@ Judgment: $p : \GG \vdash A \dashv \GG$.
 \todo{TODO: patterns and pattern inference}
 
 
-\subsection{Tones and the $\fn$ rule}
+\subsection{Tones and the \texorpdfstring{$\fn$}{lambda} rule}
 
 Here are two more general variations on the $\fn$ rule I've considered:
 \begin{mathpar}
