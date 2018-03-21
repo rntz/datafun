@@ -1,6 +1,6 @@
 LATEXRUN := ./latexrun/latexrun
 
-TEXS  := tones.tex tufte-test.tex
+TEXS  := tones.tex
 # other things which affect compilation result
 AUXIL := $(wildcard *.sty *.cls) Makefile
 PDFS  := $(addsuffix .pdf,$(basename $(TEXS)))
