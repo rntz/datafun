@@ -4,8 +4,12 @@
 \RequirePackage{etoolbox}       % ifstrequal; toggles; fixing titlesec.
 \newtoggle{colorheaders}        % option: colorize headers, or no?
 \newtoggle{mathpazo}            % option: use mathpazo font, or no?
+\newtoggle{narrow}
 
 %% ---- Options ----
+\DeclareOption{narrow}{\toggletrue{narrow}}
+\DeclareOption{wide}{\togglefalse{narrow}}
+
 \DeclareOption{cm}{\def\rntz@font{cm}}
 \DeclareOption{libertine}{\def\rntz@font{libertine}}
 \DeclareOption{mathpazo}{\def\rntz@font{mathpazo}}
@@ -13,10 +17,11 @@
 \DeclareOption{colorheaders}{\toggletrue{colorheaders}}
 \DeclareOption{nocolorheaders}{\togglefalse{colorheaders}}
 
-\DeclareOption{a5}{\PassOptionsToPackage{a5paper,margin=11mm,top=12mm,bottom=17.5mm}{geometry}}
-\DeclareOption{b5}{\PassOptionsToPackage{b5paper,margin=15mm,bottom=17.5mm}{geometry}}
-\DeclareOption{a4}{\PassOptionsToPackage{a4paper,margin=2cm}{geometry}}
-\DeclareOption{letter}{\PassOptionsToPackage{letterpaper,margin=2cm}{geometry}}
+\DeclareOption{a5}{\def\rntz@geom{a5paper,text={126mm,180mm}}}
+\DeclareOption{b5}{\def\rntz@geom{b5paper,text={146mm,215mm}}}
+\DeclareOption{a4}{\def\rntz@geom{a4paper,text={170mm,247mm}}}
+%% TODO: fix this.
+\DeclareOption{letter}{\def\rntz@geom{letterpaper,margin=2cm}}
 
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
 
@@ -25,7 +30,9 @@
 
 %% ---- Basic layout ----
 \LoadClass{extarticle}
-\RequirePackage{geometry}
+\RequirePackage[\rntz@geom]{geometry}
+%% if narrow, limit text width to 12cm, which is article.cls' default.
+\iftoggle{narrow}{\geometry{textwidth=12cm}}{}
 
 %% ---- AMS stuff and theorem styles ----
 %% This must precede \RequirePackage{newtxmath}; otherwise newtxmath defines
@@ -104,10 +111,10 @@
 
 \iftoggle{colorheaders}{
   \newcommand{\colorhno}[3]%
-  {\llap{\colorbox{#1}{\parbox{2cm}{\hfill{\color{#2}#3\hnopost}}}\hnopre}}
+  {\llap{\colorbox{#1}{\parbox{100in}{\hfill{\color{#2}#3\hnopost}}}\hnopre}}
 }{
   \newcommand{\colorhno}[3]{%
-  {\llap{\colorbox{white}{\parbox{2cm}{\hfill{#3\hnopost}}\hnopre}}}}
+  {\llap{\colorbox{white}{\parbox{100in}{\hfill{#3\hnopost}}\hnopre}}}}
 }
 
 \titlespacing*{\section}{0pt}{1.25em}{.5em}
