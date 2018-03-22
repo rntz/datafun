@@ -1,6 +1,7 @@
-\documentclass[a5]{rntz}
+\documentclass[a4,12pt]{rntz}
 
-%% \documentclass{article}
+%% \documentclass[12pt]{article}
+%% \usepackage[a4paper,margin=2cm]{geometry}
 %% \usepackage{amsthm,amsmath,amssymb}
 %% \theoremstyle{plain}
 %% \newtheorem{theorem}{Theorem}
@@ -248,10 +249,9 @@ transitive! Instead, $\ms{fencepost}^\path$ is the \emph{transitive closure} of
 $|a-b| \le 1$, which makes everything equivalent:
 \[ 0 \equiv 1 \equiv 2 \equiv 3 \equiv 4 \equiv \dots \]
 
-However, a direct definition of $A^\path$ is possible using \emph{paths}:
-``zig-zagging'' lists $a_0, \dots, a_n$ such that $a_i \le a_{i+1} \vee a_i \ge
-a_{i+1} : A$. Then $a \le b : A^\path$ iff there is a path starting at $a$ and
-ending at $b$.
+This suggests a direct definition: let a \emph{path} be a ``zig-zagging'' list
+$a_0, \dots, a_n$ such that $a_i \le a_{i+1} \vee a_i \ge a_{i+1} : A$. Then $a
+\le b : A^\path$ iff there is a path starting at $a$ and ending at $b$.
 
 
 \subsection{Tone operators}
@@ -260,7 +260,7 @@ ending at $b$.
   \begin{mathpar}
     %% "baseline=(current bounding box.center)" incantation taken from
     %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
-    \begin{tikzpicture}[scale=0.8,baseline=(current bounding box.center)]
+    \begin{tikzpicture}[scale=1,baseline=(current bounding box.center)]
       \node (top)  at ( 0, 1) {$\tb$};
       \node (bot)  at ( 0,-1) {$\ti$};
       \node (-1)   at (-1, 0) {$\tm$};
@@ -350,7 +350,7 @@ Figure~\ref{fig:tone-op-laws}. \todo{TODO: Reference ``I Got Plenty o'
   \label{fig:tone-op-laws}
 \end{figure*}
 
-\subsection{Relation to Monotonicity Types}
+\subsection{Monotonicity Types}
 
 \href{https://infoscience.epfl.ch/record/231867/files/monotonicity-types.pdf}{\emph{Monotonicity
     Types}} by Clancy, Miller, and Meiklejohn has similar tables for their
@@ -713,8 +713,8 @@ We wish to prove admissible the following tone-weakening and substitution rules:
 
 \subsection{Subtyping and type equivalence}
 
-Type equivalence $A^s \equiv B^t$ is identical to two-way subtyping $A^s \le B^t
-\wedge B^t \le A^s$.
+Type equivalence $A^s \equiv B^t$ is a synonym for $A^s \le B^t \wedge B^t \le
+A^s$.
 
 \begin{mathpar}
   \infer{s \le t}{A^s \le A^t}

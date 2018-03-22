@@ -1,27 +1,30 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{rntz}[2018/03/19]
 
-\RequirePackage{etoolbox}       % toggles; fixing titlesec.
+\RequirePackage{etoolbox}       % ifstrequal; toggles; fixing titlesec.
 \newtoggle{colorheaders}        % option: colorize headers, or no?
+\newtoggle{mathpazo}            % option: use mathpazo font, or no?
 
 %% ---- Options ----
-%% TODO: use kvoptions package.
-\DeclareOption{a5}{\def\rntz@ptsize{10}
-  \PassOptionsToPackage{a5paper,margin=11mm,top=12mm,bottom=17.5mm}{geometry}}
-\DeclareOption{b5}{\def\rntz@ptsize{11}
-  \PassOptionsToPackage{b5paper,margin=15mm,bottom=17.5mm}{geometry}}
-\DeclareOption{a4}{\def\rntz@ptsize{12}
-  \PassOptionsToPackage{a4paper,margin=2cm}{geometry}}
+\DeclareOption{cm}{\def\rntz@font{cm}}
+\DeclareOption{libertine}{\def\rntz@font{libertine}}
+\DeclareOption{mathpazo}{\def\rntz@font{mathpazo}}
 
 \DeclareOption{colorheaders}{\toggletrue{colorheaders}}
 \DeclareOption{nocolorheaders}{\togglefalse{colorheaders}}
 
-\ExecuteOptions{b5,colorheaders}   % defaults.
+\DeclareOption{a5}{\PassOptionsToPackage{a5paper,margin=11mm,top=12mm,bottom=17.5mm}{geometry}}
+\DeclareOption{b5}{\PassOptionsToPackage{b5paper,margin=15mm,bottom=17.5mm}{geometry}}
+\DeclareOption{a4}{\PassOptionsToPackage{a4paper,margin=2cm}{geometry}}
+\DeclareOption{letter}{\PassOptionsToPackage{letterpaper,margin=2cm}{geometry}}
+
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
+
+\ExecuteOptions{b5,mathpazo,colorheaders} % defaults.
 \ProcessOptions\relax
-\PassOptionsToClass{\rntz@ptsize pt}{article}
 
 %% ---- Basic layout ----
-\LoadClass{article}
+\LoadClass{extarticle}
 \RequirePackage{geometry}
 
 %% ---- AMS stuff and theorem styles ----
@@ -39,14 +42,16 @@
 \newtheorem{definition}{Definition}
 
 %% ---- Fonts ----
-\RequirePackage[mono=false,osf]{libertine} % osf = old-style figures
-\RequirePackage[libertine]{newtxmath}      % makes math look prettier
-\linespread{1.05}
+\ifdefstring{\rntz@font}{libertine}{
+  \RequirePackage[mono=false,osf]{libertine} % osf = old-style figures
+  \RequirePackage[libertine]{newtxmath}      % makes math look prettier
+  \linespread{1.1}
+}{}
 
-%% %% Alternative: mathpazo for Palatino
-%% %% TODO: make this an option.
-%% \RequirePackage[osf]{mathpazo}
-%% \linespread{1.15}
+\ifdefstring{\rntz@font}{mathpazo}{
+  \RequirePackage[osf]{mathpazo}
+  \linespread{1.15}
+}{}
 
 %% ---- Styling paragraphs and lists ----
 \setlength{\parindent}{1.0pc}
@@ -108,8 +113,10 @@
 \titlespacing*{\section}{0pt}{1.25em}{.5em}
 \titlespacing*{\subsection}{0pt}{1.25em}{.5em}
 
+% Nice colors: Whee, Periwinkle, cyan
+\definecolor[named]{Whee}{cmyk}{0.33, 0.33, 0, 0}
 \titleformat{\section}{\large\header}
-            {\colorhno{cyan}{white}{\thesection}}{0pt}{}
+            {\colorhno{Whee}{white}{\thesection}}{0pt}{}
 \titleformat{\subsection}{\normalsize\header}
             {\colorhno{ACMOrange}{white}{\thesubsection}}{0pt}{}
 %% Comment out for colorful subsection headers.
