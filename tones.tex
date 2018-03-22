@@ -1,4 +1,25 @@
-\documentclass[b5]{rntz}
+\documentclass[a5]{rntz}
+
+%% \documentclass{article}
+%% \usepackage{amsthm,amsmath,amssymb}
+%% \theoremstyle{plain}
+%% \newtheorem{theorem}{Theorem}
+%% \newtheorem{conjecture}[theorem]{Conjecture}
+%% \newtheorem{lemma}[theorem]{Lemma}
+%% \theoremstyle{remark}
+%% \newtheorem*{corollary}{Corollary}
+%% \theoremstyle{definition}
+%% \newtheorem{definition}{Definition}
+%% \usepackage[dvipsnames]{xcolor}
+%% \definecolor[named]{ACMBlue}{cmyk}{1,0.1,0,0.1}
+%% \definecolor[named]{ACMYellow}{cmyk}{0,0.16,1,0}
+%% \definecolor[named]{ACMOrange}{cmyk}{0,0.42,1,0.01}
+%% \definecolor[named]{ACMRed}{cmyk}{0,0.90,0.86,0}
+%% \definecolor[named]{ACMLightBlue}{cmyk}{0.49,0.01,0,0}
+%% \definecolor[named]{ACMGreen}{cmyk}{0.20,0,1,0.19}
+%% \definecolor[named]{ACMPurple}{cmyk}{0.55,1,0,0.15}
+%% \definecolor[named]{ACMDarkBlue}{cmyk}{1,0.58,0,0.21}
+%% \usepackage{hyperref,url}
 
 
 %% ---- Packages ----
@@ -85,7 +106,7 @@ this document, ostensibly about maps between preorders, extends to functors
 between categories.
 
 
-\section{Tones}
+\section{Tones}\label{sec:tones}
 
 Tones are ways a function $f$ may respect a preordering. I will consider four
 tones, \tm, \ta, \tb, and \ti:
@@ -208,17 +229,29 @@ a : A$, does not always hold. A good counterexample is the \ms{fencepost}
 ordering on the naturals, where $a \le a+1$ for even $a$, and $a \ge a+1$ for
 odd $a$:
 
-\todo{TODO: Diagram}.
+\begin{center}
+  \begin{tikzpicture}
+    \node (0)    at ( 0, 0) {0};
+    \node (1)    at ( 1, 1) {1};
+    \node (2)    at ( 2, 0) {2};
+    \node (3)    at ( 3, 1) {3};
+    \node (4)    at ( 4, 0) {4};
+    \node (5)    at ( 5, 1) {5};
+    \node (6)    at ( 6, 0) {6};
+    \node (dots) at ( 7, 1) {$\quad\cdots$};
+    \draw (0) -- (1) -- (2) -- (3) -- (4) -- (5) -- (6) -- (dots);
+  \end{tikzpicture}
+\end{center}
 
 Note that $a \le b \vee b \le a : \ms{fencepost} \iff |a-b| \le 1$, which isn't
 transitive! Instead, $\ms{fencepost}^\path$ is the \emph{transitive closure} of
 $|a-b| \le 1$, which makes everything equivalent:
-\[ 0 \equiv 1 \equiv 2 \equiv 3 \equiv 4 \equiv ... \]
+\[ 0 \equiv 1 \equiv 2 \equiv 3 \equiv 4 \equiv \dots \]
 
 However, a direct definition of $A^\path$ is possible using \emph{paths}:
-``zig-zagging'' lists $a_0, a_1, ..., a_n$ such that $a_i \le a_{i+1} \vee a_i
-\ge a_{i+1} : A$. Then $a \le b : A^\path$ iff there is a path starting at $a$
-and ending at $b$.
+``zig-zagging'' lists $a_0, \dots, a_n$ such that $a_i \le a_{i+1} \vee a_i \ge
+a_{i+1} : A$. Then $a \le b : A^\path$ iff there is a path starting at $a$ and
+ending at $b$.
 
 
 \subsection{Tone operators}
@@ -355,15 +388,18 @@ a transformation on orderings. However, it seems related to subtyping.
 
 %% TODO: adapt this prose as an intro to this section.
 
-This section gives a more ``semantic'', categorical account of tones. It may be
-safely skipped.
+This section gives a categorical semantics of tones. You may safely skip it.
 
-Let's change perspective. I defined tones $s$ as function properties, and showed
-they correspond to certain preorder transformations $-^s$. Now, let's
-reinterpret Theorems \ref{thm:tones-transform-orders} and
-\ref{thm:tone-functoriality} as \emph{definitions}: A tone $s$ is a
-transformation $-^s$ such that if $f : A \to B$ is monotone, so is $f : A^s \to
-B^s$.
+Let's change perspective. Section \ref{sec:tones} defines tones as function
+properties, then gives corresponding preorder transformations. Now, let's define
+tones as preorder transformations, and derive corresponding function properties.
+
+%% Section \ref{sec:tones} defines tones $s$ as function
+%% properties, and gives corresponding preorder transformations $-^s$ such that $f
+%% : A \to B$ has tone $s$ iff $f : A^s \to B$ is monotone. Now, let's reinterpret
+%% Theorems \ref{thm:tones-transform-orders} and \ref{thm:tone-functoriality} as
+%% \emph{definitions}: A tone $s$ is a transformation $-^s$ such that if $f : A \to
+%% B$ is monotone, so is $f : A^s \to B^s$. Categorically:
 
 \begin{definition}
   $\elemsetfn : \Pre \to \Set$ is the functor taking a preorder to its set of
@@ -371,16 +407,22 @@ B^s$.
 \end{definition}
 
 \begin{definition}\label{def:tone}
-  A tone $s$ is a functor $-^s : \Pre \to \Pre$ such that
-  $\elemset{-^s} = \elemsetfn$.
+  A tone $s$ is a functor $-^s : \Pre \to \Pre$ such that $\elemset{-^s} =
+  \elemsetfn$.
 \end{definition}
 
-In particular, for any preorder $A$ and monotone map $f$,
-\begin{enumerate}
-\item $|A^s| = |A|$: tone functors change a preorder's \emph{ordering}, not its
-  elements.
-\item $|f^s| = |f|$: tone functors do not change functions' behavior.
-\end{enumerate}
+\begin{corollary}
+  For any preorder $A$ and monotone map $f$,
+  \begin{enumerate}
+  \item $|A^s| = |A|$: tone functors change a preorder's \emph{ordering}, not its
+    elements.
+  \item $|f^s| = |f|$: tone functors do not change functions' behavior.
+  \end{enumerate}
+\end{corollary}
+
+\begin{definition}
+  A function $f$ from $A$ to $B$ has tone $s$ iff $f : A^s \to B$ is monotone.
+\end{definition}
 
 A more categorical approach might require only a natural isomorphism \(\iota :
 \elemset{-^s} \isoto \elemsetfn\). I'm not yet comfortable generalizing that
@@ -429,7 +471,7 @@ Tone composition $s \tc t$ corresponds to functor composition:
 \section{A tonal sequent calculus}
 
 \begin{mathpar}
-  (A_1^{t_1}, ..., A_n^{t_n})^u = (A_1^{t_1 \tc u}, ..., A_n^{t_n \tc u})\\
+  (A_1^{t_1}, \dots, A_n^{t_n})^u = (A_1^{t_1 \tc u}, \dots, A_n^{t_n \tc u})\\
 
   \infer[Hypothesis]{t \le \tm}{\GG, A^t \vdash A}
 
