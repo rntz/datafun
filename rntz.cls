@@ -25,13 +25,14 @@
 
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
 
-\ExecuteOptions{b5,mathpazo,colorheaders} % defaults.
+% Defaults imitate article.cls.
+\ExecuteOptions{a4,mathpazo,nocolorheaders,narrow}
 \ProcessOptions\relax
 
 %% ---- Basic layout ----
 \LoadClass{extarticle}
 \RequirePackage[\rntz@geom]{geometry}
-%% if narrow, limit text width to 12cm, which is article.cls' default.
+%% if narrow, limit text width to 12cm, imitating article.cls.
 \iftoggle{narrow}{\geometry{textwidth=12cm}}{}
 
 %% ---- AMS stuff and theorem styles ----
