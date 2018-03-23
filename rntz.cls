@@ -51,14 +51,16 @@
 %% \openbox and amsthm crashes complaining \openbox is already defined.
 \RequirePackage{amsthm,amsmath,amssymb}
 
-\theoremstyle{remark}
-\newtheorem*{corollary}{Corollary}
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}
+%% Everything is numbered sequentially with a single counter.
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}
 \newtheorem{conjecture}[theorem]{Conjecture}
 \newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem*{corollary}{Corollary}
+\theoremstyle{plain}            %back to default
 
 %% ---- Fonts ----
 \ifdefstring{\rntz@font}{libertine}{
