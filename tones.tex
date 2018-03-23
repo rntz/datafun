@@ -1,4 +1,5 @@
 \documentclass{rntz}
+\usepackage{eulervm}
 
 %% \documentclass[12pt]{article}
 %% \usepackage[a4paper,margin=2cm]{geometry}
@@ -52,6 +53,7 @@
 \newcommand{\fn}{\lambda}
 \newcommand{\binder}{.\,}
 \newcommand{\bind}[1]{{#1}\binder}
+\newcommand{\fnof}[1]{\fn\bind{#1}}
 \newcommand{\sub}[1]{\{{#1}\}}
 \newcommand{\fix}{\ms{fix}}
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
@@ -155,7 +157,7 @@ Informally,
 
 Consider preorders $A, B$. Let $A^\op$ be $A$, ordered oppositely. Now, observe
 that
-
+%
 \begin{center}
   $f : A \to B$ is antitone
 
@@ -194,13 +196,13 @@ transformed by the tone $s$, defined:
 \end{center}
 
 With this, we can state the theorem generalizing our observation:
-\begin{theorem}[Tones transform orders]\label{thm:tones-transform-orders}
+\begin{theorem}[Tones transform orders]\label{thm:tones-transform-orders}%
   %% For any function $f : A \to B$ between preorders $A$, $B$:
-  ~
+  ~\nopagebreak
   \begin{center}
     $f : A \to B$ has tone $s$
 
-    \nopagebreak \emph{iff} \nopagebreak
+    \nopagebreak\emph{iff}\nopagebreak
 
     $f : A^s \to B$ is monotone
   \end{center}
@@ -381,6 +383,8 @@ a transformation on orderings. However, it seems related to subtyping.
 \newcommand{\cat}[1]{\textsc{#1}} %category name
 \newcommand{\Pre}{\cat{preord}}
 \newcommand{\Set}{\cat{set}}
+\newcommand{\Tone}{\cat{tone}}
+\newcommand{\Cat}{\cat{cat}}
 
 \newcommand{\elemset}[1]{\ensuremath{\mc{U}({#1})}}
 \newcommand{\elemsetfn}[0]{\mc{U}}
@@ -407,17 +411,19 @@ tones as preorder transformations, and derive corresponding function properties.
   elements.
 \end{definition}
 
-\begin{definition}\label{def:tone}
+\begin{definition}[Tones]\label{def:tone}
   A tone $s$ is a functor $-^s : \Pre \to \Pre$ such that $\elemset{-^s} =
-  \elemsetfn$.
+  \elemsetfn$.\footnote{A more categorical approach might require only a natural
+    isomorphism \(\iota : \elemset{-^s} \isoto \elemsetfn\). I'm not yet
+    comfortable generalizing that far. }
 \end{definition}
 
 \begin{corollary}
   For any preorder $A$ and monotone map $f$,
   \begin{enumerate}
-  \item $|A^s| = |A|$: tone functors change a preorder's \emph{ordering}, not its
+  \item $|A^s| = |A|$: tone functors alter a preorder's \emph{ordering}, not its
     elements.
-  \item $|f^s| = |f|$: tone functors do not change functions' behavior.
+  \item $|f^s| = |f|$: tone functors do not alter functions' behavior.
   \end{enumerate}
 \end{corollary}
 
@@ -425,13 +431,94 @@ tones as preorder transformations, and derive corresponding function properties.
   A function $f$ from $A$ to $B$ has tone $s$ iff $f : A^s \to B$ is monotone.
 \end{definition}
 
-A more categorical approach might require only a natural isomorphism \(\iota :
-\elemset{-^s} \isoto \elemsetfn\). I'm not yet comfortable generalizing that
-far.
 %% It's also unclear how to generalize this definition to tones of functors on
-%% \cat{Cat}.
+%% \Cat{}.
 
-\subsection{Tone operators}
+\subsection{The tone monoid}
+
+Tone composition $s \tc t$ corresponds to composition of tone functors:
+
+\begin{theorem}
+  The composition $(-^s)^t$ of two tones is itself a tone.
+\end{theorem}
+
+\begin{proof} Applying Definition~\ref{def:tone} on $-^t$ and $-^s$, we have
+  \( \elemset{(-^s)^t} = \elemset{-^s} = \elemsetfn \).
+\end{proof}
+
+
+\subsection{The \Tone{} category}
+
+Preorders have a natural partial order, letting $A \le B$ iff $A$ is a
+\emph{subpreorder} of $B$ --- that is, if $\fnof{x} x : A \to B$. (In other
+words, if $A \subseteq B$ and $x \le y : A \implies x \le y : B$.) This lifts
+pointwise to a partial order on tones: let $s \le t$ iff $A^s \le A^t$ for all
+$A$.
+
+As functors, tones also form a category, \Tone{}, with natural transformations
+as morphisms. However, \Tone{} is a mere fa\c{c}ade over this partial
+order:
+
+\begin{theorem}\label{thm:tone-poset}
+  $s \le t \iff \exists \eta : \Tone(s, t)$. Moreover, any two morphisms $\eta,
+  \varepsilon : \Tone(s,t)$ are equal.
+\end{theorem}
+
+\begin{proof}
+  Expanding definitions, $s \le t$ means $\fnof{x} x : A^s \to A^t$ for all $A :
+  \Pre$. By Lemma~\ref{lem:tone-transformations-are-id}, any $\eta : \Tone(s,t)$
+  is of the form $\eta_A = \fnof{x} x : A^s \to A^t$.
+\end{proof}
+
+The crux here is that natural transformations between tones are \emph{boring}:
+\begin{lemma}\label{lem:tone-transformations-are-id}
+  For any natural transformation $\eta : -^s \to -^t$, we have $\eta_A = \fnof{x} x$.
+\end{lemma}
+
+\begin{proof}
+  Let $\mb{1}$ be the singleton preorder $\{\star\}$. Fix some $x : A$. Let $f :
+  \mb{1} \to A = \fnof{\star} x$. Then by naturality of $\eta$ the following
+  square commutes:
+  %
+  \[\tikzset{
+    no line/.style={draw=none,
+      commutative diagrams/every label/.append style={/tikz/auto=false}}}
+  \begin{tikzcd}[sep=3.3em]
+    \mb{1} \arrow[r,"\textstyle \eta_{\mb{1}}"] \arrow[d,"\textstyle f^s"]
+    & \mb{1} \arrow[d,"\textstyle f^t"]
+    \\ A^s \arrow[r,"\textstyle\eta_A"]
+    & A^t
+  \end{tikzcd}\]
+
+From Definition~\ref{def:tone} we have $f^s = f = f^t$; and since $\mb{1}$ is
+terminal, we have $\eta_{\mb{1}} = {!} = id$; thus:
+  \[\begin{array}{rlcl}
+  & \eta_A \circ f^s &=& f^t \circ \eta_{\mb{1}}\\
+  \iff & \eta_A \circ f &=& f\\
+  \iff & \eta_A(x) &=& x
+  \end{array}\]
+\end{proof}
+
+%% However, \Tone{} is a ``thin''
+%% category: between two tones $s,t$ there is at most one natural transformation
+%% $\eta : -^s \to -^t$.
+
+%% \begin{definition}\label{def:tone-cat}
+%%   \Tone{} is the category of tones and natural transformations between them.
+%% \end{definition}
+
+
+\subsection{The \Tone{} lattice}
+
+\begin{conjecture}
+  \Tone{} is a distributive lattice.
+\end{conjecture}
+\begin{proof}
+  \todo{TODO}
+\end{proof}
+
+\todo{TODO: Isn't $\wedge$ greatest lower bound / product? Don't we have
+  $\vee$/least upper bound / coproducts? Old stuff:}
 
 Tone meet $\wedge$ and composition $\tc$ also have semantic versions. Meet $s
 \wedge t$ corresponds to intersection of relations (noting that the intersection
@@ -451,26 +538,11 @@ tone composition $s \tc t$ corresponds to functor composition.
   \todo{TODO}
 \end{proof}
 
-\begin{theorem}
-  The composition $(-^s)^t$ of two tones is itself a tone.
-\end{theorem}
-
-\begin{proof} Use Definition~\ref{def:tone} on $-^t$ and $-^s$ in succession:
-  \[ \elemset{(-^s)^t} = \elemset{-^s} = \elemsetfn \]
-\end{proof}
-
 \begin{conjecture}
   The definitions of $\wedge$ and $\tc$ in Figure~\ref{fig:tone-ops} coincide
   with their semantic definitions, applied to the semantic interpretation of
   $\tm$, $\ta$, $\tb$, and $\ti$.
 \end{conjecture}
-
-
-\subsection{Tones, preordered}
-
-\todo{TODO: Don't tones have a natural semantic partial ordering? Isn't $\wedge$
-  the greatest lower bound of this ordering? (In fact, perhaps they form a
-  functor category with products? Do they have coproducts, too?)}
 
 
 \section{A tonal sequent calculus}
@@ -515,7 +587,7 @@ $\lambda$-calculus.
     &\bnfeq& \ms{base} ~|~ A \to B ~|~ A \x B ~|~ \Box A ~|~ \op\;A
     \vspace{0.5em}\\
     \text{checking terms} & M
-    &\bnfeq& N ~|~ \fn\bind{x} M ~|~ (M, M)
+    &\bnfeq& N ~|~ \fnof{x} M ~|~ (M, M)
     ~|~ \mb{let}~x = N~\mb{in}~ M
     \vspace{0.5em}\\
     \text{inferring terms} & N
@@ -559,7 +631,7 @@ $\lambda$-calculus.
 
   %% introductions
   \infer{\checks{M}{\GG{},\, \h{x}{A}{s}}{B} \\ \tm \le s}
-        {\checks{\fn\bind{x} M}{\GG}{A \to B}}
+        {\checks{\fnof{x} M}{\GG}{A \to B}}
 
   \infer{\checks{M_1}{\GG_1}{A_1} \\ \checks{M_2}{\GG_2}{A_2}}
         {\checks{(M_1,M_2)}{\GG_1 \wedge \GG_2}{A_1 \x A_2}}
@@ -663,13 +735,13 @@ Here are two more general variations on the $\fn$ rule I've considered:
 \begin{mathpar}
   \infer[Fn-1]
         {\checks{M}{\GG{},\, \h{x}{A}{s}}{B} \\ A \sqsubset A^s}
-        {\checks{\fn\bind{x}{M}}{\GG}{A \to B}}
+        {\checks{\fnof{x}{M}}{\GG}{A \to B}}
 
   \infer[Fn-2]
         {\checks{M}{\GG{},\, \h{x}{A}{t}}{B}
          \\ \subtype{s}{A}{A}
          \\ \tm \le s \tc t}
-        {\checks{\fn\bind{x} M}{\GG}{A \to B}}
+        {\checks{\fnof{x} M}{\GG}{A \to B}}
 \end{mathpar}
 \textsc{Fn-1} requires a new judgment, $A \sqsubset B^s$, where $A,B,s$ are all
 inputs; this doesn't seem difficult to define, but it's Yet Another Subtyping
@@ -680,14 +752,14 @@ thought I did was to justify something like the following:
 \begin{mathpar}
   \infer*{\infer*{\vdots}
            {{\GG{},\, \h{x}{A}{\ti}} \vdash {M} : {B}}}
-         {{\GG} \vdash {\fn\bind{x}{M}} : {\Box A \to B}}
+         {{\GG} \vdash {\fnof{x}{M}} : {\Box A \to B}}
 \end{mathpar}
 
 But this \emph{could} check as follows:
 \begin{mathpar}
   \infer*{\infer*{\vdots}{\checks{M}{\GG{},\, \h{x}{\Box A}{s}}{B}}
           \\ \tm \le s}
-         {\checks{\fn\bind{x}{M}}{\GG}{\Box A \to B}}
+         {\checks{\fnof{x}{M}}{\GG}{\Box A \to B}}
 \end{mathpar}
 
 So the crucial question is: can we always substitute $\h{x}{\Box A}{\tm}$ for
@@ -840,7 +912,7 @@ A^s$.
 %%   \\
 
 %%   \infer{\xbar{i}{\h{x_i}{A_i}{s_i}}, \h{y}{B}{t} \vdash M : C}
-%%         {\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash \fn\bind{x} M : B \overset{t}{\to} C}
+%%         {\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash \fnof{x} M : B \overset{t}{\to} C}
 
 %%   \infer{\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash M : B \overset{u}{\to} C
 %%          \quad
