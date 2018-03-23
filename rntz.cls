@@ -1,50 +1,52 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesClass{rntz}[2018/03/19]
 
-\RequirePackage{etoolbox}       % ifstrequal; toggles; fixing titlesec.
-\newtoggle{colorheaders}        % option: colorize headers, or no?
-\newtoggle{mathpazo}            % option: use mathpazo font, or no?
-\newtoggle{narrow}
-\newtoggle{centertitle}
+\RequirePackage{etoolbox}       % toggles; fixing titlesec.
+\newtoggle{narrow}              % stick to a 12cm central column?
+\newtoggle{centertitle}         % center titles?
+\newtoggle{nogeometry}          % don't configure geometry?
+\newtoggle{nocolorheaders}      % omit colored section header bands?
+\newtoggle{noeuler}             % don't use Euler with mathpazo
 
-%% TODO: factor out as much of this as possible into a .sty file; those are more
-%% composable anyway. to factor out:
+%% TODO: consider factoring out some of this into a .sty file:
 %% - the newtheorem stuff
 %% - colors
 %% - hyperref & hypersetup
-%%
-%% really, why does any of this need to be a .cls file at all? why use a class
-%% rather than a package?
 
 %% ---- Options ----
 \DeclareOption{narrow}{\toggletrue{narrow}}
 \DeclareOption{wide}{\togglefalse{narrow}}
-\DeclareOption{centertitle}{\toggletrue{centertitle}}
-\DeclareOption{nocentertitle}{\togglefalse{centertitle}}
-\DeclareOption{colorheaders}{\toggletrue{colorheaders}}
-\DeclareOption{nocolorheaders}{\togglefalse{colorheaders}}
+\DeclareOption{centertitle}{\toggletrue{nocentertitle}}
+\DeclareOption{nocentertitle}{\togglefalse{nocentertitle}}
+\DeclareOption{nocolorheaders}{\toggletrue{nocolorheaders}}
+\DeclareOption{colorheaders}{\togglefalse{nocolorheaders}}
+\DeclareOption{nogeometry}{\toggletrue{nogeometry}}
+\DeclareOption{geometry}{\togglefalse{nogeometry}}
 
 \DeclareOption{cm}{\def\rntz@font{cm}}
 \DeclareOption{libertine}{\def\rntz@font{libertine}}
 \DeclareOption{mathpazo}{\def\rntz@font{mathpazo}}
 
+%     a5: 148 x 210mm    5.8 x  8.3in
+%     b5: 176 x 250mm    6.9 x  9.8in
+%     a4: 210 x 297mm    8.3 x 11.7in
+% letter: 216 x 279mm    8.5 x 11in
 \DeclareOption{a5}{\def\rntz@geom{a5paper,text={126mm,180mm}}}
 \DeclareOption{b5}{\def\rntz@geom{b5paper,text={146mm,215mm}}}
-\DeclareOption{a4}{\def\rntz@geom{a4paper,text={170mm,247mm}}}
-%% TODO: fix this.
-\DeclareOption{letter}{\def\rntz@geom{letterpaper,margin=2cm}}
+\DeclareOption{a4}{\def\rntz@geom{a4paper,text={170mm,252mm}}}
+\DeclareOption{letter}{\def\rntz@geom{letterpaper,text={176mm,239mm}}}
 
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
 
 % Defaults
-\ExecuteOptions{b5,mathpazo,wide,colorheaders,nocentertitle}
+\ExecuteOptions{b5,mathpazo}
 \ProcessOptions\relax
 
 %% ---- Basic layout ----
 \LoadClass{extarticle}
-\RequirePackage[\rntz@geom]{geometry}
-%% if narrow, limit text width to 12cm, imitating article.cls.
-\iftoggle{narrow}{\geometry{textwidth=12cm}}{}
+\iftoggle{nogeometry}{}{\RequirePackage[\rntz@geom]{geometry}}
+%% if narrow, limit text width to about 12cm.
+\iftoggle{narrow}{\geometry{textwidth=126mm}}{}
 
 %% ---- AMS stuff and theorem styles ----
 %% This must precede \RequirePackage{newtxmath}; otherwise newtxmath defines
@@ -125,12 +127,12 @@
 \newcommand{\header}{\itshape\rmfamily}
 \newcommand{\hno}[1]{\colorhno{white}{black}{#1}}
 
-\iftoggle{colorheaders}{
-  \newcommand{\colorhno}[3]%
-  {\llap{\colorbox{#1}{\parbox{100in}{\hfill{\color{#2}#3\hnopost}}}\hnopre}}
-}{
+\iftoggle{nocolorheaders}{
   \newcommand{\colorhno}[3]{%
   {\llap{\colorbox{white}{\parbox{100in}{\hfill{#3\hnopost}}\hnopre}}}}
+}{
+  \newcommand{\colorhno}[3]%
+  {\llap{\colorbox{#1}{\parbox{100in}{\hfill{\color{#2}#3\hnopost}}}\hnopre}}
 }
 
 \titlespacing*{\section}{0pt}{1.25em}{.5em}
