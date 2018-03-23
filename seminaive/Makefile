@@ -2,7 +2,7 @@ LATEXRUN := ./latexrun
 
 TEXS    := seminaive.tex fixderiv.tex
 # other things which affect compilation result
-DEPENDS := Makefile $(wildcard *.sty)
+DEPENDS := Makefile $(wildcard *.sty *.cls) ../rntz.cls
 
 .PHONY: all watch clean FORCE
 all: $(TEXS:.tex=.pdf)

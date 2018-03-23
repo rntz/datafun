@@ -1,36 +1,13 @@
 \usepackage{amssymb,amsmath,amsthm}
-\usepackage{latexsym}
-
-\usepackage{url}
-\usepackage{hyperref}
-
-%% uses the AMS Euler math font.
-\usepackage{euler}
-
-%% for coloneqq
-\usepackage{mathtools}
-
-%% for \underaccent
-\usepackage{accents}
-
-% for semantic brackets
-\usepackage{stmaryrd}
-
-% for inference rules
-\usepackage{proof}
-
-%% for mathpar environment
-\usepackage{mathpartir}
-
-% for \scalebox, \rotatebox
-\usepackage{graphicx}
-
-%% for colors
-%% must be loaded before tikz in order for options to take effect :/
-\usepackage[dvipsnames]{xcolor}
-
-\usepackage{tikz}
-\usepackage{tikz-cd}
+\usepackage{url,hyperref}
+\usepackage{mathtools}          % \coloneqq - do I need this?
+\usepackage{accents}            % \underaccent
+\usepackage{stmaryrd}           % semantic brackets
+\usepackage{proof}              % inference rules
+\usepackage{mathpartir}         % mathpar environment
+\usepackage{graphicx}           % \scalebox, \rotatebox
+\usepackage[dvipsnames]{xcolor} % must be loaded before tikz
+\usepackage{tikz,tikz-cd}       % diagrams.
 
 
 %% My commands
@@ -83,7 +60,7 @@
 %% lexical types
 \newcommand{\lsum}{\lhd}
 \newcommand{\lprod}{\mathop{\x_\lhd}}
-\newcommand{\under}[2]{\underaccent{\mathit{#1}}{#2}}
+\newcommand{\under}[2]{\underaccent{\mi{#1}}{#2}}
 
 %% typeclasses
 \newcommand{\eq}[1]{\under{dec}{#1}}
@@ -109,8 +86,8 @@
 
 %% expressions
 % \d for discrete, \m for monotone variables
-\renewcommand{\d}[1]{\ensuremath{\mb{\dt{#1}}}}
-\newcommand{\m}[1]{\ensuremath{\mt{\mathit{#1}}}}
+\renewcommand{\d}[1]{\mb{\dt{#1}}}
+\newcommand{\m}[1]{\mi{\mt{#1}}}
 \newcommand{\sub}[1]{[{#1}]\,}                   % substitution
 \newcommand{\lam}[1]{\fn\bind{#1}}
 \newcommand{\mfix}{\mb{fix}}
@@ -177,14 +154,8 @@
 \newcommand{\cSL}{\ms{SemiLat}}
 
 %% theorem environments
-\newtheorem{theorem}{Theorem}
-\newtheorem{corollary}{Corollary}
-\newtheorem{lemma}{Lemma}
-\newtheorem{property}{Property}
-
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}
-\newtheorem{observation}{Observation}
+\theoremstyle{remark}
+\newtheorem*{observation}{Observation}
 
 %% for rule names.
 \newcommand{\rn}[1]{\mathsz{8pt}{#1}}

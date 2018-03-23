@@ -5,17 +5,28 @@
 \newtoggle{colorheaders}        % option: colorize headers, or no?
 \newtoggle{mathpazo}            % option: use mathpazo font, or no?
 \newtoggle{narrow}
+\newtoggle{centertitle}
+
+%% TODO: factor out as much of this as possible into a .sty file; those are more
+%% composable anyway. to factor out:
+%% - the newtheorem stuff
+%% - colors
+%% - hyperref & hypersetup
+%%
+%% really, why does any of this need to be a .cls file at all? why use a class
+%% rather than a package?
 
 %% ---- Options ----
 \DeclareOption{narrow}{\toggletrue{narrow}}
 \DeclareOption{wide}{\togglefalse{narrow}}
+\DeclareOption{centertitle}{\toggletrue{centertitle}}
+\DeclareOption{nocentertitle}{\togglefalse{centertitle}}
+\DeclareOption{colorheaders}{\toggletrue{colorheaders}}
+\DeclareOption{nocolorheaders}{\togglefalse{colorheaders}}
 
 \DeclareOption{cm}{\def\rntz@font{cm}}
 \DeclareOption{libertine}{\def\rntz@font{libertine}}
 \DeclareOption{mathpazo}{\def\rntz@font{mathpazo}}
-
-\DeclareOption{colorheaders}{\toggletrue{colorheaders}}
-\DeclareOption{nocolorheaders}{\togglefalse{colorheaders}}
 
 \DeclareOption{a5}{\def\rntz@geom{a5paper,text={126mm,180mm}}}
 \DeclareOption{b5}{\def\rntz@geom{b5paper,text={146mm,215mm}}}
@@ -25,8 +36,8 @@
 
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
 
-% Defaults imitate article.cls.
-\ExecuteOptions{a4,mathpazo,nocolorheaders,narrow}
+% Defaults
+\ExecuteOptions{b5,mathpazo,wide,colorheaders,nocentertitle}
 \ProcessOptions\relax
 
 %% ---- Basic layout ----
@@ -40,14 +51,14 @@
 %% \openbox and amsthm crashes complaining \openbox is already defined.
 \RequirePackage{amsthm,amsmath,amssymb}
 
-\theoremstyle{plain}
-\newtheorem{theorem}{Theorem}
-\newtheorem{conjecture}[theorem]{Conjecture}
-\newtheorem{lemma}[theorem]{Lemma}
 \theoremstyle{remark}
 \newtheorem*{corollary}{Corollary}
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{lemma}[theorem]{Lemma}
 
 %% ---- Fonts ----
 \ifdefstring{\rntz@font}{libertine}{
@@ -68,9 +79,11 @@
 
 %% ---- Title formatting ----
 %% TODO: omit {title,author,date} if not provided
+%% TODO: support \subtitle.
 \renewcommand*{\maketitle}{
   \begingroup%
   \setlength{\parindent}{0pt}%
+  \iftoggle{centertitle}{\centering}{}%
   \itshape%
   {\LARGE\@title\vspace{0.5ex}\par}%
   {\@author\vspace{0.5ex}\par}%

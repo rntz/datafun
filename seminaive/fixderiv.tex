@@ -1,10 +1,15 @@
-\documentclass{article}
-\usepackage[a4paper,margin=0.8in]{geometry}
+\documentclass[a5,libertine]{rntz}
 
-\usepackage{amssymb,amsmath,amsthm}
-\usepackage{latexsym}
-\usepackage{url}
-\usepackage{hyperref}
+%% \documentclass{article}
+%% \usepackage{amsmath,amssymb,amsthm}
+%% \usepackage{url,hyperref}
+%% \usepackage[a4paper,margin=2cm]{geometry}
+%% \theoremstyle{plain}
+%% \newtheorem{theorem}{Theorem}
+%% \newtheorem{corollary}{Corollary}
+%% \newtheorem{lemma}{Lemma}
+%% \theoremstyle{definition}
+%% \newtheorem{definition}{Definition}
 
 %% uses the AMS Euler math font.
 \usepackage{euler}
@@ -27,21 +32,13 @@
 \newcommand{\sub}[1]{\;\{{#1}\}}
 \newcommand{\Disc}[1]{\square{#1}}
 
-\newtheorem{theorem}{Theorem}
-\newtheorem{corollary}{Corollary}
-\newtheorem{lemma}{Lemma}
-\newtheorem{property}{Property}
-
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}
-\newtheorem{observation}{Observation}
-
 \newcommand{\fix}{\ms{fix}}
 \newcommand{\dv}{\delta}
 
+%% TODO: subtitle support in rntz.cls.
 \title{$\dv(\fix\;f) = \fix\;(\dv{f} \; (\fix\;f))$
-  \\\vspace{0.5em}
-\large Static differentiation of monotone fixed points}
+\\
+\large or, Static differentiation of monotone fixed points}
 \author{Michael Robert Arntzenius}
 \date{28 May 2017}
 
@@ -176,14 +173,14 @@ To do this, we will need the corollary of one crucial lemma:
   \]
 \end{proof}
 
-\begin{corollary}
-  \label{cor:crux}
+\begin{theorem}
+  \label{thm:crux}
   For any $i : \N$ and any valid change $e : \Delta{P}$ to $\fix\;f$,
   \[
   (f\oplus\dv f)^i \;(\fix\;f \oplus e)
   = \fix\;f \oplus (\dv f \; (\fix\;f))^i \;e
   \]
-\end{corollary}
+\end{theorem}
 \begin{proof}
   Apply Lemma \ref{lem:crux} with $x = \fix\;f$ and $dx = e$, noting that
   $f^j\;(\fix\;f) = \fix\;f$ for any $j$.
@@ -266,7 +263,7 @@ Armed with these, we can prove our main result:
     =& (f \oplus \dv f)^i \; (\fix\;f \oplus \bot)
     & \text{by Lemma \ref{lem:bot-change}}\\
     =& \fix\;f \oplus (\dv f \;(\fix\;f))^i \;\bot
-    & \text{by Corollary \ref{cor:crux}, since $\dv f$ is valid and $\bot$ is always valid by Lemma \ref{lem:bot-change}}\\
+    & \text{by Theorem~\ref{thm:crux}, as $\dv f$ is valid \& $\bot$ is valid by Lemma \ref{lem:bot-change}}\\
     =& \fix\;f \oplus \fix\;(\dv f\;(\fix\;f))
   \end{array}
   \]
