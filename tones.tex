@@ -24,14 +24,15 @@
 
 
 %% ---- Packages ----
-\usepackage{mathpartir}
+\usepackage{mathpartir}         % \mathpar, \infer
 \usepackage{multirow}
 \usepackage{stmaryrd}           % for semantic brackets
 \usepackage{anyfontsize}        % avoid font size warnings from stmaryrd
 \usepackage{mathtools}          % for \dblcolon
-\usepackage{accents}            % for \underaccent
 \usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
-\usepackage{adjustbox}          % aligning tikz diagrams vertically w/ tables.p
+\usepackage{adjustbox}          % aligning tikz diagrams vertically w/ tables.
+\usepackage{booktabs}           % \midrule
+%\usepackage{accents}            % for \underaccent
 
 
 %% ---- Commands ----
@@ -118,7 +119,7 @@ tones, \tm, \ta, \tb, and \ti:
     & \multicolumn{1}{c}{\textit{Name}}
     %% & \multicolumn{1}{c}{\textbf{Respects}}
     & \multicolumn{3}{c}{\textit{Property of $f$}}
-    \\\hline
+    \\\midrule
     \tm & \text{Monotone}
     %% & \text{ordering}
     & $x \le y$ &$\implies$& $f(x) \le f(y)$
@@ -169,11 +170,11 @@ ordering. So \textbf{tones transform orders.} I write $A^s$ for the preorder $A$
 transformed by the tone $s$, defined:
 
 \begin{center}
-  \begin{tabular}{clc@{\hskip 0.25em}c@{\hskip 0.25em}l}
+  \begin{tabular}{clc@{\hskip 0.25em}c@{\hskip 0.25em}ll}
     {\textit{Tone}}
     & {\textit{Meaning}}
     & \multicolumn{3}{c}{\textit{Transformation on $A$}}
-    \\\hline
+    \\\midrule
     \tm & \text{same ordering}
     & $a \le b : A$ &$\iff$& $a \le b : A^\tm$
     \\
@@ -184,7 +185,7 @@ transformed by the tone $s$, defined:
     \tb{}
     & \text{equivalence closure}
     & $a \le b \vee b \le a : A$ &$\ \implies$& $a \le b : A^\path$
-    \small\quad\emph{see \ref{sec:defining-path}}
+    & {\small\it see \ref{sec:defining-path}}
     \\
     \ti
     & \text{induced equivalence}
@@ -268,15 +269,16 @@ $a_0, \dots, a_n$ such that $a_i \le a_{i+1} \vee a_i \ge a_{i+1} : A$. Then $a
       \draw (top) -- (-1) -- (bot) -- (1) -- (top);
     \end{tikzpicture}
     
-    \begin{array}{c|rrrrr}
-      s \wedge t & \tm & \tb & \ta & \ti\\\hline
+    \begin{array}{r|cccc}
+      s \wedge t
+          & \tm & \tb & \ta & \ti\\\hline
       \tm & \tm & \tm & \ti & \ti\\
       \tb & \tm & \tb & \ta & \ti\\
       \ta & \ti & \ta & \ta & \ti\\
       \ti & \ti & \ti & \ti & \ti
     \end{array}
 
-    \begin{array}{cc|rrrr}
+    \begin{array}{cr|cccc}
       \multicolumn{2}{c|}{\multirow{2}{*}{$s \tc t$}}
       & \multicolumn{4}{c}{t}\\
       && \tm & \ta & \ti & \tb\\\hline
@@ -319,11 +321,10 @@ Figure~\ref{fig:tone-op-laws}. \todo{TODO: Reference ``I Got Plenty o'
 \todo{TODO: check the distribution laws hold!}
 
 \begin{figure*}
-  \small
   \begin{mathpar}
     \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
       \multicolumn{4}{c}{\textit{\normalsize Properties of ${}\wedge{}$}}
-      \vspace{0.1em}\\
+      \vspace{2pt}\\
       \text{Associativity} & (s \wedge t) \wedge u &=& s \wedge (t \wedge u)\\
       \text{Commutativity} & s \wedge t &=& t \wedge s\\
       \text{Idempotence} & s \wedge s &=& s\\
@@ -333,7 +334,7 @@ Figure~\ref{fig:tone-op-laws}. \todo{TODO: Reference ``I Got Plenty o'
 
     \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
       \multicolumn{4}{c}{\textit{\normalsize Properties of ${}\tc{}$}}
-      \vspace{0.1em}\\
+      \vspace{2pt}\\
       \text{Associativity} & (s \tc t) \tc u &=& s \tc (t \tc u)\\
       \text{Identity} & \multicolumn{3}{c}{\tm \tc s = s = s \tc \tm}\\
       \tb~ \text{left-absorbs} & \tb \tc s &=& \tb\\
@@ -434,11 +435,14 @@ far.
 
 Tone meet $\wedge$ and composition $\tc$ also have semantic versions. Meet $s
 \wedge t$ corresponds to intersection of relations (noting that the intersection
-of two reflexive, transitive relations is itself reflexive and transitive):
+of two reflexive, transitive relations is itself reflexive and transitive), and
+tone composition $s \tc t$ corresponds to functor composition.
 %
-\[ a \le b : A^{s \wedge t}
-%% \iff a \le b : A^s \cap A^t
-\iff a \le b : A^s \wedge a \le b : A^t \]
+\begin{eqnarray*}
+  a \le b : A^{s \wedge t} %% \iff a \le b : A^s \cap A^t
+  &\iff& a \le b : A^s \wedge a \le b : A^t\\
+  a \le b : A^{s \tc t} &\iff& a \le b : (A^s)^t
+\end{eqnarray*}
 
 \begin{conjecture}
   The intersection of two tones is a tone.
@@ -446,8 +450,6 @@ of two reflexive, transitive relations is itself reflexive and transitive):
 \begin{proof}
   \todo{TODO}
 \end{proof}
-
-Tone composition $s \tc t$ corresponds to functor composition:
 
 \begin{theorem}
   The composition $(-^s)^t$ of two tones is itself a tone.
@@ -462,6 +464,9 @@ Tone composition $s \tc t$ corresponds to functor composition:
   with their semantic definitions, applied to the semantic interpretation of
   $\tm$, $\ta$, $\tb$, and $\ti$.
 \end{conjecture}
+
+
+\subsection{Tones, preordered}
 
 \todo{TODO: Don't tones have a natural semantic partial ordering? Isn't $\wedge$
   the greatest lower bound of this ordering? (In fact, perhaps they form a

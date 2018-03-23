@@ -1,5 +1,7 @@
-%% \documentclass[a4,cm]{rntz}
-%% \usepackage{euler}
+%% %% rntz.cls doesn't support subsubsections.
+%% \documentclass[a4,libertine]{rntz}
+%% \usepackage{eulervm}
+%% \usepackage{anyfontsize}
 %% \usepackage{seminaive}
 
 \documentclass{article}
@@ -320,7 +322,7 @@ really it should have a dependent type.
   & {\textbf{Definition of}~\oplus}
   & {\textbf{Definition of}~\ominus}
   & {\textbf{Definition of}~\zero}
-  \\ \midrule
+  \\\midrule
   A \to B
   & (f \oplus df)\; x = f\; x \oplus df\; x\; (\zero\; x)
   & (f \ominus g)\; x \;dx = f\; (x \oplus dx) \ominus g \; x
