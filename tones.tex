@@ -1,7 +1,8 @@
-\documentclass[a5,narrow]{rntz}
+\documentclass[ribbons]{rntz}
 \usepackage{eulervm}
 
-%% \documentclass{article}
+%% \documentclass[twocolumn]{article}
+%% \usepackage{eulervm}
 %% \usepackage{amsthm,amsmath,amssymb}
 %% \theoremstyle{plain}
 %% \newtheorem{theorem}{Theorem}
@@ -27,12 +28,11 @@
 \usepackage{mathpartir}         % \mathpar, \infer
 \usepackage{multirow}
 \usepackage{stmaryrd}           % for semantic brackets
-%% \usepackage{anyfontsize}        % avoid font size warnings from stmaryrd
 \usepackage{mathtools}          % for \dblcolon
 \usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
 \usepackage{adjustbox}          % aligning tikz diagrams vertically w/ tables.
 \usepackage{booktabs}           % \midrule
-%\usepackage{accents}            % for \underaccent
+%\usepackage{anyfontsize}        % avoid font size warnings from stmaryrd
 
 
 %% ---- Commands ----
@@ -259,37 +259,39 @@ $a_0, \dots, a_n$ such that $a_i \le a_{i+1} \vee a_i \ge a_{i+1} : A$. Then $a
 \subsection{Tone operators}
 
 \begin{figure*}[t]
-  \begin{mathpar}
-    %% "baseline=(current bounding box.center)" incantation taken from
-    %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
-    \begin{tikzpicture}[scale=1,baseline=(current bounding box.center)]
-      \node (top)  at ( 0, 1) {$\tb$};
-      \node (bot)  at ( 0,-1) {$\ti$};
-      \node (-1)   at (-1, 0) {$\tm$};
-      \node (1)    at ( 1, 0) {$\ta$};
-      \draw (top) -- (-1) -- (bot) -- (1) -- (top);
-    \end{tikzpicture}
-    
-    \begin{array}{r|cccc}
-      s \wedge t
-          & \tm & \tb & \ta & \ti\\\hline
-      \tm & \tm & \tm & \ti & \ti\\
-      \tb & \tm & \tb & \ta & \ti\\
-      \ta & \ti & \ta & \ta & \ti\\
-      \ti & \ti & \ti & \ti & \ti
-    \end{array}
 
-    \begin{array}{cr|cccc}
-      \multicolumn{2}{c|}{\multirow{2}{*}{$s \tc t$}}
-      & \multicolumn{4}{c}{t}\\
-      && \tm & \ta & \ti & \tb\\\hline
-      \multirow{4}{*}{$s$}
-      & \tm & \tm & \ta & \ti & \tb\\
-      & \ta & \ta & \tm & \ti & \tb\\
-      & \ti & \ti & \ti & \ti & \ti\\
-      & \tb & \tb & \tb & \tb & \tb
-    \end{array}
-  \end{mathpar}
+    \begin{mathpar}
+      %% "baseline=(current bounding box.center)" incantation taken from
+      %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
+      \begin{tikzpicture}[scale=1,baseline=(current bounding box.center)]
+        \node (top)  at ( 0, 1) {$\tb$};
+        \node (bot)  at ( 0,-1) {$\ti$};
+        \node (-1)   at (-1, 0) {$\tm$};
+        \node (1)    at ( 1, 0) {$\ta$};
+        \draw (top) -- (-1) -- (bot) -- (1) -- (top);
+      \end{tikzpicture}
+
+      \begin{array}{r|cccc}
+        s \wedge t
+        & \tm & \tb & \ta & \ti\\\hline
+        \tm & \tm & \tm & \ti & \ti\\
+        \tb & \tm & \tb & \ta & \ti\\
+        \ta & \ti & \ta & \ta & \ti\\
+        \ti & \ti & \ti & \ti & \ti
+      \end{array}
+
+      \begin{array}{cr|cccc}
+        \multicolumn{2}{c|}{\multirow{2}{*}{$s \tc t$}}
+        & \multicolumn{4}{c}{t}\\
+        && \tm & \ta & \ti & \tb\\\hline
+        \multirow{4}{*}{$s$}
+        & \tm & \tm & \ta & \ti & \tb\\
+        & \ta & \ta & \tm & \ti & \tb\\
+        & \ti & \ti & \ti & \ti & \ti\\
+        & \tb & \tb & \tb & \tb & \tb
+      \end{array}
+    \end{mathpar}
+
   \caption{Tone lattice, meet, and composition}
   \label{fig:tone-ops}
 \end{figure*}

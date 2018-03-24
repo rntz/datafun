@@ -5,23 +5,23 @@
 \newtoggle{narrow}              % stick to a 12cm central column?
 \newtoggle{centertitle}         % center titles?
 \newtoggle{nogeometry}          % don't configure geometry?
-\newtoggle{nocolorheaders}      % omit colored section header bands?
-\newtoggle{noeuler}             % don't use Euler with mathpazo
+\newtoggle{ribbons}             % colored section number ribbons?
 
 %% TODO: consider factoring out some of this into a .sty file:
 %% - the newtheorem stuff
 %% - colors
 %% - hyperref & hypersetup
+%% - the left-margin colored section numbers
 
 %% ---- Options ----
 \DeclareOption{narrow}{\toggletrue{narrow}}
 \DeclareOption{wide}{\togglefalse{narrow}}
-\DeclareOption{centertitle}{\toggletrue{nocentertitle}}
-\DeclareOption{nocentertitle}{\togglefalse{nocentertitle}}
-\DeclareOption{nocolorheaders}{\toggletrue{nocolorheaders}}
-\DeclareOption{colorheaders}{\togglefalse{nocolorheaders}}
-\DeclareOption{nogeometry}{\toggletrue{nogeometry}}
+\DeclareOption{centertitle}{\toggletrue{centertitle}}
+\DeclareOption{nocentertitle}{\togglefalse{centertitle}}
+\DeclareOption{ribbons}{\toggletrue{ribbons}}
+\DeclareOption{noribbons}{\togglefalse{ribbons}}
 \DeclareOption{geometry}{\togglefalse{nogeometry}}
+\DeclareOption{nogeometry}{\toggletrue{nogeometry}}
 
 \DeclareOption{cm}{\def\rntz@font{cm}}
 \DeclareOption{libertine}{\def\rntz@font{libertine}}
@@ -36,17 +36,42 @@
 \DeclareOption{a4}{\def\rntz@geom{a4paper,text={170mm,252mm}}}
 \DeclareOption{letter}{\def\rntz@geom{letterpaper,text={176mm,239mm}}}
 
+\DeclareOption{twocolumn}{\ClassWarning{rntz}{Two-column mode is not supported.}}
+
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
 
 % Defaults
-\ExecuteOptions{b5,mathpazo}
+\ExecuteOptions{b5,mathpazo,narrow}
 \ProcessOptions\relax
 
 %% ---- Basic layout ----
 \LoadClass{extarticle}
 \iftoggle{nogeometry}{}{\RequirePackage[\rntz@geom]{geometry}}
 %% if narrow, limit text width to about 12cm.
-\iftoggle{narrow}{\geometry{textwidth=126mm}}{}
+\iftoggle{narrow}{
+  \newlength{\rntz@fulltextwidth}
+  \setlength{\rntz@fulltextwidth}{\textwidth}
+  \geometry{textwidth=126mm}}{}
+
+%% ---- Make figure* produce wide figures in narrow mode ----
+\iftoggle{narrow}{
+  \RequirePackage[strict]{changepage}
+  %% I want to go from \textwidth to \rntz@fulltextwidth.
+  %% So I should adjust each margin by: (\textwidth-\rntz@fulltextwidth)/2
+  \newlength{\rntz@widemarginoffset}
+  \setlength{\rntz@widemarginoffset}{\dimexpr(\textwidth-\rntz@fulltextwidth)/2\relax}
+  \newenvironment{fullwidth}
+    {\begin{adjustwidth}{\the\rntz@widemarginoffset}{\the\rntz@widemarginoffset}}
+    {\end{adjustwidth}}
+}
+% otherwise, fullwidth does nothing
+{ \newenvironment{fullwidth}{}{} }
+
+%% This is a terrible hack. Taken from https://stackoverflow.com/questions/1565988/making-a-small-modification-to-a-latex-environment
+\renewenvironment{figure*}[1][\fps@figure]
+  {\edef\@tempa{\noexpand\@float{figure}[#1]}%
+   \@tempa\begin{fullwidth}\centering}
+  {\end{fullwidth}\end@float}
 
 %% ---- AMS stuff and theorem styles ----
 %% This must precede \RequirePackage{newtxmath}; otherwise newtxmath defines
@@ -112,6 +137,9 @@
 %% ---- Section & subsection titles ----
 \RequirePackage{textcase,titlesec}    % (sub)section header styling
 
+\titlespacing*{\section}{0pt}{1.25em}{.5em}
+\titlespacing*{\subsection}{0pt}{1.25em}{.5em}
+
 %% titlesec < 2.10.2 has a bug that prevents showing section numbers. This fixes
 %% it. Taken from
 %% https://tex.stackexchange.com/questions/96090/formatting-subsections-and-chapters-in-tufte-book/96125
@@ -127,16 +155,13 @@
 \newcommand{\header}{\itshape\rmfamily}
 \newcommand{\hno}[1]{\colorhno{white}{black}{#1}}
 
-\iftoggle{nocolorheaders}{
-  \newcommand{\colorhno}[3]{%
-  {\llap{\colorbox{white}{\parbox{100in}{\hfill{#3\hnopost}}\hnopre}}}}
-}{
+\iftoggle{ribbons}{
   \newcommand{\colorhno}[3]%
   {\llap{\colorbox{#1}{\parbox{100in}{\hfill{\color{#2}#3\hnopost}}}\hnopre}}
+}{
+  \newcommand{\colorhno}[3]{%
+  {\llap{\colorbox{white}{\parbox{100in}{\hfill{#3\hnopost}}\hnopre}}}}
 }
-
-\titlespacing*{\section}{0pt}{1.25em}{.5em}
-\titlespacing*{\subsection}{0pt}{1.25em}{.5em}
 
 % Nice colors: Whee, Periwinkle, cyan
 \definecolor[named]{Whee}{cmyk}{0.33, 0.33, 0, 0}
