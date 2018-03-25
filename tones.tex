@@ -1,8 +1,7 @@
 \documentclass[ribbons]{rntz}
-\usepackage{eulervm}
 
-%% \documentclass[twocolumn]{article}
-%% \usepackage{eulervm}
+%% \documentclass{scrartcl}
+%% %% \usepackage{eulervm}
 %% \usepackage{amsthm,amsmath,amssymb}
 %% \theoremstyle{plain}
 %% \newtheorem{theorem}{Theorem}
@@ -58,15 +57,22 @@
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
 
 %% Category & preorder theory
+\newcommand{\cat}[1]{\textsc{#1}} %category name
+\newcommand{\Pre}{\cat{preord}}
+\newcommand{\Set}{\cat{set}}
+\newcommand{\Tone}{\cat{tone}}
+\newcommand{\Cat}{\cat{cat}}
+
+\newcommand{\idfn}{\mi{id}}
 \newcommand{\isoto}{\simeq}
 \newcommand{\pathto}{\sim}
 
+%% Tone functors.
 \newcommand{\id}{\ms{id}}
 \newcommand{\op}{\ms{op}}
 \newcommand{\iso}{\ms{core}}
 \renewcommand{\path}{\ms{path}}
 
-%% tones: mono, anti, discrete, bivariant
 \newcommand{\tc}{\cdot}                 % tone composition
 \newcommand{\tm}{\id}                   % monotone / id
 \newcommand{\ta}{{\color{ACMGreen}\op}} % antitone / op
@@ -186,7 +192,7 @@ transformed by the tone $s$, defined:
     \tb{}
     & \text{equivalence closure}
     & $a \le b \vee b \le a : A$ &$\ \implies$& $a \le b : A^\path$
-    & {\small\it see \ref{sec:defining-path}}
+    & {\small\itshape see \ref{sec:defining-path}}
     \\
     \ti
     & \text{induced equivalence}
@@ -381,31 +387,14 @@ a transformation on orderings. However, it seems related to subtyping.
 
 \section{Tones, categorically}
 
-\newcommand{\cat}[1]{\textsc{#1}} %category name
-\newcommand{\Pre}{\cat{preord}}
-\newcommand{\Set}{\cat{set}}
-\newcommand{\Tone}{\cat{tone}}
-\newcommand{\Cat}{\cat{cat}}
-
-\newcommand{\elemset}[1]{\ensuremath{\mc{U}({#1})}}
-\newcommand{\elemsetfn}[0]{\mc{U}}
-\renewcommand{\elemset}[1]{\ensuremath{|{#1}|}}
-\renewcommand{\elemsetfn}[0]{\elemset{-}}
-
-%% TODO: adapt this prose as an intro to this section.
+\newcommand{\elemset}[1]{\ensuremath{|{#1}|}}
+\newcommand{\elemsetfn}[0]{\elemset{-}}
 
 This section gives a categorical semantics of tones. You may safely skip it.
 
 Let's change perspective. Section \ref{sec:tones} defines tones as function
 properties, then gives corresponding preorder transformations. Now, let's define
 tones as preorder transformations, and derive corresponding function properties.
-
-%% Section \ref{sec:tones} defines tones $s$ as function
-%% properties, and gives corresponding preorder transformations $-^s$ such that $f
-%% : A \to B$ has tone $s$ iff $f : A^s \to B$ is monotone. Now, let's reinterpret
-%% Theorems \ref{thm:tones-transform-orders} and \ref{thm:tone-functoriality} as
-%% \emph{definitions}: A tone $s$ is a transformation $-^s$ such that if $f : A \to
-%% B$ is monotone, so is $f : A^s \to B^s$. Categorically:
 
 \begin{definition}
   $\elemsetfn : \Pre \to \Set$ is the functor taking a preorder to its set of
@@ -435,7 +424,7 @@ tones as preorder transformations, and derive corresponding function properties.
 %% It's also unclear how to generalize this definition to tones of functors on
 %% \Cat{}.
 
-\subsection{The tone monoid}
+\subsection{Tone composition}
 
 Tone composition $s \tc t$ corresponds to composition of tone functors:
 
@@ -478,8 +467,8 @@ The crux here is that natural transformations between tones are \emph{boring}:
 
 \begin{proof}
   Let $\mb{1}$ be the singleton preorder $\{\star\}$. Fix some $x : A$. Let $f :
-  \mb{1} \to A = \fnof{\star} x$. Then by naturality of $\eta$ the following
-  square commutes:
+  \mb{1} \to A = \fnof{\star} x$. Then by naturality of $\eta$, this square
+  commutes:
   %
   \[\tikzset{
     no line/.style={draw=none,
@@ -491,12 +480,12 @@ The crux here is that natural transformations between tones are \emph{boring}:
     & A^t
   \end{tikzcd}\]
 
-From Definition~\ref{def:tone} we have $f^s = f = f^t$; and since $\mb{1}$ is
-terminal, we have $\eta_{\mb{1}} = {!} = id$; thus:
+From Definition~\ref{def:tone}, $f^s = f = f^t$; and since $\mb{1}$ is a
+singleton, $\eta_{\mb{1}} = \idfn$, thus:
   \[\begin{array}{rlcl}
   & \eta_A \circ f^s &=& f^t \circ \eta_{\mb{1}}\\
-  \iff & \eta_A \circ f &=& f\\
-  \iff & \eta_A(x) &=& x
+  \implies & \eta_A \circ f &=& f\\
+  \implies & \eta_A(x) &=& x
   \end{array}\]
 \end{proof}
 
