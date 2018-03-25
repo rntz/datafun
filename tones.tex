@@ -88,7 +88,10 @@
 \title{Tones and Types}
 \author{Michael Arntzenius, %
   \href{mailto:daekharel@gmail.com}{daekharel@gmail.com}}
-\date{20 March 2018}
+% Date format: "25 March 2018"
+\usepackage[en-GB]{datetime2}
+\DTMlangsetup[en-GB]{ord=omit}
+\date{\today}
 
 
 \begin{document}
@@ -554,7 +557,7 @@ tone composition $s \tc t$ corresponds to functor composition.
 \end{mathpar}
 
 Jason Reed sent me these rules for a tonal sequent calculus. $T_s$ is the
-connective to internalizing $-^s$. I aim to adapt this into a
+connective internalizing $-^s$. I aim to adapt this into a
 natural-deduction-style system with proof terms, i.e.\! a simply typed
 $\lambda$-calculus.
 
