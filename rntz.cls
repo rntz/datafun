@@ -25,7 +25,7 @@
 
 \DeclareOption{cm}{\def\rntz@font{cm}}
 \DeclareOption{libertine}{\def\rntz@font{libertine}}
-\DeclareOption{mathpazo}{\def\rntz@font{mathpazo}}
+\DeclareOption{zapf}{\def\rntz@font{zapf}}
 
 %     a5: 148 x 210mm    5.8 x  8.3in
 %     b5: 176 x 250mm    6.9 x  9.8in
@@ -41,33 +41,36 @@
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
 
 % Defaults
-\ExecuteOptions{b5,mathpazo,narrow}
+\ExecuteOptions{b5,zapf,narrow}
 \ProcessOptions\relax
 
 %% ---- Basic layout ----
 \LoadClass{extarticle}
 \iftoggle{nogeometry}{}{\RequirePackage[\rntz@geom]{geometry}}
-%% if narrow, limit text width to about 12cm.
+%% if narrow, limit text width to 126mm - the same width we use on A5,
+%% and pretty close to article.cls' default width.
 \iftoggle{narrow}{
   \newlength{\rntz@fulltextwidth}
   \setlength{\rntz@fulltextwidth}{\textwidth}
   \geometry{textwidth=126mm}}{}
 
-%% ---- Make figure* produce wide figures in narrow mode ----
+%% ---- figure* for wide figures in narrow mode ----
+%% First, define a fullwidth environment.
 \iftoggle{narrow}{
   \RequirePackage[strict]{changepage}
-  %% I want to go from \textwidth to \rntz@fulltextwidth.
-  %% So I should adjust each margin by: (\textwidth-\rntz@fulltextwidth)/2
-  \newlength{\rntz@widemarginoffset}
-  \setlength{\rntz@widemarginoffset}{\dimexpr(\textwidth-\rntz@fulltextwidth)/2\relax}
+  %% I want to go from \textwidth to \rntz@fulltextwidth. adjustwidth adds to
+  %% margins, subtracting from text width, so I should adjust by:
+  %% (\textwidth-\rntz@fulltextwidth)/2.
+  \newlength{\rntz@fullwidthoffset}
+  \setlength{\rntz@fullwidthoffset}{\dimexpr(\textwidth-\rntz@fulltextwidth)/2\relax}
   \newenvironment{fullwidth}
-    {\begin{adjustwidth}{\the\rntz@widemarginoffset}{\the\rntz@widemarginoffset}}
+    {\begin{adjustwidth}{\the\rntz@fullwidthoffset}{\the\rntz@fullwidthoffset}}
     {\end{adjustwidth}}
 }
-% otherwise, fullwidth does nothing
+% in wide mode, fullwidth does nothing
 { \newenvironment{fullwidth}{}{} }
 
-%% This is a terrible hack. Taken from https://stackoverflow.com/questions/1565988/making-a-small-modification-to-a-latex-environment
+%% A hack, taken from https://stackoverflow.com/questions/1565988/making-a-small-modification-to-a-latex-environment
 \renewenvironment{figure*}[1][\fps@figure]
   {\edef\@tempa{\noexpand\@float{figure}[#1]}%
    \@tempa\begin{fullwidth}\centering}
@@ -96,8 +99,9 @@
   \linespread{1.1}
 }{}
 
-\ifdefstring{\rntz@font}{mathpazo}{
+\ifdefstring{\rntz@font}{zapf}{
   \RequirePackage[osf]{mathpazo}
+  \RequirePackage{eulervm}
   \linespread{1.15}
 }{}
 
