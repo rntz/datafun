@@ -4,7 +4,7 @@
 \RequirePackage{etoolbox}       % toggles; fixing titlesec.
 \newtoggle{narrow}              % stick to a 12cm central column?
 \newtoggle{centertitle}         % center titles?
-\newtoggle{nogeometry}          % don't configure geometry?
+\newtoggle{geometry}            % configure geometry?
 \newtoggle{ribbons}             % colored section number ribbons?
 
 %% TODO: use more Tufte-css-like font sizes, then:
@@ -25,12 +25,12 @@
 \DeclareOption{nocentertitle}{\togglefalse{centertitle}}
 \DeclareOption{ribbons}{\toggletrue{ribbons}}
 \DeclareOption{noribbons}{\togglefalse{ribbons}}
-\DeclareOption{geometry}{\togglefalse{nogeometry}}
-\DeclareOption{nogeometry}{\toggletrue{nogeometry}}
+\DeclareOption{geometry}{\toggletrue{geometry}}
+\DeclareOption{nogeometry}{\togglefalse{geometry}}
 
-\DeclareOption{cm}{\def\rntz@font{cm}}
-\DeclareOption{libertine}{\def\rntz@font{libertine}}
 \DeclareOption{zapf}{\def\rntz@font{zapf}}
+\DeclareOption{libertine}{\def\rntz@font{libertine}}
+\DeclareOption{cm}{\def\rntz@font{cm}}
 
 %     a5: 148 x 210mm    5.8 x  8.3in
 %     b5: 176 x 250mm    6.9 x  9.8in
@@ -46,15 +46,17 @@
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
 
 % Defaults
-\ExecuteOptions{b5,zapf,narrow}
+\ExecuteOptions{b5,zapf,geometry,narrow}
 \ProcessOptions\relax
 
 %% ---- Basic layout ----
 \LoadClass{extarticle}
-\iftoggle{nogeometry}{}{\RequirePackage[\rntz@geom]{geometry}}
+\iftoggle{geometry}{\RequirePackage[\rntz@geom]{geometry}}
+  %% We can't do a narrow column if we don't understand the geometry.
+  {\togglefalse{narrow}}
+
 %% if narrow, limit text width to 126mm - the same width we use on A5,
 %% and pretty close to article.cls' default width.
-%% FIXME: how should this interact with nogeometry?
 \iftoggle{narrow}{
   \newlength{\rntz@fulltextwidth}
   \setlength{\rntz@fulltextwidth}{\textwidth}
@@ -62,7 +64,6 @@
 
 %% ---- figure* for wide figures in narrow mode ----
 %% First, define a fullwidth environment.
-%% FIXME: if nogeometry is passed, this will do the wrong thing!
 \iftoggle{narrow}{
   \RequirePackage[strict]{changepage}
   %% I want to go from \textwidth to \rntz@fulltextwidth. adjustwidth adds to
