@@ -13,6 +13,7 @@
 %% and check that all this still works on a5.
 
 %% TODO: consider factoring out some of this into a .sty file:
+%% - narrowing!
 %% - the newtheorem stuff
 %% - colors
 %% - hyperref & hypersetup
@@ -118,7 +119,12 @@
 \RequirePackage{enumitem}           % list styling
 \setlist{noitemsep,topsep=\smallskipamount}
 
-%% ---- Title formatting ----
+%% ---- Title formatting and sizing ----
+\newcommand{\titlesize}{\Large}
+\newcommand{\authorsize}{\normalsize}
+\newcommand{\secsize}{\large}
+\newcommand{\subsecsize}{\normalsize}
+
 %% TODO: omit {title,author,date} if not provided
 %% TODO: support \subtitle.
 \renewcommand*{\maketitle}{
@@ -126,9 +132,9 @@
   \setlength{\parindent}{0pt}%
   \iftoggle{centertitle}{\centering}{}%
   \itshape%
-  {\LARGE\@title\vspace{0.5ex}\par}%
-  {\@author\vspace{0.5ex}\par}%
-  {\@date\par}%
+  {\titlesize\@title\vspace{0.5ex}\par}%
+  {\authorsize\@author\vspace{0.5ex}\par}%
+  {\authorsize\@date\par}%
   \endgroup}
 
 %% ---- Colors ----
@@ -155,32 +161,29 @@
 %% titlesec < 2.10.2 has a bug that prevents showing section numbers. This fixes
 %% it. Taken from
 %% https://tex.stackexchange.com/questions/96090/formatting-subsections-and-chapters-in-tufte-book/96125
-\makeatletter
 \patchcmd{\ttlh@hang}{\parindent\z@}{\parindent\z@\leavevmode}{}{}
 \patchcmd{\ttlh@hang}{\noindent}{}{}{}
-\makeatother
 
 %% Spacing.
 %% TODO: maybe this should depend on paper size?
-\newcommand{\hnopre}{\hspace*{2mm}}
 \newcommand{\hnopost}{\hspace*{.5mm}}
+\newcommand{\hnopre}{\hspace*{2mm}}
+%% \renewcommand{\hnopost}{\hspace*{0mm}}
+%% \renewcommand{\hnopre}{\hspace*{2mm}}
 \newcommand{\header}{\itshape\rmfamily}
 \newcommand{\hno}[1]{\colorhno{white}{black}{#1}}
 
-\iftoggle{ribbons}{
-  \newcommand{\colorhno}[3]%
-  {\llap{\colorbox{#1}{\parbox{100in}{\hfill{\color{#2}#3\hnopost}}}\hnopre}}
-}{
-  \newcommand{\colorhno}[3]{%
-  {\llap{\colorbox{white}{\parbox{100in}{\hfill{#3\hnopost}}\hnopre}}}}
-}
+\iftoggle{ribbons}
+  {\newcommand{\colorhno}[3]%
+    {\llap{\colorbox{#1}{\parbox{100in}{\hfill{\color{#2}#3\hnopost}}}\hnopre}}}
+  {\newcommand{\colorhno}[3]{%
+    {\llap{\colorbox{white}{\parbox{100in}{\hfill{#3\hnopost}}\hnopre}}}}}
 
 % Nice colors: Whee, Periwinkle, cyan
 \definecolor[named]{Whee}{cmyk}{0.33, 0.33, 0, 0}
-\titleformat{\section}{\large\header}
+\titleformat{\section}{\secsize\header}
             {\colorhno{Whee}{white}{\thesection}}{0pt}{}
-\titleformat{\subsection}{\normalsize\header}
-            {\colorhno{ACMOrange}{white}{\thesubsection}}{0pt}{}
-%% Comment out for colorful subsection headers.
-%% TODO: make this an option
-\titleformat{\subsection}{\normalsize\header}{\hno{\thesubsection}}{0pt}{}
+\titleformat{\subsection}{\subsecsize\header}{\hno{\thesubsection}}{0pt}{}
+%% %% Uncomment for orange subsection ribbons.
+%% \titleformat{\subsection}{\subsecsize\header}
+%%             {\colorhno{ACMOrange}{white}{\thesubsection}}{0pt}{}
