@@ -7,6 +7,11 @@
 \newtoggle{nogeometry}          % don't configure geometry?
 \newtoggle{ribbons}             % colored section number ribbons?
 
+%% TODO: use more Tufte-css-like font sizes, then:
+%% change \section to be \Large, \subsection to \large
+%% change author,date to be \large
+%% and check that all this still works on a5.
+
 %% TODO: consider factoring out some of this into a .sty file:
 %% - the newtheorem stuff
 %% - colors
@@ -49,6 +54,7 @@
 \iftoggle{nogeometry}{}{\RequirePackage[\rntz@geom]{geometry}}
 %% if narrow, limit text width to 126mm - the same width we use on A5,
 %% and pretty close to article.cls' default width.
+%% FIXME: how should this interact with nogeometry?
 \iftoggle{narrow}{
   \newlength{\rntz@fulltextwidth}
   \setlength{\rntz@fulltextwidth}{\textwidth}
@@ -56,6 +62,7 @@
 
 %% ---- figure* for wide figures in narrow mode ----
 %% First, define a fullwidth environment.
+%% FIXME: if nogeometry is passed, this will do the wrong thing!
 \iftoggle{narrow}{
   \RequirePackage[strict]{changepage}
   %% I want to go from \textwidth to \rntz@fulltextwidth. adjustwidth adds to
