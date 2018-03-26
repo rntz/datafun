@@ -35,10 +35,10 @@
 
 
 %% ---- Commands ----
-\newcommand{\todo}[1]{{\color{red}#1}}
+\newcommand{\todo}[1]{{\itshape\color{blue}#1}}
 
 \newcommand{\bnfeq}{\dblcolon=}
-\newcommand{\defeq}{\overset{\ms{def}}{=}}
+%% \newcommand{\defeq}{\overset{\ms{def}}{=}}
 
 \newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
 \newcommand{\mb}[1]{\ensuremath{\mathbf{#1}}}
@@ -70,8 +70,14 @@
 %% Tone functors.
 \newcommand{\id}{\ms{id}}
 \newcommand{\op}{\ms{op}}
-\newcommand{\iso}{\ms{core}}
-\renewcommand{\path}{\ms{path}}
+\newcommand{\iso}{\ms{iso}}     % iso, core, inv, eq
+\renewcommand{\path}{\ms{path}} % path, loc, biv, bi
+% Sensible combinations:
+% {bi, eq}: suggestive, short.
+%           DISLIKE: "bi" ambiguous. "eq" suggests equality.
+% {inv, biv}: invariant, bivariant. DISLIKE: functor meaning nonobvious.
+% {iso, path}: suggestive of generalization to categories
+% {core, loc}: established-ish category theory notation. DISLIKE: opaque.
 
 \newcommand{\tc}{\cdot}                 % tone composition
 \newcommand{\tm}{\id}                   % monotone / id
@@ -79,9 +85,9 @@
 \newcommand{\ti}{{\color{ACMBlue}\iso}} % invariant/ core
 \newcommand{\tb}{{\color{ACMRed}\path}} % bivariant/ path
 
-%% \newcommand{\ta}{{\color{ForestGreen}\op}}   % antitone / op
-%% \newcommand{\ti}{{\color{NavyBlue}\iso}}     % invariant/ core
-%% \newcommand{\tb}{{\color{Bittersweet}\path}} % bivariant/ path
+%% \renewcommand{\ta}{{\color{ForestGreen}\op}}   % antitone / op
+%% \renewcommand{\ti}{{\color{NavyBlue}\iso}}     % invariant/ core
+%% \renewcommand{\tb}{{\color{Bittersweet}\path}} % bivariant/ path
 
 
 %% ---- Front matter ----
@@ -121,7 +127,7 @@ between categories.
 \section{Tones}\label{sec:tones}
 
 Tones are ways a function $f$ may respect a preordering. I will consider four
-tones, \tm, \ta, \tb, and \ti:
+tones, \tm, \ta, \ti, and \tb:
 
 \begin{center}
   \begin{tabular}{clc@{\hskip 0.25em}c@{\hskip 0.25em}c}
@@ -138,13 +144,13 @@ tones, \tm, \ta, \tb, and \ti:
     %% & \text{opposite ordering}
     & $x \ge y$ &$\implies$& $f(x) \le f(y)$
     \\
-    \tb & \text{Bivariant}
-    %% & \text{equivalence closure or ``paths''}
-    & $x \le y \vee y \le x$ &$\implies$& $f(x) \le f(y)$
-    \\
     \ti & \text{Invariant}
     %% & \text{induced equivalence or ``isomorphisms''}
     & $x \le y \wedge y \le x$ &$\implies$& $f(x) \le f(y)$
+    \\
+    \tb & \text{Bivariant}
+    %% & \text{equivalence closure or ``paths''}
+    & $x \le y \vee y \le x$ &$\implies$& $f(x) \le f(y)$
   \end{tabular}
 \end{center}
 
@@ -152,8 +158,8 @@ Informally,
 \begin{enumerate}
 \item $\tm$ is monotone (order-preserving).
 \item $\ta$ is antitone (order-inverting).
+\item $\ti$ is invariant, preserving only equivalence.
 \item $\tb$ is bivariant: both monotone and antitone.
-\item $\ti$ is invariant, respecting only equivalence.
 \end{enumerate}
 
 %% In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
@@ -192,14 +198,14 @@ transformed by the tone $s$, defined:
     & \text{opposite ordering}
     & $a \ge b : A$ &$\iff$& $a \le b : A^\op$
     \\
+    \ti
+    & \text{induced equivalence}
+    & $a \le b \wedge b \le a : A$ &$\iff$& $a \le b : A^\iso$
+    \\
     \tb{}
     & \text{equivalence closure}
     & $a \le b \vee b \le a : A$ &$\ \implies$& $a \le b : A^\path$
     & {\small\itshape see \ref{sec:defining-path}}
-    \\
-    \ti
-    & \text{induced equivalence}
-    & $a \le b \wedge b \le a : A$ &$\iff$& $a \le b : A^\iso$
   \end{tabular}
 \end{center}
 
@@ -228,7 +234,13 @@ Also, there is one more property of tones we will need:
 \end{theorem}
 %% \begin{proof} Exercise for the reader. \end{proof}
 
-\subsection{Defining \ms{path}} \label{sec:defining-path}
+\subsection{Understanding \iso{} and \path{}}
+
+\todo{TODO: An intuition about $\ti$ and $\tb$: $\ti$ keeps only the
+  \emph{strongly connected components}, while $\tb$ turns \emph{weakly}
+  connected components into \emph{strong} ones.}
+
+\subsection{Defining \path{}} \label{sec:defining-path}
 
 $A^\path$ is the smallest preorder satisfying
 \[ a \le b \vee b \le a : A \implies a \le b : A^\path \]
@@ -268,39 +280,37 @@ $a_0, \dots, a_n$ such that $a_i \le a_{i+1} \vee a_i \ge a_{i+1} : A$. Then $a
 \subsection{Tone operators}
 
 \begin{figure*}[t]
+  \begin{mathpar}
+    %% "baseline=(current bounding box.center)" incantation taken from
+    %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
+    \begin{tikzpicture}[scale=1,baseline=(current bounding box.center)]
+      \node (top)  at ( 0, 1) {$\tb$};
+      \node (bot)  at ( 0,-1) {$\ti$};
+      \node (-1)   at (-1, 0) {$\tm$};
+      \node (1)    at ( 1, 0) {$\ta$};
+      \draw (top) -- (-1) -- (bot) -- (1) -- (top);
+    \end{tikzpicture}
 
-    \begin{mathpar}
-      %% "baseline=(current bounding box.center)" incantation taken from
-      %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
-      \begin{tikzpicture}[scale=1,baseline=(current bounding box.center)]
-        \node (top)  at ( 0, 1) {$\tb$};
-        \node (bot)  at ( 0,-1) {$\ti$};
-        \node (-1)   at (-1, 0) {$\tm$};
-        \node (1)    at ( 1, 0) {$\ta$};
-        \draw (top) -- (-1) -- (bot) -- (1) -- (top);
-      \end{tikzpicture}
+    \begin{array}{r|cccc}
+      s \wedge t
+      & \tm & \tb & \ta & \ti\\\hline
+      \tm & \tm & \tm & \ti & \ti\\
+      \tb & \tm & \tb & \ta & \ti\\
+      \ta & \ti & \ta & \ta & \ti\\
+      \ti & \ti & \ti & \ti & \ti
+    \end{array}
 
-      \begin{array}{r|cccc}
-        s \wedge t
-        & \tm & \tb & \ta & \ti\\\hline
-        \tm & \tm & \tm & \ti & \ti\\
-        \tb & \tm & \tb & \ta & \ti\\
-        \ta & \ti & \ta & \ta & \ti\\
-        \ti & \ti & \ti & \ti & \ti
-      \end{array}
-
-      \begin{array}{cr|cccc}
-        \multicolumn{2}{c|}{\multirow{2}{*}{$s \tc t$}}
-        & \multicolumn{4}{c}{t}\\
-        && \tm & \ta & \ti & \tb\\\hline
-        \multirow{4}{*}{$s$}
-        & \tm & \tm & \ta & \ti & \tb\\
-        & \ta & \ta & \tm & \ti & \tb\\
-        & \ti & \ti & \ti & \ti & \ti\\
-        & \tb & \tb & \tb & \tb & \tb
-      \end{array}
-    \end{mathpar}
-
+    \begin{array}{cr|cccc}
+      \multicolumn{2}{c|}{\multirow{2}{*}{$s \tc t$}}
+      & \multicolumn{4}{c}{t}\\
+      && \tm & \ta & \ti & \tb\\\hline
+      \multirow{4}{*}{$s$}
+      & \tm & \tm & \ta & \ti & \tb\\
+      & \ta & \ta & \tm & \ti & \tb\\
+      & \ti & \ti & \ti & \ti & \ti\\
+      & \tb & \tb & \tb & \tb & \tb
+    \end{array}
+  \end{mathpar}
   \caption{Tone lattice, meet, and composition}
   \label{fig:tone-ops}
 \end{figure*}
