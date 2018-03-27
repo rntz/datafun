@@ -137,6 +137,9 @@
   {\authorsize\@date\par}%
   \endgroup}
 
+%% ---- Abstracts ----
+%% TODO.
+
 %% ---- Colors ----
 \RequirePackage[dvipsnames]{xcolor}
 \definecolor[named]{ACMBlue}{cmyk}{1,0.1,0,0.1}
