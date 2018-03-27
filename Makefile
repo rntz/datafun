@@ -16,6 +16,9 @@ watch: all
 %.pdf: %.tex FORCE
 	$(LATEXRUN) $<
 
+%-book.pdf: %.pdf
+	pdfbook $<
+
 %.tex: %.md $(AUXIL)
 	$(PANDOC) $(PANDOC_TEX) $< -o $@
 

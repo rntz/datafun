@@ -65,10 +65,11 @@ operator $\fix : (P \to P) \to P$ such that $\fix\;f = f^i\;\bot$ for some $i :
 
 Let us consider a higher-order language $\mc{L}$ which can, among perhaps many
 other things, express monotone maps on $P$. Let's assume we have a theory of
-changes for $\mc{L}$ (\`a la ``A Theory of Changes for Higher Order Languages''
-by Cai et al, PLDI 2014). We wish to extend $\mc{L}$ with $\fix$, and find a
-theory of changes for the resulting $\mc{L}_\fix$. In particular, how do we
-compute derivatives of fixed points? The answer is in the title:
+changes for $\mc{L}$, \`a la \href{https://arxiv.org/abs/1312.0658}{``A Theory of
+  Changes for Higher Order Languages'' by Cai et al, PLDI 2014}. We wish to
+extend $\mc{L}$ with $\fix$, and find a theory of changes for the resulting
+$\mc{L}_\fix$. In particular, how do we compute derivatives of fixed points? The
+answer is in the title:
 \[ \dv(\fix\;f) = \fix\;(\dv{f} \; (\fix\;f)) \]
 
 %% TODO: show derivation of this from d(fix f) = d(f (fix f)) and the function
