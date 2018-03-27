@@ -26,6 +26,9 @@ BinOp A = A -> A -> A
 Function : ∀{i j} -> Set i -> Set j -> Set _
 Function A B = A -> B
 
+coerce : ∀{i}{A B : Set i} -> A ≡ B -> A -> B
+coerce = Eq.subst (λ x → x)
+
 -- A better version of Data.Product.,_
 infixr 4 ,_
 pattern ,_ x = _ , x
