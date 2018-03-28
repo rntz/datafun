@@ -103,8 +103,8 @@
 \begin{document}
 \maketitle
 
-{\vspace{1em}\small%\textbf{Abstract.}
-%
+{\vspace{1em}%\small
+\textbf{Abstract.}
  Many kinds of ``non-monotone'' maps (e.g.\! equivalence-preserving) can be
  understood as monotone with respect to an altered domain ordering. I dub such
  alterations ``tones'', and explore their theory. I sketch a typed
@@ -135,7 +135,7 @@ between categories.
 
 \section{Tones}\label{sec:tones}
 
-Tones are ways a function $f$ may respect a preordering. I will consider four
+Tones are ways a function $f$ may respect a preorder. I will consider four
 tones, \tm, \ta, \ti, and \tb:
 
 \begin{center}
@@ -260,8 +260,7 @@ language like ``the smallest preorder satisfying'')
 %
 because the reverse implication, from $a \le b : A^\path$ to $a \le b \vee b \le
 a : A$, does not always hold. A good counterexample is the \ms{fencepost}
-ordering on the naturals, where $a \le a+1$ for even $a$, and $a \ge a+1$ for
-odd $a$:
+preorder on $\N$, where $a < a+1$ for even $a$, and $a > a+1$ for odd $a$:
 
 \begin{center}
   \begin{tikzpicture}
@@ -464,16 +463,16 @@ Tone composition $s \tc t$ corresponds to composition of tone functors:
 
 Preorders have a natural partial order, letting $A \le B$ iff $A$ is a
 \emph{subpreorder} of $B$ --- that is, if $\fnof{x} x : A \to B$. (In other
-words, if $A \subseteq B$ and $x \le y : A \implies x \le y : B$.) This lifts
-pointwise to a partial order on tones: let $s \le t$ iff $A^s \le A^t$ for all
-$A$.
+words, if $A \subseteq B$ and $x \le y : A \implies x \le y : B$.)
+%
+This lifts pointwise to a partial order on tones: let $s \le t$ iff $A^s \le
+A^t$ for all $A$.
 
 As functors, tones also form a category, \Tone{}, with natural transformations
-as morphisms. However, \Tone{} is a mere fa\c{c}ade over this partial
-order:
+as morphisms. However, \Tone{} is but a fa\c{c}ade over this partial order:
 
 \begin{theorem}\label{thm:tone-poset}
-  $s \le t \iff \exists \eta : \Tone(s, t)$. Moreover, any two morphisms $\eta,
+  $s \le t \iff \exists \eta : \Tone(s, t)$. Also, any two morphisms $\eta,
   \varepsilon : \Tone(s,t)$ are equal.
 \end{theorem}
 
@@ -576,8 +575,8 @@ tone composition $s \tc t$ corresponds to functor composition.
   \infer[Cut]{\GG \vdash A \\ \Delta,A^t \vdash C}{\GG^t,\Delta \vdash C}
 \end{mathpar}
 
-Jason Reed sent me these rules for a tonal sequent calculus. $T_s$ is the
-connective internalizing $-^s$. I aim to adapt this into a
+Jason Reed sent me these rules for a sequent calculus with a connective $T_s$
+internalizing the tone functor $-^s$. I aim to adapt this into a
 natural-deduction-style system with proof terms, i.e.\! a simply typed
 $\lambda$-calculus.
 
