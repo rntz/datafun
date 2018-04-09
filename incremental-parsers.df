@@ -1,0 +1,93 @@
+# this is a sketch, not working code.
+
+# The syntax here imitates v3-web.
+#
+# (A -> B) is discrete functions; (A => B) is monotone.
+#
+# I pretend Datafun has parametric polymorphism. Type variables are UPPERCASE
+# and type application is postfix/Haskell-style: (list int) not (int list).
+#
+# Definitions look like:
+#
+#     def NAME: TYPE = EXPR
+#     
+# If EXPR starts with `fn` (pronounced "lambda"), the `=` is optional:
+#
+#     def NAME: TYPE
+#     fn PARAMS => EXPR
+
+# We order strings by prefixity: `s <= t` iff `s` is a prefix of `t`.
+
+# A parser is a monotone map taking a string to a set of parses (i,j,x).
+# [i,j) is the span that parses.
+# x is the parsed value.
+#
+# Monotonicity means appending to the string never removes parses. This means
+# parsers can't detect end-of-input (unless we add an EOF character); however,
+# we can use `i` & `j` to find only parses which consume the whole input.
+#
+# By construction, parsers are ordered by how much they recognize:
+# p1 <= p2 iff whenever p1 parses (i,j,x), so does p2.
+type parser A = str => {int, int, A}
+
+# Alternatively, we could parse prefixes, producing parses (length, x) where
+# length is the length of the prefix parsed, and x is the parsed value.
+type prefix-parser A = str => {int, A}
+
+# prefix-parser resembles the classic Haskell definition:
+#
+#     type Parser a = String -> [(a, String)]
+#
+# except with offsets instead of suffixes & sets instead of lists.
+
+# We assume these builtin functions:
+#
+#     length: str => int                 # length "foo" = 3
+#     drop: int -> str => str            # drop 2 "abcd" = "cd"
+#     range: (int, int) => {int}         # range (1,4) = {1,2,3}
+#     substrings: str => {int,int,str}   # substrings "x" = {(0,0,""), (1,1,""), (0,1,"x")}
+#
+# Observe that (substrings: parser str). substrings is our primitive parser!
+#
+# PROBLEM #1: the derivative of substrings uses its original input, not just the
+# change to it!
+#
+# But is this really a problem? The original input is just the string before we
+# append the new input. We can keep that around easily enough.
+
+# parser is a functor, Set -> Poset.
+def map: (A -> B) -> parser A => parser B
+fn f parse text => {(i, j, f x) | (i,j,x) in parse text}
+
+# parser is monoidal/applicative, giving us parser concatenation.
+def unit: parser ()
+fn text => {(i,i,()) | i in range (0, 1 + length text)}
+
+def then: parser A => parser B => parser (A,B)
+fn p q text => {(i,k,(a,b)) | (i,j,a) in p text, (j,k,b) in q text}
+
+# PROBLEM #2: I believe the derivative of `then p q` is going to need to
+# recompute `p text` and `q text` from scratch, because it's basically a
+# database join between `p text` and `q text`. Since `then` is a very common
+# operation, we're not really incrementalising much at all.
+#
+# The same problem also occurs with prefix parsers. Also, `then` for prefix
+# parsers has a more monadic implementation:
+def prefix-then: prefix-parser A => prefix-parser B => prefix-parser (A,B)
+fn p q text =>
+  { (m+n, (x,y))
+  | (n,x) in p text
+  # note the monadic use of `n` here.
+  , (m,y) in q (drop n text)}
+
+# Is parser a monad? I'm not sure.
+
+# parsers can be filtered.
+def filter: (A -> bool) => parser A => parser A
+fn pred parse text => {(i,j,x) | (i,j,x) in parse text, pred x}
+
+# Parses a literal string.
+def literal: str -> parser str
+fn needle => filter (== needle) substrings
+
+
