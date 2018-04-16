@@ -591,6 +591,12 @@ $\lambda$-calculus.
 \newcommand{\infers}[3]{{#1} \Rightarrow {#2} \vdash {#3}}
 \newcommand{\checks}[3]{{#1} \Leftarrow {#2} \vdash {#3}}
 
+%% \renewcommand{\infers}[3]{{#1} ~\shortrightarrow~ {#2} \vdash {#3}}
+%% \renewcommand{\checks}[3]{{#1} ~::~ {#2} \vdash {#3}}
+
+%% \renewcommand{\infers}[3]{{#2}\vdash {#1} \shortrightarrow {#3}}
+%% \renewcommand{\checks}[3]{{#2}\vdash {#1} : {#3}}
+
 \begin{mathpar}
   \begin{array}{cccl}
     \text{variables} & x\\
@@ -600,21 +606,19 @@ $\lambda$-calculus.
     \text{types} & A,B,C
     &\bnfeq& P ~|~ A \to B ~|~ A \x B ~|~ \Box A ~|~ \op\;A
     \vspace{0.5em}\\
-    \text{checking terms} & M
-    &\bnfeq& N ~|~ \fnof{x} M ~|~ (M, M)
-    ~|~ \mb{let}~x = N~\mb{in}~ M
+    \text{checking terms} & m,n
+    &\bnfeq& \fnof{x} m ~|~ (m,n)
+    ~|~ \mb{let}~x = m~\mb{in}~ n ~|~ e
     \vspace{0.5em}\\
-    %% TODO: use more distinct variables for checking/inferring terms
-    %% v for checking forms, t for inferring terms?
-    \text{inferring terms} & N
-    &\bnfeq& M : A ~|~ x ~|~ N\;M ~|~ \pi_i\;N
+    \text{inferring terms} & e
+    &\bnfeq& x ~|~ e\;m ~|~ \pi_i\;e ~|~ m : A
     \vspace{0.5em}\\
     \text{contexts}
     & \GG &\bnfeq& \cdot ~|~ \GG{}, \h{x}{A}{s}
     \vspace{0.5em}\\
     \text{judgments}
     & J &\bnfeq&
-    \checks{M}{\GG}{A} ~~|~~ \infers{N}{\GG}{A}
+    \checks{m}{\GG}{A} ~~|~~ \infers{e}{\GG}{A}
     ~~|~~ \subtype{s}{A}{B} ~~|~~ \converts{s}{A}{B}
   \end{array}
 \end{mathpar}
@@ -628,37 +632,37 @@ $\lambda$-calculus.
 \begin{mathpar}
   \infer{ }{\infers{x}{\h{x}{A}{\tm}}{A}}
 
-  \infer{\checks{M}{\GG}{A}}{\infers{M : A}{\GG}{A}}
+  \infer{\checks{m}{\GG}{A}}{\infers{m : A}{\GG}{A}}
 
-  \infer{\infers{N}{\GG}{A} \\ \subtype{t}{A}{B}}
-        {\checks{N}{\GG^t}{B}}
+  \infer{\infers{e}{\GG}{A} \\ \subtype{t}{A}{B}}
+        {\checks{e}{\GG^t}{B}}
 
-  %% type-driven subtyping for checking
-  \infer{\checks{M}{\GG}{A}}
-        {\checks{M}{\GG^\ti}{\Box A}}
+  %% automatic box and op introduction
+  \infer{\checks{m}{\GG}{A}}
+        {\checks{m}{\GG^\ti}{\Box A}}
 
-  \infer{\checks{M}{\GG}{A}}
-        {\checks{M}{\GG^\ta}{\op\; A}}
+  \infer{\checks{m}{\GG}{A}}
+        {\checks{m}{\GG^\ta}{\op\; A}}
 
   %% let-binding
-  \infer{\infers{N}{\GG_1}{A} \\ \checks{M}{\GG_2,\, \h{x}{A}{s}}{C}}
-        {\checks{\mb{let}~x = N~\mb{in}~M}{\GG_1^s \wedge \GG_2}{C}}
+  \infer{\infers{e}{\GG_1}{A} \\ \checks{m}{\GG_2,\, \h{x}{A}{s}}{C}}
+        {\checks{\mb{let}~x = e~\mb{in}~m}{\GG_1^s \wedge \GG_2}{C}}
 
   %% introductions
-  \infer{\checks{M}{\GG{},\, \h{x}{A}{s}}{B} \\ \tm \le s}
-        {\checks{\fnof{x} M}{\GG}{A \to B}}
+  \infer{\checks{m}{\GG{},\, \h{x}{A}{s}}{B} \\ \tm \le s}
+        {\checks{\fnof{x} m}{\GG}{A \to B}}
 
-  \infer{\checks{M_1}{\GG_1}{A_1} \\ \checks{M_2}{\GG_2}{A_2}}
-        {\checks{(M_1,M_2)}{\GG_1 \wedge \GG_2}{A_1 \x A_2}}
+  \infer{\checks{m}{\GG_1}{A_1} \\ \checks{n}{\GG_2}{A_2}}
+        {\checks{(m,n)}{\GG_1 \wedge \GG_2}{A_1 \x A_2}}
 
   %% eliminations
-  \infer{\infers{N}{\GG_1}{A}
+  \infer{\infers{e}{\GG_1}{A}
          \\ \converts{u}{A}{B \to C}
-         \\ \checks{M}{\GG_2}{B}}
-        {\infers{N\; M}{\GG_1^u \wedge \GG_2}{C}}
+         \\ \checks{m}{\GG_2}{B}}
+        {\infers{e\; m}{\GG_1^u \wedge \GG_2}{C}}
 
-  \infer{\infers{N}{\GG}{A} \\ \converts{s}{A}{B_1 \x B_2}}
-        {\infers{\pi_i\;N}{\GG^s}{B_i}}
+  \infer{\infers{e}{\GG}{A} \\ \converts{s}{A}{B_1 \x B_2}}
+        {\infers{\pi_i\;e}{\GG^s}{B_i}}
 \end{mathpar}
 
 
@@ -778,14 +782,14 @@ Judgment: $\pinfer{p}{\GG}{A}{s}{\Delta}$. \todo{TODO: what's an input, what's
 Here are two more general variations on the $\fn$ rule I've considered:
 \begin{mathpar}
   \infer[Fn-1]
-        {\checks{M}{\GG{},\, \h{x}{A}{s}}{B} \\ A \sqsubset A^s}
-        {\checks{\fnof{x}{M}}{\GG}{A \to B}}
+        {\checks{m}{\GG{},\, \h{x}{A}{s}}{B} \\ A \sqsubset A^s}
+        {\checks{\fnof{x}{m}}{\GG}{A \to B}}
 
   \infer[Fn-2]
-        {\checks{M}{\GG{},\, \h{x}{A}{t}}{B}
+        {\checks{m}{\GG{},\, \h{x}{A}{t}}{B}
          \\ \subtype{s}{A}{A}
          \\ \tm \le s \tc t}
-        {\checks{\fnof{x} M}{\GG}{A \to B}}
+        {\checks{\fnof{x} m}{\GG}{A \to B}}
 \end{mathpar}
 \textsc{Fn-1} requires a new judgment, $A \sqsubset B^s$, where $A,B,s$ are all
 inputs; this doesn't seem difficult to define, but it's Yet Another Subtyping
@@ -795,15 +799,15 @@ However, it's not clear to me I need to generalize the $\fn$ rule. The reason I
 thought I did was to justify something like the following:
 \begin{mathpar}
   \infer*{\infer*{\vdots}
-           {{\GG{},\, \h{x}{A}{\ti}} \vdash {M} : {B}}}
-         {{\GG} \vdash {\fnof{x}{M}} : {\Box A \to B}}
+           {{\GG{},\, \h{x}{A}{\ti}} \vdash {m} : {B}}}
+         {{\GG} \vdash {\fnof{x}{m}} : {\Box A \to B}}
 \end{mathpar}
 
 But this \emph{could} check as follows:
 \begin{mathpar}
-  \infer*{\infer*{\vdots}{\checks{M}{\GG{},\, \h{x}{\Box A}{s}}{B}}
+  \infer*{\infer*{\vdots}{\checks{m}{\GG{},\, \h{x}{\Box A}{s}}{B}}
           \\ \tm \le s}
-         {\checks{\fnof{x}{M}}{\GG}{\Box A \to B}}
+         {\checks{\fnof{x}{m}}{\GG}{\Box A \to B}}
 \end{mathpar}
 
 So the crucial question is: can we always substitute $\h{x}{\Box A}{\tm}$ for
@@ -822,22 +826,22 @@ We wish to prove admissible the following rules:
 %
 \begin{mathpar}
   \infer[tone weakening]
-        {\checks{M}{\GG}{A}}
-        {\checks{M}{\GG \wedge \GG'}{A}}
+        {\checks{m}{\GG}{A}}
+        {\checks{m}{\GG \wedge \GG'}{A}}
 
   \infer[subtyping left]
-        {\checks{M}{\GG, \h{x}{A}{s}}{C} \\ A^s \le B^t}
-        {\checks{M}{\GG, \h{x}{B}{t}}{C}}
+        {\checks{m}{\GG, \h{x}{A}{s}}{C} \\ A^s \le B^t}
+        {\checks{m}{\GG, \h{x}{B}{t}}{C}}
 
   \infer[subtyping right]
-        {\checks{M}{\GG}{A} \\ A^s \le B^\tm}
-        {\checks{M}{\GG^s}{B}}
+        {\checks{m}{\GG}{A} \\ A^s \le B^\tm}
+        {\checks{m}{\GG^s}{B}}
 
   \infer[substitution]
-        {\infers{N}{\GG_1}{A}
+        {\infers{e}{\GG_1}{A}
          \\ A^s \le B^t
-         \\ \checks{M}{\GG_2, \h{x}{B}{t}}{C}}
-        {\checks{M[N/x]}{\GG_1^s \wedge \GG_2}{C}}
+         \\ \checks{m}{\GG_2, \h{x}{B}{t}}{C}}
+        {\checks{m[e/x]}{\GG_1^s \wedge \GG_2}{C}}
 \end{mathpar}
 
 \todo{TODO: Can we unify \textsc{weakening} and \textsc{subtyping left}?}
