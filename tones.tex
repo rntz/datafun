@@ -1,7 +1,7 @@
-\documentclass[ribbons]{rntz}
+\documentclass[b5,wide,libertine,ribbons]{rntz}
 
-%% \documentclass{scrartcl}
-%% %% \usepackage{eulervm}
+%% \documentclass{article}
+%% \usepackage{mathpazo,eulervm}
 %% \usepackage{amsthm,amsmath,amssymb}
 %% \theoremstyle{plain}
 %% \newtheorem{theorem}{Theorem}
@@ -85,9 +85,9 @@
 \newcommand{\ti}{{\color{ACMBlue}\iso}} % invariant/ core
 \newcommand{\tb}{{\color{ACMRed}\path}} % bivariant/ path
 
-%% \renewcommand{\ta}{{\color{ForestGreen}\op}}   % antitone / op
-%% \renewcommand{\ti}{{\color{NavyBlue}\iso}}     % invariant/ core
-%% \renewcommand{\tb}{{\color{Bittersweet}\path}} % bivariant/ path
+\renewcommand{\ta}{{\color{ForestGreen}\op}}   % antitone / op
+\renewcommand{\ti}{{\color{NavyBlue}\iso}}     % invariant/ core
+\renewcommand{\tb}{{\color{Bittersweet}\path}} % bivariant/ path
 
 
 %% ---- Front matter ----
@@ -105,12 +105,12 @@
 
 {\vspace{1em}%\small
 \textbf{Abstract.}
- Many kinds of ``non-monotone'' maps (e.g.\! equivalence-preserving) can be
- understood as monotone with respect to an altered domain ordering. I dub such
+%
+ Certain properties of maps between preorders (e.g.\! preserving equivalence)
+ reduce to monotonicity with respect to an altered domain ordering. I dub such
  alterations ``tones'', and explore their theory. I sketch a typed
  $\lambda$-calculus of monotone functions, using tones to allow selective
- non-mono\-tonicity.
-\par}
+ non-mono\-tonicity. \par}
 
 \section{Preorders}
 
@@ -593,15 +593,19 @@ $\lambda$-calculus.
 
 \begin{mathpar}
   \begin{array}{cccl}
+    \text{variables} & x\\
+    \text{base types} & P\vspace{0.5em}\\
     \text{tones} & s,t,u & \bnfeq & \tm ~|~ \ta ~|~ \tb ~|~ \ti
     \vspace{0.5em}\\
     \text{types} & A,B,C
-    &\bnfeq& \ms{base} ~|~ A \to B ~|~ A \x B ~|~ \Box A ~|~ \op\;A
+    &\bnfeq& P ~|~ A \to B ~|~ A \x B ~|~ \Box A ~|~ \op\;A
     \vspace{0.5em}\\
     \text{checking terms} & M
     &\bnfeq& N ~|~ \fnof{x} M ~|~ (M, M)
     ~|~ \mb{let}~x = N~\mb{in}~ M
     \vspace{0.5em}\\
+    %% TODO: use more distinct variables for checking/inferring terms
+    %% v for checking forms, t for inferring terms?
     \text{inferring terms} & N
     &\bnfeq& M : A ~|~ x ~|~ N\;M ~|~ \pi_i\;N
     \vspace{0.5em}\\
@@ -610,9 +614,8 @@ $\lambda$-calculus.
     \vspace{0.5em}\\
     \text{judgments}
     & J &\bnfeq&
-    \checks{M}{\GG}{A}
-    \\&&|& \infers{N}{\GG}{A}
-    \\&&|& \subtype{s}{A}{B} ~|~ \converts{s}{A}{B}
+    \checks{M}{\GG}{A} ~~|~~ \infers{N}{\GG}{A}
+    ~~|~~ \subtype{s}{A}{B} ~~|~~ \converts{s}{A}{B}
   \end{array}
 \end{mathpar}
 
@@ -639,7 +642,7 @@ $\lambda$-calculus.
 
   %% let-binding
   \infer{\infers{N}{\GG_1}{A} \\ \checks{M}{\GG_2,\, \h{x}{A}{s}}{C}}
-        {\checks{\mb{let}~x = N~\mb{in}~M}{\GG_1{}^s \wedge \GG_2}{C}}
+        {\checks{\mb{let}~x = N~\mb{in}~M}{\GG_1^s \wedge \GG_2}{C}}
 
   %% introductions
   \infer{\checks{M}{\GG{},\, \h{x}{A}{s}}{B} \\ \tm \le s}
@@ -652,7 +655,7 @@ $\lambda$-calculus.
   \infer{\infers{N}{\GG_1}{A}
          \\ \converts{u}{A}{B \to C}
          \\ \checks{M}{\GG_2}{B}}
-        {\infers{N\; M}{\GG_1{}^u \wedge \GG_2}{C}}
+        {\infers{N\; M}{\GG_1^u \wedge \GG_2}{C}}
 
   \infer{\infers{N}{\GG}{A} \\ \converts{s}{A}{B_1 \x B_2}}
         {\infers{\pi_i\;N}{\GG^s}{B_i}}
@@ -663,11 +666,18 @@ $\lambda$-calculus.
 
 In $\subtype{s}{A}{B}$, the types $A$ and $B$ are inputs, and the tone $s$ is
 output.
+%
+``$P~\text{equiv}$'' holds iff the base type $P$'s preorder is symmetric (i.e.\!
+an equivalence relation).
+%
+Most complex are the four rules for function subtyping, $\subtype{s}{(A_1 \to
+  B_1)}{A_2 \to B_2}$, one for each tone $s$, determined by the result of
+$\subtype{s}{B_1}{B_2}$.
 
 \begin{mathpar}
   \infer{ }{\subtype{\tm}{A}{A}}
 
-  \infer{A~\text{equiv}}{\subtype{\ti}{A}{A}}
+  \infer{P~\text{equiv}}{\subtype{\ti}{P}{P}}
 
   \infer{\subtype{s}{A}{B}}
         {\subtype{s \tc \ti}{A}{\Box B}}
@@ -683,7 +693,9 @@ output.
 
   \infer{\subtype{s}{A_1}{A_2} \\ \subtype{t}{B_1}{B_2}}
         {\subtype{s \wedge t}{(A_1 \x B_1)}{A_2 \x B_2}}
+% \end{mathpar}
 
+% \begin{mathpar}
   %% The function rules!
   \infer{\subtype{s}{A_1}{A_2} \\ \subtype{\tm}{B_1}{B_2} \\ \tm \le s}
         {\subtype{\tm}{(A_1 \to B_1)}{A_2 \to B_2}}
@@ -702,43 +714,63 @@ output.
   $\ge \tm$'', for some choice of $u$ depending on $t$?}
 
 
-\subsection{Spine subtyping}
+\subsection{Modal stripping}
 
-In $\converts{s}{A}{B}$, the type $A$ is input, the \emph{shape} of $B$ (either
-$- \to -$ or $- \x -$) is input, the actual types in $B$ are outputs, and the
-tone $s$ is output.
-
+$\converts{s}{A}{B}$ is a specialization of $\subtype{s}{A}{B}$ which strips off
+modal operators on $A$, turning them into transformations on $s$. As in
+subtyping, $A$ is an input and $s$ an output; however, $B$ is now an output.
+%
 \begin{mathpar}
-  \infer{ }{\converts{\tm}{A}{A}}
+  \infer{A~\text{stripped}}{\converts{\tm}{A}{A}}
 
   \infer{\converts{s}{A}{B}}{\converts{\tb\tc s}{\Box A}{B}}
 
   \infer{\converts{s}{A}{B}}{\converts{\ta\tc s}{(\op\; A)}{B}}
-
-  %% \infer{\isfn{s}{A}{B}{C}}
-  %%       {\isfn{s}{\op\; A}{\op\;B}{\op\;C}}
 \end{mathpar}
 
-\textbf{Q:} Aren't these just a subset of the subtyping rules?
+``$A~\text{stripped}$'' holds iff $A$ is \emph{not} of the form $\Box B$ or
+$\op\; B$, i.e. its outermost connective is not modal.
 
-\textbf{A:} Yes, but with a change of mode! If we let $B$ be an output, the
-rules for $\subtype{s}{A}{B}$ are nondeterministic! So $\converts{s}{A}{B}$ is a
-specialisation of $\subtype{s}{A}{B}$ chosen to be deterministic when $B$ is an
-output.
+%% \textbf{Q:} Aren't these just a subset of the subtyping rules?
 
-\textbf{Todo:} Prove this ``determinisation'' is in some sense
-correct/complete for our use-case.
+%% \textbf{A:} Yes, but with a change of mode! If we let $B$ be an output, the
+%% rules for $\subtype{s}{A}{B}$ are nondeterministic! So $\converts{s}{A}{B}$ is a
+%% specialisation of $\subtype{s}{A}{B}$ chosen to be deterministic when $B$ is an
+%% output.
 
-\textbf{Observation:} $\converts{s}{A}{B}$ ``strips off'' modal operators on
-$A$, turning them into transformations on $s$. Maybe this is a better
-specification for it than having ``the \emph{shape} of $B$'' be an input.
+%% \textbf{Todo:} Prove this ``determinisation'' is in some sense
+%% correct/complete for our use-case.
+
+%% \textbf{Observation:} $\converts{s}{A}{B}$ ``strips off'' modal operators on
+%% $A$, turning them into transformations on $s$. Maybe this is a better
+%% specification for it than having ``the \emph{shape} of $B$'' be an input.
 
 
 \subsection{Patterns}
 
-Judgment: $p : \GG \vdash A \dashv \GG$.
-
 \todo{TODO: patterns and pattern inference}
+
+\newcommand{\pinfer}[5]{#1 : #2 \vdash #3^{#4} \dashv #5}
+
+Judgment: $\pinfer{p}{\GG}{A}{s}{\Delta}$. \todo{TODO: what's an input, what's
+  an output? I think $s$ and the tones on $\GG$ are outputs? so the only inputs
+  are $A$ and the types in $\GG$.}
+
+\begin{mathpar}
+  %% this is wrong
+  \infer{x \not\in \GG}
+        {\pinfer{x}{\GG}{A}{s}{x : A^s}}
+
+  \infer{\h{x}{A}{t} \in \GG
+         \\ \text{\todo{TODO}}
+         \\ A~\text{decidable} }
+        {\pinfer{x}{\GG}{A}{s}{\cdot}}
+
+  \infer{\converts{t}{A}{B_1 \x B_2}
+         \\ \pinfer{p}{\GG}{B_1}{?}{\Delta_1}
+         \\ \pinfer{q}{\GG,\Delta_1}{B_2}{?}{\Delta_2} }
+        {\pinfer{(p,q)}{\GG}{A}{s}{\Delta_1, \Delta_2}}
+\end{mathpar}
 
 
 \subsection{Tones and the \texorpdfstring{$\fn$}{lambda} rule}
@@ -777,28 +809,38 @@ But this \emph{could} check as follows:
 So the crucial question is: can we always substitute $\h{x}{\Box A}{\tm}$ for
 $\h{x}{A}{\ti}$?
 %
-It would suffice to prove the weakening and substitution principles given in
-subsection~\ref{subsec:weakening-substitution}. Can we prove these with our
-original, subtyping-less $\lambda$ rule?
+It would suffice to prove the subtyping and substitution principles given in
+subsection~\ref{subsec:principles}. Can we prove these with our original,
+subtyping-less $\lambda$ rule?
 
 
 \section{Declarative rules}
-\subsection{Weakening and substitution principles}
-\label{subsec:weakening-substitution}
+\subsection{Weakening, subtyping, and substitution}
+\label{subsec:principles}
 
-We wish to prove admissible the following tone-weakening and substitution rules:
+We wish to prove admissible the following rules:
 %
 \begin{mathpar}
-  \infer[weakening]
-        {\checks{M}{\GG, \h{x}{A}{s}}{C} \quad A^s \le B^t}
+  \infer[tone weakening]
+        {\checks{M}{\GG}{A}}
+        {\checks{M}{\GG \wedge \GG'}{A}}
+
+  \infer[subtyping left]
+        {\checks{M}{\GG, \h{x}{A}{s}}{C} \\ A^s \le B^t}
         {\checks{M}{\GG, \h{x}{B}{t}}{C}}
+
+  \infer[subtyping right]
+        {\checks{M}{\GG}{A} \\ A^s \le B^\tm}
+        {\checks{M}{\GG^s}{B}}
 
   \infer[substitution]
         {\infers{N}{\GG_1}{A}
-         \quad A^s \le B^t
-         \quad \checks{M}{\GG_2, \h{x}{B}{t}}{C}}
-        {\checks{M[N/x]}{\GG_1{}^s \wedge \GG_2}{C}}
+         \\ A^s \le B^t
+         \\ \checks{M}{\GG_2, \h{x}{B}{t}}{C}}
+        {\checks{M[N/x]}{\GG_1^s \wedge \GG_2}{C}}
 \end{mathpar}
+
+\todo{TODO: Can we unify \textsc{weakening} and \textsc{subtyping left}?}
 
 \subsection{Subtyping and type equivalence}
 
@@ -808,14 +850,14 @@ A^s$.
 \begin{mathpar}
   \infer{s \le t}{A^s \le A^t}
 
-  \infer{A^s \le B^t \quad B^t \le C^u}{A^s \le C^u}
+  \infer{A^s \le B^t \\ B^t \le C^u}{A^s \le C^u}
 
   \infer{A^s \le B^t}{A^{s\tc u} \le B^{s \tc u}}
 
-  \infer{A_1^s \le B_1^t \quad A_2^s \le B_2^t}
+  \infer{A_1^s \le B_1^t \\ A_2^s \le B_2^t}
         {(A_1 \x A_2)^s \le (B_1 \x B_2)^t}
 
-  \infer{A_2^\tm \le A_1^\tm \quad B_1^\tm \le B_2^\tm}
+  \infer{A_2^\tm \le A_1^\tm \\ B_1^\tm \le B_2^\tm}
         {(A_1 \to B_1)^\tm \le (A_2 \to B_2)^\tm}
 
   \infer{}{\Box A^\tm \equiv A^\ti}
