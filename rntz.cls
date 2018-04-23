@@ -127,6 +127,7 @@
 
 %% TODO: omit {title,author,date} if not provided
 %% TODO: support \subtitle.
+\RequirePackage{placeins}       % for \FloatBarrier
 \renewcommand*{\maketitle}{
   \begingroup%
   \setlength{\parindent}{0pt}%
@@ -135,7 +136,7 @@
   {\titlesize\@title\vspace{0.5ex}\par}%
   {\authorsize\@author\vspace{0.5ex}\par}%
   {\authorsize\@date\par}%
-  \endgroup}
+  \endgroup\FloatBarrier}
 
 %% ---- Abstracts ----
 %% TODO.

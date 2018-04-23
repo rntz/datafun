@@ -1,0 +1,189 @@
+\documentclass[a5,libertine,ribbons,nogeometry]{rntz}
+\usepackage[a5paper,total={12cm,18cm}]{geometry}
+
+
+%% ---- Packages ----
+\usepackage{mathpartir}         % \mathpar, \infer
+\usepackage{multirow}
+\usepackage{stmaryrd}           % for semantic brackets
+\usepackage{mathtools}          % for \dblcolon
+\usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
+\usepackage{adjustbox}          % aligning tikz diagrams vertically w/ tables.
+\usepackage{booktabs}           % \midrule
+\usepackage{anyfontsize}        % avoid font size warnings from stmaryrd
+
+
+%% ---- Commands ----
+\newcommand{\todo}[1]{{\itshape\color{blue}#1}}
+
+\newcommand{\bnfeq}{\dblcolon=}
+%% \newcommand{\defeq}{\overset{\ms{def}}{=}}
+
+\newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
+\newcommand{\mb}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\mi}[1]{\ensuremath{\mathit{#1}}}
+\newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}
+
+\newcommand{\GG}{\Gamma}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\x}{\times}
+\newcommand{\fn}{\lambda}
+\newcommand{\binder}{.\,}
+\newcommand{\bind}[1]{{#1}\binder}
+\newcommand{\fnof}[1]{\fn\bind{#1}}
+\newcommand{\den}[1]{\llbracket{#1}\rrbracket}
+
+%% Tones & tone operators.
+\newcommand{\tone}{1}                    % used once
+\newcommand{\tzero}{0}                   % used zero times
+\newcommand{\taff}{\ms{aff}}             % used affinely (zero or one).
+\newcommand{\tmany}{\ensuremath{\infty}} % used any number of times.
+
+\newcommand{\tc}{\cdot}                 % tone composition
+\newcommand{\tmul}{+}                   % tone addition/multiplication
+\newcommand{\tmeet}{\wedge}             % tone meet
+
+
+%% ---- Front matter ----
+\title{Tones for linearity}
+\author{Michael Arntzenius, %
+  \href{mailto:daekharel@gmail.com}{daekharel@gmail.com}}
+% Date format: "25 March 2018"
+\usepackage[en-GB]{datetime2}
+\DTMlangsetup[en-GB]{ord=omit}
+%% date started: 2018-04-23
+\date{\today}
+
+
+\begin{document}
+\maketitle
+
+{\vspace{1em}%\small
+\textbf{Abstract.}
+%
+ I present a sequent calculus for intuitionistic linear logic in which
+ hypotheses are annotated with ``tones''. Surprisingly, this involves three
+ monoids, rather than a semiring, as might be expected. \todo{TODO:
+   Contextualize this; compare to Pfenning-style multiple contexts and
+   McBride-and-other-folk's-style semiring annotations.} \par}
+
+\section{A tonal sequent calculus for intuitionistic linear logic}
+
+\newcommand{\with}{\ensuremath{\mathrel{\&}}}
+\newcommand{\ox}{\ensuremath{\otimes}}
+\newcommand{\lolli}{\ensuremath{\multimap}}
+\newcommand{\bang}{{!}}
+
+\subsection{Syntax}
+
+\[
+\begin{array}{cccl}
+  \text{tones} & s &\bnfeq& \tzero ~|~ \tone ~|~ \taff ~|~ \tmany
+  \\
+  \text{types} & A,B &\bnfeq& \bang A ~|~ A \with A ~|~ A \ox A ~|~ A \lolli A
+  \\
+  \text{contexts} & \GG &\bnfeq& \varepsilon ~|~ \GG, A^s
+  \\
+  \text{judgments} & J &\bnfeq& \GG \vdash A
+\end{array}
+\]
+
+
+\subsection{Tones}
+
+Tones are annotations on hypotheses. In linear logic, we'll use tones to track
+how many times a hypothesis is used in a proof:
+
+\begin{center}
+  \begin{tabular}{cl}
+    \textit{Tone} & \textit{Usage}\\\midrule
+    \tzero & Not at all.\\
+    \tone  & Exactly once.\\
+    \taff  & At most once (``affinely'').\\
+    \tmany & Any number of times.
+  \end{tabular}
+\end{center}
+
+Tones are partially ordered, $\tmany < \taff < \{\tzero, \tone\}$. I let $s \le
+t$ iff permission to use a hypothesis $s$ times implies permission to use it
+only $t$ times. For example, $\taff \le \tzero$, because if we are allowed to
+use something \emph{at most once}, we may choose to use it \emph{not at all}.
+
+\subsection{Tone operators}
+
+We will need three operators on tones, defined in Figure~\ref{fig:tone-ops}:
+meet $s \tmeet t$, addition $s \tmul t$, and composition $s \tc t$. Meet is the
+greatest lower bound of two tones; \todo{TODO}.
+
+\todo{Figure out which laws apply. I suspect $\tc$ distributes over both
+  $\tmeet$ and $\tmul$. Do $\tmeet$ and $\tmul$ have any interesting laws?}
+
+\begin{figure*}
+  \begin{mathpar}
+    \begin{tikzpicture}[scale=1,baseline=(current bounding box.center)]
+      \node (0)    at (-1, 1) {$\tzero$};
+      \node (1)    at ( 1, 1) {$\tone$};
+      \node (aff)  at ( 0, 0) {$\taff$};
+      \node (many) at ( 0,-1) {$\tmany$};
+      \draw (0) -- (aff) -- (1);
+      \draw (aff) -- (many);
+    \end{tikzpicture}
+
+    \begin{array}{r|cccc}
+      s \tmul t & \tzero & \tone  & \taff  & \tmany\\\hline
+      \tzero    & \tzero & \tone  & \taff  & \tmany\\
+      \tone     & \tone  & \tmany & \tmany & \tmany\\
+      \taff     & \taff  & \tmany & \tmany & \tmany\\
+      \tmany    & \tmany & \tmany & \tmany & \tmany
+    \end{array}
+
+    \begin{array}{r|cccc}
+      s \tc t & \tzero & \tone  & \taff  & \tmany\\\hline
+      \tzero  & \tzero & \tzero & \tzero & \tzero\\
+      \tone   & \tzero & \tone  & \taff  & \tmany\\
+      \taff   & \tzero & \taff  & \taff  & \tmany\\
+      \tmany  & \tzero & \tmany & \tmany & \tmany
+    \end{array}
+    \vspace{-1em}
+  \end{mathpar}
+  \caption{Tone meet-semilattice and operators}
+  \label{fig:tone-ops}
+\end{figure*}
+
+
+\subsection{Extending tone operators to contexts}
+
+\todo{TODO}
+
+
+\subsection{Rules}
+
+\begin{mathpar}
+  \infer[{\bang} left]{\GG, A^{\tmany\tc s} \vdash C}{\GG, {\bang A}^s \vdash C}
+
+  \infer[{\with} left$_i$]{\GG, A_i^s \vdash C}{\GG, (A_1 \with A_2)^s \vdash C}
+
+  \infer[{\ox} left]{\GG, A^\tone, B^\tone \vdash C}
+        {\GG, (A \ox B)^\tone \vdash C}
+
+  \infer[{\lolli} left]{\GG_1 \vdash A \\ \GG_2, B^s \vdash C}
+        {\GG_1^s \tmul \GG_2, (A \lolli B)^s \vdash C}
+\\
+  \infer[{\bang} rite]{\GG \vdash A}{\GG^\tmany \vdash \bang A}
+
+  \infer[{\with} rite]{\GG_1 \vdash A \\ \GG_2 \vdash B}
+        {\GG_1 \tmeet \GG_2 \vdash A \with B}
+
+  \infer[{\ox} rite]{\GG_1 \vdash A \\ \GG_2 \vdash B}
+        {\GG_1 \tmul \GG_2 \vdash A \ox B}
+
+  \infer[{\lolli} rite]{\GG, A^\tone \vdash B}{\GG \vdash A \lolli B}
+\\
+  \infer[cut]{\GG_1 \vdash A \\ \GG_2, A^s \vdash B}
+        {\GG_1^s \tmul \GG_2 \vdash B}
+\end{mathpar}
+
+\todo{TODO: \textsc{\ox-left} could be more general. Think about how to
+  generalize it.}
+
+\end{document}

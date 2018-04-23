@@ -1,6 +1,6 @@
 LATEXRUN := ./latexrun/latexrun
 
-TEXS  := tones.tex
+TEXS  := tones.tex tonal-linear-sequent-calculus.tex
 # other things which affect compilation result
 AUXIL := $(wildcard *.sty *.cls) Makefile
 PDFS  := $(addsuffix .pdf,$(basename $(TEXS)))
