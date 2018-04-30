@@ -8,9 +8,12 @@
 % numbers       To obtain numeric citation style instead of author/year.
 
 \usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{microtype}
-\usepackage{flushend}
+%% 2018-04-30: This used to be \usepackage[T1]{fontenc}, but for some reason
+%% that now causes a font scaling error ("auto expansion is only possible with
+%% scalable fonts").
+%\usepackage{fontenc}
+\usepackage{microtype}          % minor typographical improvements, apparently
+\usepackage{flushend}           % not sure what this is for
 
 \usepackage{datafun}
 \renewcommand{\todo}[1]{}
