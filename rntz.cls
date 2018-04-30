@@ -103,13 +103,13 @@
 
 %% ---- Fonts ----
 \ifdefstring{\rntz@font}{libertine}{
-  \RequirePackage[mono=false,osf]{libertine} % osf = old-style figures
-  \RequirePackage[libertine]{newtxmath}      % makes math look prettier
+  \RequirePackage[mono=false]{libertine} % osf = old-style figures
+  \RequirePackage[libertine]{newtxmath}  % makes math look prettier
   \linespread{1.1}
 }{}
 
 \ifdefstring{\rntz@font}{zapf}{
-  \RequirePackage[osf]{mathpazo}
+  \RequirePackage{mathpazo}
   \RequirePackage{eulervm}
   \linespread{1.15}
 }{}
@@ -170,11 +170,12 @@
 
 %% Spacing.
 %% TODO: maybe this should depend on paper size?
-\newcommand{\hnopost}{\hspace*{.5mm}}
-\newcommand{\hnopre}{\hspace*{2mm}}
+\newcommand{\hnopost}{\hspace*{0mm}}
+\newcommand{\hnopre}{\hspace*{2.5mm}}
 %% \renewcommand{\hnopost}{\hspace*{0mm}}
 %% \renewcommand{\hnopre}{\hspace*{2mm}}
 \newcommand{\header}{\itshape\rmfamily}
+%% \renewcommand{\header}{\bfseries\sffamily}
 \newcommand{\hno}[1]{\colorhno{white}{black}{#1}}
 
 \iftoggle{ribbons}
@@ -183,10 +184,10 @@
   {\newcommand{\colorhno}[3]{%
     {\llap{\colorbox{white}{\parbox{100in}{\hfill{#3\hnopost}}\hnopre}}}}}
 
-% Nice colors: Whee, Periwinkle, cyan
+% Nice colors: Periwinkle, Whee, cyan
 \definecolor[named]{Whee}{cmyk}{0.33, 0.33, 0, 0}
 \titleformat{\section}{\secsize\header}
-            {\colorhno{Whee}{white}{\thesection}}{0pt}{}
+            {\colorhno{Periwinkle}{white}{\thesection}}{0pt}{}
 \titleformat{\subsection}{\subsecsize\header}{\hno{\thesubsection}}{0pt}{}
 %% %% Uncomment for orange subsection ribbons.
 %% \titleformat{\subsection}{\subsecsize\header}
