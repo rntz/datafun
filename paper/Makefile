@@ -1,6 +1,4 @@
-# If you use latexmk, you might like to put this line in your ~/.latexmkrc:
-# $pdflatex = 'pdflatex -interaction=nonstopmode';
-# it makes latexmk quit on compilation failure.
+LATEXRUN := ../latexrun/latexrun
 
 TEXS    := datafun.tex expansions.tex presentation.tex
 # other things which affect compilation result
@@ -11,22 +9,18 @@ PDFS   := $(TEXS:.tex=.pdf)
 JUNK   := $(TEXS:.tex=.dvi) $(TEXS:.tex=.bbl)
 JUNK   += $(TEXS:.tex=.snm) $(TEXS:.tex=.nav)
 
-.PHONY: all watch view clean
+.PHONY: all watch clean
 all: $(PDFS)
 watch: all
 	@while inotifywait -e modify $(TEXS) $(DEPENDS); do make all; done
 
-view:
-	latexmk -pvc --pdf datafun.tex
-
 clean:
-	latexmk -c
-	rm -f $(PDFS) $(JUNK)
+	$(LATEXRUN) --clean-all
+	rm -r latex.out
+#	rm -f $(PDFS) $(JUNK)
 
 %.pdf: %.tex $(DEPENDS)
-	latexmk --pdf $<
-	# pdflatex $<
-	# rubber --pdf $<
+	$(LATEXRUN) $<
 
 sources.zip: $(DEPENDS)
 	rm -f $@
