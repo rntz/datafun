@@ -1,4 +1,4 @@
-\documentclass{rntz}
+\documentclass[b5,libertine,wide,ribbons]{rntz}
 
 %% \documentclass{article}
 %% \usepackage{mathpazo,eulervm}
@@ -597,6 +597,14 @@ $\lambda$-calculus.
 %% \renewcommand{\infers}[3]{{#2}\vdash {#1} \shortrightarrow {#3}}
 %% \renewcommand{\checks}[3]{{#2}\vdash {#1} : {#3}}
 
+\newcommand{\ein}{\ms{in}}
+\newcommand{\einj}[2]{\ein_{#1}\:{#2}}
+\newcommand{\einl}[1]{\einj{1}{#1}}
+\newcommand{\einr}[1]{\einj{2}{#1}}
+\newcommand{\cto}{\shortrightarrow}
+\newcommand{\ecase}[5]{%
+  \mb{case}~{#1}~\mb{of}\ {\einl{#2} \cto #3};\ {\einr{#4} \cto #5}}
+
 \begin{mathpar}
   \begin{array}{cccl}
     \text{variables} & x\\
@@ -604,11 +612,13 @@ $\lambda$-calculus.
     \text{tones} & s,t,u & \bnfeq & \tm ~|~ \ta ~|~ \tb ~|~ \ti
     \vspace{0.5em}\\
     \text{types} & A,B,C
-    &\bnfeq& P ~|~ A \to B ~|~ A \x B ~|~ \Box A ~|~ \op\;A
+    &\bnfeq& P ~|~ A \to B ~|~ A \x B ~|~ A + B ~|~ \Box A ~|~ \op\;A
     \vspace{0.5em}\\
     \text{checking terms} & m,n
-    &\bnfeq& \fnof{x} m ~|~ (m,n)
-    ~|~ \mb{let}~x = m~\mb{in}~ n ~|~ e
+    &\bnfeq& e ~|~ \fnof{x} m ~|~ (m,n) ~|~ \einj{i}{m}
+    ~|~ \mb{let}~x = e~\mb{in}~ m\\
+    %% TODO: should "case" really be a normal/checking form?
+    &&|& \ecase{e}{x}{m}{y}{n}
     \vspace{0.5em}\\
     \text{inferring terms} & e
     &\bnfeq& x ~|~ e\;m ~|~ \pi_i\;e ~|~ m : A
@@ -637,32 +647,46 @@ $\lambda$-calculus.
   \infer{\infers{e}{\GG}{A} \\ \subtype{t}{A}{B}}
         {\checks{e}{\GG^t}{B}}
 
+  %% let-binding
+  \infer{\infers{e}{\GG_1}{A} \\ \checks{m}{\GG_2,\, \h{x}{A}{s}}{C}}
+        {\checks{\mb{let}~x = e~\mb{in}~m}{\GG_1^s \wedge \GG_2}{C}}
+
   %% automatic box and op introduction
   \infer{\checks{m}{\GG}{A}}
         {\checks{m}{\GG^\ti}{\Box A}}
 
   \infer{\checks{m}{\GG}{A}}
         {\checks{m}{\GG^\ta}{\op\; A}}
-
-  %% let-binding
-  \infer{\infers{e}{\GG_1}{A} \\ \checks{m}{\GG_2,\, \h{x}{A}{s}}{C}}
-        {\checks{\mb{let}~x = e~\mb{in}~m}{\GG_1^s \wedge \GG_2}{C}}
-
-  %% introductions
+%
+\\
+%
+  %% functions
   \infer{\checks{m}{\GG{},\, \h{x}{A}{s}}{B} \\ \tm \le s}
         {\checks{\fnof{x} m}{\GG}{A \to B}}
 
-  \infer{\checks{m}{\GG_1}{A_1} \\ \checks{n}{\GG_2}{A_2}}
-        {\checks{(m,n)}{\GG_1 \wedge \GG_2}{A_1 \x A_2}}
-
-  %% eliminations
   \infer{\infers{e}{\GG_1}{A}
          \\ \converts{u}{A}{B \to C}
          \\ \checks{m}{\GG_2}{B}}
         {\infers{e\; m}{\GG_1^u \wedge \GG_2}{C}}
 
+  %% products/pairs
+  \infer{\checks{m}{\GG_1}{A_1} \\ \checks{n}{\GG_2}{A_2}}
+        {\checks{(m,n)}{\GG_1 \wedge \GG_2}{A_1 \x A_2}}
+
   \infer{\infers{e}{\GG}{A} \\ \converts{s}{A}{B_1 \x B_2}}
         {\infers{\pi_i\;e}{\GG^s}{B_i}}
+
+  %% sums
+  \infer{\checks{m}{\GG}{A_i}}
+        {\checks{\einj{i}{m}}{\GG}{A_1 + A_2}}
+
+  \infer{\infers{e}{\GG}{A} \\
+         \converts{s}{A}{B_1 + B_2} \\
+         \checks{m}{\GG_1,\, \h{x}{B_1}{t_1}}{C} \\
+         \checks{n}{\GG_2,\, \h{y}{B_2}{t_2}}{C}}
+        {\checks{\ecase{e}{x}{m}{y}{n}}
+                {\GG^{s\tc(t_1\wedge t_2)} \wedge \GG_1 \wedge \GG_2}
+                {C}}
 \end{mathpar}
 
 
@@ -674,10 +698,6 @@ output.
 ``$P~\text{equiv}$'' holds iff the base type $P$'s preorder is symmetric (i.e.\!
 an equivalence relation).
 %
-Most complex are the four rules for function subtyping, $\subtype{s}{(A_1 \to
-  B_1)}{A_2 \to B_2}$, one for each tone $s$, determined by the result of
-$\subtype{s}{B_1}{B_2}$.
-
 \begin{mathpar}
   \infer{ }{\subtype{\tm}{A}{A}}
 
@@ -695,12 +715,20 @@ $\subtype{s}{B_1}{B_2}$.
   \infer{\subtype{s}{A}{B}}
         {\subtype{s \tc \ta}{A}{\op\; B}}
 
+  %% Products
   \infer{\subtype{s}{A_1}{A_2} \\ \subtype{t}{B_1}{B_2}}
         {\subtype{s \wedge t}{(A_1 \x B_1)}{A_2 \x B_2}}
-% \end{mathpar}
 
-% \begin{mathpar}
-  %% The function rules!
+  %% Sums
+  \infer{\subtype{s}{A_1}{A_2} \\ \subtype{t}{B_1}{B_2}}
+        {\subtype{s \wedge t}{(A_1 + B_1)}{A_2 + B_2}}
+\end{mathpar}
+
+Most complex are the four rules for function subtyping, $\subtype{s}{(A_1 \to
+  B_1)}{A_2 \to B_2}$, one for each tone $s$ given by the result of
+$\subtype{s}{B_1}{B_2}$:
+%
+\begin{mathpar}
   \infer{\subtype{s}{A_1}{A_2} \\ \subtype{\tm}{B_1}{B_2} \\ \tm \le s}
         {\subtype{\tm}{(A_1 \to B_1)}{A_2 \to B_2}}
 
@@ -850,6 +878,8 @@ We wish to prove admissible the following rules:
 
 Type equivalence $A^s \equiv B^t$ is a synonym for $A^s \le B^t \wedge B^t \le
 A^s$.
+
+\todo{TODO: declarative subtyping rules for sum types}
 
 \begin{mathpar}
   \infer{s \le t}{A^s \le A^t}
