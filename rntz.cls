@@ -37,10 +37,18 @@
 %     b5: 176 x 250mm    6.9 x  9.8in
 %     a4: 210 x 297mm    8.3 x 11.7in
 % letter: 216 x 279mm    8.5 x 11in
-\DeclareOption{a5}{\def\rntz@geom{a5paper,text={126mm,180mm}}}
-\DeclareOption{b5}{\def\rntz@geom{b5paper,text={146mm,215mm}}}
-\DeclareOption{a4}{\def\rntz@geom{a4paper,text={170mm,252mm}}}
-\DeclareOption{letter}{\def\rntz@geom{letterpaper,text={176mm,239mm}}}
+\DeclareOption{a5}{
+  \def\rntz@geom{a5paper,text={345pt,17cm}}
+  \def\rntz@narrow{104mm}}
+\DeclareOption{b5}{
+  \def\rntz@geom{b5paper,text={135mm,200mm}}
+  \def\rntz@narrow{345pt}}
+\DeclareOption{a4}{
+  \def\rntz@geom{a4paper,text={160mm,240mm}}
+  \def\rntz@narrow{345pt}}
+\DeclareOption{letter}{
+  \def\rntz@geom{letterpaper,text={166mm,222mm}}
+  \def\rntz@narrow{345pt}}
 
 \DeclareOption{twocolumn}{\ClassWarning{rntz}{Two-column mode is not supported.}}
 
@@ -56,12 +64,11 @@
   %% We can't do a narrow column if we don't understand the geometry.
   {\togglefalse{narrow}}
 
-%% if narrow, limit text width to 126mm - the same width we use on A5,
-%% and pretty close to article.cls' default width.
+%% if narrow, limit text width to 12cm - article.cls' default width on a4?
 \iftoggle{narrow}{
   \newlength{\rntz@fulltextwidth}
   \setlength{\rntz@fulltextwidth}{\textwidth}
-  \geometry{textwidth=126mm}}{}
+  \geometry{textwidth=\rntz@narrow}}{}
 
 %% ---- figure* for wide figures in narrow mode ----
 %% First, define a fullwidth environment.
@@ -132,7 +139,6 @@
   \begingroup%
   \setlength{\parindent}{0pt}%
   \iftoggle{centertitle}{\centering}{}%
-  \itshape%
   {\titlesize\@title\vspace{0.5ex}\par}%
   {\authorsize\@author\vspace{0.5ex}\par}%
   {\authorsize\@date\par}%
@@ -159,8 +165,8 @@
 %% ---- Section & subsection titles ----
 \RequirePackage{textcase,titlesec}    % (sub)section header styling
 
-\titlespacing*{\section}{0pt}{1.25em}{.5em}
-\titlespacing*{\subsection}{0pt}{1.25em}{.5em}
+\titlespacing*{\section}{0pt}{18pt}{9pt}
+\titlespacing*{\subsection}{0pt}{12pt}{6pt}
 
 %% titlesec < 2.10.2 has a bug that prevents showing section numbers. This fixes
 %% it. Taken from
@@ -172,10 +178,8 @@
 %% TODO: maybe this should depend on paper size?
 \newcommand{\hnopost}{\hspace*{0mm}}
 \newcommand{\hnopre}{\hspace*{2.5mm}}
-%% \renewcommand{\hnopost}{\hspace*{0mm}}
-%% \renewcommand{\hnopre}{\hspace*{2mm}}
-\newcommand{\header}{\itshape\rmfamily}
-%% \renewcommand{\header}{\bfseries\sffamily}
+\newcommand{\header}{\rmfamily\bfseries}
+%% \renewcommand{\header}{\rmfamily\itshape} % previously
 \newcommand{\hno}[1]{\colorhno{white}{black}{#1}}
 
 \iftoggle{ribbons}
