@@ -763,20 +763,6 @@ subtyping, $A$ is an input and $s$ an output; however, $B$ is now an output.
 ``$A~\text{stripped}$'' holds iff $A$ is \emph{not} of the form $\Box B$ or
 $\op\; B$, i.e. its outermost connective is not modal.
 
-%% \textbf{Q:} Aren't these just a subset of the subtyping rules?
-
-%% \textbf{A:} Yes, but with a change of mode! If we let $B$ be an output, the
-%% rules for $\subtype{s}{A}{B}$ are nondeterministic! So $\converts{s}{A}{B}$ is a
-%% specialisation of $\subtype{s}{A}{B}$ chosen to be deterministic when $B$ is an
-%% output.
-
-%% \textbf{Todo:} Prove this ``determinisation'' is in some sense
-%% correct/complete for our use-case.
-
-%% \textbf{Observation:} $\converts{s}{A}{B}$ ``strips off'' modal operators on
-%% $A$, turning them into transformations on $s$. Maybe this is a better
-%% specification for it than having ``the \emph{shape} of $B$'' be an input.
-
 
 \subsection{Patterns}
 
@@ -872,7 +858,8 @@ We wish to prove admissible the following rules:
         {\checks{m[e/x]}{\GG_1^s \wedge \GG_2}{C}}
 \end{mathpar}
 
-\todo{TODO: Can we unify \textsc{weakening} and \textsc{subtyping left}?}
+\todo{TODO: Doesn't \textsc{tone weakening} follow from \textsc{subtyping
+    left}?}
 
 \subsection{Subtyping and type equivalence}
 
