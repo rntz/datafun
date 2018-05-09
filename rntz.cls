@@ -146,7 +146,9 @@
   \endgroup\FloatBarrier}
 
 %% ---- Abstracts ----
-%% TODO.
+\renewenvironment{abstract}
+  {\vspace{1em}\textbf{Abstract.}}
+  {}
 
 %% ---- Colors ----
 \RequirePackage[dvipsnames]{xcolor}
