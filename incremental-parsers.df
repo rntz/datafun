@@ -89,5 +89,3 @@ fn pred parse text => {(i,j,x) | (i,j,x) in parse text, pred x}
 # Parses a literal string.
 def literal: str -> parser str
 fn needle => filter (== needle) substrings
-
-
