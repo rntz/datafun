@@ -187,6 +187,7 @@
 \newcommand{\hnopost}{\hspace*{0mm}}
 \newcommand{\hnopre}{\hspace*{2.5mm}}
 \newcommand{\header}{\rmfamily\bfseries}
+%% \renewcommand{\header}{\sffamily\bfseries} % or, in sans-serif
 %% \renewcommand{\header}{\rmfamily\itshape} % previously
 \newcommand{\hno}[1]{\colorhno{white}{black}{#1}}
 
