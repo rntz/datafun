@@ -55,7 +55,7 @@
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
 
 % Defaults
-\ExecuteOptions{b5,zapf,geometry,narrow}
+\ExecuteOptions{b5,zapf,geometry,wide}
 \ProcessOptions\relax
 
 %% ---- Basic layout ----
