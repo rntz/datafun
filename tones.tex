@@ -889,7 +889,7 @@ we have:
 %
 \begin{mathpar}
   \infer{\pcheck{p}{A}{s}{\phi} \\
-    \checks{m}{\GG, \phi^{\vec{t}}}{A}}
+    \checks{m}{\GG, \phi^{\vec{t}}}{C}}
   {\casecheck{p}{m}{\GG}{A}{s \tc \bigwedge\vec{t}}{C}}
 
   \infer{\infers{e}{\GG}{A} \\
@@ -949,9 +949,13 @@ input context $\GG$, becoming $\pcheckio{p}{\GG}{A}{s}{\phi}$. This corresponds 
 \todo{These rules are getting so complicated I don't trust them without a
   proof.}
 
-Now we update the helper judgment $\casecheck{p}{m}{\GG}{A}{s}{C}$ to pass through $\GG$ to the pattern:
-
-\todo{TODO}
+Now we update the rules for $\casecheck{p}{m}{\GG}{A}{s}{C}$ to pass through $\GG$ to the pattern:
+%
+\begin{mathpar}
+  \infer{\pcheckio{p}{\GG_1}{A}{s}{\phi} \\
+         \checks{m}{\GG_2,\phi^{\vec{t}}}{C}}
+        {\casecheck{p}{m}{{\GG_1}^{\bigwedge\!\vec{t}} \wedge \GG_2}{A}{s}{C}}
+\end{mathpar}
 
 %% \subsection{Old work}
 
