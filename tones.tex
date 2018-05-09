@@ -214,7 +214,7 @@ transformed by the tone $s$, defined:
     \tb{}
     & \text{equivalence closure}
     & $a \le b \vee b \le a : A$ &$\ \implies$& $a \le b : A^\path$
-    & {\small\itshape see \ref{sec:defining-path}}
+    %% & {\small\itshape see \ref{sec:defining-path}}
   \end{tabular}
 \end{center}
 
@@ -583,11 +583,10 @@ $\lambda$-calculus.
 
 \section{A bidirectional \texorpdfstring{$\lambda$}{lambda}-calculus with tone inference}
 
-\newcommand{\isfn}[4]{{#2}^{#1}\sqsubset {#3} \Rightarrow {#4}}
-\newcommand{\subtype}[3]{{#2}^{#1}\sqsubset {#3}}
-\newcommand{\converts}[3]{{#2}^{#1} \prec {#3}}
+\newcommand{\subtype}[3]{#2^{#1}\sqsubset {#3}}
+\newcommand{\converts}[3]{#2^{#1} \prec {#3}}
 
-\newcommand{\h}[3]{#1 : {#2}^{#3}} % hypotheses
+\newcommand{\h}[3]{#1 : #2^{#3}} % hypotheses
 \newcommand{\infers}[3]{{#1} \Rightarrow {#2} \vdash {#3}}
 \newcommand{\checks}[3]{{#1} \Leftarrow {#2} \vdash {#3}}
 
@@ -725,9 +724,8 @@ an equivalence relation).
         {\subtype{s \wedge t}{(A_1 + B_1)}{A_2 + B_2}}
 \end{mathpar}
 
-Most complex are the four rules for function subtyping, $\subtype{s}{(A_1 \to
-  B_1)}{A_2 \to B_2}$, one for each tone $s$ given by the result of
-$\subtype{s}{B_1}{B_2}$:
+Function subtyping, $\subtype{s}{(A_1 \to B_1)}{A_2 \to B_2}$, has four rules
+--- one for each tone $s$ produced by $\subtype{s}{B_1}{B_2}$:
 %
 \begin{mathpar}
   \infer{\subtype{s}{A_1}{A_2} \\ \subtype{\tm}{B_1}{B_2} \\ \tm \le s}
@@ -768,6 +766,7 @@ $\op\; B$, i.e. its outermost connective is not modal.
 \subsection{Tones and the \texorpdfstring{$\fn$}{lambda} rule}
 
 Here are two more general variations on the $\fn$ rule I've considered:
+%
 \begin{mathpar}
   \infer[Fn-1]
         {\checks{m}{\GG{},\, \h{x}{A}{s}}{B} \\ A \sqsubset A^s}
@@ -812,7 +811,6 @@ subtyping-less $\lambda$ rule?
 %% \renewcommand{\xbar}[2]{{}^{#1}\overline{#2}}
 %% \renewcommand{\xbar}[2]{{}_{#1}\!\left(#2\right)}
 \newcommand{\pwild}{\_}
-\newcommand{\pinfer}[5]{#1 : #2 \vdash #3^{#4} \dashv #5}
 \newcommand{\pcheck}[4]{#1 \Leftarrow #2^{#3} \dashv #4}
 \newcommand{\casecheck}[6]{%
   #1 \cto #2 \Leftarrow #3 \vdash {#4}^{#5} >\!\!> #6}
@@ -839,16 +837,15 @@ subtyping-less $\lambda$ rule?
 
 The judgment $\pcheck{p}{A}{s}{\phi}$ corresponds to a \Pre-morphism $A^s \to 1
 + \phi$. It means that the pattern $p$, when it matches a value of type $A$,
-produces the pre-context $\phi$, and in doing so uses $A$ at tone $s$.
-
-This interpretation cannot handle non-linear patterns, or patterns with guard
-expressions; for that we'd need to give the morphism access to an input context
-$\GG$.
-
+uses that value at tone $s$ to produce the pre-context $\phi$.
+%
 \begin{mathpar}
   \infer{ }{\pcheck{\pwild}{A}{\tb}{\emptycx}}
 
   \infer{ }{\pcheck{x}{A}{\tm}{x : A}}
+
+  \infer{\converts{s}{A}{A_1 + A_2} \\ \pcheck{p}{A_i}{t}{\phi}}
+        {\pcheck{\einj{i}{p}}{A}{s \tc t}{\phi}}
 
   \infer{\converts{s}{A}{A_1 \x A_2} \\
          (\forall i)~{\pcheck{p_i}{A_i}{t_i}{\phi_i}}\\
@@ -856,10 +853,11 @@ $\GG$.
          %% \pcheck{p_2}{A_2}{u}{\phi_2} \\
          \phi_1,\phi_2~\text{disjoint}}
         {\pcheck{(p_1, p_2)}{A}{s \tc (t_1 \wedge t_2)}{\phi_1,\phi_2}}
-
-  \infer{\converts{s}{A}{A_1 + A_2} \\ \pcheck{p}{A_i}{t}{\phi}}
-        {\pcheck{\einj{i}{p}}{A}{s \tc t}{\phi}}
 \end{mathpar}
+
+To handle non-linear patterns, or patterns with gu\-ard expressions, the
+morphism would also need an input context $\GG$. I consider this in
+Section~\ref{sec:patterns-with-guards}.
 
 
 \subsection{Typing \mb{case}-expressions}
@@ -896,10 +894,62 @@ we have:
 
 
 \subsection{Patterns with guards}
+\label{sec:patterns-with-guards}
+
+\newcommand{\pif}[2]{{#1}~\mb{if}~{#2}}
+\newcommand{\pcheckio}[5]{#1 \Leftarrow #2 \vdash #3^{#4} \dashv #5}
+
+\[\begin{array}{rccl}
+  \text{patterns} & p,q
+  &\bnfeq& ... ~|~ \pif{p}{m}
+  \vspace{0.5em}\\
+  \text{judgments} & J &\bnfeq& ... ~~|~~ \pcheckio{p}{\GG}{A}{s}{\phi}
+\end{array}\]
+
+\vspace{\parsep}
+
+Now that patterns can contain expressions, our pattern typing judgment takes an
+input context $\GG$, becoming $\pcheckio{p}{\GG}{A}{s}{\phi}$. This corresponds to a morphism $\GG \x A^s \to 1 + \phi$.
+%
+\begin{mathpar}
+  \infer{ }{\pcheckio{\pwild}{\GG}{A}{\tb}{\emptycx}}
+
+  \infer{x \not\in \GG}{
+    \pcheckio{x}{\GG}{A}{\tm}{x : A}}
+
+  \infer{\converts{s}{A}{A_1 + A_2} \\
+         \pcheckio{p}{\GG}{A_i}{t}{\phi}}
+        {\pcheckio{\einj{i}{p}}{\GG}{A}{s \tc t}{\phi}}
+
+  \infer{\converts{s}{A}{A_1 \x A_2} \\
+    \pcheckio{p}{\GG_1}{A_1}{t_1}{\phi_1} \\
+    \pcheckio{q}{\GG_2, \phi_1^{\vec{u}}}{A_2}{t_2}{\phi_2}
+    }{
+    \pcheckio{(p,q)}
+             {\GG_1 \wedge {\GG_1}^{\bigwedge\!\vec{u}} \wedge \GG_2}
+             {A}
+             {s \tc (t_1 \wedge t_2 \wedge (t_1 \tc \bigwedge \vec{u}))}
+             {\phi_1,\phi_2}}
+
+  \infer{\pcheckio{p}{\GG_1}{A}{s}{\phi} \\
+  \checks{m}{\GG_2, \phi^{\vec{t}}}{\Box\thinspace 2}}
+        {\pcheckio{\pif{p}{m}}
+          {\GG_1 \wedge {\GG_1}^{\bigwedge\!\vec{t} \tc \tb} \wedge \GG_2^{\tb}}
+          {A}
+          {s \wedge (s \tc {\bigwedge\!\vec{t}} \tc \tb)}
+          {\phi}}
+\end{mathpar}
+
+\todo{These rules are getting so complicated I don't trust them without a
+  proof.}
+
+Now we update the helper judgment $\casecheck{p}{m}{\GG}{A}{s}{C}$ to pass through $\GG$ to the pattern:
 
 \todo{TODO}
 
 %% \subsection{Old work}
+
+%% \newcommand{\pinfer}[5]{#1 : #2 \vdash #3^{#4} \dashv #5}
 
 %% Judgment: $\pinfer{p}{\GG}{A}{s}{\Delta}$. \todo{TODO: what's an input, what's
 %%   an output? I think $s$ and the tones on $\GG$ are outputs? so the only inputs
