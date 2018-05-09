@@ -131,6 +131,7 @@
 \newcommand{\authorsize}{\normalsize}
 \newcommand{\secsize}{\large}
 \newcommand{\subsecsize}{\normalsize}
+\newcommand{\subsubsecsize}{\normalsize}
 
 %% TODO: omit {title,author,date} if not provided
 %% TODO: support \subtitle.
@@ -165,8 +166,10 @@
 %% ---- Section & subsection titles ----
 \RequirePackage{textcase,titlesec}    % (sub)section header styling
 
-\titlespacing*{\section}{0pt}{18pt}{9pt}
-\titlespacing*{\subsection}{0pt}{12pt}{6pt}
+\titlespacing*{\section}{0pt}{15pt}{10pt}
+%% \titlespacing*{\subsection}{0pt}{12pt}{6pt}
+\titlespacing*{\subsection}{0pt}{12pt}{8pt}
+\titlespacing*{\subsubsection}{0pt}{12pt}{8pt}
 
 %% titlesec < 2.10.2 has a bug that prevents showing section numbers. This fixes
 %% it. Taken from
@@ -193,6 +196,7 @@
 \titleformat{\section}{\secsize\header}
             {\colorhno{Periwinkle}{white}{\thesection}}{0pt}{}
 \titleformat{\subsection}{\subsecsize\header}{\hno{\thesubsection}}{0pt}{}
+\titleformat{\subsubsection}{\subsubsecsize\header}{\hno{\thesubsubsection}}{0pt}{}
 %% %% Uncomment for orange subsection ribbons.
 %% \titleformat{\subsection}{\subsecsize\header}
 %%             {\colorhno{ACMOrange}{white}{\thesubsection}}{0pt}{}
