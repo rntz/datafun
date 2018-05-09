@@ -830,14 +830,14 @@ subtyping-less $\lambda$ rule?
 
 \vspace{.5em} The types in toneless contexts $\phi$ aren't annotated with tones.
 \todo{TODO: Explain why/when we use toneless contexts. Explain $\phi^{\vec{t}}$
-  notation for a context split into its variables and its tones.}
+  notation for a context split into its types and its tones.}
 
 
 \subsection{Typing patterns}
 
 The judgment $\pcheck{p}{A}{s}{\phi}$ corresponds to a \Pre-morphism $A^s \to 1
 + \phi$. It means that the pattern $p$, when it matches a value of type $A$,
-uses that value at tone $s$ to produce the pre-context $\phi$.
+uses that value at tone $s$ to produce a values for $\phi$'s variables.
 %
 \begin{mathpar}
   \infer{ }{\pcheck{\pwild}{A}{\tb}{\emptycx}}
@@ -858,6 +858,12 @@ uses that value at tone $s$ to produce the pre-context $\phi$.
 To handle non-linear patterns, or patterns with gu\-ard expressions, the
 morphism would also need an input context $\GG$. I consider this in
 Section~\ref{sec:patterns-with-guards}.
+
+\todo{TODO: I now think modal stripping is the wrong approach, at least for
+  product types. With these rules, we have $\pcheck{(x,(y,z))}{(A \x \Box(B \x
+    C))}{\tm}{x : A, y : B, z : C}$. But the \emph{most informative} result
+  would be $\pcheck{(x,(y,z))}{(A \x \Box(B \x C))}{\tm}{x : A, y : \Box B, z :
+    \Box C}$.}
 
 
 \subsection{Typing \mb{case}-expressions}
