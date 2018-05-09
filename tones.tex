@@ -1,4 +1,4 @@
-\documentclass[a4]{rntz}
+\documentclass[b5]{rntz}
 
 %% \documentclass{article}
 %% \usepackage[b5paper]{geometry}
@@ -281,9 +281,9 @@ transitive! Instead, $\ms{fencepost}^\path$ is the \emph{transitive closure} of
 $|a-b| \le 1$, which makes everything equivalent:
 \[ 0 \equiv 1 \equiv 2 \equiv 3 \equiv 4 \equiv \dots \]
 
-This suggests a direct definition: let a \emph{path} be a ``zig-zagging'' list
-$a_0, \dots, a_n$ such that $a_i \le a_{i+1} \vee a_i \ge a_{i+1} : A$. Then $a
-\le b : A^\path$ iff there is a path starting at $a$ and ending at $b$.
+This suggests a direct definition: let a \emph{path} from $a_0$ to $a_n$ be a
+``zig-zagging'' list $a_0, \dots, a_n$ such that $a_i \le a_{i+1} \vee a_i \ge
+a_{i+1} : A$. Then $a \le b : A^\path$ iff there is a path from $a$ to $b$.
 
 
 \subsection{Tone operators}
@@ -607,7 +607,7 @@ $\lambda$-calculus.
 \newcommand{\emptycx}{\cdot}
 
 \begin{mathpar}
-  \begin{array}{cccl}
+  \begin{array}{rccl}
     \text{variables} & x\\
     \text{base types} & P\vspace{0.5em}\\
     \text{tones} & s,t,u & \bnfeq & \tm ~|~ \ta ~|~ \tb ~|~ \ti
@@ -809,30 +809,37 @@ subtyping-less $\lambda$ rule?
 \section{Pattern matching}
 
 \newcommand{\xbar}[2]{\overline{#2}^{#1}}
+%% \renewcommand{\xbar}[2]{{}^{#1}\overline{#2}}
+%% \renewcommand{\xbar}[2]{{}_{#1}\!\left(#2\right)}
 \newcommand{\pwild}{\_}
 \newcommand{\pinfer}[5]{#1 : #2 \vdash #3^{#4} \dashv #5}
 \newcommand{\pcheck}[4]{#1 \Leftarrow #2^{#3} \dashv #4}
 \newcommand{\casecheck}[6]{%
   #1 \cto #2 \Leftarrow #3 \vdash {#4}^{#5} >\!\!> #6}
 
-\[\begin{array}{cccl}
+\[\begin{array}{rccl}
   \text{patterns} & p,q
   &\bnfeq& \pwild ~|~ x ~|~ (p,q) ~|~ \einj{i}{p}
   \vspace{0.5em}\\
   \text{checking terms} & m,n &\bnfeq& ...
   ~|~ \mb{case}~ e ~\mb{of}~ \xbar{i}{p_i \cto m_i}
   \vspace{0.5em}\\
-  \text{pre-contexts} & \phi &\bnfeq& \emptycx ~|~ \phi,\, x : A
+  \text{toneless contexts} & \phi &\bnfeq& \emptycx ~|~ \phi,\, x : A
   \vspace{0.5em}\\
   \text{judgments} & J &\bnfeq& ... ~~|~~ \pcheck{p}{A}{s}{\phi}
   ~~|~~ \casecheck{p}{m}{\GG}{A}{s}{C}
 \end{array}\]
 
+\vspace{.5em} The types in toneless contexts $\phi$ aren't annotated with tones.
+\todo{TODO: Explain why/when we use toneless contexts. Explain $\phi^{\vec{t}}$
+  notation for a context split into its variables and its tones.}
+
+
 \subsection{Typing patterns}
 
-The judgment $\pcheck{p}{A}{s}{\phi}$ corresponds to a \Pre-morphism $\den{A}^s
-\to 1 + \den{\phi}$. It means that the pattern $p$, when it matches a value of
-type $A$, produces the pre-context $\phi$, and in doing so uses $A$ at tone $s$.
+The judgment $\pcheck{p}{A}{s}{\phi}$ corresponds to a \Pre-morphism $A^s \to 1
++ \phi$. It means that the pattern $p$, when it matches a value of type $A$,
+produces the pre-context $\phi$, and in doing so uses $A$ at tone $s$.
 
 This interpretation cannot handle non-linear patterns, or patterns with guard
 expressions; for that we'd need to give the morphism access to an input context
@@ -844,10 +851,11 @@ $\GG$.
   \infer{ }{\pcheck{x}{A}{\tm}{x : A}}
 
   \infer{\converts{s}{A}{A_1 \x A_2} \\
-         \pcheck{p_1}{A_1}{t}{\phi_1} \\
-         \pcheck{p_2}{A_2}{u}{\phi_2} \\
+         (\forall i)~{\pcheck{p_i}{A_i}{t_i}{\phi_i}}\\
+         %% \pcheck{p_1}{A_1}{t}{\phi_1} \\
+         %% \pcheck{p_2}{A_2}{u}{\phi_2} \\
          \phi_1,\phi_2~\text{disjoint}}
-        {\pcheck{(p_1, p_2)}{A}{s \tc (t \wedge u)}{\phi_1,\phi_2}}
+        {\pcheck{(p_1, p_2)}{A}{s \tc (t_1 \wedge t_2)}{\phi_1,\phi_2}}
 
   \infer{\converts{s}{A}{A_1 + A_2} \\ \pcheck{p}{A_i}{t}{\phi}}
         {\pcheck{\einj{i}{p}}{A}{s \tc t}{\phi}}
@@ -862,17 +870,18 @@ this:
 %
 \begin{mathpar}
   \infer{\infers{e}{\GG}{A} \\
-    (\forall i)~~{\pcheck{p_i}{A}{s_i}{\phi_i}} \\
-    (\forall i)~~{\checks{m_i}{\GG_i, \phi_i^{\vec{t}_i}}{C}}}
-        {\checks{\mb{case}~e~\mb{of}~\xbar{i}{p_i \cto m_i}}
-          {\GG^{\bigwedge_i (s_i \tc \bigwedge \vec{t}_i)} \wedge \bigwedge_i \GG_i}
-          {C}}
+    (\forall i)~{\pcheck{p_i}{A}{s_i}{\phi_i}} \\
+    (\forall i)~{\checks{m_i}{\GG_i, \phi_i^{\vec{t}_i}}{C}}
+  }{\checks{\mb{case}~e~\mb{of}~\xbar{i}{p_i \cto m_i}}
+    {\GG^{\bigwedge_i (s_i \tc \bigwedge \vec{t}_i)} \wedge \bigwedge_i \GG_i}
+    {C}}
 \end{mathpar}
 
 We can split this up using a helper judgment, $\casecheck{p}{m}{\GG}{A}{s}{C}$,
-which says that the \mb{case} branch $p \cto m$ uses variables in $\GG$ to match
-a scrutinee of type $A$, which it uses at tone $s$, producing (if it matches) a
-result of type $C$. This corresponds to a morphism $\den{\GG} \x \den{A}^s \to 1 + \den{C}$. Then we have:
+which says that the \mb{case} branch $p \cto m$ uses variables in $\GG$, matches
+a scrutinee of type $A$ that it uses at tone $s$, producing (if it matches) a
+result of type $C$. This corresponds to a morphism $\GG \x A^s \to 1 + C$. Then
+we have:
 %
 \begin{mathpar}
   \infer{\pcheck{p}{A}{s}{\phi} \\
@@ -882,30 +891,35 @@ result of type $C$. This corresponds to a morphism $\den{\GG} \x \den{A}^s \to 1
   \infer{\infers{e}{\GG}{A} \\
     (\forall i)~~{\casecheck{p_i}{m_i}{\GG_i}{A}{s_i}{C}}}
         {\checks{\mb{case}~ e ~\mb{of} ~\xbar{i}{p_i \cto m_i}}
-          {\GG?}{C}}
+          {\GG^{\bigwedge_i s_i} \wedge \bigwedge_i \GG_i}{C}}
 \end{mathpar}
 
-\subsection{Junk}
+
+\subsection{Patterns with guards}
 
-Judgment: $\pinfer{p}{\GG}{A}{s}{\Delta}$. \todo{TODO: what's an input, what's
-  an output? I think $s$ and the tones on $\GG$ are outputs? so the only inputs
-  are $A$ and the types in $\GG$.}
+\todo{TODO}
 
-\begin{mathpar}
-  %% this is wrong
-  \infer{x \not\in \GG}
-        {\pinfer{x}{\GG}{A}{s}{x : A^s}}
+%% \subsection{Old work}
 
-  \infer{\h{x}{A}{t} \in \GG
-         \\ \text{\todo{TODO}}
-         \\ A~\text{decidable} }
-        {\pinfer{x}{\GG}{A}{s}{\emptycx}}
+%% Judgment: $\pinfer{p}{\GG}{A}{s}{\Delta}$. \todo{TODO: what's an input, what's
+%%   an output? I think $s$ and the tones on $\GG$ are outputs? so the only inputs
+%%   are $A$ and the types in $\GG$.}
 
-  \infer{\converts{t}{A}{B_1 \x B_2}
-         \\ \pinfer{p}{\GG}{B_1}{?}{\Delta_1}
-         \\ \pinfer{q}{\GG,\Delta_1}{B_2}{?}{\Delta_2} }
-        {\pinfer{(p,q)}{\GG}{A}{s}{\Delta_1, \Delta_2}}
-\end{mathpar}
+%% \begin{mathpar}
+%%   %% this is wrong
+%%   \infer{x \not\in \GG}
+%%         {\pinfer{x}{\GG}{A}{s}{x : A^s}}
+
+%%   \infer{\h{x}{A}{t} \in \GG
+%%          \\ \text{\todo{TODO}}
+%%          \\ A~\text{decidable} }
+%%         {\pinfer{x}{\GG}{A}{s}{\emptycx}}
+
+%%   \infer{\converts{t}{A}{B_1 \x B_2}
+%%          \\ \pinfer{p}{\GG}{B_1}{?}{\Delta_1}
+%%          \\ \pinfer{q}{\GG,\Delta_1}{B_2}{?}{\Delta_2} }
+%%         {\pinfer{(p,q)}{\GG}{A}{s}{\Delta_1, \Delta_2}}
+%% \end{mathpar}
 
 
 \section{Declarative rules}
