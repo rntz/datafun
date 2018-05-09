@@ -168,10 +168,13 @@
 %% ---- Section & subsection titles ----
 \RequirePackage{textcase,titlesec}    % (sub)section header styling
 
-\titlespacing*{\section}{0pt}{15pt}{10pt}
-%% \titlespacing*{\subsection}{0pt}{12pt}{6pt}
-\titlespacing*{\subsection}{0pt}{12pt}{8pt}
-\titlespacing*{\subsubsection}{0pt}{12pt}{8pt}
+%% \titlespacing*{\section}{0pt}{\baselineskip}{.5\baselineskip}
+%% \titlespacing*{\subsection}{0pt}{\baselineskip}{.5\baselineskip}
+%% \titlespacing*{\subsubsection}{0pt}{\baselineskip}{.5\baselineskip}
+
+\titlespacing*{\section}{0pt}{3.5\parsep}{1.75\parsep}
+\titlespacing*{\subsection}{0pt}{3\parsep}{1.5\parsep}
+\titlespacing*{\subsubsection}{0pt}{3\parsep}{1.5\parsep}
 
 %% titlesec < 2.10.2 has a bug that prevents showing section numbers. This fixes
 %% it. Taken from
