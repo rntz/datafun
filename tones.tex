@@ -1,4 +1,4 @@
-\documentclass[b5]{rntz}
+\documentclass{rntz}
 
 %% \documentclass{article}
 %% \usepackage[b5paper]{geometry}
@@ -120,12 +120,12 @@ A preorder is a relation $a \le b$ satisfying:
 \item \textbf{Transitivity:} If $a \le b$ and $b \le c$ then $a \le c$.
 \end{enumerate}
 
-A good example of a preorder is ``lists under containment'', where $a \le b$ iff
-every element of $a$ is also in $b$.
-
-Preorders are partial orders, sans antisymmetry. Let $a \equiv b$ iff $a \le b$
-and $b \le a$. Antisymmetry means $a \equiv b$ implies $a = b$. However, under
-list containment, $[0,1] \equiv [1,0]$, but $[0,1] \ne [1,0]$.
+Preorders generalize partial orders by not requiring antisymmetry. Let $a \equiv
+b$ iff $a \le b$ and $b \le a$. Antisymmetry means $a \equiv b$ implies $a = b$.
+%
+A good example preorder is ``lists under containment'', where $a \le b$ iff
+every element of $a$ is also in $b$. Note that $[0,1] \equiv [1,0]$, but $[0,1]
+\ne [1,0]$.
 
 To a category theorist, a preorder is a ``thin'' category: between any two
 objects there is at most one morphism. I suspect much of the ``tone theory'' in
@@ -178,7 +178,7 @@ Informally,
 
 \subsection{Tones transform orders}
 
-Consider preorders $A, B$. Let $A^\op$ be $A$, ordered oppositely. Now, observe
+Fix preorders $A, B$. Let $A^\op$ be $A$, ordered oppositely. Now, observe
 that
 %
 \begin{center}
@@ -230,25 +230,31 @@ With this, we can state the theorem generalizing our observation:
     $f : A^s \to B$ is monotone
   \end{center}
 \end{theorem}
-%% \begin{proof} Exercise for the reader. \end{proof}
 
 From this point on, when I write $f : A \to B$, I mean implicitly that $f$ is
 monotone; and therefore $f : A^s \to B$ means that $f$ has tone $s$.
-%
-Also, there is one more property of tones we will need:
+
+Here are a few more useful properties of tones, which I invite you to verify:
 
 \begin{theorem}[Functoriality of tones]\label{thm:tone-functoriality}
   If $f : A \to B$ then $f : A^s \to B^s$.
   %% \[\text{If}~ f : A \to B ~\text{then}~ f : A^s \to B^s\text{.}\]
 \end{theorem}
-%% \begin{proof} Exercise for the reader. \end{proof}
+
+\begin{theorem}[Tones distribute over $\x$ and $+$]
+  \begin{eqnarray*}
+    (A + B)^s = A^s + B^s\\
+    (A \x B)^s = A^s \x B^s
+  \end{eqnarray*}
+\end{theorem}
 
 \subsection{Understanding \iso{} and \path{}}
 
 \todo{TODO: An intuition about $\ti$ and $\tb$: $\ti$ keeps only the
   \emph{strongly connected components}, while $\tb$ turns \emph{weakly}
   connected components into \emph{strong} ones. I should use an example, with
-  diagrams.}
+  diagrams. I should also mention that \iso{} and \path{} turn preorders into
+  equivalence relations, and the corresponding category-and-functor diagram.}
 
 \subsection{Defining \path{}} \label{sec:defining-path}
 
@@ -829,8 +835,8 @@ subtyping-less $\lambda$ rule?
 \end{array}\]
 
 \vspace{.5em} The types in toneless contexts $\phi$ aren't annotated with tones.
-\todo{TODO: Explain why/when we use toneless contexts. Explain $\phi^{\vec{t}}$
-  notation for a context split into its types and its tones.}
+\todo{TODO: Explain why and when we use toneless contexts. Explain
+  $\phi^{\vec{t}}$ notation for a context split into its types and its tones.}
 
 
 \subsection{Typing patterns}
