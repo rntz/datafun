@@ -421,8 +421,9 @@ a transformation on orderings. However, it seems related to subtyping.
 This section gives a categorical semantics of tones. You may safely skip it.
 
 Let's change perspective. Section \ref{sec:tones} defines tones as function
-properties, then gives corresponding preorder transformations. Now, let's define
-tones as preorder transformations, and derive corresponding function properties.
+pro\-per\-ties, then gives corresponding pre\-order trans\-form\-ations. Now,
+let's define tones as preorder transformations, and derive corresponding
+function properties.
 
 \begin{definition}
   $\elemsetfn : \Pre \to \Set$ is the functor taking a preorder to its set of
@@ -460,7 +461,7 @@ Tone composition $s \tc t$ corresponds to composition of tone functors:
   The composition $(-^s)^t$ of two tones is itself a tone.
 \end{theorem}
 
-\begin{proof} Applying Definition~\ref{def:tone} on $-^t$ and $-^s$, we have
+\begin{proof} Applying Definition~\ref{def:tone}, we have
   \( \elemset{(-^s)^t} = \elemset{-^s} = \elemsetfn \).
 \end{proof}
 
@@ -536,12 +537,12 @@ singleton, $\eta_{\mb{1}} = \idfn$, thus:
 \end{proof}
 
 \todo{TODO: Isn't $\wedge$ greatest lower bound / product? Don't we have
-  $\vee$/least upper bound / coproducts? Old stuff:}
+  $\vee$ / least upper bound / coproducts? Old stuff:}
 
-Tone meet $\wedge$ and composition $\tc$ also have semantic versions. Meet $s
-\wedge t$ corresponds to intersection of relations (noting that the intersection
-of two reflexive, transitive relations is itself reflexive and transitive), and
-tone composition $s \tc t$ corresponds to functor composition.
+Tone meet $\wedge$ and composition $\tc$ also have semantic versions. $s \wedge
+t$ corresponds to intersection of relations (noting that the intersection of two
+reflexive, transitive relations is itself reflexive and transitive), and $s \tc
+t$ corresponds to functor composition.
 %
 \begin{eqnarray*}
   a \le b : A^{s \wedge t} %% \iff a \le b : A^s \cap A^t
@@ -621,9 +622,8 @@ $\lambda$-calculus.
     &\bnfeq& P ~|~ A \to B ~|~ A \x B ~|~ A + B ~|~ \Box A ~|~ \op\;A
     \vspace{0.5em}\\
     \text{checking terms} & m,n
-    &\bnfeq& e ~|~ \fnof{x} m ~|~ (m,n) ~|~ \einj{i}{m}
-    ~|~ \mb{let}~x = e~\mb{in}~ m\\
-    %% TODO: should "case" really be a normal/checking form?
+    &\bnfeq& e ~|~ \fnof{x} m ~|~ (m,n) ~|~ \einj{i}{m}\\
+    &&|& \mb{let}~x = e~\mb{in}~ m\\
     &&|& \ecase{e}{x}{m}{y}{n}
     \vspace{0.5em}\\
     \text{inferring terms} & e
@@ -634,8 +634,8 @@ $\lambda$-calculus.
     \vspace{0.5em}\\
     \text{judgments}
     & J &\bnfeq&
-    \checks{m}{\GG}{A} ~~|~~ \infers{e}{\GG}{A}
-    ~~|~~ \subtype{s}{A}{B} ~~|~~ \converts{s}{A}{B}
+    \checks{m}{\GG}{A} ~~|~~ \infers{e}{\GG}{A}\\
+    &&|& \subtype{s}{A}{B} ~~|~~ \converts{s}{A}{B}
   \end{array}
 \end{mathpar}
 
@@ -807,7 +807,7 @@ So the crucial question is: can we always substitute $\h{x}{\Box A}{\tm}$ for
 $\h{x}{A}{\ti}$?
 %
 It would suffice to prove the subtyping and substitution principles given in
-subsection~\ref{subsec:principles}. Can we prove these with our original,
+subsection~\ref{sec:principles}. Can we prove these with our original,
 subtyping-less $\lambda$ rule?
 
 
@@ -825,13 +825,13 @@ subtyping-less $\lambda$ rule?
   \text{patterns} & p,q
   &\bnfeq& \pwild ~|~ x ~|~ (p,q) ~|~ \einj{i}{p}
   \vspace{0.5em}\\
-  \text{checking terms} & m,n &\bnfeq& ...
-  ~|~ \mb{case}~ e ~\mb{of}~ \xbar{i}{p_i \cto m_i}
+  \text{checking terms} & m,n
+  &\bnfeq& \mb{case}~ e ~\mb{of}~ \xbar{i}{p_i \cto m_i}
   \vspace{0.5em}\\
   \text{toneless contexts} & \phi &\bnfeq& \emptycx ~|~ \phi,\, x : A
   \vspace{0.5em}\\
-  \text{judgments} & J &\bnfeq& ... ~~|~~ \pcheck{p}{A}{s}{\phi}
-  ~~|~~ \casecheck{p}{m}{\GG}{A}{s}{C}
+  \text{judgments} & J &\bnfeq& \pcheck{p}{A}{s}{\phi}\\
+  &&|& \casecheck{p}{m}{\GG}{A}{s}{C}
 \end{array}\]
 
 \vspace{.5em} The types in toneless contexts $\phi$ aren't annotated with tones.
