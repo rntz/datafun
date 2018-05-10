@@ -245,7 +245,7 @@ Here are a few more useful properties of tones, which I invite you to verify:
   %% \[\text{If}~ f : A \to B ~\text{then}~ f : A^s \to B^s\text{.}\]
 \end{theorem}
 
-\begin{theorem}[Tones distribute over $\x$ and $+$]
+\begin{theorem}[Tones distribute over $\x$ and $+$]\label{thm:tones-monoidal}
   \begin{eqnarray*}
     (A + B)^s = A^s + B^s\\
     (A \x B)^s = A^s \x B^s
@@ -649,17 +649,32 @@ $\lambda$-calculus.
 
 \subsection{Typing rules}
 
+\noindent\textbf{Inferring forms}
 \begin{mathpar}
-  \infer{ }{\infers{x}{\h{x}{A}{\tm}}{A}}
-
+  %% ---- inferring forms ----
+  %% checking -> inferring by annotation
   \infer{\checks{m}{\GG}{A}}{\infers{m : A}{\GG}{A}}
 
+  %% variables
+  \infer{ }{\infers{x}{\h{x}{A}{\tm}}{A}}
+
+  %% projection
+  \infer{\infers{e}{\GG}{A} \\ \converts{s}{A}{B_1 \x B_2}}
+        {\infers{\pi_i\;e}{\GG^s}{B_i}}
+
+  %% application
+  \infer{\infers{e}{\GG_1}{A}
+         \\ \converts{u}{A}{B \to C}
+         \\ \checks{m}{\GG_2}{B}}
+        {\infers{e\; m}{\GG_1^u \wedge \GG_2}{C}}
+\end{mathpar}
+
+\noindent\textbf{Checking forms}
+\begin{mathpar}
+  %% ---- checking forms ----
+  %% inferring -> checking by subtyping
   \infer{\infers{e}{\GG}{A} \\ \subtype{t}{A}{B}}
         {\checks{e}{\GG^t}{B}}
-
-  %% let-binding
-  \infer{\infers{e}{\GG_1}{A} \\ \checks{m}{\GG_2,\, \h{x}{A}{s}}{C}}
-        {\checks{\mb{let}~x = e~\mb{in}~m}{\GG_1^s \wedge \GG_2}{C}}
 
   %% automatic box and op introduction
   \infer{\checks{m}{\GG}{A}}
@@ -667,29 +682,24 @@ $\lambda$-calculus.
 
   \infer{\checks{m}{\GG}{A}}
         {\checks{m}{\GG^\ta}{\op\; A}}
-%
-\\
-%
-  %% functions
+
+  %% let-binding
+  \infer{\infers{e}{\GG_1}{A} \\ \checks{m}{\GG_2,\, \h{x}{A}{s}}{C}}
+        {\checks{\mb{let}~x = e~\mb{in}~m}{\GG_1^s \wedge \GG_2}{C}}
+
+  %% lambdas
   \infer{\checks{m}{\GG{},\, \h{x}{A}{s}}{B} \\ \tm \le s}
         {\checks{\fnof{x} m}{\GG}{A \to B}}
 
-  \infer{\infers{e}{\GG_1}{A}
-         \\ \converts{u}{A}{B \to C}
-         \\ \checks{m}{\GG_2}{B}}
-        {\infers{e\; m}{\GG_1^u \wedge \GG_2}{C}}
-
-  %% products/pairs
+  %% pairs
   \infer{\checks{m}{\GG_1}{A_1} \\ \checks{n}{\GG_2}{A_2}}
         {\checks{(m,n)}{\GG_1 \wedge \GG_2}{A_1 \x A_2}}
 
-  \infer{\infers{e}{\GG}{A} \\ \converts{s}{A}{B_1 \x B_2}}
-        {\infers{\pi_i\;e}{\GG^s}{B_i}}
-
-  %% sums
+  %% injection
   \infer{\checks{m}{\GG}{A_i}}
         {\checks{\einj{i}{m}}{\GG}{A_1 + A_2}}
 
+  %% case analysis
   \infer{\infers{e}{\GG}{A} \\
          \converts{s}{A}{B_1 + B_2} \\
          \checks{m}{\GG_1,\, \h{x}{B_1}{t_1}}{C} \\
@@ -869,11 +879,63 @@ To handle non-linear patterns, or patterns with gu\-ard expressions, the
 morphism would also need an input context $\GG$. I consider this in
 Section~\ref{sec:patterns-with-guards}.
 
-\todo{TODO: I now think modal stripping is the wrong approach, at least for
-  product types. With these rules, we have $\pcheck{(x,(y,z))}{(A \x \Box(B \x
-    C))}{\tm}{x : A, y : B, z : C}$. But the \emph{most informative} result
-  would be $\pcheck{(x,(y,z))}{(A \x \Box(B \x C))}{\tm}{x : A, y : \Box B, z :
-    \Box C}$.}
+
+\subsection{Alternative: Modal distributing}
+
+\newcommand{\mdist}[2]{#1 \equiv #2}
+\newcommand{\anybinop}{\boxplus}
+
+Consider matching a nested pair pattern $(x,(y,z))$ against a value of type $A
+\x \Box(B \x C)$.
+%
+Applying the rules above derives:
+\[\pcheck{(x,(y,z))}{(A \x \Box(B \x C))}{\tm}{x : A, y : B, z : C}\]
+
+Although this is sound, the \emph{most informative} result would be:
+\[\pcheck{(x,(y,z))}{(A \x \Box(B \x C))}{\tm}{x : A, y : \Box B, z : \Box C}\]
+
+The problem lies in the interaction of modal stripping and the rule for pair
+patterns $(p,q)$. So, rather than use modal stripping, which is inspired by
+subtyping, we could apply Theorem~\ref{thm:tones-monoidal} and distribute our
+modal operators over $\x$ and $+$. Let's only consider $\x$ for now. Define the
+judgment $A \equiv B \x C$, where $A$ is an input and $B$, $C$ are outputs, like
+so:
+%
+\begin{mathpar}
+  \infer{ }{\mdist{A \x B}{A \x B}}
+
+  \infer{\mdist{A}{B \x C}}{\mdist{\Box A}{\Box B \x \Box C}}
+
+  \infer{\mdist{A}{B \x C}}{\mdist{\op\; A}{\op\; B \x \op\; C}}
+\end{mathpar}
+
+Now, let's use this to rewrite our pattern typing rule for $(p,q)$:
+\begin{mathpar}
+  \infer{\mdist{A}{A_1 \x A_2} \\
+         (\forall i)~\pcheck{p_i}{A_i}{s_i}{\phi_i} \\
+         \phi_1, \phi_2~\text{disjoint}}
+        {\pcheck{(p_1,p_2)}{A}{s_1 \wedge s_2}{\phi_1,\phi_2}}
+\end{mathpar}
+
+This is even cleaner!
+
+Can we also use modal distribution instead of modal stripping in our rules for
+expressions? Not quite. The tuple-projection rule can be rewritten:
+\begin{mathpar}
+  \infer{\infers{e}{\GG}{A} \\ \mdist{A}{A_1 \x A_2}}
+        {\infers{\pi_i\;e}{\GG}{A_i}}
+\end{mathpar}
+
+However, the function application rule (shown below) cannot, because in general,
+$\Box(A \to B) \not\equiv \Box A \to \Box B$. So it seems there is no choice but
+to use subtyping.
+
+\begin{mathpar}
+  \infer{\infers{e}{\GG_1}{A}
+         \\ {\color{ACMRed} \converts{u}{A}{B \to C}}
+         \\ \checks{m}{\GG_2}{B}}
+        {\infers{e\; m}{\GG_1^u \wedge \GG_2}{C}}
+\end{mathpar}
 
 
 \subsection{Typing \mb{case}-expressions}
