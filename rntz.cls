@@ -3,7 +3,6 @@
 
 \RequirePackage{etoolbox}       % toggles; fixing titlesec.
 \newtoggle{narrow}              % stick to a 12cm central column?
-\newtoggle{centertitle}         % center titles?
 \newtoggle{geometry}            % configure geometry?
 \newtoggle{ribbons}             % colored section number ribbons?
 
@@ -22,8 +21,6 @@
 %% ---- Options ----
 \DeclareOption{narrow}{\toggletrue{narrow}}
 \DeclareOption{wide}{\togglefalse{narrow}}
-\DeclareOption{centertitle}{\toggletrue{centertitle}}
-\DeclareOption{nocentertitle}{\togglefalse{centertitle}}
 \DeclareOption{ribbons}{\toggletrue{ribbons}}
 \DeclareOption{noribbons}{\togglefalse{ribbons}}
 \DeclareOption{geometry}{\toggletrue{geometry}}
@@ -139,7 +136,6 @@
 \renewcommand*{\maketitle}{
   \begingroup%
   \setlength{\parindent}{0pt}%
-  \iftoggle{centertitle}{\centering}{}%
   {\titlesize\@title\vspace{0.5ex}\par}%
   {\authorsize\@author\vspace{0.5ex}\par}%
   {\authorsize\@date\par}%
