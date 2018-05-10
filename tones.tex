@@ -84,15 +84,11 @@
 % {iso, path}: suggestive of generalization to categories
 % {core, loc}: established-ish category theory notation. DISLIKE: opaque.
 
-\newcommand{\tc}{\cdot}                 % tone composition
-\newcommand{\tm}{\id}                   % monotone / id
-\newcommand{\ta}{{\color{ACMGreen}\op}} % antitone / op
-\newcommand{\ti}{{\color{ACMBlue}\iso}} % invariant/ core
-\newcommand{\tb}{{\color{ACMRed}\path}} % bivariant/ path
-
-\renewcommand{\ta}{{\color{ForestGreen}\op}}   % antitone / op
-\renewcommand{\ti}{{\color{NavyBlue}\iso}}     % invariant/ core
-\renewcommand{\tb}{{\color{Bittersweet}\path}} % bivariant/ path
+\newcommand{\tc}{\cdot}                      % tone composition
+\newcommand{\tm}{\id}                        % monotone / id
+\newcommand{\ta}{{\color{ForestGreen}\op}}   % antitone / op
+\newcommand{\ti}{{\color{NavyBlue}\iso}}     % invariant/ core
+\newcommand{\tb}{{\color{Bittersweet}\path}} % bivariant/ path
 
 
 %% ---- Front matter ----
@@ -500,7 +496,7 @@ The crux here is that natural transformations between tones are \emph{boring}:
 
 \begin{proof}
   Let $\mb{1}$ be the singleton preorder $\{\star\}$. Fix some $x : A$. Let $f :
-  \mb{1} \to A = \fnof{\star} x$. Then by naturality of $\eta$, this square
+  \mb{1} \to A = \fnof{\star}{x}$. Then by naturality of $\eta$, this square
   commutes:
   %
   \[\tikzset{
@@ -828,8 +824,6 @@ subtyping-less $\lambda$ rule?
 \section{Pattern matching}
 
 \newcommand{\xbar}[2]{\overline{#2}^{#1}}
-%% \renewcommand{\xbar}[2]{{}^{#1}\overline{#2}}
-%% \renewcommand{\xbar}[2]{{}_{#1}\!\left(#2\right)}
 \newcommand{\pwild}{\_}
 \newcommand{\pcheck}[4]{#1 \Leftarrow #2^{#3} \dashv #4}
 \newcommand{\casecheck}[6]{%
@@ -842,7 +836,7 @@ subtyping-less $\lambda$ rule?
   \text{checking terms} & m,n
   &\bnfeq& \mb{case}~ e ~\mb{of}~ \xbar{i}{p_i \cto m_i}
   \vspace{0.5em}\\
-  \text{toneless contexts} & \phi &\bnfeq& \emptycx ~|~ \phi,\, x : A
+  \text{toneless contexts} & \phi,\psi &\bnfeq& \emptycx ~|~ \phi,\, x : A
   \vspace{0.5em}\\
   \text{judgments} & J &\bnfeq& \pcheck{p}{A}{s}{\phi}\\
   &&|& \casecheck{p}{m}{\GG}{A}{s}{C}
@@ -880,7 +874,7 @@ morphism would also need an input context $\GG$. I consider this in
 Section~\ref{sec:patterns-with-guards}.
 
 
-\subsection{Alternative: Modal distributing}
+\subsection{Alternative: Modal distribution}
 
 \newcommand{\mdist}[2]{#1 \equiv #2}
 \newcommand{\anybinop}{\boxplus}
@@ -888,36 +882,67 @@ Section~\ref{sec:patterns-with-guards}.
 Consider matching a nested pair pattern $(x,(y,z))$ against a value of type $A
 \x \Box(B \x C)$.
 %
-Applying the rules above derives:
+The rules above can derive:
 \[\pcheck{(x,(y,z))}{(A \x \Box(B \x C))}{\tm}{x : A, y : B, z : C}\]
 
 Although this is sound, the \emph{most informative} result would be:
 \[\pcheck{(x,(y,z))}{(A \x \Box(B \x C))}{\tm}{x : A, y : \Box B, z : \Box C}\]
 
 The problem lies in the interaction of modal stripping and the rule for pair
-patterns $(p,q)$. So, rather than use modal stripping, which is inspired by
-subtyping, we could apply Theorem~\ref{thm:tones-monoidal} and distribute our
-modal operators over $\x$ and $+$. Let's only consider $\x$ for now. Define the
-judgment $A \equiv B \x C$, where $A$ is an input and $B$, $C$ are outputs, like
-so:
-%
+patterns $(p,q)$. So, rather than use modal stripping (or its cousin subtyping),
+let's apply Theorem~\ref{thm:tones-monoidal} and distribute our modal operators
+over $\x$ and $+$. We'll define judgments $A \equiv B \x C$ and $A \equiv B +
+C$; in each, $A$ is an input and $B$, $C$ are outputs.
+
 \begin{mathpar}
   \infer{ }{\mdist{A \x B}{A \x B}}
 
   \infer{\mdist{A}{B \x C}}{\mdist{\Box A}{\Box B \x \Box C}}
 
   \infer{\mdist{A}{B \x C}}{\mdist{\op\; A}{\op\; B \x \op\; C}}
+\\
+  \infer{ }{\mdist{A + B}{A + B}}
+
+  \infer{\mdist{A}{B + C}}{\mdist{\Box A}{\Box B + \Box C}}
+
+  \infer{\mdist{A}{B + C}}{\mdist{\op\; A}{\op\; B + \op\; C}}
 \end{mathpar}
 
-Now, let's use this to rewrite our pattern typing rule for $(p,q)$:
+By distributing our modes we can define a simplifed, \emph{toneless} pattern
+typing judgment $p : A \vdash \phi$:
+%
 \begin{mathpar}
-  \infer{\mdist{A}{A_1 \x A_2} \\
-         (\forall i)~\pcheck{p_i}{A_i}{s_i}{\phi_i} \\
-         \phi_1, \phi_2~\text{disjoint}}
-        {\pcheck{(p_1,p_2)}{A}{s_1 \wedge s_2}{\phi_1,\phi_2}}
+  \infer{ }{\pwild : A \vdash \emptycx}
+
+  \infer{ }{x : A \vdash x : A}
+
+  \infer{
+    \mdist{A}{A_1 + A_2} \\
+    p : A_i \vdash \phi
+  }{\einj{i}{p} : A \vdash \phi}
+
+  \infer{
+    \mdist{A}{A_1 \x A_2} \\
+    (\forall i)~{p_i : A_i \vdash \phi_i}\\
+    \phi_1,\phi_2~\text{disjoint}
+  }{(p_1,p_2) : A \vdash \phi_1,\phi_2}
 \end{mathpar}
 
-This is even cleaner!
+Finally, our \mb{case} rule becomes:
+\[
+\infer{
+  \infers{e}{\GG}{A} \\
+  (\forall i)~{p_i : A \vdash \phi_i} \\
+  (\forall i)~{\checks{m_i}{\GG_i,\phi_i^{\vec{s}_i}}{C}}
+}{
+  \checks{\mb{case}~e~\mb{of}~\xbar{i}{p_i \cto m_i}}
+         {\GG^{\bigwedge_i\bigwedge\vec{s}_i} \wedge \bigwedge_i \GG_i}
+         {A}}
+\]
+
+\todo{However, I'm skeptical that this toneless approach will scale to nonlinear
+  and guarded pattern matching. We could probably add tones back in, or we could
+  understand guarded \& nonlinear pattern matching by as mere syntax sugar.}
 
 Can we also use modal distribution instead of modal stripping in our rules for
 expressions? Not quite. The tuple-projection rule can be rewritten:
