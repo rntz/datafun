@@ -1,0 +1,21 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{rntzfont}[2018/05/10]
+
+\DeclareOption{zapf}{\def\rntz@font{zapf}}
+\DeclareOption{libertine}{\def\rntz@font{libertine}}
+\DeclareOption{cm}{\def\rntz@font{cm}}
+
+\ExecuteOptions{zapf}
+\ProcessOptions\relax
+
+\ifdefstring{\rntz@font}{libertine}{
+  \RequirePackage[mono=false]{libertine} % osf = old-style figures
+  \RequirePackage[libertine]{newtxmath}  % makes math look prettier
+  \linespread{1.1}
+}{}
+
+\ifdefstring{\rntz@font}{zapf}{
+  \RequirePackage{mathpazo}
+  \RequirePackage{eulervm}
+  \linespread{1.15}
+}{}

@@ -6,6 +6,8 @@
 
 %% TODO: consider factoring out some of this into a .sty file:
 %% DONE - narrowing! in narrow.sty.
+%% DONE - geometry! in rntzgeometry.sty.
+%% DONE - fonts! in rntzfont.sty
 %% - the newtheorem stuff
 %% - colors
 %% - hyperref & hypersetup
@@ -15,16 +17,12 @@
 \DeclareOption{ribbons}{\toggletrue{ribbons}}
 \DeclareOption{noribbons}{\togglefalse{ribbons}}
 
-\DeclareOption{zapf}{\def\rntz@font{zapf}}
-\DeclareOption{libertine}{\def\rntz@font{libertine}}
-\DeclareOption{cm}{\def\rntz@font{cm}}
-
 \DeclareOption{twocolumn}{\ClassWarning{rntz}{Two-column mode is not supported.}}
 
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
 
 % Defaults
-\ExecuteOptions{zapf}
+\ExecuteOptions{}
 \ProcessOptions\relax
 
 %% ---- Basic layout ----
@@ -45,19 +43,6 @@
 \theoremstyle{remark}
 \newtheorem*{corollary}{Corollary}
 \theoremstyle{plain}            %back to default
-
-%% ---- Fonts ----
-\ifdefstring{\rntz@font}{libertine}{
-  \RequirePackage[mono=false]{libertine} % osf = old-style figures
-  \RequirePackage[libertine]{newtxmath}  % makes math look prettier
-  \linespread{1.1}
-}{}
-
-\ifdefstring{\rntz@font}{zapf}{
-  \RequirePackage{mathpazo}
-  \RequirePackage{eulervm}
-  \linespread{1.15}
-}{}
 
 %% ---- Styling paragraphs and lists ----
 \setlength{\parindent}{1.0pc}
