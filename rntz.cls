@@ -2,7 +2,6 @@
 \ProvidesClass{rntz}[2018/03/19]
 
 \RequirePackage{etoolbox}       % toggles; fixing titlesec.
-\newtoggle{geometry}            % configure geometry?
 \newtoggle{ribbons}             % colored section number ribbons?
 
 %% TODO: consider factoring out some of this into a .sty file:
@@ -15,33 +14,21 @@
 %% ---- Options ----
 \DeclareOption{ribbons}{\toggletrue{ribbons}}
 \DeclareOption{noribbons}{\togglefalse{ribbons}}
-\DeclareOption{geometry}{\toggletrue{geometry}}
-\DeclareOption{nogeometry}{\togglefalse{geometry}}
 
 \DeclareOption{zapf}{\def\rntz@font{zapf}}
 \DeclareOption{libertine}{\def\rntz@font{libertine}}
 \DeclareOption{cm}{\def\rntz@font{cm}}
-
-%     a5: 148 x 210mm    5.8 x  8.3in
-%     b5: 176 x 250mm    6.9 x  9.8in
-%     a4: 210 x 297mm    8.3 x 11.7in
-% letter: 216 x 279mm    8.5 x 11in
-\DeclareOption{a5}{\def\rntz@geom{a5paper,text={345pt,17cm}}}
-\DeclareOption{b5}{\def\rntz@geom{b5paper,text={135mm,200mm}}}
-\DeclareOption{a4}{\def\rntz@geom{a4paper,text={160mm,240mm}}}
-\DeclareOption{letter}{\def\rntz@geom{letterpaper,text={166mm,222mm}}}
 
 \DeclareOption{twocolumn}{\ClassWarning{rntz}{Two-column mode is not supported.}}
 
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
 
 % Defaults
-\ExecuteOptions{b5,zapf,geometry}
+\ExecuteOptions{zapf}
 \ProcessOptions\relax
 
 %% ---- Basic layout ----
 \LoadClass{extarticle}
-\iftoggle{geometry}{\RequirePackage[\rntz@geom]{geometry}}{}
 
 %% ---- AMS stuff and theorem styles ----
 %% This must precede \RequirePackage{newtxmath}; otherwise newtxmath defines
