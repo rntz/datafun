@@ -2,25 +2,17 @@
 \ProvidesClass{rntz}[2018/03/19]
 
 \RequirePackage{etoolbox}       % toggles; fixing titlesec.
-\newtoggle{narrow}              % stick to a 12cm central column?
 \newtoggle{geometry}            % configure geometry?
 \newtoggle{ribbons}             % colored section number ribbons?
 
-%% TODO: use more Tufte-css-like font sizes, then:
-%% change \section to be \Large, \subsection to \large
-%% change author,date to be \large
-%% and check that all this still works on a5.
-
 %% TODO: consider factoring out some of this into a .sty file:
-%% - narrowing!
+%% DONE - narrowing! in narrow.sty.
 %% - the newtheorem stuff
 %% - colors
 %% - hyperref & hypersetup
 %% - the left-margin colored section numbers
 
 %% ---- Options ----
-\DeclareOption{narrow}{\toggletrue{narrow}}
-\DeclareOption{wide}{\togglefalse{narrow}}
 \DeclareOption{ribbons}{\toggletrue{ribbons}}
 \DeclareOption{noribbons}{\togglefalse{ribbons}}
 \DeclareOption{geometry}{\toggletrue{geometry}}
@@ -34,60 +26,22 @@
 %     b5: 176 x 250mm    6.9 x  9.8in
 %     a4: 210 x 297mm    8.3 x 11.7in
 % letter: 216 x 279mm    8.5 x 11in
-\DeclareOption{a5}{
-  \def\rntz@geom{a5paper,text={345pt,17cm}}
-  \def\rntz@narrow{104mm}}
-\DeclareOption{b5}{
-  \def\rntz@geom{b5paper,text={135mm,200mm}}
-  \def\rntz@narrow{345pt}}
-\DeclareOption{a4}{
-  \def\rntz@geom{a4paper,text={160mm,240mm}}
-  \def\rntz@narrow{345pt}}
-\DeclareOption{letter}{
-  \def\rntz@geom{letterpaper,text={166mm,222mm}}
-  \def\rntz@narrow{345pt}}
+\DeclareOption{a5}{\def\rntz@geom{a5paper,text={345pt,17cm}}}
+\DeclareOption{b5}{\def\rntz@geom{b5paper,text={135mm,200mm}}}
+\DeclareOption{a4}{\def\rntz@geom{a4paper,text={160mm,240mm}}}
+\DeclareOption{letter}{\def\rntz@geom{letterpaper,text={166mm,222mm}}}
 
 \DeclareOption{twocolumn}{\ClassWarning{rntz}{Two-column mode is not supported.}}
 
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
 
 % Defaults
-\ExecuteOptions{b5,zapf,geometry,wide}
+\ExecuteOptions{b5,zapf,geometry}
 \ProcessOptions\relax
 
 %% ---- Basic layout ----
 \LoadClass{extarticle}
-\iftoggle{geometry}{\RequirePackage[\rntz@geom]{geometry}}
-  %% We can't do a narrow column if we don't understand the geometry.
-  {\togglefalse{narrow}}
-
-%% if narrow, limit text width to 12cm - article.cls' default width on a4?
-\iftoggle{narrow}{
-  \newlength{\rntz@fulltextwidth}
-  \setlength{\rntz@fulltextwidth}{\textwidth}
-  \geometry{textwidth=\rntz@narrow}}{}
-
-%% ---- figure* for wide figures in narrow mode ----
-%% First, define a fullwidth environment.
-\iftoggle{narrow}{
-  \RequirePackage[strict]{changepage}
-  %% I want to go from \textwidth to \rntz@fulltextwidth. adjustwidth adds to
-  %% margins, subtracting from text width, so I should adjust by:
-  %% (\textwidth-\rntz@fulltextwidth)/2.
-  \newlength{\rntz@fullwidthoffset}
-  \setlength{\rntz@fullwidthoffset}{\dimexpr(\textwidth-\rntz@fulltextwidth)/2\relax}
-  \newenvironment{fullwidth}
-    {\begin{adjustwidth}{\the\rntz@fullwidthoffset}{\the\rntz@fullwidthoffset}}
-    {\end{adjustwidth}}
-}
-% in wide mode, fullwidth does nothing
-{ \newenvironment{fullwidth}{}{} }
-
-%% A hack, taken from https://stackoverflow.com/questions/1565988/making-a-small-modification-to-a-latex-environment
-\renewenvironment{figure*}[1][\fps@figure]
-  {\edef\@tempa{\noexpand\@float{figure}[#1]}%
-   \@tempa\begin{fullwidth}\centering}
-  {\end{fullwidth}\end@float}
+\iftoggle{geometry}{\RequirePackage[\rntz@geom]{geometry}}{}
 
 %% ---- AMS stuff and theorem styles ----
 %% This must precede \RequirePackage{newtxmath}; otherwise newtxmath defines
@@ -169,6 +123,7 @@
 %% \titlespacing*{\subsubsection}{0pt}{\baselineskip}{.5\baselineskip}
 
 \titlespacing*{\section}{0pt}{3.5\parsep}{1.75\parsep}
+%% \titlespacing*{\section}{0pt}{4\parsep}{2\parsep}
 \titlespacing*{\subsection}{0pt}{3\parsep}{1.5\parsep}
 \titlespacing*{\subsubsection}{0pt}{3\parsep}{1.5\parsep}
 
