@@ -1,9 +1,10 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{rntzfont}[2018/05/10]
+\RequirePackage{etoolbox}       %for \ifdefstring
 
 \DeclareOption{zapf}{\def\rntz@font{zapf}}
 \DeclareOption{libertine}{\def\rntz@font{libertine}}
-\DeclareOption{cm}{\def\rntz@font{cm}}
+\DeclareOption{cm}{\def\rntz@font{cm}} % currently a no-op.
 
 \ExecuteOptions{zapf}
 \ProcessOptions\relax
