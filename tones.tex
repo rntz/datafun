@@ -989,36 +989,12 @@ Now we update the rules for $\casecheck{p}{m}{\GG}{A}{s}{C}$ to pass through $\G
 
 
 \section{Declarative rules}
-\subsection{Weakening, subtyping, and substitution}
-\label{subsec:principles}
 
-We wish to prove admissible the following rules:
-%
-\begin{mathpar}
-  \infer[tone weakening]
-        {\checks{m}{\GG}{A}}
-        {\checks{m}{\GG \wedge \GG'}{A}}
-
-  \infer[subtyping left]
-        {\checks{m}{\GG, \h{x}{A}{s}}{C} \\ A^s \le B^t}
-        {\checks{m}{\GG, \h{x}{B}{t}}{C}}
-
-  \infer[subtyping right]
-        {\checks{m}{\GG}{A} \\ A^s \le B^\tm}
-        {\checks{m}{\GG^s}{B}}
-
-  \infer[substitution]
-        {\infers{e}{\GG_1}{A}
-         \\ A^s \le B^t
-         \\ \checks{m}{\GG_2, \h{x}{B}{t}}{C}}
-        {\checks{m[e/x]}{\GG_1^s \wedge \GG_2}{C}}
-\end{mathpar}
-
-\todo{TODO: Doesn't \textsc{tone weakening} follow from \textsc{subtyping
-    left}?}
+\todo{This is where I'm stashing important inference rules, stated in a way that
+  makes them obviously valid, but leaves non-obvious how to algorithmically
+  check them.}
 
 \subsection{Subtyping and type equivalence}
-
 Type equivalence $A^s \equiv B^t$ is a synonym for $A^s \le B^t \wedge B^t \le
 A^s$.
 
@@ -1048,9 +1024,39 @@ A^s$.
   \infer{}{(A \to B)^\ti \le (\Box A \to \Box B)^\tm}
 \end{mathpar}
 
-\todo{TODO: check the function subtyping rules. $(A \to B)^\ti \le (\Box A \to
-  \Box B)^\tm$ handles one of the cases; $(A \to B)^\ta \equiv (\op\;A \to
-  \op\;B)^\tm$ handles another; what about the last one?}
+\todo{TODO: check these vs the algorithmic function subtyping rules. $(A \to
+  B)^\ti \le (\Box A \to \Box B)^\tm$ handles one of the cases; $(A \to B)^\ta
+  \equiv (\op\;A \to \op\;B)^\tm$ handles another; what about the last one?}
+
+
+\section{Metatheory}
+\subsection{Weakening, subtyping, and substitution}
+\label{sec:principles}
+
+We wish to prove admissible the following rules:
+%
+\begin{mathpar}
+  \infer[tone weakening]
+        {\checks{m}{\GG}{A}}
+        {\checks{m}{\GG \wedge \GG'}{A}}
+
+  \infer[subtyping left]
+        {\checks{m}{\GG, \h{x}{A}{s}}{C} \\ A^s \le B^t}
+        {\checks{m}{\GG, \h{x}{B}{t}}{C}}
+
+  \infer[subtyping right]
+        {\checks{m}{\GG}{A} \\ A^s \le B^\tm}
+        {\checks{m}{\GG^s}{B}}
+
+  \infer[substitution]
+        {\infers{e}{\GG_1}{A}
+         \\ A^s \le B^t
+         \\ \checks{m}{\GG_2, \h{x}{B}{t}}{C}}
+        {\checks{m[e/x]}{\GG_1^s \wedge \GG_2}{C}}
+\end{mathpar}
+
+\todo{TODO: Doesn't \textsc{tone weakening} follow from \textsc{subtyping
+    left}?}
 
 
 %% \section{An aside on overline notation}
