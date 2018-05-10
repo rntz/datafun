@@ -4,10 +4,12 @@
 
 \DeclareOption{zapf}{\def\rntz@font{zapf}}
 \DeclareOption{libertine}{\def\rntz@font{libertine}}
-\DeclareOption{cm}{\def\rntz@font{cm}} % currently a no-op.
+\DeclareOption{cm}{\def\rntz@font{cm}}
 
 \ExecuteOptions{zapf}
 \ProcessOptions\relax
+
+\ifdefstring{\rntz@font}{cm}{\linespread{1.05}}{}
 
 \ifdefstring{\rntz@font}{libertine}{
   \RequirePackage[mono=false]{libertine} % osf = old-style figures
