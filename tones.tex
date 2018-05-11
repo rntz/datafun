@@ -1,7 +1,6 @@
 \documentclass{rntz}
 \usepackage[b5]{rntzgeometry}
 \usepackage{rntzfont}
-\usepackage{narrow}
 
 %% \documentclass{article}
 %% \usepackage[b5paper]{geometry}
@@ -40,6 +39,8 @@
 
 %% ---- Commands ----
 \newcommand{\todo}[1]{{\color{Rhodamine}#1}}
+
+\newcommand{\fapremise}[1]{(\forall #1)~\,}
 
 \newcommand{\bnfeq}{\dblcolon=}
 %% \newcommand{\defeq}{\overset{\ms{def}}{=}}
@@ -828,20 +829,29 @@ subtyping-less $\lambda$ rule?
 
 \newcommand{\xbar}[2]{\overline{#2}^{#1}}
 \newcommand{\pwild}{\_}
-\newcommand{\pcheck}[4]{#1 \Leftarrow #2^{#3} \dashv #4}
+\newcommand{\pcheck}[3]{#1 : #2 \vdash #3}
 \newcommand{\casecheck}[6]{%
   #1 \cto #2 \Leftarrow #3 \vdash {#4}^{#5} >\!\!> #6}
+\renewcommand{\casecheck}[6]{%
+  #1 \cto #2 \Leftarrow #3 \vdash {#4}^{#5} \rightsquigarrow #6}
+
+\newcommand{\mdist}[2]{#1 \equiv #2}
+\newcommand{\mbinop}{\boxplus}
 
 \[\begin{array}{rccl}
   \text{patterns} & p,q
-  &\bnfeq& \pwild ~|~ x ~|~ (p,q) ~|~ \einj{i}{p}
+  &\bnfeq& x ~|~ (p,q) ~|~ \einj{i}{p}
   \vspace{0.5em}\\
   \text{checking terms} & m,n
   &\bnfeq& \mb{case}~ e ~\mb{of}~ \xbar{i}{p_i \cto m_i}
   \vspace{0.5em}\\
   \text{toneless contexts} & \phi,\psi &\bnfeq& \emptycx ~|~ \phi,\, x : A
   \vspace{0.5em}\\
-  \text{judgments} & J &\bnfeq& \pcheck{p}{A}{s}{\phi}\\
+  \text{distributive type ops} & \boxplus &\bnfeq& {\x} ~|~ {+}
+  \vspace{0.5em}\\
+  \text{judgments} & J
+  &\bnfeq& \mdist{A}{B \mbinop C}\\
+  &&|& \pcheck{p}{A}{\phi}\\
   &&|& \casecheck{p}{m}{\GG}{A}{s}{C}
 \end{array}\]
 
@@ -850,113 +860,108 @@ subtyping-less $\lambda$ rule?
   $\phi^{\vec{t}}$ notation for a context split into its types and its tones.}
 
 
-\subsection{Typing patterns}
+\subsection{Distributing modes}
 
-The judgment $\pcheck{p}{A}{s}{\phi}$ corresponds to a \Pre-morphism $A^s \to 1
-+ \phi$. It means that the pattern $p$, when it matches a value of type $A$,
-uses that value at tone $s$ to produce a values for $\phi$'s variables.
+The pattern $(x,y)$ matches values of type $A \x B$. But how shall we match
+values of type $\Box(A \x B)$?
+%
+We might add a pattern, $\mb{box}\:p$, matching values of type $\Box A$. Then
+$\mb{box}\:(x,y)$ would match values of type $\Box(A \x B)$.
+%
+But do we \emph{need} this \mb{box} annotation? Theorem~\ref{thm:tones-monoidal}
+says $\Box(A \x B)$ and $\Box A \x \Box B$ mean the same thing. Why not let
+$(x,y)$ match $\Box(A \x B)$ \emph{directly}, yielding $x : \Box A$ and $y : \Box B$?
+
+To this end, we'll need a judgment $\mdist{A}{B \mbinop C}$ for distributing modes
+over an operator $\mbinop$ (either $\x$ or $+$). Here $A$ is an input and
+$B$, $C$ are outputs.
 %
 \begin{mathpar}
-  \infer{ }{\pcheck{\pwild}{A}{\tb}{\emptycx}}
+  \infer{ }{\mdist{A \mbinop B}{A \mbinop B}}
 
-  \infer{ }{\pcheck{x}{A}{\tm}{x : A}}
+  \infer{\mdist{A}{B \mbinop C}}{\mdist{\Box A}{\Box B \mbinop \Box C}}
 
-  \infer{\converts{s}{A}{A_1 + A_2} \\ \pcheck{p}{A_i}{t}{\phi}}
-        {\pcheck{\einj{i}{p}}{A}{s \tc t}{\phi}}
-
-  \infer{\converts{s}{A}{A_1 \x A_2} \\
-         (\forall i)~{\pcheck{p_i}{A_i}{t_i}{\phi_i}}\\
-         %% \pcheck{p_1}{A_1}{t}{\phi_1} \\
-         %% \pcheck{p_2}{A_2}{u}{\phi_2} \\
-         \phi_1,\phi_2~\text{disjoint}}
-        {\pcheck{(p_1, p_2)}{A}{s \tc (t_1 \wedge t_2)}{\phi_1,\phi_2}}
+  \infer{\mdist{A}{B \mbinop C}}{\mdist{\op\, A}{\op\, B \mbinop \op\, C}}
 \end{mathpar}
-
-To handle non-linear patterns, or patterns with gu\-ard expressions, the
-morphism would also need an input context $\GG$. I consider this in
-Section~\ref{sec:patterns-with-guards}.
 
 
-\subsection{Alternative: Modal distribution}
+\subsection{Typing patterns}
 
-\newcommand{\mdist}[2]{#1 \equiv #2}
-\newcommand{\anybinop}{\boxplus}
-
-Consider matching a nested pair pattern $(x,(y,z))$ against a value of type $A
-\x \Box(B \x C)$.
-%
-The rules above can derive:
-\[\pcheck{(x,(y,z))}{(A \x \Box(B \x C))}{\tm}{x : A, y : B, z : C}\]
-
-Although this is sound, the \emph{most informative} result would be:
-\[\pcheck{(x,(y,z))}{(A \x \Box(B \x C))}{\tm}{x : A, y : \Box B, z : \Box C}\]
-
-The problem lies in the interaction of modal stripping and the rule for pair
-patterns $(p,q)$. So, rather than use modal stripping (or its cousin subtyping),
-let's apply Theorem~\ref{thm:tones-monoidal} and distribute our modal operators
-over $\x$ and $+$. We'll define judgments $A \equiv B \x C$ and $A \equiv B +
-C$; in each, $A$ is an input and $B$, $C$ are outputs.
-
-\begin{mathpar}
-  \infer{ }{\mdist{A \x B}{A \x B}}
-
-  \infer{\mdist{A}{B \x C}}{\mdist{\Box A}{\Box B \x \Box C}}
-
-  \infer{\mdist{A}{B \x C}}{\mdist{\op\; A}{\op\; B \x \op\; C}}
-\\
-  \infer{ }{\mdist{A + B}{A + B}}
-
-  \infer{\mdist{A}{B + C}}{\mdist{\Box A}{\Box B + \Box C}}
-
-  \infer{\mdist{A}{B + C}}{\mdist{\op\; A}{\op\; B + \op\; C}}
-\end{mathpar}
-
-By distributing our modes we can define a simplifed, \emph{toneless} pattern
-typing judgment $p : A \vdash \phi$:
+The judgment $\pcheck{p}{A}{\phi}$ corresponds to a \Pre-morphism $A \to 1 +
+\phi$. It means that the pattern $p$, when it matches a value of type $A$,
+produces values for $\phi$'s variables.
 %
 \begin{mathpar}
-  \infer{ }{\pwild : A \vdash \emptycx}
+  \infer{ }{\pcheck{x}{A}{x : A}}
 
-  \infer{ }{x : A \vdash x : A}
+  \infer{\mdist{A}{A_1 + A_2} \\ \pcheck{p}{A_i}{\phi}}
+        {\pcheck{\einj{i}{p}}{A}{\phi}}
 
-  \infer{
-    \mdist{A}{A_1 + A_2} \\
-    p : A_i \vdash \phi
-  }{\einj{i}{p} : A \vdash \phi}
-
-  \infer{
-    \mdist{A}{A_1 \x A_2} \\
-    (\forall i)~{p_i : A_i \vdash \phi_i}\\
-    \phi_1,\phi_2~\text{disjoint}
-  }{(p_1,p_2) : A \vdash \phi_1,\phi_2}
+  \infer{\mdist{A}{A_1 \x A_2} \\
+         \fapremise{i} \pcheck{p_i}{A_i}{\phi_i}\\
+         \phi_1,\phi_2~\text{disjoint}}
+        {\pcheck{(p_1, p_2)}{A}{\phi_1,\phi_2}}
 \end{mathpar}
 
-Finally, our \mb{case} rule becomes:
+%% To handle non-linear patterns, or patterns with gu\-ard expressions, the
+%% morphism would also need an input context $\GG$. I consider this in
+%% Section~\ref{sec:patterns-with-guards}.
+
+
+\subsection{Typing \mb{case}-expressions}
+
+Typing \mb{case} as a single rule is complicated:
+%
 \[
 \infer{
   \infers{e}{\GG}{A} \\
-  (\forall i)~{p_i : A \vdash \phi_i} \\
-  (\forall i)~{\checks{m_i}{\GG_i,\phi_i^{\vec{s}_i}}{C}}
+  \fapremise{i} p_i : A \vdash \phi_i\\
+  \fapremise{i} \checks{m_i}{\GG_i,\phi_i^{\vec{s}_i}}{C}
 }{
   \checks{\mb{case}~e~\mb{of}~\xbar{i}{p_i \cto m_i}}
          {\GG^{\bigwedge_i\bigwedge\vec{s}_i} \wedge \bigwedge_i \GG_i}
          {A}}
 \]
+%% \begin{mathpar}
+%%   \infer{\infers{e}{\GG}{A} \\
+%%     (\forall i)~{\pcheck{p_i}{A}{s_i}{\phi_i}} \\
+%%     (\forall i)~{\checks{m_i}{\GG_i, \phi_i^{\vec{t}_i}}{C}}
+%%   }{\checks{\mb{case}~e~\mb{of}~\xbar{i}{p_i \cto m_i}}
+%%     {\GG^{\bigwedge_i (s_i \tc \bigwedge \vec{t}_i)} \wedge \bigwedge_i \GG_i}
+%%     {C}}
+%% \end{mathpar}
 
-\todo{However, I'm skeptical that the toneless approach can handle nonlinear
-  and guarded pattern matching. We could probably add tones back in, or we could
-  understand guarded \& nonlinear pattern matching by as mere syntax sugar.}
+We can split this up using a helper judgment, $\casecheck{p}{m}{\GG}{A}{s}{C}$,
+corresponding to a morphism $\GG \x A^s \to 1 + C$. This says that the arm $p
+\cto m$ uses variables in $\GG$, matches a scrutinee of type $A$ that it uses at
+tone $s$, and produces (if it matches) a result of type $C$. Then we have:
+%
+\begin{mathpar}
+  \infer{\pcheck{p}{A}{\phi} \\
+         \checks{m}{\GG, \phi^{\vec{t}}}{C}
+  }     {\casecheck{p}{m}{\GG}{A}{\bigwedge\vec{t}}{C}}
 
-Can we also use modal distribution instead of modal stripping in our rules for
-expressions? Not quite. The tuple-projection rule can be rewritten:
+  \infer{\infers{e}{\GG}{A} \\
+         \fapremise{i} {\casecheck{p_i}{m_i}{\GG_i}{A}{s_i}{C}}
+  }{\checks
+    {\mb{case}~ e ~\mb{of} ~\xbar{i}{p_i \cto m_i}}
+    {\GG^{\bigwedge_i s_i} \wedge \bigwedge_i \GG_i}
+    {C}}
+\end{mathpar}
+
+
+\subsection{Why do we need both stripping and distribution?}
+
+Can we also use modal distribution instead of modal stripping in our typing
+rules for expressions? Not quite. We can rewrite the tuple-projection rule:
 \begin{mathpar}
   \infer{\infers{e}{\GG}{A} \\ \mdist{A}{A_1 \x A_2}}
         {\infers{\pi_i\;e}{\GG}{A_i}}
 \end{mathpar}
 
-However, the function application rule (shown below) cannot, because in general,
-$\Box(A \to B) \not\equiv \Box A \to \Box B$. So it seems there is no choice but
-to use subtyping.
+However, the function application rule (below) cannot; in general, $\Box(A \to
+B) \not\equiv \Box A \to \Box B$. So it seems there is no choice but to use
+subtyping.
 
 \begin{mathpar}
   \infer{\infers{e}{\GG_1}{A}
@@ -965,41 +970,47 @@ to use subtyping.
         {\infers{e\; m}{\GG_1^u \wedge \GG_2}{C}}
 \end{mathpar}
 
-
-\subsection{Typing \mb{case}-expressions}
+\todo{TODO: explain why using modal stripping for pattern matching doesn't work,
+  with the $(x,(y,z))$ versus $A \x \Box(B \x C)$ example.}
 
-Typing \mb{case} is complicated. I give two formulations of it, one direct and
-one involving a helper judgment. Formulated as a single rule, it looks like
-this:
-%
+\todo{TODO: explain why using modal stripping rather than distribution for the
+  tuple projection rule is fine, because of the adjunction between \path{} and
+  \iso{}.}
+
+
+\subsection{Case analysis with guarded arms}
+
+\newcommand{\armif}[3]{#1 ~\mb{if}~ #2 \cto #3}
+\newcommand{\armifcheck}[7]{%
+  \armif{#1}{#2}{#3} \Leftarrow {#4} \vdash #5^{#6} \rightsquigarrow #7}
+
+\[\begin{array}{rccl}
+  \text{checking expressions} & m
+  &\bnfeq& \mb{case}~ e ~\mb{of}~\, \xbar{i}{\armif{p_i}{m_i}{n_i}}
+  \vspace{.5em}\\
+  \text{judgments}& J &\bnfeq& \armifcheck{p}{m}{n}{\GG}{A}{s}{C}
+\end{array}\]
+
 \begin{mathpar}
-  \infer{\infers{e}{\GG}{A} \\
-    (\forall i)~{\pcheck{p_i}{A}{s_i}{\phi_i}} \\
-    (\forall i)~{\checks{m_i}{\GG_i, \phi_i^{\vec{t}_i}}{C}}
-  }{\checks{\mb{case}~e~\mb{of}~\xbar{i}{p_i \cto m_i}}
-    {\GG^{\bigwedge_i (s_i \tc \bigwedge \vec{t}_i)} \wedge \bigwedge_i \GG_i}
+  \infer{
+    \pcheck{p}{A}{\phi} \\
+    \checks{m}{\GG_1, \phi^{\vec{s}}}{\Box\, 2} \\
+    \checks{n}{\GG_2, \phi^{\vec{t}}}{C}
+  }     {\armifcheck{p}{m}{n}{\GG}{A}
+    {\bigwedge\!\vec{s} \wedge \bigwedge\!\vec{t}}
+    {C}}
+
+  \infer{
+    \infers{e}{\GG}{A} \\
+    \fapremise{i} \armifcheck{p_i}{m_i}{n_i}{\GG_i}{A}{s_i}{C}
+  }{\checks
+    {\mb{case}~e~\mb{of}~ \xbar{i}{\armif{p_i}{m_i}{n_i}}}
+    {\GG^{\bigwedge_i\!s_i} \wedge \bigwedge_i \GG_i}
     {C}}
 \end{mathpar}
 
-We can split this up using a helper judgment, $\casecheck{p}{m}{\GG}{A}{s}{C}$,
-which says that the \mb{case} branch $p \cto m$ uses variables in $\GG$, matches
-a scrutinee of type $A$ that it uses at tone $s$, producing (if it matches) a
-result of type $C$. This corresponds to a morphism $\GG \x A^s \to 1 + C$. Then
-we have:
-%
-\begin{mathpar}
-  \infer{\pcheck{p}{A}{s}{\phi} \\
-    \checks{m}{\GG, \phi^{\vec{t}}}{C}}
-  {\casecheck{p}{m}{\GG}{A}{s \tc \bigwedge\vec{t}}{C}}
-
-  \infer{\infers{e}{\GG}{A} \\
-    (\forall i)~~{\casecheck{p_i}{m_i}{\GG_i}{A}{s_i}{C}}}
-        {\checks{\mb{case}~ e ~\mb{of} ~\xbar{i}{p_i \cto m_i}}
-          {\GG^{\bigwedge_i s_i} \wedge \bigwedge_i \GG_i}{C}}
-\end{mathpar}
-
 
-\subsection{Patterns with guards}
+\subsection{Patterns with guards, old version}
 \label{sec:patterns-with-guards}
 
 \newcommand{\pif}[2]{{#1}~\mb{if}~{#2}}
