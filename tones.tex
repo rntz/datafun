@@ -40,7 +40,7 @@
 
 
 %% ---- Commands ----
-\newcommand{\todo}[1]{{\itshape\color{blue}#1}}
+\newcommand{\todo}[1]{{\color{Rhodamine}#1}}
 
 \newcommand{\bnfeq}{\dblcolon=}
 %% \newcommand{\defeq}{\overset{\ms{def}}{=}}
@@ -250,11 +250,11 @@ Here are a few more useful properties of tones, which I invite you to verify:
 
 \subsection{Understanding \iso{} and \path{}}
 
-\todo{TODO: An intuition about $\ti$ and $\tb$: $\ti$ keeps only the
-  \emph{strongly connected components}, while $\tb$ turns \emph{weakly}
-  connected components into \emph{strong} ones. I should use an example, with
-  diagrams. I should also mention that \iso{} and \path{} turn preorders into
-  equivalence relations, and the corresponding category-and-functor diagram.}
+\todo{An intuition about $\ti$ and $\tb$: $\ti$ keeps only the \emph{strongly
+    connected components}, while $\tb$ turns \emph{weakly} connected components
+  into \emph{strong} ones. I should use an example, with diagrams. I should also
+  mention that \iso{} and \path{} turn preorders into equivalence relations, and
+  the corresponding category-and-functor diagram.}
 
 \subsection{Defining \path{}} \label{sec:defining-path}
 
@@ -536,7 +536,7 @@ singleton, $\eta_{\mb{1}} = \idfn$, thus:
   \todo{TODO}
 \end{proof}
 
-\todo{TODO: Isn't $\wedge$ greatest lower bound / product? Don't we have
+\todo{Isn't $\wedge$ greatest lower bound / product? Don't we have
   $\vee$ / least upper bound / coproducts? Old stuff:}
 
 Tone meet $\wedge$ and composition $\tc$ also have semantic versions. $s \wedge
@@ -639,8 +639,8 @@ $\lambda$-calculus.
   \end{array}
 \end{mathpar}
 
-\todo{TODO: explain my various abuses of notation, e.g. $\GG^t$ and $\GG_1
-  \wedge \GG_2$}
+\todo{TODO: explain my various abuses of notation, e.g. $\GG^t$ and $\GG_1 \wedge
+  \GG_2$}
 
 
 \subsection{Typing rules}
@@ -757,8 +757,8 @@ Function subtyping, $\subtype{s}{(A_1 \to B_1)}{A_2 \to B_2}$, has four rules
         {\subtype{\ti}{(A_1 \to B_1)}{A_2 \to B_2}}
 \end{mathpar}
 
-\todo{Can these $t \le s$ constraints be turned into ``composing with $u$ is
-  $\ge \tm$'', for some choice of $u$ depending on $t$?}
+\todo{Can these $t \le s$ constraints be turned into ``composing with $u$
+  is $\ge \tm$'', for some choice of $u$ depending on $t$?}
 
 
 \subsection{Modal stripping}
