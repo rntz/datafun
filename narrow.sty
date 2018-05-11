@@ -6,20 +6,21 @@
 \RequirePackage[strict]{changepage}
 
 \DeclareStringOption[345pt]{width}
+\DeclareStringOption[\textwidth]{fullwidth}
 \ProcessLocalKeyvalOptions*
 
-\newlength{\narrow@fullwidth}
-\setlength{\narrow@fullwidth}{\textwidth}
+\newlength{\narrow@full}
+\setlength{\narrow@full}{\narrow@fullwidth}
 \geometry{textwidth=\narrow@width}
 
 %% Define a fullwidth environment.
 %%
-%% I want to go from \textwidth to \narrow@fullwidth. adjustwidth adds to
+%% I want to go from \textwidth to \narrow@full. adjustwidth adds to
 %% margins, subtracting from text width, so I should adjust by:
-%% (\textwidth-\narrow@fullwidth)/2.
+%% (\textwidth-\narrow@full)/2.
 \newlength{\narrow@offset}
 \setlength{\narrow@offset}
-          {\dimexpr(\textwidth-\narrow@fullwidth)/2\relax}
+          {\dimexpr(\textwidth-\narrow@full)/2\relax}
 \newenvironment{fullwidth}
   {\begin{adjustwidth}{\the\narrow@offset}{\the\narrow@offset}}
   {\end{adjustwidth}}
