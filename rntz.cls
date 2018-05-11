@@ -90,28 +90,31 @@
 %% ---- Section & subsection titles ----
 \RequirePackage{textcase,titlesec}    % (sub)section header styling
 
-%% \titlespacing*{\section}{0pt}{\baselineskip}{.5\baselineskip}
-%% \titlespacing*{\subsection}{0pt}{\baselineskip}{.5\baselineskip}
-%% \titlespacing*{\subsubsection}{0pt}{\baselineskip}{.5\baselineskip}
-
-\titlespacing*{\section}{0pt}{3.5\parsep}{1.75\parsep}
-%% \titlespacing*{\section}{0pt}{4\parsep}{2\parsep}
-\titlespacing*{\subsection}{0pt}{3\parsep}{1.5\parsep}
-\titlespacing*{\subsubsection}{0pt}{3\parsep}{1.5\parsep}
-
 %% titlesec < 2.10.2 has a bug that prevents showing section numbers. This fixes
 %% it. Taken from
 %% https://tex.stackexchange.com/questions/96090/formatting-subsections-and-chapters-in-tufte-book/96125
 \patchcmd{\ttlh@hang}{\parindent\z@}{\parindent\z@\leavevmode}{}{}
 \patchcmd{\ttlh@hang}{\noindent}{}{}{}
 
+%% \titlespacing*{\section}{0pt}{3.5\parsep}{1.75\parsep}
+%% \titlespacing*{\subsection}{0pt}{3\parsep}{1.5\parsep}
+%% \titlespacing*{\subsubsection}{0pt}{3\parsep}{1.5\parsep}
+
+%% \titlespacing*{\section}{0pt}{\baselineskip}{.55\baselineskip}
+%% \titlespacing*{\subsection}{0pt}{\baselineskip}{.5\baselineskip}
+%% \titlespacing*{\subsubsection}{0pt}{\baselineskip}{.5\baselineskip}
+
+% Lotsa whitespace.
+\titlespacing*{\section}{0pt}{4\parsep}{2\parsep}
+\titlespacing*{\subsection}{0pt}{4\parsep}{2\parsep}
+\titlespacing*{\subsubsection}{0pt}{4\parsep}{2\parsep}
+
 %% Spacing.
-%% TODO: maybe this should depend on paper size?
 \newcommand{\hnopost}{\hspace*{0mm}}
 \newcommand{\hnopre}{\hspace*{2.5mm}}
 \newcommand{\header}{\rmfamily\bfseries}
-%% \renewcommand{\header}{\sffamily\bfseries} % or, in sans-serif
-%% \renewcommand{\header}{\rmfamily\itshape} % previously
+%% \renewcommand{\header}{\rmfamily\itshape}  % or, italics
+%% \renewcommand{\header}{\sffamily\bfseries} % or, sans-serif
 \newcommand{\hno}[1]{\colorhno{white}{black}{#1}}
 
 \iftoggle{ribbons}
@@ -125,7 +128,9 @@
 \titleformat{\section}{\secsize\header}
             {\colorhno{Periwinkle}{white}{\thesection}}{0pt}{}
 \titleformat{\subsection}{\subsecsize\header}{\hno{\thesubsection}}{0pt}{}
-\titleformat{\subsubsection}{\subsubsecsize\header}{\hno{\thesubsubsection}}{0pt}{}
+% sub-subsections have no heading numbers
+\titleformat{\subsubsection}{\subsecsize\header}{}{0pt}{}
+
 %% %% Uncomment for orange subsection ribbons.
 %% \titleformat{\subsection}{\subsecsize\header}
 %%             {\colorhno{ACMOrange}{white}{\thesubsection}}{0pt}{}
