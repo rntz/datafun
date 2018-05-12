@@ -13,8 +13,10 @@
 
 \ifdefstring{\rntz@font}{libertine}{
   \RequirePackage[mono=false]{libertine} % osf = old-style figures
+  %% HACK: amsthm must be loaded before newtxmath otherwise it will crash.
+  \RequirePackage{amsthm}
   \RequirePackage[libertine]{newtxmath}  % makes math look prettier
-  \linespread{1.1}
+  \linespread{1.08333}
 }{}
 
 \ifdefstring{\rntz@font}{zapf}{
