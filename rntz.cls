@@ -88,7 +88,7 @@
 \hypersetup{colorlinks,linkcolor=ACMRed,citecolor=ACMPurple,urlcolor=ACMDarkBlue,filecolor=ACMDarkBlue}
 
 %% ---- Section & subsection titles ----
-\RequirePackage{textcase,titlesec}    % (sub)section header styling
+\RequirePackage{titlesec}    % (sub)section header styling
 
 %% titlesec < 2.10.2 has a bug that prevents showing section numbers. This fixes
 %% it. Taken from
@@ -110,23 +110,24 @@
 \titlespacing*{\subsubsection}{0pt}{4\parsep}{2\parsep}
 
 %% Spacing.
-\newcommand{\hnopost}{\hspace*{0mm}}
-\newcommand{\hnopre}{\hspace*{2.5mm}}
 \newcommand{\header}{\rmfamily\bfseries}
 %% \renewcommand{\header}{\rmfamily\itshape}  % or, italics
 %% \renewcommand{\header}{\sffamily\bfseries} % or, sans-serif
-\newcommand{\hno}[1]{\colorhno{white}{black}{#1}}
 
+\newcommand{\hnopost}{\hspace*{0mm}}
+\newcommand{\hnopre}{\hspace*{2.5mm}}
+\newcommand{\makehno}[3]{%
+  \llap{\colorbox{#1}{\parbox[t]{100in}{\hfill{\color{#2}#3\hnopost}}}\hnopre}}
+
+\newcommand{\hno}[1]{\makehno{white}{black}{#1}}
 \iftoggle{ribbons}
-  {\newcommand{\colorhno}[3]%
-    {\llap{\colorbox{#1}{\parbox{100in}{\hfill{\color{#2}#3\hnopost}}}\hnopre}}}
-  {\newcommand{\colorhno}[3]{%
-    {\llap{\colorbox{white}{\parbox{100in}{\hfill{#3\hnopost}}\hnopre}}}}}
+  {\newcommand{\colorhno}[3]{\makehno{#1}{#2}{#3}}}
+  {\newcommand{\colorhno}[3]{\hno{#3}}}
 
 % Nice colors: Periwinkle, Whee, cyan
 \definecolor[named]{Whee}{cmyk}{0.33, 0.33, 0, 0}
 \titleformat{\section}{\secsize\header}
-            {\colorhno{Periwinkle}{white}{\thesection}}{0pt}{}
+            {\colorhno{Whee}{white}{\thesection}}{0pt}{}
 \titleformat{\subsection}{\subsecsize\header}{\hno{\thesubsection}}{0pt}{}
 % sub-subsections have no heading numbers
 \titleformat{\subsubsection}{\subsecsize\header}{}{0pt}{}
