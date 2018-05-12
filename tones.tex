@@ -1,19 +1,13 @@
 \documentclass{rntz}
 \usepackage{rntzfont}
-\usepackage[b5,width=38em]{rntzgeometry}
+
+%\usepackage[a5]{rntzgeometry}
+\usepackage[b5,width=13cm]{rntzgeometry}
+%\usepackage[a4]{rntzgeometry}
 
 %% \documentclass{article}
-%% \usepackage[b5paper]{geometry}
-%% \usepackage{mathpazo,eulervm}
-%% \usepackage{amsthm,amsmath,amssymb}
-%% \theoremstyle{plain}
-%% \newtheorem{theorem}{Theorem}
-%% \newtheorem{conjecture}[theorem]{Conjecture}
-%% \newtheorem{lemma}[theorem]{Lemma}
-%% \theoremstyle{remark}
-%% \newtheorem*{corollary}{Corollary}
-%% \theoremstyle{definition}
-%% \newtheorem{definition}{Definition}
+%% %% \usepackage[b5paper]{geometry}
+%% %% \usepackage{mathpazo,eulervm}
 %% \usepackage[dvipsnames]{xcolor}
 %% \definecolor[named]{ACMBlue}{cmyk}{1,0.1,0,0.1}
 %% \definecolor[named]{ACMYellow}{cmyk}{0,0.16,1,0}
@@ -27,18 +21,21 @@
 
 
 %% ---- Packages ----
-\usepackage{mathpartir}         % \mathpar, \infer
-\usepackage{multirow}
-\usepackage{stmaryrd}           % for semantic brackets
-\usepackage{mathtools}          % for \dblcolon
-\usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
 \usepackage{adjustbox}          % aligning tikz diagrams vertically w/ tables.
-\usepackage{booktabs}           % \midrule
+\usepackage{amsmath,amssymb}    % basic math formatting & symbols
 \usepackage{anyfontsize}        % avoid font size warnings from stmaryrd
+\usepackage{booktabs}           % \midrule
+\usepackage{mathpartir}         % \mathpar, \infer
+\usepackage{mathtools}          % for \dblcolon
+\usepackage{multirow}           % \multirow, \multicolumn
+\usepackage{stmaryrd}           % \llbracket,\rrbracket
+\usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
+
+% TODO: use \cref everywhere.
 
 
 %% ---- Commands ----
-\newcommand{\todo}[1]{{\color{Rhodamine}#1}}
+\newcommand{\todo}[1]{{\color{Purple}#1}}
 
 \newcommand{\fapremise}[1]{(\forall #1)~\,}
 
@@ -54,7 +51,7 @@
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\x}{\times}
 \newcommand{\fn}{\lambda}
-\newcommand{\binder}{.\,}
+\newcommand{\binder}{.~}
 \newcommand{\bind}[1]{{#1}\binder}
 \newcommand{\fnof}[1]{\fn\bind{#1}}
 \newcommand{\sub}[1]{\{{#1}\}}
@@ -330,7 +327,7 @@ a_{i+1} : A$. Then $a \le b : A^\path$ iff there is a path from $a$ to $b$.
   \label{fig:tone-ops}
 \end{figure*}
 
-Figure~\ref{fig:tone-ops} defines two operators on tones:
+\Cref{fig:tone-ops} defines two operators on tones:
 \begin{enumerate}
 \item Meet $s \wedge t$ is greatest lower bound in the lattice ordered $\ti
   < \{\tm, \ta\} < \tb$. This gives the general tone of the pairing $\langle f,
@@ -343,17 +340,16 @@ Figure~\ref{fig:tone-ops} defines two operators on tones:
 \end{enumerate}
 
 Together, $\wedge$ and $\tc$ form a semiring whose properties are given in
-Figure~\ref{fig:tone-op-laws}. \todo{TODO: Reference ``I Got Plenty o'
-  Nuttin'{}'' --- another use of variable annotations drawn from a semiring, and
-  with similar (the same?) behavior of those annotations in the inference
-  rules.}
+\cref{fig:tone-op-laws}. \todo{TODO: Reference ``I Got Plenty o' Nuttin'{}'' ---
+  another use of variable annotations drawn from a semiring, and with similar
+  (the same?) behavior of those annotations in the inference rules.}
 
 %% Together, $\wedge$ and $\tc$ form a semiring, with $\wedge$ as an idempotent
-%% addition and $\tc$ as multiplication. Multiplication has $\tm$ as identity, but
-%% lacks an absorbing zero element. (\todo{TODO: Reference ``I Got Plenty o'
-%%   Nuttin'{}'' --- another use of variable annotations drawn from a semiring, and
-%%   with similar (the same?) behavior of those annotations in the inference
-%%   rules.}) Figure \ref{fig:tone-op-laws} gives the relevant laws.
+%% addition and $\tc$ as multiplication. Multiplication has $\tm$ as identity,
+%% but lacks an absorbing zero element. (\todo{TODO: Reference ``I Got Plenty o'
+%% Nuttin'{}'' --- another use of variable annotations drawn from a semiring,
+%% and with similar (the same?) behavior of those annotations in the inference
+%% rules.}) \Cref{fig:tone-op-laws} gives the relevant laws.
 
 \todo{TODO: check the distribution laws hold!}
 
@@ -420,7 +416,7 @@ a transformation on orderings. However, it seems related to subtyping.
 
 This section gives a categorical semantics of tones. You may safely skip it.
 
-Let's change perspective. Section \ref{sec:tones} defines tones as function
+Let's change perspective. \Cref{sec:tones} defines tones as function
 pro\-per\-ties, then gives corresponding pre\-order trans\-form\-ations. Now,
 let's define tones as preorder transformations, and derive corresponding
 function properties.
@@ -461,31 +457,31 @@ Tone composition $s \tc t$ corresponds to composition of tone functors:
   The composition $(-^s)^t$ of two tones is itself a tone.
 \end{theorem}
 
-\begin{proof} Applying Definition~\ref{def:tone}, we have
+\begin{proof} Applying \cref{def:tone}, we have
   \( \elemset{(-^s)^t} = \elemset{-^s} = \elemsetfn \).
 \end{proof}
 
 
 \subsection{The \Tone{} category}
 
-Preorders have a natural partial order, letting $A \le B$ iff $A$ is a
-\emph{subpreorder} of $B$ --- that is, if $\fnof{x} x : A \to B$. (In other
-words, if $A \subseteq B$ and $x \le y : A \implies x \le y : B$.)
+Preorders have a natural partial order, letting $A \le B$
+iff $A$ is a \emph{subpreorder} of $B$ --- that is, if $\fnof{x} x : A \to
+B$.\footnote{In other words, if $A \subseteq B$ and $x \le y : A \implies x \le
+  y : B$.}
 %
 This lifts pointwise to a partial order on tones: let $s \le t$ iff $A^s \le
 A^t$ for all $A$.
-
+%
 As functors, tones also form a category, \Tone{}, with natural transformations
 as morphisms. However, \Tone{} is but a fa\c{c}ade over this partial order:
 
-\begin{theorem}\label{thm:tone-poset}
-  $s \le t \iff \exists \eta : \Tone(s, t)$. Also, any two morphisms $\eta,
-  \varepsilon : \Tone(s,t)$ are equal.
+\begin{theorem} \label{thm:tone-poset}
+  \[s \le t \iff \exists \eta : \Tone(s, t) \iff \exists! \eta : \Tone(s,t)\]
 \end{theorem}
 
 \begin{proof}
   Expanding definitions, $s \le t$ means $\fnof{x} x : A^s \to A^t$ for all $A :
-  \Pre$. By Lemma~\ref{lem:tone-transformations-are-id}, any $\eta : \Tone(s,t)$
+  \Pre$. By \cref{lem:tone-transformations-are-id}, any $\eta : \Tone(s,t)$
   is of the form $\eta_A = \fnof{x} x : A^s \to A^t$.
 \end{proof}
 
@@ -509,8 +505,8 @@ The crux here is that natural transformations between tones are \emph{boring}:
     & A^t
   \end{tikzcd}\]
 
-From Definition~\ref{def:tone}, $f^s = f = f^t$; and since $\mb{1}$ is a
-singleton, $\eta_{\mb{1}} = \idfn$, thus:
+From \cref{def:tone}, $f^s = f = f^t$; and since $\mb{1}$ is a singleton,
+$\eta_{\mb{1}} = \idfn$, thus:
   \[\begin{array}{rlcl}
   & \eta_A \circ f^s &=& f^t \circ \eta_{\mb{1}}\\
   \implies & \eta_A \circ f &=& f\\
@@ -558,9 +554,9 @@ t$ corresponds to functor composition.
 \end{proof}
 
 \begin{conjecture}
-  The definitions of $\wedge$ and $\tc$ in Figure~\ref{fig:tone-ops} coincide
-  with their semantic definitions, applied to the semantic interpretation of
-  $\tm$, $\ta$, $\tb$, and $\ti$.
+  The definitions of $\wedge$ and $\tc$ in \cref{fig:tone-ops} coincide with
+  their semantic definitions, applied to the semantic interpretation of $\tm$,
+  $\ta$, $\tb$, and $\ti$.
 \end{conjecture}
 
 
@@ -821,8 +817,8 @@ So the crucial question is: can we always substitute $\h{x}{\Box A}{\tm}$ for
 $\h{x}{A}{\ti}$?
 %
 It would suffice to prove the subtyping and substitution principles given in
-subsection~\ref{sec:principles}. Can we prove these with our original,
-subtyping-less $\lambda$ rule?
+\cref{sec:principles}. Can we prove these with our original, subtyping-less
+$\lambda$ rule?
 
 
 \section{Pattern matching}
@@ -865,12 +861,12 @@ subtyping-less $\lambda$ rule?
 The pattern $(x,y)$ matches values of type $A \x B$. But how shall we match
 values of type $\Box(A \x B)$?
 %
-We might add a pattern, $\mb{box}\:p$, matching values of type $\Box A$. Then
-$\mb{box}\:(x,y)$ would match values of type $\Box(A \x B)$.
+We might add a pattern, $\mb{box}~p$, matching values of type $\Box A$. Then
+$\mb{box}~(x,y)$ would match values of type $\Box(A \x B)$.
 %
-But do we \emph{need} this \mb{box} annotation? Theorem~\ref{thm:tones-monoidal}
-says $\Box(A \x B)$ and $\Box A \x \Box B$ mean the same thing. Why not let
-$(x,y)$ match $\Box(A \x B)$ \emph{directly}, yielding $x : \Box A$ and $y : \Box B$?
+But do we \emph{need} this \mb{box} annotation? \Cref{thm:tones-monoidal} says
+$\Box(A \x B)$ and $\Box A \x \Box B$ mean the same thing. Why not let $(x,y)$
+match $\Box(A \x B)$ \emph{directly}, yielding $x : \Box A$ and $y : \Box B$?
 
 To this end, we'll need a judgment $\mdist{A}{B \mbinop C}$ for distributing modes
 over an operator $\mbinop$ (either $\x$ or $+$). Here $A$ is an input and
@@ -881,7 +877,7 @@ $B$, $C$ are outputs.
 
   \infer{\mdist{A}{B \mbinop C}}{\mdist{\Box A}{\Box B \mbinop \Box C}}
 
-  \infer{\mdist{A}{B \mbinop C}}{\mdist{\op\, A}{\op\, B \mbinop \op\, C}}
+  \infer{\mdist{A}{B \mbinop C}}{\mdist{\op~ A}{\op\, B \mbinop \op~ C}}
 \end{mathpar}
 
 
@@ -905,7 +901,7 @@ produces values for $\phi$'s variables.
 
 %% To handle non-linear patterns, or patterns with gu\-ard expressions, the
 %% morphism would also need an input context $\GG$. I consider this in
-%% Section~\ref{sec:patterns-with-guards}.
+%% \cref{sec:patterns-with-guards}.
 
 
 \subsection{Typing \mb{case}-expressions}
@@ -1129,9 +1125,10 @@ A^s$.
   \infer{}{(A \to B)^\ti \le (\Box A \to \Box B)^\tm}
 \end{mathpar}
 
-\todo{TODO: check these vs the algorithmic function subtyping rules. $(A \to
-  B)^\ti \le (\Box A \to \Box B)^\tm$ handles one of the cases; $(A \to B)^\ta
-  \equiv (\op\;A \to \op\;B)^\tm$ handles another; what about the last one?}
+\todo{TODO: check we can derive the algorithmic function subtyping rules. \((A
+  \to B)^\ti \le (\Box A \to \Box B)^\tm\) handles one of the cases; $(A \to
+  B)^\ta \equiv (\op\;A \to \op\;B)^\tm$ handles another; what about the last
+  one?}
 
 
 \section{Metatheory}

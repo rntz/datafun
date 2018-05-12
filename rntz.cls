@@ -28,44 +28,10 @@
 %% ---- Basic layout ----
 \LoadClass{extarticle}
 
-%% ---- AMS stuff and theorem styles ----
-%% This must precede \RequirePackage{newtxmath}; otherwise newtxmath defines
-%% \openbox and amsthm crashes complaining \openbox is already defined.
-\RequirePackage{amsthm,amsmath,amssymb}
-
-%% Everything is numbered sequentially with a single counter.
-\theoremstyle{plain}
-\newtheorem{theorem}{Theorem}
-\newtheorem{conjecture}[theorem]{Conjecture}
-\newtheorem{lemma}[theorem]{Lemma}
-\theoremstyle{definition}
-\newtheorem{definition}[theorem]{Definition}
-\theoremstyle{remark}
-\newtheorem*{corollary}{Corollary}
-\theoremstyle{plain}            %back to default
-
 %% ---- Styling paragraphs and lists ----
-\setlength{\parindent}{1.0pc}
+\setlength{\parindent}{1pc}
 \RequirePackage{enumitem}           % list styling
 \setlist{noitemsep,topsep=\smallskipamount}
-
-%% ---- Title formatting and sizing ----
-\newcommand{\titlesize}{\Large}
-\newcommand{\authorsize}{\normalsize}
-\newcommand{\secsize}{\large}
-\newcommand{\subsecsize}{\normalsize}
-\newcommand{\subsubsecsize}{\normalsize}
-
-%% TODO: omit {title,author,date} if not provided
-%% TODO: support \subtitle.
-\RequirePackage{placeins}       % for \FloatBarrier
-\renewcommand*{\maketitle}{
-  \begingroup%
-  \setlength{\parindent}{0pt}%
-  {\titlesize\@title\vspace{0.5ex}\par}%
-  {\authorsize\@author\vspace{0.5ex}\par}%
-  {\authorsize\@date\par}%
-  \endgroup\FloatBarrier}
 
 %% ---- Abstracts ----
 \renewenvironment{abstract}
@@ -83,10 +49,53 @@
 \definecolor[named]{ACMPurple}{cmyk}{0.55,1,0,0.15}
 \definecolor[named]{ACMDarkBlue}{cmyk}{1,0.58,0,0.21}
 
-%% ---- Hyperlinks ----
+%% ---- Links and references ----
 \RequirePackage{hyperref,url}
-\hypersetup{colorlinks,linkcolor=ACMRed,citecolor=ACMPurple,urlcolor=ACMDarkBlue,filecolor=ACMDarkBlue}
+\hypersetup{colorlinks, linkcolor=ACMBlue, citecolor=ACMBlue, urlcolor=ACMBlue, filecolor=ACMBlue}
 
+%% TODO: less garish colors.
+
+%% cleveref must be loaded AFTER hyperref & amsmath, or it errors; and AFTER
+%% amsthm and BEFORE we define theorem styles, otherwise (eg) it calls lemmas
+%% "Theorem"s.
+\RequirePackage{amsmath,amsthm}
+% options: capitalise
+\usepackage[nameinlink,noabbrev]{cleveref}
+% Use \S for section references, except when starting a sentence.
+\crefname{section}{\S}{\S}
+\Crefname{section}{Section}{Sections}
+
+%% ---- Theorem styling ----
+%% Everything is numbered sequentially with a single counter.
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem*{corollary}{Corollary}
+\theoremstyle{plain}            %back to default
+
+%% ---- Document title formatting and sizing ----
+\newcommand{\titlesize}{\Large}
+\newcommand{\authorsize}{\normalsize}
+\newcommand{\secsize}{\large}
+\newcommand{\subsecsize}{\normalsize}
+\newcommand{\subsubsecsize}{\normalsize}
+
+%% TODO: omit {title,author,date} if not provided
+%% TODO: support \subtitle.
+\RequirePackage{placeins}       % for \FloatBarrier
+\renewcommand*{\maketitle}{
+  \begingroup%
+  \setlength{\parindent}{0pt}%
+  {\titlesize\@title\vspace{0.5ex}\par}%
+  {\authorsize\@author\vspace{0.5ex}\par}%
+  {\authorsize\@date\par}%
+  \endgroup\FloatBarrier}
+
+
 %% ---- Section & subsection titles ----
 \RequirePackage{titlesec}    % (sub)section header styling
 
