@@ -31,7 +31,9 @@
 %% ---- Styling paragraphs and lists ----
 \setlength{\parindent}{1pc}
 \RequirePackage{enumitem}           % list styling
-\setlist{noitemsep,topsep=\smallskipamount}
+\setlist{itemsep=0pt}
+% Consider also: topsep, listparindent, parsep.
+%\setlength{\parskip}{.125ex plus .075ex minus .075ex}
 
 %% ---- Abstracts ----
 \renewenvironment{abstract}
