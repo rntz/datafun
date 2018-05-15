@@ -5,8 +5,8 @@
 This is a collection of tools I (Michael Arntzenius) use for my LaTeX projects.
 It contains:
 
-1. A Makefile for LaTex projects that's short and fairly generic. It uses
-   aclement's wonderful [latexrun][] tool, which is included as a git submodule.
+1. A Makefile for LaTeX projects that's short and fairly generic. It uses Austin
+   Clements' wonderful [latexrun][] tool, which is included as a git submodule.
    After cloning this repo, you should run:
 
    ```
@@ -16,23 +16,23 @@ It contains:
    This pulls down latexrun (~315kb as of 2018-05-15); no other installation
 necessary.
 
-2. A LaTeX document class, `rntz.cls`, which is based on `extarticle`, but with
-   some formatting changes. Most notably, it puts section numbers into the
-   left-margin.
+2. `rntz.cls`, a LaTeX document class based on `extarticle` with some formatting
+   changes. Most notably, it puts section numbers into the left-margin.
 
-3. `rntzgeometry.sty`, which has geometry presets for various paper sizes.
+3. `rntzfont.sty`, which chooses between some nice font combinations.
 
-4. `rntzfont.sty`, which chooses between some nice font combinations.
+4. `rntzgeometry.sty`, which has geometry presets for various paper sizes.
 
 5. `narrow.sty`, which sets up a one-column layout with extra width for
    `figure*` and `fullwidth` environments. `rntzgeometry.sty` uses `narrow.sty`
-   automatically, but if you want to you can use `narrow.sty` on its own.
+   automatically, but you can also use `narrow.sty` on its own.
 
 # How to use this repo
 
 If you want to use my tools in your project, here are two ways to go about it:
 
-1. Clone or copy this repo, put your `.tex` files in it, and you're good!
+1. Clone or copy this repo, put your `.tex` files in it, and run `make` — that's
+   all it takes!
 
 2. Use this repo as a submodule of your actual project. This keeps your work
    separate from mine, and lets you stay up-to-date easily. In this case, you
@@ -46,7 +46,23 @@ to be useful to as many people as possible.
 # Files
 
 ## Makefile
-Should be fairly self-documenting. Let me know if you have any trouble with it.
+Should be fairly self-documenting. Let me know if you have any trouble with it. Useful targets:
+
+- `make all`: Makes PDFs for every `.tex` file in its directory. Does not look
+  in subdirectories.
+
+- `make watch`: Watches for changes and recompiles on-the-fly. Uses
+  `inotifywait`, which is in the `inotify-tools` package on Ubuntu.
+
+- `make foo.pdf`: Makes a PDF from `foo.tex`.
+
+- `make foo-book.pdf`: Makes a zine-style "booklet" from a regular PDF. For
+  example, if `foo.pdf` is formatted for A5 paper, `foo-book.pdf` will be A4,
+  with two pages per side. You can print it out, cut or fold down the middle,
+  and staple the pages together.
+
+- `make clean`: Runs `latexrun --clean-all` and also removes `latex.out` (where
+  `latexrun` stores intermediate files).
 
 ## example.tex
 
