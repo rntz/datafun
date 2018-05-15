@@ -95,10 +95,17 @@
 % {core, loc}: established-ish category theory notation. DISLIKE: opaque.
 
 \newcommand{\tc}{\cdot}                      % tone composition
+\newcommand{\tmeet}{\wedge}                  % tone meet
+\newcommand{\bigmeet}{\bigwedge}             % tone meet
 \newcommand{\tm}{\id}                        % monotone / id
 \newcommand{\ta}{{\color{ForestGreen}\op}}   % antitone / op
-\newcommand{\ti}{{\color{NavyBlue}\iso}}     % invariant/ core
+\newcommand{\ti}{{\color{NavyBlue}\iso}}     % invariant/ iso
 \newcommand{\tb}{{\color{Bittersweet}\path}} % bivariant/ path
+
+%% \renewcommand{\tm}{1}                       % monotone / id
+%% \renewcommand{\ta}{{\ensuremath{-1}}}       % antitone / op
+%% \renewcommand{\ti}{{\ensuremath{\Box}}}     % invariant/ iso
+%% \renewcommand{\tb}{{\ensuremath{\lozenge}}} % bivariant/ path
 
 
 %% ---- Front matter ----
@@ -318,7 +325,7 @@ a_{i+1} : A$. Then $a \le b : A^\path$ iff there is a path from $a$ to $b$.
     \end{tikzpicture}
 
     \begin{array}{r|cccc}
-      s \wedge t
+      s \tmeet t
       & \tm & \tb & \ta & \ti\\\hline
       \tm & \tm & \tm & \ti & \ti\\
       \tb & \tm & \tb & \ta & \ti\\
@@ -343,9 +350,9 @@ a_{i+1} : A$. Then $a \le b : A^\path$ iff there is a path from $a$ to $b$.
 
 \Cref{fig:tone-ops} defines two operators on tones:
 \begin{enumerate}
-\item Meet $s \wedge t$ is greatest lower bound in the lattice ordered $\ti
+\item Meet $s \tmeet t$ is greatest lower bound in the lattice ordered $\ti
   < \{\tm, \ta\} < \tb$. This gives the general tone of the pairing $\langle f,
-  g\rangle : A^{s \wedge t} \to B \times C$ of two functions $f : A^s \to B$ and
+  g\rangle : A^{s \tmeet t} \to B \times C$ of two functions $f : A^s \to B$ and
   $g : A^{t} \to C$.
 
 \item Composition $s \tc t$ gives the tone of a composed function $g \circ f :
@@ -353,7 +360,10 @@ a_{i+1} : A$. Then $a \le b : A^\path$ iff there is a path from $a$ to $b$.
   $A^{s\tc t} = (A^s)^t$ for any preorder $A$.
 \end{enumerate}
 
-Together, $\wedge$ and $\tc$ form a semiring whose properties are given in
+By convention, composition binds tighter than meet, and $s \tc t$ may be written
+simply as $st$. Thus $(s \tc t) \tmeet u = s \tc t \tmeet u = st \tmeet u$.
+%
+Together, $\tmeet$ and $\tc$ form a semiring whose properties are given in
 \cref{fig:tone-op-laws}. \todo{TODO: Reference ``I Got Plenty o' Nuttin'{}'' ---
   another use of variable annotations drawn from a semiring, and with similar
   (the same?) behavior of those annotations in the inference rules.}
@@ -363,13 +373,13 @@ Together, $\wedge$ and $\tc$ form a semiring whose properties are given in
 \begin{figure*}
   \begin{mathpar}
     \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
-      \multicolumn{4}{c}{\textit{\normalsize Properties of ${}\wedge{}$}}
+      \multicolumn{4}{c}{\textit{\normalsize Properties of ${}\tmeet{}$}}
       \vspace{2pt}\\
-      \text{Associativity} & (s \wedge t) \wedge u &=& s \wedge (t \wedge u)\\
-      \text{Commutativity} & s \wedge t &=& t \wedge s\\
-      \text{Idempotence} & s \wedge s &=& s\\
-      \tb~\text{is identity} & \tb \wedge s &=& s\\
-      \ti~\text{absorbs} & \ti \wedge s &=& \ti\\
+      \text{Associativity} & (s \tmeet t) \tmeet u &=& s \tmeet (t \tmeet u)\\
+      \text{Commutativity} & s \tmeet t &=& t \tmeet s\\
+      \text{Idempotence} & s \tmeet s &=& s\\
+      \tb~\text{is identity} & \tb \tmeet s &=& s\\
+      \ti~\text{absorbs} & \ti \tmeet s &=& \ti\\
     \end{array}
 
     \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
@@ -383,8 +393,8 @@ Together, $\wedge$ and $\tc$ form a semiring whose properties are given in
     \end{array}
 
     \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
-      \text{Left-distribution} & s \tc (t \wedge u) &=& (s \tc t) \wedge (s \tc u)\\
-      \text{Right-distribution} & (s \wedge t) \tc u &=& (s \tc u) \wedge (t \tc u)
+      \text{Left-distribution} & s  (t \tmeet u) &=& s t \tmeet s u\\
+      \text{Right-distribution} & (s \tmeet t) u &=& s u \tmeet t u
     \end{array}
   \end{mathpar}
   \caption{Properties of tone operators}
@@ -539,18 +549,18 @@ $\eta_{\mb{1}} = \idfn$, thus:
   \todo{TODO}
 \end{proof}
 
-\todo{Isn't $\wedge$ greatest lower bound / product? Don't we have
+\todo{Isn't $\tmeet$ greatest lower bound / product? Don't we have
   $\vee$ / least upper bound / coproducts? Old stuff:}
 
-Tone meet $\wedge$ and composition $\tc$ also have semantic versions. $s \wedge
+Tone meet $\tmeet$ and composition $\tc$ also have semantic versions. $s \tmeet
 t$ corresponds to intersection of relations (noting that the intersection of two
 reflexive, transitive relations is itself reflexive and transitive), and $s \tc
 t$ corresponds to functor composition.
 %
 \begin{eqnarray*}
-  a \le b : A^{s \wedge t} %% \iff a \le b : A^s \cap A^t
+  a \le b : A^{s \tmeet t} %% \iff a \le b : A^s \cap A^t
   &\iff& a \le b : A^s \wedge a \le b : A^t\\
-  a \le b : A^{s \tc t} &\iff& a \le b : (A^s)^t
+  a \le b : A^{s t} &\iff& a \le b : (A^s)^t
 \end{eqnarray*}
 
 \begin{conjecture}
@@ -561,7 +571,7 @@ t$ corresponds to functor composition.
 \end{proof}
 
 \begin{conjecture}
-  The definitions of $\wedge$ and $\tc$ in \cref{fig:tone-ops} coincide with
+  The definitions of $\tmeet$ and $\tc$ in \cref{fig:tone-ops} coincide with
   their semantic definitions, applied to the semantic interpretation of $\tm$,
   $\ta$, $\tb$, and $\ti$.
 \end{conjecture}
@@ -569,80 +579,92 @@ t$ corresponds to functor composition.
 
 \section{A tonal sequent calculus}
 
+\newcommand{\T}[1]{#1\,}
+
 \begin{mathpar}
-  (A_1^{t_1}, \dots, A_n^{t_n})^u = (A_1^{t_1 \tc u}, \dots, A_n^{t_n \tc u})\\
+  (A_1^{t_1}, \dots, A_n^{t_n})^u = (A_1^{t_1 u}, \dots, A_n^{t_n u})\\
 
   \infer[Hypothesis]{t \le \tm}{\GG, A^t \vdash A}
 
-  \infer[$T$-Right]{\GG \vdash A}{\GG^t \vdash T_t A}
+  \infer[$T$-Right]{\GG \vdash A}{\GG^t \vdash \T{t} A}
 
-  \infer[$T$-Left]{\GG{},A^{t\tc u} \vdash C}{\GG{}, (T_t A)^u \vdash C}
+  \infer[$T$-Left]{\GG{},A^{t\tc u} \vdash C}{\GG{}, (\T{t} A)^u \vdash C}
 
   \infer[Weakening]{\GG{}, A^t \vdash C \\ u \le t}{\GG{}, A^u \vdash C}
 
-  \infer[Contraction]{\GG{},A^t, A^u \vdash C}{\GG{}, A^{t \wedge u} \vdash C}
+  \infer[Contraction]{\GG{},A^t, A^u \vdash C}{\GG{}, A^{t \tmeet u} \vdash C}
 
   \infer[Cut]{\GG \vdash A \\ \Delta,A^t \vdash C}{\GG^t,\Delta \vdash C}
 \end{mathpar}
 
-Jason Reed sent me these rules for a sequent calculus with a connective $T_s$
-internalizing the tone functor $-^s$. I aim to adapt this into a
-natural-deduction-style system with proof terms, i.e.\! a simply typed
-$\lambda$-calculus.
+Jason Reed sent me these rules for a sequent calculus, where $\T{t} A$ is the
+type internalizing the tone functor $-^t$ applied to the type $A$. I aim to
+adapt this into a natural-deduction-style system with proof terms, i.e.\ a
+simply typed $\lambda$-calculus.
 
 
 \section{A bidirectional \texorpdfstring{$\lambda$}{lambda}-calculus with tone inference}
 
-\newcommand{\subtype}[3]{#2^{#1}\sqsubset {#3}}
-\newcommand{\converts}[3]{#2^{#1} \prec {#3}}
+\newcommand{\subtype}{\le}
+\newcommand{\strips}{\prec}
 
-\newcommand{\h}[3]{#1 : #2^{#3}} % hypotheses
+\newcommand{\uh}[2]{#1 : #2}         % toneless hypothesis
+\newcommand{\h}[3]{\uh{#1}{#2^{#3}}} % hypotheses
+\newcommand{\extend}[2]{{#1},\, {#2}}
 \newcommand{\infers}[3]{{#1} \Rightarrow {#2} \vdash {#3}}
 \newcommand{\checks}[3]{{#1} \Leftarrow {#2} \vdash {#3}}
 
-%% \renewcommand{\infers}[3]{{#1} ~\shortrightarrow~ {#2} \vdash {#3}}
-%% \renewcommand{\checks}[3]{{#1} ~::~ {#2} \vdash {#3}}
-
-%% \renewcommand{\infers}[3]{{#2}\vdash {#1} \shortrightarrow {#3}}
-%% \renewcommand{\checks}[3]{{#2}\vdash {#1} : {#3}}
-
-\newcommand{\ein}{\ms{in}}
-\newcommand{\einj}[2]{\ein_{#1}\:{#2}}
-\newcommand{\einl}[1]{\einj{1}{#1}}
-\newcommand{\einr}[1]{\einj{2}{#1}}
+\newcommand{\ein}[2]{\ms{in}_{#1}\:{#2}}
 \newcommand{\cto}{\shortrightarrow}
 \newcommand{\ecase}[5]{%
-  \mb{case}~{#1}~\mb{of}\ {\einl{#2} \cto #3};\ {\einr{#4} \cto #5}}
-\newcommand{\emptycx}{\cdot}
+  \mb{case}~{#1}~\mb{of}\ {\ein{1}{#2} \cto #3};\ {\ein{2}{#4} \cto #5}}
+\newcommand{\emptycx}{\varepsilon}
+
+\newcommand{\mdist}[2]{#1 \equiv #2}
+\newcommand{\mbinop}{\oast}
+\newcommand{\adjoint}[2]{#1 \dashv #2}
+
+%% \renewcommand{\infers}[3]{#2 \vdash #1 \Rightarrow #3}
+%% \renewcommand{\checks}[3]{#2 \vdash #1 \Leftarrow #3}
+
+%% \renewcommand{\infers}[3]{#1 \Rightarrow {#3} \dashv {#2}}
+%% \renewcommand{\checks}[3]{#1 \Leftarrow {#3} \dashv {#2}}
+%% \renewcommand{\extend}[2]{{#2},\, {#1}}
+%% \renewcommand{\uh}[2]{#2\,#1}
+
+\newcommand{\pipe}{~\,|\,~}
 
 \begin{mathpar}
   \begin{array}{rccl}
-    \text{variables} & x\\
-    \text{base types} & P\vspace{0.5em}\\
-    \text{tones} & s,t,u & \bnfeq & \tm ~|~ \ta ~|~ \tb ~|~ \ti
+    \text{variables} & x\vspace{1pt}\\
+    \text{base types} & P
     \vspace{0.5em}\\
+
+    \text{tones} & s,t,u & \bnfeq & \tm \pipe \ta \pipe \tb \pipe \ti
+    \vspace{1pt}\\
+    \text{cartesian operators} & \mbinop &\bnfeq& {+} \pipe {\x}
+    \vspace{1pt}\\
     \text{types} & A,B,C
-    &\bnfeq& P ~|~ A \to B ~|~ A \x B ~|~ A + B ~|~ \Box A ~|~ \op\;A
+    &\bnfeq& P \pipe \T{s} A \pipe A \to B \pipe A \mbinop B
     \vspace{0.5em}\\
+
+    \text{inferring terms} & e
+    &\bnfeq& x \pipe e\;m \pipe \pi_i\;e \pipe m : A \vspace{1pt}\\
     \text{checking terms} & m,n
-    &\bnfeq& e ~|~ \fnof{x} m ~|~ (m,n) ~|~ \einj{i}{m}\\
+    &\bnfeq& e \pipe \fnof{x} m \pipe (m,n) \pipe \ein{i}{m}\\
     &&|& \mb{let}~x = e~\mb{in}~ m\\
     &&|& \ecase{e}{x}{m}{y}{n}
     \vspace{0.5em}\\
-    \text{inferring terms} & e
-    &\bnfeq& x ~|~ e\;m ~|~ \pi_i\;e ~|~ m : A
-    \vspace{0.5em}\\
-    \text{contexts}
-    & \GG &\bnfeq& \emptycx ~|~ \GG{}, \h{x}{A}{s}
-    \vspace{0.5em}\\
-    \text{judgments}
-    & J &\bnfeq&
-    \checks{m}{\GG}{A} ~~|~~ \infers{e}{\GG}{A}\\
-    &&|& \subtype{s}{A}{B} ~~|~~ \converts{s}{A}{B}
+
+    \text{contexts} & \GG
+    &\bnfeq& \emptycx \pipe \extend{\GG}{\h{x}{A}{s}}\vspace{1pt}\\
+    \text{judgments} & J
+    &\bnfeq& \checks{m}{\GG}{A} \pipe \infers{e}{\GG}{A}\\
+    &&|& \adjoint{s}{t} \pipe s \le t \pipe A^s \subtype B \pipe A^s \strips B
   \end{array}
 \end{mathpar}
 
-\todo{TODO: explain my various abuses of notation, e.g. $\GG^t$ and $\GG_1 \wedge
+\todo{TODO: explain my various abuses of notation, e.g. $\GG^t$ and $\GG_1 \tmeet
   \GG_2$}
 
 
@@ -660,14 +682,14 @@ $\lambda$-calculus.
   \infer{ }{\infers{x}{\h{x}{A}{\tm}}{A}}
 
   %% projection
-  \infer{\infers{e}{\GG}{A} \\ \converts{s}{A}{B_1 \x B_2}}
+  \infer{\infers{e}{\GG}{A} \\ A^{s} \strips B_1 \x B_2}
         {\infers{\pi_i\;e}{\GG^s}{B_i}}
 
   %% application
   \infer{\infers{e}{\GG_1}{A}
-         \\ \converts{u}{A}{B \to C}
+         \\ A^{u} \strips B \to C
          \\ \checks{m}{\GG_2}{B}}
-        {\infers{e\; m}{\GG_1^u \wedge \GG_2}{C}}
+        {\infers{e\; m}{\GG_1^u \tmeet \GG_2}{C}}
 \end{mathpar}
 
 %% \noindent\textbf{Checking forms}
@@ -676,114 +698,137 @@ $\lambda$-calculus.
 \begin{mathpar}
   %% ---- checking forms ----
   %% inferring -> checking by subtyping
-  \infer{\infers{e}{\GG}{A} \\ \subtype{t}{A}{B}}
+  \infer{\infers{e}{\GG}{A} \\ A^t \subtype B}
         {\checks{e}{\GG^t}{B}}
 
-  %% automatic box and op introduction
+  %% mode introduction
   \infer{\checks{m}{\GG}{A}}
-        {\checks{m}{\GG^\ti}{\Box A}}
-
-  \infer{\checks{m}{\GG}{A}}
-        {\checks{m}{\GG^\ta}{\op\; A}}
+        {\checks{m}{\GG^s}{\T{s} A}}
 
   %% let-binding
-  \infer{\infers{e}{\GG_1}{A} \\ \checks{m}{\GG_2,\, \h{x}{A}{s}}{C}}
-        {\checks{\mb{let}~x = e~\mb{in}~m}{\GG_1^s \wedge \GG_2}{C}}
+  \infer{\infers{e}{\GG_1}{A} \\ \checks{m}{\extend{\GG_2}{\h{x}{A}{s}}}{C}}
+        {\checks{\mb{let}~x = e~\mb{in}~m}{\GG_1^s \tmeet \GG_2}{C}}
 
   %% lambdas
-  \infer{\checks{m}{\GG{},\, \h{x}{A}{s}}{B} \\ \tm \le s}
+  \infer{\checks{m}{\extend{\GG}{\h{x}{A}{s}}}{B} \\ \tm \le s}
         {\checks{\fnof{x} m}{\GG}{A \to B}}
 
   %% pairs
   \infer{\checks{m}{\GG_1}{A_1} \\ \checks{n}{\GG_2}{A_2}}
-        {\checks{(m,n)}{\GG_1 \wedge \GG_2}{A_1 \x A_2}}
+        {\checks{(m,n)}{\GG_1 \tmeet \GG_2}{A_1 \x A_2}}
 
   %% injection
   \infer{\checks{m}{\GG}{A_i}}
-        {\checks{\einj{i}{m}}{\GG}{A_1 + A_2}}
+        {\checks{\ein{i}{m}}{\GG}{A_1 + A_2}}
 
   %% case analysis
   \infer{\infers{e}{\GG}{A} \\
-         \converts{s}{A}{B_1 + B_2} \\
-         \checks{m}{\GG_1,\, \h{x}{B_1}{t_1}}{C} \\
-         \checks{n}{\GG_2,\, \h{y}{B_2}{t_2}}{C}}
+         A^{s} \strips B_1 + B_2 \\
+         \checks{m}{\extend{\GG_1}{\h{x}{B_1}{t_1}}}{C} \\
+         \checks{n}{\extend{\GG_2}{\h{y}{B_2}{t_2}}}{C}}
         {\checks{\ecase{e}{x}{m}{y}{n}}
-                {\GG^{s\tc(t_1\wedge t_2)} \wedge \GG_1 \wedge \GG_2}
+                {\GG^{s\tc(t_1\tmeet t_2)} \tmeet \GG_1 \tmeet \GG_2}
                 {C}}
 \end{mathpar}
 
 
-\subsection{Subtyping}
+\subsection{Tone judgments}
 
-In $\subtype{s}{A}{B}$, the types $A$ and $B$ are inputs, and the tone $s$ is
-output.
-%
-``$P~\text{equiv}$'' holds iff the base type $P$'s preorder is symmetric (i.e.\!
-an equivalence relation).
+\todo{TODO: Explain judgment $s \le t$, for tone ordering, and $\adjoint{s}{t}$,
+  for tone adjunction.}
 %
 \begin{mathpar}
-  \infer{ }{\subtype{\tm}{A}{A}}
+\adjoint{\tm}{\tm}
 
-  \infer{P~\text{equiv}}{\subtype{\ti}{P}{P}}
+\adjoint{\ta}{\ta}
 
-  \infer{\subtype{s}{A}{B}}
-        {\subtype{s \tc \ti}{A}{\Box B}}
+\adjoint{\tb}{\ti}
 
-  \infer{\subtype{s}{A}{B}}
-        {\subtype{\tb \tc s}{\Box A}{B}}
+\infer{}{s \le s}
 
-  \infer{\subtype{s}{A}{B}}
-        {\subtype{\ta \tc s}{(\op\; A)}{B}}
+\infer{}{\ti \le s}
 
-  \infer{\subtype{s}{A}{B}}
-        {\subtype{s \tc \ta}{A}{\op\; B}}
-
-  %% Products
-  \infer{\subtype{s}{A_1}{A_2} \\ \subtype{t}{B_1}{B_2}}
-        {\subtype{s \wedge t}{(A_1 \x B_1)}{A_2 \x B_2}}
-
-  %% Sums
-  \infer{\subtype{s}{A_1}{A_2} \\ \subtype{t}{B_1}{B_2}}
-        {\subtype{s \wedge t}{(A_1 + B_1)}{A_2 + B_2}}
+\infer{}{s \le \tb}
 \end{mathpar}
 
-Function subtyping, $\subtype{s}{(A_1 \to B_1)}{A_2 \to B_2}$, has four rules
---- one for each tone $s$ produced by $\subtype{s}{B_1}{B_2}$:
+
+
+\subsection{Subtyping}
+
+\todo{TODO: Explain why we use tone-annotated subtyping.}
+
+In ${A}^{s} \subtype {B}$, the types $A$ and $B$ are inputs, and the tone $s$ is
+output.
 %
 \begin{mathpar}
-  \infer{\subtype{s}{A_1}{A_2} \\ \subtype{\tm}{B_1}{B_2} \\ \tm \le s}
-        {\subtype{\tm}{(A_1 \to B_1)}{A_2 \to B_2}}
+  \infer[refl]{}{A^\tm \subtype {A}}
 
-  \infer{\subtype{s}{A_1}{A_2} \\ \subtype{\ta}{B_1}{B_2} \\ \ta \le s}
-        {\subtype{\ta}{(A_1 \to B_1)}{A_2 \to B_2}}
+  \infer[map]
+        {A^{s} \subtype B}
+        {A^{st} \subtype \T{t} B}
 
-  \infer{\subtype{s}{A_1}{A_2} \\ \subtype{\tb}{B_1}{B_2} \\ \ti < s}
-        {\subtype{\tb}{(A_1 \to B_1)}{A_2 \to B_2}}
+  \infer[adjoint]
+        {\adjoint{t}{s} \\ A^u \subtype B}
+        {(\T{s} A)^{tu} \subtype B}
 
-  \infer{\subtype{\tb}{A_1}{A_2} \\ \subtype{\ti}{B_1}{B_2}}
-        {\subtype{\ti}{(A_1 \to B_1)}{A_2 \to B_2}}
+  %% Products and sums
+  \infer[distribute]
+        {A_1^{s} \subtype A_2 \\ B_1^{t} \subtype B_2}
+        {(A_1 \mbinop B_1)^{s \tmeet t} \subtype A_2 \mbinop B_2}
+\end{mathpar}
+
+The semantic justification for \textsc{adjoint} is as follows. From $-^t \dashv
+-^s$ we have $A^{st} \to A \isoto A^s \to A^s$, thus $A^{st} \le A$, thus
+$(\T{s} A)^t \le A$, and so finally $(\T{s} A)^{tu} \le A^u \le B$. \todo{TODO:
+  Bridge the gap between ${\isoto}$ and ${=}$; I think ``tones don't alter the
+  elements'' suffices? Clean up this explanation. Explain that we use adjunction
+  rather than $st \le \tm$ directly because adjunction gives us the \emph{most
+    informative} result; $st \le \tm$ is declarative, $\adjoint{t}{s}$ is
+  algorithmic. Give explanations for each other rule as well.}
+
+Function subtyping, $(A_1 \to B_1)^{s} \subtype A_2 \to B_2$, has four rules ---
+one for each tone $s$ produced by $\subtype{s}{B_1}{B_2}$:
+%
+\begin{mathpar}
+  \infer{A_1^{s} \subtype A_2 \\ B_1^{\tm} \subtype B_2 \\ \tm \le s}
+        {(A_1 \to B_1)^{\tm} \subtype A_2 \to B_2}
+
+  \infer{A_1^{s} \subtype A_2 \\ B_1^{\ta} \subtype B_2 \\ \ta \le s}
+        {(A_1 \to B_1)^{\ta} \subtype A_2 \to B_2}
+
+  \infer{A_1^{s} \subtype A_2 \\ B_1^{\tb} \subtype B_2 \\ \ti < s}
+        {(A_1 \to B_1)^{\tb} \subtype A_2 \to B_2}
+
+  \infer{A_1^{\tb} \subtype A_2 \\ B_1^{\ti} \subtype B_2}
+        {(A_1 \to B_1)^{\ti} \subtype A_2 \to B_2}
 \end{mathpar}
 
 \todo{Can these $t \le s$ constraints be turned into ``composing with $u$
   is $\ge \tm$'', for some choice of $u$ depending on $t$?}
 
-
-\subsection{Modal stripping}
+Subtyping at base types will depend on the base types you choose. Frequently,
+some base types' preorders will be symmetric (or even discrete, $x \le y \iff x
+= y$), and therefore equivalence relations. Let ``$P~\text{equiv}$'' hold if
+$P$'s order is symmetric. Then the following rule is useful:
+\[ \infer{P~\text{equiv}}{P^{\ti} \subtype P} \]
 
-$\converts{s}{A}{B}$ is a specialization of $\subtype{s}{A}{B}$ which strips off
+
+\subsection{Mode stripping}
+
+$A^{s} \strips B$ is a specialization of $A^{s} \subtype B$ which strips off
 modal operators on $A$, turning them into transformations on $s$. As in
 subtyping, $A$ is an input and $s$ an output; however, $B$ is now an output.
 %
 \begin{mathpar}
-  \infer{A~\text{stripped}}{\converts{\tm}{A}{A}}
+  \infer{\fapremise{s,B} A \ne \T{s} B}{A^{\tm} \strips A}
 
-  \infer{\converts{s}{A}{B}}{\converts{\tb\tc s}{\Box A}{B}}
-
-  \infer{\converts{s}{A}{B}}{\converts{\ta\tc s}{(\op\; A)}{B}}
+  \infer{\adjoint{t}{s} \\ A^{u} \strips B}
+        {(\T{s} A)^{tu} \strips B}
 \end{mathpar}
 
-``$A~\text{stripped}$'' holds iff $A$ is \emph{not} of the form $\Box B$ or
-$\op\; B$, i.e. its outermost connective is not modal.
+\todo{TODO: note that we cannot strip the mode $\tb$. $\tb$ is basically a
+  pariah; we cannot eliminate it through mode stripping, and we don't have an
+  explicit elimination rule.}
 
 
 \subsection{Tones and the \texorpdfstring{$\fn$}{lambda} rule}
@@ -792,16 +837,16 @@ Here are two more general variations on the $\fn$ rule I've considered:
 %
 \begin{mathpar}
   \infer[Fn-1]
-        {\checks{m}{\GG{},\, \h{x}{A}{s}}{B} \\ A \sqsubset A^s}
+        {\checks{m}{\extend{\GG}{\h{x}{A}{s}}}{B} \\ A \le A^s}
         {\checks{\fnof{x}{m}}{\GG}{A \to B}}
 
   \infer[Fn-2]
-        {\checks{m}{\GG{},\, \h{x}{A}{t}}{B}
-         \\ \subtype{s}{A}{A}
+        {\checks{m}{\extend{\GG}{\h{x}{A}{t}}}{B}
+         \\ A^{s} \subtype A
          \\ \tm \le s \tc t}
         {\checks{\fnof{x} m}{\GG}{A \to B}}
 \end{mathpar}
-\textsc{Fn-1} requires a new judgment, $A \sqsubset B^s$, where $A,B,s$ are all
+\textsc{Fn-1} requires a new judgment, $A \le B^s$, where $A,B,s$ are all
 inputs; this doesn't seem difficult to define, but it's Yet Another Subtyping
 Judgment. \textsc{Fn-2} avoids this, but is much less easy to explain.
 
@@ -809,13 +854,13 @@ However, it's not clear to me I need to generalize the $\fn$ rule. The reason I
 thought I did was to justify something like the following:
 \begin{mathpar}
   \infer*{\infer*{\vdots}
-           {{\GG{},\, \h{x}{A}{\ti}} \vdash {m} : {B}}}
+           {{\extend{\GG}{\h{x}{A}{\ti}}} \vdash {m} : {B}}}
          {{\GG} \vdash {\fnof{x}{m}} : {\Box A \to B}}
 \end{mathpar}
 
 But this \emph{could} check as follows:
 \begin{mathpar}
-  \infer*{\infer*{\vdots}{\checks{m}{\GG{},\, \h{x}{\Box A}{s}}{B}}
+  \infer*{\infer*{\vdots}{\checks{m}{\extend{\GG}{\h{x}{\Box A}{s}}}{B}}
           \\ \tm \le s}
          {\checks{\fnof{x}{m}}{\GG}{\Box A \to B}}
 \end{mathpar}
@@ -833,24 +878,18 @@ $\lambda$ rule?
 \newcommand{\xbar}[2]{\overline{#2}^{#1}}
 \newcommand{\pwild}{\_}
 \newcommand{\pcheck}[3]{#1 : #2 \vdash #3}
-\newcommand{\casecheck}[6]{%
-  #1 \cto #2 \Leftarrow #3 \vdash {#4}^{#5} >\!\!> #6}
-\renewcommand{\casecheck}[6]{%
-  #1 \cto #2 \Leftarrow #3 \vdash {#4}^{#5} \rightsquigarrow #6}
-
-\newcommand{\mdist}[2]{#1 \equiv #2}
-\newcommand{\mbinop}{\boxplus}
+%\newcommand{\casecheck}[6]{#1 \cto #2 : #3 \vdash {#4}^{#5} >\!\!> #6}
+\newcommand{\casecheck}[6]{#1 \cto #2 \Leftarrow {#4}^{#5}; #3 \vdash #6}
 
 \[\begin{array}{rccl}
   \text{patterns} & p,q
-  &\bnfeq& x ~|~ (p,q) ~|~ \einj{i}{p}
+  &\bnfeq& x ~|~ (p,q) ~|~ \ein{i}{p}
   \vspace{0.5em}\\
   \text{checking terms} & m,n
   &\bnfeq& \mb{case}~ e ~\mb{of}~ \xbar{i}{p_i \cto m_i}
   \vspace{0.5em}\\
-  \text{toneless contexts} & \phi,\psi &\bnfeq& \emptycx ~|~ \phi,\, x : A
-  \vspace{0.5em}\\
-  \text{distributive type ops} & \boxplus &\bnfeq& {\x} ~|~ {+}
+  \text{toneless contexts} & \phi,\psi
+  &\bnfeq& \emptycx ~|~ \extend{\phi}{\uh{x}{A}}
   \vspace{0.5em}\\
   \text{judgments} & J
   &\bnfeq& \mdist{A}{B \mbinop C}\\
@@ -875,16 +914,14 @@ But do we \emph{need} this \mb{box} annotation? \Cref{thm:tones-monoidal} says
 $\Box(A \x B)$ and $\Box A \x \Box B$ mean the same thing. Why not let $(x,y)$
 match $\Box(A \x B)$ \emph{directly}, yielding $x : \Box A$ and $y : \Box B$?
 
-To this end, we'll need a judgment $\mdist{A}{B \mbinop C}$ for distributing modes
-over an operator $\mbinop$ (either $\x$ or $+$). Here $A$ is an input and
-$B$, $C$ are outputs.
+To this end, we'll need a judgment $\mdist{A}{B \mbinop C}$ for distributing
+modes over a cartesian operator $\mbinop$ (either $\x$ or $+$). Here $A$ is an
+input and $B$, $C$ are outputs.
 %
 \begin{mathpar}
   \infer{ }{\mdist{A \mbinop B}{A \mbinop B}}
 
-  \infer{\mdist{A}{B \mbinop C}}{\mdist{\Box A}{\Box B \mbinop \Box C}}
-
-  \infer{\mdist{A}{B \mbinop C}}{\mdist{\op~ A}{\op\, B \mbinop \op~ C}}
+  \infer{\mdist{A}{B \mbinop C}}{\mdist{\T{s} A}{\T{s} B \mbinop \T{s} C}}
 \end{mathpar}
 
 
@@ -895,10 +932,10 @@ The judgment $\pcheck{p}{A}{\phi}$ corresponds to a \Pre-morphism $A \to 1 +
 produces values for $\phi$'s variables.
 %
 \begin{mathpar}
-  \infer{ }{\pcheck{x}{A}{x : A}}
+  \infer{ }{\pcheck{x}{A}{\uh{x}{A}}}
 
   \infer{\mdist{A}{A_1 + A_2} \\ \pcheck{p}{A_i}{\phi}}
-        {\pcheck{\einj{i}{p}}{A}{\phi}}
+        {\pcheck{\ein{i}{p}}{A}{\phi}}
 
   \infer{\mdist{A}{A_1 \x A_2} \\
          \fapremise{i} \pcheck{p_i}{A_i}{\phi_i}\\
@@ -918,11 +955,11 @@ Typing \mb{case} as a single rule is complicated:
 \[
 \infer{
   \infers{e}{\GG}{A} \\
-  \fapremise{i} p_i : A \vdash \phi_i\\
+  \fapremise{i} \pcheck{p_i}{A}{\phi_i}\\
   \fapremise{i} \checks{m_i}{\GG_i,\phi_i^{\vec{s}_i}}{C}
 }{
   \checks{\mb{case}~e~\mb{of}~\xbar{i}{p_i \cto m_i}}
-         {\GG^{\bigwedge_i\bigwedge\vec{s}_i} \wedge \bigwedge_i \GG_i}
+         {\GG^{\bigmeet_i\bigmeet\vec{s}_i} \tmeet \bigmeet_i \GG_i}
          {A}}
 \]
 %% \begin{mathpar}
@@ -930,25 +967,26 @@ Typing \mb{case} as a single rule is complicated:
 %%     (\forall i)~{\pcheck{p_i}{A}{s_i}{\phi_i}} \\
 %%     (\forall i)~{\checks{m_i}{\GG_i, \phi_i^{\vec{t}_i}}{C}}
 %%   }{\checks{\mb{case}~e~\mb{of}~\xbar{i}{p_i \cto m_i}}
-%%     {\GG^{\bigwedge_i (s_i \tc \bigwedge \vec{t}_i)} \wedge \bigwedge_i \GG_i}
+%%     {\GG^{\bigmeet_i (s_i \tc \bigmeet \vec{t}_i)} \tmeet \bigmeet_i \GG_i}
 %%     {C}}
 %% \end{mathpar}
 
 We can split this up using a helper judgment, $\casecheck{p}{m}{\GG}{A}{s}{C}$,
-corresponding to a morphism $\GG \x A^s \to 1 + C$. This says that the arm $p
-\cto m$ uses variables in $\GG$, matches a scrutinee of type $A$ that it uses at
-tone $s$, and produces (if it matches) a result of type $C$. Then we have:
+corresponding to a morphism $A^s \x \GG \to 1 + C$. This says that the arm $p
+\cto m$ matches a scrutinee of type $A$ that it uses at tone $s$, along with
+variables in $\GG$, to produce (if it matches) a result of type $C$. Then we
+have:
 %
 \begin{mathpar}
   \infer{\pcheck{p}{A}{\phi} \\
-         \checks{m}{\GG, \phi^{\vec{t}}}{C}
-  }     {\casecheck{p}{m}{\GG}{A}{\bigwedge\vec{t}}{C}}
+         \checks{m}{\extend{\GG}{\phi^{\vec{t}}}}{C}
+  }     {\casecheck{p}{m}{\GG}{A}{\bigmeet\vec{t}}{C}}
 
   \infer{\infers{e}{\GG}{A} \\
          \fapremise{i} {\casecheck{p_i}{m_i}{\GG_i}{A}{s_i}{C}}
   }{\checks
     {\mb{case}~ e ~\mb{of} ~\xbar{i}{p_i \cto m_i}}
-    {\GG^{\bigwedge_i s_i} \wedge \bigwedge_i \GG_i}
+    {\GG^{\bigmeet_i s_i} \tmeet \bigmeet_i \GG_i}
     {C}}
 \end{mathpar}
 
@@ -962,15 +1000,15 @@ rules for expressions? Not quite. We can rewrite the tuple-projection rule:
         {\infers{\pi_i\;e}{\GG}{A_i}}
 \end{mathpar}
 
-However, the function application rule (below) cannot; in general, $\Box(A \to
-B) \not\equiv \Box A \to \Box B$. So it seems there is no choice but to use
-subtyping.
+However, we cannot rewrite function application (shown below) this way; in
+general, $\Box(A \to B) \not\equiv \Box A \to \Box B$. So it seems there is no
+choice but to use subtyping.
 
 \begin{mathpar}
   \infer{\infers{e}{\GG_1}{A}
-         \\ {\color{ACMRed} \converts{u}{A}{B \to C}}
+         \\ {\color{ACMRed} A^{u} \strips B \to C}
          \\ \checks{m}{\GG_2}{B}}
-        {\infers{e\; m}{\GG_1^u \wedge \GG_2}{C}}
+        {\infers{e\; m}{\GG_1^u \tmeet \GG_2}{C}}
 \end{mathpar}
 
 \todo{TODO: explain why using modal stripping for pattern matching doesn't work,
@@ -985,7 +1023,10 @@ subtyping.
 
 \newcommand{\armif}[3]{#1 ~\mb{if}~ #2 \cto #3}
 \newcommand{\armifcheck}[7]{%
-  \armif{#1}{#2}{#3} \Leftarrow {#4} \vdash #5^{#6} \rightsquigarrow #7}
+  \armif{#1}{#2}{#3} : {#4} \x #5^{#6} \rightharpoonup #7}
+
+%% \renewcommand{\armifcheck}[7]{%
+%%   \armif{#1}{#2}{#3} \Leftarrow #5^{#6} \rightsquigarrow #7 \dashv {\,#4}}
 
 \[\begin{array}{rccl}
   \text{checking expressions} & m
@@ -997,10 +1038,10 @@ subtyping.
 \begin{mathpar}
   \infer{
     \pcheck{p}{A}{\phi} \\
-    \checks{m}{\GG_1, \phi^{\vec{s}}}{\Box\, 2} \\
-    \checks{n}{\GG_2, \phi^{\vec{t}}}{C}
+    \checks{m}{\extend{\GG_1}{\phi^{\vec{s}}}}{\Box\, 2} \\
+    \checks{n}{\extend{\GG_2}{\phi^{\vec{t}}}}{C}
   }     {\armifcheck{p}{m}{n}{\GG}{A}
-    {\bigwedge\!\vec{s} \wedge \bigwedge\!\vec{t}}
+    {\bigmeet\!\vec{s} \tmeet \bigmeet\!\vec{t}}
     {C}}
 
   \infer{
@@ -1008,56 +1049,57 @@ subtyping.
     \fapremise{i} \armifcheck{p_i}{m_i}{n_i}{\GG_i}{A}{s_i}{C}
   }{\checks
     {\mb{case}~e~\mb{of}~ \xbar{i}{\armif{p_i}{m_i}{n_i}}}
-    {\GG^{\bigwedge_i\!s_i} \wedge \bigwedge_i \GG_i}
+    {\GG^{\bigmeet_i\!s_i} \tmeet \bigmeet_i \GG_i}
     {C}}
 \end{mathpar}
 
 
-\subsection{Patterns with guards, old version}
+\subsection{Patterns with embedded guards}
 \label{sec:patterns-with-guards}
 
 \newcommand{\pif}[2]{{#1}~\mb{if}~{#2}}
-\newcommand{\pcheckio}[5]{#1 \Leftarrow #2 \vdash #3^{#4} \dashv #5}
+\newcommand{\pcheckio}[5]{#1 : #2^{#3} \x #4 \rightharpoonup #5}
 
 \[\begin{array}{rccl}
   \text{patterns} & p,q
-  &\bnfeq& ... ~|~ \pif{p}{m}
+  &\bnfeq& \pif{p}{m}
   \vspace{0.5em}\\
-  \text{judgments} & J &\bnfeq& ... ~~|~~ \pcheckio{p}{\GG}{A}{s}{\phi}
+  \text{judgments} & J &\bnfeq& \pcheckio{p}{A}{s}{\GG}{\phi}
 \end{array}\]
 
 \vspace{\parsep}
 
 Now that patterns can contain expressions, our pattern typing judgment takes an
-input context $\GG$, becoming $\pcheckio{p}{\GG}{A}{s}{\phi}$. This corresponds to a morphism $\GG \x A^s \to 1 + \phi$.
+input context $\GG$, becoming $\pcheckio{p}{A}{s}{\GG}{\phi}$. This corresponds
+to a morphism $A^s \x \GG \to 1 + \phi$.
 %
 \begin{mathpar}
-  \infer{ }{\pcheckio{\pwild}{\GG}{A}{\tb}{\emptycx}}
+  \infer{x \not\in \phi}{
+    \pcheckio{x}{A}{\tm}{\GG}{x : A}}
 
-  \infer{x \not\in \GG}{
-    \pcheckio{x}{\GG}{A}{\tm}{x : A}}
+  \infer{\mdist{A}{A_1 + A_2} \\
+         \pcheckio{p}{A_i}{s}{\GG}{\phi}}
+        {\pcheckio{\ein{i}{p}}{A}{s}{\GG}{\phi}}
 
-  \infer{\converts{s}{A}{A_1 + A_2} \\
-         \pcheckio{p}{\GG}{A_i}{t}{\phi}}
-        {\pcheckio{\einj{i}{p}}{\GG}{A}{s \tc t}{\phi}}
-
-  \infer{\converts{s}{A}{A_1 \x A_2} \\
-    \pcheckio{p}{\GG_1}{A_1}{t_1}{\phi_1} \\
-    \pcheckio{q}{\GG_2, \phi_1^{\vec{u}}}{A_2}{t_2}{\phi_2}
-    }{
+  \infer{\mdist{A}{B \x C} \\
+         \pcheckio{p}{B}{s}{\GG_1}{\phi} \\
+         \pcheckio{q}{C}{t}{\extend{\GG_2}{\phi^{\vec{u}}}}{\psi}
+  }{
     \pcheckio{(p,q)}
-             {\GG_1 \wedge {\GG_1}^{\bigwedge\!\vec{u}} \wedge \GG_2}
              {A}
-             {s \tc (t_1 \wedge t_2 \wedge (t_1 \tc \bigwedge \vec{u}))}
-             {\phi_1,\phi_2}}
+             {s \tc (\tm \tmeet \bigmeet\vec{u}) \tmeet t}
+             {{\GG_1}^{\tm \tmeet \bigmeet\!\vec{u}} \tmeet \GG_2}
+             {\extend{\phi}{\psi}}}
 
-  \infer{\pcheckio{p}{\GG_1}{A}{s}{\phi} \\
-  \checks{m}{\GG_2, \phi^{\vec{t}}}{\Box\thinspace 2}}
-        {\pcheckio{\pif{p}{m}}
-          {\GG_1 \wedge {\GG_1}^{\bigwedge\!\vec{t} \tc \tb} \wedge \GG_2^{\tb}}
-          {A}
-          {s \wedge (s \tc {\bigwedge\!\vec{t}} \tc \tb)}
-          {\phi}}
+  \infer{\pcheckio{p}{A}{s}{\GG_1}{\phi} \\
+         \checks{m}{\extend{\GG_2}{\phi^{\vec{t}}}}{\Box\, 2}
+  }{
+    \pcheckio
+        {\pif{p}{m}}
+        {A}
+        {s \tc (\tm \tmeet {\bigmeet\!\vec{t}} \tc \tb)}
+        {{\GG_1} \tmeet (\GG_1^{\bigmeet\!\vec{t}} \tmeet \GG_2)^\tb}
+        {\phi}}
 \end{mathpar}
 
 \todo{These rules are getting so complicated I don't trust them without a
@@ -1068,7 +1110,7 @@ Now we update the rules for $\casecheck{p}{m}{\GG}{A}{s}{C}$ to pass through $\G
 \begin{mathpar}
   \infer{\pcheckio{p}{\GG_1}{A}{s}{\phi} \\
          \checks{m}{\GG_2,\phi^{\vec{t}}}{C}}
-        {\casecheck{p}{m}{{\GG_1}^{\bigwedge\!\vec{t}} \wedge \GG_2}{A}{s}{C}}
+        {\casecheck{p}{m}{{\GG_1}^{\bigmeet\!\vec{t}} \tmeet \GG_2}{A}{s}{C}}
 \end{mathpar}
 
 %% \subsection{Old work}
@@ -1089,7 +1131,7 @@ Now we update the rules for $\casecheck{p}{m}{\GG}{A}{s}{C}$ to pass through $\G
 %%          \\ A~\text{decidable} }
 %%         {\pinfer{x}{\GG}{A}{s}{\emptycx}}
 
-%%   \infer{\converts{t}{A}{B_1 \x B_2}
+%%   \infer{A^{t} \strips B_1 \x B_2
 %%          \\ \pinfer{p}{\GG}{B_1}{?}{\Delta_1}
 %%          \\ \pinfer{q}{\GG,\Delta_1}{B_2}{?}{\Delta_2} }
 %%         {\pinfer{(p,q)}{\GG}{A}{s}{\Delta_1, \Delta_2}}
@@ -1103,7 +1145,7 @@ Now we update the rules for $\casecheck{p}{m}{\GG}{A}{s}{C}$ to pass through $\G
   check them.}
 
 \subsection{Subtyping and type equivalence}
-Type equivalence $A^s \equiv B^t$ is a synonym for $A^s \le B^t \wedge B^t \le
+Type equivalence $A^s \equiv B^t$ is a synonym for $A^s \le B^t \tmeet B^t \le
 A^s$.
 
 \todo{TODO: declarative subtyping rules for sum types}
@@ -1147,7 +1189,7 @@ We wish to prove admissible the following rules:
 \begin{mathpar}
   \infer[tone weakening]
         {\checks{m}{\GG}{A}}
-        {\checks{m}{\GG \wedge \GG'}{A}}
+        {\checks{m}{\GG \tmeet \GG'}{A}}
 
   \infer[subtyping left]
         {\checks{m}{\GG, \h{x}{A}{s}}{C} \\ A^s \le B^t}
@@ -1161,7 +1203,7 @@ We wish to prove admissible the following rules:
         {\infers{e}{\GG_1}{A}
          \\ A^s \le B^t
          \\ \checks{m}{\GG_2, \h{x}{B}{t}}{C}}
-        {\checks{m[e/x]}{\GG_1^s \wedge \GG_2}{C}}
+        {\checks{m[e/x]}{\GG_1^s \tmeet \GG_2}{C}}
 \end{mathpar}
 
 \todo{TODO: Doesn't \textsc{tone weakening} follow from \textsc{subtyping
@@ -1239,7 +1281,7 @@ We wish to prove admissible the following rules:
 %%     \xbar{i}{\h{x_i}{A_i}{\hilited t_i}},\, \h{y}{B}{\hilited u}
 %%     \vdash N : C
 %%   }{
-%%     \xbar{i}{\h{x_i}{A_i}{\hilited (s_i \tc u) \wedge t_i}}
+%%     \xbar{i}{\h{x_i}{A_i}{\hilited (s_i \tc u) \tmeet t_i}}
 %%     \vdash \textbf{let}~ y = M ~\textbf{in}~ N : C
 %%   }
 %% \end{mathpar}
@@ -1251,7 +1293,7 @@ We wish to prove admissible the following rules:
 %%     \xbar{i}{\h{x_i}{A_i}{s_i}} \vdash M : A
 %%     \quad
 %%     \xbar{i}{\h{x_i}{A_i}{t_i}} \vdash N : B
-%%   }{\xbar{i}{\h{x_i}{A_i}{s_i \wedge t_i}} \vdash (M,N) : A \x B}
+%%   }{\xbar{i}{\h{x_i}{A_i}{s_i \tmeet t_i}} \vdash (M,N) : A \x B}
 
 %%   \infer{\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash M : B_1 \x B_2}
 %%         {\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash \pi_i\;M : B_i}
@@ -1263,7 +1305,7 @@ We wish to prove admissible the following rules:
 %%   \infer{\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash M : B \overset{u}{\to} C
 %%          \quad
 %%          \xbar{i}{\h{x_i}{A_i}{t_i}} \vdash N : B}
-%%         {\xbar{i}{\h{x_i}{A_i}{s_i \wedge (t_i \tc u)}} \vdash M\;N : C}
+%%         {\xbar{i}{\h{x_i}{A_i}{s_i \tmeet (t_i \tc u)}} \vdash M\;N : C}
 %%   \\
 
 %%   \infer{\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash M : C}
@@ -1273,7 +1315,7 @@ We wish to prove admissible the following rules:
 %%          \quad
 %%          \xbar{i}{\h{x_i}{A_i}{t_i}, \h{y}{B}{u}} \vdash N : C
 %%          \quad \iso \le u}
-%%         {\xbar{i}{\h{x_i}{A_i}{(s_i \tc \tb) \wedge t_i}} \vdash
+%%         {\xbar{i}{\h{x_i}{A_i}{(s_i \tc \tb) \tmeet t_i}} \vdash
 %%           \textbf{let box}~ x = M ~\textbf{in}~ N : C}
 %% \end{mathpar}
 
