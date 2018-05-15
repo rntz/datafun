@@ -92,10 +92,10 @@
 \renewcommand*{\maketitle}{
   \begingroup%
   \setlength{\parindent}{0pt}%
-  {\titlesize\@title\vspace{0.5ex}\par}%
-  {\authorsize\@author\vspace{0.5ex}\par}%
-  {\authorsize\@date\par}%
-  \endgroup\FloatBarrier}
+  {\titlesize\@title\vspace{0.5ex}\\}%
+  {\authorsize\@author\vspace{0.5ex}\\}%
+  {\authorsize\@date}%
+  \endgroup\FloatBarrier\par}
 
 
 %% ---- Section & subsection titles ----
