@@ -8,7 +8,7 @@ DEPENDS := Makefile $(wildcard *.sty)
 
 PDFS   := $(TEXS:.tex=.pdf)
 JUNK   := $(TEXS:.tex=.dvi) $(TEXS:.tex=.bbl)
-JUNK   += $(TEXS:.tex=.snm) $(TEXS:.tex=.nav)
+JUNK   += $(TEXS:.tex=.snm) $(TEXS:.tex=.nav) $(TEXS:.tex=.vrb)
 
 .PHONY: all watch view clean
 all: $(PDFS)

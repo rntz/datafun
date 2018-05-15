@@ -1,4 +1,4 @@
-LATEXRUN := ../latexrun/latexrun
+LATEXRUN := ../rntztex/latexrun/latexrun
 
 TEXS    := datafun.tex expansions.tex presentation.tex
 # other things which affect compilation result
