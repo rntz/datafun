@@ -1,4 +1,8 @@
-\documentclass[a5,libertine]{rntz}
+\documentclass{rntz}
+\usepackage[b5,width=13cm]{rntzgeometry}
+\usepackage[cochineal]{rntzfont}
+\usepackage{amssymb}
+\usepackage{microtype}
 
 %% \documentclass{article}
 %% \usepackage{amsmath,amssymb,amsthm}
@@ -10,9 +14,6 @@
 %% \newtheorem{lemma}{Lemma}
 %% \theoremstyle{definition}
 %% \newtheorem{definition}{Definition}
-
-%% \usepackage{anyfontsize}
-\usepackage{eulervm}              % use Euler math font.
 
 \newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
 \newcommand{\mb}[1]{\ensuremath{\mathbf{#1}}}
@@ -160,7 +161,7 @@ To do this, we will need the corollary of one crucial lemma:
      & (f \oplus df)^{i+1}\; (x \oplus dx)\\
     =& (f \oplus df)\; (f^i\;x \oplus
     (df \;(f^{i-1}\;x) \circ ... \circ df\;x)\;dx)
-    & \text{by our inductive hypothesis}\\
+    & \text{by inductive hypothesis}\\
     =& f^{i+1}\;x \oplus df\; (f^i\;x) \;
     ((df \;(f^{i-1}\;x) \circ ... \circ df\;x)\;dx)
     & \text{by Lemma \ref{lem:fun-change}}\\
@@ -230,7 +231,8 @@ We'll also need a simple but cute lemma about monotone fixed points in general:
 \begin{proof}
   Since $\bot \le a$, by monotonicity $\fix\;f = f^i\;\bot \le f^i\;a$. Since $a
   \le \fix\;f$, by monotonicity $f^i\;a \le f^i\;(\fix\;f) = \fix\;f$. So by
-  antisymmetry $f^i\;a = \fix\;f$.\footnote{This is a special-case of a more general lemma, which you can find at \url{https://mathoverflow.net/questions/269117/random-iteration-of-a-set-of-monotone-maps-until-fixed-point}.}
+  antisymmetry $f^i\;a = \fix\;f$.\footnote{This is a special-case of a more
+    general lemma, which you can find \href{https://mathoverflow.net/questions/269117/random-iteration-of-a-set-of-monotone-maps-until-fixed-point}{on MathOverflow}.}
 \end{proof}
 
 Armed with these, we can prove our main result:
@@ -260,7 +262,7 @@ Armed with these, we can prove our main result:
     =& (f \oplus \dv f)^i \; (\fix\;f \oplus \bot)
     & \text{by Lemma \ref{lem:bot-change}}\\
     =& \fix\;f \oplus (\dv f \;(\fix\;f))^i \;\bot
-    & \text{by Theorem~\ref{thm:crux}, as $\dv f$ is valid \& $\bot$ is valid by Lemma \ref{lem:bot-change}}\\
+    & \text{by Thm.~\ref{thm:crux}, as $\dv f$ is valid \& $\bot$ is valid by Lemma \ref{lem:bot-change}}\\
     =& \fix\;f \oplus \fix\;(\dv f\;(\fix\;f))
   \end{array}
   \]
