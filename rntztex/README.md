@@ -75,17 +75,16 @@ Based on extarticle, and supports most of its options. Notable differences:
 2. Sections & sub-sections headings are smaller.
 3. Sub-sub-sections are un-numbered; I use them sparingly if at all.
 4. Redefines `\maketitle` and the `abstract` environment.
-5. Fiddles with paragraph and list item spacing.
 
 It also has a somewhat random grab-bag of other features I happen to use:
 
-6. Requires and configures hyperref, url, and cleveref.
+5. Requires and configures hyperref, url, and cleveref.
 
-7. Requires amsmath & amsthm, and defines theorem, conjecture, lemma,
+6. Requires amsmath & amsthm, and defines theorem, conjecture, lemma,
 definition, and corollary environments. It sets them to share a single running
 counter.
 
-8. Defines some colors, taken from acmart.cls:
+7. Defines some colors, taken from acmart.cls:
 ACM{Blue,Yellow,Orange,Red,LightBlue,DarkBlue,Green,Purple}.
 
 ## rntzgeometry.sty
