@@ -29,11 +29,11 @@
 \LoadClass{extarticle}
 
 %% ---- Styling paragraphs and lists ----
-\setlength{\parindent}{1pc}
 \RequirePackage{enumitem}           % list styling
-\setlist{itemsep=0pt}
+% No extra separation between items (aside from \parsep). Indent lists to match
+% paragraph indentation.
+\setlist{itemsep=0pt,labelindent=\parindent,leftmargin=*}
 % Consider also: topsep, listparindent, parsep.
-%\setlength{\parskip}{.125ex plus .075ex minus .075ex}
 
 %% ---- Abstracts ----
 \renewenvironment{abstract}
