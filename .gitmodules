@@ -1,0 +1,3 @@
+[submodule "latexrun"]
+	path = latexrun
+	url = https://github.com/aclements/latexrun.git
