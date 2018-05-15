@@ -1,0 +1,63 @@
+% ---- The rntz class ----
+% Based on extarticle, and supports most of its options. Notable differences:
+%
+% 1. Section & sub-section numbers go into the left margin.
+% 2. Sections & sub-sections headings are smaller.
+% 3. Sub-sub-sections are un-numbered; I use them sparingly if at all.
+% 4. Redefines \maketitle and the `abstract' environment.
+% 5. Fiddles with paragraph and list item spacing.
+
+% It also has a somewhat random grab-bag of other features I happen to use:
+%
+% 6. Requires and configures hyperref, url, and cleveref.
+%
+% 7. Requires amsmath & amsthm, and defines theorem, conjecture, lemma,
+% definition, and corollary environments. It sets them to share a single running
+% counter.
+%
+% 8. Defines some colors, taken from acmart.cls:
+% ACM{Blue,Yellow,Orange,Red,LightBlue,DarkBlue,Green,Purple}.
+\documentclass{rntz}
+
+% ---- rntzgeometry ----
+%
+% rntzgeometry sets the page geometry to have "reasonable" margins. It uses
+% narrow.sty to produce a single column of text; the figure* and fullwidth
+% environments expand to a larger width.
+%
+% a5, b5, a4, letter
+%   Paper size. Default is b5.
+%
+% width=LEN
+%   Text width. Default is 345pt.
+%
+% fullwidth=LEN
+%   Width for figure* and fullwidth environments. Default varies by paper size.
+\usepackage{rntzgeometry}
+
+% ---- rntzfont ----
+%
+% rntzfont chooses from a set of paired text & math fonts, with appropriate
+% scalings and line spacings.
+% 
+% The options are charter, cochineal, palatino, libertine, fourier, cm.
+% Default is palatino.
+\usepackage{rntzfont}
+
+\title{An example document}
+\author{Lore M. Ipsum}
+\date{\today}
+
+\usepackage{lipsum} % for example text.
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+  \lipsum[1]
+\end{abstract}
+
+\section{An example section}
+\lipsum
+
+\end{document}
