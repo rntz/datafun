@@ -120,4 +120,5 @@ width as well.
 - `width=LEN`: The width of the main text column. Default 345pt.
 
 - `fullwidth=LEN`: The width for `figure*` and `fullwidth` environments. Default
-  is `\textwidth`.
+  is `\textwidth`, i.e. the width the text *would have been* before you loaded
+  `narrow.sty`.
