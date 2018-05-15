@@ -6,17 +6,10 @@ rntztex is a collection of tools I (Michael Arntzenius) use for my LaTeX
 projects. It contains:
 
 1. A Makefile for LaTeX projects that's short and fairly generic. It uses Austin
-   Clements' wonderful [latexrun][] tool, which is included as a git submodule.
-   After cloning this repo, you should run:
+   Clements' wonderful [latexrun][] tool, which is included; no installation
+   necessary.
 
-   ```
-   $ git submodule update --init --recursive
-   ```
-
-   This pulls down latexrun (~315kb as of 2018-05-15); no other installation
-necessary.
-
-2. `rntz.cls`, a LaTeX document class based on `extarticle` with some formatting
+2. `rntz.cls`, a document class based on `extarticle` with some formatting
    changes. Most notably, it puts section numbers into the left-margin.
 
 3. `rntzfont.sty`, which chooses between some nice font combinations.
@@ -37,16 +30,8 @@ separate from mine, and lets you update rntztex easily. In this case, you should
 copy the included `Makefile` to your source directory and update its
 `RNTZTEXDIR` variable to contain the path to rntztex.
 
-## rntztex as a git submodule
-
-If you're using git, a nice way to manage rntztex is as a submodule. However,
-rntztex has [latexrun][] as a submodule, and the UI for nested submodules has a
-few sharp edges. To get started, I recommend this:
-
-```
-$ git submodule add https://github.com/rntz/rntztex.git
-$ git submodule update --init --recursive
-```
+If you use git, you could use rntztex as a submodule, but submodules are a bit
+complicated and beyond the scope of this README. Good luck!
 
 # Licensing
 
@@ -57,7 +42,9 @@ request; I want this to be useful to as many people as possible.
 # Files
 
 ## Makefile
-Should be fairly self-documenting. Let me know if you have any trouble with it. Useful targets:
+
+Should be fairly self-documenting. Let me know if you have any trouble with it.
+Useful targets:
 
 - `make all`: Makes PDFs for every `.tex` file in its directory. Does not look
   in subdirectories.
@@ -81,6 +68,7 @@ A simple example document showing off `rntz.cls`, `rntzgeometry.sty`, and
 `rntzfont.sty`.
 
 ## rntz.cls
+
 Based on extarticle, and supports most of its options. Notable differences:
 
 1. Section & sub-section numbers go into the left margin.
@@ -101,6 +89,7 @@ counter.
 ACM{Blue,Yellow,Orange,Red,LightBlue,DarkBlue,Green,Purple}.
 
 ## rntzgeometry.sty
+
 Sets the page geometry to have "reasonable" margins. It uses `narrow.sty` to
 produce a single column of text; the `figure*` and `fullwidth` environments
 expand to a larger width.
@@ -115,6 +104,7 @@ expand to a larger width.
   varies by paper size.
 
 ## rntzfont.sty
+
 This chooses from a set of paired text & math fonts, with appropriate scalings
 and line spacings.
 
@@ -122,6 +112,7 @@ The options are `charter`, `cochineal`, `palatino`, `libertine`, `fourier`, and
 `cm` (Computer Modern). Default is `palatino`.
 
 ## narrow.sty
+
 This sets your body text in a single narrow column, but defines a `fullwidth`
 environment that expands to "full width". It redefines `figure*` to use full
 width as well.
