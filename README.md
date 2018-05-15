@@ -2,15 +2,15 @@
 
 [latexrun]: https://github.com/aclements/latexrun
 
-This is a collection of tools I (Michael Arntzenius) use for my LaTeX projects.
-It contains:
+rntztex is a collection of tools I (Michael Arntzenius) use for my LaTeX
+projects. It contains:
 
 1. A Makefile for LaTeX projects that's short and fairly generic. It uses Austin
    Clements' wonderful [latexrun][] tool, which is included as a git submodule.
    After cloning this repo, you should run:
 
    ```
-   $ git submodule init && git submodule update
+   $ git submodule update --init --recursive
    ```
 
    This pulls down latexrun (~315kb as of 2018-05-15); no other installation
@@ -27,21 +27,32 @@ necessary.
    `figure*` and `fullwidth` environments. `rntzgeometry.sty` uses `narrow.sty`
    automatically, but you can also use `narrow.sty` on its own.
 
-# How to use this repo
+# Using rntztex
 
-If you want to use my tools in your project, here are two ways to go about it:
+The easiest way to use this repo is to clone or copy it, put some `.tex` files
+in it, and run `make`. That's all it takes!
 
-1. Clone or copy this repo, put your `.tex` files in it, and run `make` — that's
-   all it takes!
+Alternatively, you can keep rntztex in its own directory. This keeps your work
+separate from mine, and lets you update rntztex easily. In this case, you should
+copy the included `Makefile` to your source directory and update its
+`RNTZTEXDIR` variable to contain the path to rntztex.
 
-2. Use this repo as a submodule of your actual project. This keeps your work
-   separate from mine, and lets you stay up-to-date easily. In this case, you
-   should copy the included `Makefile` to your source directory and update its
-   `SUBMODULEDIR` variable to point to the submodule's path.
+## rntztex as a git submodule
 
-This repo is currently MIT-licensed. If you want to reuse my code but you're
-worried about licensing issues, send me an email or a pull request; I want this
-to be useful to as many people as possible.
+If you're using git, a nice way to manage rntztex is as a submodule. However,
+rntztex has [latexrun][] as a submodule, and the UI for nested submodules has a
+few sharp edges. To get started, I recommend this:
+
+```
+$ git submodule add https://github.com/rntz/rntztex.git
+$ git submodule update --init --recursive
+```
+
+# Licensing
+
+This repo is currently MIT-licensed; see LICENSE.txt. If you want to reuse my
+code but you're worried about licensing issues, send me an email or a pull
+request; I want this to be useful to as many people as possible.
 
 # Files
 

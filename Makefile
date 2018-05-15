@@ -1,13 +1,13 @@
-# Copy this Makefile to where your .tex files are and change $(SUBMODULEDIR) to
+# Copy this Makefile to where your .tex files are and change $(RNTZTEXDIR) to
 # point to rntztex's directory and this Makefile will still work.
-SUBMODULEDIR := .
+RNTZTEXDIR := .
 
 # The TEXINPUTS environment variable tells TeX where to find .sty and .cls
-# files. This is necessary if you set SUBMODULEDIR to something other than ".".
-export TEXINPUTS := $(SUBMODULEDIR):
+# files. This is necessary if you set RNTZTEXDIR to something other than ".".
+export TEXINPUTS := $(RNTZTEXDIR):
 
 # Path to latexrun.
-LATEXRUN := $(SUBMODULEDIR)/latexrun/latexrun
+LATEXRUN := $(RNTZTEXDIR)/latexrun/latexrun
 
 # By default, try to build every tex file in this directory.
 # Customize $(TEXS) to change this.
