@@ -1,0 +1,16 @@
+% Test overfull hbox messages
+
+\documentclass{article}
+
+\begin{document}
+
+X
+
+\newpage
+
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+\end{document}
+
+%% output:
+%% T-overfull-hbox.tex:11: warning: Overfull \hbox (982.50267pt too wide) (page 2)

@@ -1,0 +1,34 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{narrow}[2018/05/10]
+
+\RequirePackage{kvoptions}
+\RequirePackage{geometry}
+\RequirePackage[strict]{changepage}
+
+\DeclareStringOption[345pt]{width}
+\DeclareStringOption[\textwidth]{fullwidth}
+\ProcessLocalKeyvalOptions*
+
+\newlength{\narrow@full}
+\setlength{\narrow@full}{\narrow@fullwidth}
+\geometry{textwidth=\narrow@width}
+
+%% Define a fullwidth environment.
+%%
+%% I want to go from \textwidth to \narrow@full. adjustwidth adds to
+%% margins, subtracting from text width, so I should adjust by:
+%% (\textwidth-\narrow@full)/2.
+\newlength{\narrow@offset}
+\setlength{\narrow@offset}
+          {\dimexpr(\textwidth-\narrow@full)/2\relax}
+\newenvironment{fullwidth}
+  {\begin{adjustwidth}{\the\narrow@offset}{\the\narrow@offset}}
+  {\end{adjustwidth}}
+
+%% Redefine figure* to use fullwidth.
+%%
+%% A hack, taken from https://stackoverflow.com/questions/1565988/making-a-small-modification-to-a-latex-environment
+\renewenvironment{figure*}[1][\fps@figure]
+  {\edef\@tempa{\noexpand\@float{figure}[#1]}%
+   \@tempa\begin{fullwidth}\centering}
+  {\end{fullwidth}\end@float}

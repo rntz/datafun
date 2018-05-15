@@ -1,0 +1,24 @@
+% Test error unwinding
+
+\documentclass{article}
+
+\begin{document}
+\errorcontextlines=20
+
+\newtoks\testa
+\testa={a \the\testb c}
+\newtoks\testb
+\testb={b \errmessage{Error message}}
+\the\testa
+
+\end{document}
+
+%% status: 1
+
+%% output:
+%% T-unwind-error.tex:12: error: Error message
+%%       at <inserted text> b \errmessage {Error message}
+%%     from <inserted text> a \the \testb c
+%%                                        ^
+%%     from \the\testa
+%% There were errors; output/x.pdf not updated
