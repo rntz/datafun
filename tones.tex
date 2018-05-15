@@ -1,13 +1,13 @@
 \documentclass{rntz}
-\usepackage{rntzfont}
-
-%\usepackage[a5]{rntzgeometry}
+% Options: charter, cochineal, palatino, libertine
+\usepackage[charter]{rntzfont}
+%\usepackage[a5,width=115mm]{rntzgeometry}
+%\usepackage[b5,width=350pt]{rntzgeometry}
 \usepackage[b5,width=13cm]{rntzgeometry}
 %\usepackage[a4]{rntzgeometry}
 
 %% \documentclass{article}
-%% %% \usepackage[b5paper]{geometry}
-%% %% \usepackage{mathpazo,eulervm}
+%% \usepackage[b5paper]{geometry}
 %% \usepackage[dvipsnames]{xcolor}
 %% \definecolor[named]{ACMBlue}{cmyk}{1,0.1,0,0.1}
 %% \definecolor[named]{ACMYellow}{cmyk}{0,0.16,1,0}
@@ -17,7 +17,17 @@
 %% \definecolor[named]{ACMGreen}{cmyk}{0.20,0,1,0.19}
 %% \definecolor[named]{ACMPurple}{cmyk}{0.55,1,0,0.15}
 %% \definecolor[named]{ACMDarkBlue}{cmyk}{1,0.58,0,0.21}
-%% \usepackage{hyperref,url}
+%% \usepackage{amsmath,amsthm}
+%% \usepackage{hyperref,url,cleveref}
+%% \theoremstyle{definition}
+%% \newtheorem{theorem}{Theorem}
+%% \newtheorem{conjecture}[theorem]{Conjecture}
+%% \newtheorem{lemma}[theorem]{Lemma}
+%% \theoremstyle{definition}
+%% \newtheorem{definition}[theorem]{Definition}
+%% \theoremstyle{remark}
+%% \newtheorem*{corollary}{Corollary}
+%% \theoremstyle{plain}            %back to default
 
 
 %% ---- Packages ----
@@ -31,7 +41,10 @@
 \usepackage{stmaryrd}           % \llbracket,\rrbracket
 \usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
 
-% TODO: use \cref everywhere.
+% typographic improvements
+% TODO: put these in rntzfont.sty or rntz.cls?
+\usepackage[spacing=true,stretch=15,tracking=true,letterspace=15]{microtype}
+\frenchspacing
 
 
 %% ---- Commands ----

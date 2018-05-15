@@ -1,6 +1,8 @@
-\documentclass[ribbons]{rntz}
-\usepackage[libertine]{rntzfont}
-\usepackage[a5paper,total={12cm,18cm}]{geometry}
+\documentclass{rntz}
+\usepackage{rntzfont}
+\usepackage[b5,width=350pt]{rntzgeometry}
+\usepackage{amssymb}
+\usepackage{microtype}
 
 
 %% ---- Packages ----
@@ -59,14 +61,13 @@
 \begin{document}
 \maketitle
 
-{\vspace{1em}%\small
-\textbf{Abstract.}
-%
- I present a sequent calculus for intuitionistic linear logic in which
- hypotheses are annotated with ``tones''. Surprisingly, this involves three
- monoids, rather than a semiring, as might be expected. \todo{TODO:
-   Contextualize this; compare to Pfenning-style multiple contexts and
-   McBride-and-other-folk's-style semiring annotations.} \par}
+\begin{abstract}
+  I present a sequent calculus for intuitionistic linear logic in which
+  hypotheses are annotated with ``tones''. Surprisingly, this involves three
+  monoids, rather than a semiring, as might be expected. \todo{TODO:
+    Contextualize this; compare with Pfenning-style multiple contexts and
+    McBride-and-co semiring annotations.}
+\end{abstract}
 
 \section{A tonal sequent calculus for intuitionistic linear logic}
 
