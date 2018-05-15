@@ -41,6 +41,11 @@
 \usepackage{stmaryrd}           % \llbracket, \rrbracket, \oast
 \usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
 
+% List styling: No extra separation between items (aside from \parsep). Indent
+% lists to match paragraph indentation.
+\usepackage{enumitem}
+\setlist{itemsep=0pt,labelindent=\parindent,leftmargin=*}
+
 % typographic improvements
 % TODO: put these in rntzfont.sty or rntz.cls?
 \usepackage[spacing=true,stretch=15,tracking=true,letterspace=15]{microtype}
