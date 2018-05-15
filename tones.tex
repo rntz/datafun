@@ -31,14 +31,14 @@
 
 
 %% ---- Packages ----
-\usepackage{adjustbox}          % aligning tikz diagrams vertically w/ tables.
+%\usepackage{adjustbox}          % aligning tikz diagrams vertically w/ tables.
 \usepackage{amsmath,amssymb}    % basic math formatting & symbols
-\usepackage{anyfontsize}        % avoid font size warnings from stmaryrd
+%\usepackage{anyfontsize}        % avoid font size warnings from stmaryrd
 \usepackage{booktabs}           % \midrule
 \usepackage{mathpartir}         % \mathpar, \infer
 \usepackage{mathtools}          % for \dblcolon
 \usepackage{multirow}           % \multirow, \multicolumn
-\usepackage{stmaryrd}           % \llbracket,\rrbracket
+\usepackage{stmaryrd}           % \llbracket, \rrbracket, \oast
 \usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
 
 % typographic improvements
@@ -112,10 +112,11 @@
 
 
 \begin{document}
+
 \maketitle
 
 \begin{abstract}
- Certain properties of maps between preorders (e.g.\! preserving equivalence)
+ Certain properties of maps between preorders (e.g.\ preserving equivalence)
  reduce to monotonicity with respect to an altered domain ordering. I dub such
  alterations ``tones'', and explore their theory. I sketch a typed
  $\lambda$-calculus of monotone functions, using tones to allow selective
@@ -201,7 +202,7 @@ that
 
 So ``antitone'' is a special case of ``monotone''! This observation generalizes:
 every tone is really monotonicity with a transformation applied to the domain's
-ordering. So \textbf{tones transform orders.} I write $A^s$ for the preorder $A$
+ordering. So \textbf{tones transform orders}. I write $A^s$ for the preorder $A$
 transformed by the tone $s$, defined:
 
 \begin{center}
@@ -348,7 +349,7 @@ a_{i+1} : A$. Then $a \le b : A^\path$ iff there is a path from $a$ to $b$.
   $g : A^{t} \to C$.
 
 \item Composition $s \tc t$ gives the tone of a composed function $g \circ f :
-  A^{s\tc t} \to C$ when $f : A^s \to B$ and $g : B^t \to C$. Equivalently,
+  A^{s \tc t} \to C$ when $f : A^s \to B$ and $g : B^t \to C$. Equivalently,
   $A^{s\tc t} = (A^s)^t$ for any preorder $A$.
 \end{enumerate}
 
@@ -356,13 +357,6 @@ Together, $\wedge$ and $\tc$ form a semiring whose properties are given in
 \cref{fig:tone-op-laws}. \todo{TODO: Reference ``I Got Plenty o' Nuttin'{}'' ---
   another use of variable annotations drawn from a semiring, and with similar
   (the same?) behavior of those annotations in the inference rules.}
-
-%% Together, $\wedge$ and $\tc$ form a semiring, with $\wedge$ as an idempotent
-%% addition and $\tc$ as multiplication. Multiplication has $\tm$ as identity,
-%% but lacks an absorbing zero element. (\todo{TODO: Reference ``I Got Plenty o'
-%% Nuttin'{}'' --- another use of variable annotations drawn from a semiring,
-%% and with similar (the same?) behavior of those annotations in the inference
-%% rules.}) \Cref{fig:tone-op-laws} gives the relevant laws.
 
 \todo{TODO: check the distribution laws hold!}
 
