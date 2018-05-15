@@ -28,13 +28,6 @@
 %% ---- Basic layout ----
 \LoadClass{extarticle}
 
-%% ---- Styling paragraphs and lists ----
-\RequirePackage{enumitem}           % list styling
-% No extra separation between items (aside from \parsep). Indent lists to match
-% paragraph indentation.
-\setlist{itemsep=0pt,labelindent=\parindent,leftmargin=*}
-% Consider also: topsep, listparindent, parsep.
-
 %% ---- Abstracts ----
 \renewenvironment{abstract}
   {\vspace{1em}\textbf{Abstract.}}
