@@ -5,6 +5,7 @@ module ModalDatafun where
 import Control.Monad.Reader
 import Control.Monad.Writer.Strict hiding (Sum)
 import Data.Coerce
+import Data.Either (isRight)
 import Data.List (foldl')
 import Data.Map.Strict (Map)
 import Data.Monoid hiding (Sum, Product)
@@ -72,8 +73,16 @@ subtype a@(Fn a1 b1) b@(Fn a2 b2) = do
 -- incongruous types
 subtype a b = Left (a,b)
 
+subset a b = isRight (subtype (Box a) (Box b))
+
+seteq a b = subset a b && subset b a
+
+-- equiv a b = isRight $ subtype a b >> subtype b a
+-- The above definition of `equiv` is wrong! For example, it claims that
+-- (Box a -> Box b) is equivalent to (Box a -> b).
+
 -- Strips the modes off a type. Useful when typechecking an elimination form for
--- a non-modal type. Currently called "spine subtyping" in tones.tex.
+-- a non-modal type. Called "modal stripping" in tones.tex.
 demode :: Type -> (Type, Tone)
 demode (Box a) = (b, Path <> s) where (b,s) = demode a
 demode (Opp a) = (b, Op <> s) where (b,s) = demode a
