@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import argparse
+import subprocess
+import re
+import difflib
+import shutil
+import shlex
+
+failures = 0
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--latexrun', default='../latexrun',
+                        help='Path to latexrun (default: %(default)s)')
+    parser.add_argument('--latex-cmd', help='Passed to latexrun')
+    parser.add_argument('input', nargs='*', help='Input test file')
+    args = parser.parse_args()
+
+    latexrun_args = []
+    if args.latex_cmd is not None:
+        latexrun_args.extend(['--latex-cmd', args.latex_cmd])
+
+    os.makedirs('output', exist_ok=True)
+
+    for inp in args.input:
+        test(args.latexrun, latexrun_args, inp)
+
+    sys.exit(1 if failures else 0)
+
+def check(label, latexrun_args, passed=False, passed_expect=True):
+    global failures
+    if passed_expect and not passed:
+        failures += 1
+
+    msg, color = {(False, True): ('FAIL', 1),
+                  (True, False): ('FIXED', 2),
+                  (False, False): ('BROKEN', 3),
+                  (True, True): ('PASS', 2)}[(passed, passed_expect)]
+
+    label += ''.join(' ' + shlex.quote(a) for a in latexrun_args)
+    print('\x1b[1;3%dm%-6s\x1b[0m %s' % (color, msg, label))
+
+INDENT = 7 * ' '
+
+def test(latexrun_path, latexrun_args, input_path):
+    testname = os.path.splitext(input_path.split('/')[0])[0]
+
+    # Get expectations
+    input_src = open(input_path, errors='surrogateescape').read()
+
+    if input_path.endswith('.tex'):
+        pre = '^%% '
+    elif input_path.endswith('.sh'):
+        pre = '^## '
+    else:
+        raise ValueError('Unknown extension for test input input_path')
+
+    if re.search(pre + 'known_broken$', input_src, re.I|re.M):
+        passed_expect = False
+    else:
+        passed_expect = True
+
+    m = re.search(pre + 'status: (.*)', input_src, re.I|re.M)
+    if m:
+        status_expect = int(m.group(1))
+    else:
+        status_expect = 0
+
+    m = re.search(pre + 'bibtex-cmd: (.*)', input_src, re.I|re.M)
+    if m:
+        bibtex_cmd = m.group(1)
+        latexrun_args += ["--bibtex-cmd",  bibtex_cmd]
+
+    m = re.search(pre + 'output:\n((?:' + pre + '.*\n)*)', input_src, re.I|re.M)
+    if m:
+        output_expect = re.sub(pre, '', m.group(1), flags=re.M)
+    else:
+        output_expect = ''
+
+    # Clean
+    try:
+        shutil.rmtree(os.path.join(os.path.dirname(input_path), 'latex.out'))
+    except FileNotFoundError:
+        pass
+    try:
+        os.unlink(os.path.join(os.path.dirname(input_path), '.latexrun.db'))
+    except FileNotFoundError:
+        pass
+
+    # Run latexrun
+    input_dir = os.path.dirname(input_path)
+    outpath = os.path.relpath('output/x.pdf', start=input_dir)
+    latexrun_path = os.path.relpath(latexrun_path, start=input_dir)
+    latexrun_cmd = [latexrun_path, '-o', outpath] + latexrun_args
+
+    if input_path.endswith('.tex'):
+        cmd = latexrun_cmd + [os.path.basename(input_path)]
+    elif input_path.endswith('.sh'):
+        cmd = ['sh', os.path.basename(input_path)] + latexrun_cmd
+
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                         cwd=input_dir or None)
+    output = p.stdout.read().decode('ascii', errors='surrogateescape')
+    status = p.wait()
+
+    # Check results
+    if output != output_expect:
+        check(testname, latexrun_args, False, passed_expect)
+        open('output/%s.output' % testname, 'w', errors='surrogateescape')\
+            .write(output)
+        msg = []
+        for line in difflib.unified_diff(output_expect.splitlines(),
+                                         output.splitlines(), lineterm='',
+                                         fromfile='expected', tofile='output'):
+            if line.startswith('-'):
+                msg.append(INDENT + '\x1b[1;31m%s\x1b[0m' % line)
+            elif line.startswith('+'):
+                msg.append(INDENT + '\x1b[1;32m%s\x1b[0m' % line)
+            elif line.startswith('@'):
+                msg.append(INDENT + '\x1b[1;35m%s\x1b[0m' % line)
+            else:
+                msg.append(INDENT + line)
+        sys.stdout.flush()
+        sys.stdout.buffer.write('\n'.join(msg).encode(errors='surrogateescape'))
+        print()
+    elif status != status_expect:
+        check(testname, latexrun_args, False, passed_expect)
+        print(INDENT + 'Expected status %d, got %d' % (status_expect, status))
+    else:
+        check(testname, latexrun_args, True, passed_expect)
+
+if __name__ == '__main__':
+    main()
