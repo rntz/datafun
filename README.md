@@ -14,7 +14,8 @@ projects. It contains:
 
 3. `rntzfont.sty`, which chooses between some nice font combinations.
 
-4. `rntzgeometry.sty`, which has geometry presets for various paper sizes.
+4. `rntzgeometry.sty`, which sets margins etc. appropriately for common paper
+   sizes.
 
 5. `narrow.sty`, which sets up a one-column layout with extra width for
    `figure*` and `fullwidth` environments. `rntzgeometry.sty` uses `narrow.sty`
