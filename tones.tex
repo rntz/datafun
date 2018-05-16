@@ -60,7 +60,6 @@
 \newcommand{\bnfeq}{\dblcolon=}
 %% \newcommand{\defeq}{\overset{\ms{def}}{=}}
 
-\newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
 \newcommand{\mb}[1]{\ensuremath{\mathbf{#1}}}
 \newcommand{\mi}[1]{\ensuremath{\mathit{#1}}}
 \newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}
@@ -73,7 +72,7 @@
 \newcommand{\bind}[1]{{#1}\binder}
 \newcommand{\fnof}[1]{\fn\bind{#1}}
 \newcommand{\sub}[1]{\{{#1}\}}
-\newcommand{\fix}{\ms{fix}}
+\newcommand{\fix}{\textsf{fix}}
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
 
 %% Category & preorder theory
@@ -88,10 +87,10 @@
 \newcommand{\pathto}{\sim}
 
 %% Tone functors.
-\newcommand{\id}{\ms{id}}
-\newcommand{\op}{\ms{op}}
-\newcommand{\iso}{\ms{iso}}     % iso, core, inv, eq
-\renewcommand{\path}{\ms{path}} % path, loc, biv, bi
+\newcommand{\id}{\textsf{id}}
+\newcommand{\op}{\textsf{op}}
+\newcommand{\iso}{\textsf{iso}}     % iso, core, inv, eq
+\renewcommand{\path}{\textsf{path}} % path, loc, biv, bi
 % Sensible combinations:
 % {bi, eq}: suggestive, short.
 %           DISLIKE: "bi" ambiguous. "eq" suggests equality.
@@ -224,7 +223,7 @@ transformed by the tone $s$, defined:
     & \multicolumn{3}{c}{\textit{Transformation on $A$}}
     \\\midrule
     \tm & \text{same ordering}
-    & $a \le b : A$ &$\iff$& $a \le b : A^\tm$
+    & $a \le b : A$ &$\iff$& $a \le b : A^\id$
     \\
     \ta
     & \text{opposite ordering}
@@ -284,12 +283,11 @@ Here are a few more useful properties of tones, which I invite you to verify:
 $A^\path$ is the smallest preorder satisfying
 \[ a \le b \vee b \le a : A \implies a \le b : A^\path \]
 
-Unfortunately $A^\path$ is not so easy to define directly (without
-language like ``the smallest preorder satisfying'')
-%
-because the reverse implication, from $a \le b : A^\path$ to $a \le b \vee b \le
-a : A$, does not always hold. A good counterexample is the \ms{fencepost}
-preorder on $\N$, where $a < a+1$ for even $a$, and $a > a+1$ for odd $a$:
+Unfortunately $A^\path$ is not so easy to define directly (without language like
+``the smallest preorder satisfying'') because the reverse implication, from $a
+\le b : A^\path$ to $a \le b \vee b \le a : A$, does not always hold. A good
+counterexample is the \textsf{fencepost} preorder on $\N$, where $a < a+1$ for
+even $a$, and $a > a+1$ for odd $a$:
 
 \begin{center}
   \begin{tikzpicture}
@@ -305,9 +303,9 @@ preorder on $\N$, where $a < a+1$ for even $a$, and $a > a+1$ for odd $a$:
   \end{tikzpicture}
 \end{center}
 
-Note that $a \le b \vee b \le a : \ms{fencepost} \iff |a-b| \le 1$, which isn't
-transitive! Instead, $\ms{fencepost}^\path$ is the \emph{transitive closure} of
-$|a-b| \le 1$, which makes everything equivalent:
+Note that $a \le b \vee b \le a : \textsf{fencepost} \iff |a-b| \le 1$, which
+isn't transitive! Instead, $\textsf{fencepost}^\path$ is the \emph{transitive
+  closure} of $|a-b| \le 1$, which makes everything equivalent:
 \[ 0 \equiv 1 \equiv 2 \equiv 3 \equiv 4 \equiv \dots \]
 
 This suggests a direct definition: let a \emph{path} from $a_0$ to $a_n$ be a
@@ -619,7 +617,7 @@ simply typed $\lambda$-calculus.
 \newcommand{\infers}[3]{{#1} \Rightarrow {#2} \vdash {#3}}
 \newcommand{\checks}[3]{{#1} \Leftarrow {#2} \vdash {#3}}
 
-\newcommand{\ein}[2]{\ms{in}_{#1}\:{#2}}
+\newcommand{\ein}[2]{\textsf{in}_{#1}\:{#2}}
 \newcommand{\cto}{\shortrightarrow}
 \newcommand{\ecase}[5]{%
   \mb{case}~{#1}~\mb{of}\ {\ein{1}{#2} \cto #3};\ {\ein{2}{#4} \cto #5}}
@@ -953,7 +951,7 @@ produces values for $\phi$'s variables.
 %% \cref{sec:patterns-with-guards}.
 
 
-\subsection{Typing \mb{case}-expressions}
+\subsection{Typing \mb{case}-analysis}
 
 Typing \mb{case} as a single rule is complicated:
 %
