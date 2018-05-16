@@ -1,7 +1,10 @@
 %% %% rntz.cls doesn't support subsubsections.
-%% \documentclass[a4,libertine]{rntz}
-%% \usepackage{eulervm}
+%% \documentclass{rntz}
+%% \usepackage[b5,width=13cm]{rntzgeometry}
+%% \usepackage{rntzfont}
 %% \usepackage{anyfontsize}
+%% \usepackage[spacing=true]{microtype}
+%% \frenchspacing
 %% \usepackage{seminaive}
 
 \documentclass{article}
@@ -170,7 +173,8 @@ strict chain $f^s$.
   &&\pipe& \inj{i}{e} \pipe \case{e}{\m{x}}{e_1}{\m{x}}{e_2}\\
   &&\pipe& \disc{e} \pipe \letdisc{\d{x}}{e}{e} \pipe \splitsum{e}\\
   &&\pipe& \unit \pipe e \vee e \pipe \single{e} \pipe \setelim{\m{x}}{e}{e}\\
-  &&\pipe& \etrue \pipe \efalse \pipe \when{e}{e} \pipe \ifthen{e}{e}{e}\\
+  &&\pipe& \etrue \pipe \efalse\\
+  &&\pipe& \when{e}{e} \pipe \ifthen{e}{e}{e}\\
   &&\pipe& \fix{\m{x}}{e} \pipe \fixle{\m{x}}{e}{e}
 \end{array}
 \]
