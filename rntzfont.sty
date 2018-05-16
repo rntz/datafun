@@ -6,7 +6,6 @@
 \DeclareOption{libertine}{\def\rntz@font{libertine}}
 \DeclareOption{cm}{\def\rntz@font{cm}}
 \DeclareOption{charter}{\def\rntz@font{charter}}
-\DeclareOption{fourier}{\def\rntz@font{fourier}}
 \DeclareOption{cochineal}{\def\rntz@font{cochineal}}
 
 % Useful math fonts: mathpazo, eulervm, newtxmath.
@@ -38,11 +37,6 @@
   \RequirePackage[scale=1.1135]{cochineal}
   \linespread{1.15}
   \RequirePackage{eulervm}
-}{}
-
-\ifdefstring{\rntz@font}{fourier}{
-  \RequirePackage{fourier}
-  \linespread{1.1}
 }{}
 
 \ifdefstring{\rntz@font}{charter}{

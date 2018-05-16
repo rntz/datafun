@@ -107,8 +107,8 @@ expand to a larger width.
 This chooses from a set of paired text & math fonts, with appropriate scalings
 and line spacings.
 
-The options are `charter`, `cochineal`, `palatino`, `libertine`, `fourier`, and
-`cm` (Computer Modern). Default is `palatino`.
+The options are `charter`, `cochineal`, `libertine`, `palatino`, and `cm`
+(Computer Modern). Default is `palatino`.
 
 ## narrow.sty
 
