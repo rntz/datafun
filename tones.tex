@@ -41,7 +41,7 @@
 %\usepackage{anyfontsize}        % avoid font size warnings from stmaryrd
 \usepackage{booktabs}           % \midrule
 \usepackage{mathpartir}         % \mathpar, \infer
-\usepackage{mathtools}          % for \dblcolon
+\usepackage{mathtools}          % for \dblcolon, \prescript
 \usepackage{multirow}           % \multirow, \multicolumn
 \usepackage{stmaryrd}           % \llbracket, \rrbracket, \oast
 \usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
@@ -883,7 +883,8 @@ $\lambda$ rule?
 
 \section{Pattern matching}
 
-\newcommand{\xbar}[2]{\overline{#2}^{#1}}
+\newcommand{\xbar}[2]{\overline{#2}^{\hspace{.5pt}#1}}
+%\renewcommand{\xbar}[2]{\prescript{#1\hspace{.5pt}}{}{\overline{#2}}}
 \newcommand{\pwild}{\_}
 \newcommand{\pcheck}[3]{#1 : #2 \vdash #3}
 %\newcommand{\casecheck}[6]{#1 \cto #2 : #3 \vdash {#4}^{#5} >\!\!> #6}
