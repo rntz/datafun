@@ -106,10 +106,28 @@ expand to a larger width.
 ## rntzfont.sty
 
 This chooses from a set of paired text & math fonts, with appropriate scalings
-and line spacings.
+and line spacings. The options are:
 
-The options are `charter`, `cochineal`, `libertine`, `palatino`, and `cm`
-(Computer Modern). Default is `palatino`.
+- `charter` for [Bitstream Charter][charter] with [Euler][].
+- `cochineal` for [Cochineal][] with [Euler][].
+- `libertine` for [Linux Libertine][Libertine] with [newtxmath][].
+- `palatino` for [Palatino][] with [Euler][]. Both fonts are designed by Hermann
+  Zapf, and match very nicely.
+- `pt` for [PT Serif][pt] with [newtxmath][].
+- `pteuler` for [PT Serif][pt] with [Euler][]. To match x-heights, PT Serif is
+  scaled down.
+- and `cm` for Computer Modern, which is TeX's default, but I've increased the
+  line spacing.
+
+The default is `palatino`.
+
+[Cochineal]: https://ctan.org/pkg/cochineal
+[Euler]: https://ctan.org/pkg/eulervm
+[Libertine]: https://ctan.org/pkg/libertine
+[Palatino]: https://ctan.org/pkg/newpx
+[charter]: https://ctan.org/pkg/charter
+[newtxmath]: https://ctan.org/pkg/newtx
+[pt]: https://ctan.org/pkg/paratype
 
 ## narrow.sty
 
