@@ -108,22 +108,37 @@ expand to a larger width.
 This chooses from a set of paired text & math fonts, with appropriate scalings
 and line spacings. The options are:
 
-- `charter` for [Bitstream Charter][charter] with [Euler][].
-- `cochineal` for [Cochineal][] with [Euler][].
-- `libertine` for [Linux Libertine][Libertine] with [newtxmath][].
+- `charter` for [Bitstream Charter][charter] with [Euler][]. Charter is a
+  legible, no-nonsense font that displays well both on screen and in print.
+
+- `cochineal` for [Cochineal][] with [Euler][]. Cochineal is an old-style font,
+   very pleasant in print.
+
+- `cm` for Computer Modern, which is TeX's default, but I've increased the line
+  spacing. I dislike Computer Modern; I find it almost unreadable on screen.
+
+- `libertine` for [Linux Libertine][Libertine] with [newtxmath][]. Libertine
+  imitates Times New Roman. It's tolerable.
+
+- `merriweather` for [Merriweather][] with [newtxmath][]. Merriweather is quite
+  readable on screen, but heavy and very large; unfortunately its LaTeX package
+  does not allow scaling it.
+
 - `palatino` for [Palatino][] with [Euler][]. Both fonts are designed by Hermann
-  Zapf, and match very nicely.
-- `pt` for [PT Serif][pt] with [newtxmath][].
+  Zapf, and match nicely.
+
+- `pt` for [PT Serif][pt] with [newtxmath][]. PT Serif is quite readable on
+  screen.
+
 - `pteuler` for [PT Serif][pt] with [Euler][]. To match x-heights, PT Serif is
   scaled down.
-- and `cm` for Computer Modern, which is TeX's default, but I've increased the
-  line spacing.
 
 The default is `palatino`.
 
 [Cochineal]: https://ctan.org/pkg/cochineal
 [Euler]: https://ctan.org/pkg/eulervm
 [Libertine]: https://ctan.org/pkg/libertine
+[Merriweather]: https://ctan.org/pkg/merriweather
 [Palatino]: https://ctan.org/pkg/newpx
 [charter]: https://ctan.org/pkg/charter
 [newtxmath]: https://ctan.org/pkg/newtx

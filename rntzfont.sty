@@ -2,13 +2,17 @@
 \ProvidesPackage{rntzfont}[2018/05/10]
 \RequirePackage{etoolbox}       %for \ifdefstring
 
+%% TODO: think about sans-serif fonts as well. acmart.cls chooses a nice one;
+%% what is it?
+
 \DeclareOption{charter}{\def\rntz@font{charter}}
 \DeclareOption{cm}{\def\rntz@font{cm}}
 \DeclareOption{cochineal}{\def\rntz@font{cochineal}}
 \DeclareOption{libertine}{\def\rntz@font{libertine}}
+\DeclareOption{merriweather}{\def\rntz@font{merriweather}}
 \DeclareOption{palatino}{\def\rntz@font{palatino}}
-\DeclareOption{pt}{\def\rntz@font{pt}}
 \DeclareOption{pteuler}{\def\rntz@font{pteuler}}
+\DeclareOption{pt}{\def\rntz@font{pt}}
 
 % Useful math fonts: mathpazo, eulervm, newtxmath.
 
@@ -51,6 +55,13 @@
   \RequirePackage[mono=false,llscale=1.05,scale=1.05]{libertine}
   \RequirePackage[libertine,scaled=1.05]{newtxmath}  % math font matching libertine
   \linespread{1.15}
+}{}
+
+\ifdefstring{\rntz@font}{merriweather}{
+  %% TODO: think about sans behavior
+  \RequirePackage{merriweather}
+  \RequirePackage[libertine,scaled=1.3]{newtxmath}
+  \linespread{1.3}
 }{}
 
 \ifdefstring{\rntz@font}{palatino}{
