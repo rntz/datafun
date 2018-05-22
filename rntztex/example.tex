@@ -39,24 +39,72 @@
 % rntzfont chooses from a set of paired text & math fonts, with appropriate
 % scalings and line spacings.
 % 
-% The options are charter, cochineal, palatino, libertine, fourier, cm.
-% Default is palatino.
+% The options are charter, cm, cochineal, libertine, merriweather, palatino,
+% pt, pteuler. Default is palatino.
 \usepackage{rntzfont}
+
+% Some small typographic improvements.
+\usepackage{microtype}
+\frenchspacing
+
+\usepackage{lipsum} % for example text.
 
 \title{An example document}
 \author{Lore M. Ipsum}
 \date{\today}
 
-\usepackage{lipsum} % for example text.
-
 \begin{document}
 \maketitle
 
 \begin{abstract}
-  \lipsum[1]
+  Nam dui ligula, fringilla a, euismod sodales, sollicitudin vel, wisi. Morbi
+  auctor lorem non justo. Nam lacus libero, pretium at, lobortis vitae,
+  ultricies et, tellus. Donec aliquet, tortor sed accumsan bibendum, erat ligula
+  aliquet magna, vitae ornare odio metus a mi. Morbi ac orci et nisl hendrerit
+  mollis.
 \end{abstract}
 
-\section{An example section}
-\lipsum
+\section{A section}\label{sec:one}
+\lipsum[4]
+
+\subsection{Some mathematics, with references}
+
+Nulla malesuada porttitor diam. Donec felis erat, congue non,
+volutpat at, tincidunt tristique, libero.
+
+\begin{theorem}[Binomial]\label{thm:binomial} Lorem ipsum dolor sit amet, consectetuer:
+  \[ (x+y)^n = \sum_{k=0}^n \binom{n}{k} x^{n-k} y^k \]
+\end{theorem}
+
+\begin{corollary} Adipiscing $n=4$, elit
+  \( (x+y)^4 = x^4 + 4x^3y + 6x^2y^2 + 4xy^3 + y^4 \).
+\end{corollary}
+
+Vivamus viverra fermentum felis. Donec nonummy pellentesque ante. Phasellus
+adipiscing semper elit. Proin fermentum \cref{thm:binomial} massa ac quam:
+
+\[ \sum_{i=1}^n n = \frac{n(n+1)}{2} \]
+
+%% %
+%% \begin{eqnarray}
+%%   e^{i\tau} &=& 0\\
+%%   (x+y)^n &=& \sum_{k=0}^n \binom{n}{k} x^{n-k} y^k
+%% \end{eqnarray}
+
+Sed diam turpis, molestie vitae, placerat a, molestie nec, leo. Maecenas lacinia. \Cref{sec:two} nam ipsum ligula, eleifend at, accumsan nec, suscipit a, ipsum. Morbi blandit ligula feugiat magna. Nunc eleifend consequat lorem. Sed lacinia nulla vitae enim. Pellentesque tincidunt purus vel magna. Integer non enim. Praesent euismod nunc eu purus. Donec bibendum quam in tellus. Nullam cursus pulvinar lectus. Donec et mi. Nam vulputate metus eu enim. Vestibulum pellentesque felis eu massa.
+
+\section{Another section}\label{sec:two}
+\subsection{Immediately followed by a subsection}\label{sec:two-one}
+
+\lipsum[6]
+
+\begin{conjecture}
+  Morbi luctus, wisi viverra faucibus pretium, nibh est placerat odio, nec
+  commod wisi enim egat quam \cref{sec:two-one}.
+\end{conjecture}
+
+\subsubsection{I usually avoid sub-subsections, but here one is anyway}
+
+\lipsum[7-8]
 
 \end{document}

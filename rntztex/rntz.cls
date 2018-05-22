@@ -57,7 +57,7 @@
 % options: capitalise
 \usepackage[nameinlink,noabbrev]{cleveref}
 % Use \S for section references, except when starting a sentence.
-\crefname{section}{\S}{\S}
+\crefname{section}{\S\!}{\S\!}
 \Crefname{section}{Section}{Sections}
 
 %% ---- Theorem styling ----

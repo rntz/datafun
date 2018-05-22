@@ -14,7 +14,8 @@ projects. It contains:
 
 3. `rntzfont.sty`, which chooses between some nice font combinations.
 
-4. `rntzgeometry.sty`, which has geometry presets for various paper sizes.
+4. `rntzgeometry.sty`, which sets margins etc. appropriately for common paper
+   sizes.
 
 5. `narrow.sty`, which sets up a one-column layout with extra width for
    `figure*` and `fullwidth` environments. `rntzgeometry.sty` uses `narrow.sty`
@@ -105,10 +106,43 @@ expand to a larger width.
 ## rntzfont.sty
 
 This chooses from a set of paired text & math fonts, with appropriate scalings
-and line spacings.
+and line spacings. The options are:
 
-The options are `charter`, `cochineal`, `palatino`, `libertine`, `fourier`, and
-`cm` (Computer Modern). Default is `palatino`.
+- `charter` for [Bitstream Charter][charter] with [Euler][]. Charter is a
+  legible, no-nonsense font that displays well both on screen and in print.
+
+- `cochineal` for [Cochineal][] with [Euler][]. Cochineal is an old-style font,
+   very pleasant in print.
+
+- `cm` for Computer Modern, which is TeX's default, but I've increased the line
+  spacing. I dislike Computer Modern; I find it almost unreadable on screen.
+
+- `libertine` for [Linux Libertine][Libertine] with [newtxmath][]. Libertine
+  imitates Times New Roman. It's tolerable.
+
+- `merriweather` for [Merriweather][] with [newtxmath][]. Merriweather is quite
+  readable on screen, but heavy and very large; unfortunately its LaTeX package
+  does not allow scaling it.
+
+- `palatino` for [Palatino][] with [Euler][]. Both fonts are designed by Hermann
+  Zapf, and match nicely.
+
+- `pt` for [PT Serif][pt] with [newtxmath][]. PT Serif is quite readable on
+  screen.
+
+- `pteuler` for [PT Serif][pt] with [Euler][]. To match x-heights, PT Serif is
+  scaled down.
+
+The default is `palatino`.
+
+[Cochineal]: https://ctan.org/pkg/cochineal
+[Euler]: https://ctan.org/pkg/eulervm
+[Libertine]: https://ctan.org/pkg/libertine
+[Merriweather]: https://ctan.org/pkg/merriweather
+[Palatino]: https://ctan.org/pkg/newpx
+[charter]: https://ctan.org/pkg/charter
+[newtxmath]: https://ctan.org/pkg/newtx
+[pt]: https://ctan.org/pkg/paratype
 
 ## narrow.sty
 
