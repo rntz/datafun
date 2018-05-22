@@ -1,0 +1,16 @@
+* Monotone functions compose
+
+Why is (x + log x) monotone?
+Because it's a composition of monotone functions.
+
+Simply typed lambda calculus
+where all base functions are monotone
+then all definable functions are monotone!
+
+* Types enforce monotonicity!
+
+* Modal types for nonmonotonicity
+
+What about (log x - y)?
+We know this is monotone in x and antitone in y!
+But how can we typecheck that?

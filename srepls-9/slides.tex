@@ -1,0 +1,50 @@
+\documentclass{beamer}
+
+%\usefonttheme{serif}
+\usepackage[pt]{rntzfont} % charter, pt, pteuler work well
+\usepackage{PTSans}
+\usepackage[semibold]{sourcesanspro}
+
+\usepackage{url,hyperref}
+\usepackage{mathpartir}
+\usepackage{latexsym,amssymb,stmaryrd}
+
+\title{Inferring monotonicity}
+\author{Michael Arntzenius}
+\institute{University of Birmingham}
+\date{S-REPLS 9, 2018}
+
+\newcommand{\x}{\times}
+\newcommand{\G}{\Gamma}
+\newcommand{\fn}{\lambda}
+\newcommand{\binder}{.~}
+\newcommand{\bind}[1]{{#1}\binder}
+\newcommand{\fnof}[1]{\fn\bind{#1}}
+\newcommand{\den}[1]{\llbracket{#1}\rrbracket}
+
+
+\begin{document}
+\maketitle
+
+\begin{frame}
+  \Huge \[ x + \log x \]
+\end{frame}
+
+\begin{frame}{Types for monotonicity?}
+  \Large
+  %% \begin{center}{\bfseries Types for monotonicity?}\end{center}
+
+  Usually, \[\den{A \to B} = \den{A} \to \den{B}\]\vspace{0pt}
+
+  What if instead,
+  \[
+  \den{A \to B} = \text{\emph{monotone} maps }\den{A} \to \den{B}
+  \]
+\end{frame}
+
+\begin{frame}
+  \Huge
+\[ x - \log x \]
+\end{frame}
+
+\end{document}
