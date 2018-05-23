@@ -1,19 +1,35 @@
-\documentclass{beamer}
+\documentclass[xcolor={dvipsnames}]{beamer}
 
-%\usefonttheme{serif}
-\usepackage[pt]{rntzfont} % charter, pt, pteuler work well
+\usefonttheme{serif}
+\usepackage[pteuler]{rntzfont} % pteuler, charter, cochineal work well
 \usepackage{PTSans}
 \usepackage[semibold]{sourcesanspro}
 
 \usepackage{url,hyperref}
 \usepackage{mathpartir}
-\usepackage{latexsym,amssymb,stmaryrd}
+\usepackage{latexsym,amssymb,stmaryrd,mathtools}
+\usepackage{anyfontsize} % fix font warnings from stmaryrd
+%\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage[normalem]{ulem}               % for \sout
+\newcommand{\msout}[1]{\text{\sout{\ensuremath{#1}}}}
+
+\definecolor[named]{ACMBlue}{cmyk}{1,0.1,0,0.1}
+\definecolor[named]{ACMYellow}{cmyk}{0,0.16,1,0}
+\definecolor[named]{ACMOrange}{cmyk}{0,0.42,1,0.01}
+\definecolor[named]{ACMRed}{cmyk}{0,0.90,0.86,0}
+\definecolor[named]{ACMLightBlue}{cmyk}{0.49,0.01,0,0}
+\definecolor[named]{ACMGreen}{cmyk}{0.20,0,1,0.19}
+\definecolor[named]{ACMPurple}{cmyk}{0.55,1,0,0.15}
+\definecolor[named]{ACMDarkBlue}{cmyk}{1,0.58,0,0.21}
 
 \title{Inferring monotonicity}
 \author{Michael Arntzenius}
 \institute{University of Birmingham}
 \date{S-REPLS 9, 2018}
 
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
 \newcommand{\x}{\times}
 \newcommand{\G}{\Gamma}
 \newcommand{\fn}{\lambda}
@@ -21,30 +37,272 @@
 \newcommand{\bind}[1]{{#1}\binder}
 \newcommand{\fnof}[1]{\fn\bind{#1}}
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
+\newcommand{\bnfeq}{\dblcolon=}
+
+\newcommand{\rulename}{\sffamily\scshape}
+
+\newcommand{\mb}[1]{\ensuremath{\textbf{#1}}}
+\newcommand{\mi}[1]{\ensuremath{\textit{#1}}}
+\newcommand{\kw}[1]{\mb{#1}}
+
+\newcommand{\id}{\textrm{id}}
+\newcommand{\op}{\textrm{op}}
+\newcommand{\iso}{\ensuremath{\Box}}
+\renewcommand{\path}{\ensuremath{\lozenge}}
+
+\newcommand{\idof}{\mathop{\id}}
+\newcommand{\opof}{\mathop{\op}}
+\newcommand{\isof}{\iso}
+\newcommand{\pathof}{\path}
 
 
 \begin{document}
 \maketitle
+\Large
 
 \begin{frame}
-  \Huge \[ x + \log x \]
+  \Huge\centering
+  %% Which ones are monotone?
+  \[\begin{array}{c}
+  x + \log x\vspace{.5em}\\
+  x - \log x
+  \vspace{.5em}\\
+  -2x\vspace{.5em}\\
+  4
+  \end{array}\]
+
+  %% How did we know that so quickly?
+  %% Did we do a proof in our head? No!
+  %% We used compositional reasoning!
+  %%
+  %% I want a type system that tells me the first one is monotone and the second
+  %% isn't.
 \end{frame}
 
-\begin{frame}{Types for monotonicity?}
-  \Large
-  %% \begin{center}{\bfseries Types for monotonicity?}\end{center}
+\begin{frame}%{Types for monotonicity}
+  \begin{mathpar}
+    \begin{array}{llcll}
+      \text{types}& A,B &\bnfeq& \R ~~|~~ A \to B
+      \\ \text{terms}& M,N &\bnfeq& x ~~|~~ \fnof{x} M ~~|~~ M\;N
+      \vspace{1em}\\
+      \multicolumn{2}{r}{\den{A}} &\in& \mathbf{Poset}\vspace{.2em}\\
+      \multicolumn{2}{r}{\den{\R}} &=& \R\\
+      \multicolumn{2}{r}{\den{A \to B}}
+      &=& \text{\emph{monotone} maps}~ \den{A} \to \den{B},\\
+      &&& \text{ordered pointwise}
+    \end{array}
+  \end{mathpar}
+\end{frame}
 
-  Usually, \[\den{A \to B} = \den{A} \to \den{B}\]\vspace{0pt}
+\begin{frame}
+  \huge
+  \[\begin{array}{l}
+    (\fnof{x} x + \log x) : \R \to \R\vspace{.5em}\\
+    (\fnof{x} x - \log x) : {??} \to \R
+  \end{array}\]
+\end{frame}
 
-  What if instead,
+\begin{frame}
+  %% this would work better with a diagram.
+  %%
+  %% I should explain that \iso is a comonad,
+  %% axioms: □A -> A; □A → □□A
+  %% but most modal type theories need further annotations
+  %%
+  %% explain Pfenning-Davies annotations here?
+
+  Let $\isof{A}$ be $A$, ordered \emph{discretely}:
+  \[x \le y : {\isof{A}} \iff x = y \]
+  \vspace{0pt}
+
+  Then {\color{blue} $f : \isof{A} \to B$ is monotone} iff
+  \[x = y \implies f(x) \le f(y) \]
+  i.e. \textbf{always}!
+\end{frame}
+
+\begin{frame}
+  \huge
+  \[\begin{array}{l}
+    (\fnof{x} x + \log x) : \R \to \R\vspace{.5em}\\
+    (\fnof{x} x - \log x) : {\color{Green} \isof{\R}} \to \R
+  \end{array}\]
+\end{frame}
+
+\begin{frame}
+  \iso{} is a \emph{comonad} or \emph{necessity modality}:
+
   \[
-  \den{A \to B} = \text{\emph{monotone} maps }\den{A} \to \den{B}
+  \begin{array}{rcl}
+    \isof A &\to& A\\
+    \isof A &\to& \isof{\isof A}\\
+    A \to B &\implies& \isof{A} \to \isof{B}
+  \end{array}
   \]
+  \vspace{0pt}
+
+  Pfenning \& Davies gave typing rules for these in \\
+  \emph{A Judgmental Reconstruction of Modal Logic}!
 \end{frame}
 
 \begin{frame}
-  \Huge
-\[ x - \log x \]
+  \LARGE
+  \[
+  \begin{array}{l}
+    {\color{Red} (\fnof{x} x - \log x) : \isof{\R} \to \R}
+    \vspace{.5em}\\
+    {(\fnof{x} \kw{let}~\kw{box}~u = x~\kw{in}~
+      u - \kw{box}\,(\log u)) : \isof{\R} \to \R}
+  \end{array}\]
+  \vspace{1em}
+
+  \pause\centering\Huge\sffamily :~(
 \end{frame}
 
+\begin{frame}{Get rid of pesky annotations in three easy steps!}
+  \begin{enumerate}
+  \item Exploit features of \mb{Poset}.
+  \item Propagate variable usage modes bottom-up.
+  \item Use moded subtyping for implicit coercion.
+  \end{enumerate}
+\end{frame}
+
+
+%% ---- Exploiting Poset ---
+%% Include this once we need to explain \path.
+\begin{frame}{1. Exploiting \textbf{Poset}}
+  \LARGE%\vspace{-1em}
+  %% Which ones are monotone?
+  \[\begin{array}{lcl}
+  \fnof{x} x + \log x &:& \R \to \R\vspace{.5em}\\
+  \fnof{x} x - \log x &:& \isof{\R} \to \R \vspace{.5em}\\
+  \fnof{x} {-2}x
+  &:& {\alt<2->{\opof{\R}}{\color{Orange}????\hspace{2.9pt}}} \to \R
+  \vspace{.5em}\\
+  \fnof{x} 4
+  &:& {\alt<3->{\color{Green}\pathof{\R}}{\color{Orange}???\hspace{1.3pt}}} \to \R
+  \end{array}\]
+\end{frame}
+
+\begin{frame}{1. Exploiting \textbf{Poset}: \path}
+  $\pathof{A}$ \emph{identifies} weakly connected elements in $A$:
+  \[ x \le y \vee y \le x : A \implies x = y : \pathof{A} \]
+  \vspace{0pt}
+
+  \pause
+  \textbf{Theorem:}
+  \[ f : \pathof{A} \to B \iff f : A \to \isof{B} \]
+\end{frame}
+
+%% Maybe I need another frame here?
+
+
+%% ---- 2. PROPAGATING VARIABLE MODES ----
+\begin{frame}{2. Propagate variable modes bottom-up}
+  
+\end{frame}
+
+
+%% %% Pfenning-Davies vs tonal intro/elim rules.
+%% \newcommand{\m}[1]{\left[#1\right]}
+%% \newcommand{\disc}[1]{\m{\iso}{#1}}
+
+%% \begin{frame}
+%%   \Large
+%%   \vspace{-1em}
+%%   \begin{mathpar}
+%%     \begin{array}{rcl}
+%%       T &\bnfeq& 1 ~~|~~ \iso\\
+%%       \G &\bnfeq& \varepsilon ~~|~~ \G, x : \m{T}{A}
+%%     \end{array}
+%%     \\
+%%     \infer[\rulename Pfenning-Davies]
+%%           {\{x : \m{\iso}{A} \in \G\} \vdash M : A}
+%%           {\G \vdash \kw{box}~M : \iso{A}}
+
+%%     \pause
+%%     \infer[\rulename Ours]{\G \vdash M : A}{\disc{\G} \vdash M : \isof{A}}
+%%   \end{mathpar}
+%% \end{frame}
+
+%% \begin{frame}\large
+%%   \begin{mathpar}
+%%     \infer[PfD \iso-intro]
+%%           {\{\disc{A} \in \G\} \vdash A}
+%%           {\G \vdash \isof{A}}
+
+%%     \infer[PfD \iso-elim]
+%%           {\G \vdash \isof{A} \\ \G, \disc{A} \vdash B}
+%%           {\G \vdash B}
+%%   \end{mathpar}
+
+%%   \begin{mathpar}
+%%     \infer[\iso-intro]{\G \vdash A}{\disc{\G} \vdash \isof{A}}
+
+%%     \infer[\iso-elim]{\G \vdash \isof{A}}{\m{\path}{\G} \vdash A}
+%%   \end{mathpar}
+%% \end{frame}
+
+%% %% The full Pfenning-Davies rules
+%% \begin{frame}{Propagate variable usage bottom-up}
+%%   \vspace{-1em}
+%%   \begin{mathpar}
+%%     \G \bnfeq \varepsilon ~~|~~ \G, x : A ~~|~~ \G, x : \disc{A}
+%%     \\
+%%     \infer{\{x : \disc{A} ~|~ x : \disc{A} \in \G\} \vdash M : A}
+%%           {\G \vdash \kw{box}~M : \iso{A}}
+       
+%%     \infer
+%%         {\G \vdash M : \isof{A} \\
+%%           \G, x : \disc{A} \vdash N : B}
+%%         {\G \vdash \kw{let}~\kw{box}~x = M ~\kw{in}~ N : B}
+%%   \end{mathpar}
+%% \end{frame}
+
+
+%% %% ---- BIDIRECTIONAL INFERENCE ----
+%% \newcommand{\inp}{\color{ACMPurple}}
+%% \newcommand{\outp}{\color{Cyan}}
+%% \newcommand{\inpu}[1]{{\inp{#1}^-}}
+%% \newcommand{\outpu}[1]{{\outp{#1}^+}}
+%% \newcommand{\checks}[3]{{\inp#1} \vdash {\inp#2} ~\mathbf{checks}~ {\inp#3}}
+%% \newcommand{\infers}[3]{{\inp#1} \vdash {\inp#2} ~\mathbf{infers}~ {\outp#3}}
+
+%% \begin{frame}{Input/output modes}
+%%   %% Talk about algorithmic interpretation.
+%%   \[
+%%   \begin{array}{l@{\hskip 2em}l}
+%%     \text{Na\"ive} & \inpu{\G} \vdash \inpu{M} : \inpu{A}
+%%     \vspace{1em}\\\pause
+%%     \text{Hindley-Milner} & \inpu{\G} \vdash \inpu{M} : \outpu{A}
+%%     \vspace{1em}\\\pause
+%%     \multirow{2}{*}{\text{Bidirectional}}
+%%     &
+%%     \checks{\inpu{\G}}{\inpu{m}}{\inpu{A}}\\
+%%     & \infers{\inpu{\G}}{\inpu{e}}{\outpu{A}}
+%%   \end{array}
+%%   \]
+%% \end{frame}
+
+%% \begin{frame}{Bidirectional type inference}
+%%   %% TODO: I should talk about input/output moding here!
+%%   \[
+%%   \begin{array}{llcl}
+%%     \text{checking terms} & m &\bnfeq& \fnof{x} m ~~|~~ e\\
+%%     \text{inferring terms} & e &\bnfeq& x ~~|~~ e\;m ~~|~~ (m : A)
+%%   \end{array}
+%%   \]
+
+%%   %% I should not put all of these on one slide. I should probably ignore some.
+%%   %% I only have ~25 mins.
+%%   \begin{mathpar}
+%%     \infer{\infers{\G}{e}{A \to B} \\ \checks{\G}{m}{A}}
+%%           {\infers{\G}{e\;m}{B}}
+%%     %% \infer{\checks{\G, x : A}{m}{B}}{\checks{\G}{\fnof{x} m}{A \to B}}
+%%     %% \infer{\infers{\G}{e}{B}}{\checks{\G}{e}{B}}
+%%     %% \infer{ }{\infers{\G,x : A}{x}{A}}
+%%     %% \infer{\checks{\G}{m}{A}}{\infers{\G}{m : A}{A}}
+%%   \end{mathpar}
+%% \end{frame}
+
+
 \end{document}

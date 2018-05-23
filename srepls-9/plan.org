@@ -1,16 +1,69 @@
-* Monotone functions compose
+* Overall plan (OUTDATED)
+1. Monotonicity as modal types.
+2. Bidirectional typing.
+3. We find tones bottom-up.
 
-Why is (x + log x) monotone?
-Because it's a composition of monotone functions.
+4. Q: How do we avoid annotating the intro rule?
+   A: Checking/inference boundary & subtyping.
 
-Simply typed lambda calculus
-where all base functions are monotone
+5. Explain subtyping.
+
+6. Show we can derive the elim rule as well.
+
+7. Conclude.
+- pattern-matching
+- related work: "semiring systems", the Next 700 Modal Type Assignment systems
+
+** Getting rid of Pf-D in two bits!
+1. simplify □-elim using adjunction
+2. compute tones bottom-up for inference
+
+* Slides for talk
+** Intro
+*** Opening: Four examples
+Which of these are monotone?
+Which antitone?
+How do we know?
+
+A: Compositional reasoning!
+Can we capture this with types?
+
+*** A type system for monotonicity
+If all builtin functions are monotone
 then all definable functions are monotone!
 
-* Types enforce monotonicity!
+*** Types for non-monotonicity?
+We can already typecheck (λx. x + log x).
+But what about (λx. x - log x)?
 
-* Modal types for nonmonotonicity
+*** Defining □A
+Now we know what type our term should have!
+But what typing rules do we use?
+Has anything like this box operator been studied before?
 
-What about (log x - y)?
-We know this is monotone in x and antitone in y!
-But how can we typecheck that?
+*** Pfenning-Davies, JRML
+Pf-D can't typecheck (λx. x - log x) : □ℝ → ℝ!
+In fact, *no modal type system I know accepts this sans further annotation*!
+This talk shows how I do this.
+
+*** Three steps
+
+** 1. Exploit Poset
+*** Four examples again
+Discuss op briefly.
+
+For reasons that will become clear, I'll assign (λx. 4) the type ◇R → R.
+What is ◇?
+
+*** Defining ◇
+
+** 2. Propagate variable modes bottom-up
+TODO:
+- general idea of bottom-up/tones as outputs
+- typing rules for (M,N) and ∧ operator
+- typing rules for `let` and ∘ operator
+
+** 3. Modal subtyping
+TODO
+motivation?
+□-elim? function application?
