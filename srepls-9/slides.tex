@@ -69,9 +69,8 @@
   %% Which ones are monotone?
   \[\begin{array}{c}
   x + \log x\vspace{.5em}\\
-  x - \log x
-  \vspace{.5em}\\
   -2x\vspace{.5em}\\
+  x - \log x \vspace{.5em}\\
   4
   \end{array}\]
 
@@ -100,9 +99,14 @@
 
 \begin{frame}
   \huge
-  \[\begin{array}{l}
-    (\fnof{x} x + \log x) : \R \to \R\vspace{.5em}\\
-    (\fnof{x} x - \log x) : {??} \to \R
+  %% TODO: color-hilight these things in turn.
+  \[\begin{array}{l@{\hskip 1em}l@{\hskip 1em}l}
+    \fnof{x} x + \log x &:& \R \to \R\vspace{.5em}\\
+    \fnof{x} {-2}x &:&
+         \alt<2->{\opof\R}{????\hspace{3.5pt}} \to \R \vspace{.5em}\\
+    \fnof{x} x - \log x &:&
+         \alt<2->{\isof\R}{???\hspace{3pt}} \to \R \vspace{.5em}\\
+    \fnof{x} 4 &:& \alt<2->{\pathof\R}{???\hspace{1.33pt}} \to \R
   \end{array}\]
 \end{frame}
 
@@ -116,7 +120,7 @@
   %% explain Pfenning-Davies annotations here?
 
   Let $\isof{A}$ be $A$, ordered \emph{discretely}:
-  \[x \le y : {\isof{A}} \iff x = y \]
+  \[x \le y : {\isof{A}} \iff x = y : A \]
   \vspace{0pt}
 
   Then \hil{$f : \isof{A} \to B$ is monotone} iff
@@ -126,28 +130,54 @@
 
 \begin{frame}
   \huge
-  \[\begin{array}{l}
-    (\fnof{x} x + \log x) : \R \to \R\vspace{.5em}\\
-    (\fnof{x} x - \log x) : {\color{Green} \isof{\R}} \to \R
+  %% TODO: color-hilight these things in turn.
+  \[\begin{array}{l@{\hskip 1em}l@{\hskip 1em}l}
+    \fnof{x} x + \log x &:& \R \to \R\vspace{.5em}\\
+    \fnof{x} {-2}x &:&
+         {\opof\R} \to \R \vspace{.5em}\\
+    \fnof{x} x - \log x &:&
+         {\isof\R \to \R} \vspace{.5em}\\
+    \fnof{x} 4 &:& {\hilit\pathof\R} \to \R
   \end{array}\]
 \end{frame}
 
+%% \begin{frame}
+%%   \huge
+%%   \[\begin{array}{l}
+%%     (\fnof{x} x + \log x) : \R \to \R\vspace{.5em}\\
+%%     (\fnof{x} x - \log x) : {\color{Green} \isof{\R}} \to \R
+%%   \end{array}\]
+%% \end{frame}
+
 \begin{frame}
-  \iso{} is a \emph{comonad} or \emph{necessity modality}.
+  $\pathof{A}$ \emph{identifies} weakly connected elements in $A$:
+  \[ x \le y \vee y \le x : A \implies x = y : \pathof{A} \]
+  \vspace{0pt}
 
-  %% \[
-  %% \begin{array}{rcl}
-  %%   \isof A &\to& A\\
-  %%   \isof A &\to& \isof{\isof A}\\
-  %%   A \to B &\implies& \isof{A} \to \isof{B}
-  %% \end{array}
-  %% \]
-  %% \vspace{0pt}
+  \pause
+  \textbf{Theorem:}
+  \[ f : \pathof{A} \to B \iff f : A \to \isof{B} \]
+\end{frame}
 
+\begin{frame}
+  \huge
+  \[\begin{array}{l@{\hskip 1em}l@{\hskip 1em}l}
+    \fnof{x} x + \log x &:& \R \to \R\vspace{.5em}\\
+    \fnof{x} {-2}x &:&
+         {\opof\R} \to \R \vspace{.5em}\\
+    \fnof{x} x - \log x &:&
+         {\isof\R \to \R} \vspace{.5em}\\
+    \fnof{x} 4 &:& \pathof\R \to \R
+  \end{array}\]
+\end{frame}
+
+
+\begin{frame}
+  \huge\centering\itshape
+  ``This is just a modal type system!''
   \vspace{1em}
 
-  Pfenning \& Davies gave typing rules for these in\\
-  \emph{A Judgmental Reconstruction of Modal Logic}!
+  ``Pfenning \& Davies did this in 2001!''
 \end{frame}
 
 \begin{frame}
@@ -165,52 +195,85 @@
   \centering\Huge\sffamily :~(
 \end{frame}
 
-\begin{frame}{Get rid of pesky annotations in three easy steps!}
+\begin{frame}
+  \textbf{Two tricks:}
   \begin{enumerate}
-  \item Exploit features of \mb{Poset}.
   \item Infer variable usage modes bottom-up.
   \item Use moded subtyping for implicit coercion.
   \end{enumerate}
 \end{frame}
 
 
+%% \begin{frame}
+%%   \iso{} is a \emph{comonad} or \emph{necessity modality}.
+
+%%   %% \[
+%%   %% \begin{array}{rcl}
+%%   %%   \isof A &\to& A\\
+%%   %%   \isof A &\to& \isof{\isof A}\\
+%%   %%   A \to B &\implies& \isof{A} \to \isof{B}
+%%   %% \end{array}
+%%   %% \]
+%%   %% \vspace{0pt}
+
+%%   \vspace{1em}
+
+%%   Pfenning \& Davies gave typing rules for these in\\
+%%   \emph{A Judgmental Reconstruction of Modal Logic}!
+%% \end{frame}
+
+%% \begin{frame}
+%%   \LARGE
+%%   \[
+%%   \begin{array}{l}
+%%     {\color{Red} (\fnof{x} x - \log x) : \isof{\R} \to \R}
+%%     \vspace{.5em}\pause\\
+%%     {(\fnof{x} \kw{let}~\kw{box}~u = x~\kw{in}~
+%%       u - \kw{box}\,(\log u)) : \isof{\R} \to \R}
+%%   \end{array}
+%%   \]
+%%   \vspace{0em}
+
+%%   \centering\Huge\sffamily :~(
+%% \end{frame}
+
+%% \begin{frame}{Get rid of pesky annotations in three easy steps!}
+%%   \begin{enumerate}
+%%   \item Exploit features of \mb{Poset}.
+%%   \item Infer variable usage modes bottom-up.
+%%   \item Use moded subtyping for implicit coercion.
+%%   \end{enumerate}
+%% \end{frame}
+
+
 %% ---- Exploiting Poset ---
 %% Include this once we need to explain \path.
-\begin{frame}{1. Exploiting \textbf{Poset}}
-  \LARGE%\vspace{-1em}
-  %% Which ones are monotone?
-  \[\begin{array}{lcl}
-  \fnof{x} x + \log x &:& \R \to \R\vspace{.5em}\\
-  \fnof{x} x - \log x &:& \isof{\R} \to \R \vspace{.5em}\\
-  \fnof{x} {-2}x
-  &:& \alt<2->{\opof{\R}}{\hil{????\hspace{2.9pt}}} \to \R
-  \vspace{.5em}\\ \fnof{x} 4 &:&
-  {\alt<2->{\hilit}{}????\hspace{2.9pt}} \to \R
-  \end{array}\]
-\end{frame}
+%% \begin{frame}{1. Exploiting \textbf{Poset}}
+%%   \LARGE%\vspace{-1em}
+%%   %% Which ones are monotone?
+%%   \[\begin{array}{lcl}
+%%   \fnof{x} x + \log x &:& \R \to \R\vspace{.5em}\\
+%%   \fnof{x} x - \log x &:& \isof{\R} \to \R \vspace{.5em}\\
+%%   \fnof{x} {-2}x
+%%   &:& \alt<2->{\opof{\R}}{\hil{????\hspace{2.9pt}}} \to \R
+%%   \vspace{.5em}\\ \fnof{x} 4 &:&
+%%   {\alt<2->{\hilit}{}????\hspace{2.9pt}} \to \R
+%%   \end{array}\]
+%% \end{frame}
 
-\begin{frame}{1. Exploiting \textbf{Poset}: \path}
-  $\pathof{A}$ identifies weakly connected elements in $A$:
-  \[ x \le y \vee y \le x : A \implies x = y : \pathof{A} \]
-  \vspace{0pt}
 
-  \pause
-  \textbf{Theorem:}
-  \[ f : \pathof{A} \to B \iff f : A \to \isof{B} \]
-\end{frame}
-
-\begin{frame}{1. Exploiting \textbf{Poset}}
-  \LARGE%\vspace{-1em}
-  %% Which ones are monotone?
-  \[\begin{array}{lcl}
-  \fnof{x} x + \log x &:& \R \to \R\vspace{.5em}\\
-  \fnof{x} x - \log x &:& \isof{\R} \to \R \vspace{.5em}\\
-  \fnof{x} {-2}x
-  &:& \opof{\R} \to \R \vspace{.5em}\\
-  \fnof{x} 4
-  &:& {\color{Green}\pathof{\R}} \to \R
-  \end{array}\]
-\end{frame}
+%% \begin{frame}{1. Exploiting \textbf{Poset}}
+%%   \LARGE%\vspace{-1em}
+%%   %% Which ones are monotone?
+%%   \[\begin{array}{lcl}
+%%   \fnof{x} x + \log x &:& \R \to \R\vspace{.5em}\\
+%%   \fnof{x} x - \log x &:& \isof{\R} \to \R \vspace{.5em}\\
+%%   \fnof{x} {-2}x
+%%   &:& \opof{\R} \to \R \vspace{.5em}\\
+%%   \fnof{x} 4
+%%   &:& {\color{Green}\pathof{\R}} \to \R
+%%   \end{array}\]
+%% \end{frame}
 
 %% Maybe I need another frame here?
 
