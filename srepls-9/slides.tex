@@ -1,16 +1,18 @@
 \documentclass[xcolor={dvipsnames}]{beamer}
 
 \usefonttheme{serif}
-\usepackage[pteuler]{rntzfont} % pteuler, charter, cochineal work well
-\usepackage{PTSans}
+\usepackage[pteuler]{rntzfont} % pteuler, charter work well
+%\usepackage{PTSans}
 \usepackage[semibold]{sourcesanspro}
 
-\usepackage{url,hyperref}
-\usepackage{mathpartir}
-\usepackage{latexsym,amssymb,stmaryrd,mathtools}
-\usepackage{anyfontsize} % fix font warnings from stmaryrd
 %\usepackage{booktabs}
+\usepackage{anyfontsize} % fix font warnings from stmaryrd
+\usepackage{latexsym,amssymb,stmaryrd,mathtools}
+\usepackage{mathpartir}
 \usepackage{multirow}
+\usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
+\usepackage{url,hyperref}
+
 \usepackage[normalem]{ulem}               % for \sout
 \newcommand{\msout}[1]{\text{\sout{\ensuremath{#1}}}}
 
@@ -23,7 +25,7 @@
 \definecolor[named]{ACMPurple}{cmyk}{0.55,1,0,0.15}
 \definecolor[named]{ACMDarkBlue}{cmyk}{1,0.58,0,0.21}
 
-\title{Inferring monotonicity}
+\title{Type inference for monotonicity}
 \author{Michael Arntzenius}
 \institute{University of Birmingham}
 \date{S-REPLS 9, 2018}
@@ -38,6 +40,8 @@
 \newcommand{\fnof}[1]{\fn\bind{#1}}
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
 \newcommand{\bnfeq}{\dblcolon=}
+\newcommand{\hilit}{\color{Rhodamine}}
+\newcommand{\hil}[1]{{\hilit#1}}
 
 \newcommand{\rulename}{\sffamily\scshape}
 
@@ -45,8 +49,8 @@
 \newcommand{\mi}[1]{\ensuremath{\textit{#1}}}
 \newcommand{\kw}[1]{\mb{#1}}
 
-\newcommand{\id}{\textrm{id}}
-\newcommand{\op}{\textrm{op}}
+\newcommand{\id}{\text{id}}
+\newcommand{\op}{\text{op}}
 \newcommand{\iso}{\ensuremath{\Box}}
 \renewcommand{\path}{\ensuremath{\lozenge}}
 
@@ -115,7 +119,7 @@
   \[x \le y : {\isof{A}} \iff x = y \]
   \vspace{0pt}
 
-  Then {\color{blue} $f : \isof{A} \to B$ is monotone} iff
+  Then \hil{$f : \isof{A} \to B$ is monotone} iff
   \[x = y \implies f(x) \le f(y) \]
   i.e. \textbf{always}!
 \end{frame}
@@ -129,18 +133,20 @@
 \end{frame}
 
 \begin{frame}
-  \iso{} is a \emph{comonad} or \emph{necessity modality}:
+  \iso{} is a \emph{comonad} or \emph{necessity modality}.
 
-  \[
-  \begin{array}{rcl}
-    \isof A &\to& A\\
-    \isof A &\to& \isof{\isof A}\\
-    A \to B &\implies& \isof{A} \to \isof{B}
-  \end{array}
-  \]
-  \vspace{0pt}
+  %% \[
+  %% \begin{array}{rcl}
+  %%   \isof A &\to& A\\
+  %%   \isof A &\to& \isof{\isof A}\\
+  %%   A \to B &\implies& \isof{A} \to \isof{B}
+  %% \end{array}
+  %% \]
+  %% \vspace{0pt}
 
-  Pfenning \& Davies gave typing rules for these in \\
+  \vspace{1em}
+
+  Pfenning \& Davies gave typing rules for these in\\
   \emph{A Judgmental Reconstruction of Modal Logic}!
 \end{frame}
 
@@ -149,19 +155,20 @@
   \[
   \begin{array}{l}
     {\color{Red} (\fnof{x} x - \log x) : \isof{\R} \to \R}
-    \vspace{.5em}\\
+    \vspace{.5em}\pause\\
     {(\fnof{x} \kw{let}~\kw{box}~u = x~\kw{in}~
       u - \kw{box}\,(\log u)) : \isof{\R} \to \R}
-  \end{array}\]
-  \vspace{1em}
+  \end{array}
+  \]
+  \vspace{0em}
 
-  \pause\centering\Huge\sffamily :~(
+  \centering\Huge\sffamily :~(
 \end{frame}
 
 \begin{frame}{Get rid of pesky annotations in three easy steps!}
   \begin{enumerate}
   \item Exploit features of \mb{Poset}.
-  \item Propagate variable usage modes bottom-up.
+  \item Infer variable usage modes bottom-up.
   \item Use moded subtyping for implicit coercion.
   \end{enumerate}
 \end{frame}
@@ -176,15 +183,14 @@
   \fnof{x} x + \log x &:& \R \to \R\vspace{.5em}\\
   \fnof{x} x - \log x &:& \isof{\R} \to \R \vspace{.5em}\\
   \fnof{x} {-2}x
-  &:& {\alt<2->{\opof{\R}}{\color{Orange}????\hspace{2.9pt}}} \to \R
-  \vspace{.5em}\\
-  \fnof{x} 4
-  &:& {\alt<3->{\color{Green}\pathof{\R}}{\color{Orange}???\hspace{1.3pt}}} \to \R
+  &:& \alt<2->{\opof{\R}}{\hil{????\hspace{2.9pt}}} \to \R
+  \vspace{.5em}\\ \fnof{x} 4 &:&
+  {\alt<2->{\hilit}{}????\hspace{2.9pt}} \to \R
   \end{array}\]
 \end{frame}
 
 \begin{frame}{1. Exploiting \textbf{Poset}: \path}
-  $\pathof{A}$ \emph{identifies} weakly connected elements in $A$:
+  $\pathof{A}$ identifies weakly connected elements in $A$:
   \[ x \le y \vee y \le x : A \implies x = y : \pathof{A} \]
   \vspace{0pt}
 
@@ -193,18 +199,172 @@
   \[ f : \pathof{A} \to B \iff f : A \to \isof{B} \]
 \end{frame}
 
+\begin{frame}{1. Exploiting \textbf{Poset}}
+  \LARGE%\vspace{-1em}
+  %% Which ones are monotone?
+  \[\begin{array}{lcl}
+  \fnof{x} x + \log x &:& \R \to \R\vspace{.5em}\\
+  \fnof{x} x - \log x &:& \isof{\R} \to \R \vspace{.5em}\\
+  \fnof{x} {-2}x
+  &:& \opof{\R} \to \R \vspace{.5em}\\
+  \fnof{x} 4
+  &:& {\color{Green}\pathof{\R}} \to \R
+  \end{array}\]
+\end{frame}
+
 %% Maybe I need another frame here?
 
 
 %% ---- 2. PROPAGATING VARIABLE MODES ----
-\begin{frame}{2. Propagate variable modes bottom-up}
-  
+%% #1: Explain how I'm ferrying tone annotations around on variables.
+%%
+%% A typical typing judgment Γ ⊢ M : A records
+%% - the types of variables used
+%% - the type of the term
+%%
+%% I also want to know: how were those variables *used*?
+%% Were they used monotonically, antitonically, discretely, path-ly?
+%%
+%% #2: Explain what "bottom-up" means.
+%%
+%% maybe I could explain what I mean using a counterexample?
+%% and an example?
+\newcommand{\m}[1]{\left[#1\right]}
+\newcommand{\disc}[1]{\m{\iso}{#1}}
+
+\begin{frame}{2. Bottom-up mode inference}
+  \LARGE
+  \begin{mathpar}
+    \alt<2->{x : \m{T}{A}}{\G} \vdash M : B
+    \\\pause\pause
+    \begin{array}{rrcl}
+      \text{modes} & T &\bnfeq& \id ~~|~~ \op ~~|~~ \iso ~~|~~ \path
+    \end{array}
+  \end{mathpar}
+\end{frame}
+
+\begin{frame}{2. Bottom-up mode inference: duplication}
+  %% Talk here about always thinking of tones as an *output* of our
+  %% type-checking judgment.
+  \LARGE
+  \[
+  \infer{x : \m{\hil T} A \vdash M : A
+         \\ x : \m{\hil U} A \vdash N : B}
+        {x : \m{\hil{\alt<2>{T \wedge U}{??????}}} A \vdash (M,N) : A \x B}
+  \]
+\end{frame}
+
+%% TODO: figure out how to explain \wedge
+\begin{frame}{2. Bottom-up mode inference: $\wedge$}
+  \LARGE
+  \begin{mathpar}
+    \begin{array}{rcl}
+      T \wedge T &=& T\\
+      T \wedge U &=& U \wedge T\\
+      \iso \wedge T &=& \iso\\
+      \id \wedge \op &=& \iso\\
+      \path \wedge T &=& T
+    \end{array}
+
+    \begin{tikzpicture}[scale=1.4,baseline=(current bounding box.center)]
+      \node (top)  at ( 0, 1) {$\path$};
+      \node (bot)  at ( 0,-1) {$\iso$};
+      \node (-1)   at (-1, 0) {$\id$};
+      \node (1)    at ( 1, 0) {$\op$};
+      \draw (top) -- (-1) -- (bot) -- (1) -- (top);
+    \end{tikzpicture}
+  \end{mathpar}
+\end{frame}
+
+\newcommand{\compx}[1]{{\alt<1>{\color{Green}}{}#1}}
+\newcommand{\compy}[1]{{\alt<1>{\color{Orange}}{}#1}}
+\newcommand{\comptone}[1]{{\alt<2>{\hilit}{}#1}}
+
+\begin{frame}{2. Bottom-up mode inference: composition}
+  \LARGE
+  \[
+  \infer{\compx{x} : \m{\comptone{T}} A \vdash \compx{M} : B
+         \\ \compy{y} : \m{\comptone{U}} B \vdash \compy{N} : C}
+        {\compx{x} : \m{\comptone{UT}} A
+          \vdash \kw{let}~ \compy{y} = \compx{M} ~\kw{in}~ \compy{N}}
+  \]
+\end{frame}
+%% TODO: frame about composition of tones.
+
+\begin{frame}{2. Bottom-up mode inference: composition}
+  Composition forms a monoid with $\id$ as identity:
+  \begin{mathpar}
+    \begin{array}{cr|cccc}
+      \multicolumn{2}{c|}{\multirow{2}{*}{$UT$}}
+      & \multicolumn{4}{c}{T}\\
+      && \id & \op & \iso & \path\\\hline
+      \multirow{4}{*}{$U$}
+      & \id & \id & \op & \iso & \path\\
+      & \op & \op & \id & \iso & \path\\
+      & \iso & \iso & \iso & \iso & \path\\
+      & \path & \path & \path & \iso & \path
+    \end{array}
+  \end{mathpar}
+\end{frame}
+
+
+%% 3. Modal subtyping
+\newcommand{\subtype}{\mathrel{<:}}
+
+\begin{frame}{3. Modal subtyping}
+  \LARGE
+  \[{(\fnof{x} \kw{let}~\kw{box}~u = x~\kw{in}~
+    u - \kw{box}\,(\log u)) : \isof{\R} \to \R}\]
+
+  %% All of the things that explicitly convert into and out of boxes can be
+  %% subsumed by implicit subtyping.
+\end{frame}
+
+%% \begin{frame}{3. Modal subtyping: \iso-elimination}
+%%   \huge
+%%   \[ \fnof{x} x : \isof{\R} \to \R \pause\iff \isof{\R} \subtype \R \]
+%% \end{frame}
+
+\begin{frame}{3. Modal subtyping: \iso-introduction?}
+  \LARGE
+  \[
+  \infer[\rulename subtyping]
+        {\G \vdash M : A \\ A \subtype B}
+        {\G \vdash M : B}
+  \]\vspace{0em}
+
+  \centering But \(A \not\subtype \isof{A}\)!
+\end{frame}
+
+\begin{frame}{3. Modal subtyping!}
+  \huge
+  \[\m{\hil U} A \subtype B\]
+  \vspace{-1em}
+
+  \Large Finds the \emph{most general} mode $U$ such that $UA \subtype B$.
+  \pause{} Then subtyping is modal composition:
+  \LARGE
+
+  \[\infer[\rulename subtyping]
+        {x : \m{\hil T} A \vdash M : B
+          \\ \m{\hil U} B \subtype C}
+        {x : \m{\hil{UT}} A \vdash M : C}\]
+\end{frame}
+
+\begin{frame}{3. Modal subtyping: \iso-introduction!}
+  \LARGE\vspace{-1em}
+  \begin{mathpar}
+  \infer{\m{T} A \subtype B}{\m{\iso T} A \subtype \isof{B}}
+  \vspace{1em}\\\pause
+  \infer[\rulename subtyping as \iso{}-introduction]
+        {x : \m{\hil T} A \vdash M : B
+          \\ \m{\hil \iso} B \subtype \isof{B}}
+        {x : \m{\hil{\iso T}} A \vdash M : \isof{B}}
+  \end{mathpar}
 \end{frame}
 
 
 %% %% Pfenning-Davies vs tonal intro/elim rules.
-%% \newcommand{\m}[1]{\left[#1\right]}
-%% \newcommand{\disc}[1]{\m{\iso}{#1}}
 
 %% \begin{frame}
 %%   \Large
