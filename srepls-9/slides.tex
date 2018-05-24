@@ -197,9 +197,10 @@
 
 \begin{frame}
   \textbf{Two tricks:}
+
   \begin{enumerate}
   \item Infer variable usage modes bottom-up.
-  \item Use moded subtyping for implicit coercion.
+  \item Use modal subtyping for implicit coercion.
   \end{enumerate}
 \end{frame}
 
@@ -309,8 +310,7 @@
 \begin{frame}{1. Bottom-up mode inference: duplication}
   %% Talk here about always thinking of tones as an *output* of our
   %% type-checking judgment.
-
-  
+  \vspace{-1em}
   \begin{mathpar}
     \infer{x : \m{\hil T} A \vdash M : A \\ x : \m{\hil U} A \vdash N : B}{
       x : \m{\hil{\alt<2>{T \wedge U}{??????}}} A \vdash (M,N) : A \x B
@@ -436,11 +436,11 @@
         {x : \m{\hil T} A \vdash M : B
           \\ \m{\hil U} B \subtype C}
         {x : \m{\hil{UT}} A \vdash M : C}
+  % TODO: cancel previous hilights after pause
 
   \infer[\rulename subtyping into \iso]
         {\m{\hil T} A \subtype B}
         {\m{\hil{\iso T}} A \subtype \isof{B}}
-  % TODO: cancel previous hilights after pause
   \vspace{1em}\\\pause
   %
   \infer[\rulename \iso{}-introduction via subsumption]
@@ -451,7 +451,49 @@
 \end{frame}
 
 \begin{frame}{2. Modal subtyping: \iso-elimination}
-  
+  \large\vspace{-1em}
+  \[ f : \pathof{A} \to B \iff f : A \to \isof{B} \]
+  \pause
+
+  Which suggests this elimination rule for $\iso$:
+  \[
+    \infer{x : \m{T} A \vdash M : \isof B}
+          {x : \m{\pathof T} A \vdash \mathop{\kw{unbox}} M : B}
+  \]\vspace{0pt}
+
+  \pause
+  Happily, we can do this with subtyping!
+  \begin{mathpar}
+    \infer[\rulename subtyping out of $\iso$]
+          {\m{T} A \subtype B}
+          {\m{T \path} \isof A \subtype B}
+
+    \infer[\rulename subsumption as \iso-elimination]
+          {x : \m{T} A \vdash M : B \\ \m{\path} \isof B \subtype B}
+          {x : \m{\path T} A \vdash M : C}
+  \end{mathpar}
+\end{frame}
+
+\begin{frame}
+  \textbf{How to infer monotonicity:}
+
+  \begin{enumerate}
+  \item Infer variable usage modes bottom-up.
+  \item Use modal subtyping for implicit coercion.
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}{Further work}\vspace{-1em}
+  \begin{enumerate}
+  \item \textbf{Solved:} pattern matching!
+  \item \textbf{Unsolved:} internalizing $\path$ w/o annotations.
+  \item \textbf{Conjectured:} substitution.
+  \item Pfenning-Davies rules are derivable from substitution.
+  \end{enumerate}
+  \vspace{1em}
+
+  \centering
+  \url{http://www.rntz.net/files/tones.pdf}
 \end{frame}
 
 
