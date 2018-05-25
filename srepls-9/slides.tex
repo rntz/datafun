@@ -103,7 +103,7 @@
   \[\begin{array}{l@{\hskip 1em}l@{\hskip 1em}l}
     \fnof{x} x + \log x &:& \R \to \R\vspace{.5em}\\
     \fnof{x} {-2}x &:&
-         \alt<2->{\opof\R}{????\hspace{3.5pt}} \to \R \vspace{.5em}\\
+         \alt<2->{\color{Green}\opof\R}{????\hspace{3.5pt}} \to \R \vspace{.5em}\\
     \fnof{x} x - \log x &:&
          \alt<2->{\isof\R}{???\hspace{3pt}} \to \R \vspace{.5em}\\
     \fnof{x} 4 &:& \alt<2->{\pathof\R}{???\hspace{1.33pt}} \to \R
@@ -136,8 +136,8 @@
     \fnof{x} {-2}x &:&
          {\opof\R} \to \R \vspace{.5em}\\
     \fnof{x} x - \log x &:&
-         {\isof\R \to \R} \vspace{.5em}\\
-    \fnof{x} 4 &:& {\hilit\pathof\R} \to \R
+         \color{Green}{\isof\R \to \R} \vspace{.5em}\\
+    \fnof{x} 4 &:& {\pathof\R} \to \R
   \end{array}\]
 \end{frame}
 
@@ -167,17 +167,18 @@
          {\opof\R} \to \R \vspace{.5em}\\
     \fnof{x} x - \log x &:&
          {\isof\R \to \R} \vspace{.5em}\\
-    \fnof{x} 4 &:& \pathof\R \to \R
+    \fnof{x} 4 &:& \color{Green} \pathof\R \to \R
   \end{array}\]
 \end{frame}
 
 
 \begin{frame}
-  \huge\centering\itshape
-  ``This is just a modal type system!''
+  \iso{} is a \emph{necessity modality / monoidal comonad};\\
+  \path{} is a \emph{possibility modality / monoidal monad}.
   \vspace{1em}
 
-  ``Pfenning \& Davies did this in 2001!''
+  Pfenning \& Davies gave typing rules for these in\\
+  \emph{A Judgmental Reconstruction of Modal Logic}!
 \end{frame}
 
 \begin{frame}
@@ -196,7 +197,7 @@
 \end{frame}
 
 \begin{frame}
-  \textbf{Two tricks:}
+  \textbf{How to infer monotonicity:}
 
   \begin{enumerate}
   \item Infer variable usage modes bottom-up.
@@ -383,13 +384,15 @@
   \begin{enumerate}
   \item \emph{Linear Haskell} (POPL 2018)
     %% TODO FIXME ARGH
-  \item \emph{I Got Plenty o' Nuttin} (McBride, unpublished?)
-  \item \emph{Monotonicity Types} (Clancy, Miller \& Meiklejohn)
-  \item \emph{Bounded Linear Types in a Resource Semiring} (FIXME TODO)
-  \item \emph{The Next 700 Modal Type Assignment Systems}\\(Abel, TYPES 2015)
-  \item TODO: A Fibrational Framework... Licata Shulman etc.
-  \item ... more?
+  \item \emph{I Got Plenty o' Nuttin} (McBride)
+  \item \emph{Monotonicity Types} (PMLDC 2017)
+  \item \emph{Bounded Linear Types in a Resource Semiring} (ESOP 2014)
+  \item \emph{The Next 700 Modal Type Assignment Systems} (TYPES 2015)
+  \item \emph{A Fibrational Framework for Substructural and Modal Logics}
+    (FSCD 2017)
+    \textbf{massively} generalizes this pattern.
   \end{enumerate}
+  ... more?
 \end{frame}
 
 
@@ -437,6 +440,7 @@
           \\ \m{\hil U} B \subtype C}
         {x : \m{\hil{UT}} A \vdash M : C}
   % TODO: cancel previous hilights after pause
+  \pause
 
   \infer[\rulename subtyping into \iso]
         {\m{\hil T} A \subtype B}
@@ -445,7 +449,8 @@
   %
   \infer[\rulename \iso{}-introduction via subsumption]
         {x : \m{\hil T} A \vdash M : B
-          \\ \m{\hil \iso} B \subtype \isof{B}}
+          %% \\ \m{\hil \iso} B \subtype \isof{B}
+        }
         {x : \m{\hil{\iso T}} A \vdash M : \isof{B}}
   \end{mathpar}
 \end{frame}
@@ -468,9 +473,9 @@
           {\m{T} A \subtype B}
           {\m{T \path} \isof A \subtype B}
 
-    \infer[\rulename subsumption as \iso-elimination]
-          {x : \m{T} A \vdash M : B \\ \m{\path} \isof B \subtype B}
-          {x : \m{\path T} A \vdash M : C}
+    \infer[\rulename \iso-elimination via subsumption]
+          {x : \m{T} A \vdash M : \isof B}
+          {x : \m{\path T} A \vdash M : B}
   \end{mathpar}
 \end{frame}
 
@@ -483,12 +488,13 @@
   \end{enumerate}
 \end{frame}
 
-\begin{frame}{Further work}\vspace{-1em}
+\begin{frame}{State of work}\vspace{-1em}
   \begin{enumerate}
-  \item \textbf{Solved:} pattern matching!
-  \item \textbf{Unsolved:} internalizing $\path$ w/o annotations.
-  \item \textbf{Conjectured:} substitution.
-  \item Pfenning-Davies rules are derivable from substitution.
+  \item \textbf{Solved:} Pattern matching!
+  \item \textbf{Conjectured:} Substitution.
+  \item \textbf{Unsolved:} Internalizing $\path$ w/o annotations.
+  \item \textbf{Open:} HM-style type inference?
+  \item Pfenning-Davies elim rule is derivable from substitution.
   \end{enumerate}
   \vspace{1em}
 
