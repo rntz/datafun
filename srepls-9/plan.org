@@ -1,3 +1,11 @@
+* Plan
+** 2
+- which are monotonically nondecreasing?
+- compositional reasoning = type system
+- all you need is STLC
+
+** 3
+
 * Overall plan (OUTDATED)
 1. Monotonicity as modal types.
 2. Bidirectional typing.
