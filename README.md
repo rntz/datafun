@@ -63,11 +63,6 @@ Useful targets:
 - `make clean`: Runs `latexrun --clean-all` and also removes `latex.out` (where
   `latexrun` stores intermediate files).
 
-## example.tex
-
-A simple example document showing off `rntz.cls`, `rntzgeometry.sty`, and
-`rntzfont.sty`.
-
 ## rntz.cls
 
 Based on extarticle, and supports most of its options. Notable differences:
@@ -152,3 +147,12 @@ width as well.
 - `fullwidth=LEN`: The width for `figure*` and `fullwidth` environments. Default
   is `\textwidth`, i.e. the width the text *would have been* before you loaded
   `narrow.sty`.
+
+## example.tex
+
+A simple example document showing off `rntz.cls`, `rntzgeometry.sty`, and
+`rntzfont.sty`.
+
+## xheight.tex
+
+A test document used to check x-heights are aligned across different fonts.
