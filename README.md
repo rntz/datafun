@@ -120,10 +120,6 @@ and line spacings. The options are:
 - `libertine` for [Linux Libertine][Libertine] with [newtxmath][]. Libertine
   imitates Times New Roman. It's tolerable.
 
-- `merriweather` for [Merriweather][] with [newtxmath][]. Merriweather is quite
-  readable on screen, but heavy and very large; unfortunately its LaTeX package
-  does not allow scaling it.
-
 - `palatino` for [Palatino][] with [Euler][]. Both fonts are designed by Hermann
   Zapf, and match nicely.
 
@@ -138,7 +134,6 @@ The default is `palatino`.
 [Cochineal]: https://ctan.org/pkg/cochineal
 [Euler]: https://ctan.org/pkg/eulervm
 [Libertine]: https://ctan.org/pkg/libertine
-[Merriweather]: https://ctan.org/pkg/merriweather
 [Palatino]: https://ctan.org/pkg/newpx
 [charter]: https://ctan.org/pkg/charter
 [newtxmath]: https://ctan.org/pkg/newtx
