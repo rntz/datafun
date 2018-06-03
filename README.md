@@ -100,39 +100,44 @@ expand to a larger width.
 
 ## rntzfont.sty
 
-This chooses from a set of paired text & math fonts, with appropriate scalings
-and line spacings. The options are:
+This chooses from a set of matched fonts, with appropriate scalings and line
+spacings. The options are named by the text serif font they choose. Most options
+also load [Euler][] for math, [Source Sans Pro][ssp] for sans-serif and
+[Inconsolata][] for monospace.
 
-- `charter` for [Bitstream Charter][charter] with [Euler][]. Charter is a
-  legible, no-nonsense font that displays well both on screen and in print.
+Options (default `palatino`):
 
-- `cochineal` for [Cochineal][] with [Euler][]. Cochineal is an old-style font,
-   very pleasant in print.
+- `charter` for [Bitstream Charter][charter]. Charter is a nice, legible font
+  that displays well both on screen and in print.
+
+- `cochineal` for [Cochineal][]. Cochineal is an old-style font, very pleasant
+   in print.
 
 - `cm` for Computer Modern, which is TeX's default, but I've increased the line
   spacing. I dislike Computer Modern; I find it almost unreadable on screen.
 
-- `libertine` for [Linux Libertine][Libertine] with [newtxmath][]. Libertine
-  imitates Times New Roman. It's tolerable.
+- `libertine` for [Linux Libertine and Biolinum][Libertine] with [newtxmath][].
+  Libertine imitates Times New Roman.
 
-- `palatino` for [Palatino][] with [Euler][]. Both fonts are designed by Hermann
+- `palatino` for [Palatino][]. Palatino and Euler are both designed by Hermann
   Zapf, and match nicely.
 
-- `pt` for [PT Serif][pt] with [newtxmath][]. PT Serif is quite readable on
-  screen.
+- `pt` for [PT Serif and Sans][pt] with [newtxmath][]. PT Serif is quite
+  readable on screen. However, its LaTeX package is missing some features, such
+  as small caps and straight quotes.
 
-- `pteuler` for [PT Serif][pt] with [Euler][]. To match x-heights, PT Serif is
-  scaled down.
-
-The default is `palatino`.
+- `pteuler` for [PT Serif and Sans][pt] with [Euler][]. To match x-heights, the
+  PT fonts are scaled down.
 
 [Cochineal]: https://ctan.org/pkg/cochineal
 [Euler]: https://ctan.org/pkg/eulervm
+[Inconsolata]: https://ctan.org/pkg/inconsolata
 [Libertine]: https://ctan.org/pkg/libertine
 [Palatino]: https://ctan.org/pkg/newpx
 [charter]: https://ctan.org/pkg/charter
 [newtxmath]: https://ctan.org/pkg/newtx
 [pt]: https://ctan.org/pkg/paratype
+[ssp]: https://ctan.org/pkg/sourcesanspro
 
 ## narrow.sty
 
