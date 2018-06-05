@@ -8,19 +8,26 @@
 
 \documentclass[sigplan,screen,review,timestamp]{acmart}
 
-\usepackage{cochineal}
-\usepackage{eulervm}
-
 
 %% ---- Packages ----
-\usepackage{lipsum}
+\usepackage{amsmath,latexsym,stmaryrd}
+\usepackage{anyfontsize}
+
+%% %% Avoid ``too many math alphabets'' error.
+%% \newcommand\hmmax{0}
+%% \newcommand\bmmax{0}
+%% \usepackage{bm}
 
 %% ---- Commands ----
 
 
 %% ---- Top matter ----
-\title{Deriving incremental recursive queries}
-\subtitle{Extended abstract}
+\title{Finding fixed points faster}
+% The derivative of a fixed point is the fixed point of its derivative
+% Finding fixed points faster
+% Finding fixed points faster by differentiation
+% Deriving incremental recursive queries
+\subtitle{\sffamily\scshape extended abstract}
 \author{Michael Arntzenius}
 \affiliation{University of Birmingham}
 \email{daekharel@gmail.com}
@@ -28,8 +35,8 @@
 \settopmatter{printacmref=false}
 
 %% TODO
-% \terms{blah}
-% \keywords{blah}
+%\terms{blah}
+%\keywords{blah}
 
 
 \begin{document}
@@ -40,6 +47,72 @@
 
 \maketitle
 
-\lipsum[1]
+\renewcommand{\d}{\delta}
+\newcommand{\dzero}{\mathbf{0}~} % todo: mathbold, or \mb or something
+\newcommand{\fn}{\lambda}
+\newcommand{\binder}{.~}
+\newcommand{\bind}[1]{#1\binder}
+\newcommand{\fnof}[1]{\fn\bind{#1}}
+
+\newcommand{\kw}[1]{\textsf{\bfseries#1}}
+\newcommand{\ebiglub}[1]{\bigcup(#1)~}
+\newcommand{\elet}[1]{\kw{let}~#1~\kw{in}~}
+\newcommand{\subst}[1]{\,[#1]}
+\newcommand{\efix}{\kw{fix}~}
+\newcommand{\tlv}[1]{\textrm{#1}}
+\newcommand{\var}[1]{\mathit{#1}}
+\newcommand{\dee}[1]{\var{d#1}}
+
+\begin{figure}
+  \[\begin{array}{rcl}
+    \d x &=& dx\\
+    \d(\fnof x e) &=& \fnof x \fnof{\dee x} \d{e}\\
+    \d(e_1~e_2) &=& \d{e_1}~e_2~\d{e_2}\\
+    \d(e_1 \cup e_2) &=& \d{e_1} \cup \d{e_2}\\
+    \d{\{e\}} &=& \emptyset\\
+    \d(\ebiglub{x \in e_1} e_2)
+    &=& \ebiglub{x \in \d{e_1}} e_2\\
+    &\cup& \ebiglub{x \in e_1 \cup \d{e_1}}
+    \elet{\dee x = \dzero x}
+    \d{e_2}
+    %\subst{dx \mapsto \dzero x}
+    \\
+    \d(\efix f) &=& \efix (\d\!f~(\efix f))
+  \end{array}\]
+  \caption{Derivatives for a fragment of Datafun}
+  \label{fig:derivs}
+\end{figure}
+
+\begin{figure}
+  \[
+  \begin{array}{rcl}
+  \tlv{fix} \,f &=& \tlv{na\"ive} \,f \,\emptyset \,(f\, \emptyset)\\
+  \tlv{na\"ive} \,f \,x \,\var{next}
+  &=& \kw{if}~ x = \var{next} ~\kw{then}~ x ~\kw{else}\\
+  && \tlv{na\"ive} \,f \,\var{next} \,(f \,\var{next})
+
+  \vspace{1em}\\
+
+  \tlv{fix} \,f &=& \tlv{semina\"ive} \,\d\!{f} \,\emptyset \,(f\, \emptyset)\\
+  \tlv{semina\"ive} \,\dee f \,x \,\dee x
+  &=& \kw{if}~ \dee x \subseteq x ~\kw{then}~ x ~\kw{else}\\
+  && \tlv{semina\"ive} \,\dee f \,(x \cup \dee x) \,(\dee f \,x \,\dee x)
+  %% \tlv{semina\"ive-fix} \:\dee f \:x \:\var{new}
+  %% &=& \elet{\var{toadd} = \var{df} \:x \:\var{new}}\\
+  %% && \kw{if}~ \var{to-add} \subseteq x
+
+  %% fix f x next =
+  %%   if next = x then x
+  %%   else fix f next (f next)
+  %%
+  %% fix-fast df x dx =
+  %%   if dx ⊆ x then x else
+  %%   fix-fast df (x ∪ dx) (df x dx)
+  \end{array}
+  \]  
+  \caption{Na\"ive and semina\"ive fixed point computation}
+\end{figure}
+
+%% TODO: code for naive-fix and seminaive-fix
 
 \end{document}
