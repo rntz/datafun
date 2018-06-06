@@ -86,17 +86,17 @@
 \begin{figure}
   \[
   \begin{array}{rcl}
-  \tlv{fix} \,f &=& \tlv{na\"ive} \,f \,\emptyset \,(f\, \emptyset)\\
-  \tlv{na\"ive} \,f \,x \,\var{next}
+  \efix f &=& \tlv{na\"ive}_f \,\emptyset \,(f\, \emptyset)\\
+  \tlv{na\"ive}_f \,x \,\var{next}
   &=& \kw{if}~ x = \var{next} ~\kw{then}~ x ~\kw{else}\\
-  && \tlv{na\"ive} \,f \,\var{next} \,(f \,\var{next})
+  && \tlv{na\"ive}_f \,\var{next} \,(f \,\var{next})
 
   \vspace{1em}\\
 
-  \tlv{fix} \,f &=& \tlv{semina\"ive} \,\d\!{f} \,\emptyset \,(f\, \emptyset)\\
-  \tlv{semina\"ive} \,\dee f \,x \,\dee x
+  \efix f &=& \tlv{semina\"ive}_f \,\emptyset \,(f\, \emptyset)\\
+  \tlv{semina\"ive}_f \,x \,\dee x
   &=& \kw{if}~ \dee x \subseteq x ~\kw{then}~ x ~\kw{else}\\
-  && \tlv{semina\"ive} \,\dee f \,(x \cup \dee x) \,(\dee f \,x \,\dee x)
+  && \tlv{semina\"ive}_f \,(x \cup \dee x) \,(\d\!f \,x \,\dee x)
   %% \tlv{semina\"ive-fix} \:\dee f \:x \:\var{new}
   %% &=& \elet{\var{toadd} = \var{df} \:x \:\var{new}}\\
   %% && \kw{if}~ \var{to-add} \subseteq x
