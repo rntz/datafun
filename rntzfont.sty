@@ -29,9 +29,9 @@
 % that scales it *down*.
 \ifdefstring{\rntz@font}{charter}{
   \RequirePackage{charter}
-  \RequirePackage{eulervm}
   \usepackage[semibold,scaled=.99]{sourcesanspro}
   \usepackage[scale=1.05263]{inconsolata}
+  \RequirePackage{eulervm}
   \linespread{1.14}
 }{}
 
@@ -39,11 +39,11 @@
 
 % Cochineal is tiny by default. I scale it to match Euler's x-height.
 \ifdefstring{\rntz@font}{cochineal}{
-  \RequirePackage[scale=1.08]{cochineal}
+  \RequirePackage[scale=1.09]{cochineal}
+  \RequirePackage[semibold,scaled=.959]{sourcesanspro}
+  \RequirePackage[scaled=1.02]{inconsolata}
   \RequirePackage{eulervm}
-  \RequirePackage[semibold,scaled=.95]{sourcesanspro}
-  \RequirePackage[scaled=1.01]{inconsolata}
-  \linespread{1.12}
+  \linespread{1.15}
 }{}
 
 \ifdefstring{\rntz@font}{libertine}{
@@ -59,9 +59,9 @@
 \ifdefstring{\rntz@font}{palatino}{
   %\RequirePackage{mathpazo}
   \RequirePackage{newpxtext}
-  \RequirePackage{eulervm}
   \RequirePackage[semibold,scaled=.9475]{sourcesanspro}
   \RequirePackage[scaled=1.01]{inconsolata}
+  \RequirePackage{eulervm}
   \linespread{1.16667}
 }{}
 
@@ -83,8 +83,8 @@
 % option to scale it up.)
 \ifdefstring{\rntz@font}{pteuler}{
   \RequirePackage[scaled=0.93]{PTSerif}
-  \RequirePackage{eulervm}
   \RequirePackage[scaled=0.93]{PTSans}
   \RequirePackage[scaled=1.019]{inconsolata}
+  \RequirePackage{eulervm}
   \linespread{1.126}
 }{}
