@@ -5,22 +5,6 @@
 \usepackage[spacing=true,stretch=10]{microtype}
 \frenchspacing
 
-%% \documentclass{article}
-%% \usepackage{amsmath,amssymb,amsthm}
-%% \usepackage{url,hyperref}
-%% \usepackage[a4paper,margin=2cm]{geometry}
-%% \theoremstyle{plain}
-%% \newtheorem{theorem}{Theorem}
-%% \newtheorem{corollary}{Corollary}
-%% \newtheorem{lemma}{Lemma}
-%% \theoremstyle{definition}
-%% \newtheorem{definition}{Definition}
-
-\newcommand{\ms}[1]{\ensuremath{\mathsf{#1}}}
-\newcommand{\mb}[1]{\ensuremath{\mathbf{#1}}}
-\newcommand{\mi}[1]{\ensuremath{\mathit{#1}}}
-\newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}
-
 \newcommand{\todo}[1]{\noindent{\color{red}#1}}
 
 \newcommand{\N}{\mathbb{N}}
@@ -30,7 +14,8 @@
 \newcommand{\sub}[1]{\;\{{#1}\}}
 \newcommand{\Disc}[1]{\square{#1}}
 
-\newcommand{\fix}{\ms{fix}}
+\newcommand{\kw}[1]{\ensuremath{\mathrm{#1}}}
+\newcommand{\fix}{\kw{fix}}
 \newcommand{\dv}{\delta}
 
 %% TODO: subtitle support in rntz.cls.
@@ -65,13 +50,13 @@ Fix a poset $P$ with a least element $\bot : P$ admitting a least-fixed-point
 operator $\fix : (P \to P) \to P$ such that $\fix\;f = f^i\;\bot$ for some $i :
 \N$.
 
-Let us consider a higher-order language $\mc{L}$ which can, among perhaps many
-other things, express monotone maps on $P$. Let's assume we have a theory of
-changes for $\mc{L}$, \`a la \href{https://arxiv.org/abs/1312.0658}{``A Theory of
-  Changes for Higher Order Languages'' by Cai et al, PLDI 2014}. We wish to
-extend $\mc{L}$ with $\fix$, and find a theory of changes for the resulting
-$\mc{L}_\fix$. In particular, how do we compute derivatives of fixed points? The
-answer is in the title:
+Let us consider a higher-order language $\mathcal{L}$ which can, among perhaps
+many other things, express monotone maps on $P$. Let's assume we have a theory
+of changes for $\mathcal{L}$, \`a la \href{https://arxiv.org/abs/1312.0658}{``A
+  Theory of Changes for Higher Order Languages'' by Cai et al, PLDI 2014}. We
+wish to extend $\mathcal{L}$ with $\fix$, and find a theory of changes for the
+resulting $\mathcal{L}_{\fix}$. In particular, how do we compute derivatives of
+fixed points? The answer is in the title:
 \[ \dv(\fix\;f) = \fix\;(\dv{f} \; (\fix\;f)) \]
 
 %% TODO: show derivation of this from d(fix f) = d(f (fix f)) and the function
@@ -95,7 +80,7 @@ I will assume $\Delta P = P$ and make use of this implicitly. This is a fairly
 strong assumption, but is true for seminaive Datalog (where $P$ is roughly
 ``finite sets of facts'' or ``relations'') and in Datafun. I do not provide
 definitions of $\oplus$, $\ominus$ etc for $P$; I assume they are already a part
-of $\mc{L}$'s theory of changes. I will also assume the following lemmas:
+of $\mathcal{L}$'s theory of changes. I will also assume the following lemmas:
 
 \begin{lemma}[Bottom changes]
   \label{lem:bot-change}
@@ -249,10 +234,10 @@ Armed with these, we can prove our main result:
     \fix\;(\dv f \;(\fix\;f)) &=& (\dv f\;(\fix\;f))^i \;\bot
   \end{eqnarray*}
 
-  We can pick such an $i$ because it's always the case that $\fix\;f = f^i \bot$
-  for some ``iteration count'' $i$; and since $f^i\;\bot$ is a fixed point, we
-  can increase $i$ without changing its value. So just take the larger of the
-  ``iteration counts'' for $f \oplus \dv f$ and $\dv f\;(\fix\;f)$.
+  We can pick such an $i$ because $\fix\;f = f^i \bot$ for some ``iteration
+  count'' $i$; and since $f^i\;\bot$ is a fixed point, we can increase $i$
+  without chang\-ing its value. So we take the larger of the ``iteration
+  counts'' for $f \oplus \dv f$ and $\dv f\;(\fix\;f)$.
 
   Then:
   \[
