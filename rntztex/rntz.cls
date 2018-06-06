@@ -100,18 +100,12 @@
 \patchcmd{\ttlh@hang}{\parindent\z@}{\parindent\z@\leavevmode}{}{}
 \patchcmd{\ttlh@hang}{\noindent}{}{}{}
 
-%% \titlespacing*{\section}{0pt}{3.5\parsep}{1.75\parsep}
-%% \titlespacing*{\subsection}{0pt}{3\parsep}{1.5\parsep}
-%% \titlespacing*{\subsubsection}{0pt}{3\parsep}{1.5\parsep}
-
-%% \titlespacing*{\section}{0pt}{\baselineskip}{.55\baselineskip}
-%% \titlespacing*{\subsection}{0pt}{\baselineskip}{.5\baselineskip}
-%% \titlespacing*{\subsubsection}{0pt}{\baselineskip}{.5\baselineskip}
-
 % Lotsa whitespace.
-\titlespacing*{\section}{0pt}{4\parsep}{2\parsep}
-\titlespacing*{\subsection}{0pt}{4\parsep}{2\parsep}
-\titlespacing*{\subsubsection}{0pt}{4\parsep}{2\parsep}
+\def\rntz@secbefore{1.6em plus .8em minus .4em}
+\def\rntz@secafter{.8em plus .4em minus .2em}
+\titlespacing*{\section}{0pt}{\rntz@secbefore}{\rntz@secafter}
+\titlespacing*{\subsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
+\titlespacing*{\subsubsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
 
 %% Spacing.
 \newcommand{\header}{\rmfamily\bfseries}

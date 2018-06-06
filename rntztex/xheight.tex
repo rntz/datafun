@@ -1,0 +1,33 @@
+%% This is a test document that I use to check my x-heights are aligned across
+%% different typefaces (rm, math, sf, tt). Ideally I'd automate this process but
+%% augh, LaTeX and augh, fonts. Maybe LuaTeX or XeTeX could handle this better.
+
+\documentclass[20pt]{rntz}
+%\usepackage[paperheight=50pt,paperwidth=150pt,margin=5pt]{geometry}
+\usepackage[paperheight=330pt,paperwidth=150pt,margin=5pt]{geometry}
+
+\usepackage{rntzfont}
+
+\setlength{\parindent}{0pt}
+\linespread{.8}
+\begin{document}\Huge
+
+%% x$x$ i$i$ a$a$ n$n$ h$h$ p$p$
+
+%% x{\ttfamily x} i{\ttfamily i} a{\ttfamily a} n{\ttfamily n} h{\ttfamily h} p{\ttfamily p}
+
+%% x{\sffamily x} i{\sffamily i} a{\sffamily a} n{\sffamily n} h{\sffamily h} p{\sffamily p}
+
+$x$x{\sffamily x}{\ttfamily x}
+
+$i$i{\sffamily i}{\ttfamily i}
+
+$a$a{\sffamily a}{\ttfamily a}
+
+$n$n{\sffamily n}{\ttfamily n}
+
+$h$h{\sffamily h}{\ttfamily h}
+
+$p$p{\sffamily p}{\ttfamily p}
+
+\end{document}
