@@ -8,6 +8,7 @@
 
 \documentclass[sigplan,screen,review,timestamp,dvipsnames]{acmart}
 %\usepackage[scaled=1.023]{cochineal}
+%\usepackage[scaled=1.03]{cochineal}
 
 
 %% ---- Packages ----
@@ -47,90 +48,109 @@
 \newcommand{\todo}[1]{{\color{ACMPurple}#1}}
 \newcommand{\hilited}{\color{Cyan}}
 
-\renewcommand{\d}{\delta}
-\newcommand{\dzero}{\mathbf{0}~} % todo: mathbold, or \mb or something
+\newcommand{\bnfeq}{\dblcolon=}
+\newcommand{\bnfcont}{}
+\newcommand{\pipe}{~|~}
+\newcommand{\x}{\times}
 \newcommand{\fn}{\lambda}
 \newcommand{\binder}{.~}
 \newcommand{\bind}[1]{#1\binder}
 \newcommand{\fnof}[1]{\fn\bind{#1}}
+\newcommand{\setfor}[2]{\{#1 ~|~ #2\}}
 
-\newcommand{\kw}[1]{\textsf{\bfseries#1}}
-\newcommand{\ebiglub}[1]{\bigcup(#1)~}
-\newcommand{\elet}[1]{\kw{let}~#1~\kw{in}~}
-\newcommand{\subst}[1]{\,[#1]}
-\newcommand{\efix}{\kw{fix}~}
+\renewcommand{\d}{\delta}
+\newcommand{\dzero}{\mathbf{0}~} % todo: mathbold, or \mb or something
+\newcommand{\kw}[1]{\textsf{#1}}
 \newcommand{\tlv}[1]{\textrm{#1}}
 \newcommand{\var}[1]{\mathit{#1}}
 \newcommand{\dee}[1]{\var{d#1}}
+\newcommand{\subst}[1]{\,[#1]}
+
+\newcommand{\mto}{\overset{+}{\to}}
+\newcommand{\tset}[1]{\{#1\}}
+
+\newcommand{\eset}[1]{\{#1\}}
+\newcommand{\ewhen}[1]{\kw{when}~#1~\kw{then}~}
+\newcommand{\eif}[2]{\kw{if}~#1~\kw{then}~#2~\kw{else}~}
+\newcommand{\ebiglub}[1]{\bigcup(#1)~}
+\newcommand{\elet}[1]{\kw{let}~#1~\kw{in}~}
+\newcommand{\efix}{\kw{fix}~}
 
 
 \begin{document}
-
-%% \begin{abstract}
-%%   Logic programming has a powerful appeal: declare what counts as a solution, and
-%%   let the computer find it! Unfortunately, traditional logic programming systems
-%%   like Prolog have trouble going truly \emph{higher-order} in the way functional
-%%   programmers are used to. Seeking to have their cake and eat it, too, functional
-%%   programmers have learned to emulate logic programming using the effect of
-%%   \emph{nondeterminism}, usually implemented as backtracking.
-
-%%   However, backtracking search is often inefficient; logic programmers have
-%%   explored other useful strategies. Datalog~\citep{datalog} takes an extreme
-%%   approach, allowing only predicates with finite extent. This allows bottom-up
-%%   evaluation, which easily handles queries (such as transitive closure) which are
-%%   difficult or inefficient to implement in Prolog.
-
-%%   Recently, Datafun~\cite{datafun} has shown that higher-order functional programs
-%%   can emulate Datalog using a \emph{bottom-up nondeterminism effect} (a
-%%   \emph{finite set monad}) combined with \emph{monotone fixed points}. In the
-%%   present work, we sketch a translation of a classic Datalog optimisation,
-%%   semina\"ive evaluation, to Datafun.
-%% \end{abstract}
-
 % \begin{abstract} blah \end{abstract}
 \maketitle
 
-\section{Introduction}
-Logic programming has a powerful appeal: declare what counts as a solution, and
-let the computer find it! Unfortunately, traditional logic programming systems
-like Prolog have trouble going truly \emph{higher-order} in the way functional
-programmers are used to. Seeking to have their cake and eat it, too, functional
-programmers have learned to emulate logic programming using the effect of
-\emph{nondeterminism}, usually implemented as backtracking.
+%% Logic programming has a powerful appeal: declare what counts as a solution, and
+%% let the computer find it! Unfortunately, traditional logic programming systems
+%% like Prolog have trouble going truly \emph{higher-order} in the way functional
+%% programmers are used to. Seeking to have their cake and eat it, too, functional
+%% programmers have learned to emulate logic programming using the effect of
+%% \emph{nondeterminism}, usually implemented as backtracking.
 
-However, backtracking search is often inefficient; logic programmers have
-explored other useful strategies. Datalog~\citep{datalog} takes an extreme
-approach, allowing only predicates with finite extent. This allows bottom-up
-evaluation, which easily handles queries (such as transitive closure) which are
-difficult or inefficient to implement in Prolog.
+%% However, backtracking search is often inefficient; logic programmers have
+%% explored other useful strategies. Datalog~\citep{datalog} takes an extreme
+%% approach, allowing only predicates with finite extent. This allows bottom-up
+%% evaluation, which easily handles queries (such as transitive closure) which are
+%% difficult or inefficient to implement in Prolog.
 
-Recently, Datafun~\cite{datafun} has shown that higher-order functional programs
-can emulate Datalog using a \emph{bottom-up nondeterminism effect} (a
-\emph{finite set monad}) combined with \emph{monotone fixed points}. In the
-present work, we sketch a translation of a classic Datalog optimisation,
-semina\"ive evaluation, to Datafun.
+Functional programmers have learned to emulate logic programming using the
+effect of \emph{nondeterminism}, usually implemented as backtracking. However,
+backtracking search is often inefficient; logic programmers have explored other
+useful strategies.
+%
+Datalog~\citep{datalog} takes an extreme approach, allowing only predicates with
+finite extent. This allows bottom-up evaluation, which easily handles queries
+(such as transitive closure) that are inefficient to solve by brute-force
+search.
+
+Datafun~\cite{datafun} shows that higher-order functional programs can emulate
+Datalog using a \emph{bottom-up nondeterminism effect} (a \emph{finite set
+  monad}) combined with \emph{monotone fixed points}. Here, we sketch a
+translation of a classic Datalog optimisation, semina\"ive evaluation, to
+Datafun.
 
 
-\section{Datalog and Datafun}
+\section{Datalog, na\"ively and semina\"ively}
 
-This classic Datalog program computes the transitive closure of an \texttt{edge}
-relation:
+This simple Datalog program computes reachability in a graph, given its
+\texttt{edge} relation:
 %
 \begin{lstlisting}
 path(X,Y) :- edge(X,Y).
 path(X,Z) :- edge(X,Y), path(Y,Z).
 \end{lstlisting}
 
+This says a path is either an edge, or an edge followed by a path. But how does
+Datalog actually find these paths? Let's identify a predicate with the set of
+elements of which it is true. Then computing \texttt{path} amounts to finding
+the least fixed point of the following function:
+%
+\[
+\begin{array}{l}
+  \tlv{step}~ \var{path} = \setfor{(x,y)}{(x,y) \in \tlv{edge}}\\
+  \phantom{\tlv{step}~ \var{path}} \hspace{.5pt}\cup
+  \setfor{(x,z)}{(x,y) \in \tlv{edge}, (y,z) \in \var{path}}
+\end{array}
+\]
+
+The na\"ive approach is to repeatedly apply the \tlv{step} function, computing
+the sequence $\emptyset, \tlv{step}^1(\emptyset), \tlv{step}^2(\emptyset), ...$
+until we find a fixed point $\tlv{step}^k(\emptyset) =
+\tlv{step}^{k+1}(\emptyset)$.
+
+This works, but observe that $\tlv{step}^i(\emptyset) \subseteq
+\tlv{step}^{i+1}(\emptyset)$. This means we are doing \emph{redundant
+  computation} --- for example, iteration $i+1$ will append an edge $(x,y)$ to a
+path $(y,z)$ even if iteration $i$ already found the path $(x,z)$. What we
+really want to compute is what \emph{changes} between iterations.
+
+
+
+
+\section{Datafun, na\"ively}
+
 \todo{TODO: How do I quickly introduce Datafun?}
-
-\newcommand{\bnfeq}{\dblcolon=}
-\newcommand{\bnfcont}{}
-\newcommand{\pipe}{~|~}
-\newcommand{\x}{\times}
-
-\newcommand{\mto}{\overset{+}{\to}}
-\newcommand{\tset}[1]{\{#1\}}
-\newcommand{\eset}[1]{\{#1\}}
 
 \begin{figure}
   \[
@@ -139,18 +159,27 @@ path(X,Z) :- edge(X,Y), path(Y,Z).
     \\
     e &\bnfeq& \fnof{x} e \pipe e_1\:e_2 \pipe \eset{\vec{e}} \pipe e_1 \cup e_2
     \pipe \bigcup(x \in e_1)~ e_2
+    \\ &\bnfcont& \ewhen{e_1} e_2 \pipe \eif{e_1}{e_2}{e_3}
+    %% FIXME: need equality!
   \end{array}
   \]\vspace{-1em}
   \caption{A fragment of Datafun}
   \label{fig:datafun}
 \end{figure}
 
-\section{Semina\"ive evaluation}
-
-\section{Change structures}
+
+\section{Derivatives for Datafun}
 
 \todo{TODO: describe our version of change structures and derivatives}
 
+\newcommand{\D}{\Delta}
+\newcommand{\zero}{\mathbf{0}}
+
+We use a variant suggested by \citet{atkey-changes}: a change structure for a
+type $A$ is a triple $(\D A, \oplus, \zero)$. $\D A$ is a type representing
+\emph{changes} to values of type $A$.
+%
+$\oplus : A \to \Delta A \to A$ is a function 
 
 \begin{figure}
   \[\begin{array}{rcl}
@@ -203,6 +232,8 @@ path(X,Z) :- edge(X,Y), path(Y,Z).
   \label{fig:defining-fix}
 \end{figure}
 
+\vspace{1em}
+
 Observe that $\d(\efix f)$ must be a fixed point of $\d\!f\;(\efix f)$:
 %% We discovered the definition of $\d(\efix f)$ in \cref{fig:derivatives} by
 %% observing that, if it exists, $\d(\efix f)$ must be a fixed point of $\d\!f\;
@@ -224,9 +255,6 @@ Which suggests the following motto:
 \end{center}
 %
 This is so beautiful it must be true. Nevertheless, we have proven the definition of $\delta(\efix f)$ in \cref{fig:derivatives} correct~\citep{fixderiv}.
-
-%{\color{ACMGreen} \lipsum}
-
 
 %% TODO: code for naive-fix and seminaive-fix
 
