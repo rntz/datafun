@@ -1,21 +1,23 @@
-%% %% rntz.cls doesn't support subsubsections.
-%% \documentclass{rntz}
-%% \usepackage[b5,width=13cm]{rntzgeometry}
-%% \usepackage{rntzfont}
-%% \usepackage{anyfontsize}
-%% \usepackage[spacing=true]{microtype}
-%% \frenchspacing
-%% \usepackage{seminaive}
-
-\documentclass{article}
-\usepackage[a4paper,margin=2cm]{geometry}
-\usepackage{euler}
+%% rntz.cls doesn't support subsubsections.
+\documentclass{rntz}
+\usepackage[a4,width=14cm]{rntzgeometry}
+\usepackage{rntzfont}
+%\usepackage{anyfontsize}
+\usepackage[spacing=true,stretch=10]{microtype}
+\frenchspacing
 \usepackage{seminaive}
-\theoremstyle{plain}
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}
+
+%% \documentclass{article}
+%% \usepackage{rntzfont}
+%% \usepackage[a4paper,margin=2cm]{geometry}
+%% \usepackage{euler}
+%% \usepackage{seminaive}
+%% \usepackage{cleveref}
+%% \theoremstyle{plain}
+%% \newtheorem{theorem}{Theorem}
+%% \newtheorem{lemma}{Lemma}
+%% \theoremstyle{definition}
+%% \newtheorem{definition}{Definition}
 
 %% Allows using >{blah} and <{blah} in array formats.
 \usepackage{array}
@@ -195,67 +197,74 @@ We have similarly omitted the cases in which function types are finite $\fin{A} 
 
 \subsection{Typing rules}
 
-The typing judgment \[\J{\GP}{\GG}{e}{A}\] says that $e$ has type $A$ using variables with types given by $\d{\GP} \cup \m{\GG}$, and moreover uses the variables in $\m{\GG}$ in a monotone fashion.
+The typing judgment \[\J{\GP}{\GG}{e}{A}\] given by the rules in
+\cref{fig:typing-rules} says that $e$ has type $A$ using variables with types
+given by $\dt{\GP} \cup \mt{\GG}$, and moreover uses the variables in $\mt{\GG}$
+in a monotone fashion.
 %
 Where possible without ambiguity, I omit the contexts $\dt{\GP};\mt{\GG}$ from typing rules.
 
-\begin{mathpar}
-  \infer{\J{\GP}{\GG}{\m{x}}{A}}{\mt{\m{x} \of A \in \GG}}
+\begin{figure*}
+  \begin{mathpar}
+    \infer{\J{\GP}{\GG}{\m{x}}{A}}{\mt{\m{x} \of A \in \GG}}
 
-  \infer{\J{\GP}{\GG}{\d{x}}{A}}{\dt{\d{x} \of A \in \GP}}
+    \infer{\J{\GP}{\GG}{\d{x}}{A}}{\dt{\d{x} \of A \in \GP}}
 
-  \infer{\lam{\m{x}} e : A \to B}{\J{\GP}{\GG,\m{x} \of A}{e}{B}}
+    \infer{\lam{\m{x}} e : A \to B}{\J{\GP}{\GG,\m{x} \of A}{e}{B}}
 
-  \infer{e \; f : B}{e : A \to B & f : A}
-  \\
-  %% \infer{\pair{e}{f} : A \x B}{e : A & f : B}
-  \infer{\pair{e_1}{e_2} : A_1 \x A_2}{e_i : A_i}
+    \infer{e \; f : B}{e : A \to B & f : A}
+    \\
+    %% \infer{\pair{e}{f} : A \x B}{e : A & f : B}
+    \infer{\pair{e_1}{e_2} : A_1 \x A_2}{e_i : A_i}
 
-  \infer{\pi_i\; e : A_i}{e : A_1 \x A_2}
+    \infer{\pi_i\; e : A_i}{e : A_1 \x A_2}
 
-  \infer{\inj{i}{e} : A_1 + A_2}{e : A_i}
+    \infer{\inj{i}{e} : A_1 + A_2}{e : A_i}
 
-  \infer{\case{e}{\m{x}}{f_1}{\m{x}}{f_2} : B}
-        {e : A_1 + A_2 & \J{\GP}{\GG, \m{x} \of A_i}{f_i}{B}}
-  \\
-  \infer{\J{\GP}{\GG}{\disc{e}}{\Disc{A}}}{\J{\GP}{-}{e}{A}}
+    \infer{\case{e}{\m{x}}{f_1}{\m{x}}{f_2} : B}
+          {e : A_1 + A_2 & \J{\GP}{\GG, \m{x} \of A_i}{f_i}{B}}
+    \\
+    \infer{\J{\GP}{\GG}{\disc{e}}{\Disc{A}}}{\J{\GP}{-}{e}{A}}
 
-  \infer{\letdisc{\d{x}}{e}{f} : B}
-        { e : \Disc{A}
-        & \J{\GP, \d{x}\of A}{\GG}{f}{B}}
+    \infer{\letdisc{\d{x}}{e}{f} : B}
+          { e : \Disc{A}
+          & \J{\GP, \d{x}\of A}{\GG}{f}{B}}
 
-  \infer{\splitsum{e} : \Disc{A} + \Disc{B}}
-        {e : \Disc{(A + B)}}
-  \\
-  \infer{\unit : \lat{A}}{}
+    \infer{\splitsum{e} : \Disc{A} + \Disc{B}}
+          {e : \Disc{(A + B)}}
+    \\
+    \infer{\unit : \lat{A}}{}
 
-  \infer{e_1 \vee e_2 : \lat{A}}{e_i : \lat{A}}
+    \infer{e_1 \vee e_2 : \lat{A}}{e_i : \lat{A}}
 
-  \infer{\J{\GP}{\GG}{\single{e}}{\Seteq{A}}}
-        { \J{\GP}{-}{e}{\eq{A}} }
+    \infer{\J{\GP}{\GG}{\single{e}}{\Seteq{A}}}
+          { \J{\GP}{-}{e}{\eq{A}} }
 
-  %% TODO: explain that although we allow only decidable types here, we can
-  %% eta-expand function types, so we can pretend we allow any semilattice type.
-  \infer{\setelim{\d{x}}{e}{f} : \eqlat{B}}
-        { e : \Seteq{A}
-        & \J{\GP, \d{x} \of A}{\GG}{f}{\eqlat{B}}}
-  \\
-  \infer{\etrue : \tbool}{}
+    %% TODO: explain that although we allow only decidable types here, we can
+    %% eta-expand function types, so we can pretend we allow any semilattice type.
+    \infer{\setelim{\d{x}}{e}{f} : \eqlat{B}}
+          { e : \Seteq{A}
+          & \J{\GP, \d{x} \of A}{\GG}{f}{\eqlat{B}}}
+    \\
+    \infer{\etrue : \tbool}{}
 
-  \infer{\efalse : \tbool}{}
+    \infer{\efalse : \tbool}{}
 
-  %% TODO: Same explanation about eta-expansion here
-  \infer{\when{e}{f} : \eqlat{A}}{e : \tbool & f : \eqlat{A}}
+    %% TODO: Same explanation about eta-expansion here
+    \infer{\when{e}{f} : \eqlat{A}}{e : \tbool & f : \eqlat{A}}
 
-  \infer{\ifthen{e}{f_1}{f_2} : A}{e : \Disc{\tbool} & f_i : A}
-  \\
-  \infer{\fix{\m{x}}{e} : \fixtype{A}}{
-    \J{\GP}{\GG, \m{x}\of\fixtype{A}}{e}{\fixtype{A}}}
+    \infer{\ifthen{e}{f_1}{f_2} : A}{e : \Disc{\tbool} & f_i : A}
+    \\
+    \infer{\fix{\m{x}}{e} : \fixtype{A}}{
+      \J{\GP}{\GG, \m{x}\of\fixtype{A}}{e}{\fixtype{A}}}
 
-  \infer{\fixle{\m{x}}{e}{f} : \fixletype{A}}{
-    e : \fixletype{A} &
-    \J{\GP}{\GG, \m{x}\of\fixletype{A}}{f}{\fixletype{A}}}
-\end{mathpar}
+    \infer{\fixle{\m{x}}{e}{f} : \fixletype{A}}{
+      e : \fixletype{A} &
+      \J{\GP}{\GG, \m{x}\of\fixletype{A}}{f}{\fixletype{A}}}
+  \end{mathpar}
+  \caption{Typing rules}
+  \label{fig:typing-rules}
+\end{figure*}
 
 
 \subsection{Eta-expanding excessively expressive eliminators}
@@ -296,12 +305,12 @@ For each type $A$ we define a change type $\Ch A$.
   \Ch\thinspace \tbool &=& \tbool
 \end{eqnarray*}
 
-We also define associated operators $\oplus : A \to \Ch A \to A$, $\ominus : A
-\to A \to \Ch A$ and $\zero : A \to \Ch A$. Note, however, the
-definitions of these operators \emph{are not well-typed Datafun terms}. \todo{I
-  do not believe there exists a way to assign them tones that is compatible with
-  Datafun's type system; every way I've tried fails. But I have not proved
-  this.}
+We also define (in \cref{fig:operators}) associated operators $\oplus : A \to
+\Ch A \to A$, $\ominus : A \to A \to \Ch A$ and $\zero : A \to \Ch A$. Note,
+however, the definitions of these operators \emph{are not well-typed Datafun
+  terms}. \todo{I do not believe there exists a way to assign them tones that is
+  compatible with Datafun's type system; every way I've tried fails. But I have
+  not proved this.}
 
 As for the semantic tonal behavior of these operators, I believe I know this
 much:
@@ -317,56 +326,57 @@ But is $\oplus$ monotone in its first argument? I'm not sure. It seems wrong to
 contemplate changing its first argument without also changing its second ---
 really it should have a dependent type.
 
-\begin{center}
-\[
-\scalebox{0.85}{\(
-\arraycolsep=1.5em
-\begin{array}{cccc}
-  \textbf{Type}
-  & {\textbf{Definition of}~\oplus}
-  & {\textbf{Definition of}~\ominus}
-  & {\textbf{Definition of}~\zero}
-  \\\midrule
-  A \to B
-  & (f \oplus df)\; x = f\; x \oplus df\; x\; (\zero\; x)
-  & (f \ominus g)\; x \;dx = f\; (x \oplus dx) \ominus g \; x
-  & \zero\; f\; x\; dx = f\; (x \oplus dx) \ominus f\; x
-  \\
-  A \x B
-  & \pair{x}{y} \oplus \pair{dx}{dy} = \pair{x \oplus dx}{y \oplus dy}
-  & \pair{a}{x} \ominus \pair{b}{y} = \pair{a \ominus b}{x \ominus y}
-  & \zero \; \pair{x}{y} = \pair{\zero\; x}{\zero\; y}
-  \\
-  A + B
-  & \inj{i}{x} \oplus \inj{i}{dx} = \inj{i}{(x \oplus dx)}
-  & \inj{i}{x} \ominus \inj{i}{y} = \inj{i}{x \ominus y}
-  & \zero\; (\inj{i}{x}) = \inj{i}{(\zero\;x)}
-  \\
-  \Disc{A}
-  & \disc{x} \oplus \disc{dx} = \disc{x \oplus dx}
-  & \disc{x} \ominus \disc{y} = \disc{x \ominus y}
-  & \zero\; \disc{x} = \disc{\zero\; x}
-  \\
-  \Seteq{A}
-  & x \oplus y = x \vee y
-  & x \ominus y = x
-  & \zero\; x = \unit
-  \\
-  \tbool
-  & x \oplus y = x \vee y
-  & x \ominus y = x
-  & \zero\; x = \unit
-\end{array}
-\)}
-\]
-\end{center}
+\begin{figure*}
+  \[
+  \scalebox{0.85}{\(
+    \arraycolsep=1.5em
+    \begin{array}{cccc}
+      \textbf{Type}
+      & {\textbf{Definition of}~\oplus}
+      & {\textbf{Definition of}~\ominus}
+      & {\textbf{Definition of}~\zero}
+      \\\midrule
+      A \to B
+      & (f \oplus df)\; x = f\; x \oplus df\; x\; (\zero\; x)
+      & (f \ominus g)\; x \;dx = f\; (x \oplus dx) \ominus g \; x
+      & \zero\; f\; x\; dx = f\; (x \oplus dx) \ominus f\; x
+      \\
+      A \x B
+      & \pair{x}{y} \oplus \pair{dx}{dy} = \pair{x \oplus dx}{y \oplus dy}
+      & \pair{a}{x} \ominus \pair{b}{y} = \pair{a \ominus b}{x \ominus y}
+      & \zero \; \pair{x}{y} = \pair{\zero\; x}{\zero\; y}
+      \\
+      A + B
+      & \inj{i}{x} \oplus \inj{i}{dx} = \inj{i}{(x \oplus dx)}
+      & \inj{i}{x} \ominus \inj{i}{y} = \inj{i}{x \ominus y}
+      & \zero\; (\inj{i}{x}) = \inj{i}{(\zero\;x)}
+      \\
+      \Disc{A}
+      & \disc{x} \oplus \disc{dx} = \disc{x \oplus dx}
+      & \disc{x} \ominus \disc{y} = \disc{x \ominus y}
+      & \zero\; \disc{x} = \disc{\zero\; x}
+      \\
+      \Seteq{A}
+      & x \oplus y = x \vee y
+      & x \ominus y = x
+      & \zero\; x = \unit
+      \\
+      \tbool
+      & x \oplus y = x \vee y
+      & x \ominus y = x
+      & \zero\; x = \unit
+    \end{array}
+    \)}
+  \]
+  \caption{Definitions of $\oplus$, $\ominus$, and $\zero$}
+  \label{fig:operators}
+\end{figure*}
 
 These should satisfy the following laws:
-\begin{eqnarray}
-  x \le y \quad\implies\quad
-  y &=& x \oplus (y \ominus x)\\
-  x &=& x \oplus \zero\; x
-\end{eqnarray}
+\begin{gather}
+x = x \oplus \zero\; x\\
+x \le y \implies y = x \oplus (y \ominus x)
+\end{gather}
 
 \todo{TODO: Prove these laws hold.}
 
@@ -428,20 +438,21 @@ These should satisfy the following laws:
   \end{eqnarray*}
 
   And, for the operations:
-  \[\arraycolsep=0.75em\longarray
-  \begin{array}{c|ccc}
-    \eqlat{A} \x \eqlat{B}
-    & (x,y) \oplus (dx,dy) = (x \oplus dx, y \oplus dy)
-    & (a,x) \ominus (b,y) = (a \ominus b, x \ominus y)
-    & \zero\; (x,y) = (\zero\; x, \zero\; y)\\
-    \Set{\eq{A}}
+  \[\arraycolsep=1em
+  \begin{array}{ccc}
+    \eqlat{A} \x \eqlat{B} & \Set{\eq{A}} & \tbool\\
+    \midrule
+    (x,y) \oplus (dx,dy) = (x \oplus dx, y \oplus dy)
     & x \oplus y = x \vee y
-    & x \ominus y = x
-    & \zero\;x = \unit\\
-    \tbool
     & x \oplus y = x \vee y
+    \\
+    (a,x) \ominus (b,y) = (a \ominus b, x \ominus y)
     & x \ominus y = x
-    & \zero\;x = \unit\\
+    & x \ominus y = x
+    \\
+    \zero\; (x,y) = (\zero\; x, \zero\; y)
+    & \zero\; x = \unit
+    & \zero\; x = \unit
   \end{array}
   \]
 \end{proof}
@@ -449,7 +460,8 @@ These should satisfy the following laws:
 
 \subsection{Derivatives}
 
-We wish to define an operator $\delta$ on well-typed terms such that the following holds:
+In \cref{fig:delta} we define an operator $\delta$ on well-typed terms such that
+the following holds:
 \[
 \infer{\J{\GP,\GG,\Ch\GP}{\Ch\GG}{\delta e}{\Ch A}}
       {\J{\GP}{\GG}{e}{A}}
@@ -466,70 +478,74 @@ In particular, if $\J{\GP}{\GG}{e}{A}$, then $\J{\GP,\GG,\Ch\GP}{-}{e}{A}$.
 This means $e$ may be used in its own derivative, even in positions which require an empty monotone context, such as $\disc{e}$ or $\single{e}$.
 %
 We highlight such uses in \preserve{green}.
-%
-\[
-\begin{array}{lcll}
-  \delta \m{x} &=& \m{dx}\\
-  \delta \d{x} &=& \d{dx}\\
-  \delta(\lam{\m{x}} e) &=&
-  \lam{\disc{\d{x}} \, \m{dx}} \delta e\\
-  \delta(e\;f) &=& \delta e \; \preservedisc{f} \; \delta f\\
-  \delta \pair{e}{f} &=& \pair{\delta{e}}{\delta{f}}\\
-  \delta(\pi_i\; e) &=& \pi_i\; \delta{e}\\
-  \delta(\inj{i}{e}) &=& \inj{i}{\delta{e}}\\
 
-  \delta(\case{e}{\m x}{f}{\m y}{g})
-  &=& \mb{case}~ \pair{\splitsum{\preservedisc{e}}}{\delta e} ~\mb{of}\\
-   && \quad \pair{\inj{1}{\disc{\d{x}}}}{\inj{1}{\m{dx}}} \cto \delta f\\
-   && \quad \pair{\inj{2}{\disc{\d{y}}}}{\inj{2}{\m{dy}}} \cto \delta g\\
-   && \quad \comment{The following cases are unreachable.}\\
-   && \quad \pair{\inj{1}{\disc{\d{x}}}}{\inj{2}{\m{\pwild}}} \cto
-      \letv{\m{dx}}{\dummy\; \d{x}} \delta f\\
-   && \quad \pair{\inj{2}{\disc{\d{y}}}}{\inj{1}{\m{\pwild}}} \cto
-      \letv{\m{dy}}{\dummy\; \d{y}} \delta g\\
+\begin{figure*}
+  \[
+  \begin{array}{lcll}
+    \delta \m{x} &=& \m{dx}\\
+    \delta \d{x} &=& \d{dx}\\
+    \delta(\lam{\m{x}} e) &=&
+    \lam{\disc{\d{x}} \, \m{dx}} \delta e\\
+    \delta(e\;f) &=& \delta e \; \preservedisc{f} \; \delta f\\
+    \delta \pair{e}{f} &=& \pair{\delta{e}}{\delta{f}}\\
+    \delta(\pi_i\; e) &=& \pi_i\; \delta{e}\\
+    \delta(\inj{i}{e}) &=& \inj{i}{\delta{e}}\\
 
-  \delta\disc{e} &=& \disc{\delta e}\\
-  \delta(\letdisc{\d{x}}{e} f) &=&
-  %% TODO: Wait, is this right? Check with Agda code.
-    \letdisc{\d{x}}{e} \letdisc{\d{dx}}{\delta e} \delta f\\
+    \delta(\case{e}{\m x}{f}{\m y}{g})
+    &=& \mb{case}~ \pair{\splitsum{\preservedisc{e}}}{\delta e} ~\mb{of}\\
+     && \quad \pair{\inj{1}{\disc{\d{x}}}}{\inj{1}{\m{dx}}} \cto \delta f\\
+     && \quad \pair{\inj{2}{\disc{\d{y}}}}{\inj{2}{\m{dy}}} \cto \delta g\\
+     && \quad \comment{The following cases are unreachable.}\\
+     && \quad \pair{\inj{1}{\disc{\d{x}}}}{\inj{2}{\m{\pwild}}} \cto
+        \letv{\m{dx}}{\dummy\; \d{x}} \delta f\\
+     && \quad \pair{\inj{2}{\disc{\d{y}}}}{\inj{1}{\m{\pwild}}} \cto
+        \letv{\m{dy}}{\dummy\; \d{y}} \delta g\\
 
-  \delta(\splitsum{e}) &=&
-  %% want type: Δ□A + Δ□B = □ΔA + □ΔB
-  %% e : □(A + B)
-  %% δe : □(ΔA + ΔB)
-  %% splitsum δe : □ΔA + □ΔB
-  \splitsum{\delta e}\\
-  \delta \unit &=& \unit\\
-  \delta(e \vee f) &=& \delta e \vee \delta f
-  \qquad \comment{This is a crucial over-approximation.}\\
-  \delta(\single{e}) &=& \unit\\
-  %% \delta(\setelim{\d{x}}{e}{f}) &=& \text{\todo{see below}}\\
+    \delta\disc{e} &=& \disc{\delta e}\\
+    \delta(\letdisc{\d{x}}{e} f) &=&
+    %% TODO: Wait, is this right? Check with Agda code.
+      \letdisc{\d{x}}{e} \letdisc{\d{dx}}{\delta e} \delta f\\
 
-  \delta(\setelim{\d{x}}{e}{f})
-  &=& \phantom{\vee~} (\setelim{\d{x}}{e}
-        {\phantom{\delta} \letv{\m{dx}}{\zero\; \d{x}} \delta f})\\
-  && \vee~ (\setelim{\d{x}}{\delta e}
-        {\letv{\m{dx}}{\zero\; \d{x}}
-          (f \oplus \delta f) \ominus \unit})\\
+    \delta(\splitsum{e}) &=&
+    %% want type: Δ□A + Δ□B = □ΔA + □ΔB
+    %% e : □(A + B)
+    %% δe : □(ΔA + ΔB)
+    %% splitsum δe : □ΔA + □ΔB
+    \splitsum{\delta e}\\
+    \delta \unit &=& \unit\\
+    \delta(e \vee f) &=& \delta e \vee \delta f
+    \qquad \comment{This is a crucial over-approximation.}\\
+    \delta(\single{e}) &=& \unit\\
+    %% \delta(\setelim{\d{x}}{e}{f}) &=& \text{\todo{see below}}\\
 
-  \delta(\etrue) &=& \efalse\\
-  \delta(\efalse) &=& \efalse\\
-  \delta(\when{e}{f})
-  &=& \ifthen{\preservedisc{e}}{\delta f}{}\\
-  && \when{\delta e}{(f \oplus \delta f) \ominus \unit}
-  \\
-  \delta(\ifthen{e}{f}{g}) &=& \ifthen{e}{\delta f}{\delta g}\\
-  \delta(\fix{\m{x}}{e}) &=&
-  \letdisc{\d{x}}
-          {\disc{\fix{\m{x}} \preserve{e}}}
-          {\fix{\m{dx}} \delta e}\\
-  && \todo{\comment{I'm not sure this next definition is right yet.}}\\
-  %% the best way to find out is probably to try to prove it, though
-  \delta(\fixle{\m{x}}{e}{f}) &=&
-    \letdisc{\d x}{\disc{\fixle{\m x}{\preserve{e}}{\preserve{f}}}}
-    \fixle{\m{dx}}{(e \oplus \delta e) \ominus \unit}{\delta f}
-\end{array}
-\]
+    \delta(\setelim{\d{x}}{e}{f})
+    &=& \phantom{\vee~} (\setelim{\d{x}}{e}
+          {\phantom{\delta} \letv{\m{dx}}{\zero\; \d{x}} \delta f})\\
+    && \vee~ (\setelim{\d{x}}{\delta e}
+          {\letv{\m{dx}}{\zero\; \d{x}}
+            (f \oplus \delta f) \ominus \unit})\\
+
+    \delta(\etrue) &=& \efalse\\
+    \delta(\efalse) &=& \efalse\\
+    \delta(\when{e}{f})
+    &=& \ifthen{\preservedisc{e}}{\delta f}{}\\
+    && \when{\delta e}{(f \oplus \delta f) \ominus \unit}
+    \\
+    \delta(\ifthen{e}{f}{g}) &=& \ifthen{e}{\delta f}{\delta g}\\
+    \delta(\fix{\m{x}}{e}) &=&
+    \letdisc{\d{x}}
+            {\disc{\fix{\m{x}} \preserve{e}}}
+            {\fix{\m{dx}} \delta e}\\
+    && \todo{\comment{I'm not sure this next definition is right yet.}}\\
+    %% the best way to find out is probably to try to prove it, though
+    \delta(\fixle{\m{x}}{e}{f}) &=&
+      \letdisc{\d x}{\disc{\fixle{\m x}{\preserve{e}}{\preserve{f}}}}
+      \fixle{\m{dx}}{(e \oplus \delta e) \ominus \unit}{\delta f}
+  \end{array}
+  \]
+  \caption{Definition of $\delta$}
+  \label{fig:delta}
+\end{figure*}
 
 
 \subsubsection{Overapproximation}
@@ -675,8 +691,13 @@ Let's apply \ms{fix} to solve the equation!
   \delta f \;\disc{\ms{fix}\;\preserve{f}} \;{\m{\color{Cyan} dx}})
 \end{equation}
 
-However, this is not a proof. We have merely established it is \emph{true} that equation \ref{eqn:delta-fix} holds, not that it suffices as a \emph{definition} of $\delta(\ms{fix}\;f)$. The correctness criterion for $\delta(\ms{fix}\; f)$ is:
-
+However, we must be careful. We have shown that if $\ms{fix}~f$ has a
+derivative, it satisfies equation~\ref{eqn:delta-fix} --- it's a fixed point of
+$\delta f\; [\ms{fix}\; \preserve{f}]$. We haven't established that this
+derivative exists, or that it is the \emph{least} fixed point.
+%
+The correctness criterion for $\delta(\ms{fix}\; f)$ is:
+%
 \begin{equation}
   \ms{fix}\;f \oplus \delta(\ms{fix}\;f)
   = (\ms{fix}\;f)\sub{\gamma \oplus \delta\gamma/\gamma}
@@ -858,17 +879,42 @@ domain and codomain by $(a,da) \le (b,db) \iff a \oplus da \le b \oplus db$.
 In Cai et al., figure 4, page 5, the corresponding condition is
 $(f \oplus_{A \to B} df)\; (a \oplus_A da) = f\;a \oplus_B df\;a\;da$.
 %
-Our condition is stronger, to account for monotonicity, and implies theirs as follows:
+Our condition is stronger, to account for monotonicity, and implies theirs as
+follows.
 %% TODO: make this argument clearer. it is too brief.
-\[\begin{array}{crcll}
-  & a \oplus da &=& (a \oplus da) \oplus \zero_A \;(a \oplus da)
-  & \text{by Lemma \ref{lemma:zero-id}}\\
-  \implies& f\;a \oplus df\;a\;da &=&
-  f\;(a \oplus da) \oplus df \;(a \oplus da) \;(\zero_A \;(a \oplus da))
-  & \text{our condition and antisymmetry}\\
-  \implies& f\;a \oplus df\;a\;da &=& (f \oplus df) \; (a \oplus da)
-  & \text{definition of $f \oplus_{A \to B} df$}
-\end{array}\]
+By \cref{lemma:zero-id},
+\[ a \oplus da = (a \oplus da) \oplus \zero \;(a \oplus da) \]
+%
+Applying our condition and antisymmetry,
+\[
+f\;a \oplus df\;a\;da =
+f\;(a \oplus da) \oplus df \;(a \oplus da) \;(\zero \;(a \oplus da))
+\]
+%
+So by the definition of $\oplus_{A \to B}$,
+\[
+f\;a \oplus df\;a\;da = (f \oplus df) \; (a \oplus da)
+\]
+
+%% \[\begin{array}{crcll}
+%%   & a \oplus da &=& (a \oplus da) \oplus \zero \;(a \oplus da)
+%%   & \text{\cref{lemma:zero-id}}\\
+%%   & f\;a \oplus df\;a\;da &=&
+%%   f\;(a \oplus da) \oplus df \;(a \oplus da) \;(\zero \;(a \oplus da))
+%%   & \text{our condition \& antisymmetry}\\
+%%   & f\;a \oplus df\;a\;da &=& (f \oplus df) \; (a \oplus da)
+%%   & \text{definition of $\oplus_{A \to B}$}
+%% \end{array}\]
+
+%% \[\begin{array}{crcll}
+%%   & a \oplus da &=& (a \oplus da) \oplus \zero \;(a \oplus da)
+%%   & \text{\cref{lemma:zero-id}}\\
+%%   & f\;a \oplus df\;a\;da &=&
+%%   f\;(a \oplus da) \oplus df \;(a \oplus da) \;(\zero \;(a \oplus da))
+%%   & \text{our condition \& antisymmetry}\\
+%%   & f\;a \oplus df\;a\;da &=& (f \oplus df) \; (a \oplus da)
+%%   & \text{definition of $\oplus_{A \to B}$}
+%% \end{array}\]
 
 We will show the following:
 
@@ -964,8 +1010,8 @@ We will show the following:
 
 If $\J{\GP}{\GG}{e}{A}$, then $\J{\GP, \GG, \Ch\GP}{\Ch\GG}{\delta e}{\Ch A}$.
 %
-So by Theorem \ref{thm:denotation} we have
-$\den{\delta e} \in \Den{\Disc{(\GP \x \GG \x \Ch\GP)} \x \Ch\GG \to \Ch A}$.
+So by \cref{thm:denotation} we have
+\[\den{\delta e} \in \Den{\Disc{(\GP \x \GG \x \Ch\GP)} \x \Ch\GG \to \Ch A}\]
 %
 We define $\dendelta{e}$ to be a reassociated version of
 $\den{\delta e}$ with a type that looks like the change type of $\den{e}$:
