@@ -6,19 +6,24 @@
 % https://icfp18.sigplan.org/track/hope-2018-papers#Call-for-Presentations
 % https://icfp18.sigplan.org/track/FHPC-2018-papers#FHPC-2018-Call-for-Papers
 
-\documentclass[sigplan,screen,review,timestamp]{acmart}
+\documentclass[sigplan,screen,review,timestamp,dvipsnames]{acmart}
+\usepackage[scaled=1.023]{cochineal}
 
 
 %% ---- Packages ----
 \usepackage{amsmath,latexsym,stmaryrd}
+\usepackage[nameinlink]{cleveref}
+\usepackage{mathtools}          % \dblcolon
 \usepackage{anyfontsize}
+\usepackage{lipsum}
+\usepackage{listings}
+\lstset{language=prolog, columns=fullflexible,
+  basicstyle=\ttfamily, commentstyle=\color{Green}}
 
 %% %% Avoid ``too many math alphabets'' error.
 %% \newcommand\hmmax{0}
 %% \newcommand\bmmax{0}
 %% \usepackage{bm}
-
-%% ---- Commands ----
 
 
 %% ---- Top matter ----
@@ -27,7 +32,6 @@
 % Finding fixed points faster
 % Finding fixed points faster by differentiation
 % Deriving incremental recursive queries
-\subtitle{\sffamily\scshape extended abstract}
 \author{Michael Arntzenius}
 \affiliation{University of Birmingham}
 \email{daekharel@gmail.com}
@@ -39,13 +43,9 @@
 %\keywords{blah}
 
 
-\begin{document}
-
-%% \begin{abstract}
-%%   testing.
-%% \end{abstract}
-
-\maketitle
+%% ---- Commands ----
+\newcommand{\todo}[1]{{\color{ACMPurple}#1}}
+\newcommand{\hilited}{\color{Cyan}}
 
 \renewcommand{\d}{\delta}
 \newcommand{\dzero}{\mathbf{0}~} % todo: mathbold, or \mb or something
@@ -62,6 +62,95 @@
 \newcommand{\tlv}[1]{\textrm{#1}}
 \newcommand{\var}[1]{\mathit{#1}}
 \newcommand{\dee}[1]{\var{d#1}}
+
+
+\begin{document}
+
+%% \begin{abstract}
+%%   Logic programming has a powerful appeal: declare what counts as a solution, and
+%%   let the computer find it! Unfortunately, traditional logic programming systems
+%%   like Prolog have trouble going truly \emph{higher-order} in the way functional
+%%   programmers are used to. Seeking to have their cake and eat it, too, functional
+%%   programmers have learned to emulate logic programming using the effect of
+%%   \emph{nondeterminism}, usually implemented as backtracking.
+
+%%   However, backtracking search is often inefficient; logic programmers have
+%%   explored other useful strategies. Datalog~\citep{datalog} takes an extreme
+%%   approach, allowing only predicates with finite extent. This allows bottom-up
+%%   evaluation, which easily handles queries (such as transitive closure) which are
+%%   difficult or inefficient to implement in Prolog.
+
+%%   Recently, Datafun~\cite{datafun} has shown that higher-order functional programs
+%%   can emulate Datalog using a \emph{bottom-up nondeterminism effect} (a
+%%   \emph{finite set monad}) combined with \emph{monotone fixed points}. In the
+%%   present work, we sketch a translation of a classic Datalog optimisation,
+%%   semina\"ive evaluation, to Datafun.
+%% \end{abstract}
+
+% \begin{abstract} blah \end{abstract}
+\maketitle
+
+\section{Introduction}
+Logic programming has a powerful appeal: declare what counts as a solution, and
+let the computer find it! Unfortunately, traditional logic programming systems
+like Prolog have trouble going truly \emph{higher-order} in the way functional
+programmers are used to. Seeking to have their cake and eat it, too, functional
+programmers have learned to emulate logic programming using the effect of
+\emph{nondeterminism}, usually implemented as backtracking.
+
+However, backtracking search is often inefficient; logic programmers have
+explored other useful strategies. Datalog~\citep{datalog} takes an extreme
+approach, allowing only predicates with finite extent. This allows bottom-up
+evaluation, which easily handles queries (such as transitive closure) which are
+difficult or inefficient to implement in Prolog.
+
+Recently, Datafun~\cite{datafun} has shown that higher-order functional programs
+can emulate Datalog using a \emph{bottom-up nondeterminism effect} (a
+\emph{finite set monad}) combined with \emph{monotone fixed points}. In the
+present work, we sketch a translation of a classic Datalog optimisation,
+semina\"ive evaluation, to Datafun.
+
+
+\section{Datalog and Datafun}
+
+This classic Datalog program computes the transitive closure of an \texttt{edge}
+relation:
+%
+\begin{lstlisting}
+path(X,Y) :- edge(X,Y).
+path(X,Z) :- edge(X,Y), path(Y,Z).
+\end{lstlisting}
+
+\todo{TODO: How do I quickly introduce Datafun?}
+
+\newcommand{\bnfeq}{\dblcolon=}
+\newcommand{\bnfcont}{}
+\newcommand{\pipe}{~|~}
+\newcommand{\x}{\times}
+
+\newcommand{\mto}{\overset{+}{\to}}
+\newcommand{\tset}[1]{\{#1\}}
+\newcommand{\eset}[1]{\{#1\}}
+
+\begin{figure}
+  \[
+  \begin{array}{rcl}
+    A,B &\bnfeq& \tset{A} \pipe A \to B \pipe A \mto B
+    \\
+    e &\bnfeq& \fnof{x} e \pipe e_1\:e_2 \pipe \eset{\vec{e}} \pipe e_1 \cup e_2
+    \pipe \bigcup(x \in e_1)~ e_2
+  \end{array}
+  \]\vspace{-1em}
+  \caption{A fragment of Datafun}
+  \label{fig:datafun}
+\end{figure}
+
+\section{Semina\"ive evaluation}
+
+\section{Change structures}
+
+\todo{TODO: describe our version of change structures and derivatives}
+
 
 \begin{figure}
   \[\begin{array}{rcl}
@@ -80,7 +169,7 @@
     \d(\efix f) &=& \efix (\d\!f~(\efix f))
   \end{array}\]
   \caption{Derivatives for a fragment of Datafun}
-  \label{fig:derivs}
+  \label{fig:derivatives}
 \end{figure}
 
 \begin{figure}
@@ -109,10 +198,41 @@
   %%   if dx ⊆ x then x else
   %%   fix-fast df (x ∪ dx) (df x dx)
   \end{array}
-  \]  
+  \]
   \caption{Na\"ive and semina\"ive fixed point computation}
+  \label{fig:defining-fix}
 \end{figure}
 
+Observe that $\d(\efix f)$ must be a fixed point of $\d\!f\;(\efix f)$:
+%% We discovered the definition of $\d(\efix f)$ in \cref{fig:derivatives} by
+%% observing that, if it exists, $\d(\efix f)$ must be a fixed point of $\d\!f\;
+%% (\efix f)$:
+%
+\begin{align*}
+  {\hilited \d(\efix f)}
+  &= \d(f\: (\efix f))
+  & \text{expand fixed point}\\
+  &= \d\!f\; (\efix f)\; {\hilited \d(\efix f)}
+  & \text{rule for}~\delta(e_1\;e_2)
+\end{align*}
+%
+Which suggests the following motto:
+\begin{center}
+  \large \scshape
+  the derivative of a fixed point\\
+  is the fixed point of its derivative.
+\end{center}
+%
+This is so beautiful it must be true. Nevertheless, we have proven the definition of $\delta(\efix f)$ in \cref{fig:derivatives} correct~\citep{fixderiv}.
+
+%{\color{ACMGreen} \lipsum}
+
+
 %% TODO: code for naive-fix and seminaive-fix
+
+
+%% Bibliography
+\bibliographystyle{abbrvnat}
+\bibliography{datafun}
 
 \end{document}
