@@ -50,6 +50,7 @@
 \newcommand{\hilited}{\color{Cyan}}
 
 \newcommand{\naive}{na\"ive}
+\newcommand{\Naive}{Na\"ive}
 
 \newcommand{\D}{\Delta}
 \newcommand{\bnfeq}{\dblcolon=}
@@ -88,10 +89,11 @@
 
 %% TODO: include if enough space.
 
-%% \begin{abstract}
-%%   We sketch a generalisation of the classic Datalog \emph{semi\naive{}
-%%     evaluation} optimisation to the higher-order functional language Datafun.
-%% \end{abstract}
+\begin{abstract}
+  I propose to talk about work-in-progress on generalising the classic Datalog
+  optimisation \emph{semi\naive{} evaluation} to the higher-order functional
+  language Datafun.
+\end{abstract}
 
 \maketitle
 
@@ -235,25 +237,54 @@ formulated on Datalog, does not handle higher-order functions. Can we lift this 
 
 %% TODO: citation for folklore
 
-Folklore suggests semi\naive{} evaluation uses the \emph{derivative} of Datalog
-rules.
-%
-\citet{incremental} formulate \emph{incremental computation} of higher-order
-programs in terms of derivatives.
-%
-We confirm and generalise folklore by applying this work to Datafun, discovering
-a faster way to compute $\efix f$ using the derivative of $f$.
+%% Folklore suggests semi\naive{} evaluation uses the \emph{derivative} of Datalog
+%% rules.
+%% %
+%% \citet{incremental} formulate \emph{incremental computation} of higher-order
+%% programs in terms of derivatives.
+%% %
+%% We confirm and generalise folklore by applying this work to Datafun, discovering
+%% a faster way to compute $\efix f$ using the derivative of $f$.
 
-\Citeauthor{incremental}'s incremental $\lambda$-calculus
+%% \Citeauthor{incremental}'s incremental $\lambda$-calculus
 
-
-\todo{TODO: describe our version of change structures and derivatives}
-
-We use a variant suggested by \citet{atkey-changes}: a change structure for a
-type $A$ is a triple $(\D A, \oplus, \zero)$. $\D A$ is a type representing
-\emph{changes} to values of type $A$.
+%\Naive{} evaluation iterates a function $f$.
 %
-$\oplus : A \to \Delta A \to A$ is a function
+Semi\naive{} evaluation approximates the \emph{change} between iterations ---
+how does $f(x)$ change as $x$ goes from $f^{i}(\emptyset)$ to
+$f^{i+1}(\emptyset)$?
+%
+To answer this question for Datafun, we build on the \emph{incremental
+  $\lambda$-calculus} of \citet{incremental}, which shows how to compute the
+change to a function's result given a change to its input.
+%
+Here we summarize their approach and how we apply it to Datafun.
+
+%% provides a static transformation assigning to every definable function $f : A
+%% \to B$ a derivative $\d\!f : A \to \D A \to \D B$ such that $\d\!f \;x \;\dee x$
+%% computes the change to $f\;x$ under a change $\dee x$ to its input.
+
+To capture what changes are possible, we assign to every type $A$ a \emph{change
+  structure} $(\D A, \oplus, \zero)$.\footnote{\Citeauthor{incremental} also
+  include an operator $\ominus$ from which $\zero$ is derived; our restriction
+  to just $\zero$ is suggested by \citet{atkey-changes}.}
+%
+The type $\D A$ represents changes to values of type $A$. Since the steps of a fixed point computation increase monotonically, we need only represent \emph{increasing changes}.
+%
+The function $\oplus : A \to \Delta A \to A$ applies a change to a value.
+Finally, $\zero : A \to \Delta A$ computes the \emph{zero change} for a value:
+$x \oplus \zero\,x = x$.
+
+\todo{TODO: STRUCTURE OF REST OF ARGUMENT}
+
+%% 1. derivatives of expressions?
+
+%% Questions left unanswered:
+%% 1. What are derivatives of expressions?
+%% 2. What is \D(A)?
+%%    - Q: why is \D(A \to B) = A \to \D A \mto \D B?
+%%      A: because in addition to the function changing, so might its argument!
+%% 3. How do we use \d to compute fix faster?
 
 \begin{figure}
   \[\begin{array}{rcl}
