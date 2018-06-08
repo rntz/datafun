@@ -8,7 +8,8 @@
 
 \documentclass[sigplan,screen,review,timestamp,dvipsnames]{acmart}
 %\usepackage[scaled=1.023]{cochineal}
-%\usepackage[scaled=1.03]{cochineal}
+%\usepackage[scaled=1.04]{cochineal}\linespread{1.03}
+\setlength\arraycolsep{2.5pt}
 
 
 %% ---- Packages ----
@@ -48,6 +49,9 @@
 \newcommand{\todo}[1]{{\color{ACMPurple}#1}}
 \newcommand{\hilited}{\color{Cyan}}
 
+\newcommand{\naive}{na\"ive}
+
+\newcommand{\D}{\Delta}
 \newcommand{\bnfeq}{\dblcolon=}
 \newcommand{\bnfcont}{}
 \newcommand{\pipe}{~|~}
@@ -59,27 +63,39 @@
 \newcommand{\setfor}[2]{\{#1 ~|~ #2\}}
 
 \renewcommand{\d}{\delta}
-\newcommand{\dzero}{\mathbf{0}~} % todo: mathbold, or \mb or something
-\newcommand{\kw}[1]{\textsf{#1}}
-\newcommand{\tlv}[1]{\textrm{#1}}
+\newcommand{\zero}{\mathbf{0}}
+\newcommand{\kw}[1]{\textsf{\bfseries #1}}
+\newcommand{\tlv}[1]{\textsf{#1}}
 \newcommand{\var}[1]{\mathit{#1}}
 \newcommand{\dee}[1]{\var{d#1}}
-\newcommand{\subst}[1]{\,[#1]}
+\newcommand{\subst}[1]{[#1]\,}
 
 \newcommand{\mto}{\overset{+}{\to}}
+\renewcommand{\mto}{\Rightarrow}
 \newcommand{\tset}[1]{\{#1\}}
+\newcommand{\tbool}{\textsf{bool}}
 
 \newcommand{\eset}[1]{\{#1\}}
-\newcommand{\ewhen}[1]{\kw{when}~#1~\kw{then}~}
+\newcommand{\ewhen}[1]{\kw{when}\,(#1)~}
 \newcommand{\eif}[2]{\kw{if}~#1~\kw{then}~#2~\kw{else}~}
-\newcommand{\ebiglub}[1]{\bigcup(#1)~}
+\newcommand{\efor}[1]{\bigcup(#1)~}
 \newcommand{\elet}[1]{\kw{let}~#1~\kw{in}~}
 \newcommand{\efix}{\kw{fix}~}
 
+
 
 \begin{document}
-% \begin{abstract} blah \end{abstract}
+
+%% TODO: include if enough space.
+
+%% \begin{abstract}
+%%   We sketch a generalisation of the classic Datalog \emph{semi\naive{}
+%%     evaluation} optimisation to the higher-order functional language Datafun.
+%% \end{abstract}
+
 \maketitle
+
+\section{Introduction}
 
 %% Logic programming has a powerful appeal: declare what counts as a solution, and
 %% let the computer find it! Unfortunately, traditional logic programming systems
@@ -106,12 +122,20 @@ search.
 
 Datafun~\cite{datafun} shows that higher-order functional programs can emulate
 Datalog using a \emph{bottom-up nondeterminism effect} (a \emph{finite set
-  monad}) combined with \emph{monotone fixed points}. Here, we sketch a
-translation of a classic Datalog optimisation, semina\"ive evaluation, to
-Datafun.
+  monad}) combined with \emph{monotone fixed points}. Here, we sketch the
+translation to Datafun of a classic Datalog optimisation, semi\naive{}
+evaluation, which avoids needlessly re-deducing facts when evaluating a
+recursive predicate.
+
+%% TODO: include if space permits.
+%% TODO: citation for Datalog folklore
+
+%% Datalog folklore suggests semi\naive{} evaluation can be understood in terms of
+%% \emph{derivatives}; we substantiate this by applying recent work by
+%% \citet{incremental} on \todo{TODO: Cai et al stuff}.
 
 
-\section{Datalog, na\"ively and semina\"ively}
+\section{Datalog, \naive{}ly and semi\naive{}ly}\label{sec:datalog}
 
 This simple Datalog program computes reachability in a graph, given its
 \texttt{edge} relation:
@@ -121,10 +145,10 @@ path(X,Y) :- edge(X,Y).
 path(X,Z) :- edge(X,Y), path(Y,Z).
 \end{lstlisting}
 
-This says a path is either an edge, or an edge followed by a path. But how does
-Datalog actually find these paths? Let's identify a predicate with the set of
-elements of which it is true. Then computing \texttt{path} amounts to finding
-the least fixed point of the following function:
+A path is either an edge, or an edge followed by a path. But how does Datalog
+find these paths? Let's identify a predicate with the set of argument-tuples it
+holds of. Then we can compute \texttt{path} as the least fixed point of this
+function:
 %
 \[
 \begin{array}{l}
@@ -134,32 +158,45 @@ the least fixed point of the following function:
 \end{array}
 \]
 
-The na\"ive approach is to repeatedly apply the \tlv{step} function, computing
-the sequence $\emptyset, \tlv{step}^1(\emptyset), \tlv{step}^2(\emptyset), ...$
-until we find a fixed point $\tlv{step}^k(\emptyset) =
+The \naive{} approach is to iterate the \tlv{step} function, computing the
+sequence $\emptyset, \tlv{step}^1(\emptyset), \tlv{step}^2(\emptyset), ...$
+until it reaches a fixed point $\tlv{step}^k(\emptyset) =
 \tlv{step}^{k+1}(\emptyset)$.
-
+%
 This works, but observe that $\tlv{step}^i(\emptyset) \subseteq
 \tlv{step}^{i+1}(\emptyset)$. This means we are doing \emph{redundant
-  computation} --- for example, iteration $i+1$ will append an edge $(x,y)$ to a
-path $(y,z)$ even if iteration $i$ already found the path $(x,z)$. What we
-really want to compute is what \emph{changes} between iterations.
+  computation} --- if step $i$ appends an edge $(x,y)$ to a path $(y,z)$ to
+discover the path $(x,z)$, step $i+1$ re-discovers it the same way. We really
+want to compute the \emph{change} between iterations:
+%
+\[
+\begin{array}{rcl}
+  \tlv{path} &=& \tlv{iterate} \;\emptyset \;\tlv{edge}\\
+  \tlv{iterate} \;x \;\dee x &=&
+  \eif{\dee x \subseteq x}{x}\\
+  && \tlv{loop} \;(x \cup \dee x) \;(\delta\tlv{step} \;dx)\\
+  \delta\tlv{step} \;\var{dpaths} &=&
+  \setfor{(x,z)}{(x,y) \in \tlv{edge}, (y,z) \in \var{dpaths}}\\
+\end{array}
+\]
 
-
+This insight underlies the technique known in Datalog as \emph{semina\"ive
+  evaluation}. \todo{TODO: Describe it. Maybe don't need to describe it in full,
+  just suggest that it approximates the change between approximations by static
+  transformation.}
 
 
 \section{Datafun, na\"ively}
 
-\todo{TODO: How do I quickly introduce Datafun?}
-
 \begin{figure}
+  %% TODO: do we need types?
   \[
   \begin{array}{rcl}
-    A,B &\bnfeq& \tset{A} \pipe A \to B \pipe A \mto B
+    A,B &\bnfeq& \tbool \pipe \tset{A} \pipe A \to B \pipe A \mto B
     \\
     e &\bnfeq& \fnof{x} e \pipe e_1\:e_2 \pipe \eset{\vec{e}} \pipe e_1 \cup e_2
-    \pipe \bigcup(x \in e_1)~ e_2
-    \\ &\bnfcont& \ewhen{e_1} e_2 \pipe \eif{e_1}{e_2}{e_3}
+    \pipe \efor{x \in e_1}~ e_2
+    \\ &\bnfcont&  \efix e \pipe \ewhen{e_1} e_2 \pipe \eif{e_1}{e_2}{e_3}
     %% FIXME: need equality!
   \end{array}
   \]\vspace{-1em}
@@ -167,36 +204,78 @@ really want to compute is what \emph{changes} between iterations.
   \label{fig:datafun}
 \end{figure}
 
-
+You've actually already seen some Datafun code: the \tlv{step} function in
+\cref{sec:datalog}! Datafun is a typed higher-order functional language equipped
+with a \emph{finite set monad}, which supports set-comprehension syntax sugar in
+the usual way~\cite{comprehending-monads}. Like Datalog, Datafun is
+\emph{total}: all programs terminate.
+
+\Cref{fig:datafun} gives the fragment of Datafun we consider here. For the full
+language, see \citet{datafun}. We write monadic bind $\efor{x \in e_1} e_2$,
+meaning ``the union of the sets $e_2$ for each $x \in e_1$''.
+%
+Datafun can also compute \emph{fixed points} of functions on finite sets, $\efix
+f$.\footnote{The full language generalizes both monadic bind and fixed points to
+  \emph{semilattice types}; for simplicity we here consider only finite sets.}
+
+To ensure $\efix f$ terminates, $f$ must be (among other things) monotone ($x
+\subseteq y$ implies $f\:x \subseteq f\:y$), so Datafun's type system tracks
+monotonicity of functions and expressions.
+%
+The type $A \mto B$ represents monotone functions, a subtype of all functions $A
+\to B$. The expression $\ewhen{e_1}{e_2}$ yields the set $e_2$ if $e_1$ is true,
+and $\emptyset$ otherwise; unlike \kw{if}, this is always monotone in $e_1$.
+
+As we've seen, Datalog programs can be expressed using a combination of set
+operations and fixed points. For example, \texttt{path} is
+$(\efix{\tlv{step}})$. However, the semi\naive{} evaluation transformation,
+formulated on Datalog, does not handle higher-order functions. Can we lift this limitation?
+
 \section{Derivatives for Datafun}
 
-\todo{TODO: describe our version of change structures and derivatives}
+%% TODO: citation for folklore
 
-\newcommand{\D}{\Delta}
-\newcommand{\zero}{\mathbf{0}}
+Folklore suggests semi\naive{} evaluation uses the \emph{derivative} of Datalog
+rules.
+%
+\citet{incremental} formulate \emph{incremental computation} of higher-order
+programs in terms of derivatives.
+%
+We confirm and generalise folklore by applying this work to Datafun, discovering
+a faster way to compute $\efix f$ using the derivative of $f$.
+
+\Citeauthor{incremental}'s incremental $\lambda$-calculus
+
+
+\todo{TODO: describe our version of change structures and derivatives}
 
 We use a variant suggested by \citet{atkey-changes}: a change structure for a
 type $A$ is a triple $(\D A, \oplus, \zero)$. $\D A$ is a type representing
 \emph{changes} to values of type $A$.
 %
-$\oplus : A \to \Delta A \to A$ is a function 
+$\oplus : A \to \Delta A \to A$ is a function
 
 \begin{figure}
   \[\begin{array}{rcl}
     \d x &=& dx\\
     \d(\fnof x e) &=& \fnof x \fnof{\dee x} \d{e}\\
     \d(e_1~e_2) &=& \d{e_1}~e_2~\d{e_2}\\
+    \d{\eset{\vec e}} &=& \emptyset\\
     \d(e_1 \cup e_2) &=& \d{e_1} \cup \d{e_2}\\
-    \d{\{e\}} &=& \emptyset\\
-    \d(\ebiglub{x \in e_1} e_2)
-    &=& \ebiglub{x \in \d{e_1}} e_2\\
-    &\cup& \ebiglub{x \in e_1 \cup \d{e_1}}
-    \elet{\dee x = \dzero x}
+    \d(\efor{x \in e_1} e_2)
+    &=& \efor{x \in \d{e_1}} e_2\\
+    &\cup& \efor{x \in e_1 \cup \d{e_1}}
+    %\elet{\dee x = \dzero x}
+    \subst{\zero\, x / \dee x}
     \d{e_2}
-    %\subst{dx \mapsto \dzero x}
     \\
-    \d(\efix f) &=& \efix (\d\!f~(\efix f))
+    \d(\efix f) &=& \efix (\d\!f~(\efix f))\\
+    \d(\eif{e}{e_1}{e_2}) &=& \eif{e}{\d{e_1}}{\d{e_2}}\\
+    \d(\ewhen{e_1}{e_2})
+    &=& \eif{e_1}{\d{e_2}}\\
+    && \ewhen{\d{e_1}} {e_2 \cup \d{e_2}}
   \end{array}\]
+  \vspace{-.8em}
   \caption{Derivatives for a fragment of Datafun}
   \label{fig:derivatives}
 \end{figure}
@@ -204,30 +283,20 @@ $\oplus : A \to \Delta A \to A$ is a function
 \begin{figure}
   \[
   \begin{array}{rcl}
-  \efix f &=& \tlv{na\"ive}_f \,\emptyset \,(f\, \emptyset)\\
-  \tlv{na\"ive}_f \,x \,\var{next}
+  \efix f &=& \tlv{\naive}_f \,\emptyset \,(f\, \emptyset)\\
+  \tlv{\naive}_f \,x \,\var{next}
   &=& \kw{if}~ x = \var{next} ~\kw{then}~ x ~\kw{else}\\
-  && \tlv{na\"ive}_f \,\var{next} \,(f \,\var{next})
+  && \tlv{\naive}_f \,\var{next} \,(f \,\var{next})
 
   \vspace{1em}\\
 
-  \efix f &=& \tlv{semina\"ive}_f \,\emptyset \,(f\, \emptyset)\\
-  \tlv{semina\"ive}_f \,x \,\dee x
+  \efix f &=& \tlv{semi\naive}_f \,\emptyset \,(f\, \emptyset)\\
+  \tlv{semi\naive}_f \,x \,\dee x
   &=& \kw{if}~ \dee x \subseteq x ~\kw{then}~ x ~\kw{else}\\
-  && \tlv{semina\"ive}_f \,(x \cup \dee x) \,(\d\!f \,x \,\dee x)
-  %% \tlv{semina\"ive-fix} \:\dee f \:x \:\var{new}
-  %% &=& \elet{\var{toadd} = \var{df} \:x \:\var{new}}\\
-  %% && \kw{if}~ \var{to-add} \subseteq x
-
-  %% fix f x next =
-  %%   if next = x then x
-  %%   else fix f next (f next)
-  %%
-  %% fix-fast df x dx =
-  %%   if dx ⊆ x then x else
-  %%   fix-fast df (x ∪ dx) (df x dx)
+  && \tlv{semi\naive}_f \,(x \cup \dee x) \,(\d\!f \,x \,\dee x)
   \end{array}
   \]
+  \vspace{-.5em}
   \caption{Na\"ive and semina\"ive fixed point computation}
   \label{fig:defining-fix}
 \end{figure}
@@ -250,7 +319,7 @@ Observe that $\d(\efix f)$ must be a fixed point of $\d\!f\;(\efix f)$:
 Which suggests the following motto:
 \begin{center}
   \large \scshape
-  the derivative of a fixed point\\
+  the derivative of a fixed point\nopagebreak\\
   is the fixed point of its derivative.
 \end{center}
 %
