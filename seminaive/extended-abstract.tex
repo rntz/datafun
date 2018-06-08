@@ -11,10 +11,10 @@
 \setcopyright{none}
 \renewcommand\footnotetextcopyrightpermission[1]{}
 \pagestyle{plain}
-%\acmConference{HOPE}{2018}{St. Louis, Missouri}
 
-%% \usepackage[scaled=1.023]{cochineal}
-\usepackage[scaled=1.05]{cochineal}\linespread{1.03}
+%\usepackage[scaled=1.025]{cochineal}\linespread{1.025}
+%\usepackage[scaled=1.05]{cochineal}\linespread{1.05}
+%\usepackage[scaled=1.02]{cochineal}
 
 
 %% ---- Packages ----
@@ -43,12 +43,6 @@
 \author{Michael Arntzenius}
 \affiliation{University of Birmingham}
 \email{daekharel@gmail.com}
-
-%% TODO: customize for HOPE?
-
-%% TODO
-%\terms{blah}
-%\keywords{blah}
 
 
 %% ---- Commands ----
@@ -135,11 +129,11 @@ translation to Datafun of a classic Datalog optimisation, semi\naive{}
 evaluation, which avoids needlessly re-deducing facts when evaluating a
 recursive predicate.
 
-%% TODO: include if space permits.
-
-%% Datalog folklore suggests semi\naive{} evaluation can be understood in terms of
-%% \emph{derivatives}; we substantiate this by applying recent work by
-%% \citet{incremental} on \todo{TODO: Cai et al stuff}.
+Datalog folklore suggests semi\naive{} evaluation can be understood in terms of
+\emph{derivatives}~\citep{bancilhon85,bancilhon86}; we substantiate this by
+showing that its analogue in Datafun can be defined by applying recent work by
+\citet{incremental} on derivatives for incremental computation in a higher-order
+setting.
 
 
 \section{Datalog, \naive{}ly and semi\naive{}ly}\label{sec:datalog}
@@ -187,17 +181,18 @@ want to compute the \emph{change} between iterations:
 \end{array}
 \]
 
-%% TODO FIXME XXX: citation for seminaive evaluation!
-
 In Datalog, it's long been known how to safely approximate this change using a
 static transformation on Datalog rules (we omit its definition for space
-reasons); this is known as \emph{semi\naive{} evaluation}.
+reasons); this is known as \emph{semi\naive{}
+  evaluation}~\citep{bancilhon85,bancilhon86}.
 
 
 \section{Datafun, na\"ively}
 
+%% TODO: omit if, when, etc?
+%% or expand to include equality?
+
 \begin{figure}
-  %% TODO: do we need types?
   \[
   \begin{array}{rcl}
     A,B &\bnfeq& \tbool \pipe \tset{A} \pipe A \to B \pipe A \mto B
@@ -205,7 +200,6 @@ reasons); this is known as \emph{semi\naive{} evaluation}.
     e &\bnfeq& \fnof{x} e \pipe e_1\:e_2 \pipe \eset{\vec{e}} \pipe e_1 \cup e_2
     \pipe \efor{x \in e_1}~ e_2
     \\ &\bnfcont&  \efix e \pipe \ewhen{e_1} e_2 \pipe \eif{e_1}{e_2}{e_3}
-    %% FIXME: need equality!
   \end{array}
   \]\vspace{-1em}
   \caption{A fragment of Datafun}
@@ -241,20 +235,7 @@ formulated on Datalog, does not handle higher-order functions. Can we lift this 
 
 \section{Derivatives for Datafun}
 
-%% TODO: citation for folklore
-
-%% Folklore suggests semi\naive{} evaluation uses the \emph{derivative} of Datalog
-%% rules.
-%% %
-%% \citet{incremental} formulate \emph{incremental computation} of higher-order
-%% programs in terms of derivatives.
-%% %
-%% We confirm and generalise folklore by applying this work to Datafun, discovering
-%% a faster way to compute $\efix f$ using the derivative of $f$.
-
-%% \Citeauthor{incremental}'s incremental $\lambda$-calculus
-
-%\Naive{} evaluation iterates a function $f$.
+\Naive{} evaluation iterates a function $f$.
 %
 Semi\naive{} evaluation approximates the \emph{change} between iterations ---
 how does $f(x)$ change as $x$ goes from $f^{i}(\emptyset)$ to
