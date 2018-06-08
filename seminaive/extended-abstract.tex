@@ -6,10 +6,15 @@
 % https://icfp18.sigplan.org/track/hope-2018-papers#Call-for-Presentations
 % https://icfp18.sigplan.org/track/FHPC-2018-papers#FHPC-2018-Call-for-Papers
 
-\documentclass[sigplan,screen,review,timestamp,dvipsnames]{acmart}
-%\usepackage[scaled=1.023]{cochineal}
-%\usepackage[scaled=1.03]{cochineal}
-\setlength\arraycolsep{2.5pt}
+\documentclass[sigplan,screen,dvipsnames]{acmart}
+\settopmatter{printacmref=false}
+\setcopyright{none}
+\renewcommand\footnotetextcopyrightpermission[1]{}
+\pagestyle{plain}
+%\acmConference{HOPE}{2018}{St. Louis, Missouri}
+
+%% \usepackage[scaled=1.023]{cochineal}
+\usepackage[scaled=1.05]{cochineal}\linespread{1.03}
 
 
 %% ---- Packages ----
@@ -32,14 +37,12 @@
 %% ---- Top matter ----
 \title{Finding fixed points faster}
 % The derivative of a fixed point is the fixed point of its derivative
-% Finding fixed points faster
 % Finding fixed points faster by differentiation
 % Deriving incremental recursive queries
+
 \author{Michael Arntzenius}
 \affiliation{University of Birmingham}
 \email{daekharel@gmail.com}
-\setcopyright{none}
-\settopmatter{printacmref=false}
 
 %% TODO: customize for HOPE?
 
@@ -89,8 +92,8 @@
 
 
 \begin{document}
-
-%% TODO: include if enough space.
+\thispagestyle{plain}
+\setlength\arraycolsep{2.5pt}
 
 \begin{abstract}
   I propose to talk about work-in-progress on generalising the classic Datalog
@@ -384,9 +387,9 @@ correct~\citep{fixderiv}.
 
 \section{Contributions}
 
-Our main contributions are:
-%
-\begin{enumerate}
+Our main contributions are:%\vspace{1ex}
+
+\begin{enumerate}\setlength\itemsep{1ex}
 \item Generalising semi\naive{} evaluation to a higher-order functional
   language, Datafun, giving an optimisation for finding fixed points faster.
 
