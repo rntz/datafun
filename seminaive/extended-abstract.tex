@@ -8,12 +8,13 @@
 
 \documentclass[sigplan,screen,review,timestamp,dvipsnames]{acmart}
 %\usepackage[scaled=1.023]{cochineal}
-%\usepackage[scaled=1.04]{cochineal}\linespread{1.03}
+%\usepackage[scaled=1.03]{cochineal}
 \setlength\arraycolsep{2.5pt}
 
 
 %% ---- Packages ----
 \usepackage{amsmath,latexsym,stmaryrd}
+\usepackage{mathpartir}
 \usepackage[nameinlink]{cleveref}
 \usepackage{mathtools}          % \dblcolon
 \usepackage{anyfontsize}
@@ -39,6 +40,8 @@
 \email{daekharel@gmail.com}
 \setcopyright{none}
 \settopmatter{printacmref=false}
+
+%% TODO: customize for HOPE?
 
 %% TODO
 %\terms{blah}
@@ -130,7 +133,6 @@ evaluation, which avoids needlessly re-deducing facts when evaluating a
 recursive predicate.
 
 %% TODO: include if space permits.
-%% TODO: citation for Datalog folklore
 
 %% Datalog folklore suggests semi\naive{} evaluation can be understood in terms of
 %% \emph{derivatives}; we substantiate this by applying recent work by
@@ -182,10 +184,11 @@ want to compute the \emph{change} between iterations:
 \end{array}
 \]
 
-This insight underlies the technique known in Datalog as \emph{semina\"ive
-  evaluation}. \todo{TODO: Describe it. Maybe don't need to describe it in full,
-  just suggest that it approximates the change between approximations by static
-  transformation.}
+%% TODO FIXME XXX: citation for seminaive evaluation!
+
+In Datalog, it's long been known how to safely approximate this change using a
+static transformation on Datalog rules (we omit its definition for space
+reasons); this is known as \emph{semi\naive{} evaluation}.
 
 
 \section{Datafun, na\"ively}
@@ -264,7 +267,7 @@ Here we summarize their approach and how we apply it to Datafun.
 %% \to B$ a derivative $\d\!f : A \to \D A \to \D B$ such that $\d\!f \;x \;\dee x$
 %% computes the change to $f\;x$ under a change $\dee x$ to its input.
 
-To capture what changes are possible, we assign to every type $A$ a \emph{change
+To capture what change means, we assign to every type $A$ a \emph{change
   structure} $(\D A, \oplus, \zero)$.\footnote{\Citeauthor{incremental} also
   include an operator $\ominus$ from which $\zero$ is derived; our restriction
   to just $\zero$ is suggested by \citet{atkey-changes}.}
@@ -272,22 +275,16 @@ To capture what changes are possible, we assign to every type $A$ a \emph{change
 The type $\D A$ represents changes to values of type $A$. Since the steps of a fixed point computation increase monotonically, we need only represent \emph{increasing changes}.
 %
 The function $\oplus : A \to \Delta A \to A$ applies a change to a value.
-Finally, $\zero : A \to \Delta A$ computes the \emph{zero change} for a value:
-$x \oplus \zero\,x = x$.
-
-\todo{TODO: STRUCTURE OF REST OF ARGUMENT}
-
-%% 1. derivatives of expressions?
-
-%% Questions left unanswered:
-%% 1. What are derivatives of expressions?
-%% 2. What is \D(A)?
-%%    - Q: why is \D(A \to B) = A \to \D A \mto \D B?
-%%      A: because in addition to the function changing, so might its argument!
-%% 3. How do we use \d to compute fix faster?
+Finally, $\zero : A \to \Delta A$ gives a \emph{zero change} such that $x \oplus
+\zero\,x = x$.
 
 \begin{figure}
   \[\begin{array}{rcl}
+    \D\tbool &=& \tbool\\
+    \D\tset{A} &=& \tset{A}\\
+    \D(A \to B) &=& A \to \D A \to \D B\\
+    \D(A \mto B) &=& A \to \D A \mto \D B
+    \vspace{0.5em}\\
     \d x &=& dx\\
     \d(\fnof x e) &=& \fnof x \fnof{\dee x} \d{e}\\
     \d(e_1~e_2) &=& \d{e_1}~e_2~\d{e_2}\\
@@ -311,6 +308,31 @@ $x \oplus \zero\,x = x$.
   \label{fig:derivatives}
 \end{figure}
 
+In \cref{fig:derivatives} we give a transformation from an expression $e : A$ to
+its derivative $\d e : \D A$, which computes how $e$ changes as its free
+variables change. By convention, the change to a variable $x_i : A_i$ is given
+by a variable named $\dee x_i : \D A_i$.
+
+For our purpose, the most important change structures are those on finite sets
+and on functions. Sets are ordered by inclusion, so increasing a set means is
+simply it with a set of added elements. Thus $\D\tset{A} = \tset{A}$, $\oplus =
+\cup$, and $\zero\,x = \emptyset$.
+
+Putting monotonicity aside, the change type for functions is $\D(A \to B) = A
+\to \D A \to \D B$. Why not simply $A \to \D B$? Because in the derivative of
+function application $\d(e_1\;e_2)$, it isn't only the function that may change,
+but its argument!
+
+%% TODO: talk more about function changes!
+
+\subsection{How to compute fixed points faster}
+
+We promised an analogue of semi\naive{} evaluation --- a way to find fixed
+points faster. How do derivatives help us? Well, given $\efix f$, the expression
+$\d\!f \;x \;dx$ tells us how $f$ changes as its argument $x$ changes to $x \cup
+dx$. This is exactly what we need: to compute the change between steps in our
+fixed point iteration. We give the na\"ive and semina\"ive algorithms for computing fixed points in \cref{fig:defining-fix}.
+
 \begin{figure}
   \[
   \begin{array}{rcl}
@@ -332,9 +354,11 @@ $x \oplus \zero\,x = x$.
   \label{fig:defining-fix}
 \end{figure}
 
-\vspace{1em}
+\subsection{Defining \texorpdfstring{$\d(\efix f)$}{d(fix f)}}
 
-Observe that $\d(\efix f)$ must be a fixed point of $\d\!f\;(\efix f)$:
+The definition of $\d(\efix f)$ in \cref{fig:derivatives} may seem a little
+mysterious. However, it's easy to show that $\d(\efix f)$ must be a fixed point
+of $\d\!f\;(\efix f)$:
 %% We discovered the definition of $\d(\efix f)$ in \cref{fig:derivatives} by
 %% observing that, if it exists, $\d(\efix f)$ must be a fixed point of $\d\!f\;
 %% (\efix f)$:
@@ -354,9 +378,24 @@ Which suggests the following motto:
   is the fixed point of its derivative.
 \end{center}
 %
-This is so beautiful it must be true. Nevertheless, we have proven the definition of $\delta(\efix f)$ in \cref{fig:derivatives} correct~\citep{fixderiv}.
+This is so beautiful it must be true. Nevertheless, we have proven it
+correct~\citep{fixderiv}.
 
-%% TODO: code for naive-fix and seminaive-fix
+
+\section{Contributions}
+
+Our main contributions are:
+%
+\begin{enumerate}
+\item Generalising semi\naive{} evaluation to a higher-order functional
+  language, Datafun, giving an optimisation for finding fixed points faster.
+
+\item Substantiating folklore that semi\naive{} evaluation can be understood in
+  terms of derivatives.
+
+\item Extending the work of \citet{incremental} to handle a finite set monad,
+  fixed points, and interaction with monotonicity.
+\end{enumerate}
 
 
 %% Bibliography
