@@ -102,8 +102,8 @@ expand to a larger width.
 
 This chooses from a set of fonts, with matched x-heights and reasonable line
 spacings. The text font options are named by the serif font they choose. Most
-load [Biolinum][] for sans-serif, and all load [Inconsolata][] for monospace.
-The text fonts are:
+load [Biolinum][Libertine] for sans-serif, and all load [Inconsolata][] for
+monospace. The text fonts are:
 
 - `baskerville` for [Libre Baskerville][librebaskerville]. It lacks small caps
   and has "faked" bold italics, but is otherwise very pleasant and quite
@@ -113,7 +113,7 @@ The text fonts are:
   Charter is very legible, even at low DPI.
 
 - `cochineal` for [Cochineal][]. Cochineal is an old-style font, very pleasant
-   in print.
+   in print and tolerable on screen.
 
 - `cm` for TeX's default, Computer Modern, but I've increased the line spacing.
   I dislike Computer Modern; I find it almost unreadable on screen.
