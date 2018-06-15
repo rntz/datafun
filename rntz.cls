@@ -120,17 +120,15 @@
   {\newcommand{\colorhno}[3]{\makehno{#1}{#2}{#3}}}
   {\newcommand{\colorhno}[3]{\hno{#3}}}
 
-% Nice colors: Periwinkle, Whee, cyan
+% Nice colors: Periwinkle, Whee, Cyan, ACMOrange
 \definecolor[named]{Whee}{cmyk}{0.33, 0.33, 0, 0}
 \titleformat{\section}{\secsize\header}
-            {\colorhno{Whee}{white}{\thesection}}{0pt}{}
-\titleformat{\subsection}{\subsecsize\header}{\hno{\thesubsection}}{0pt}{}
+            {\colorhno{Periwinkle}{white}{\thesection}}{0pt}{}
+%\titleformat{\subsection}{\subsecsize\header}{\hno{\thesubsection}}{0pt}{}
+\titleformat{\subsection}{\subsecsize\header}
+            {\colorhno{Whee}{white}{\thesubsection}}{0pt}{}
 % sub-subsections have no heading numbers
 \titleformat{\subsubsection}{\subsecsize\header}{}{0pt}{}
-
-%% %% Uncomment for orange subsection ribbons.
-%% \titleformat{\subsection}{\subsecsize\header}
-%%             {\colorhno{ACMOrange}{white}{\thesubsection}}{0pt}{}
 
 
 %% %% Tufte font sizes.
