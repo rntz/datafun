@@ -2,89 +2,143 @@
 \ProvidesPackage{rntzfont}[2018/05/10]
 \RequirePackage{etoolbox}       %for \ifdefstring
 
-%% TODO: think about sans-serif fonts as well. acmart.cls chooses a nice one;
-%% what is it?
-
+%% serif font options
+\DeclareOption{baskerville}{\def\rntz@font{baskerville}}
 \DeclareOption{charter}{\def\rntz@font{charter}}
 \DeclareOption{cm}{\def\rntz@font{cm}}
 \DeclareOption{cochineal}{\def\rntz@font{cochineal}}
+\DeclareOption{fbb}{\def\rntz@font{fbb}}
 \DeclareOption{libertine}{\def\rntz@font{libertine}}
 \DeclareOption{palatino}{\def\rntz@font{palatino}}
-\DeclareOption{pteuler}{\def\rntz@font{pteuler}}
 \DeclareOption{pt}{\def\rntz@font{pt}}
 
-% Useful math fonts: mathpazo, eulervm, newtxmath.
+%% math font options
+\DeclareOption{newmath}{\def\rntz@mathfont{newmath}}
+\DeclareOption{euler}{\def\rntz@mathfont{euler}}
 
-\ExecuteOptions{palatino}
+\ExecuteOptions{palatino,euler} % default options
 \ProcessOptions\relax
 
-% Computer Modern, but better. We load this because many of our font choices
-% fall back on CM Sans as their math sans-serif, and it improves rendering of CM
-% Sans in \mathsf, especially in super/sub-scripts. Try e.g. cochineal without
-% this.
-\RequirePackage{lmodern}
+%% inconsolata[varqu] - Uses straight double & single quotes.
+%% Other options I haven't used:
+%% - varl makes l not vertical, ugh.
+%% - var0 removes the slash in 0, which is less clear for code.
+\PassOptionsToPackage{varqu}{inconsolata}
 
-% Charter's x-height is slightly larger than Euler. Unfortunately the charter
-% package doesn't have a scaling option, and Euler only has a "small" option
-% that scales it *down*.
+%% newtxmath[vvarbb] - A more readable variant blackboard bold.
+%% Other useful options to newtxmath:
+%% baskerv{aldx,ille}, libertine, cochineal, utopia.
+\PassOptionsToPackage{vvarbb}{newtxmath}
+\PassOptionsToPackage{vvarbb}{newpxmath}
+
+%% TO CONSIDER:
+%\PassOptionsToPackage{euler-digits}{eulervm}
+%\usepackage[cal=boondoxo]{mathalfa} % adjusts mathcal
+%\usepackage[full]{textcomp} % what does this do?
+
+% Baskervaldx is a little too heavy, baskervillef is way too light. I like
+% librebaskerville, but it doesn't have small caps :(.
+\ifdefstring{\rntz@font}{baskerville}{
+  \RequirePackage[scaled=0.82]{librebaskerville}
+  %\RequirePackage[p,osf]{Baskervaldx}
+  \RequirePackage[p,osf]{biolinum}
+  \RequirePackage[scaled=0.95]{inconsolata}
+  \ifdefstring{\rntz@mathfont}{euler}{\RequirePackage[small]{eulervm}}{
+    \RequirePackage[libertine,scaled=1.0175]{newtxmath}
+    %\RequirePackage[baskerville,scaled=1.0175]{newtxmath}
+    %\RequirePackage[baskervaldx]{newtxmath}
+  }
+  \linespread{1.0667}
+}{}
+
 \ifdefstring{\rntz@font}{charter}{
-  \RequirePackage{charter}
-  \RequirePackage{eulervm}
-  \usepackage[semibold,scaled=.99]{sourcesanspro}
-  \usepackage[scale=1.05263]{inconsolata}
-  \linespread{1.14}
+  %% TODO: try using lato instead of sourcesanspro!
+  %% \usepackage{lato}
+
+  %% %% The charter package can't be scaled to match Euler's x-height. On the
+  %% %% other hand, it doesn't require me to install texlive-lang-cyrillic.
+  %% \RequirePackage{charter}
+  %% \RequirePackage[semibold,scaled=.99]{sourcesanspro}
+  %% \RequirePackage[scale=1.05263]{inconsolata}
+
+  %% XCharter can be scaled. It also has ``proper'' small caps, but I think they
+  %% actually look worse? Bad kerning, maybe. It has an option [osf] for
+  %% old-style proportional figures, but lacks proportional lining figures, and
+  %% doesn't respect fontaxes' \tbfigures or \lnfigures.
+  \RequirePackage[osf,scaled=0.967]{XCharter}
+  \RequirePackage[osf,proportional,semibold,scaled=.955]{sourcesanspro}
+  \RequirePackage[scaled=1.019]{inconsolata}
+
+  %% Biolinum doesn't really work; matching its x-height to Charter makes its
+  %% capitals too large. Other sans-serif options:
+  %\RequirePackage[scale=0.935,semibold]{plex-sans}
+  %\RequirePackage[scaled=0.896]{noto}
+
+  \ifdefstring{\rntz@mathfont}{euler}{\RequirePackage{eulervm}}{
+    \RequirePackage[xcharter,scaled=1.05]{newtxmath}
+    % But now \mathcal is badly scaled :(
+  }
+  \linespread{1.10238}
 }{}
 
 \ifdefstring{\rntz@font}{cm}{\linespread{1.05}}{}
 
-% Cochineal is tiny by default. I scale it to match Euler's x-height.
 \ifdefstring{\rntz@font}{cochineal}{
-  \RequirePackage[scale=1.08]{cochineal}
-  \RequirePackage{eulervm}
-  \RequirePackage[semibold,scaled=.95]{sourcesanspro}
-  \RequirePackage[scaled=1.01]{inconsolata}
-  \linespread{1.12}
+  \RequirePackage[p,osf,swashQ,scale=1.08]{cochineal}
+  \RequirePackage[p,osf,scaled=1.065]{biolinum}
+  \RequirePackage[scaled=1.015]{inconsolata}
+  %% TODO: test cochineal,newmath!
+  \ifdefstring{\rntz@mathfont}{euler}{\RequirePackage{eulervm}}
+              {\RequirePackage[cochineal,scaled=1.08]{newtxmath}}
+  \linespread{1.13} % 1.12-1.15 is a good range.
+}{}
+
+\ifdefstring{\rntz@font}{fbb}{
+  \RequirePackage[p,osf]{fbb}
+  \RequirePackage[p,osf,scaled=1.02]{biolinum}
+  \RequirePackage[scaled=0.965]{inconsolata}
+  \ifdefstring{\rntz@mathfont}{euler}
+              {\RequirePackage[small]{eulervm}}
+              {\RequirePackage[cochineal,scaled=1.03]{newtxmath}}
+  
+  \linespread{1.1}
 }{}
 
 \ifdefstring{\rntz@font}{libertine}{
-  %% HACK: amsthm must be loaded before newtxmath otherwise it will crash.
-  \RequirePackage{amsthm}
-  % osf = old-style figures
-  \RequirePackage[mono=false,llscale=1.05,scale=1.05]{libertine}
-  \RequirePackage[libertine,scaled=1.05]{newtxmath}  % math font matching libertine
+  % libertine[osf] makes newtxmath use old-style figures in math mode :(
+  % Other options: semibold.
+  \RequirePackage[p,mono=false,llscale=1.0526,scale=1.0526]{libertine}
   \RequirePackage[scaled=.995]{inconsolata}
-  \linespread{1.15}
+  \ifdefstring{\rntz@mathfont}{euler}
+              {\RequirePackage{eulervm}}
+              {\RequirePackage[libertine,scaled=1.0526]{newtxmath}}
+  \linespread{1.11}
 }{}
 
 \ifdefstring{\rntz@font}{palatino}{
-  %\RequirePackage{mathpazo}
   \RequirePackage{newpxtext}
-  \RequirePackage{eulervm}
-  \RequirePackage[semibold,scaled=.9475]{sourcesanspro}
-  \RequirePackage[scaled=1.01]{inconsolata}
-  \linespread{1.16667}
+  \RequirePackage[scaled=1.067]{biolinum}
+  \RequirePackage[scaled=1.012]{inconsolata}
+  \ifdefstring{\rntz@mathfont}{euler}
+              {\RequirePackage{eulervm}}
+              {\RequirePackage{newpxmath}}
+  \linespread{1.15}
+
+  %% HACK: newpxtext doesn't respect fontaxes' \tbfigures! :( but it _does_
+  %% define, eg., \tlfstyle! hm...
+  \RequirePackage{fontaxes}
+  \renewcommand\tbfigures{}
+  \renewcommand\lnfigures{}
 }{}
 
-%% PTSerif & newtxmath have wildly different x-heights; matching their x-heights
-%% makes their ascenders mismatched. Oh well.
 \ifdefstring{\rntz@font}{pt}{
-  \RequirePackage[scaled=0.98]{PTSerif}
-  \RequirePackage[scaled=1.135,libertine]{newtxmath}
-  \RequirePackage[scaled=0.98]{PTSans}
+  \RequirePackage[scaled=0.93]{PTSerif}
+  \RequirePackage[scaled=0.93]{PTSans}
   %% PTSans doesn't have small caps; could use biolinum or sourcesanspro instead.
   %\RequirePackage[scaled=1.135]{biolinum}
-  \RequirePackage[scaled=1.074]{inconsolata}
-  \linespread{1.18613}
-}{}
-
-% PT Serif has a humongous x-height, which makes it very readable. It also
-% meshes decently with euler. However, to match its x-height with eulervm, we
-% need to shrink it significantly. (Unfortunately, eulervm doesn't have an
-% option to scale it up.)
-\ifdefstring{\rntz@font}{pteuler}{
-  \RequirePackage[scaled=0.93]{PTSerif}
-  \RequirePackage{eulervm}
-  \RequirePackage[scaled=0.93]{PTSans}
-  \RequirePackage[scaled=1.019]{inconsolata}
+  \RequirePackage[scaled=1.04]{inconsolata}
+  \ifdefstring{\rntz@mathfont}{euler}{\RequirePackage{eulervm}}{
+    \RequirePackage[utopia,scaled=1.05726]{newtxmath}
+  }
   \linespread{1.126}
 }{}
