@@ -90,6 +90,7 @@
 
 %% ---- Section & subsection titles ----
 \RequirePackage{titlesec}    % (sub)section header styling
+\RequirePackage{fontaxes}    % selecting tabular lining figures
 
 %% titlesec < 2.10.2 has a bug that prevents showing section numbers. This fixes
 %% it. Taken from
@@ -105,7 +106,7 @@
 \titlespacing*{\subsubsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
 
 %% Spacing.
-\newcommand{\header}{\rmfamily\bfseries}
+\newcommand{\header}{\rmfamily\bfseries\lnfigures\tbfigures}
 %% \renewcommand{\header}{\rmfamily\itshape}  % or, italics
 %% \renewcommand{\header}{\sffamily\bfseries} % or, sans-serif
 
