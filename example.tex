@@ -36,11 +36,12 @@
 
 % ---- rntzfont ----
 %
-% rntzfont chooses from a set of paired text & math fonts, with appropriate
-% scalings and line spacings.
-% 
-% The options are charter, cm, cochineal, libertine, palatino, pt, pteuler.
-% Default is palatino.
+% rntzfont chooses from a set of paired fonts, with appropriate scalings and line
+% spacings.
+%
+% Text font options are baskerville, charter, cm, cochineal, fbb, libertine,
+% palatino, pt. Math font options are euler and newmath. Default is palatino
+% with euler.
 \usepackage{rntzfont}
 
 % Some small typographic improvements.
@@ -54,23 +55,39 @@
 \date{\today}
 
 \begin{document}
+
 \maketitle
 
 \begin{abstract}
   Nam dui ligula, fringilla a, euismod sodales, sollicitudin vel, wisi. Morbi
   auctor lorem non justo. Nam lacus libero, pretium at, lobortis vitae,
   ultricies et, tellus. Donec aliquet, tortor sed accumsan bibendum, erat ligula
-  aliquet magna, vitae ornare odio metus a mi. Morbi ac orci et nisl hendrerit
-  mollis.
+  aliquet magna, vitae ornare odio metus a mi. And on the
+  \emph{n}\textsuperscript{th} day, Knuth created \TeX, and all was woe.
 \end{abstract}
 
-\section{A section}\label{sec:one}
-\lipsum[4]
+\section{Mostly fonts}\label{sec:one}
+
+\newcommand{\testtext}{\textsc{This text} is ``meaningless''. \emph{[Quite
+      `thoroughly' so! \textsc{-Ed.}]} {\bfseries \{Do you \textsc{disagree}?\}} I
+  know 18--57 (\textsc{count 'em}) badgers --- who'd like a 9"
+  {\bfseries\itshape rather \textsc{long}} word.}
+
+\begingroup
+\testtext\setlength\parskip{1em}\setlength\parindent{0em}
+
+{\sffamily\testtext}
+
+{\ttfamily It's "meaningless". \textbf{But it's monospace!}
+  {\itshape
+    Is it italic?} Unlikely.\\
+  (Braces) [are] \{rather\} <important>. Il1, O0.}
+\endgroup
 
 \subsection{Some mathematics, with references}
 
 Nulla malesuada porttitor diam. Donec felis erat, congue non,
-volutpat at, tincidunt tristique, libero.
+volutpat at, tincidunt tristique, libero.\footnote{Latin latin latin, latin latin latin. Greek.}
 
 \begin{theorem}[Binomial]\label{thm:binomial} Lorem ipsum dolor sit amet, consectetuer:
   \[ (x+y)^n = \sum_{k=0}^n \binom{n}{k} x^{n-k} y^k \]
@@ -80,8 +97,9 @@ volutpat at, tincidunt tristique, libero.
   \( (x+y)^4 = x^4 + 4x^3y + 6x^2y^2 + 4xy^3 + y^4 \).
 \end{corollary}
 
-Vivamus viverra fermentum felis. Donec nonummy pellentesque ante. Phasellus
-adipiscing semper elit. Proin fermentum \cref{thm:binomial} massa ac quam:
+Vivamus viverra fermentum felis. Donec nonummy pellentesque ante.
+Phasellus adipiscing semper elit. Proin fermentum \cref{thm:binomial} massa ac
+quam:
 
 \[ \sum_{i=1}^n n = \frac{n(n+1)}{2} \]
 
@@ -103,7 +121,7 @@ Sed diam turpis, molestie vitae, placerat a, molestie nec, leo. Maecenas lacinia
   commod wisi enim egat quam \cref{sec:two-one}.
 \end{conjecture}
 
-\subsubsection{I usually avoid sub-subsections, but here one is anyway}
+\subsubsection{Sub-subsections (like this one) are always unnumbered}
 
 \lipsum[7-8]
 
