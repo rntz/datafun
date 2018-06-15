@@ -2,12 +2,16 @@
 %% different typefaces (rm, math, sf, tt). Ideally I'd automate this process but
 %% augh, LaTeX and augh, fonts. Maybe LuaTeX or XeTeX could handle this better.
 
+%% https://tex.stackexchange.com/questions/205667/is-there-an-equivalent-to-fontspecs-scale-matchuppercase-for-pdflatex-or-how-t
+%% suggests I can get latex to print the heights of things for me! however, this
+%% won't necessarily result in things visually aligning.
+
 \documentclass[20pt]{rntz}
-\usepackage[paperheight=330pt,paperwidth=330pt,margin=5pt]{geometry}
+\usepackage[paperheight=330pt,paperwidth=340pt,margin=5pt]{geometry}
 
 % serif: baskerville, charter, cm, cochineal, fbb, libertine, palatino, pt
 % math: newmath, euler
-\usepackage[baskerville]{rntzfont}
+\usepackage{rntzfont}
 
 \setlength{\parindent}{0pt}
 \linespread{.8}
