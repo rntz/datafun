@@ -36,19 +36,19 @@
 %\usepackage[cal=boondoxo]{mathalfa} % adjusts mathcal
 %\usepackage[full]{textcomp} % what does this do?
 
-% Baskervaldx is a little too heavy, baskervillef is way too light. I like
+% Baskervaldx is too heavy, baskervillef is way too light. I like
 % librebaskerville, but it doesn't have small caps :(.
 \ifdefstring{\rntz@font}{baskerville}{
-  \RequirePackage[scaled=0.82]{librebaskerville}
-  %\RequirePackage[p,osf]{Baskervaldx}
-  \RequirePackage[p,osf]{biolinum}
-  \RequirePackage[scaled=0.95]{inconsolata}
-  \ifdefstring{\rntz@mathfont}{euler}{\RequirePackage[small]{eulervm}}{
-    \RequirePackage[libertine,scaled=1.0175]{newtxmath}
-    %\RequirePackage[baskerville,scaled=1.0175]{newtxmath}
-    %\RequirePackage[baskervaldx]{newtxmath}
+  %\RequirePackage[p,osf,scaled=1.0526]{Baskervaldx}
+  \RequirePackage[scaled=0.86315]{librebaskerville}
+  \RequirePackage[p,osf,scaled=1.0526]{biolinum}
+  \RequirePackage[scaled=.995]{inconsolata}
+  \ifdefstring{\rntz@mathfont}{euler}{\RequirePackage{eulervm}}{
+    \RequirePackage[libertine,scaled=1.0526]{newtxmath}
+    %\RequirePackage[baskerville,scaled=1.0711]{newtxmath}
+    %\RequirePackage[baskervaldx,scaled=1.0526]{newtxmath}
   }
-  \linespread{1.0667}
+  \linespread{1.11}
 }{}
 
 \ifdefstring{\rntz@font}{charter}{
