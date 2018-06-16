@@ -52,9 +52,6 @@
 }{}
 
 \ifdefstring{\rntz@font}{charter}{
-  %% TODO: try using lato instead of sourcesanspro!
-  %% \usepackage{lato}
-
   %% %% The charter package can't be scaled to match Euler's x-height. On the
   %% %% other hand, it doesn't require me to install texlive-lang-cyrillic.
   %% \RequirePackage{charter}
@@ -69,8 +66,10 @@
   \RequirePackage[osf,proportional,semibold,scaled=.955]{sourcesanspro}
   \RequirePackage[scaled=1.019]{inconsolata}
 
-  %% Biolinum doesn't really work; matching its x-height to Charter makes its
-  %% capitals too large. Other sans-serif options:
+  %% Biolinum doesn't really look like Charter, and besides, matching its
+  %% x-height to Charter makes its capitals too large. I'd like to use lato, but
+  %% it lacks small caps. Other sans-serif options:
+  %\RequirePackage[defaultsans,oldstyle,proportional,scale=0.92]{lato}
   %\RequirePackage[scale=0.935,semibold]{plex-sans}
   %\RequirePackage[scaled=0.896]{noto}
 
