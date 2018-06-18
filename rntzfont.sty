@@ -83,13 +83,13 @@
 \ifdefstring{\rntz@font}{cm}{\linespread{1.05}}{}
 
 \ifdefstring{\rntz@font}{cochineal}{
-  \RequirePackage[p,osf,swashQ,scale=1.08]{cochineal}
+  \RequirePackage[p,osf,scale=1.08]{cochineal}
   \RequirePackage[p,osf,scaled=1.065]{biolinum}
   \RequirePackage[scaled=1.015]{inconsolata}
   %% TODO: test cochineal,newmath!
   \ifdefstring{\rntz@mathfont}{euler}{\RequirePackage{eulervm}}
               {\RequirePackage[cochineal,scaled=1.08]{newtxmath}}
-  \linespread{1.13} % 1.12-1.15 is a good range.
+  \linespread{1.15} % 1.12-1.15 is a good range.
 }{}
 
 \ifdefstring{\rntz@font}{fbb}{
