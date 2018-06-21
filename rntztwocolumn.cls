@@ -8,8 +8,8 @@
 \ProcessOptions\relax
 
 \LoadClass[9pt,twocolumn]{extarticle}
-
 \RequirePackage[a4paper,text={182mm,257mm}]{geometry}
+\setlength\parskip{0pt}
 \setlength\columnsep{16pt}
 
 %% TODO: all this is copy-pasted from rntz.cls. Factor it out!
@@ -84,18 +84,27 @@
 \patchcmd{\ttlh@hang}{\parindent\z@}{\parindent\z@\leavevmode}{}{}
 \patchcmd{\ttlh@hang}{\noindent}{}{}{}
 
-% Lotsa whitespace.
-\def\rntz@secbefore{1.6em plus .8em minus .4em}
-\def\rntz@secafter{.8em plus .4em minus .2em}
-\titlespacing*{\section}{0pt}{\rntz@secbefore}{\rntz@secafter}
-\titlespacing*{\subsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
-\titlespacing*{\subsubsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
+%% Section title & paragraph spacing
+\titlespacing*{\section}{0pt}
+              {1\baselineskip plus .4\baselineskip minus .2\baselineskip}
+              {.4\baselineskip plus .16\baselineskip minus .08\baselineskip}
+\titlespacing*{\subsection}{0pt}
+              {.8\baselineskip plus .32\baselineskip minus .16\baselineskip}
+              {.32\baselineskip plus .128\baselineskip minus .064\baselineskip}
+\titlespacing*{\subsubsection}{0pt}
+              {.8\baselineskip plus .32\baselineskip minus .16\baselineskip}
+              {.32\baselineskip plus .128\baselineskip minus .064\baselineskip}
+\titlespacing*{\paragraph}{0pt}
+              {.5\baselineskip plus .2\baselineskip minus .1\baselineskip}
+              {1em}
+
+% 0.5 plus 0.2 minus 0.1
 
 %% Spacing.
 \newcommand{\header}{\rmfamily\bfseries\lnfigures\tbfigures}
 %% \renewcommand{\header}{\rmfamily\itshape}  % or, italics
 %% \renewcommand{\header}{\sffamily\bfseries} % or, sans-serif
 
-\titleformat{\section}{\secsize\header}{\thesection}{9pt}{}
-\titleformat{\subsection}{\subsecsize\header}{\thesubsection}{9pt}{}
-\titleformat{\subsubsection}{\subsecsize\header}{}{0pt}{}
+\titleformat{\section}{\secsize\header}{\thesection}{1em}{}
+\titleformat{\subsection}{\subsecsize\header}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}{\subsubsecsize\header}{}{0pt}{}

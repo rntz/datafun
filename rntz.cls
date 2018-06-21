@@ -99,11 +99,12 @@
 \patchcmd{\ttlh@hang}{\noindent}{}{}{}
 
 % Lotsa whitespace.
-\def\rntz@secbefore{1.6em plus .8em minus .4em}
-\def\rntz@secafter{.8em plus .4em minus .2em}
+\def\rntz@secbefore{1.6em plus .64em minus .32em}
+\def\rntz@secafter{.8em plus .32em minus .16em}
 \titlespacing*{\section}{0pt}{\rntz@secbefore}{\rntz@secafter}
 \titlespacing*{\subsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
 \titlespacing*{\subsubsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
+%\titlespacing*{\paragraph}{0pt}{1.28em plus .512em minus .256em}{1em}
 
 %% Spacing.
 \newcommand{\header}{\rmfamily\bfseries\lnfigures\tbfigures}
