@@ -58,9 +58,6 @@
 %% ---- Document title formatting and sizing ----
 \newcommand{\titlesize}{\Large}
 \newcommand{\authorsize}{\normalsize}
-\newcommand{\secsize}{\large}
-\newcommand{\subsecsize}{\normalsize}
-\newcommand{\subsubsecsize}{\normalsize}
 
 %% TODO: omit {title,author,date} if not provided
 %% TODO: support \subtitle.
@@ -85,22 +82,21 @@
 \patchcmd{\ttlh@hang}{\noindent}{}{}{}
 
 %% Section title & paragraph spacing
-\titlespacing*{\section}{0pt}
-              {1\baselineskip plus .4\baselineskip minus .2\baselineskip}
-              {.4\baselineskip plus .16\baselineskip minus .08\baselineskip}
-\titlespacing*{\subsection}{0pt}
-              {.8\baselineskip plus .32\baselineskip minus .16\baselineskip}
-              {.32\baselineskip plus .128\baselineskip minus .064\baselineskip}
-\titlespacing*{\subsubsection}{0pt}
-              {.8\baselineskip plus .32\baselineskip minus .16\baselineskip}
-              {.32\baselineskip plus .128\baselineskip minus .064\baselineskip}
-\titlespacing*{\paragraph}{0pt}
-              {.5\baselineskip plus .2\baselineskip minus .1\baselineskip}
-              {1em}
+\def\secbefore{1\baselineskip plus .4\baselineskip minus .2\baselineskip}
+\def\secafter{.4\baselineskip plus .16\baselineskip minus .08\baselineskip}
+\def\subsecbefore{.8\baselineskip plus .32\baselineskip minus .16\baselineskip}
+\def\subsecafter{.32\baselineskip plus .128\baselineskip minus .064\baselineskip}
+\titlespacing*{\section}{0pt}{\secbefore}{\secafter}
+\titlespacing*{\subsection}{0pt}{\secbefore}{\secafter}
+\titlespacing*{\subsubsection}{0pt}{\subsecbefore}{\subsecafter}
+\titlespacing*{\paragraph}{0pt}{\subsecbefore}{1.2em}
 
 % 0.5 plus 0.2 minus 0.1
 
-%% Spacing.
+%% Section title sizing
+\newcommand{\secsize}{\Large}
+\newcommand{\subsecsize}{\large}
+\newcommand{\subsubsecsize}{\normalsize}
 \newcommand{\header}{\rmfamily\bfseries\lnfigures\tbfigures}
 %% \renewcommand{\header}{\rmfamily\itshape}  % or, italics
 %% \renewcommand{\header}{\sffamily\bfseries} % or, sans-serif
@@ -108,3 +104,4 @@
 \titleformat{\section}{\secsize\header}{\thesection}{1em}{}
 \titleformat{\subsection}{\subsecsize\header}{\thesubsection}{1em}{}
 \titleformat{\subsubsection}{\subsubsecsize\header}{}{0pt}{}
+\titleformat*{\paragraph}{\bfseries}{}
