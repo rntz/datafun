@@ -48,8 +48,6 @@
 \RequirePackage{hyperref,url}
 \hypersetup{colorlinks, linkcolor=ACMBlue, citecolor=ACMBlue, urlcolor=ACMBlue, filecolor=ACMBlue}
 
-%% TODO: less garish colors.
-
 %% cleveref must be loaded AFTER hyperref & amsmath, or it errors; and AFTER
 %% amsthm and BEFORE we define theorem styles, otherwise (eg) it calls lemmas
 %% "Theorem"s.
@@ -98,15 +96,24 @@
 \patchcmd{\ttlh@hang}{\parindent\z@}{\parindent\z@\leavevmode}{}{}
 \patchcmd{\ttlh@hang}{\noindent}{}{}{}
 
-% Lotsa whitespace.
+% Lotsa whitespace. 2:1 before:after ratio.
 \def\rntz@secbefore{1.6em plus .64em minus .32em}
 \def\rntz@secafter{.8em plus .32em minus .16em}
+%\def\rntz@secbefore{1.5em plus .6em minus .3em}
+%\def\rntz@secafter{ .75em plus .3em minus .15em}
 \titlespacing*{\section}{0pt}{\rntz@secbefore}{\rntz@secafter}
 \titlespacing*{\subsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
 \titlespacing*{\subsubsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
 %\titlespacing*{\paragraph}{0pt}{1.28em plus .512em minus .256em}{1em}
 
-%% Spacing.
+%% %% Tighter spacing: 1.5\baselineskip at 2:1 before:after.
+%% \def\rntz@secbefore{1\baselineskip plus .4\baselineskip minus .2\baselineskip}
+%% \def\rntz@secafter{.5\baselineskip plus .2\baselineskip minus .1\baselineskip}
+%% \titlespacing*{\paragraph}{0pt}
+%%               {1\baselineskip plus .2\baselineskip minus .1\baselineskip}
+%%               {1em}
+
+%% Title formatting.
 \newcommand{\header}{\rmfamily\bfseries\lnfigures\tbfigures}
 %% \renewcommand{\header}{\rmfamily\itshape}  % or, italics
 %% \renewcommand{\header}{\sffamily\bfseries} % or, sans-serif
@@ -129,7 +136,7 @@
 \titleformat{\subsection}{\subsecsize\header}
             {\colorhno{Whee}{white}{\thesubsection}}{0pt}{}
 % sub-subsections have no heading numbers
-\titleformat{\subsubsection}{\subsecsize\header}{}{0pt}{}
+\titleformat{\subsubsection}{\subsubsecsize\header}{}{0pt}{}
 
 
 %% %% Tufte font sizes.
