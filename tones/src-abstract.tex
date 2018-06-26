@@ -1,0 +1,168 @@
+%% And extended abstract addressing:
+%% - Problem & motivation
+%% - Background & related work
+%% - Approach & uniqueness
+%% - Results and contributions
+%%
+%% 2 pages, pdf. Reference lists don't count.
+%% Options:
+%% - acmart[sigplan]
+%% - rntz, rntzgeometry[a5], pdfbook
+%%   hm, need custom configuration...
+
+\documentclass[sigplan,screen,dvipsnames]{acmart}
+\settopmatter{printacmref=false}
+\setcopyright{none}
+\renewcommand\footnotetextcopyrightpermission[1]{}
+\pagestyle{plain}
+\usepackage[scale=1.042]{cochineal}
+
+
+%% %% ---- Formatting ----
+%% \documentclass[twocolumn,10pt]{extarticle}
+%% \usepackage[dvipsnames]{xcolor}
+%% \usepackage[a4,width=175mm]{rntzgeometry}
+%% \setlength\columnsep{20pt}
+%% \setlength\parskip{0pt}
+
+%% %% TODO: smaller section titles
+%% \usepackage{titlesec}    % (sub)section header styling
+%% \titleformat*{\section}{\normalfont\large\bfseries}
+%% \titleformat*{\subsection}{\normalfont\normalsize\bfseries}
+%% \titlespacing{\section}{0pt}{.667em plus .1em minus .1em}{.3em plus .1em}
+
+%% \usepackage[scale=1.0355]{cochineal}
+%% \usepackage[semibold,scaled=.911]{sourcesanspro}
+%% %\usepackage{biolinum}
+%% \usepackage[scaled=.969]{inconsolata}
+%% \usepackage[small]{eulervm}
+
+%% \usepackage[spacing=true]{microtype}
+%% \frenchspacing
+
+
+%% ---- Packages ----
+\usepackage{amsfonts,amsmath,latexsym,stmaryrd}
+\usepackage{anyfontsize}
+\usepackage{lipsum}
+\usepackage{mathpartir}
+\usepackage{mathtools}          % \dblcolon
+\usepackage[nameinlink]{cleveref}
+
+%% ---- Commands ----
+\newcommand\R{\mathbb{R}}
+\newcommand\x\times
+\newcommand\todo[1]{{\color{Purple}#1}}
+
+%% ---- Top matter ----
+%%
+%% Should include:
+%% - Student author's name & email
+%% - Institutional affiliation
+%% - Research advisor's name
+%% - ACM student member number
+%% - Category (graduate or undergraduate)
+%% - Research title
+\title{Type inference for monotonicity}
+\author{Michael Arntzenius, PhD student}
+\email{daekharel@gmail.com}
+\affiliation{University of Birmingham}
+
+% arg, should this be Neel or Dan? Neel, probably.
+%\author{advised by Dan Ghica}
+
+
+\begin{document}
+
+\maketitle
+
+\section{Problem \& motivation}
+
+Quick: which of these are monotone in $x$?\footnote{Whenever I say ``monotone''
+  I mean ``monotonically nondecreasing'': $f$ is monotone iff $x \le y \implies
+  f(x) \le f(y)$.}
+%
+\begin{mathpar}
+  x - \log x
+
+  x + 2^x
+
+  {-2}x
+
+  4
+\end{mathpar}
+
+Now, how did you \emph{know}?
+%
+Did you prove that $x \le y$ implies
+%$x + \log x \le y + \log y$?
+$x + 2^x \le y + 2^y$?
+%
+I didn't. I used a shortcut: compositional reasoning. Addition is monotone, and
+so is $2^x$; so $x + 2^x$ must be as well.
+%
+And when I hear ``compositional reasoning'', I think ``type system''.
+
+I aim to give a type system that can statically guarantee a function is monotone.
+%
+%Moreover, I aim to be able to \emph{infer} whether functions are monotone in their arguments without requiring any annotations other than type annotations.
+%
+This system is flexible --- capable, for example, of typing a function $f : A \x
+B \to C$ which is monotone in $A$ but not $B$.
+%
+It handles several flavors of function (which I call \emph{tones}): ordinary (or
+\emph{invariant}), monotone, antitone, and bivariant (both mono- and anti-tone).
+%
+And it requires no changes to terms besides type annotations.
+
+What use might a type system guaranteeing monotonicity of certain functions be?
+%
+Well, monotonicity
+
+\begin{itemize}
+\item Monotonicity for fixed points in Datafun
+\item Monotonicity for eventual consistency
+\item LVars????
+\end{itemize}
+
+{\color{MidnightBlue}\lipsum[4]}
+
+\section{Background \& related work}
+
+\newcommand\mto{\overset{+}{\to}}
+
+This is an extension of my prior work with Neel Krishnaswami on
+Datafun~\citep{datafun}, a pure and total functional language inspired by the
+deductive database language Datalog~\citep{datalog}.
+%
+\todo{TODO. Datafun implements Datalog's recursive queries using fixed points computed by iteration}. To ensure termination, the function must be monotone.
+
+Datafun's type system as published has two \emph{separate} function types,
+ordinary $A \to B$ and monotone $A \mto B$. Thus it cannot type a function $A \x
+B \to C$ that is monotone in $A$ but not $B$. This work aims to remove that
+restriction.
+
+%% Problems with Datafun as published:
+%% - can't have f : A * B -> C monotone in A but not B
+%% - doesn't handle antitone functions
+
+\todo{TODO: Pfenning-Davies, Monotonicity Types, variance analysis?, that static analysis someone's pointed out}
+
+
+
+\lipsum[2-4]
+
+\section{Approach \& uniqueness}              % \& uniqueness
+
+\lipsum[5]
+
+\section{Results and contributions}
+
+\lipsum[6-8]
+
+
+%% Bibliography
+\bibliographystyle{abbrvnat}
+\bibliography{datafun}
+
+\end{document}
