@@ -61,7 +61,7 @@
   %% actually look worse? Bad kerning, maybe. It has an option [osf] for
   %% old-style proportional figures, but lacks proportional lining figures, and
   %% doesn't respect fontaxes' \tbfigures or \lnfigures.
-  \RequirePackage[osf,scaled=0.967]{XCharter}
+  \RequirePackage[sups,osf,scaled=0.967]{XCharter}
   \RequirePackage[osf,proportional,semibold,scaled=.955]{sourcesanspro}
   \RequirePackage[scaled=1.019]{inconsolata}
 
@@ -80,7 +80,7 @@
 }{}
 
 \ifdefstring{\rntz@font}{cochineal}{
-  \RequirePackage[p,osf,scale=1.08]{cochineal}
+  \RequirePackage[p,osf,sups,scale=1.08]{cochineal}
   \RequirePackage[p,osf,scaled=1.065]{biolinum}
   \RequirePackage[scaled=1.015]{inconsolata}
   %% TODO: test cochineal,newmath!
