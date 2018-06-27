@@ -97,20 +97,20 @@
 \patchcmd{\ttlh@hang}{\noindent}{}{}{}
 
 % Lotsa whitespace. 2:1 before:after ratio.
-\def\rntz@secbefore{1.6em plus .64em minus .32em}
-\def\rntz@secafter{.8em plus .32em minus .16em}
-%\def\rntz@secbefore{1.5em plus .6em minus .3em}
-%\def\rntz@secafter{ .75em plus .3em minus .15em}
+\def\rntz@secbefore{1.6em plus .4em minus .32em}
+\def\rntz@secafter{.8em plus .2em minus .16em}
+%\def\rntz@secbefore{1.5em plus .375em minus .3em}
+%\def\rntz@secafter{ .75em plus .1875em minus .15em}
 \titlespacing*{\section}{0pt}{\rntz@secbefore}{\rntz@secafter}
 \titlespacing*{\subsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
 \titlespacing*{\subsubsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
 %\titlespacing*{\paragraph}{0pt}{1.28em plus .512em minus .256em}{1em}
 
 %% %% Tighter spacing: 1.5\baselineskip at 2:1 before:after.
-%% \def\rntz@secbefore{1\baselineskip plus .4\baselineskip minus .2\baselineskip}
-%% \def\rntz@secafter{.5\baselineskip plus .2\baselineskip minus .1\baselineskip}
+%% \def\rntz@secbefore{1\baselineskip plus .25\baselineskip minus .2\baselineskip}
+%% \def\rntz@secafter{.5\baselineskip plus .125\baselineskip minus .1\baselineskip}
 %% \titlespacing*{\paragraph}{0pt}
-%%               {1\baselineskip plus .2\baselineskip minus .1\baselineskip}
+%%               {1\baselineskip plus .25\baselineskip minus .2\baselineskip}
 %%               {1em}
 
 %% Title formatting.
