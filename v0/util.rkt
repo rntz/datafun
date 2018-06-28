@@ -262,7 +262,7 @@
 (define (hash-filter-keys p h)
   (for/hash ([(k v) h] #:when (p k)) (values k v)))
 
-;; TODO: remove if unused.
+;; ;; TODO: remove if unused.
 ;; (define (hash-select-keys h k)
 ;;   (hash-filter-keys (curry set-member? (for/set ([x k]) x)) h))
 
