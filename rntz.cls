@@ -48,17 +48,12 @@
 \RequirePackage{hyperref,url}
 \hypersetup{colorlinks, linkcolor=ACMBlue, citecolor=ACMBlue, urlcolor=ACMBlue, filecolor=ACMBlue}
 
-%% TODO: less garish colors.
-
 %% cleveref must be loaded AFTER hyperref & amsmath, or it errors; and AFTER
 %% amsthm and BEFORE we define theorem styles, otherwise (eg) it calls lemmas
 %% "Theorem"s.
 \RequirePackage{amsmath,amsthm}
 % options: capitalise
 \RequirePackage[nameinlink,noabbrev]{cleveref}
-% Use \S for section references, except when starting a sentence.
-\crefname{section}{\S\!}{\S\!}
-\Crefname{section}{Section}{Sections}
 
 %% ---- Theorem styling ----
 %% Everything is numbered sequentially with a single counter.
@@ -93,6 +88,7 @@
 
 %% ---- Section & subsection titles ----
 \RequirePackage{titlesec}    % (sub)section header styling
+\RequirePackage{fontaxes}    % selecting tabular lining figures
 
 %% titlesec < 2.10.2 has a bug that prevents showing section numbers. This fixes
 %% it. Taken from
@@ -100,15 +96,25 @@
 \patchcmd{\ttlh@hang}{\parindent\z@}{\parindent\z@\leavevmode}{}{}
 \patchcmd{\ttlh@hang}{\noindent}{}{}{}
 
-% Lotsa whitespace.
-\def\rntz@secbefore{1.6em plus .8em minus .4em}
-\def\rntz@secafter{.8em plus .4em minus .2em}
+% Lotsa whitespace. 2:1 before:after ratio.
+\def\rntz@secbefore{1.6em plus .4em minus .32em}
+\def\rntz@secafter{.8em plus .2em minus .16em}
+%\def\rntz@secbefore{1.5em plus .375em minus .3em}
+%\def\rntz@secafter{ .75em plus .1875em minus .15em}
 \titlespacing*{\section}{0pt}{\rntz@secbefore}{\rntz@secafter}
 \titlespacing*{\subsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
 \titlespacing*{\subsubsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
+%\titlespacing*{\paragraph}{0pt}{1.28em plus .512em minus .256em}{1em}
 
-%% Spacing.
-\newcommand{\header}{\rmfamily\bfseries}
+%% %% Tighter spacing: 1.5\baselineskip at 2:1 before:after.
+%% \def\rntz@secbefore{1\baselineskip plus .25\baselineskip minus .2\baselineskip}
+%% \def\rntz@secafter{.5\baselineskip plus .125\baselineskip minus .1\baselineskip}
+%% \titlespacing*{\paragraph}{0pt}
+%%               {1\baselineskip plus .25\baselineskip minus .2\baselineskip}
+%%               {1em}
+
+%% Title formatting.
+\newcommand{\header}{\rmfamily\bfseries\lnfigures\tbfigures}
 %% \renewcommand{\header}{\rmfamily\itshape}  % or, italics
 %% \renewcommand{\header}{\sffamily\bfseries} % or, sans-serif
 
@@ -122,17 +128,15 @@
   {\newcommand{\colorhno}[3]{\makehno{#1}{#2}{#3}}}
   {\newcommand{\colorhno}[3]{\hno{#3}}}
 
-% Nice colors: Periwinkle, Whee, cyan
+% Nice colors: Periwinkle, Whee, Cyan, ACMOrange
 \definecolor[named]{Whee}{cmyk}{0.33, 0.33, 0, 0}
 \titleformat{\section}{\secsize\header}
-            {\colorhno{Whee}{white}{\thesection}}{0pt}{}
-\titleformat{\subsection}{\subsecsize\header}{\hno{\thesubsection}}{0pt}{}
+            {\colorhno{Periwinkle}{white}{\thesection}}{0pt}{}
+%\titleformat{\subsection}{\subsecsize\header}{\hno{\thesubsection}}{0pt}{}
+\titleformat{\subsection}{\subsecsize\header}
+            {\colorhno{Whee}{white}{\thesubsection}}{0pt}{}
 % sub-subsections have no heading numbers
-\titleformat{\subsubsection}{\subsecsize\header}{}{0pt}{}
-
-%% %% Uncomment for orange subsection ribbons.
-%% \titleformat{\subsection}{\subsecsize\header}
-%%             {\colorhno{ACMOrange}{white}{\thesubsection}}{0pt}{}
+\titleformat{\subsubsection}{\subsubsecsize\header}{}{0pt}{}
 
 
 %% %% Tufte font sizes.

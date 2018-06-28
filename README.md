@@ -100,44 +100,62 @@ expand to a larger width.
 
 ## rntzfont.sty
 
-This chooses from a set of matched fonts, with appropriate scalings and line
-spacings. The options are named by the text serif font they choose. Most options
-also load [Euler][] for math, [Source Sans Pro][ssp] for sans-serif and
-[Inconsolata][] for monospace.
+This chooses from a set of fonts, with matched x-heights and reasonable line
+spacings. The text font options are named by the serif font they choose. Most
+load [Biolinum][Libertine] for sans-serif, and all load [Inconsolata][] for
+monospace. The text fonts are:
 
-Options (default `palatino`):
+- `baskerville` for [Libre Baskerville][librebaskerville]. It lacks small caps
+  and has "faked" bold italics, but is otherwise very pleasant and quite
+  legible.
 
-- `charter` for [Bitstream Charter][charter]. Charter is a nice, legible font
-  that displays well both on screen and in print.
+- `charter` for [Bitstream Charter][charter] with [Source Sans Pro][ssp].
+  Charter is very legible, even at low DPI.
 
 - `cochineal` for [Cochineal][]. Cochineal is an old-style font, very pleasant
-   in print.
+   in print and tolerable on screen.
 
-- `cm` for Computer Modern, which is TeX's default, but I've increased the line
-  spacing. I dislike Computer Modern; I find it almost unreadable on screen.
+- `cm` for TeX's default, Computer Modern, but I've increased the line spacing.
+  I dislike Computer Modern; I find it almost unreadable on screen.
 
-- `libertine` for [Linux Libertine and Biolinum][Libertine] with [newtxmath][].
-  Libertine imitates Times New Roman.
+- `fbb` for the Bembo-inspired [fbb][] package. Elegant, but not very readable
+  on screen.
 
-- `palatino` for [Palatino][]. Palatino and Euler are both designed by Hermann
-  Zapf, and match nicely.
+- `libertine` for [Linux Libertine][Libertine]. Libertine is somewhat similar to
+  Times New Roman.
+
+- `palatino` for [Palatino][], an elegant font that still displays well on
+  screen. Palatino and Euler are both designed by Hermann Zapf, and match
+  nicely.
 
 - `pt` for [PT Serif and Sans][pt] with [newtxmath][]. PT Serif is quite
   readable on screen. However, its LaTeX package is missing some features, such
   as small caps and straight quotes.
 
-- `pteuler` for [PT Serif and Sans][pt] with [Euler][]. To match x-heights, the
-  PT fonts are scaled down.
+You can also choose between two families of math fonts:
 
+- `euler` for [Euler][], a somewhat calligraphic upright math font.
+
+- `newmath` for [newtxmath][] (or its relative [newpxmath][]), using whichever
+  variant most nicely matches the text font choice.
+
+The defaults are `palatino` with `euler`.
+
+A big thanks to [Michael Sharpe](http://math.ucsd.edu/~msharpe/), who maintains
+the newtx, newpx, XCharter, cochineal, and fbb packages.
+
+[librebaskerville]: https://ctan.org/pkg/librebaskerville
 [Cochineal]: https://ctan.org/pkg/cochineal
 [Euler]: https://ctan.org/pkg/eulervm
 [Inconsolata]: https://ctan.org/pkg/inconsolata
 [Libertine]: https://ctan.org/pkg/libertine
 [Palatino]: https://ctan.org/pkg/newpx
-[charter]: https://ctan.org/pkg/charter
-[newtxmath]: https://ctan.org/pkg/newtx
+[charter]: https://ctan.org/pkg/XCharter
 [pt]: https://ctan.org/pkg/paratype
+[newtxmath]: https://ctan.org/pkg/newtx
+[newpxmath]: https://ctan.org/pkg/newpx
 [ssp]: https://ctan.org/pkg/sourcesanspro
+[fbb]: https://ctan.org/pkg/fbb
 
 ## narrow.sty
 
