@@ -165,7 +165,10 @@
 (define-flat-contracts
   [pat?
    symbol? ;; variable
-   lit?
+
+   ;; I can't handle literal patterns yet because it involves testing equality,
+   ;; which uses its argument iso-ly.
+   ;lit?
    (list*/c 'tuple expr?)
    (list/c 'tag symbol? expr?)]
 
@@ -239,7 +242,13 @@
   (set! tone T)
   (match* (A pat)
     [(A (? symbol? x)) (hash x `(,tone ,A))]
-    [(A (app lit-type B)) #:when B (subtype B A) #hash()]
+    ;; TODO: literal patterns test for equality, which analyses the subject
+    ;; discretely! need some condition relating tone, (subtype B A), and Iso! or
+    ;; are we just screwed? think of the inference rules.
+    #;
+    [(A (app lit-type B)) #:when B
+     TODO
+     (subtype B A) #hash()]
     [(`(* ,@As) `(tuple ,@Ps)) #:when (length=? As Ps)
      ;; TODO: nonlinear patterns
      (apply hash-union #hash() (map (curry check-pat #:tone tone) As Ps))]
