@@ -55,73 +55,75 @@
 % Baskervaldx is too heavy, baskervillef is way too light. I like
 % librebaskerville, but it doesn't have small caps :(.
 \ifdefstring{\rntz@font}{baskerville}{
+  \linespread{\@scaled{1.07}}
   %\RequirePackage[p,osf,scaled=1.0526]{Baskervaldx}
-  \RequirePackage[scaled=\@scaled{0.86315}]{librebaskerville}
-  \RequirePackage[p,osf,scaled=\@scaled{1.0526}]{biolinum}
-  \RequirePackage[scaled=\@scaled{.995}]{inconsolata}
-  \ifdefstring{\rntz@mathfont}{euler}{\@eulervm{1}}{
-    \RequirePackage[libertine,scaled=\@scaled{1.0526}]{newtxmath}
+  \RequirePackage[scaled=\@scaled{0.8717815}]{librebaskerville}
+  \RequirePackage[p,osf,scaled=\@scaled{1.063126}]{biolinum}
+  \RequirePackage[scaled=\@scaled{1.005}]{inconsolata}
+  \ifdefstring{\rntz@mathfont}{newmath}{
+    \RequirePackage[libertine,scaled=\@scaled{1.063126}]{newtxmath}
     %\RequirePackage[baskerville,scaled=1.0711]{newtxmath}
     %\RequirePackage[baskervaldx,scaled=1.0526]{newtxmath}
-  }
-  \linespread{\@scaled{1.06}}
+  }{}
 }{}
 
 \ifdefstring{\rntz@font}{charter}{
+  \linespread{\@scaled{1.06}} % 1.09395? 1.04-1.12?
   %% XCharter can be scaled. It has an option [osf] for old-style proportional
   %% figures, but lacks proportional lining figures, and so doesn't respect
   %% fontaxes' \tbfigures or \lnfigures.
-  \RequirePackage[sups,scaled=\@scaled{0.967}]{XCharter}
-  \RequirePackage[proportional,semibold,scaled=\@scaled{.955}]{sourcesanspro}
-  \RequirePackage[scaled=\@scaled{1.019}]{inconsolata}
-
+  \RequirePackage[sups,scaled=\@scaled{1.02}]{XCharter}
+  \RequirePackage[proportional,semibold,scaled=\@scaled{1.0074}]{sourcesanspro}
+  \RequirePackage[scaled=\@scaled{1.075}]{inconsolata}
+  \edef\rntz@eulerscale{1.054782}
   \ifdefstring{\rntz@mathfont}{newmath}{
-    \RequirePackage[xcharter,scaled=\@scaled{1.05}]{newtxmath}
+    \RequirePackage[xcharter,scaled=\@scaled{1.1075}]{newtxmath}
   }{}
-  \linespread{\@scaled{1.05}} % 1.02-1.05?
 }{}
 
 \ifdefstring{\rntz@font}{cochineal}{
-  \RequirePackage[p,osf,sups,scale=\@scaled{1.08}]{cochineal}
-  \RequirePackage[p,osf,scaled=\@scaled{1.065}]{biolinum}
-  \RequirePackage[scaled=\@scaled{1.015}]{inconsolata}
+  \linespread{\@scaled{1.13}}
+  \RequirePackage[p,osf,sups,scale=\@scaled{1.13}]{cochineal}
+  \RequirePackage[p,osf,scaled=\@scaled{1.12}]{biolinum}
+  \RequirePackage[scaled=\@scaled{1.0622}]{inconsolata}
+  \edef\rntz@eulerscale{1.05}
   \ifdefstring{\rntz@mathfont}{newmath} {
-    \RequirePackage[cochineal,scaled=\@scaled{1.08}]{newtxmath}
+    \RequirePackage[cochineal,scaled=\@scaled{1.13}]{newtxmath}
   }{}
-  \linespread{\@scaled{1.1}}   % 1.02-1.05? 1.08? 1.12-1.15?? agh, I don't know.
 }{}
 
 \ifdefstring{\rntz@font}{fbb}{
-  \RequirePackage[p,osf,scaled=\@scaled{1}]{fbb}
-  \RequirePackage[p,osf,scaled=\@scaled{1.02}]{biolinum}
-  \RequirePackage[scaled=\@scaled{0.965}]{inconsolata}
-  \edef\rntz@eulerscale{0.95}
+  \linespread{\@scaled{1.166}}
+  \RequirePackage[p,osf,scaled=\@scaled{1.06}]{fbb}
+  \RequirePackage[p,osf,scaled=\@scaled{1.0812}]{biolinum}
+  \RequirePackage[scaled=\@scaled{1.023}]{inconsolata}
+  \edef\rntz@eulerscale{1.007}
   \ifdefstring{\rntz@mathfont}{newmath}{
-    \RequirePackage[cochineal,scaled=\@scaled{1.03}]{newtxmath}
+    \RequirePackage[cochineal,scaled=\@scaled{1.0918}]{newtxmath}
   }{}
-  \linespread{\@scaled{1.1}}
 }{}
 
 \ifdefstring{\rntz@font}{libertine}{
+  \linespread{\@scaled{1.06}} % 1.1021?
   % libertine[osf] makes newtxmath use old-style figures in math mode :(
   % Other options: semibold.
-  \RequirePackage[p,mono=false,llscale=\@scaled{1.0526},scale=\@scaled{1.0526}]
+  \RequirePackage[p,mono=false,llscale=\@scaled{1.0842},scale=\@scaled{1.0842}]
                  {libertine}
-  \RequirePackage[scaled=\@scaled{.995}]{inconsolata}
+  \RequirePackage[scaled=\@scaled{1.02485}]{inconsolata}
+  \edef\rntz@eulerscale{1.03}
   \ifdefstring{\rntz@mathfont}{newmath}{
-    \RequirePackage[libertine,scaled=\@scaled{1.0526}]{newtxmath}
+    \RequirePackage[libertine,scaled=\@scaled{1.0842}]{newtxmath}
   }{}
-  \linespread{\@scaled{1.07}}
 }{}
 
 \ifdefstring{\rntz@font}{palatino}{
+  \linespread{\@scaled{1.08333}}
   \RequirePackage[scaled=\@scaled{1}]{newpxtext}
   \RequirePackage[scaled=\@scaled{1.067}]{biolinum}
   \RequirePackage[scaled=\@scaled{1.012}]{inconsolata}
   \ifdefstring{\rntz@mathfont}{newmath}{
     \RequirePackage[scaled=\@scaled{1}]{newpxmath}
   }{}
-  \linespread{\@scaled{1.08333}}
 
   %% HACK: newpxtext doesn't respect fontaxes' \tbfigures! :( but it _does_
   %% define, eg., \tlfstyle! hm...
@@ -131,15 +133,16 @@
 }{}
 
 \ifdefstring{\rntz@font}{pt}{
-  \RequirePackage[scaled=\@scaled{0.93}]{PTSerif}
-  \RequirePackage[scaled=\@scaled{0.93}]{PTSans}
+  \linespread{\@scaled{1.07}}
+  \RequirePackage[scaled=\@scaled{0.995}]{PTSerif}
+  \RequirePackage[scaled=\@scaled{0.995}]{PTSans}
   %% PTSans doesn't have small caps; could use biolinum or sourcesanspro instead.
   %\RequirePackage[scaled=1.135]{biolinum}
-  \RequirePackage[scaled=\@scaled{1.04}]{inconsolata}
+  \RequirePackage[scaled=\@scaled{1.1128}]{inconsolata}
+  \edef\rntz@eulerscale{1.07}
   \ifdefstring{\rntz@mathfont}{newmath}{
-    \RequirePackage[utopia,scaled=\@scaled{1.05726}]{newtxmath}
+    \RequirePackage[utopia,scaled=\@scaled{1.1313}]{newtxmath}
   }{}
-  \linespread{\@scaled{1.126}}
 }{}
 
 

@@ -115,9 +115,6 @@ monospace. The text fonts are:
 - `cochineal` for [Cochineal][]. Cochineal is an old-style font, very pleasant
    in print and tolerable on screen.
 
-- `cm` for TeX's default, Computer Modern, but I've increased the line spacing.
-  I dislike Computer Modern; I find it almost unreadable on screen.
-
 - `fbb` for the Bembo-inspired [fbb][] package. Elegant, but not very readable
   on screen.
 
@@ -139,7 +136,7 @@ You can also choose between two families of math fonts:
 - `newmath` for [newtxmath][] (or its relative [newpxmath][]), using whichever
   variant most nicely matches the text font choice.
 
-The defaults are `palatino` with `euler`.
+The defaults are `charter` with `euler`.
 
 A big thanks to [Michael Sharpe](http://math.ucsd.edu/~msharpe/), who maintains
 the newtx, newpx, XCharter, cochineal, and fbb packages.
