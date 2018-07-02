@@ -27,6 +27,7 @@
 
 %% ---- Basic layout ----
 \LoadClass{extarticle}
+\RequirePackage{rntzfootnotes}
 
 %% ---- Abstracts ----
 \renewenvironment{abstract}
