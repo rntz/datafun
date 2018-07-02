@@ -1,6 +1,7 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{rntzfont}[2018/05/10]
-\RequirePackage{etoolbox}       %for \ifdefstring
+\ProvidesPackage{rntzfont}[2018/07/02]
+\RequirePackage{etoolbox}       % for \ifdefstring
+\RequirePackage{xfp}            % multiplying scaling factors with \fpeval
 
 %% serif font options
 \DeclareOption{baskerville}{\def\rntz@font{baskerville}}
@@ -15,7 +16,7 @@
 \DeclareOption{newmath}{\def\rntz@mathfont{newmath}}
 \DeclareOption{euler}{\def\rntz@mathfont{euler}}
 
-\ExecuteOptions{palatino,euler} % default options
+\ExecuteOptions{charter,euler} % default options
 \ProcessOptions\relax
 
 %% inconsolata[varqu] - Uses straight double & single quotes.
@@ -32,8 +33,9 @@
 
 %% TO CONSIDER:
 %\PassOptionsToPackage{euler-digits}{eulervm}
-%\usepackage[cal=boondoxo]{mathalfa} % adjusts mathcal
 %\usepackage[full]{textcomp} % what does this do?
+
+%% NB \zeu@Scale adjusts scale of euler.
 
 % Baskervaldx is too heavy, baskervillef is way too light. I like
 % librebaskerville, but it doesn't have small caps :(.
@@ -138,3 +140,9 @@
   }
   \linespread{1.126}
 }{}
+
+
+%% Adjust calendar alphabet and make sure \mathbold is defined.
+% Other options: cal={cm,pxtx,boondoxo}.
+\usepackage[cal=pxtx]{mathalfa}
+\ifdefined\mathbold\else\newcommand\mathbold{\boldsymbol}\fi
