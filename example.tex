@@ -1,11 +1,16 @@
 % ---- The rntz class ----
 % Based on extarticle, and supports most of its options. Notable differences:
 %
-% 1. Section & sub-section numbers go into the left margin.
+% 1. Section & sub-section numbers go into the left margin. Option `nomarginums'
+%    disables this. Option `ribbons' puts these numbers on purple-colored
+%    ribbons extending from page left.
+%
 % 2. Sections & sub-sections headings are smaller.
-% 3. Sub-sub-sections are un-numbered; I use them sparingly if at all.
+%
+% 3. Sub-sub-sections are unnumbered.
+%
 % 4. Redefines \maketitle and the `abstract' environment.
-
+%
 % It also has a somewhat random grab-bag of other features I happen to use:
 %
 % 5. Requires and configures hyperref, url, and cleveref.
@@ -18,21 +23,36 @@
 % ACM{Blue,Yellow,Orange,Red,LightBlue,DarkBlue,Green,Purple}.
 \documentclass{rntz}
 
-% ---- rntzgeometry ----
+%% %% Alternatively, the following suffices for this document, if you just wish
+%% %% to see the effect of the other packages in this repo:
+%% \documentclass{article}
+%% \usepackage{amsmath,amsthm}
+%% \usepackage{hyperref,cleveref}
+%% \theoremstyle{definition}
+%% \newtheorem{theorem}{Theorem}
+%% \newtheorem{conjecture}[theorem]{Conjecture}
+%% \newtheorem{lemma}[theorem]{Lemma}
+%% \theoremstyle{definition}
+%% \newtheorem{definition}[theorem]{Definition}
+%% \theoremstyle{remark}
+%% \newtheorem*{corollary}{Corollary}
+%% \theoremstyle{plain}            %back to default
+
+% ---- rntzgeometry and narrow ----
 %
-% rntzgeometry sets the page geometry to have "reasonable" margins. It uses
-% narrow.sty to produce a single column of text; the figure* and fullwidth
-% environments expand to a larger width.
+% \usepackage{rntzgeometry} chooses a paper size and sets up reasonable margins
+% for it. Options: a5, b5, a4, and letter.
 %
-% a5, b5, a4, letter
-%   Paper size. Default is b5.
+% \usepackage{narrow} produces a single narrow column of text. The figure* and
+% fullwidth environments expand to a larger width. Options:
 %
 % width=LEN
 %   Text width. Default is 345pt.
-%
 % fullwidth=LEN
-%   Width for figure* and fullwidth environments. Default varies by paper size.
-\usepackage{rntzgeometry}
+%   Width for figure* and fullwidth environments. Default is \textwidth, i.e.
+%   whatever the text width was before you used narrow.sty.
+\usepackage[b5]{rntzgeometry}
+\usepackage{narrow}
 
 % ---- rntzfont ----
 %
@@ -55,6 +75,7 @@
 \author{Lore M. Ipsum}
 \date{\today}
 
+
 \begin{document}
 
 \maketitle
@@ -102,9 +123,8 @@ tincidunt tristique, libero.\footnote{Latin latin latin, latin latin latin.
   \( (x+y)^4 = x^4 + 4x^3y + 6x^2y^2 + 4xy^3 + y^4 \).
 \end{corollary}
 
-Vivamus viverra fermentum felis. Donec nonummy pellentesque ante.
-Phasellus adipiscing semper elit. Proin fermentum \cref{thm:binomial} massa ac
-quam:
+Vivamus viverra fermentum felis. Donec nonummy pellentesque ante. Pha\-sellus
+adipiscing semper elit. Proin fermentum \cref{thm:binomial} massa ac quam:
 
 \[ \sum_{i=1}^n n = \frac{n(n+1)}{2} \]
 

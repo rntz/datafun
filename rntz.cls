@@ -3,6 +3,7 @@
 
 \RequirePackage{etoolbox}       % toggles; fixing titlesec.
 \newtoggle{ribbons}             % colored section number ribbons?
+\newtoggle{marginums}           % header numbers in left margin?
 
 %% TODO: consider factoring out some of this into a .sty file:
 %% DONE - narrowing! in narrow.sty.
@@ -16,13 +17,15 @@
 %% ---- Options ----
 \DeclareOption{ribbons}{\toggletrue{ribbons}}
 \DeclareOption{noribbons}{\togglefalse{ribbons}}
+\DeclareOption{marginums}{\toggletrue{marginums}}
+\DeclareOption{nomarginums}{\togglefalse{marginums}}
 
 \DeclareOption{twocolumn}{\ClassWarning{rntz}{Two-column mode is not supported.}}
 
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
 
 % Defaults
-\ExecuteOptions{}
+\ExecuteOptions{marginums,noribbons}
 \ProcessOptions\relax
 
 %% ---- Basic layout ----
@@ -121,8 +124,12 @@
 
 \newcommand{\hnopost}{\hspace*{0mm}}
 \newcommand{\hnopre}{\hspace*{2.5mm}}
-\newcommand{\makehno}[3]{%
-  \llap{\colorbox{#1}{\parbox[t]{100in}{\hfill{\color{#2}#3\hnopost}}}\hnopre}}
+\iftoggle{marginums}{
+  \newcommand{\makehno}[3]{%
+    \llap{\colorbox{#1}{\parbox[t]{100in}{\hfill{\color{#2}#3\hnopost}}}\hnopre}}
+}{
+  \newcommand{\makehno}[3]{#3\hspace{1em}}
+}
 
 \newcommand{\hno}[1]{\makehno{white}{black}{#1}}
 \iftoggle{ribbons}
