@@ -118,7 +118,8 @@
 %%               {1em}
 
 %% Title formatting.
-\newcommand{\header}{\rmfamily\bfseries\lnfigures\tbfigures}
+\newcommand{\headernum}{\lnfigures\tbfigures}
+\newcommand{\header}{\rmfamily\bfseries}
 %% \renewcommand{\header}{\rmfamily\itshape}  % or, italics
 %% \renewcommand{\header}{\sffamily\bfseries} % or, sans-serif
 
@@ -126,9 +127,9 @@
 \newcommand{\hnopre}{\hspace*{2.5mm}}
 \iftoggle{marginums}{
   \newcommand{\makehno}[3]{%
-    \llap{\colorbox{#1}{\parbox[t]{100in}{\hfill{\color{#2}#3\hnopost}}}\hnopre}}
+    \llap{\colorbox{#1}{\parbox[t]{100in}{\hfill{\color{#2}\headernum#3\hnopost}}}\hnopre}}
 }{
-  \newcommand{\makehno}[3]{#3\hspace{1em}}
+  \newcommand{\makehno}[3]{\headernum#3\hspace{1em}}
 }
 
 \newcommand{\hno}[1]{\makehno{white}{black}{#1}}
