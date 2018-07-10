@@ -2,7 +2,6 @@
 module MiniToneInference where
 
 import Prelude hiding ((&&))
-
 import Control.Applicative
 import Control.Monad
 import Data.Maybe
@@ -13,8 +12,6 @@ import Data.Set (Set, (\\), union, unions)
 import qualified Data.Bool as Bool
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
-
-todo = error "TODO"
 
 -- Laws: (<:) is reflexive and transitive.
 class Preorder a where (<:) :: a -> a -> Bool
@@ -57,11 +54,11 @@ data Tone = Id | Op | Iso | Path deriving (Show, Eq, Ord)
 -- B and x ≤ y : A implies x ≤ y : B. Then tones form a lattice as follows: let
 -- (t <= u) iff (t A <: u A) for all preorders A. The lattice is diamond-shaped:
 --
---          Path
+--          Path                greatest: ∀A. (A <: Path)
 --         /   \
 --        Id   Op
 --         \   /
---          Iso
+--          Iso                 least: ∀A. (Iso <: A)
 --
 instance Preorder Tone where
   Iso <: _ = True
@@ -110,8 +107,20 @@ instance Monoid Tone where
 
 ---------- Types ----------
 infixr 4 :->
-data Type = Mode Tone Type      -- invariant: in (Mode t a), t /= Path
-          | Bool | Prod [Type] | Sum (Map String Type) | (:->) Type Type
+data Type
+  = Bool                  -- booleans
+  | Prod [Type]           -- Tuples or product types
+  | Sum (Map String Type) -- Sum types; values tagged with a constructor
+  | (:->) Type Type       -- Functions
+
+  -- Finally, a type can be wrapped with a tone. This doesn't change the type's
+  -- values, but it alters how they're ordered for purposes of checking
+  -- monotonicity. Datafun's type system ensures all functions are monotone, so
+  -- to use something "non-monotonically", we have to wrap it with a tone.
+  | Mode Tone Type
+  -- invariant: in (Mode t a), t /= Path.
+  -- This is because I don't know how to handle the (t = Path) case yet.
+  -- I'm not sure there is a "good" way to do it.
 
 instance Show Type where
   showsPrec _ Bool = showString "bool"
@@ -154,8 +163,8 @@ stripTone t a = (t,a)
 detune :: Type -> (Tone, Type)
 detune a = (leftAdjoint t, b) where (t,b) = stripTone Id a
 
--- (subtype a b == Just t) implies (Mode t a) is a subtype of b, and t is the
--- greatest tone for which this is true.
+-- (subtype a b == Just t) implies (t a <: b), and t is the greatest tone for
+-- which this is true.
 subtype :: (Monad m, Alternative m) => Type -> Type -> m Tone
 -- Mode introduction/elimination.
 subtype a (Mode t b) = (t <>) <$> subtype a b
@@ -183,22 +192,34 @@ instance Preorder Type where a <: b = isJust (subtype a b)
 
 
 ---------- Expressions and patterns ----------
-type Var = String
-type Tag = String
+type Var = String               -- a variable name
+type Tag = String               -- a "tag", or constructor of a sum type
+
+-- Patterns can be variables, tuples, or constructors.
 data Pat = PVar Var | PTuple [Pat] | PTag Tag Pat deriving Show
--- Expressions whose types can be inferred.
-data Expr = Var Var | LitBool Bool | The Type Term | App Expr Term
-  deriving Show
--- Terms, whose types can be checked.
-data Term = Expr Expr | If Term Term Term | When Term Term
-          | Lambda Var Term | Tag Tag Term | Tuple [Term]
-          | Let Var Expr Term | Case Expr [(Pat,Term)]
+
+-- Expressions whose types can be inferred:
+data Expr = Var Var             -- variables,
+          | LitBool Bool        -- literals,
+          | The Type Term       -- any type-annotated term,
+          | App Expr Term       -- and function applications.
   deriving Show
 
--- instance Show Pat where
---   showsPrec _ (PVar x) = showString x
---   showsPrec d (PTuple ps) = error "todo"
---   showsPrec d (PTag n p) = error "todo"
+-- Terms, whose types can be checked:
+data Term = Expr Expr              -- any expression whose type can be inferred,
+          | If Term Term Term      -- conditionals,
+          | When Term Term         -- monotone conditionals,
+          | Lambda Var Term        -- functions,
+          | Tag Tag Term           -- tagged values of a sum type,
+          | Tuple [Term]           -- tuples,
+          | Let Var Expr Term      -- let-bindings,
+          | Case Expr [(Pat,Term)] -- and case-expressions.
+  deriving Show
+
+-- We could probably expand the set of inferrable expressions. But for the sake
+-- of clarity, I don't, to avoid redundancy. For example, "let x = e1 in e2" can
+-- infer if "e2" can infer; but then we need two cases for typechecking let - an
+-- inferring case, and a checking case.
 
 
 ---------- Type checking ----------
@@ -216,7 +237,20 @@ t <@ ts = fmap (t <>) ts
 instance MeetSemilattice Tones where top = M.empty; (&&) = M.unionWith (&&)
 instance Preorder Tones where (<:) = error "Left as exercise for the reader."
 
--- TODO: probably this should be in a monad.
+-- (checkPat t a p == cx) means pattern `p` can match a value of type `a` at
+-- tone `t`, producing variables with types in `cx`.
+checkPat :: Tone -> Type -> Pat -> Types
+checkPat t (Mode u b) p = checkPat (t <> u) b p
+checkPat t a (PVar x) = M.singleton x (Mode t a)
+checkPat t (Prod as) (PTuple ps)
+  | length as == length ps = M.unionsWith uhoh $ zipWith (checkPat t) as ps
+  where uhoh _ _ = error "cannot use same variable twice in pattern"
+checkPat t (Sum arms) (PTag name p) = checkPat t (arms ! name) p
+checkPat t _ PTuple{} = error "tuple must have product type"
+checkPat t _ PTag{} = error "tagged pattern must have sum type"
+
+-- (infer cx e == (a,ts)) means `e` infers type `a` using variables of types in
+-- `cx` at tones given in `ts`.
 infer :: Types -> Expr -> (Type, Tones)
 infer cx (Var x) = (cx ! x, M.singleton x Id)
 infer cx (LitBool b) = (Bool, M.empty)
@@ -225,6 +259,8 @@ infer cx (App e m) = let (tp, ts) = infer cx e
                          (t, a :-> b) = detune tp
                      in (b, (t <@ ts) && check cx a m)
 
+-- (check cx a m == ts) means `e` checks at type `a` using variables of types
+-- in `cx` at tones given in `ts`.
 check :: Types -> Type -> Term -> Tones
 -- first, deal with modes on the type.
 check cx (Mode t a) m = t <@ check cx a m
@@ -243,19 +279,24 @@ check cx (a :-> b) (Lambda x m) =
 check cx (Sum as) (Tag name m) = check cx (as ! name) m
 check cx (Prod as) (Tuple ms)
   | length as == length ms = meet $ zipWith (check cx) as ms
-check cx a (Let x e m) = let (a,t) = infer cx e
-                         in todo
-check cx a (Case e arms) = todo
+check cx expected (Let x e m) =
+  let (a, eTones) = infer cx e
+      mTones = check (M.insert x a cx) expected m
+      xTone = M.findWithDefault Path x mTones
+  in M.delete x mTones && (xTone <@ eTones)
+check cx expected (Case e arms) =
+  let (subjType, subjTones) = infer cx e in
+  meet $ flip map arms $ \(p, m) ->
+    let patCx = checkPat Id subjType p
+        -- The monoid instance on Map is a left-biased union.
+        armTones = check (patCx <> cx) expected m
+        -- Split tones: are they on variables from subject, or external?
+        (patTones, cxTones) =
+          M.partitionWithKey (\x _ -> M.member x patCx) armTones
+        -- The tone at which we use the subject.
+        useTone = meet $ map snd $ M.toList patTones
+    in cxTones && (useTone <@ subjTones)
 -- Failure cases
 check cx _ Lambda{} = error "lambda must have function type"
 check cx _ Tag{} = error "tagged expression must have sum type"
 check cx _ Tuple{} = error "tuple must have product type"
-
-checkPat :: Tone -> Type -> Pat -> Types
-checkPat t a (PVar x) = M.singleton x (Mode t a)
-checkPat t (Prod as) (PTuple ps)
-  | length as == length ps = M.unionsWith uhoh $ zipWith (checkPat t) as ps
-  where uhoh _ _ = error "cannot use same variable twice in pattern"
-checkPat t (Sum arms) (PTag name p) = checkPat t (arms ! name) p
-checkPat t _ PTuple{} = error "tuple must have product type"
-checkPat t _ PTag{} = error "tagged pattern must have sum type"
