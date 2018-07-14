@@ -16,11 +16,10 @@
 \renewcommand\footnotetextcopyrightpermission[1]{}
 \pagestyle{plain}
 
-%\usepackage[scale=0.8]{librebaskerville}\linespread{.97}
-\usepackage[scale=0.82]{librebaskerville}%\linespread{.995}
-
-%\usepackage[scale=1.042]{cochineal}
-%\usepackage[scale=0.94]{XCharter}\usepackage{eulervm}\edef\zeu@Scale{.972}
+\usepackage[scale=0.94]{XCharter}
+%\usepackage[scale=0.81]{librebaskerville}%\linespread{.97}
+%\usepackage[scale=0.82]{librebaskerville}\linespread{.995}
+%\usepackage{eulervm}\makeatletter\edef\zeu@Scale{.975}\makeatother
 
 
 
@@ -62,6 +61,8 @@
 %% ---- Commands ----
 \newcommand\rulestyle{\sffamily}
 \newcommand\rulename[1]{{\rulestyle#1}}
+\newcommand{\catname}[1]{\textbf{#1}}
+\newcommand{\Preorder}{\catname{Preorder}}
 
 \newcommand\R{\mathbb{R}}
 \newcommand\x\times
@@ -87,9 +88,15 @@
 \newcommand{\ciso}{{\isocolor\iso}}
 \newcommand{\cpath}{{\pathcolor\path}}
 
-\newcommand\boxof{\kw{box}~}
 \newcommand\h[3]{#1 : \left[#2\right] #3}
 \newcommand\subtype[3]{\left[#1\right] #2 <: #3}
+
+\newcommand\kw[1]{\text{#1}}
+\newcommand\boxof{\kw{box}~}
+\newcommand\elet[1]{\kw{let}~#1~\kw{in}~}
+\newcommand\fn\lambda
+\newcommand\fnof[1]{\lambda{#1}\binder}
+\newcommand\binder{.~}
 
 \newcommand\checksto{~\mathbf{checks}~}
 \newcommand\infersto{~\mathbf{infers}~}
@@ -169,9 +176,13 @@ Well, monotonicity
 
 \todo{
 \begin{itemize}
-\item Monotonicity for fixed points in Datafun
-\item Monotonicity for eventual consistency
-\item LVars????
+\item Monotonicity for fixed points in Datafun --- can talk about all Datafun
+  example programs (eg.\ parsing)
+\item Static analyses as monotone maps on lattices
+\item Monotonicity for eventual consistency, CALM
+\item LVars???? automatically telling whether types are a lattice, getting a join which is correct (cite blog post where she constructs a ``lattice'' with an incorrect join)
+  %% http://composition.al/blog/2013/12/24/the-lvar-that-wasnt/
+  %% http://composition.al/blog/2014/05/28/the-lvar-that-was-after-all/
 \end{itemize}
 }
 
@@ -199,13 +210,23 @@ and monotone; it cannot type a function $A \x B \to C$ monotone in $A$ but not
 $B$. I aim to remove this restriction. Besides monotonicity, understanding
 Datafun's features is not necessary for the present work.
 
-I use bidirectional type inference \cite{bidirectional} to check programs' types. This requires some type annotations, but is simpler to describe and implement than full Damas-Milner inference. \todo{Explain how bidirectional inference works by splitting things into inferring \& checking forms, briefly.} Extending the scheme presented here to full type inference is left to future work.
+I use bidirectional type checking \cite{bidirectional}, which requires some type
+annotations, but is simpler to describe and implement than full Damas-Milner
+inference. Bidirectional typing works by segregating terms into \emph{checking}
+and \emph{inferring} forms. Checking forms can have their types checked;
+inferring forms can have their types inferred. Extending the scheme presented
+here to full type inference is left to future work.
 
 %% Problems with Datafun as published:
 %% - can't have f : A * B -> C monotone in A but not B
 %% - doesn't handle antitone functions
 
-\todo{TODO: Pfenning-Davies, Monotonicity Types, variance analysis?, that static analysis someone's pointed out}
+%% My approach uses \emph{modal types}; in particular, I take inspiration from
+%% \citet{jrml}. However, the natural way of giving proof terms to their system has
+%% explicit syntax for introducing and eliminating modal types. I aim to make
+%% these \emph{implicit} using features of the particular modes I'm working with and their semantic properties.
+
+\todo{TODO: Monotonicity Types, variance analysis?, that static analysis someone's pointed out}
 
 
 \section{Approach \& uniqueness}
@@ -225,29 +246,52 @@ I use bidirectional type inference \cite{bidirectional} to check programs' types
 %% novel: higher-order! unlike Monotonicity Types!
 %%
 %% no intro/elim annotations! unlike Pfenning-Davies, certainly, or basically any modal approach?
-%%
-%% but how does it differ from variance typing?
+
+%% but how does it differ from variance typing? well, variance typing in e.g.
+%% Agda at least is mostly not exposed to the user. in OCaml it is but OCaml
+%% doesn't have a full type-level programming language.
+
+I interpret types as preorders (sets equipped with reflexive, transitive
+relations) and functions as monotone maps. To handle non-monotone function
+flavors, I use four modes (unary type operators) that \emph{alter the ordering
+  on a type}: \id{}, \op{}, \iso{}, and \path{}.
 
 \begin{center}
-  \begin{tabular}{clc@{\hskip 0.25em}c@{\hskip 0.25em}ll}
-    {\textit{Tone}}
-    & {\textit{Name}}
+  \begin{tabular}{cc@{\hskip 0.25em}c@{\hskip 0.25em}ll}
+    {\textit{Mode}}
     & \multicolumn{3}{c}{\textit{Transformation on $A$}}
     \\\midrule
-    \cid & monotone
-    & $a \le b : A$ &$\iff$& $a \le b : \idof A$
+    \cid & $a \le b : A$ &$\iff$& $a \le b : \idof A$
     \\
-    \cop & antitone
-    & $a \ge b : A$ &$\iff$& $a \le b : \opof A$
+    \cop & $a \ge b : A$ &$\iff$& $a \le b : \opof A$
     \\
-    \ciso & invariant
+    \ciso
     & $a \le b \wedge b \le a : A$ &$\iff$& $a \le b : \isof A$
     \\
-    \cpath{} & bivariant
+    \cpath{}
     & $a \le b \vee b \le a : A$ &$\ \implies$& $a \le b : \pathof A$
-    %% & {\small\itshape see \ref{sec:defining-path}}
   \end{tabular}
 \end{center}
+
+A mode captures a function flavor: \id{} for monotone, \op{} for antitone,
+\iso{} for invariant, and \path{} for bivariant. For example, $f : A \to B$ is
+antitone iff $f : \opof{A} \to B$ is monotone. Moreover, we can mix-and-match:
+$A \x \isof{B} \to C$ captures functions monotone in $A$, but invariant in $B$.
+
+
+$\iso$ and $\path$ are necessity and possibility modalities in the sense of
+\citet{jrml}. Invoking Curry-Howard, we may endow their rules for $\iso$ and
+$\path$ with proof terms. However, I aim to \emph{avoid} explicit term syntax
+for modal types. For example, given $(-) : \R \x \isof{\R} \to \R$ and $\log :
+\isof{\R} \to \R$, I'd like to write $(\fnof{x} x - \log x) : \isof\R \to \R$.
+But with their rules, it would look more like $(\fnof{x} \elet{\boxof u = x} u -
+\boxof(\log x))$.
+
+How to avoid introduction and elimination forms? With two simple tricks:
+\begin{enumerate}
+\item Infer variable usage modes bottom-up.
+\item Use modal subtyping to silently introduce and remove modes.
+\end{enumerate}
 
 
 \subsection{Inferring usage bottom-up}
@@ -260,9 +304,6 @@ I use bidirectional type inference \cite{bidirectional} to check programs' types
   \checks{x}{T\wedge U}{A}{(e_1,e_2)}{B_1 \x B_2}
 }
 \]
-
-\newcommand{\kw}[1]{\textrm{#1}}
-\newcommand{\elet}[1]{\kw{let}~#1~\kw{in}~}
 
 \todo{TODO explain let-binding rule}
 \[\infer[\rulestyle let]{
@@ -321,7 +362,8 @@ I use bidirectional type inference \cite{bidirectional} to check programs' types
 % - handles antitonicity for e.g. parity-stratified negation
 % - no need to annotate case-expressions
 
-% Suggests a novel approach to modal type systems that could, in some circumstances, result in fewer annotations and more ``natural'' code.
+% Suggests a novel approach to modal type systems that could, in some
+% circumstances, result in fewer annotations and more ``natural'' code.
 
 
 %% Bibliography
