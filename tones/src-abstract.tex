@@ -56,10 +56,11 @@
 \usepackage{tikz,tikz-cd}
 \usepackage{multirow}
 \usepackage{booktabs}           % \midrule
+\usepackage{nccmath}            % fix spacing issues
 
 
 %% ---- Commands ----
-\newcommand\rulestyle{\sffamily}
+\newcommand\rulestyle{\sffamily\scshape}
 \newcommand\rulename[1]{{\rulestyle#1}}
 \newcommand{\catname}[1]{\textbf{#1}}
 \newcommand{\Preorder}{\catname{Preorder}}
@@ -67,6 +68,9 @@
 \newcommand\R{\mathbb{R}}
 \newcommand\x\times
 \newcommand\todo[1]{{\color{Purple}#1}}
+\renewcommand\G\Gamma
+\newcommand\D\Delta
+\newcommand\mto{\overset{+}{\to}}
 
 \newcommand{\opcolor}{\color{ForestGreen}}
 \newcommand{\isocolor}{\color{NavyBlue}}
@@ -91,7 +95,7 @@
 \newcommand\h[3]{#1 : \left[#2\right] #3}
 \newcommand\subtype[3]{\left[#1\right] #2 <: #3}
 
-\newcommand\kw[1]{\text{#1}}
+\newcommand\kw[1]{\textrm{#1}}
 \newcommand\boxof{\kw{box}~}
 \newcommand\elet[1]{\kw{let}~#1~\kw{in}~}
 \newcommand\fn\lambda
@@ -114,9 +118,10 @@
 %% - Category (graduate or undergraduate)
 %% - Research title
 \title{Type inference for monotonicity}
-\author{Michael Arntzenius, a PhD student ...}
+\author{Michael Arntzenius, a graduate student ...}
 \email{daekharel@gmail.com}
 \affiliation{University of Birmingham}
+\authornote{ACM Student \# TODO}
 
 % arg, should this be Neel or Dan? Neel, probably.
 \author{... advised by Neelakantan R. Krishnaswami}
@@ -170,45 +175,44 @@ It handles several flavors (or \emph{modes}) of function: ordinary (or
 %
 And it requires no changes to terms besides type annotations.
 
-What use might a type system guaranteeing monotonicity of certain functions be?
+%What use might a type system guaranteeing monotonicity of certain functions be?
 %
-Well, monotonicity
-
-\todo{
-\begin{itemize}
-\item Monotonicity for fixed points in Datafun --- can talk about all Datafun
-  example programs (eg.\ parsing)
-\item Static analyses as monotone maps on lattices
-\item Monotonicity for eventual consistency, CALM
-\item LVars???? automatically telling whether types are a lattice, getting a join which is correct (cite blog post where she constructs a ``lattice'' with an incorrect join)
-  %% http://composition.al/blog/2013/12/24/the-lvar-that-wasnt/
-  %% http://composition.al/blog/2014/05/28/the-lvar-that-was-after-all/
-\end{itemize}
-}
-
-%{\color{MidnightBlue}\lipsum[4]}
+Monotonicity crops up in a variety of interesting places. In abstract
+interpretation, static analyses are phrased as monotone maps on lattices. In
+Datafun~\cite{datafun}, a pure and total functional language generalizing the
+venerable deductive database language Datalog, monotonicity is needed to ensure
+that recursive queries terminate. Monotonicity also turns out to be relevant to
+ensuring eventual consistency in distributed systems \citep{bloom}, and
+determinism in concurrent systems \cite{lvars}. In all these cases, the need to
+ensure monotonicity by one means or another occurs. Spotting a nail, I offer my
+favorite hammer: perhaps type systems have something to offer?
 
 
 \section{Background \& related work}
 
-\todo{
-Describe the specialized (but pertinent) background necessary to appreciate
-the work in the context of ICFP areas of interest. Include references to the
-literature where appropriate, and briefly explain where your work departs
-from that done by others.
-}
+%% \todo{
+%% Describe the specialized (but pertinent) background necessary to appreciate
+%% the work in the context of ICFP areas of interest. Include references to the
+%% literature where appropriate, and briefly explain where your work departs
+%% from that done by others.
+%% }
 
-\newcommand\mto{\overset{+}{\to}}
+%% I extend prior work on Datafun~\citep{datafun}, a pure, total functional
+%% language inspired by the deductive database language Datalog~\citep{datalog}.
+%% %
+%% Like Datalog, Datafun allows recursive queries, computed by iteration to a fixed point. To ensure termination, the iterated function must be monotone.
+%% %
 
-I extend prior work on Datafun~\citep{datafun}, a pure, total functional
-language inspired by the deductive database language Datalog~\citep{datalog}.
-%
-Like Datalog, Datafun allows recursive queries, computed by iteration to a fixed point. To ensure termination, the iterated function must be monotone.
-%
-Datafun's original type system has \emph{two separate} function types, ordinary
-and monotone; it cannot type a function $A \x B \to C$ monotone in $A$ but not
-$B$. I aim to remove this restriction. Besides monotonicity, understanding
-Datafun's features is not necessary for the present work.
+I extend prior work on Datafun~\cite{datafun}. Datafun's original type system
+has \emph{two separate} function types, ordinary and monotone; it cannot type a
+function $A \x B \to C$ monotone in $A$ but not $B$. I aim to remove this
+restriction. Besides monotonicity, understanding Datafun's features is not
+necessary for the present work.
+
+Clancy and Miller's \emph{Monotonicity Types} \citep{monotonicity-types} also
+checks various flavors of monotonicity of certain functions, called ``sfuns'',
+but they do not permit nesting sfuns inside other sfuns. I impose no such
+restriction.
 
 I use bidirectional type checking \cite{bidirectional}, which requires some type
 annotations, but is simpler to describe and implement than full Damas-Milner
@@ -217,102 +221,90 @@ and \emph{inferring} forms. Checking forms can have their types checked;
 inferring forms can have their types inferred. Extending the scheme presented
 here to full type inference is left to future work.
 
-%% Problems with Datafun as published:
-%% - can't have f : A * B -> C monotone in A but not B
-%% - doesn't handle antitone functions
-
-%% My approach uses \emph{modal types}; in particular, I take inspiration from
-%% \citet{jrml}. However, the natural way of giving proof terms to their system has
-%% explicit syntax for introducing and eliminating modal types. I aim to make
-%% these \emph{implicit} using features of the particular modes I'm working with and their semantic properties.
-
-\todo{TODO: Monotonicity Types, variance analysis?, that static analysis someone's pointed out}
+%% \todo{TODO: Monotonicity Types , variance analysis?, that static analysis someone's pointed out}
 
 
 \section{Approach \& uniqueness}
-\todo{Describe your approach in addressing the problem and clear\-ly state how
-  your approach is novel.}
-
-%% - interpret everything in Preorder
-%%
-%% - infer how variables are used, entirely bottom-up (novel!)
-%%
-%% - use modal subtyping to handle mismatches between inferred & expected types, and to handle function application (novel!)
-%%
-%% - use distribution of modes to handle pattern-matching (novel?)
-
-%% novel: modes for monotonicity! (not special kinds of functions, as in Datafun & Monotonicity Types)
-%%
-%% novel: higher-order! unlike Monotonicity Types!
-%%
-%% no intro/elim annotations! unlike Pfenning-Davies, certainly, or basically any modal approach?
-
-%% but how does it differ from variance typing? well, variance typing in e.g.
-%% Agda at least is mostly not exposed to the user. in OCaml it is but OCaml
-%% doesn't have a full type-level programming language.
 
 I interpret types as preorders (sets equipped with reflexive, transitive
-relations) and functions as monotone maps. To handle non-monotone function
-flavors, I use four modes (unary type operators) that \emph{alter the ordering
-  on a type}: \id{}, \op{}, \iso{}, and \path{}.
+relations) and terms and functions as monotone maps. To handle non-monotone
+function flavors, I use four modes (unary type operators) that alter types'
+orderings (but not their elements). These are \id{}, \op{}, \iso{}, and \path{},
+defined by:
 
-\begin{center}
-  \begin{tabular}{cc@{\hskip 0.25em}c@{\hskip 0.25em}ll}
-    {\textit{Mode}}
-    & \multicolumn{3}{c}{\textit{Transformation on $A$}}
-    \\\midrule
-    \cid & $a \le b : A$ &$\iff$& $a \le b : \idof A$
-    \\
-    \cop & $a \ge b : A$ &$\iff$& $a \le b : \opof A$
-    \\
-    \ciso
-    & $a \le b \wedge b \le a : A$ &$\iff$& $a \le b : \isof A$
-    \\
-    \cpath{}
-    & $a \le b \vee b \le a : A$ &$\ \implies$& $a \le b : \pathof A$
-  \end{tabular}
-\end{center}
+\[\setlength{\arraycolsep}{.25em}\begin{array}{lll}
+  a \le b : \idof A &\iff& a \le b : A\\
+  a \le b : \opof A &\iff& a \ge b : A\\
+  a \le b : \isof A &\iff& a \le b \wedge a \ge b : A\\
+  a \le b : \pathof A &\impliedby& a \le b \vee b \le a : A
+\end{array}\]
 
-A mode captures a function flavor: \id{} for monotone, \op{} for antitone,
+Each mode captures a function flavor: \id{} for monotone, \op{} for antitone,
 \iso{} for invariant, and \path{} for bivariant. For example, $f : A \to B$ is
 antitone iff $f : \opof{A} \to B$ is monotone. Moreover, we can mix-and-match:
-$A \x \isof{B} \to C$ captures functions monotone in $A$, but invariant in $B$.
-
+$A \x \isof{B} \to C$ denotes functions monotone in $A$, but invariant in $B$.
 
 $\iso$ and $\path$ are necessity and possibility modalities in the sense of
 \citet{jrml}. Invoking Curry-Howard, we may endow their rules for $\iso$ and
-$\path$ with proof terms. However, I aim to \emph{avoid} explicit term syntax
-for modal types. For example, given $(-) : \R \x \isof{\R} \to \R$ and $\log :
-\isof{\R} \to \R$, I'd like to write $(\fnof{x} x - \log x) : \isof\R \to \R$.
-But with their rules, it would look more like $(\fnof{x} \elet{\boxof u = x} u -
-\boxof(\log x))$.
-
-How to avoid introduction and elimination forms? With two simple tricks:
+$\path$ with proof terms. But I want to \emph{avoid} explicit term syntax for
+modal types.
+%
+For example, given $(-) : \R \x \isof{\R} \to \R$ and $\log : \isof{\R} \to \R$,
+I'd like to write $(\fnof{x} x - \log x) : \isof\R \to \R$. With their rules, it
+would look more like $(\fnof{x} \elet{\boxof u = x} u - \boxof(\log x))$.
+%
+I avoid this bureaucracy with two simple tricks:
 \begin{enumerate}
 \item Infer variable usage modes bottom-up.
-\item Use modal subtyping to silently introduce and remove modes.
+\item Use \emph{modal subtyping} to silently convert to and from modal types.
 \end{enumerate}
 
+In the remainder of this section, I sketch how these tricks apply to a tiny
+fragment (\cref{fig:rules,fig:mode-ops}) of the type system I have constructed.
+
 
-\subsection{Inferring usage bottom-up}
+\subsection{Inferring variable usage modes}
 
-\todo{TODO explain pair rule}
-\[\infer[\rulestyle pair]{
-  \checks{x}{T}{A}{e_1}{B_1} \\
-  \checks{x}{U}{A}{e_2}{B_2}
-}{
-  \checks{x}{T\wedge U}{A}{(e_1,e_2)}{B_1 \x B_2}
-}
-\]
+\begin{figure}
+  \begin{mathpar}
+    %\setlength{\arraycolsep}{.3em}
+    %% \begin{array}{rc@{\hskip .67em}c@{\hskip .67em}l}
+    %%   \text{modes} & T,U &\dblcolon=& \id ~|~ \op ~|~ \iso ~|~ \path\\
+    %%   \text{types} & A,B &\dblcolon=& A \x B ~|~ TA ~|~ ...\\
+    %%   \text{expressions} & e &\dblcolon=& (e,e) ~|~ \elet{x = e} e ~|~ ...
+    %% \end{array}
+    %%
+    \infer[\rulestyle pair]{
+      \checks{x}{T}{A}{e_1}{B_1} \\
+      \checks{x}{U}{A}{e_2}{B_2}
+    }{
+      \checks{x}{T\wedge U}{A}{(e_1,e_2)}{B_1 \x B_2}
+    }
 
-\todo{TODO explain let-binding rule}
-\[\infer[\rulestyle let]{
-  \infers{x}{T}{A}{e_1}{B} \\
-  \checks{y}{U}{B}{e_2}{C}
-}{
-  \checks{x}{UT}{A}{\elet{y = e_1} e_2}{C}
-}
-\]
+    \infer[\rulestyle let]{
+      \infers{x}{T}{A}{e_1}{B} \\
+      \checks{y}{U}{B}{e_2}{C}
+    }{
+      \checks{x}{UT}{A}{\elet{y = e_1} e_2}{C}
+    }
+
+    \infer[\rulestyle subsumption]{
+      \infers{x}{T}{A}{e}{B} \\ \subtype{U}{B}{C}
+    }{\checks{x}{UT}{A}{e}{C}}
+\\
+    \infer[\rulestyle $\iso$-injection]{
+      \subtype{T}{A}{B}
+    }{
+      \subtype{\iso T}{A}{\isof B}
+    }
+
+    \infer[\rulestyle $\iso$-extraction]{\subtype T A B}{
+      \subtype{\path}{\isof A}{B}
+    }
+  \end{mathpar}
+  \caption{Example typing and subtyping rules}
+  \label{fig:rules}
+\end{figure}
 
 \begin{figure}
   \begin{mathpar}
@@ -345,17 +337,91 @@ How to avoid introduction and elimination forms? With two simple tricks:
     \end{array}
   \end{mathpar}
 
-  \caption{Tone lattice and composition}
-  \label{fig:tone-ops}
+  \caption{Mode lattice and composition}
+  \label{fig:mode-ops}
 \end{figure}
 
+
+I use two typing judgments: $\G \vdash e \infersto B$, where $B$ is an
+\emph{output} of the rule, and $\G \vdash e \checksto B$, where it is an
+\emph{input}. The full system handles many variables, but to simplify my
+examples, I restrict to single-variable contexts, $\G \dblcolon= \h x T A$. A
+variable $x$ has both a type $A$ and a mode $T$ saying \emph{how} it is used.
+$A$ is (as usual in bidirectional typing) an input, but $T$ is an
+\emph{output}---we infer how variables are used!
+
+\rulename{pair} (\cref{fig:rules}) shows how this \emph{mode inference} works
+when a variable is used multiple times. If $x$ is used in $e_1, e_2$ at modes
+$T,U$ respectively, then $(e_1,e_2)$ uses $x$ at their \emph{meet}, $T \wedge
+U$, in the lattice shown in \cref{fig:mode-ops}. The ordering of the mode
+lattice arises naturally as follows. For preorders $A,B$, let $A \le B$ iff $A$
+is a subpreorder of $B$ (iff $A \subseteq B$ and $x \le y : A \implies x \le y :
+B$). Then $T \le U$ iff $\forall A.~ TA \le UA$. So $T \wedge U$ is the most
+general mode which supports both uses at mode $T$ and at $U$.
+
+\rulename{let} (\cref{fig:rules}) shows how mode inference works under
+\emph{composition} of computations: if $x$ is used at mode $T$ to compute $e_1$,
+which is bound to $y$ and used at mode $U$ to compute $e_2$, the overall
+expression uses $x$ at the mode $UT$ (\cref{fig:mode-ops}) such that $(UT)A \equiv U(TA)$ (i.e.\ they denote the same preorder).
+
+
 \subsection{Modal subtyping}
+
+To construct or use terms of modal type $TA$ implicitly, I use a subtyping
+judgment, $\subtype{T}{A}{B}$. Given input types $A,B$ this outputs the
+\emph{greatest} mode $T$ such that $TA \le B$ (if one exists).
+\rulename{subsumption} lets a term $e : B$ be used at type $C$ by
+\emph{composing} it with the subtyping $\subtype{U}{B}{C}$. This composes $U$
+onto the context: subtyping changes variables' usage modes!
+
+Compared to a typical subtyping judgment $A <: B$, this extra degree of freedom
+lets us silently coerce into and out of $\isof A$ using
+\rulename{$\iso$-injection} and \rulename{$\iso$-extraction} (\cref{fig:rules}).
+\rulename{$\iso$-injection} internalizes $\iso$'s covariance, while
+\rulename{$\iso$-extraction} uses the properties $\forall T.~ \iso \le T$ and
+$\path\iso = \iso$.
+
+
+\subsection{Novelty}
+
+I generalize Datafun by handling function types such as $A \x \iso B \to C$
+which are monotone in $A$ but not $B$. I generalize \citet{monotonicity-types}
+by handling $\lambda$-abstractions nested inside other $\fn$-abstractions.
+%
+I have not surveyed the entire literature, but I know of no other modal type
+system where subtyping alters the typing context, the ``trick'' I use to
+silently coerce to and from modal types. Although not discussed in this
+abstract, I also exploit the distribution of my modes over products and sums to
+handle pattern-matching.
+
+%% \todo{Describe your approach in addressing the problem and clear\-ly state how
+%%   your approach is novel.}
+
+%% - interpret everything in Preorder
+%%
+%% - infer how variables are used, entirely bottom-up (novel!)
+%%
+%% - use modal subtyping to handle mismatches between inferred & expected types, and to handle function application (novel!)
+%%
+%% - use distribution of modes to handle pattern-matching (novel?)
+
+%% novel: modes for monotonicity! (not special kinds of functions, as in Datafun & Monotonicity Types)
+%%
+%% novel: higher-order! unlike Monotonicity Types!
+%%
+%% no intro/elim annotations! unlike Pfenning-Davies, certainly, or basically any modal approach?
+
+%% but how does it differ from variance typing? well, variance typing in e.g.
+%% Agda at least is mostly not exposed to the user. in OCaml it is but OCaml
+%% doesn't have a full type-level programming language.
 
 
 \section{Results and contributions}
 \todo{Clearly show how the results of your work contribute to programming
   language design and implementation in particular and to computer science in
   general; explain the significance of those results.}
+
+{\color{Rhodamine} TODO!}
 
 % Makes Datafun more flexible.
 % - functions f : A * B -> C
