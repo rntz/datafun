@@ -417,11 +417,30 @@ handle pattern-matching.
 
 
 \section{Results and contributions}
-\todo{Clearly show how the results of your work contribute to programming
-  language design and implementation in particular and to computer science in
-  general; explain the significance of those results.}
+%% \todo{Clearly show how the results of your work contribute to programming
+%%   language design and implementation in particular and to computer science in
+%%   general; explain the significance of those results.}
 
-{\color{Rhodamine} TODO!}
+I present a simply-typed modal $\fn$-calculus with a denotational semantics in
+the category \Preorder{} of preorders and monotone maps. I aim to prove (but
+haven't yet proven) that typing is preserved under substitution and subtyping.
+From these, the derivability of the rules in \citet{jrml} follows. I'd also like
+to show that every Datafun program \cite{datafun} typechecks in my system with
+no changes except local rewriting of types. This would achieve my primary goal, which is to make Datafun more flexible.
+
+More generally, this system could provide a jumping-off point for systems which
+need to ensure monotonicity for other reasons, such as for static analysis or
+eventual consistency.
+
+Finally and most speculatively, the combination of inferring variable modes and
+modal subtyping might prove useful for eliminating bureaucratic term syntax in
+other contexts. Modal types occur in languages for reactive programming
+\cite{Krishnaswami13:simple-frp}, distributed programming \cite{ml5}, and
+resource-constrained programming
+\cite{context-constrained,DBLP:conf/esop/GhicaS14}; could the same techniques
+make these languages less verbose? The only way to find out is to try.
+
+%% Results: a type system with a formal semantics in Preorder. WTB: formal proof of substitution and subtyping lemmas. from these, derivability of Pfenning-Davies rules follows. want to show: everything typable in Datafun typechecks, rewriting only types.
 
 % Makes Datafun more flexible.
 % - functions f : A * B -> C
