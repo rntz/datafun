@@ -226,11 +226,11 @@ here to full type inference is left to future work.
 
 \section{Approach \& uniqueness}
 
-I interpret types as preorders (sets equipped with reflexive, transitive
-relations) and terms and functions as monotone maps. To handle non-monotone
-function flavors, I use four modes (unary type operators) that alter types'
-orderings (but not their elements). These are \id{}, \op{}, \iso{}, and \path{},
-defined by:
+I interpret types $A,B$ as preorders (sets equipped with a reflexive, transitive
+relation, written $a \le b : A$) and terms and functions as monotone maps. To
+handle non-monotone function flavors, I use four unary type operators called
+\emph{modes} that alter types' orderings (but not their elements). These are
+\id{}, \op{}, \iso{}, and \path{}, defined by:
 
 \[\setlength{\arraycolsep}{.25em}\begin{array}{lll}
   a \le b : \idof A &\iff& a \le b : A\\
@@ -362,7 +362,8 @@ general mode which supports both uses at mode $T$ and at $U$.
 \rulename{let} (\cref{fig:rules}) shows how mode inference works under
 \emph{composition} of computations: if $x$ is used at mode $T$ to compute $e_1$,
 which is bound to $y$ and used at mode $U$ to compute $e_2$, the overall
-expression uses $x$ at the mode $UT$ (\cref{fig:mode-ops}) such that $(UT)A \equiv U(TA)$ (i.e.\ they denote the same preorder).
+expression uses $x$ at the composition of modes $UT$ (\cref{fig:mode-ops}) such
+that $(UT)A \equiv U(TA)$ (that is, they denote the same preorder).
 
 
 \subsection{Modal subtyping}
