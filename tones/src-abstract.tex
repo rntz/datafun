@@ -154,7 +154,7 @@ Quick: which of these are monotone in $x$?\footnote{Whenever I say ``monotone''
 
 Now, how did you \emph{know}?
 %
-Did you prove that $x \le y$ implies
+Did you prove from first principles that $x \le y$ implies
 %$x + \log x \le y + \log y$?
 $x + 2^x \le y + 2^y$?
 %
@@ -179,13 +179,12 @@ And it requires no changes to terms besides type annotations.
 %
 Monotonicity crops up in a variety of interesting places. In abstract
 interpretation, static analyses are phrased as monotone maps on lattices. In
-Datafun~\cite{datafun}, a pure and total functional language generalizing the
-venerable deductive database language Datalog, monotonicity is needed to ensure
-that recursive queries terminate. Monotonicity also turns out to be relevant to
-ensuring eventual consistency in distributed systems \citep{bloom}, and
-determinism in concurrent systems \cite{lvars}. In all these cases, the need to
-ensure monotonicity by one means or another occurs. Spotting a nail, I offer my
-favorite hammer: perhaps type systems have something to offer?
+Datafun~\cite{datafun}, monotonicity is needed to ensure that recursive queries
+terminate. Monotonicity turns out to be relevant to ensuring eventual
+consistency in distributed systems \citep{bloom} and determinism in concurrent
+systems \cite{lvars}. In all these cases, the need to ensure monotonicity by one
+means or another occurs. Spotting a nail, I offer my favorite hammer: a
+type system!
 
 
 \section{Background \& related work}
@@ -203,23 +202,24 @@ favorite hammer: perhaps type systems have something to offer?
 %% Like Datalog, Datafun allows recursive queries, computed by iteration to a fixed point. To ensure termination, the iterated function must be monotone.
 %% %
 
-I extend prior work on Datafun~\cite{datafun}. Datafun's original type system
-has \emph{two separate} function types, ordinary and monotone; it cannot type a
-function $A \x B \to C$ monotone in $A$ but not $B$. I aim to remove this
-restriction. Besides monotonicity, understanding Datafun's features is not
-necessary for the present work.
+I extend prior work on Datafun~\cite{datafun}, a pure and total functional
+language generalizing the venerable deductive database language Datalog.
+Datafun's original type system has \emph{two separate} function types, ordinary
+and monotone; it cannot type a function $A \x B \to C$ monotone in $A$ but not
+$B$. I aim to lift this restriction. Besides monotonicity, understanding
+Datafun's features is not necessary for the present work.
 
 Clancy and Miller's \emph{Monotonicity Types} \citep{monotonicity-types} also
-checks various flavors of monotonicity of certain functions, called ``sfuns'',
-but they do not permit nesting sfuns inside other sfuns. I impose no such
-restriction.
+checks various flavors of (non-)monotonicity for certain functions, called
+``sfuns'', but they do not permit nesting sfuns inside other sfuns. I impose no
+such restriction.
 
 I use bidirectional type checking \cite{bidirectional}, which requires some type
 annotations, but is simpler to describe and implement than full Damas-Milner
-inference. Bidirectional typing works by segregating terms into \emph{checking}
-and \emph{inferring} forms. Checking forms can have their types checked;
-inferring forms can have their types inferred. Extending the scheme presented
-here to full type inference is left to future work.
+inference. Bidirectional typing segregates terms into those that can be
+\emph{checked} against a type and those whose type may be \emph{inferred}.
+Extending the scheme presented here to full type inference is left to future
+work.
 
 %% \todo{TODO: Monotonicity Types , variance analysis?, that static analysis someone's pointed out}
 
