@@ -14,7 +14,7 @@
 \settopmatter{printacmref=false}
 \setcopyright{none}
 \renewcommand\footnotetextcopyrightpermission[1]{}
-\pagestyle{plain}
+\pagestyle{empty}
 
 \usepackage[scale=0.94]{XCharter}
 %\usepackage[scale=0.81]{librebaskerville}%\linespread{.97}
@@ -384,15 +384,14 @@ $\path\iso = \iso$.
 
 \subsection{Novelty}
 
-I generalize Datafun by handling function types such as $A \x \iso B \to C$
-which are monotone in $A$ but not $B$. I generalize \citet{monotonicity-types}
-by handling $\lambda$-abstractions nested inside other $\fn$-abstractions.
-%
 I have not surveyed the entire literature, but I know of no other modal type
 system where subtyping alters the typing context, the ``trick'' I use to
-silently coerce to and from modal types. Although not discussed in this
-abstract, I also exploit the distribution of my modes over products and sums to
-handle pattern-matching.
+silently coerce to and from modal types. Although not discussed here, I also
+handle pattern-matching by distributing modes over products and sums. These
+tricks let us generalize Datafun by handling function types like $A \x \iso B
+\to C$, which are monotone in $A$ but not $B$, \emph{without} additional term
+syntax. We also generalize \citet{monotonicity-types} by handling
+nested $\fn$-abstractions.
 
 %% \todo{Describe your approach in addressing the problem and clear\-ly state how
 %%   your approach is novel.}
@@ -421,24 +420,28 @@ handle pattern-matching.
 %%   language design and implementation in particular and to computer science in
 %%   general; explain the significance of those results.}
 
-I present a simply-typed modal $\fn$-calculus with a denotational semantics in
-the category \Preorder{} of preorders and monotone maps. I aim to prove (but
-haven't yet proven) that typing is preserved under substitution and subtyping.
-From these, the derivability of the rules in \citet{jrml} follows. I'd also like
-to show that every Datafun program \cite{datafun} typechecks in my system with
-no changes except local rewriting of types. This would achieve my primary goal, which is to make Datafun more flexible.
+I construct a simply-typed modal $\fn$-calculus with a denotational semantics in
+the category of preorders and monotone maps. I aim to prove (but haven't yet)
+that typing is preserved under substitution and subtyping. From these, the
+derivability of the rules in \citet{jrml} follows. I also hope to prove that
+every Datafun program typechecks in my system with no changes except local
+rewriting of types. This would achieve my primary goal: to make Datafun more
+flexible.
 
-More generally, this system could provide a jumping-off point for systems which
+More generally, my system could provide a jumping-off point for systems which
 need to ensure monotonicity for other reasons, such as for static analysis or
 eventual consistency.
 
 Finally and most speculatively, the combination of inferring variable modes and
 modal subtyping might prove useful for eliminating bureaucratic term syntax in
-other contexts. Modal types occur in languages for reactive programming
-\cite{Krishnaswami13:simple-frp}, distributed programming \cite{ml5}, and
-resource-constrained programming
-\cite{context-constrained,DBLP:conf/esop/GhicaS14}; could the same techniques
-make these languages less verbose? The only way to find out is to try.
+other modal languages. Modal subtyping in particular may have wide application:
+modal type systems manipulate the context, so allowing subtyping to manipulate
+it as well is a natural fit. Modal types occur in languages for reactive
+programming \cite{Krishnaswami13:simple-frp}, distributed programming
+\cite{ml5}, and resource-constrained programming
+\cite{context-constrained,DBLP:conf/esop/GhicaS14}; could these techniques make
+such languages more flexible and less verbose? The only way to find out is to
+try.
 
 %% Results: a type system with a formal semantics in Preorder. WTB: formal proof of substitution and subtyping lemmas. from these, derivability of Pfenning-Davies rules follows. want to show: everything typable in Datafun typechecks, rewriting only types.
 
