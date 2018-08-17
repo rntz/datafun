@@ -1,3 +1,5 @@
+-- Hypothesis: this file is out-of-date and not used. When I opened it, it used
+-- false≤ instead of f≤* from Prosets.agda.
 module ACC where
 
 open import Prelude
@@ -120,9 +122,9 @@ module DefnClassical where
 
   -- Let's try proving it for some types and constructions.
   ¬3bools : ∀{a b c} -> ¬ bool≤ a b -> ¬ bool≤ b c -> ⊥
-  ¬3bools {false}         p q = p false≤
-  ¬3bools {true}  {false} p q = q false≤
-  ¬3bools {true}  {true}  p q = p bool-refl
+  ¬3bools {false}         p q = p f≤*
+  ¬3bools {true}  {false} p q = q f≤*
+  ¬3bools {true}  {true}  p q = p id
 
   bool-acc : ACC bools
   bool-acc C non-stop =

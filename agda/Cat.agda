@@ -47,9 +47,6 @@ rel× : ∀{a b c d r s} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
      -> (A × B) -> (C × D) -> Set _
 rel× R S (a , x) (b , y) = R a b × S x y
 
--- data rel+ {a b c d r s} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
---           (R : A -> C -> Set r) (S : B -> D -> Set s)
---      : (A ⊎ B) -> (C ⊎ D) -> Set (r ⊔ s) where
 data rel+ {i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) : Rel (A ⊎ B) (j ⊔ l) where
   rel₁ : ∀{a b} -> R a b -> rel+ R S (inj₁ a) (inj₁ b)
   rel₂ : ∀{a b} -> S a b -> rel+ R S (inj₂ a) (inj₂ b)
@@ -84,6 +81,8 @@ record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   -- TODO: don't use an infix operator for this here.
   infixr 2 Either
   field Either : BinOp (Obj C)
+  -- TODO: try replacing in₁,in₂ with
+  -- inj : (d : Bool) → ∀{a b} → (if d then a else b) ≤ Either a b
   field in₁ : ∀{a b} -> a ≤ Either a b
   field in₂ : ∀{a b} -> b ≤ Either a b
   field either : ∀{a b c} -> a ≤ c -> b ≤ c -> Either a b ≤ c
@@ -112,6 +111,8 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   -- TODO: don't use an infix operator for this here
   infixr 2 Pair
   field Pair : BinOp (Obj C)
+  -- TODO: try replacing π₁,π₂ with
+  -- π : (d : Bool) → ∀{a b} → Pair a b ≤ (if d then a else b)
   field π₁ : ∀{a b} -> Pair a b ≤ a
   field π₂ : ∀{a b} -> Pair a b ≤ b
   field make-pair : ∀{a b Γ} -> Γ ≤ a -> Γ ≤ b -> Γ ≤ Pair a b

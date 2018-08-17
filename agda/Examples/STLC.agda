@@ -31,6 +31,22 @@ rename f (app M N) = app (rename f M) (rename f N)
 rename f (pair M N) = pair (rename f M) (rename f N)
 rename f (proj d M) = proj d (rename f M)
 
+-- Substitution
+infix 1 _⊢*_
+_⊢*_ : Cx -> Cx -> Set
+X ⊢* Y = ∀{a} -> Y a -> X ⊢ a
+
+∷/⊢* : ∀{X Y} -> X ⊢* Y -> ∀{a} -> a ∷ X ⊢* a ∷ Y
+∷/⊢* σ here = var here
+∷/⊢* σ (next x) = rename (λ _ → inj₂) (σ x)
+
+subst : ∀{X Y a} -> X ⊢* Y -> Y ⊢ a -> X ⊢ a
+subst σ (var x) = σ x
+subst σ (lam M) = lam (subst (∷/⊢* σ) M)
+subst σ (app M N) = app (subst σ M) (subst σ N)
+subst σ (pair M N) = pair (subst σ M) (subst σ N)
+subst σ (proj d M) = proj d (subst σ M)
+
 
 ---------- Denotations ----------
 ⟦_⟧ : Type -> Proset

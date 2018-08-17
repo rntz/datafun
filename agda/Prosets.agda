@@ -13,6 +13,7 @@ prosets : Cat _ _
 prosets = cats {zero} {zero}
 
 -- A type for monotone maps.
+-- TODO: move this into Cats.agda and generalize it to categories.
 infix 1 _⇒_
 _⇒_ : Rel Proset _
 _⇒_ = Fun
@@ -20,10 +21,12 @@ _⇒_ = Fun
 
 -- The proset of monotone maps between two prosets. Like the category of
 -- functors and natural transformations, but without the naturality condition.
-proset→ : ∀{i j} (A B : Cat i j) -> Cat (i ⊔ j) (i ⊔ j)
+proset→ : ∀{i j k l} (A : Cat i j) (B : Cat k l) -> Cat (i ⊔ j ⊔ k ⊔ l) (i ⊔ j ⊔ l)
 proset→ A B .Obj = Fun A B
 -- We use this definition rather than the more usual pointwise definition
 -- because it makes more sense when generalized to categories.
+--
+-- I'm beginning to think it would be easier with the other definition.
 proset→ A B .Hom F G = ∀ {x y} -> Hom A x y -> Hom B (ap F x) (ap G y)
 proset→ A B .ident {F} = map F
 proset→ A B .compo {F}{G}{H} F≤G G≤H {x}{y} x≤y = compo B (F≤G x≤y) (G≤H (ident A))
@@ -135,17 +138,15 @@ instance
   compo bools t≤t t≤t = t≤t
 
   bool-sums : Sums bools
-  _∨_ {{bool-sums}} true  _ = true
-  _∨_ {{bool-sums}} _  true = true
-  _∨_ {{bool-sums}} _ _ = false
-  in₁ {{bool-sums}} {false} = f≤*
-  in₁ {{bool-sums}} {true}  = id
-  in₂ {{bool-sums}} {_}    {false} = f≤*
-  in₂ {{bool-sums}} {false} {true} = id
-  in₂ {{bool-sums}} {true}  {true} = id
-  [_,_] {{bool-sums}} f≤* t≤t = t≤t
-  [_,_] {{bool-sums}} t≤t _   = t≤t
-  [_,_] {{bool-sums}} f≤* f≤* = f≤*
+  _∨_ {{bool-sums}} false x = x
+  _∨_ {{bool-sums}} true  x = true
+  Sums.in₁ bool-sums {false} = f≤*
+  Sums.in₁ bool-sums {true}  = t≤t
+  Sums.in₂ bool-sums {false} = id
+  Sums.in₂ bool-sums {true} {false} = f≤*
+  Sums.in₂ bool-sums {true} {true} = t≤t
+  either bool-sums f≤* q = q
+  either bool-sums t≤t _ = t≤t
   bot {{bool-sums}} = false
   bot≤ {{bool-sums}} = f≤*
 
@@ -166,14 +167,14 @@ antisym:bool≤ t≤t _   = Eq.refl
 
 -- Natural numbers
 open import Data.Nat as Nat using (ℕ; z≤n; s≤s) renaming (_≤_ to _≤'_; _⊔_ to _⊔'_)
-open import Relation.Binary using (module DecTotalOrder)
+import Data.Nat.Properties
 
 instance
   ℕ≤ : Proset
   Obj ℕ≤ = ℕ
   Hom ℕ≤ = Nat._≤_
-  ident ℕ≤ = DecTotalOrder.refl Nat.decTotalOrder
-  compo ℕ≤ = DecTotalOrder.trans Nat.decTotalOrder
+  ident ℕ≤ = Data.Nat.Properties.≤-refl
+  compo ℕ≤ = Data.Nat.Properties.≤-trans
 
   -- ℕ forms a semilattice with 0 and ⊔ (max).
   ℕ-sums : Sums ℕ≤

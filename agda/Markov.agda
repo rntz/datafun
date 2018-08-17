@@ -31,7 +31,6 @@ mutual
     more : More A -> NT A
 
   record More {i} (A : Set i) : Set i where
-    constructor More!
     coinductive
     field step : NT A
 
@@ -57,4 +56,4 @@ module _ {i} {A : Set i} where
 
   -- Markov implies that if a program weakly terminates, it terminates:
   markov-term : ∀{p} -> ∃? (Terminates p) -> ∃ (Terminates p)
-  markov-term = markov (terminates? _)
+  markov-term ex = markov (terminates? _) ex

@@ -47,4 +47,4 @@ instance
   bot≤ {{cx-sums}} _ ()
 
 ∪/⊆ : ∀ {X L R} -> L ⊆ R -> X ∪ L ⊆ X ∪ R
-∪/⊆ f = map∨ id f
+∪/⊆ = map∨ id
