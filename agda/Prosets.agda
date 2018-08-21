@@ -21,12 +21,10 @@ _⇒_ = Fun
 
 -- The proset of monotone maps between two prosets. Like the category of
 -- functors and natural transformations, but without the naturality condition.
-proset→ : ∀{i j k l} (A : Cat i j) (B : Cat k l) -> Cat (i ⊔ j ⊔ k ⊔ l) (i ⊔ j ⊔ l)
+proset→ : ∀{i j k l} (A : Cat i j) (B : Cat k l) -> Cat (i ⊔ j ⊔ k ⊔ l) _
 proset→ A B .Obj = Fun A B
--- We use this definition rather than the more usual pointwise definition
--- because it makes more sense when generalized to categories.
---
--- I'm beginning to think it would be easier with the other definition.
+-- The more usual pointwise definition makes it harder to prove that prosets is
+-- cartesian closed.
 proset→ A B .Hom F G = ∀ {x y} -> Hom A x y -> Hom B (ap F x) (ap G y)
 proset→ A B .ident {F} = map F
 proset→ A B .compo {F}{G}{H} F≤G G≤H {x}{y} x≤y = compo B (F≤G x≤y) (G≤H (ident A))
