@@ -75,14 +75,28 @@ catΠ A B .compo f g x = B x .compo (f x) (g x)
 
  -- Cartesian structures.
  --- Sums
+infix 1 _/_/_/_
+record SumOf {i j} (C : Cat i j) (a b : Obj C) : Set (i ⊔ j) where
+  constructor _/_/_/_
+  private instance -C = C
+  field a∨b : Obj C
+  field ∨I₁ : a ≤ a∨b
+  field ∨I₂ : b ≤ a∨b
+  field ∨E : ∀{c} → a ≤ c → b ≤ c → a∨b ≤ c
+open SumOf public
+
+record Joins {i j} (C : Cat i j) : Set (i ⊔ j) where
+  constructor Joins:
+  private instance -C = C
+  field join : ∀ a b → SumOf C a b
+  field bottom : Σ[ ⊥ ∈ _ ] ∀{a} → ⊥ ≤ a
+
 record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Sums:
   private instance the-cat = C
   -- TODO: don't use an infix operator for this here.
   infixr 2 Either
   field Either : BinOp (Obj C)
-  -- TODO: try replacing in₁,in₂ with
-  -- inj : (d : Bool) → ∀{a b} → (if d then a else b) ≤ Either a b
   field in₁ : ∀{a b} -> a ≤ Either a b
   field in₂ : ∀{a b} -> b ≤ Either a b
   field either : ∀{a b c} -> a ≤ c -> b ≤ c -> Either a b ≤ c
@@ -147,6 +161,15 @@ module _ {i j} {{C : Cat i j}} where
   module _ {{S : Sums C}} where open Sums S renaming (Either to _∨_; either to [_,_]) public
   module _ {{P : Products C}} where
     open Products P renaming (Pair to _∧_; make-pair to ⟨_,_⟩) public
+
+instance
+  joins→sums : ∀{i j} (C : Cat i j) (J : Joins C) → Sums C
+  joins→sums C J .Either a b = Joins.join J a b .a∨b
+  joins→sums C J .Sums.in₁ = Joins.join J _ _ .∨I₁
+  joins→sums C J .Sums.in₂ = Joins.join J _ _ .∨I₂
+  joins→sums C J .either = Joins.join J _ _ .∨E
+  joins→sums C J .Sums.bot = Joins.bottom J .proj₁
+  joins→sums C J .Sums.bot≤ = Joins.bottom J .proj₂
 
  --- CC means "cartesian closed".
 record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
@@ -259,6 +282,7 @@ instance
   cat-Π = SetΠ: catΠ (λ Γ→P → fun (λ γ a → Γ→P a .map γ)) (λ a → fun (λ ∀P≤ → ∀P≤ a))
 
  -- Preserving cartesian structure over operations on categories.
+-- TODO: do I use cat×-sums anywhere? (I don't use cat×-joins, yet.)
 module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
   private instance cc = C; cs = P; dd = D; ds = Q
   cat×-sums : Sums (cat× C D)
@@ -268,6 +292,12 @@ module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
   [_,_] {{cat×-sums}} (f₁ , f₂) (g₁ , g₂) = [ f₁ , g₁ ] , [ f₂ , g₂ ]
   bot {{cat×-sums}} = bot , bot
   bot≤ {{cat×-sums}} = bot≤ , bot≤
+
+  cat×-joins : Joins (cat× C D)
+  Joins.join cat×-joins (a , x) (b , y)
+    = (a ∨ b) , (x ∨ y) / in₁ , in₁ / in₂ , in₂
+    / λ { (f₁ , f₂) (g₁ , g₂) → [ f₁ , g₁ ] , [ f₂ , g₂ ] }
+  Joins.bottom cat×-joins = (bot , bot) , bot≤ , bot≤
 
 -- -- This is correct, but not yet useful.
 -- module _ {i j k} (A : Set i) {B} (P : ∀ a -> Sums {j}{k} (B a)) where

@@ -5,45 +5,53 @@ open import Cat
 open import Prosets
 
 data Tone : Set where
-  ID OP ISOS PATHS : Tone
+  ID OP □ ◇ : Tone
+
+data _≺_ : (T U : Tone) -> Set where
+  ≺refl : ∀{T} -> T ≺ T
+  □≺ : ∀{T} -> □ ≺ T
+  ≺◇ : ∀{T} -> T ≺ ◇
 
 instance
-  tone=? : (x y : Tone) -> Dec (x ≡ y)
-  -- this is completely boring.
-  tone=? = λ { ID ID → yes refl ; ID OP → no (λ ()) ; ID ISOS → no (λ ()) ; ID PATHS → no (λ ()) ; OP ID → no (λ ()) ; OP OP → yes refl ; OP ISOS → no (λ ()) ; OP PATHS → no (λ ()) ; ISOS ID → no (λ ()) ; ISOS OP → no (λ ()) ; ISOS ISOS → yes refl ; ISOS PATHS → no (λ ()) ; PATHS ID → no (λ ()) ; PATHS OP → no (λ ()) ; PATHS ISOS → no (λ ()) ; PATHS PATHS → yes refl }
+  -- Completely tedious decidability procedures.
+  tone=? : (T U : Tone) -> Dec (T ≡ U)
+  tone=? = λ { ID ID → yes refl ; ID OP → no (λ ()) ; ID □ → no (λ ()) ; ID ◇ → no (λ ()) ; OP ID → no (λ ()) ; OP OP → yes refl ; OP □ → no (λ ()) ; OP ◇ → no (λ ()) ; □ ID → no (λ ()) ; □ OP → no (λ ()) ; □ □ → yes refl ; □ ◇ → no (λ ()) ; ◇ ID → no (λ ()) ; ◇ OP → no (λ ()) ; ◇ □ → no (λ ()) ; ◇ ◇ → yes refl }
+  _≺?_ : (T U : Tone) -> Dec (T ≺ U)
+  _≺?_ = λ { ID ID → yes ≺refl ; ID OP → no λ () ; ID □ → no λ () ; ID ◇ → yes ≺◇ ; OP ID → no λ () ; OP OP → yes ≺refl ; OP □ → no λ () ; OP ◇ → yes ≺◇ ; □ y → yes □≺ ; ◇ ID → no λ () ; ◇ OP → no λ () ; ◇ □ → no λ () ; ◇ ◇ → yes ≺refl }
 
-data _≺_ : (o p : Tone) -> Set where
-  ≺refl : ∀{o} -> o ≺ o
-  ISOS≺ : ∀{o} -> ISOS ≺ o
-  ≺PATHS : ∀{o} -> o ≺ PATHS
-
-tone-lub : ∀ x y -> Σ[ z ∈ Tone ] (x ≺ z × y ≺ z × (∀ q → x ≺ q → y ≺ q → z ≺ q))
-tone-lub ID ID = ID , ≺refl , ≺refl , λ q x _ → x
-tone-lub OP OP = OP , ≺refl , ≺refl , λ q x _ → x
-tone-lub ID OP = PATHS , ≺PATHS , ≺PATHS , λ { _ ≺refl () ; _ ≺PATHS ≺PATHS → ≺refl }
-tone-lub OP ID = PATHS , ≺PATHS , ≺PATHS , λ { _ ≺refl () ; _ ≺PATHS ≺PATHS → ≺refl }
-tone-lub x ISOS = x , ≺refl , ISOS≺ , λ q y≺q ISOS≺q → y≺q
-tone-lub x PATHS = PATHS , ≺PATHS , ≺refl , λ q x₁ x₂ → x₂
-tone-lub ISOS y = y , ISOS≺ , ≺refl , λ q ISOS≺q y≺q → y≺q
-tone-lub PATHS y = PATHS , ≺refl , ≺PATHS , λ q PATHS≺q y≺q → PATHS≺q
-
-instance
   tones : Cat _ _
-  Obj tones = Tone
-  Hom tones = _≺_
-  ident tones = ≺refl
-  compo tones ≺refl g = g
-  compo tones ISOS≺ g = ISOS≺
-  compo tones ≺PATHS ≺refl = ≺PATHS
-  compo tones ≺PATHS ≺PATHS = ≺PATHS
+  tones = Cat: Tone _≺_ ≺refl λ { ≺refl g → g ; □≺ g → □≺ ; ≺◇ ≺refl → ≺◇ ; ≺◇ ≺◇ → ≺◇ }
 
-  tone-sums : Sums tones
-  Either tone-sums s t = tone-lub s t .proj₁
-  Sums.in₁ tone-sums = tone-lub _ _ .proj₂ .proj₁
-  Sums.in₂ tone-sums {s}{t} = tone-lub s t .proj₂ .proj₂ .proj₁
-  either tone-sums = tone-lub _ _ .proj₂ .proj₂ .proj₂ _
-  Sums.bot tone-sums = ISOS
-  Sums.bot≤ tone-sums = ISOS≺
+instance
+  tone-joins : Joins tones
+  Joins.join tone-joins ID ID = ID / ≺refl / ≺refl / λ x _ → x
+  Joins.join tone-joins OP OP = OP / ≺refl / ≺refl / λ x _ → x
+  Joins.join tone-joins ID OP = ◇ / ≺◇ / ≺◇ / λ { ≺refl () ; ≺◇ ≺◇ → ≺◇ }
+  Joins.join tone-joins OP ID = ◇ / ≺◇ / ≺◇ / λ { ≺refl () ; ≺◇ ≺◇ → ≺◇ }
+  Joins.join tone-joins □ U = U / □≺ / ≺refl / λ _ x → x
+  Joins.join tone-joins ◇ U = ◇ / ≺refl / ≺◇ / λ x _ → x
+  Joins.join tone-joins T □ = T / ≺refl / □≺ / λ x _ → x
+  Joins.join tone-joins T ◇ = ◇ / ≺◇ / ≺refl / λ _ x → x
+  Joins.bottom tone-joins = □ , □≺ 
+
+-- tone-lub : ∀ T U -> Σ[ V ∈ Tone ] (T ≺ V × U ≺ V × (∀ {W} → T ≺ W → U ≺ W → V ≺ W))
+-- tone-lub ID ID = ID , ≺refl , ≺refl , λ x _ → x
+-- tone-lub OP OP = OP , ≺refl , ≺refl , λ x _ → x
+-- tone-lub ID OP = ◇ , ≺◇ , ≺◇ , λ { ≺refl () ; ≺◇ ≺◇ → ≺refl }
+-- tone-lub OP ID = ◇ , ≺◇ , ≺◇ , λ { ≺refl () ; ≺◇ ≺◇ → ≺refl }
+-- tone-lub □ y = y , □≺ , ≺refl , λ □≺q y≺q → y≺q
+-- tone-lub ◇ y = ◇ , ≺refl , ≺◇ , λ ◇≺q y≺q → ◇≺q
+-- tone-lub x □ = x , ≺refl , □≺ , λ y≺q □≺q → y≺q
+-- tone-lub x ◇ = ◇ , ≺◇ , ≺refl , λ x₁ x₂ → x₂
+
+-- instance
+--   tone-sums : Sums tones
+--   Either tone-sums s t = tone-lub s t .proj₁
+--   Sums.in₁ tone-sums = tone-lub _ _ .proj₂ .proj₁
+--   Sums.in₂ tone-sums {s}{t} = tone-lub s t .proj₂ .proj₂ .proj₁
+--   either tone-sums = tone-lub _ _ .proj₂ .proj₂ .proj₂
+--   Sums.bot tone-sums = □
+--   Sums.bot≤ tone-sums = □≺
 
 opp : ∀{i j} -> Cat i j -> Cat i j
 opp C = Cat: (Obj C) (λ a b → Hom C b a) (ident C) (λ f g → compo C g f)
@@ -73,17 +81,18 @@ paths C = Cat: (Obj C) (Path C) (path-by (ident C)) path-•
 Paths : ∀{i j} -> cats {i}{j} ≤ cats {i}{i ⊔ j}
 Paths = Fun: paths (λ { (fun f) → fun (path-fold _ (path-by ∘ f) path⁻¹ path-•) })
 
-den : Fun tones (proset→ prosets prosets)
-ap den ID = id
-ap den OP = Opp
-ap den ISOS = Isos
-ap den PATHS = Paths
--- if (a ⇒ b), then (F_s a ⇒ F_s b), where F_s is the functor associated with
--- the tone s. this is just functoriality!
-map den {i} ≺refl = map (ap den i)
--- if (a ⇒ b), then (isos a ⇒ F_t b). initiality?
---
--- oh shit, I need that (ap den t .ap) == id!
-map den {.ISOS} {t} ISOS≺ {A} {B} A⇒B = Fun: (λ a → {!!}) {!!}
--- if (a ⇒ b), then (F_s a ⇒ paths b). finality?
-map den {s} {.PATHS} ≺PATHS A⇒B = {!!} • map Paths A⇒B
+-- -- FIXME: Need to capture the fact that we don't actually change the set, just the ordering.
+-- den : Fun tones (proset→ prosets prosets)
+-- ap den ID = id
+-- ap den OP = Opp
+-- ap den □ = Isos
+-- ap den ◇ = Paths
+-- -- if (a ⇒ b), then (F_s a ⇒ F_s b), where F_s is the functor associated with
+-- -- the tone s. this is just functoriality!
+-- map den {i} ≺refl = map (ap den i)
+-- -- if (a ⇒ b), then (isos a ⇒ F_t b). initiality?
+-- --
+-- -- oh shit, I need that (ap den t .ap) == id!
+-- map den {.□} {t} □≺ {A} {B} A⇒B = Fun: (λ a → {!!}) {!!}
+-- -- if (a ⇒ b), then (F_s a ⇒ paths b). finality?
+-- map den {s} {.◇} ≺◇ A⇒B = {!!} • map Paths A⇒B

@@ -26,23 +26,38 @@ instance
   top {{change-products}} = ⊤-change
   ≤top {{change-products}} = cfun ≤top ≤top (λ _ → tt)
 
-  change-sums : Sums changes
-  _∨_ {{change-sums}} = change+
-  in₁ {{change-sums}} = cfun in₁ (π₂ • in₁) rel₁
-  in₂ {{change-sums}} = cfun in₂ (π₂ • in₂) rel₂
-  [_,_] {{change-sums}} f g .funct = [ funct f , funct g ]
-  -- isos (𝑶 a ∨ 𝑶 b) ∧ (𝑫 a ∨ 𝑫 b) ⇒ 𝑫 c
-  -- this is the bit where I have to invent values.
-  [_,_] {{change-sums}} {A}{B}{C} f g .deriv = uncurry (isos/∨ • [ flip [ use f , fail ]
-                                                                , flip [ fail , use g ] ])
+  -- change-sums : Sums changes
+  -- _∨_ {{change-sums}} = change+
+  -- in₁ {{change-sums}} = cfun in₁ (π₂ • in₁) rel₁
+  -- in₂ {{change-sums}} = cfun in₂ (π₂ • in₂) rel₂
+  -- [_,_] {{change-sums}} f g .funct = [ funct f , funct g ]
+  -- -- isos (𝑶 a ∨ 𝑶 b) ∧ (𝑫 a ∨ 𝑫 b) ⇒ 𝑫 c
+  -- -- this is the bit where I have to invent values.
+  -- [_,_] {{change-sums}} {A}{B}{C} f g .deriv = uncurry (isos/∨ • [ flip [ use f , fail ]
+  --                                                                , flip [ fail , use g ] ])
+  --   where use : ∀{A} -> A ≤ C -> 𝑫 A ⇒ isos (𝑶 A) ⇨ 𝑫 C
+  --         fail : ∀{A B} -> A ⇒ B ⇨ 𝑫 C
+  --         use f = curry (swap • deriv f)
+  --         fail = curry (constant (dummy C))
+  -- [_,_] {{change-sums}} f g .is-id (rel₁ da) = is-id f da
+  -- [_,_] {{change-sums}} f g .is-id (rel₂ db) = is-id g db
+  -- bot {{change-sums}} = ⊥-change
+  -- bot≤ {{change-sums}} = cfun bot≤ (π₁ • Fun: bot≤ λ { {lift ()} }) (λ { {_} {lift ()} })
+
+  change-joins : Joins changes
+  Joins.join change-joins a b .a∨b = change+ a b
+  Joins.join change-joins a b .∨I₁ = cfun in₁ (π₂ • in₁) rel₁
+  Joins.join change-joins a b .∨I₂ = cfun in₂ (π₂ • in₂) rel₂
+  Joins.join change-joins a b .∨E f g .funct = [ funct f , funct g ]
+  Joins.join change-joins a b .∨E {C} f g .deriv
+    = uncurry (isos/∨ • [ flip [ use f , fail ] , flip [ fail , use g ] ])
     where use : ∀{A} -> A ≤ C -> 𝑫 A ⇒ isos (𝑶 A) ⇨ 𝑫 C
-          fail : ∀{A B} -> A ⇒ B ⇨ 𝑫 C
           use f = curry (swap • deriv f)
+          fail : ∀{A B} -> A ≤ B ⇨ (𝑫 C)
           fail = curry (constant (dummy C))
-  [_,_] {{change-sums}} f g .is-id (rel₁ da) = is-id f da
-  [_,_] {{change-sums}} f g .is-id (rel₂ db) = is-id g db
-  bot {{change-sums}} = ⊥-change
-  bot≤ {{change-sums}} = cfun bot≤ (π₁ • Fun: bot≤ λ { {lift ()} }) (λ { {_} {lift ()} })
+  Joins.join change-joins a b .∨E f g .is-id (rel₁ da) = is-id f da
+  Joins.join change-joins a b .∨E f g .is-id (rel₂ db) = is-id g db
+  Joins.bottom change-joins = ⊥-change , cfun bot≤ (π₁ • Fun: bot≤ λ { {lift ()} }) λ { {_} {lift ()} }
 
   change-cc : CC changes
   CC.products change-cc = change-products

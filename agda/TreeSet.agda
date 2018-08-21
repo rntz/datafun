@@ -40,13 +40,20 @@ module Trees (C : Proset) where
   compo trees (split₂ x) (node≤ y z) = x • z
 
   instance
-    tree-sums : Sums trees
-    _∨_ {{tree-sums}} = node
-    in₁ {{tree-sums}} = split₁ id
-    in₂ {{tree-sums}} = split₂ id
-    [_,_] {{tree-sums}} f g = node≤ f g
-    bot {{tree-sums}} = empty
-    bot≤ {{tree-sums}} = empty≤
+    -- tree-sums : Sums trees
+    -- _∨_ {{tree-sums}} = node
+    -- in₁ {{tree-sums}} = split₁ id
+    -- in₂ {{tree-sums}} = split₂ id
+    -- [_,_] {{tree-sums}} f g = node≤ f g
+    -- bot {{tree-sums}} = empty
+    -- bot≤ {{tree-sums}} = empty≤
+
+    tree-joins : Joins trees
+    Joins.join tree-joins a b = node a b / split₁ id / split₂ id / node≤
+    Joins.bottom tree-joins = empty , empty≤
+
+  -- This is used in Changes.agda. TODO: avoid need for it?
+  tree-sums = joins→sums trees tree-joins
 
   -- Semilattice join / categorical sum lifted over trees, ⋁
   module _ (Sums : Sums C) where

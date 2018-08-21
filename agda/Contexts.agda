@@ -37,14 +37,18 @@ instance
   cxs .ident _ = id
   cxs .compo X⊆Y Y⊆Z x = X⊆Y x • Y⊆Z x
 
--- ∪ forms coproducts on Cx under renaming.
-  cx-sums : Sums cxs
-  _∨_ {{cx-sums}} = _∪_
-  in₁ {{cx-sums}} _ = inj₁
-  in₂ {{cx-sums}} _ = inj₂
-  [_,_] {{cx-sums}} f g _ = [ f _ , g _ ]
-  bot {{cx-sums}} = ∅
-  bot≤ {{cx-sums}} _ ()
+-- -- ∪ forms coproducts on Cx under renaming.
+--   cx-sums : Sums cxs
+--   _∨_ {{cx-sums}} = _∪_
+--   in₁ {{cx-sums}} _ = inj₁
+--   in₂ {{cx-sums}} _ = inj₂
+--   [_,_] {{cx-sums}} f g _ = [ f _ , g _ ]
+--   bot {{cx-sums}} = ∅
+--   bot≤ {{cx-sums}} _ ()
+
+  cx-joins : Joins cxs
+  Joins.join cx-joins a b = a ∪ b / (λ _ → inj₁) / (λ _ → inj₂) / λ f g x → [ f x , g x ]
+  Joins.bottom cx-joins = ∅ , λ _ ()
 
 ∪/⊆ : ∀ {X L R} -> L ⊆ R -> X ∪ L ⊆ X ∪ R
 ∪/⊆ = map∨ id

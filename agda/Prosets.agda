@@ -45,14 +45,23 @@ instance
 -- If B has sums, then (A ⇒ B) has sums too.
 module _ {A B : Proset} (bs : Sums B) where
   private instance b' = B; bs' = bs
-  proset→-sums : Sums (proset→ A B)
-  _∨_ {{proset→-sums}} f g .ap x = ap f x ∨ ap g x
-  _∨_ {{proset→-sums}} f g .map x≤y = map∨ (map f x≤y) (map g x≤y)
-  in₁ {{proset→-sums}} {f}{g} x≤y = map f x≤y • in₁
-  in₂ {{proset→-sums}} {f}{g} x≤y = map g x≤y • in₂
-  [_,_] {{proset→-sums}} {f}{g}{h} f≤h g≤h x≤y = [ f≤h x≤y , g≤h x≤y ]
-  bot {{proset→-sums}} = constant bot
-  bot≤ {{proset→-sums}} _ = bot≤
+  -- proset→-sums : Sums (proset→ A B)
+  -- _∨_ {{proset→-sums}} f g .ap x = ap f x ∨ ap g x
+  -- _∨_ {{proset→-sums}} f g .map x≤y = map∨ (map f x≤y) (map g x≤y)
+  -- in₁ {{proset→-sums}} {f}{g} x≤y = map f x≤y • in₁
+  -- in₂ {{proset→-sums}} {f}{g} x≤y = map g x≤y • in₂
+  -- [_,_] {{proset→-sums}} {f}{g}{h} f≤h g≤h x≤y = [ f≤h x≤y , g≤h x≤y ]
+  -- bot {{proset→-sums}} = constant bot
+  -- bot≤ {{proset→-sums}} _ = bot≤
+
+  -- TODO: do I use this anywhere?
+  proset→-joins : Joins (proset→ A B)
+  Joins.join proset→-joins F G .a∨b .ap x = ap F x ∨ ap G x
+  Joins.join proset→-joins F G .a∨b .map x≤y = map∨ (map F x≤y) (map G x≤y)
+  Joins.join proset→-joins F G .∨I₁ x≤y = map F x≤y • in₁
+  Joins.join proset→-joins F G .∨I₂ x≤y = map G x≤y • in₂
+  Joins.join proset→-joins F G .∨E F≤H G≤H x≤y = [ F≤H x≤y , G≤H x≤y ]
+  Joins.bottom proset→-joins = constant bot , λ _ → bot≤
 
 
 -- The "equivalence quotient" of a proset. Not actually a category of
@@ -135,23 +144,33 @@ instance
   compo bools f≤* _   = f≤*
   compo bools t≤t t≤t = t≤t
 
-  bool-sums : Sums bools
-  _∨_ {{bool-sums}} false x = x
-  _∨_ {{bool-sums}} true  x = true
-  Sums.in₁ bool-sums {false} = f≤*
-  Sums.in₁ bool-sums {true}  = t≤t
-  Sums.in₂ bool-sums {false} = id
-  Sums.in₂ bool-sums {true} {false} = f≤*
-  Sums.in₂ bool-sums {true} {true} = t≤t
-  either bool-sums f≤* q = q
-  either bool-sums t≤t _ = t≤t
-  bot {{bool-sums}} = false
-  bot≤ {{bool-sums}} = f≤*
+  -- bool-sums : Sums bools
+  -- _∨_ {{bool-sums}} false x = x
+  -- _∨_ {{bool-sums}} true  x = true
+  -- Sums.in₁ bool-sums {false} = f≤*
+  -- Sums.in₁ bool-sums {true}  = t≤t
+  -- Sums.in₂ bool-sums {false} = id
+  -- Sums.in₂ bool-sums {true} {false} = f≤*
+  -- Sums.in₂ bool-sums {true} {true} = t≤t
+  -- either bool-sums f≤* q = q
+  -- either bool-sums t≤t _ = t≤t
+  -- bot {{bool-sums}} = false
+  -- bot≤ {{bool-sums}} = f≤*
+
+  bool-joins : Joins bools
+  Joins.join bool-joins false y = y / f≤* / id / λ p q → q
+  Joins.join bool-joins true true = true / t≤t / t≤t / λ p q → p
+  Joins.join bool-joins true false = true / t≤t / f≤* / λ p q → p
+  Joins.bottom bool-joins = false , f≤*
 
   bool≤? : Decidable bool≤
   bool≤? false _     = yes f≤*
   bool≤? true  true  = yes t≤t
   bool≤? true  false = no λ {()}
+
+-- Used by Changes*.agda, DepChanges.agda, ProsetSem/Types.agda. TODO: remove once unused.
+bool-sums : Sums bools
+bool-sums = joins→sums bools bool-joins
 
 antisym:bool≤ : Antisymmetric _≡_ bool≤
 antisym:bool≤ f≤* f≤* = Eq.refl
@@ -169,22 +188,14 @@ import Data.Nat.Properties
 
 instance
   ℕ≤ : Proset
-  Obj ℕ≤ = ℕ
-  Hom ℕ≤ = Nat._≤_
-  ident ℕ≤ = Data.Nat.Properties.≤-refl
-  compo ℕ≤ = Data.Nat.Properties.≤-trans
+  ℕ≤ = Cat: ℕ Nat._≤_ Data.Nat.Properties.≤-refl Data.Nat.Properties.≤-trans
 
   -- ℕ forms a semilattice with 0 and ⊔ (max).
-  ℕ-sums : Sums ℕ≤
-  _∨_ {{ℕ-sums}} = Nat._⊔_
-  in₁ {{ℕ-sums}} {ℕ.zero}  {_}       = z≤n
-  in₁ {{ℕ-sums}} {ℕ.suc a} {ℕ.zero}  = id
-  in₁ {{ℕ-sums}} {ℕ.suc a} {ℕ.suc b} = s≤s in₁
-  in₂ {{ℕ-sums}} {a}       {ℕ.zero}  = z≤n
-  in₂ {{ℕ-sums}} {ℕ.zero}  {ℕ.suc b} = id
-  in₂ {{ℕ-sums}} {ℕ.suc a} {ℕ.suc b} = s≤s (in₂ {a = a})
-  [_,_] {{ℕ-sums}} z≤n x = x
-  [_,_] {{ℕ-sums}} (s≤s f) z≤n = s≤s f
-  [_,_] {{ℕ-sums}} (s≤s f) (s≤s g) = s≤s [ f , g ]
-  bot {{ℕ-sums}}  = 0
-  bot≤ {{ℕ-sums}} = z≤n
+  -- TODO: revisit this with copattern syntax.
+  ℕ-joins : Joins ℕ≤
+  Joins.join ℕ-joins ℕ.zero y = y / z≤n / id / λ p q → q
+  Joins.join ℕ-joins x ℕ.zero = x / id / z≤n / λ p q → p
+  Joins.join ℕ-joins (ℕ.suc x) (ℕ.suc y) with Joins.join ℕ-joins x y
+  ... | x∨y / ∨I₁ / ∨I₂ / ∨E
+      = ℕ.suc x∨y / s≤s ∨I₁ / s≤s ∨I₂ / λ { (s≤s p) (s≤s q) → s≤s (∨E p q) }
+  Joins.bottom ℕ-joins = 0 , z≤n
