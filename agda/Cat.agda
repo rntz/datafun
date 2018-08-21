@@ -75,7 +75,7 @@ catΠ A B .compo f g x = B x .compo (f x) (g x)
 
  -- Cartesian structures.
  --- Sums
-infix 1 _/_/_/_
+infix 0 _/_/_/_
 record SumOf {i j} (C : Cat i j) (a b : Obj C) : Set (i ⊔ j) where
   constructor _/_/_/_
   private instance -C = C
@@ -85,38 +85,34 @@ record SumOf {i j} (C : Cat i j) (a b : Obj C) : Set (i ⊔ j) where
   field ∨E : ∀{c} → a ≤ c → b ≤ c → a∨b ≤ c
 open SumOf public
 
-record Joins {i j} (C : Cat i j) : Set (i ⊔ j) where
-  constructor Joins:
-  private instance -C = C
-  field join : ∀ a b → SumOf C a b
-  field bottom : Σ[ ⊥ ∈ _ ] ∀{a} → ⊥ ≤ a
-
 record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Sums:
   private instance the-cat = C
-  -- TODO: don't use an infix operator for this here.
-  infixr 2 Either
-  field Either : BinOp (Obj C)
-  field in₁ : ∀{a b} -> a ≤ Either a b
-  field in₂ : ∀{a b} -> b ≤ Either a b
-  field either : ∀{a b c} -> a ≤ c -> b ≤ c -> Either a b ≤ c
-  field bot : Obj C
-  field bot≤ : ∀{a} -> bot ≤ a
+  field lub : ∀ a b → SumOf C a b
+  field bottom : Σ[ ⊥ ∈ _ ] ∀{a} → ⊥ ≤ a
 
-  idem∨ : ∀{a} -> Either a a ≤ a
-  idem∨ = either id id
+  infixr 2 _∨_
+  _∨_ : BinOp (Obj C); a ∨ b = lub a b .a∨b
+  in₁ : ∀{a b} -> a ≤ a ∨ b; in₁ = lub _ _ .∨I₁
+  in₂ : ∀{a b} -> b ≤ a ∨ b; in₂ = lub _ _ .∨I₂
+  [_,_] : ∀{a b c} -> a ≤ c -> b ≤ c -> a ∨ b ≤ c
+  [ f , g ] = lub _ _ .∨E f g
 
-  a∨⊥≈a : ∀{a} -> Either a bot ≈ a
-  a∨⊥≈a = either id bot≤ , in₁
+  -- TODO: rename to ⊥, ⊥≤?
+  bot : Obj C;                  bot = proj₁ bottom
+  bot≤ : ∀{a} -> bot ≤ a;       bot≤ = proj₂ bottom
+  idem∨ : ∀{a} -> a ∨ a ≤ a;    idem∨ = [ id , id ]
+  a∨⊥≈a : ∀{a} -> a ∨ bot ≈ a;  a∨⊥≈a = [ id , bot≤ ] , in₁
 
-  map∨ : ∀{a b c d} -> a ≤ c -> b ≤ d -> Either a b ≤ Either c d
-  map∨ f g = either (f • in₁) (g • in₂)
+  map∨ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
+  map∨ f g = [ f • in₁ , g • in₂ ]
 
+  -- Used in Prosets.agda in ∨≈.
   functor∨ : Fun (cat× C C) C
   functor∨ = fun λ { (f , g) -> map∨ f g }
 
-  juggle∨ : ∀{a b c d} -> Either (Either a b) (Either c d) ≤ Either (Either a c) (Either b d)
-  juggle∨ = either (map∨ in₁ in₁) (map∨ in₂ in₂)
+  juggle∨ : ∀{a b c d} -> (a ∨ b) ∨ (c ∨ d) ≤ (a ∨ c) ∨ (b ∨ d)
+  juggle∨ = [ map∨ in₁ in₁ , map∨ in₂ in₂ ]
 
  --- Products
 record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
@@ -125,8 +121,6 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   -- TODO: don't use an infix operator for this here
   infixr 2 Pair
   field Pair : BinOp (Obj C)
-  -- TODO: try replacing π₁,π₂ with
-  -- π : (d : Bool) → ∀{a b} → Pair a b ≤ (if d then a else b)
   field π₁ : ∀{a b} -> Pair a b ≤ a
   field π₂ : ∀{a b} -> Pair a b ≤ b
   field make-pair : ∀{a b Γ} -> Γ ≤ a -> Γ ≤ b -> Γ ≤ Pair a b
@@ -155,21 +149,12 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   juggle∧ = make-pair (map∧ π₁ π₁) (map∧ π₂ π₂)
 
 open Products public using (Pair; make-pair)
-open Sums public using (Either; either)
+open Sums public using (lub; bottom)
 
 module _ {i j} {{C : Cat i j}} where
-  module _ {{S : Sums C}} where open Sums S renaming (Either to _∨_; either to [_,_]) public
+  module _ {{S : Sums C}} where open Sums S public
   module _ {{P : Products C}} where
     open Products P renaming (Pair to _∧_; make-pair to ⟨_,_⟩) public
-
-instance
-  joins→sums : ∀{i j} (C : Cat i j) (J : Joins C) → Sums C
-  joins→sums C J .Either a b = Joins.join J a b .a∨b
-  joins→sums C J .Sums.in₁ = Joins.join J _ _ .∨I₁
-  joins→sums C J .Sums.in₂ = Joins.join J _ _ .∨I₂
-  joins→sums C J .either = Joins.join J _ _ .∨E
-  joins→sums C J .Sums.bot = Joins.bottom J .proj₁
-  joins→sums C J .Sums.bot≤ = Joins.bottom J .proj₂
 
  --- CC means "cartesian closed".
 record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
@@ -255,7 +240,8 @@ instance
     where open import Data.Product
 
   set-sums : ∀{i} -> Sums (sets {i})
-  set-sums = Sums: _⊎_ inj₁ inj₂ Data.Sum.[_,_] (Lift ⊥) (λ { (lift ()) })
+  lub set-sums a b = a ⊎ b / inj₁ / inj₂ / Data.Sum.[_,_]
+  bottom set-sums = Lift ⊥ , λ { (lift ()) }
 
   set-cc : ∀{i} -> CC (sets {i})
   set-cc = CC: Function (λ { (f , a) -> f a }) (λ f x y -> f (x , y))
@@ -274,30 +260,23 @@ instance
                            ⊤-cat (fun ≤top)
 
   cat-sums : ∀{i j} -> Sums (cats {i}{j})
-  cat-sums {i}{j} = Sums: cat+ (fun rel₁) (fun rel₂) disj ⊥-cat (Fun: bot≤ λ { {lift ()} })
-    where disj : ∀ {a b c : Cat i j} -> a ≤ c -> b ≤ c -> cat+ a b ≤ c
+  lub cat-sums a b = cat+ a b / fun rel₁ / fun rel₂ / disj
+    where disj : ∀{a b c} -> a ≤ c -> b ≤ c -> cat+ a b ≤ c
           disj F G = Fun: [ ap F , ap G ] (λ { (rel₁ x) → map F x ; (rel₂ x) → map G x })
+  bottom cat-sums = ⊥-cat , Fun: bot≤ λ { {lift ()} }
 
   cat-Π : ∀{i j k} -> SetΠ k (cats {i ⊔ k} {j ⊔ k})
   cat-Π = SetΠ: catΠ (λ Γ→P → fun (λ γ a → Γ→P a .map γ)) (λ a → fun (λ ∀P≤ → ∀P≤ a))
 
  -- Preserving cartesian structure over operations on categories.
--- TODO: do I use cat×-sums anywhere? (I don't use cat×-joins, yet.)
-module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
-  private instance cc = C; cs = P; dd = D; ds = Q
-  cat×-sums : Sums (cat× C D)
-  _∨_ {{cat×-sums}} (a , x) (b , y) = (a ∨ b) , (x ∨ y)
-  in₁ {{cat×-sums}} = in₁ , in₁
-  in₂ {{cat×-sums}} = in₂ , in₂
-  [_,_] {{cat×-sums}} (f₁ , f₂) (g₁ , g₂) = [ f₁ , g₁ ] , [ f₂ , g₂ ]
-  bot {{cat×-sums}} = bot , bot
-  bot≤ {{cat×-sums}} = bot≤ , bot≤
-
-  cat×-joins : Joins (cat× C D)
-  Joins.join cat×-joins (a , x) (b , y)
-    = (a ∨ b) , (x ∨ y) / in₁ , in₁ / in₂ , in₂
-    / λ { (f₁ , f₂) (g₁ , g₂) → [ f₁ , g₁ ] , [ f₂ , g₂ ] }
-  Joins.bottom cat×-joins = (bot , bot) , bot≤ , bot≤
+-- -- TODO: do I use cat×-sums anywhere?
+-- module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
+--   private instance cc = C; cs = P; dd = D; ds = Q
+--   cat×-sums : Sums (cat× C D)
+--   lub cat×-sums (a , x) (b , y)
+--     = (a ∨ b) , (x ∨ y) / in₁ , in₁ / in₂ , in₂
+--     / λ { (f₁ , f₂) (g₁ , g₂) → [ f₁ , g₁ ] , [ f₂ , g₂ ] }
+--   bottom cat×-sums = (bot , bot) , bot≤ , bot≤
 
 -- -- This is correct, but not yet useful.
 -- module _ {i j k} (A : Set i) {B} (P : ∀ a -> Sums {j}{k} (B a)) where

@@ -7,12 +7,10 @@ open import Cat
 Cx : Set1
 Cx = Type -> Set
 
-∅ : Cx
-∅ _ = ⊥
-
 hyp : Type -> Cx
 hyp = _≡_
 
+-- TODO: Stop using _∪_, use _∨_ instead.
 infixr 4 _∪_
 _∪_ : Cx -> Cx -> Cx
 (X ∪ Y) a = X a ⊎ Y a
@@ -32,23 +30,11 @@ X ⊆ Y = ∀ a -> X a -> Y a
 
 instance
   cxs : Cat _ _
-  cxs .Obj = Cx
-  cxs .Hom = _⊆_
-  cxs .ident _ = id
-  cxs .compo X⊆Y Y⊆Z x = X⊆Y x • Y⊆Z x
+  cxs = Cat: Cx _⊆_ (λ _ → id) (λ X⊆Y Y⊆Z x → X⊆Y x • Y⊆Z x)
 
--- -- ∪ forms coproducts on Cx under renaming.
---   cx-sums : Sums cxs
---   _∨_ {{cx-sums}} = _∪_
---   in₁ {{cx-sums}} _ = inj₁
---   in₂ {{cx-sums}} _ = inj₂
---   [_,_] {{cx-sums}} f g _ = [ f _ , g _ ]
---   bot {{cx-sums}} = ∅
---   bot≤ {{cx-sums}} _ ()
-
-  cx-joins : Joins cxs
-  Joins.join cx-joins a b = a ∪ b / (λ _ → inj₁) / (λ _ → inj₂) / λ f g x → [ f x , g x ]
-  Joins.bottom cx-joins = ∅ , λ _ ()
+  cx-sums : Sums cxs
+  lub cx-sums X Y = (λ a → X a ⊎ Y a) / (λ _ → inj₁) / (λ _ → inj₂) / λ f g x → [ f x , g x ]
+  bottom cx-sums = (λ a → ⊥) , λ _ ()
 
 ∪/⊆ : ∀ {X L R} -> L ⊆ R -> X ∪ L ⊆ X ∪ R
 ∪/⊆ = map∨ id

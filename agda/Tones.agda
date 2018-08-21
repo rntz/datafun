@@ -22,36 +22,16 @@ instance
   tones : Cat _ _
   tones = Cat: Tone _≺_ ≺refl λ { ≺refl g → g ; □≺ g → □≺ ; ≺◇ ≺refl → ≺◇ ; ≺◇ ≺◇ → ≺◇ }
 
-instance
-  tone-joins : Joins tones
-  Joins.join tone-joins ID ID = ID / ≺refl / ≺refl / λ x _ → x
-  Joins.join tone-joins OP OP = OP / ≺refl / ≺refl / λ x _ → x
-  Joins.join tone-joins ID OP = ◇ / ≺◇ / ≺◇ / λ { ≺refl () ; ≺◇ ≺◇ → ≺◇ }
-  Joins.join tone-joins OP ID = ◇ / ≺◇ / ≺◇ / λ { ≺refl () ; ≺◇ ≺◇ → ≺◇ }
-  Joins.join tone-joins □ U = U / □≺ / ≺refl / λ _ x → x
-  Joins.join tone-joins ◇ U = ◇ / ≺refl / ≺◇ / λ x _ → x
-  Joins.join tone-joins T □ = T / ≺refl / □≺ / λ x _ → x
-  Joins.join tone-joins T ◇ = ◇ / ≺◇ / ≺refl / λ _ x → x
-  Joins.bottom tone-joins = □ , □≺ 
-
--- tone-lub : ∀ T U -> Σ[ V ∈ Tone ] (T ≺ V × U ≺ V × (∀ {W} → T ≺ W → U ≺ W → V ≺ W))
--- tone-lub ID ID = ID , ≺refl , ≺refl , λ x _ → x
--- tone-lub OP OP = OP , ≺refl , ≺refl , λ x _ → x
--- tone-lub ID OP = ◇ , ≺◇ , ≺◇ , λ { ≺refl () ; ≺◇ ≺◇ → ≺refl }
--- tone-lub OP ID = ◇ , ≺◇ , ≺◇ , λ { ≺refl () ; ≺◇ ≺◇ → ≺refl }
--- tone-lub □ y = y , □≺ , ≺refl , λ □≺q y≺q → y≺q
--- tone-lub ◇ y = ◇ , ≺refl , ≺◇ , λ ◇≺q y≺q → ◇≺q
--- tone-lub x □ = x , ≺refl , □≺ , λ y≺q □≺q → y≺q
--- tone-lub x ◇ = ◇ , ≺◇ , ≺refl , λ x₁ x₂ → x₂
-
--- instance
---   tone-sums : Sums tones
---   Either tone-sums s t = tone-lub s t .proj₁
---   Sums.in₁ tone-sums = tone-lub _ _ .proj₂ .proj₁
---   Sums.in₂ tone-sums {s}{t} = tone-lub s t .proj₂ .proj₂ .proj₁
---   either tone-sums = tone-lub _ _ .proj₂ .proj₂ .proj₂
---   Sums.bot tone-sums = □
---   Sums.bot≤ tone-sums = □≺
+  tone-sums : Sums tones
+  lub tone-sums ID ID = ID / ≺refl / ≺refl / λ x _ → x
+  lub tone-sums OP OP = OP / ≺refl / ≺refl / λ x _ → x
+  lub tone-sums ID OP = ◇ / ≺◇ / ≺◇ / λ { ≺refl () ; ≺◇ ≺◇ → ≺◇ }
+  lub tone-sums OP ID = ◇ / ≺◇ / ≺◇ / λ { ≺refl () ; ≺◇ ≺◇ → ≺◇ }
+  lub tone-sums □ U = U / □≺ / ≺refl / λ _ x → x
+  lub tone-sums ◇ U = ◇ / ≺refl / ≺◇ / λ x _ → x
+  lub tone-sums T □ = T / ≺refl / □≺ / λ x _ → x
+  lub tone-sums T ◇ = ◇ / ≺◇ / ≺refl / λ _ x → x
+  bottom tone-sums = □ , □≺
 
 opp : ∀{i j} -> Cat i j -> Cat i j
 opp C = Cat: (Obj C) (λ a b → Hom C b a) (ident C) (λ f g → compo C g f)
