@@ -37,7 +37,7 @@ opp : ∀{i j} -> Cat i j -> Cat i j
 opp C = Cat: (Obj C) (λ a b → Hom C b a) (ident C) (λ f g → compo C g f)
 
 Opp : ∀{i j} -> cats {i}{j} ≤ cats
-Opp = Fun: opp (λ { (Fun: F f) → Fun: F f })
+Opp = Fun: opp λ { (fun f) → fun f }
 
 module _  {i j} (C : Cat i j) where
   data Path : (a b : Obj C) -> Set (i ⊔ j) where
@@ -59,7 +59,7 @@ paths : ∀{i j} -> Cat i j -> Cat i (i ⊔ j)
 paths C = Cat: (Obj C) (Path C) (path-by (ident C)) path-•
 
 Paths : ∀{i j} -> cats {i}{j} ≤ cats {i}{i ⊔ j}
-Paths = Fun: paths (λ { (fun f) → fun (path-fold _ (path-by ∘ f) path⁻¹ path-•) })
+Paths = Fun: paths λ { (fun f) → fun (path-fold _ (path-by ∘ f) path⁻¹ path-•) }
 
 -- -- FIXME: Need to capture the fact that we don't actually change the set, just the ordering.
 -- den : Fun tones (proset→ prosets prosets)

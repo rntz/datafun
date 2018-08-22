@@ -48,10 +48,10 @@ module Trees (C : Proset) where
   module _ (Sums : Sums C) where
     private instance s = Sums
     tree-⋁ : trees ⇒ C
-    ap tree-⋁ empty = bot
+    ap tree-⋁ empty = ⊥
     ap tree-⋁ (leaf x) = x
     ap tree-⋁ (node l r) = ap tree-⋁ l ∨ ap tree-⋁ r
-    map tree-⋁ empty≤ = bot≤
+    map tree-⋁ empty≤ = ⊥≤
     map tree-⋁ (leaf≤ x≤y) = x≤y
     map tree-⋁ (node≤ t≤u t≤v) = [ map tree-⋁ t≤u , map tree-⋁ t≤v ]
     map tree-⋁ (split₁ t≤u) = map tree-⋁ t≤u • in₁

@@ -32,12 +32,12 @@ open Change public
 
  -- Constructions on change structures
 ⊤-change ⊥-change : Change
-⊤-change = Change: {{top}} top (λ _ _ → ⊤) TT
-⊥-change = Change: {{bot}} top (λ { {lift ()} }) TT
+⊤-change = Change: {{⊤}} ⊤ (λ _ _ → ⊤) tt
+⊥-change = Change: {{⊥}} ⊤ (λ { {()} }) tt
 
 change-SL : (P : Proset) (S : Sums P) -> Change
 -- Hm, is this right? We don't use a≤b!
-change-SL P S = Change: {{P}} P (λ {a} {b} a≤b da → a ∨ da ≈ b) bot
+change-SL P S = Change: {{P}} P (λ {a} {b} a≤b da → a ∨ da ≈ b) ⊥
   where instance p = P; s = S
 
 change-bool : Change

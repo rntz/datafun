@@ -51,7 +51,3 @@ private
       Comonad.extract Wipe-comonad (mono , _) ()
       Comonad.extract Wipe-comonad (disc , a) = id
 
-    -- FIXME: remove this if unused
-    -- foo : ∀{a : Cx} -> ap Wipe a ≤ a
-    -- foo = extract Wipe
-

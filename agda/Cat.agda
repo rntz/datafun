@@ -29,7 +29,7 @@ open Fun public
 pattern fun {F} f = Fun: F f
 
 constant : ∀{i j k l C D} -> Obj D -> Fun {i}{j}{k}{l} C D
-constant {D = D} x = Fun: (λ _ -> x) (λ _ -> ident D)
+constant {D = D} x = Fun: (const x) (λ _ → ident D)
 
 
 -- This isn't really an isomorphism, it's just a pair of arrows in both
@@ -99,10 +99,10 @@ record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   [ f , g ] = lub _ _ .∨E f g
 
   -- TODO: rename to ⊥, ⊥≤?
-  bot : Obj C;                  bot = proj₁ bottom
-  bot≤ : ∀{a} -> bot ≤ a;       bot≤ = proj₂ bottom
+  ⊥ : Obj C;                    ⊥ = proj₁ bottom
+  ⊥≤ : ∀{a} -> ⊥ ≤ a;           ⊥≤ = proj₂ bottom
   idem∨ : ∀{a} -> a ∨ a ≤ a;    idem∨ = [ id , id ]
-  a∨⊥≈a : ∀{a} -> a ∨ bot ≈ a;  a∨⊥≈a = [ id , bot≤ ] , in₁
+  a∨⊥≈a : ∀{a} -> a ∨ ⊥ ≈ a;    a∨⊥≈a = [ id , ⊥≤ ] , in₁
 
   map∨ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
   map∨ f g = [ f • in₁ , g • in₂ ]
@@ -124,8 +124,11 @@ record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
   field π₁ : ∀{a b} -> Pair a b ≤ a
   field π₂ : ∀{a b} -> Pair a b ≤ b
   field make-pair : ∀{a b Γ} -> Γ ≤ a -> Γ ≤ b -> Γ ≤ Pair a b
-  field top : Obj C
-  field ≤top : ∀{a} -> a ≤ top
+  field ⊤ : Obj C
+  field ≤⊤ : ∀{a} -> a ≤ ⊤
+
+  π : (d : Bool) → ∀{a b} → Pair a b ≤ (if d then a else b)
+  π true = π₁; π false = π₂
 
   map∧ : ∀{a b c d} -> a ≤ c -> b ≤ d -> Pair a b ≤ Pair c d
   map∧ f g = make-pair (π₁ • f) (π₂ • g)
@@ -222,11 +225,7 @@ record SetΠ k {i j} (C : Cat i j) : Set (i ⊔ j ⊔ suc k) where
 module _ {i j k} {{C : Cat i j}} {{Pi : SetΠ k C}} where open SetΠ Pi public
 
  -- Some useful categories & their structures.
-pattern TT = lift tt
-
-⊤-cat ⊥-cat : ∀{i j} -> Cat i j
-⊥-cat = Cat: (Lift ⊥) (λ { (lift ()) }) (λ { {lift ()} }) (λ { {lift ()} })
-⊤-cat = Cat: (Lift ⊤) (λ _ _ -> Lift ⊤) TT (λ _ _ → TT)
+pattern tt = lift unit
 
 instance
   sets : ∀{i} -> Cat (suc i) i
@@ -236,12 +235,12 @@ instance
   compo sets f g x = g (f x)
 
   set-products : ∀{i} -> Products (sets {i})
-  set-products = Products: _×_ proj₁ proj₂ <_,_> (Lift ⊤) (λ _ → TT)
+  set-products = Products: _×_ proj₁ proj₂ <_,_> (Lift Unit) _
     where open import Data.Product
 
   set-sums : ∀{i} -> Sums (sets {i})
   lub set-sums a b = a ⊎ b / inj₁ / inj₂ / Data.Sum.[_,_]
-  bottom set-sums = Lift ⊥ , λ { (lift ()) }
+  bottom set-sums = Lift ∅ , λ{()}
 
   set-cc : ∀{i} -> CC (sets {i})
   set-cc = CC: Function (λ { (f , a) -> f a }) (λ f x y -> f (x , y))
@@ -250,40 +249,33 @@ instance
   set-Π = SetΠ: (λ A P → (x : A) -> P x) (λ Γ→P γ a → Γ→P a γ) (λ a ∀P → ∀P a)
 
   cats : ∀{i j} -> Cat (suc (i ⊔ j)) (i ⊔ j)
-  Obj (cats {i}{j}) = Cat i j
-  Hom cats = Fun
-  ident cats = fun id
-  compo cats (fun f) (fun g) = fun (f • g)
+  cats {i}{j} = Cat: (Cat i j) Fun (fun id) λ { (fun f) (fun g) → fun (f • g) }
 
+⊤-cat ⊥-cat : ∀{i j} -> Cat i j
+⊥-cat = Cat: ⊥ (λ{()}) (λ { {()} }) λ { {()} }
+⊤-cat = Cat: (Lift Unit) (λ _ _ -> Lift Unit) tt const
+
+instance
   cat-products : ∀{i j} -> Products (cats {i}{j})
   cat-products = Products: cat× (fun π₁) (fun π₂) (λ { (fun f) (fun g) → fun ⟨ f , g ⟩ })
-                           ⊤-cat (fun ≤top)
+                           ⊤-cat (fun ≤⊤)
 
   cat-sums : ∀{i j} -> Sums (cats {i}{j})
   lub cat-sums a b = cat+ a b / fun rel₁ / fun rel₂ / disj
     where disj : ∀{a b c} -> a ≤ c -> b ≤ c -> cat+ a b ≤ c
-          disj F G = Fun: [ ap F , ap G ] (λ { (rel₁ x) → map F x ; (rel₂ x) → map G x })
-  bottom cat-sums = ⊥-cat , Fun: bot≤ λ { {lift ()} }
+          disj F G = Fun: [ ap F , ap G ] λ { (rel₁ x) → map F x ; (rel₂ x) → map G x }
+  bottom cat-sums = ⊥-cat , Fun: ⊥≤ λ{ {()} }
 
   cat-Π : ∀{i j k} -> SetΠ k (cats {i ⊔ k} {j ⊔ k})
   cat-Π = SetΠ: catΠ (λ Γ→P → fun (λ γ a → Γ→P a .map γ)) (λ a → fun (λ ∀P≤ → ∀P≤ a))
 
- -- Preserving cartesian structure over operations on categories.
--- -- TODO: do I use cat×-sums anywhere?
--- module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
---   private instance cc = C; cs = P; dd = D; ds = Q
---   cat×-sums : Sums (cat× C D)
---   lub cat×-sums (a , x) (b , y)
---     = (a ∨ b) , (x ∨ y) / in₁ , in₁ / in₂ , in₂
---     / λ { (f₁ , f₂) (g₁ , g₂) → [ f₁ , g₁ ] , [ f₂ , g₂ ] }
---   bottom cat×-sums = (bot , bot) , bot≤ , bot≤
 
--- -- This is correct, but not yet useful.
--- module _ {i j k} (A : Set i) {B} (P : ∀ a -> Sums {j}{k} (B a)) where
---   catΠ-sums : Sums (catΠ A B)
---   Sums._∨_ catΠ-sums f g x = P x .Sums._∨_ (f x) (g x)
---   Sums.in₁ catΠ-sums x = P x .Sums.in₁
---   Sums.in₂ catΠ-sums x = P x .Sums.in₂
---   Sums.[_,_] catΠ-sums f g x = P x .Sums.[_,_] (f x) (g x)
---   Sums.bot catΠ-sums x = P x .Sums.bot
---   Sums.bot≤ catΠ-sums x = P x .Sums.bot≤
+ -- Preserving cartesian structure over operations on categories.
+module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
+  private instance cc = C; cs = P; dd = D; ds = Q
+  -- used in {Proset,Change}Sem/Types*.agda
+  cat×-sums : Sums (cat× C D)
+  lub cat×-sums (a , x) (b , y)
+    = (a ∨ b) , (x ∨ y) / in₁ , in₁ / in₂ , in₂
+    / λ { (f₁ , f₂) (g₁ , g₂) → [ f₁ , g₁ ] , [ f₂ , g₂ ] }
+  bottom cat×-sums = (⊥ , ⊥) , ⊥≤ , ⊥≤

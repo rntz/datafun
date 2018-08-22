@@ -78,7 +78,7 @@ instance
   Comonad.extract Isos-comonad = fun proj₁
 
  -- Some lemmas about isos.
-⊤⇒isos : top ⇒ isos top
+⊤⇒isos : ⊤ ⇒ isos ⊤
 ⊤⇒isos = fun (λ {TT  → TT , TT})
 
 juggle : ∀{i j k l} {A B C D}
@@ -108,9 +108,9 @@ module _ {i j} {{A : Cat i j}} {{Sum : Sums A}} where
   juggle∨≈ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≈ (a ∨ c) ∨ (b ∨ d)
   juggle∨≈ = juggle∨ , juggle∨
 
-  -- -- TODO: where is this used?
-  -- ∨≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∨ b) ≈ (a' ∨ b')
-  -- ∨≈ f g = map Isos functor∨ .map (juggle (f , g))
+  -- Used in ChangeSem/Types*.agda
+  ∨≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∨ b) ≈ (a' ∨ b')
+  ∨≈ f g = map Isos functor∨ .map (juggle (f , g))
 
 
 -- Lifts an arbitrary function over an antisymmetric domain into a monotone map

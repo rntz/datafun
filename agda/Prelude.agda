@@ -4,13 +4,13 @@ module Prelude where
 open import Level public
 
 open import Data.Bool public using (Bool; true; false; not; if_then_else_)
-open import Data.Empty public using (⊥; ⊥-elim)
+open import Data.Empty public using () renaming (⊥ to ∅; ⊥-elim to ∅-elim)
 open import Data.Maybe public using (Maybe; just; nothing; maybe)
 open import Data.Nat public using (ℕ)
 open import Data.Product public using (Σ; proj₁; proj₂; Σ-syntax; ∃; ∄; _×_; _,_)
 open import Data.Sum public using (_⊎_; inj₁; inj₂)
-open import Data.Unit public using (⊤; tt)
-open import Function public using (_∘_; _on_)
+open import Data.Unit public using () renaming (⊤ to Unit; tt to unit)
+open import Function public using (_∘_; _on_; const)
 open import Relation.Nullary public using (¬_; Dec; yes; no)
 open import Relation.Binary public
   using (Rel; Reflexive; Transitive; Symmetric; Antisymmetric; Decidable; _=[_]⇒_)
@@ -28,6 +28,9 @@ Function A B = A -> B
 
 coerce : ∀{i}{A B : Set i} -> A ≡ B -> A -> B
 coerce = Eq.subst (λ x → x)
+
+ignore : ∀{i j} {A : Set i} {B : Set j} → A → B → B
+ignore = λ x y → y
 
 -- A better version of Data.Product.,_
 infixr 4 ,_
