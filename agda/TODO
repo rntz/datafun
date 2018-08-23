@@ -1,0 +1,13 @@
+- make a dependency graph of all modules. agda --dependency or something can do it.
+  see https://github.com/Toxaris/filter-agda-dependency-graph
+
+- avoid naming conflict: Cat.bottom, Datafun.bottom
+
+- rewrite Products in the style of Sums
+- rename bot and bot≤ to ⊥ and ⊥≤.
+- stop using ∪ and use ∨ instead.
+- Prosets.agda:169: revisit with copattern syntax.
+
+- clean up ACC, it's a mess and I don't know what's used by what.
+- do I use CatOmega* anywhere? I think they're just wankery.
+- Lambdas. Either work on it or put it in a different repo.
