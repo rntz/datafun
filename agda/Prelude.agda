@@ -9,7 +9,7 @@ open import Data.Maybe public using (Maybe; just; nothing; maybe)
 open import Data.Nat public using (ℕ)
 open import Data.Product public using (Σ; proj₁; proj₂; Σ-syntax; ∃; ∄; _×_; _,_)
 open import Data.Sum public using (_⊎_; inj₁; inj₂)
-open import Data.Unit public using () renaming (⊤ to Unit; tt to unit)
+open import Data.Unit public using (tt) renaming (⊤ to Unit)
 open import Function public using (_∘_; _on_; const)
 open import Relation.Nullary public using (¬_; Dec; yes; no)
 open import Relation.Binary public

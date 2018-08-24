@@ -1,6 +1,5 @@
 module Changes3 where
 
-open import Cast
 open import Cat
 open import Prelude
 open import Prosets
@@ -32,8 +31,8 @@ open Change public
 
  -- Constructions on change structures
 ⊤-change ⊥-change : Change
-⊤-change = Change: {{⊤}} ⊤ (λ _ _ → ⊤) tt
-⊥-change = Change: {{⊥}} ⊤ (λ { {()} }) tt
+⊤-change = Change: {{⊤}} ⊤ (λ _ _ → ⊤) TT
+⊥-change = Change: {{⊥}} ⊤ (λ { {()} }) TT
 
 change-SL : (P : Proset) (S : Sums P) -> Change
 -- Hm, is this right? We don't use a≤b!

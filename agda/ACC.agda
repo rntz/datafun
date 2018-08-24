@@ -121,7 +121,7 @@ module DefnClassical where
   -- really not sure it is!
 
   -- Let's try proving it for some types and constructions.
-  ¬3bools : ∀{a b c} -> ¬ bool≤ a b -> ¬ bool≤ b c -> ⊥
+  ¬3bools : ∀{a b c} -> ¬ bool≤ a b -> ¬ bool≤ b c -> ∅
   ¬3bools {false}         p q = p f≤*
   ¬3bools {true}  {false} p q = q f≤*
   ¬3bools {true}  {true}  p q = p id
@@ -178,7 +178,7 @@ module DefnStream where
     -- ACC = "there are no strictly ascending chains"
     -- I don't think this is strong enough to prove fix halts!
     ACC : Set
-    ACC = ∀ (S : Stream (Obj P)) (asc : Chain _<_ S) -> ⊥
+    ACC = ∀ (S : Stream (Obj P)) (asc : Chain _<_ S) -> ∅
 
   -- -- Ok, let's prove some ACC constructions.
   -- module _ {A B} (A≤? : Decidable≤ A) (B≤? : Decidable≤ B) (P : ACC A) (Q : ACC B) where

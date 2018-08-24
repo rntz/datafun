@@ -51,7 +51,6 @@ data rel+ {i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) : Rel (A ⊎ B) (j �
   rel₁ : ∀{a b} -> R a b -> rel+ R S (inj₁ a) (inj₁ b)
   rel₂ : ∀{a b} -> S a b -> rel+ R S (inj₂ a) (inj₂ b)
 
--- I would really like to make these instances but that makes Agda loooooooop.
 cat× cat+ : ∀{i j k l} (C : Cat i j) (D : Cat k l) -> Cat _ _
 cat× C D .Obj = Obj C × Obj D
 cat× C D .Hom = rel× (Hom C) (Hom D)
@@ -65,8 +64,7 @@ cat+ C D .ident {inj₂ _} = rel₂ (ident D)
 cat+ C D .compo (rel₁ x) (rel₁ y) = rel₁ (compo C x y)
 cat+ C D .compo (rel₂ x) (rel₂ y) = rel₂ (compo D x y)
 
--- "Indexed product of categories"?
--- Does this deserve to be its own typeclass, like Sums and Products?
+-- Indexed product of categories.
 catΠ : ∀{i j k} (A : Set i) (B : A -> Cat j k) -> Cat (j ⊔ i) (k ⊔ i)
 catΠ A B .Obj     = ∀ x -> B x .Obj
 catΠ A B .Hom f g = ∀ x -> B x .Hom (f x) (g x)
@@ -88,8 +86,8 @@ open SumOf public
 record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor Sums:
   private instance the-cat = C
-  field lub : ∀ a b → SumOf C a b
   field bottom : Σ[ ⊥ ∈ _ ] ∀{a} → ⊥ ≤ a
+  field lub : ∀ a b → SumOf C a b
 
   infixr 2 _∨_
   _∨_ : BinOp (Obj C); a ∨ b = lub a b .a∨b
@@ -193,12 +191,11 @@ open CC public using (hom)
 module _ {i j} {{C : Cat i j}} {{cc : CC C}} where
   open CC cc public renaming (hom to _⇨_) hiding (products)
 
- --- Possibly-infinitary products
+ --- Set-indexed products.
 record SetΠ k {i j} (C : Cat i j) : Set (i ⊔ j ⊔ suc k) where
   constructor SetΠ:
   private instance the-cat = C
   field Π : (A : Set k) (P : A -> Obj C) -> Obj C
-  -- Do I need projection and an introduction form?
   field Πi : ∀{A P Γ} (Γ→P : (a : A) -> Γ ≤ P a) -> Γ ≤ Π A P
   field Πe : ∀{A P} (a : A) -> Π A P ≤ P a
 
@@ -225,7 +222,7 @@ record SetΠ k {i j} (C : Cat i j) : Set (i ⊔ j ⊔ suc k) where
 module _ {i j k} {{C : Cat i j}} {{Pi : SetΠ k C}} where open SetΠ Pi public
 
  -- Some useful categories & their structures.
-pattern tt = lift unit
+pattern TT = lift tt
 
 instance
   sets : ∀{i} -> Cat (suc i) i
@@ -239,8 +236,8 @@ instance
     where open import Data.Product
 
   set-sums : ∀{i} -> Sums (sets {i})
-  lub set-sums a b = a ⊎ b / inj₁ / inj₂ / Data.Sum.[_,_]
   bottom set-sums = Lift ∅ , λ{()}
+  lub set-sums a b = a ⊎ b / inj₁ / inj₂ / Data.Sum.[_,_]
 
   set-cc : ∀{i} -> CC (sets {i})
   set-cc = CC: Function (λ { (f , a) -> f a }) (λ f x y -> f (x , y))
@@ -253,7 +250,7 @@ instance
 
 ⊤-cat ⊥-cat : ∀{i j} -> Cat i j
 ⊥-cat = Cat: ⊥ (λ{()}) (λ { {()} }) λ { {()} }
-⊤-cat = Cat: (Lift Unit) (λ _ _ -> Lift Unit) tt const
+⊤-cat = Cat: (Lift Unit) (λ _ _ -> Lift Unit) TT const
 
 instance
   cat-products : ∀{i j} -> Products (cats {i}{j})
@@ -261,10 +258,10 @@ instance
                            ⊤-cat (fun ≤⊤)
 
   cat-sums : ∀{i j} -> Sums (cats {i}{j})
+  bottom cat-sums = ⊥-cat , Fun: ⊥≤ λ{ {()} }
   lub cat-sums a b = cat+ a b / fun rel₁ / fun rel₂ / disj
     where disj : ∀{a b c} -> a ≤ c -> b ≤ c -> cat+ a b ≤ c
           disj F G = Fun: [ ap F , ap G ] λ { (rel₁ x) → map F x ; (rel₂ x) → map G x }
-  bottom cat-sums = ⊥-cat , Fun: ⊥≤ λ{ {()} }
 
   cat-Π : ∀{i j k} -> SetΠ k (cats {i ⊔ k} {j ⊔ k})
   cat-Π = SetΠ: catΠ (λ Γ→P → fun (λ γ a → Γ→P a .map γ)) (λ a → fun (λ ∀P≤ → ∀P≤ a))
@@ -275,7 +272,7 @@ module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
   private instance cc = C; cs = P; dd = D; ds = Q
   -- used in {Proset,Change}Sem/Types*.agda
   cat×-sums : Sums (cat× C D)
+  bottom cat×-sums = (⊥ , ⊥) , ⊥≤ , ⊥≤
   lub cat×-sums (a , x) (b , y)
     = (a ∨ b) , (x ∨ y) / in₁ , in₁ / in₂ , in₂
     / λ { (f₁ , f₂) (g₁ , g₂) → [ f₁ , g₁ ] , [ f₂ , g₂ ] }
-  bottom cat×-sums = (⊥ , ⊥) , ⊥≤ , ⊥≤

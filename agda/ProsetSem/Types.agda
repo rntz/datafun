@@ -30,7 +30,7 @@ type (a + b) = type a ∨ type b
 ⟦ X ⟧ = catΠ (Vars X) (λ v -> ⟦ proj₁ v ⟧₁)
 
 ⟦_⟧+ : Premise -> Proset
-⟦ nil ⟧+    = top
+⟦ nil ⟧+    = ⊤
 ⟦ P , Q ⟧+  = cat× ⟦ P ⟧+ ⟦ Q ⟧+
 ⟦ □ P ⟧+    = isos ⟦ P ⟧+
 ⟦ X ▷ P ⟧+  = ⟦ X ⟧ ⇨ ⟦ P ⟧+

@@ -33,8 +33,8 @@ instance
   cxs = Cat: Cx _⊆_ (λ _ → id) (λ X⊆Y Y⊆Z x → X⊆Y x • Y⊆Z x)
 
   cx-sums : Sums cxs
-  lub cx-sums X Y = (λ a → X a ⊎ Y a) / (λ _ → inj₁) / (λ _ → inj₂) / λ f g x → [ f x , g x ]
   bottom cx-sums = (λ a → ⊥) , λ _ ()
+  lub cx-sums X Y = (λ a → X a ⊎ Y a) / (λ _ → inj₁) / (λ _ → inj₂) / λ f g x → [ f x , g x ]
 
 ∪/⊆ : ∀ {X L R} -> L ⊆ R -> X ∪ L ⊆ X ∪ R
 ∪/⊆ = map∨ id

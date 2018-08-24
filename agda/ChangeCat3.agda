@@ -27,6 +27,7 @@ instance
   ≤⊤ {{change-products}} = cfun ≤⊤ ≤⊤ (λ _ → tt)
 
   change-sums : Sums changes
+  bottom change-sums = ⊥-change , cfun ⊥≤ (π₁ • Fun: ⊥≤ λ { {()} }) λ { {_} {()} }
   lub change-sums a b .a∨b = change+ a b
   lub change-sums a b .∨I₁ = cfun in₁ (π₂ • in₁) rel₁
   lub change-sums a b .∨I₂ = cfun in₂ (π₂ • in₂) rel₂
@@ -39,7 +40,6 @@ instance
           fail = curry (constant (dummy C))
   lub change-sums a b .∨E f g .is-id (rel₁ da) = is-id f da
   lub change-sums a b .∨E f g .is-id (rel₂ db) = is-id g db
-  bottom change-sums = ⊥-change , cfun ⊥≤ (π₁ • Fun: ⊥≤ λ { {()} }) λ { {_} {()} }
 
   change-cc : CC changes
   CC.products change-cc = change-products

@@ -42,17 +42,16 @@ instance
   curry {{proset-cc}} {A}{B}{C} F .ap a .map b   = map F (ident A , b)
   curry {{proset-cc}} {A}{B}{C} F .map a≤a' b≤b' = map F (a≤a' , b≤b')
 
--- -- If B has sums, then (A ⇒ B) has sums too.
--- module _ {A B : Proset} (bs : Sums B) where
---   private instance b' = B; bs' = bs
---   -- TODO: do I use this anywhere?
---   proset→-sums : Sums (proset→ A B)
---   lub proset→-sums F G .a∨b .ap x = ap F x ∨ ap G x
---   lub proset→-sums F G .a∨b .map x≤y = map∨ (map F x≤y) (map G x≤y)
---   lub proset→-sums F G .∨I₁ x≤y = map F x≤y • in₁
---   lub proset→-sums F G .∨I₂ x≤y = map G x≤y • in₂
---   lub proset→-sums F G .∨E F≤H G≤H x≤y = [ F≤H x≤y , G≤H x≤y ]
---   bottom proset→-sums = constant bot , λ _ → bot≤
+-- If B has sums, then (A ⇒ B) has sums too. Used in ProsetSem.Types.
+module _ {A B : Proset} (bs : Sums B) where
+  private instance b' = B; bs' = bs
+  proset→-sums : Sums (proset→ A B)
+  lub proset→-sums F G .a∨b .ap x = ap F x ∨ ap G x
+  lub proset→-sums F G .a∨b .map x≤y = map∨ (map F x≤y) (map G x≤y)
+  lub proset→-sums F G .∨I₁ x≤y = map F x≤y • in₁
+  lub proset→-sums F G .∨I₂ x≤y = map G x≤y • in₂
+  lub proset→-sums F G .∨E F≤H G≤H x≤y = [ F≤H x≤y , G≤H x≤y ]
+  bottom proset→-sums = constant ⊥ , λ _ → ⊥≤
 
 
 -- The "equivalence quotient" of a proset. Not actually a category of
@@ -137,10 +136,10 @@ instance
   compo bools t≤t t≤t = t≤t
 
   bool-sums : Sums bools
+  bottom bool-sums = false , f≤*
   lub bool-sums false y = y / f≤* / id / λ p q → q
   lub bool-sums true true = true / t≤t / t≤t / λ p q → p
   lub bool-sums true false = true / t≤t / f≤* / λ p q → p
-  bottom bool-sums = false , f≤*
 
   bool≤? : Decidable bool≤
   bool≤? false _     = yes f≤*
@@ -159,18 +158,17 @@ antisym:bool≤ t≤t _   = Eq.refl
 
 -- Natural numbers
 open import Data.Nat as Nat using (ℕ; z≤n; s≤s) renaming (_≤_ to _≤'_; _⊔_ to _⊔'_)
-import Data.Nat.Properties
+open import Data.Nat.Properties as ℕProp
 
 instance
   ℕ≤ : Proset
-  ℕ≤ = Cat: ℕ Nat._≤_ Data.Nat.Properties.≤-refl Data.Nat.Properties.≤-trans
+  ℕ≤ = Cat: ℕ Nat._≤_ ℕProp.≤-refl ℕProp.≤-trans
 
   -- ℕ forms a semilattice with 0 and ⊔ (max).
-  -- TODO: revisit this with copattern syntax.
   ℕ-sums : Sums ℕ≤
-  lub ℕ-sums ℕ.zero y = y / z≤n / id / λ p q → q
-  lub ℕ-sums x ℕ.zero = x / id / z≤n / λ p q → p
-  lub ℕ-sums (ℕ.suc x) (ℕ.suc y) with lub ℕ-sums x y
-  ... | x∨y / ∨I₁ / ∨I₂ / ∨E
-      = ℕ.suc x∨y / s≤s ∨I₁ / s≤s ∨I₂ / λ { (s≤s p) (s≤s q) → s≤s (∨E p q) }
   bottom ℕ-sums = 0 , z≤n
+  lub ℕ-sums x y = x Nat.⊔ y / ℕProp.m≤m⊔n x y / ℕProp.n≤m⊔n x y / ℕ⊔-is-lub
+    where ℕ⊔-is-lub : ∀{x y z} → x ≤ z → y ≤ z → x Nat.⊔ y ≤ z
+          ℕ⊔-is-lub z≤n b = b
+          ℕ⊔-is-lub (s≤s a) z≤n = s≤s a
+          ℕ⊔-is-lub (s≤s a) (s≤s b) = s≤s (ℕ⊔-is-lub a b)

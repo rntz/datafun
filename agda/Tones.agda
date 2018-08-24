@@ -23,6 +23,7 @@ instance
   tones = Cat: Tone _≺_ ≺refl λ { ≺refl g → g ; □≺ g → □≺ ; ≺◇ ≺refl → ≺◇ ; ≺◇ ≺◇ → ≺◇ }
 
   tone-sums : Sums tones
+  bottom tone-sums = □ , □≺
   lub tone-sums ID ID = ID / ≺refl / ≺refl / λ x _ → x
   lub tone-sums OP OP = OP / ≺refl / ≺refl / λ x _ → x
   lub tone-sums ID OP = ◇ / ≺◇ / ≺◇ / λ { ≺refl () ; ≺◇ ≺◇ → ≺◇ }
@@ -31,7 +32,6 @@ instance
   lub tone-sums ◇ U = ◇ / ≺refl / ≺◇ / λ x _ → x
   lub tone-sums T □ = T / ≺refl / □≺ / λ x _ → x
   lub tone-sums T ◇ = ◇ / ≺◇ / ≺refl / λ _ x → x
-  bottom tone-sums = □ , □≺
 
 opp : ∀{i j} -> Cat i j -> Cat i j
 opp C = Cat: (Obj C) (λ a b → Hom C b a) (ident C) (λ f g → compo C g f)

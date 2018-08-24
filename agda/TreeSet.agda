@@ -41,8 +41,8 @@ module Trees (C : Proset) where
 
   instance
     tree-sums : Sums trees
-    lub tree-sums a b = node a b / split₁ id / split₂ id / node≤
     bottom tree-sums = empty , empty≤
+    lub tree-sums a b = node a b / split₁ id / split₂ id / node≤
 
   -- Semilattice join / categorical sum lifted over trees, ⋁
   module _ (Sums : Sums C) where

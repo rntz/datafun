@@ -7,7 +7,7 @@ module CatOmega2 where
 -- http://cheng.staff.shef.ac.uk/guidebook/index.html ?
 -- https://arxiv.org/abs/1212.5853 ?
 
-open import Prelude hiding (⊤; ⊥; ⊥-elim)
+open import Prelude
 
 open import Data.Product hiding (map)
 open import Relation.Binary hiding (_⇒_)
@@ -166,6 +166,7 @@ setoid→wok S .assoc _ _ _ = boring
 
 
 -- Product of woks.
+{-# TERMINATING #-}
 wok× : ∀{i j A B} (V : Wok {i} A) (W : Wok {j} B) -> Wok (A × B)
 iso× : ∀{i j A B V W} {a₁ a₂ b₁ b₂} (F : Iso {i}{A} V a₁ b₁) (G : Iso {j}{B} W a₂ b₂)
      -> Iso (wok× V W) (a₁ , a₂) (b₁ , b₂)

@@ -116,6 +116,8 @@ data Premise : Set1 where
   _▷_ : (X : Cx) (P : Premise) -> Premise
   term : (a : Type) -> Premise
 
+-- PROBLEM: I use both "tt" and "bottom". argh!
+
 -- Term formers
 data _⊩_ : Premise -> Type -> Set where
   -- functions
@@ -149,7 +151,7 @@ data _⊩_ : Premise -> Type -> Set where
   --              = df v dg
   --
   -- So it looks like no.
-  bottom : ∀{a} -> Is SL a -> nil ⊩ a
+  empty : ∀{a} -> Is SL a -> nil ⊩ a
   join   : ∀{a} -> Is SL a -> term a , term a ⊩ a
   -- fixed points
   fix    : ∀{a} -> Is FIX a -> a is mono ▷ term a ⊩ a
