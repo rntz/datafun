@@ -1,4 +1,5 @@
 #!/bin/bash
+
 set -e
 echo "digraph {"
 
@@ -6,10 +7,9 @@ echo "digraph {"
 find . -iname '*.agda' '!' -name '.*' |
     sed -Ee 's,^\./,,;s,.agda$,,;s,/,.,g;s/.*/"&" [label="&"];/'
 
-# Generate edges. 
-# FIXME: This currently finds commented-out imports as well.
-find . -iname '*.agda' '!' -name '.*' |
+# Generate edges.
+find * -iname '*.agda' '!' -name '.*' |
     xargs egrep -o 'import [[:alnum:].]+' |
-    sed -Ee 's,^\./,",; s,\.agda,,; s,/,.,g; s,:import ," -> ",; s,$,";,'
+    sed -Ee 's/(.*).agda:import (.*)/"\1" -> "\2";/;s,/,.,g'
 
 echo "}"
