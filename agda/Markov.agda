@@ -42,9 +42,9 @@ module _ {i} {A : Set i} where
     more : ∀{p n} -> Terminates (step p) n -> Terminates (more p) (ℕ.suc n)
 
   -- You can extract the value of a terminating program.
-  run : ∀ {p n} -> Terminates p n -> A
-  run {done x} done = x
-  run (more t) = run t
+  terminates : ∀ {p n} -> Terminates p n -> A
+  terminates {done x} done = x
+  terminates (more t) = terminates t
 
   -- Given a bound `n`, we can decide whether a program terminates in ≤ n steps.
   terminates? : ∀ p n -> Dec (Terminates p n)
@@ -57,3 +57,6 @@ module _ {i} {A : Set i} where
   -- Markov implies that if a program weakly terminates, it terminates:
   markov-term : ∀{p} -> ∃? (Terminates p) -> ∃ (Terminates p)
   markov-term ex = markov (terminates? _) ex
+
+  markov-run : ∀{p} → ∃? (Terminates p) → A
+  markov-run t = terminates (markov-term t .proj₂)
