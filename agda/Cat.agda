@@ -72,34 +72,39 @@ catΠ A B .ident x     = B x .ident
 catΠ A B .compo f g x = B x .compo (f x) (g x)
 
  -- Cartesian structures.
---- Sums
+--- Sums and products
 module _ {i j} (C : Cat i j) where
   private instance the-cat = C
 
   infix 0 _/_/_/_
   record SumOf (a b : Obj C) : Set (i ⊔ j) where
     constructor _/_/_/_
+    infixr 2 a∨b
     field a∨b : Obj C
     field ∨I₁ : a ≤ a∨b
     field ∨I₂ : b ≤ a∨b
     field ∨E : ∀{c} → a ≤ c → b ≤ c → a∨b ≤ c
-  open SumOf public
+
+  record ProductOf (a b : Obj C) : Set (i ⊔ j) where
+    constructor _/_/_/_
+    -- TODO: ∧/∨ should have distinct precedences.
+    infixr 2 a∧b
+    field a∧b : Obj C
+    field ∧E₁ : a∧b ≤ a
+    field ∧E₂ : a∧b ≤ b
+    field ∧I : ∀{Γ} → Γ ≤ a → Γ ≤ b → Γ ≤ a∧b
+
+  open SumOf public; open ProductOf public
 
   record Sums : Set (i ⊔ j) where
     constructor Sums:
     field bottom : Σ[ ⊥ ∈ _ ] ∀{a} → ⊥ ≤ a
     field lub : ∀ a b → SumOf a b
 
-    infixr 2 _∨_
-    _∨_ : BinOp (Obj C); a ∨ b = lub a b .a∨b
-    in₁ : ∀{a b} -> a ≤ a ∨ b; in₁ = lub _ _ .∨I₁
-    in₂ : ∀{a b} -> b ≤ a ∨ b; in₂ = lub _ _ .∨I₂
-    [_,_] : ∀{a b c} -> a ≤ c -> b ≤ c -> a ∨ b ≤ c
-    [ f , g ] = lub _ _ .∨E f g
+    open Σ bottom public using () renaming (proj₁ to ⊥; proj₂ to ⊥≤)
+    module _ (a b : Obj C) where open SumOf (lub a b) public using () renaming (a∨b to _∨_)
+    module _ {a b : Obj C} where open SumOf (lub a b) public using () renaming (∨I₁ to in₁; ∨I₂ to in₂; ∨E to [_,_])
 
-    -- TODO: rename to ⊥, ⊥≤?
-    ⊥ : Obj C;                    ⊥ = proj₁ bottom
-    ⊥≤ : ∀{a} -> ⊥ ≤ a;           ⊥≤ = proj₂ bottom
     idem∨ : ∀{a} -> a ∨ a ≤ a;    idem∨ = [ id , id ]
     a∨⊥≈a : ∀{a} -> a ∨ ⊥ ≈ a;    a∨⊥≈a = [ id , ⊥≤ ] , in₁
 
@@ -113,53 +118,52 @@ module _ {i j} (C : Cat i j) where
     juggle∨ : ∀{a b c d} -> (a ∨ b) ∨ (c ∨ d) ≤ (a ∨ c) ∨ (b ∨ d)
     juggle∨ = [ map∨ in₁ in₁ , map∨ in₂ in₂ ]
 
-  --- Products
   record Products : Set (i ⊔ j) where
     constructor Products:
-    -- TODO: don't use an infix operator for this here
-    infixr 2 Pair
-    field Pair : BinOp (Obj C)
-    field π₁ : ∀{a b} -> Pair a b ≤ a
-    field π₂ : ∀{a b} -> Pair a b ≤ b
-    field make-pair : ∀{a b Γ} -> Γ ≤ a -> Γ ≤ b -> Γ ≤ Pair a b
-    field ⊤ : Obj C
-    field ≤⊤ : ∀{a} -> a ≤ ⊤
+    field top : Σ[ ⊤ ∈ _ ] ∀{a} → a ≤ ⊤
+    field glb : ∀ a b → ProductOf a b
 
-    π : (d : Bool) → ∀{a b} → Pair a b ≤ (if d then a else b)
+    open Σ top public using () renaming (proj₁ to ⊤; proj₂ to ≤⊤)
+    module _ (a b : Obj C) where open ProductOf (glb a b) public using () renaming (a∧b to _∧_)
+    module _ {a b : Obj C} where open ProductOf (glb a b) public using () renaming (∧I to ⟨_,_⟩; ∧E₁ to π₁; ∧E₂ to π₂)
+
+    -- TODO: remove this
+    π : (d : Bool) → ∀{a b} → a ∧ b ≤ (if d then a else b)
     π true = π₁; π false = π₂
 
-    map∧ : ∀{a b c d} -> a ≤ c -> b ≤ d -> Pair a b ≤ Pair c d
-    map∧ f g = make-pair (π₁ • f) (π₂ • g)
+    ∇ : ∀{a} -> a ≤ a ∧ a
+    ∇ = ⟨ id , id ⟩
+
+    swap : ∀{a b} -> a ∧ b ≤ b ∧ a
+    swap = ⟨ π₂ , π₁ ⟩
 
     -- Maybe factor out associativity into a separate structure?
-    assoc∧r : ∀{a b c} -> Pair (Pair a b) c ≤ Pair a (Pair b c)
-    assoc∧r = make-pair (π₁ • π₁) (make-pair (π₁ • π₂) π₂)
+    assoc∧r : ∀{a b c} -> (a ∧ b) ∧ c ≤ a ∧ (b ∧ c)
+    assoc∧r = ⟨ π₁ • π₁ , ⟨ (π₁ • π₂) , π₂ ⟩ ⟩
 
-    ∇ : ∀{a} -> a ≤ Pair a a
-    ∇ = make-pair id id
-
-    swap : ∀{a b} -> Pair a b ≤ Pair b a
-    swap = make-pair π₂ π₁
+    map∧ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∧ b ≤ c ∧ d
+    map∧ f g = ⟨ π₁ • f , π₂ • g ⟩
 
     functor∧ : Fun (cat× C C) C
     functor∧ = fun λ { (f , g) -> map∧ f g }
 
-    juggle∧ : ∀{a b c d} -> Pair (Pair a b) (Pair c d) ≤ Pair (Pair a c) (Pair b d)
-    juggle∧ = make-pair (map∧ π₁ π₁) (map∧ π₂ π₂)
+    juggle∧ : ∀{a b c d} -> (a ∧ b) ∧ (c ∧ d) ≤ (a ∧ c) ∧ (b ∧ d)
+    juggle∧ = ⟨ map∧ π₁ π₁ , map∧ π₂ π₂ ⟩
 
-open Products public using (Pair; make-pair)
-open Sums public using (lub; bottom)
+open Products public using (top; glb)
+open Sums public using (bottom; lub)
 
 module _ {i j} {{C : Cat i j}} where
   module _ {{S : Sums C}} where open Sums S public
-  module _ {{P : Products C}} where
-    open Products P renaming (Pair to _∧_; make-pair to ⟨_,_⟩) public
+  module _ {{P : Products C}} where open Products P public
 
  --- CC means "cartesian closed".
 record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   constructor CC:
   private instance the-cat = C
-  field overlap {{products}} : Products C
+  -- I used to have an "overlap" modifier on `products`. I removed it and
+  -- everything _seems_ ok. TODO: Is "overlap" necessary here?
+  field {{products}} : Products C
   -- TODO FIXME: shouldn't bind tighter than ∧.
   infixr 4 hom
   field hom : BinOp (Obj C)
@@ -230,8 +234,9 @@ instance
   compo sets f g x = g (f x)
 
   set-products : ∀{i} -> Products (sets {i})
-  set-products = Products: _×_ proj₁ proj₂ <_,_> (Lift Unit) _
-    where open import Data.Product
+  top set-products = Lift Unit , _
+  glb set-products a b = a × b / proj₁ / proj₂ / Data.Product.<_,_>
+    where import Data.Product
 
   set-sums : ∀{i} -> Sums (sets {i})
   bottom set-sums = Lift ∅ , λ{()}
@@ -252,8 +257,8 @@ instance
 
 instance
   cat-products : ∀{i j} -> Products (cats {i}{j})
-  cat-products = Products: cat× (fun π₁) (fun π₂) (λ { (fun f) (fun g) → fun ⟨ f , g ⟩ })
-                           ⊤-cat (fun ≤⊤)
+  top cat-products = ⊤-cat , fun ≤⊤
+  glb cat-products a b = cat× a b / fun π₁ / fun π₂ / λ { (fun f) (fun g) → fun ⟨ f , g ⟩ }
 
   cat-sums : ∀{i j} -> Sums (cats {i}{j})
   bottom cat-sums = ⊥-cat , Fun: ⊥≤ λ{ {()} }

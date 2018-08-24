@@ -18,13 +18,12 @@ instance
     cfun (f • g) (func&deriv F • dg) (fok • gok)
 
   change-products : Products changes
-  _∧_ {{change-products}} = change×
-  π₁ {{change-products}} = cfun π₁ (π₂ • π₁) π₁
-  π₂ {{change-products}} = cfun π₂ (π₂ • π₂) π₂
-  ⟨_,_⟩ {{change-products}} (cfun f df fok) (cfun g dg gok) =
+  change-products .top = ⊤-change , cfun ≤⊤ ≤⊤ (λ _ → TT)
+  change-products .glb a b .a∧b = change× a b
+  change-products .glb a b .∧E₁ = cfun π₁ (π₂ • π₁) π₁
+  change-products .glb a b .∧E₂ = cfun π₂ (π₂ • π₂) π₂
+  change-products .glb a b .∧I (cfun f df fok) (cfun g dg gok) =
     cfun ⟨ f , g ⟩ ⟨ df , dg ⟩ ⟨ fok , gok ⟩
-  ⊤ {{change-products}} = ⊤-change
-  ≤⊤ {{change-products}} = cfun ≤⊤ ≤⊤ (λ _ → tt)
 
   change-sums : Sums changes
   bottom change-sums = ⊥-change , cfun ⊥≤ (π₁ • Fun: ⊥≤ λ { {()} }) λ { {_} {()} }
