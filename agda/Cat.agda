@@ -72,82 +72,80 @@ catΠ A B .ident x     = B x .ident
 catΠ A B .compo f g x = B x .compo (f x) (g x)
 
  -- Cartesian structures.
- --- Sums
-infix 0 _/_/_/_
-record SumOf {i j} (C : Cat i j) (a b : Obj C) : Set (i ⊔ j) where
-  constructor _/_/_/_
-  private instance -C = C
-  field a∨b : Obj C
-  field ∨I₁ : a ≤ a∨b
-  field ∨I₂ : b ≤ a∨b
-  field ∨E : ∀{c} → a ≤ c → b ≤ c → a∨b ≤ c
-open SumOf public
-
-record Sums {i j} (C : Cat i j) : Set (i ⊔ j) where
-  constructor Sums:
+--- Sums
+module _ {i j} (C : Cat i j) where
   private instance the-cat = C
-  field bottom : Σ[ ⊥ ∈ _ ] ∀{a} → ⊥ ≤ a
-  field lub : ∀ a b → SumOf C a b
 
-  infixr 2 _∨_
-  _∨_ : BinOp (Obj C); a ∨ b = lub a b .a∨b
-  in₁ : ∀{a b} -> a ≤ a ∨ b; in₁ = lub _ _ .∨I₁
-  in₂ : ∀{a b} -> b ≤ a ∨ b; in₂ = lub _ _ .∨I₂
-  [_,_] : ∀{a b c} -> a ≤ c -> b ≤ c -> a ∨ b ≤ c
-  [ f , g ] = lub _ _ .∨E f g
+  infix 0 _/_/_/_
+  record SumOf (a b : Obj C) : Set (i ⊔ j) where
+    constructor _/_/_/_
+    field a∨b : Obj C
+    field ∨I₁ : a ≤ a∨b
+    field ∨I₂ : b ≤ a∨b
+    field ∨E : ∀{c} → a ≤ c → b ≤ c → a∨b ≤ c
+  open SumOf public
 
-  -- TODO: rename to ⊥, ⊥≤?
-  ⊥ : Obj C;                    ⊥ = proj₁ bottom
-  ⊥≤ : ∀{a} -> ⊥ ≤ a;           ⊥≤ = proj₂ bottom
-  idem∨ : ∀{a} -> a ∨ a ≤ a;    idem∨ = [ id , id ]
-  a∨⊥≈a : ∀{a} -> a ∨ ⊥ ≈ a;    a∨⊥≈a = [ id , ⊥≤ ] , in₁
+  record Sums : Set (i ⊔ j) where
+    constructor Sums:
+    field bottom : Σ[ ⊥ ∈ _ ] ∀{a} → ⊥ ≤ a
+    field lub : ∀ a b → SumOf a b
 
-  map∨ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
-  map∨ f g = [ f • in₁ , g • in₂ ]
+    infixr 2 _∨_
+    _∨_ : BinOp (Obj C); a ∨ b = lub a b .a∨b
+    in₁ : ∀{a b} -> a ≤ a ∨ b; in₁ = lub _ _ .∨I₁
+    in₂ : ∀{a b} -> b ≤ a ∨ b; in₂ = lub _ _ .∨I₂
+    [_,_] : ∀{a b c} -> a ≤ c -> b ≤ c -> a ∨ b ≤ c
+    [ f , g ] = lub _ _ .∨E f g
 
-  -- Used in Prosets.agda in ∨≈.
-  functor∨ : Fun (cat× C C) C
-  functor∨ = fun λ { (f , g) -> map∨ f g }
+    -- TODO: rename to ⊥, ⊥≤?
+    ⊥ : Obj C;                    ⊥ = proj₁ bottom
+    ⊥≤ : ∀{a} -> ⊥ ≤ a;           ⊥≤ = proj₂ bottom
+    idem∨ : ∀{a} -> a ∨ a ≤ a;    idem∨ = [ id , id ]
+    a∨⊥≈a : ∀{a} -> a ∨ ⊥ ≈ a;    a∨⊥≈a = [ id , ⊥≤ ] , in₁
 
-  juggle∨ : ∀{a b c d} -> (a ∨ b) ∨ (c ∨ d) ≤ (a ∨ c) ∨ (b ∨ d)
-  juggle∨ = [ map∨ in₁ in₁ , map∨ in₂ in₂ ]
+    map∨ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
+    map∨ f g = [ f • in₁ , g • in₂ ]
 
- --- Products
-record Products {i j} (C : Cat i j) : Set (i ⊔ j) where
-  constructor Products:
-  private instance the-cat = C
-  -- TODO: don't use an infix operator for this here
-  infixr 2 Pair
-  field Pair : BinOp (Obj C)
-  field π₁ : ∀{a b} -> Pair a b ≤ a
-  field π₂ : ∀{a b} -> Pair a b ≤ b
-  field make-pair : ∀{a b Γ} -> Γ ≤ a -> Γ ≤ b -> Γ ≤ Pair a b
-  field ⊤ : Obj C
-  field ≤⊤ : ∀{a} -> a ≤ ⊤
+    -- Used in Prosets.agda in ∨≈.
+    functor∨ : Fun (cat× C C) C
+    functor∨ = fun λ { (f , g) -> map∨ f g }
 
-  π : (d : Bool) → ∀{a b} → Pair a b ≤ (if d then a else b)
-  π true = π₁; π false = π₂
+    juggle∨ : ∀{a b c d} -> (a ∨ b) ∨ (c ∨ d) ≤ (a ∨ c) ∨ (b ∨ d)
+    juggle∨ = [ map∨ in₁ in₁ , map∨ in₂ in₂ ]
 
-  map∧ : ∀{a b c d} -> a ≤ c -> b ≤ d -> Pair a b ≤ Pair c d
-  map∧ f g = make-pair (π₁ • f) (π₂ • g)
+  --- Products
+  record Products : Set (i ⊔ j) where
+    constructor Products:
+    -- TODO: don't use an infix operator for this here
+    infixr 2 Pair
+    field Pair : BinOp (Obj C)
+    field π₁ : ∀{a b} -> Pair a b ≤ a
+    field π₂ : ∀{a b} -> Pair a b ≤ b
+    field make-pair : ∀{a b Γ} -> Γ ≤ a -> Γ ≤ b -> Γ ≤ Pair a b
+    field ⊤ : Obj C
+    field ≤⊤ : ∀{a} -> a ≤ ⊤
 
-  -- Maybe factor out associativity into a separate structure?
-  assoc∧r : ∀{a b c} -> Pair (Pair a b) c ≤ Pair a (Pair b c)
-  assoc∧r = make-pair (π₁ • π₁) (make-pair (π₁ • π₂) π₂)
+    π : (d : Bool) → ∀{a b} → Pair a b ≤ (if d then a else b)
+    π true = π₁; π false = π₂
 
-  ∇ : ∀{a} -> a ≤ Pair a a
-  ∇ = make-pair id id
+    map∧ : ∀{a b c d} -> a ≤ c -> b ≤ d -> Pair a b ≤ Pair c d
+    map∧ f g = make-pair (π₁ • f) (π₂ • g)
 
-  swap : ∀{a b} -> Pair a b ≤ Pair b a
-  swap = make-pair π₂ π₁
+    -- Maybe factor out associativity into a separate structure?
+    assoc∧r : ∀{a b c} -> Pair (Pair a b) c ≤ Pair a (Pair b c)
+    assoc∧r = make-pair (π₁ • π₁) (make-pair (π₁ • π₂) π₂)
 
-  -- This *could* be useful if cat× were an instance, but it's not.
-  -- instance
-  functor∧ : Fun (cat× C C) C
-  functor∧ = fun λ { (f , g) -> map∧ f g }
+    ∇ : ∀{a} -> a ≤ Pair a a
+    ∇ = make-pair id id
 
-  juggle∧ : ∀{a b c d} -> Pair (Pair a b) (Pair c d) ≤ Pair (Pair a c) (Pair b d)
-  juggle∧ = make-pair (map∧ π₁ π₁) (map∧ π₂ π₂)
+    swap : ∀{a b} -> Pair a b ≤ Pair b a
+    swap = make-pair π₂ π₁
+
+    functor∧ : Fun (cat× C C) C
+    functor∧ = fun λ { (f , g) -> map∧ f g }
+
+    juggle∧ : ∀{a b c d} -> Pair (Pair a b) (Pair c d) ≤ Pair (Pair a c) (Pair b d)
+    juggle∧ = make-pair (map∧ π₁ π₁) (map∧ π₂ π₂)
 
 open Products public using (Pair; make-pair)
 open Sums public using (lub; bottom)
