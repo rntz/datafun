@@ -2,7 +2,6 @@ module Classical where
 
 open import Prelude
 open import Cat
-open import Monads
 
 import Data.Product
 
@@ -15,10 +14,11 @@ import Data.Product
 ap ¬¬ a = ¬ ¬ a
 map ¬¬ f ¬¬a ¬b = ¬¬a (¬b ∘ f)
 
-instance
-  ¬¬Monad : ∀{i} -> Monad (¬¬ {i})
-  Monad.join ¬¬Monad = 3¬e
-  Monad.pure ¬¬Monad a ¬a = ¬a a
+-- open import Monads
+-- instance
+--   ¬¬Monad : ∀{i} -> Monad (¬¬ {i})
+--   Monad.join ¬¬Monad = 3¬e
+--   Monad.pure ¬¬Monad a ¬a = ¬a a
 
  -- Classical connectives
 infixr 1 _∨?_

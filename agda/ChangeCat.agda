@@ -48,7 +48,7 @@ instance
   ⟨_,_⟩ {{change-products}} (cfun f df fok) (cfun g dg gok) =
     cfun ⟨ f , g ⟩ ⟨ df , dg ⟩ ⟨ fok , gok ⟩
   ⊤ {{change-products}} = ⊤-change
-  ≤⊤ {{change-products}} = cfun ≤⊤ ≤⊤ (λ _ → tt)
+  ≤⊤ {{change-products}} = cfun ≤⊤ ≤⊤ (λ _ → TT)
 
   change-sums : Sums changes
   bottom change-sums = ⊥-change , cfun ⊥≤ (π₁ • Fun: ⊥≤ λ { {()} }) λ { {_} {()} }

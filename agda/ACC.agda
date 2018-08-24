@@ -5,7 +5,6 @@ module ACC where
 open import Prelude
 open import Cat
 open import Decidability
-open import Monads
 open import Prosets
 
 -- Observation: Maybe the nicest semantics of ACC for our purposes is over
