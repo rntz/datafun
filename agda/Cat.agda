@@ -127,10 +127,6 @@ module _ {i j} (C : Cat i j) where
     module _ (a b : Obj C) where open ProductOf (glb a b) public using () renaming (a∧b to _∧_)
     module _ {a b : Obj C} where open ProductOf (glb a b) public using () renaming (∧I to ⟨_,_⟩; ∧E₁ to π₁; ∧E₂ to π₂)
 
-    -- TODO: remove this
-    π : (d : Bool) → ∀{a b} → a ∧ b ≤ (if d then a else b)
-    π true = π₁; π false = π₂
-
     ∇ : ∀{a} -> a ≤ a ∧ a
     ∇ = ⟨ id , id ⟩
 
