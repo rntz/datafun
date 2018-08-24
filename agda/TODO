@@ -5,9 +5,8 @@
 - stop using ∪ and use ∨ instead
 
 - Figure out how I'll be handling ACC. ProsetSem.Types needs this.
-
   Answer: use "classical" definition of ACC & use Markov to do the fixed point
-  computation.
+  computation. So do I use ClassicalAcc.agda and throw away ACC.agda?
 
 - Lambdas.agda: Either work on it or put it in a different repo.
   Looks like there's an aborted attempt to use it in ProsetSem.Terms.
