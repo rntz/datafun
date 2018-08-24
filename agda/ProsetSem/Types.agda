@@ -37,8 +37,6 @@ type (a + b) = type a ∨ type b
 ⟦ term a ⟧+ = type a
 
  ---------- Semantics of type-classes ----------
--- open import ACC
-
 class : Class -> Proset -> Set
 class DEC  A = Decidable (Hom A)
 class SL   = Sums
