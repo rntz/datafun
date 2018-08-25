@@ -3,6 +3,7 @@ module Tones where
 open import Prelude
 open import Cat
 open import Prosets
+open import Action
 
 data Tone : Set where
   ID OP □ ◇ : Tone
@@ -32,6 +33,26 @@ instance
   lub tone-sums ◇ U = ◇ / ≺refl / ≺◇ / λ x _ → x
   lub tone-sums T □ = T / ≺refl / □≺ / λ x _ → x
   lub tone-sums T ◇ = ◇ / ≺◇ / ≺refl / λ _ x → x
+
+  tone-products : Products tones
+  top tone-products = ◇ , ≺◇
+  glb tone-products □ b = □ / id / □≺ / const
+  glb tone-products ◇ b = b / ≺◇ / id / ignore
+  glb tone-products a □ = □ / □≺ / id / ignore
+  glb tone-products a ◇ = a / id / ≺◇ / const
+  glb tone-products ID ID = ID / id / id / const
+  glb tone-products OP OP = OP / id / id / const
+  glb tone-products ID OP = □ / □≺ / □≺ / λ { ≺refl () ; □≺ □≺ → □≺ }
+  glb tone-products OP ID = □ / □≺ / □≺ / λ { ≺refl () ; □≺ □≺ → □≺ }
+
+  tone-compose : Action Tone Tone
+  action tone-compose ID T = T
+  action tone-compose T ID = T
+  action tone-compose T □ = □
+  action tone-compose T ◇ = ◇
+  action tone-compose □ OP = □
+  action tone-compose ◇ OP = ◇
+  action tone-compose OP OP = ID
 
 opp : ∀{i j} -> Cat i j -> Cat i j
 opp C = Cat: (Obj C) (λ a b → Hom C b a) (ident C) (λ f g → compo C g f)
