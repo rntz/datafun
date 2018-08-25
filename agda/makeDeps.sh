@@ -9,8 +9,8 @@ find * -iname '*.agda' '!' -name '.*' |
 # Generate edges. Assumes at most one import per line, but ignores commented-out
 # lines.
 find * -iname '*.agda' '!' -name '.*' |
-    xargs egrep 'import [[:alnum:].]+' |
+    xargs egrep 'import [^ ]+' |
     grep -v -- '--.*import' |
-    sed -Ee 's/(.*).agda:.*import ([[:alnum:].]+).*/"\1" -> "\2";/;s,/,.,g'
+    sed -Ee 's/^(.*).agda:.*import ([^ ]+).*/"\1" -> "\2";/;s,/,.,g'
 
 echo "}"
