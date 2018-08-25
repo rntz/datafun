@@ -275,3 +275,13 @@ module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
   lub cat×-sums (a , x) (b , y)
     = (a ∨ b) , (x ∨ y) / in₁ , in₁ / in₂ , in₂
     / λ { (f₁ , f₂) (g₁ , g₂) → [ f₁ , g₁ ] , [ f₂ , g₂ ] }
+
+-- Discrete category on a given set.
+discrete : ∀{i} → Set i → Cat _ _
+discrete A .Obj = A
+discrete A .Hom = _≡_
+discrete A .ident = refl
+discrete A .compo refl refl = refl
+
+Discrete : ∀{i} → Fun (sets {i}) cats
+Discrete = Fun: discrete λ f → Fun: f λ { refl → refl }
