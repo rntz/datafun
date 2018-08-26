@@ -43,12 +43,22 @@ mutual
   usage f (unbox U M) = U · usage f M
 
 rename : ∀{X Y} → X ≤ Y → ∀{a} → X ⊢ a → Y ⊢ a
+-- Is this even the right lemma? I don't think so.
+foo : ∀{X Y : Cx} (ρ : X ≤ Y) (f : ∀{a} → Y a → Tone) {a} (M : X ⊢ a)
+    → usage (f ∘ ρ _) M ≤ usage f (rename ρ M)
+
 rename ρ (var x) = var (ρ _ x)
 rename ρ (app M N) = app (rename ρ M) (rename ρ N)
 -- I need a lemma about the interaction of usage and rename!
-rename ρ (lam M p) = lam (rename (λ a → map∨ id (ρ a)) M) (p • {!!})
+rename ρ (lam M p) = lam (rename (λ a → map∨ id (ρ a)) M) (p • {!foo!})
 rename ρ (box T M) = box T (rename ρ M)
 rename ρ (unbox U M) = unbox U (rename ρ M)
+
+foo ρ f (var x) = id
+foo ρ f (app M N) = {!!}
+foo ρ f (lam M p) = {!!}
+foo ρ f (box T M) = {!!}
+foo ρ f (unbox U M) = {!!}
 
 -- foo : ∀{X Y : Cx} {a : Type} {f :  M ρ} → usage {X} f {a} M ≤ usage {Y} f (rename ρ M)
 -- foo = {!!}

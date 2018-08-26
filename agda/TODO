@@ -1,6 +1,10 @@
-- rewrite Products in the style of Sums
+- do I need ToneSem.agda? can I integrate it into Tones.agda?
 
-- implement MTLC with a pair of a context & a function mapping vars to modes.
+- consider how to make product & sum objects produced in the types of holes look
+  more reasonable. would going back to the old Product/Sum solve this? use "git
+  checkout" to see!
+
+- fix the precedences for ∨, ∧, ≤, ⊆, ∈, etc. Not so loose, and ∨ looser than ∧.
 
 - stop using ∪ and use ∨ instead
 
