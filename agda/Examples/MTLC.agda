@@ -120,3 +120,5 @@ rename f (var o p)  = var o (f (o , _) p)
 rename-at : ∀{X Y} o {a} -> X ⊆ Y -> X at o ⊢ a -> Y at o ⊢ a
 rename-at mono f M = rename f M
 rename-at disc f M = rename (map Wipe f) M
+
+-- TODO: substitution
