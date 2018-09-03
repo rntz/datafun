@@ -116,8 +116,6 @@ data Premise : Set1 where
   _▷_ : (X : Cx) (P : Premise) -> Premise
   term : (a : Type) -> Premise
 
--- PROBLEM: I use both "tt" and "bottom". argh!
-
 -- Term formers
 data _⊩_ : Premise -> Type -> Set where
   -- functions
@@ -143,7 +141,7 @@ data _⊩_ : Premise -> Type -> Set where
          -> term (set a p) , a is disc ▷ term b ⊩ b
   -- Semilattices. Do these need to be decidable, too?
   --
-  --     d(bot) = d(λx. bot) = λx dx. d(bot) = λ x dx. bot = bot
+  --     d(empty) = d(λx. empty) = λx dx. d(empty) = λ x dx. empty = empty
   --
   --     d(f ∨ g) = d(λx. f x ∨ g x)
   --              = λx dx. d(f x ∨ g x)
