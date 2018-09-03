@@ -282,10 +282,3 @@ discrete A .compo refl refl = refl
 
 Discrete : ∀{i} → Fun (sets {i}) cats
 Discrete = Fun: discrete λ f → Fun: f λ { refl → refl }
-
--- Indiscrete category on a given set
-indiscrete : ∀{i} → Set i → Cat _ _
-indiscrete A .Obj = A
-indiscrete A .Hom _ _ = Unit
-indiscrete A .ident = tt
-indiscrete A .compo tt tt = tt
