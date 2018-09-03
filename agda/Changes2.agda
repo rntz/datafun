@@ -2,7 +2,7 @@ module Changes2 where
 
 open import Cat
 open import Prelude
-open import Prosets
+open import Tones
 open import TreeSet
 
 

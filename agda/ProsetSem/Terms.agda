@@ -1,12 +1,12 @@
 -- Denotational semantics for terms in core Datafun.
 module ProsetSem.Terms where
 
+open import Booleans
 open import Cat
 open import Datafun
 open import Monads
 open import Prelude
 open import ProsetSem.Types
-open import Prosets
 open import Tones
 open import TreeSet
 

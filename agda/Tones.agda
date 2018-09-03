@@ -4,6 +4,7 @@ module Tones where
 open import Prelude
 open import Cat
 open import Monads
+open import Decidability
 
 -- A tone is...
 record Tone i j : Set (suc (i ⊔ j)) where
@@ -57,9 +58,11 @@ tone-op .rel-id = id
 tone-op .rel• f g = g • f
 tone-op .functorial f = map f
 
--- This is the same as _≈_ from Cat.agda.
+-- The "equivalence quotient" of a proset. Not actually a category of
+-- isomorphisms, since we don't require that the arrows be inverses. But *if* we
+-- were gonna put equations on arrows, that's what we'd require.
 tone-iso .rel A x y = Hom A x y × Hom A y x
-tone-iso .rel-id = id , id
+tone-iso .rel-id = id , id -- Same as _≈_ from Cat.agda.
 tone-iso .rel• (f₁ , f₂) (g₁ , g₂) = f₁ • g₁ , g₂ • f₂
 tone-iso .functorial f (i≤j , j≤i) = map f i≤j , map f j≤i
 
@@ -85,6 +88,13 @@ instance
   Comonad.dup Iso-comonad = fun ⟨ id , swap ⟩
   Comonad.extract Iso-comonad = fun proj₁
 
+-- TODO: derive Iso, Path, isos, paths, etc. from these. Then remove those from
+-- Cat & Prosets and put them here. Rename this to Tones.agda, and rename
+-- "tones" (the syntactic things) to "modes".
+--
+-- 1. rename "isos" to "iso"
+-- 2. rename "Isos" to "Iso"
+
 
 -- TODO: Is this necessary? Remove if not.
 instance
@@ -94,9 +104,52 @@ instance
   ident tones = id
   compo tones T≤U U≤V = T≤U • U≤V
 
--- TODO: derive Iso, Path, isos, paths, etc. from these. Then remove those from
--- Cat & Prosets and put them here. Rename this to Tones.agda, and rename
--- "tones" (the syntactic things) to "modes".
---
--- 1. rename "isos" to "iso"
--- 2. rename "Isos" to "Iso"
+
+isos = iso                      -- TODO: fix all uses of "isos" to use "iso".
+Isos = Iso                      -- TODO: fix all uses of "Isos" to use "Iso".
+
+isos≤? : ∀{i j} (A : Cat i j) -> Decidable≤ A -> Decidable≤ (isos A)
+isos≤? _ test x y = dec× (test x y) (test y x)
+
+ -- Some lemmas about isos.
+⊤⇒isos : ⊤ ⇒ isos ⊤
+⊤⇒isos = fun (λ {TT  → TT , TT})
+
+juggle : ∀{i j k l} {A B C D}
+       -> Σ {i}{j} A C × Σ {k}{l} B D
+       -> Σ (A × B) λ { (a , b) -> C a × D b }
+juggle ((a , c) , (b , d)) = (a , b) , (c , d)
+
+∧/isos : ∀{A B} -> isos A ∧ isos B ⇒ isos (A ∧ B)
+∧/isos = fun juggle
+
+isos/∧ : ∀{A B} -> isos (A ∧ B) ⇒ isos A ∧ isos B
+isos/∧ = fun juggle
+
+isos/∨ : ∀{A B} -> isos (A ∨ B) ⇒ isos A ∨ isos B
+isos/∨ .ap = id
+isos/∨ .map (rel₁ p , rel₁ q) = rel₁ (p , q)
+isos/∨ .map (rel₂ p , rel₂ q) = rel₂ (p , q)
+
+isojuggle : ∀{A B C D} -> (isos A ∧ B) ∧ (isos C ∧ D) ⇒ isos (A ∧ C) ∧ (B ∧ D)
+isojuggle = fun juggle • map∧ ∧/isos id
+
+module _ {i j} {{A : Cat i j}} {{Prod : Products A}} where
+  ∧≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∧ b) ≈ (a' ∧ b')
+  ∧≈ f g = map Iso functor∧ .map (juggle (f , g))
+
+module _ {i j} {{A : Cat i j}} {{Sum : Sums A}} where
+  juggle∨≈ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≈ (a ∨ c) ∨ (b ∨ d)
+  juggle∨≈ = juggle∨ , juggle∨
+
+  -- Used in ChangeSem/Types*.agda
+  ∨≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∨ b) ≈ (a' ∨ b')
+  ∨≈ f g = map Iso functor∨ .map (juggle (f , g))
+
+-- Lifts an arbitrary function over an antisymmetric domain into a monotone map
+-- over its preorder of isomorphisms.
+antisym⇒ : ∀{A B} -> Antisymmetric _≡_ (Hom A) -> (Obj A -> Obj B) -> isos A ⇒ B
+antisym⇒ {A}{B} antisym f = Fun: f helper
+  where helper : ∀{x y} -> Hom (isos A) x y -> Hom B (f x) (f y)
+        helper (x , y) with antisym x y
+        ... | refl = ident B

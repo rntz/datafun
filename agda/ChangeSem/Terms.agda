@@ -9,8 +9,9 @@ open import Changes
 open import Datafun
 open import Monads
 open import Prelude
-open import Prosets
+open import Tones
 open import TreeSet
+open import Booleans
 
 -- whenn = (x,y) ↦ when x then y
 -- δ(when x then y) = if x then δy else when δx then (y ∨ δy)

@@ -3,7 +3,6 @@ module Examples.STLC where
 
 open import Prelude
 open import Cat
-open import Prosets
 
 
 ---------- Types and contexts ----------

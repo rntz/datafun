@@ -2,8 +2,9 @@ module Changes where
 
 open import Cat
 open import Prelude
-open import Prosets
+open import Tones
 open import TreeSet
+open import Booleans
 
  -- Prosets equipped with change structures
 record Change : Set1 where

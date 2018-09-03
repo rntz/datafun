@@ -8,7 +8,8 @@ open import Changes
 open import Datafun
 open import Monads
 open import Prelude
-open import Prosets
+open import Tones
+open import Booleans
 
  -- Lemmas for semantics of terms
 -- ⟦_⟧ is a functor, Cx^op -> Change

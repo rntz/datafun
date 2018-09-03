@@ -4,7 +4,8 @@ open import Prelude
 open import Cat
 open import Examples.MTLC
 open import Monads
-open import Prosets
+open import Tones
+open import Booleans
 
 
 ---------- Denotations of types & tones ----------
@@ -19,7 +20,7 @@ type (a + b) = type a ∨ type b
 type bool = bools
 type (□ a) = isos (type a)
 
-⟦_⟧₁ : Tone × Type -> Proset
+⟦_⟧₁ : Mode × Type -> Proset
 ⟦ mono , a ⟧₁ = type a
 ⟦ disc , a ⟧₁ = isos (type a)
 

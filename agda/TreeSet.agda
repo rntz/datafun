@@ -2,7 +2,6 @@ module TreeSet where
 
 open import Prelude
 open import Cat
-open import Prosets
 open import Decidability
 
 data Tree (a : Set) : Set where
@@ -79,7 +78,7 @@ open Trees public renaming (_⊑_ to Tree≤) hiding (unsplit)
 
 
 -- Functoriality
-Trees : prosets ≤ prosets
+Trees : cats ≤ cats
 ap Trees = trees
 map Trees F .ap empty = empty
 map Trees F .ap (leaf x) = leaf (ap F x)

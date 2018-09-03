@@ -2,7 +2,6 @@ module Examples.STLC-TreeContexts where
 
 open import Prelude
 open import Cat
-open import Prosets
 open import TreeSet
 
 -- A structure for representing typing contexts basically has to be a

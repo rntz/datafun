@@ -1,12 +1,12 @@
 -- Denotational semantics for types in core Datafun.
 module ProsetSem.Types where
 
+open import Booleans
 open import Cat
 open import Datafun
 open import Decidability
-open import Monads
 open import Prelude
-open import Prosets
+open import Tones
 open import TreeSet
 
  ---------- Denotations of types & modes ----------
@@ -56,7 +56,7 @@ is! {DEC} (a + b) = decidable+ (is! a) (is! b)
 is! {SL} bool     = bool-sums
 is! {SL} (set a)  = tree-sums (isos (type a))
 is! {SL} (a * b)  = cat×-sums (is! a) (is! b)
-is! {SL} (a ⊃ b)  = proset→-sums (is! b)
+is! {SL} (a ⊃ b)  = cat→-sums (is! b)
 
 is! {FIN} a = TODO
 

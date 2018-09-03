@@ -2,7 +2,6 @@ module Modes where
 
 open import Prelude
 open import Cat
-open import Prosets
 open import Action
 
 data Mode : Set where

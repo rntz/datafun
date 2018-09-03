@@ -3,7 +3,6 @@ module ChangeCat2 where
 
 open import Cat
 open import Prelude
-open import Prosets
 open import TreeSet
 open import Changes2
 open import Monads

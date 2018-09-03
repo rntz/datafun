@@ -8,7 +8,7 @@ open import Datafun
 open import Decidability
 open import Monads
 open import Prelude
-open import Prosets
+open import Tones
 open import TreeSet
 
  ---------- Denotations of types & modes ----------

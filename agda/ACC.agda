@@ -5,7 +5,8 @@ module ACC where
 open import Prelude
 open import Cat
 open import Decidability
-open import Prosets
+open import Nats
+open import Booleans
 
 -- Observation: Maybe the nicest semantics of ACC for our purposes is over
 -- *decidable* Prosets! We only invoke it on those, and on those, various
@@ -100,6 +101,7 @@ module DefnWf where
 
 module DefnClassical where
   open import Classical
+
   module _  (P : Proset) where
     private instance pp = P
 

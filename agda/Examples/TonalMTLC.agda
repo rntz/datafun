@@ -3,7 +3,6 @@ module Examples.TonalMTLC where
 
 open import Prelude
 open import Cat
-open import Prosets
 open import Modes
 open import Action
 

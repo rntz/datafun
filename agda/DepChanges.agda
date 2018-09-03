@@ -3,8 +3,9 @@ module DepChanges where
 
 open import Cat
 open import Prelude
-open import Prosets
+open import Tones
 open import TreeSet
+open import Booleans
 
  -- Prosets equipped with dependent change structures
 record Change : Set1 where
@@ -19,7 +20,7 @@ open Change public
 
  -- Constructions on change structures
 ⊤-change ⊥-change : Change
-⊤-change = Change: {{⊤}} (λ _ _ → ⊤) ((λ _ → tt) , (λ _ → tt))
+⊤-change = Change: {{⊤}} (λ _ _ → ⊤) ((λ _ → TT) , (λ _ → TT))
 ⊥-change = Change: {{⊥}} (λ { () }) (λ { {()} })
 
 module _ (P : Proset) (S : Sums P) where
