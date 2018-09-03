@@ -144,10 +144,12 @@ antisym:bool≤ : Antisymmetric _≡_ bool≤
 antisym:bool≤ f≤* f≤* = Eq.refl
 antisym:bool≤ t≤t _   = Eq.refl
 
--- bool⇒ : ∀{A a b} -> Hom A a b -> bools ⇒ A
--- bool⇒ {_}{a}{b} a≤b .ap x = if x then b else a
--- bool⇒ {A} a≤b .map refl = ident A
--- bool⇒ a≤b .map false<true = a≤b
+-- Used in ChangeSem.Terms3
+bool⇒ : ∀{A a b} -> Hom A a b -> bools ⇒ A
+bool⇒ {a = a}{b} a≤b .ap x = if x then b else a
+bool⇒ a≤b .map {.false} {true} f≤* = a≤b
+bool⇒ {A} a≤b .map {.false} {false} f≤* = ident A
+bool⇒ {A} a≤b .map t≤t = ident A
 
 
 -- Natural numbers

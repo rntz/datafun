@@ -9,7 +9,7 @@ open import Prelude
 open import Prosets
 open import TreeSet
 
- ---------- Denotations of types & tones ----------
+ ---------- Denotations of types & modes ----------
 Vars : Cx -> Set
 Vars X = ∃ (λ a -> X a)
 pattern Var {o} {a} p = (o , a) , p
@@ -22,7 +22,7 @@ type (a ⊃ b) = type a ⇨ type b
 type (a * b) = type a ∧ type b
 type (a + b) = type a ∨ type b
 
-⟦_⟧₁ : Tone × Type -> Proset
+⟦_⟧₁ : Mode × Type -> Proset
 ⟦ mono , a ⟧₁ = type a
 ⟦ disc , a ⟧₁ = isos (type a)
 

@@ -11,7 +11,7 @@ open import Prelude
 open import Prosets
 open import TreeSet
 
- ---------- Denotations of types & tones ----------
+ ---------- Denotations of types & modes ----------
 Vars : Cx -> Set
 Vars X = ∃ (λ a -> X a)
 pattern Var {o} {a} p = (o , a) , p
@@ -24,7 +24,7 @@ type (a ⊃ b) = type a ⇨ type b
 type (a * b) = type a ∧ type b
 type (a + b) = type a ∨ type b
 
-⟦_⟧₁ : Tone × Type -> Change
+⟦_⟧₁ : Mode × Type -> Change
 ⟦ mono , a ⟧₁ = type a
 ⟦ disc , a ⟧₁ = change□ (type a)
 
@@ -35,7 +35,7 @@ type (a + b) = type a ∨ type b
 ⟦ X ⟧ = Π (Vars X) ⟦_⟧v
 
 ⟦_⟧+ : Premise -> Change
-⟦ nil ⟧+    = top
+⟦ nil ⟧+    = ⊤
 ⟦ P , Q ⟧+  = ⟦ P ⟧+ ∧ ⟦ Q ⟧+
 ⟦ □ P ⟧+    = change□ ⟦ P ⟧+
 ⟦ X ▷ P ⟧+  = ⟦ X ⟧ ⇨ ⟦ P ⟧+
@@ -63,15 +63,15 @@ record IsSL (A : Change) : Set where
     vee-deriv = π₂ • Sums.functor∨ 𝑫-sums
 
     -- δ(⊥) = ⊥
-    eps-func : top ⇒ 𝑶 A
-    eps-func = constant bot
-    eps-deriv : isos top ∧ top ⇒ 𝑫 A
-    eps-deriv = constant (Sums.bot 𝑫-sums)
+    eps-func : ⊤ ⇒ 𝑶 A
+    eps-func = constant ⊥
+    eps-deriv : isos ⊤ ∧ ⊤ ⇒ 𝑫 A
+    eps-deriv = constant (Sums.⊥ 𝑫-sums)
 
-  field eps-ok : IdPath (change→ top A) eps-func eps-deriv
+  field eps-ok : IdPath (change→ ⊤ A) eps-func eps-deriv
   field vee-ok : IdPath (change→ (A ∧ A) A) functor∨ vee-deriv
 
-  eps : top ≤ A
+  eps : ⊤ ≤ A
   eps = cfun eps-func eps-deriv eps-ok
   vee : A ∧ A ≤ A
   vee = cfun functor∨ vee-deriv vee-ok
@@ -91,7 +91,7 @@ sl× P Q .vee-ok = is-id (juggle∧ • map∧ (vee P) (vee Q))
 sl→ : ∀ A {B} (P : IsSL B) -> IsSL (change→ A B)
 sl→ A P .𝑶-sums = proset→-sums (𝑶-sums P)
 sl→ A P .𝑫-sums = proset→-sums (𝑫-sums P)
-sl→ A P .eps-ok tt _ = eps-ok P tt
+sl→ A P .eps-ok TT _ = eps-ok P TT
  -- vee-ok P (df-ok da-ok , dg-ok da-ok)
 sl→ A P .vee-ok {f , g}{h , k}{f≤h , g≤k}{df , dg} (df-ok , dg-ok) {a}{b}{a≤b}{da} da-ok =
 -- Path B

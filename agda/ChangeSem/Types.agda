@@ -11,7 +11,7 @@ open import Prelude
 open import Prosets
 open import TreeSet
 
- ---------- Denotations of types & tones ----------
+ ---------- Denotations of types & modes ----------
 Vars : Cx -> Set
 Vars X = ∃ (λ a -> X a)
 pattern Var {o} {a} p = (o , a) , p
@@ -24,12 +24,12 @@ type (a ⊃ b) = type a ⇨ type b
 type (a * b) = type a ∧ type b
 type (a + b) = type a ∨ type b
 
-tone : Tone -> changes ≤ changes
-tone mono = id
-tone disc = Change□
+mode : Mode -> changes ≤ changes
+mode mono = id
+mode disc = Change□
 
-⟦_⟧₁ : Tone × Type -> Change
-⟦ o , a ⟧₁ = tone o .ap (type a)
+⟦_⟧₁ : Mode × Type -> Change
+⟦ o , a ⟧₁ = mode o .ap (type a)
 -- original definition
 -- ⟦ mono , a ⟧₁ = type a
 -- ⟦ disc , a ⟧₁ = change□ (type a)

@@ -80,7 +80,7 @@ eval⊩ (single {a} p) .is-id (da:a→b , a≈b) = [ leaf≤ a≈b , empty≤ ]
                                              , leaf≤ (swap {{sets}} a≈b) • in₁
   where instance x = trees (isos (type a .𝑶))
 eval⊩ (for-in p q) = {!!}
-eval⊩ (bottom sl) = eps (is! sl)
+eval⊩ (empty sl) = eps (is! sl)
 eval⊩ (join sl) = vee (is! sl)
 eval⊩ (fix is-fix) = {!!}
 eval⊩ (fix≤ is-fix≤) = {!!}

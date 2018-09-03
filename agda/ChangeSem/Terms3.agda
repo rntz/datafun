@@ -47,7 +47,7 @@ wipe⇒□ .is-id = id
 lambda : ∀{c x} -> ⟦ hyp x ⟧ ⇨ c ≤ ⟦ x ⟧₁ ⇨ c
 lambda {c} = precompose {c = c} singleton
 
-module _ {A : Change} (f g : top ≤ A) (d : Hom! (top ⇨ A) (funct f) (funct g)) where
+module _ {A : Change} (f g : ⊤ ≤ A) (d : Hom! (⊤ ⇨ A) (funct f) (funct g)) where
   private instance aaa = A; daa = 𝑫 A
   from-bool : change-bool ≤ A
   from-bool .funct = bool⇒ (Hom!.a≤b d _)
@@ -55,11 +55,14 @@ module _ {A : Change} (f g : top ≤ A) (d : Hom! (top ⇨ A) (funct f) (funct g
     (if x then g .deriv
     else if dx then Hom!.path d
     else f .deriv) .ap _
-  from-bool .deriv .map ((false<true , ()) , _)
-  from-bool .deriv .map ((, refl) , refl) = id
-  from-bool .deriv .map {true , _} ((, refl) , _) = id
-  -- gah! I need to know that (δf tt ≤ d)!
-  from-bool .deriv .map {false , _} ((refl , refl) , false<true) = {!!}
+  from-bool .deriv .map (Var {f≤*} {f≤*} f≤*) = {!!}
+  from-bool .deriv .map (Var {f≤*} {f≤*} t≤t) = id
+  from-bool .deriv .map (Var {t≤t} {t≤t} _) = id
+  -- from-bool .deriv .map ((false<true , ()) , _)
+  -- from-bool .deriv .map ((, refl) , refl) = id
+  -- from-bool .deriv .map {true , _} ((, refl) , _) = id
+  -- -- gah! I need to know that (δf tt ≤ d)!
+  -- from-bool .deriv .map {false , _} ((refl , refl) , false<true) = {!!}
   from-bool .is-id da:a→b = {!!}
 
 -- from-bool : ∀{A a b ida idb da} -> Hom (𝑶 A) a b

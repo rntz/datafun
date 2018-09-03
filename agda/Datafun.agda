@@ -4,19 +4,19 @@ open import Prelude
 open import Cat
 open import Monads
 
- ---------- Tones, types, and typeclasses ----------
-data Tone : Set where mono disc : Tone
+ ---------- Modes, types, and typeclasses ----------
+data Mode : Set where mono disc : Mode
 
-data _≺_ : (o p : Tone) -> Set where
-  tone-refl : ∀{o} -> o ≺ o
-  tone-disc : ∀{o} -> disc ≺ o
+data _≺_ : (o p : Mode) -> Set where
+  mode-refl : ∀{o} -> o ≺ o
+  mode-disc : ∀{o} -> disc ≺ o
 
 -- NB. ≺ forms a Preorder but I haven't needed an instance for it... yet.
 
 _≺?_ : ∀ o p -> Dec (o ≺ p)
-mono ≺? mono = yes tone-refl
+mono ≺? mono = yes mode-refl
 mono ≺? disc = no (λ ())
-disc ≺? _ = yes tone-disc
+disc ≺? _ = yes mode-disc
 
 data Class : Set where
   _,_ : BinOp Class
@@ -73,11 +73,11 @@ mutual
   data Acc≤! : Type -> Set where -- TODO
 
  ---------- Contexts / typing environments ----------
-open import Contexts (Tone × Type) public
+open import Contexts (Mode × Type) public
 
 -- Singleton context.
 infix 7 _is_
-_is_ : Type -> Tone -> Cx
+_is_ : Type -> Mode -> Cx
 a is o = hyp (o , a)
 
 -- Wipe is a comonad on contexts that removes all non-discrete variables.
@@ -100,7 +100,7 @@ wipe : Cx -> Cx
 wipe = ap Wipe
 
 infix 4 _at_
-_at_ : Cx -> Tone -> Cx
+_at_ : Cx -> Mode -> Cx
 X at mono = X
 X at disc = wipe X
 

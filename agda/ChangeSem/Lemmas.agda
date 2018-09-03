@@ -54,7 +54,7 @@ if⇒ : ∀{Γ a} -> (N : Γ ≤ a ∧ a) -> isos bools ∧ Γ ⇒ a
 if⇒ N = map∧ id N • uncurry boolπ
 
 from-bool : ∀{{A}} {{S : Sums A}} -> bools ∧ A ⇒ A
-from-bool .ap (c , x) = if c then x else bot
-from-bool .map (f≤* , x≤y) = bot≤
+from-bool .ap (c , x) = if c then x else ⊥
+from-bool .map (f≤* , x≤y) = ⊥≤
 from-bool .map (t≤t , x≤y) = x≤y
 
