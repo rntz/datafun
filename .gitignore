@@ -15,4 +15,3 @@ v3-web/lib/
 v3-web/src/.merlin
 agda/agda-failures
 agda/deps.dot
-agda/All.agda
