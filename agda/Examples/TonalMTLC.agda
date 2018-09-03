@@ -1,22 +1,22 @@
 {-# OPTIONS --postfix-projections #-}
-module Examples.MTLC-Tones where
+module Examples.TonalMTLC where
 
 open import Prelude
 open import Cat
 open import Prosets
-open import Tones
+open import Modes
 open import Action
 
 -- Types
 infixr 6 _⊃_
 data Type : Set where
   bool : Type
-  _!_ : (T : Tone) (a : Type) → Type
+  _!_ : (T : Mode) (a : Type) → Type
   _⊃_ _*_ _+_ : (a b : Type) → Type
 
 open import Contexts (Type)
 
-data _⊣_ : (T U : Tone) → Set where
+data _⊣_ : (T U : Mode) → Set where
   instance id⊣id : ID ⊣ ID
   instance op⊣op : OP ⊣ OP
   instance ◇⊣□ : ◇ ⊣ □
@@ -32,7 +32,7 @@ mutual
     box : ∀{a} T (M : X ⊢ a) → X ⊢ T ! a
     unbox : ∀{a T} U {{p : U ⊣ T}} (M : X ⊢ T ! a) → X ⊢ a
 
-  usage : ∀{X} (f : ∀{a} → X a → Tone) → ∀{a} → X ⊢ a → Tone
+  usage : ∀{X} (f : ∀{a} → X a → Mode) → ∀{a} → X ⊢ a → Mode
   usage f (var x) = f x
   usage f (app M N) = usage f M ∧ usage f N
   usage f (lam M p) = usage [ const ◇ , f ] M
@@ -44,7 +44,7 @@ mutual
 
 rename : ∀{X Y} → X ≤ Y → ∀{a} → X ⊢ a → Y ⊢ a
 -- Is this even the right lemma? I don't think so.
-foo : ∀{X Y : Cx} (ρ : X ≤ Y) (f : ∀{a} → Y a → Tone) {a} (M : X ⊢ a)
+foo : ∀{X Y : Cx} (ρ : X ≤ Y) (f : ∀{a} → Y a → Mode) {a} (M : X ⊢ a)
     → usage (f ∘ ρ _) M ≤ usage f (rename ρ M)
 
 rename ρ (var x) = var (ρ _ x)
@@ -82,7 +82,7 @@ foo ρ f (unbox U M) = {!!}
 --          → X ⊢ b ⊣ f ∧ drop g
 
 
--- -- Used in Examples.MTLC-Tones
+-- -- Used in Examples.MTLC-Modes
 -- catΠ-products : ∀{i j k A B} → (∀ x → Products (B x)) → Products (catΠ{i}{j}{k} A B)
 -- catΠ-products P .top = proj₁ ∘ top ∘ P , λ x → P x .top .proj₂
 -- catΠ-products P .glb a b = a∧b ∘ F / ∧E₁ ∘ F / ∧E₂ ∘ F / λ f g x → F x .∧I (f x) (g x)
@@ -94,7 +94,7 @@ foo ρ f (unbox U M) = {!!}
 -- module _ {X : Cx} where
 --   instance
 --     usages : Proset
---     Obj usages = ∀{a} → a ∈ X → Tone
+--     Obj usages = ∀{a} → a ∈ X → Mode
 --     Hom usages f g = ∀{a} x → f {a} x ≤ g x
 --     ident usages _ = id
 --     compo usages f≤g g≤h x = f≤g x • g≤h x
@@ -107,10 +107,10 @@ foo ρ f (unbox U M) = {!!}
 
 --   -- instance
 --   --   usages : Proset
---   --   usages = catΠ (Var X) (const tones)
+--   --   usages = catΠ (Var X) (const modes)
 
 --   --   usage-products : Products usages
---   --   usage-products = catΠ-products (const tone-products)
+--   --   usage-products = catΠ-products (const mode-products)
 
 -- Usage : Cx → Set
 -- Usage X = usages {X} .Obj
@@ -122,14 +122,14 @@ foo ρ f (unbox U M) = {!!}
 
 -- TODO: subtyping?
 -- TODO: is there a way to ABT-ify this by separating out premises & term formers?
--- seems difficult, because term formers can do complicated things with tones.
+-- seems difficult, because term formers can do complicated things with modes.
 
 -- -- Other options:
 -- -- - induction/recursion, with a function assigning each variable its usage
 -- --   problem: can't test variables for equality!
 -- --
--- -- - induction/recursion, with a function assigning a (variable,tone) pair to a
--- --   Set witnessing the variable is used {at,compatibly with} that tone.
+-- -- - induction/recursion, with a function assigning a (variable,mode) pair to a
+-- --   Set witnessing the variable is used {at,compatibly with} that mode.
 -- infix 1 _⊢_⊣_
 -- data _⊢_⊣_ (X : Cx) : (a : Type) (f : Usage X) → Set where
 --   var : ∀{a f} {x : X a} (p : ID ≤ f (, x))
@@ -156,13 +156,13 @@ foo ρ f (unbox U M) = {!!}
 -- -- So, this works. But shouldn't there also be a map the other way? If X ≤ Y,
 -- -- every variable in X can be mapped to one one Y. So if we know how variables
 -- -- in X are used, we can derive how variables in Y will be used. Variables y ∈ Y
--- -- are used at the meet of the tones they're used at in X.
+-- -- are used at the meet of the modes they're used at in X.
 -- foo : ∀{X Y : Cx} → X ≤ Y → Usage Y → Usage X
 -- foo ρ f (, x) = f (, ρ _ x)
 
 -- bar : ∀{X Y : Cx} → X ≤ Y → Usage X → Usage Y
 -- -- Problem: I need a ρ⁻¹! Do I? Yeah, probably, since I'm trying to come up with
--- -- a concrete tone, not just a Set. Uh-oh!
+-- -- a concrete mode, not just a Set. Uh-oh!
 -- bar ρ R (a , y) = {!ρ a!}
 
 -- -- Γ ⊑ Θ iff ∀x. Γ(x) ≤ Θ(x).
