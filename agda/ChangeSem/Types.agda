@@ -41,7 +41,7 @@ tone disc = Change□
 ⟦ X ⟧ = Π (Vars X) ⟦_⟧v
 
 ⟦_⟧+ : Premise -> Change
-⟦ nil ⟧+    = top
+⟦ nil ⟧+    = ⊤
 ⟦ P , Q ⟧+  = ⟦ P ⟧+ ∧ ⟦ Q ⟧+
 ⟦ □ P ⟧+    = change□ ⟦ P ⟧+
 ⟦ X ▷ P ⟧+  = ⟦ X ⟧ ⇨ ⟦ P ⟧+
@@ -63,15 +63,15 @@ record IsSL (A : Change) : Set where
     vee-deriv = π₂ • Sums.functor∨ 𝑫-sums
 
     -- δ(⊥) = ⊥
-    eps-func : top ⇒ 𝑶 A
-    eps-func = constant bot
-    eps-deriv : isos top ∧ top ⇒ 𝑫 A
-    eps-deriv = constant (Sums.bot 𝑫-sums)
+    eps-func : ⊤ ⇒ 𝑶 A
+    eps-func = constant ⊥
+    eps-deriv : isos ⊤ ∧ ⊤ ⇒ 𝑫 A
+    eps-deriv = constant ⊥
 
-  field eps-ok : IdPath (change→ top A) eps-deriv eps-func
+  field eps-ok : IdPath (change→ ⊤ A) eps-deriv eps-func
   field vee-ok : IdPath (change→ (A ∧ A) A) vee-deriv functor∨
 
-  eps : top ≤ A
+  eps : ⊤ ≤ A
   eps = cfun eps-func eps-deriv eps-ok
   vee : A ∧ A ≤ A
   vee = cfun functor∨ vee-deriv vee-ok
@@ -91,7 +91,7 @@ sl× P Q .vee-ok = is-id (juggle∧ • map∧ (vee P) (vee Q))
 sl→ : ∀ A {B} (P : IsSL B) -> IsSL (change→ A B)
 sl→ A P .𝑶-sums = proset→-sums (𝑶-sums P)
 sl→ A P .𝑫-sums = proset→-sums (𝑫-sums P)
-sl→ A P .eps-ok tt _ = eps-ok P tt
+sl→ A P .eps-ok TT _ = eps-ok P TT
 sl→ A P .vee-ok (df-ok , dg-ok) da-ok = vee-ok P (df-ok da-ok , dg-ok da-ok)
 
  -- What does it mean for a type's denotation to be decidable?
@@ -114,7 +114,7 @@ record IsDEC (A : Change) : Set where
 
   module _ (sl : IsSL A) where
     from-zero : 𝑶 A ⇒ 𝑫 A
-    from-zero = ⟨ ≤top • ⊤⇒isos • map Isos (eps sl .funct) , id ⟩ • change
+    from-zero = ⟨ ≤⊤ • ⊤⇒isos • map Isos (eps sl .funct) , id ⟩ • change
 
 open IsDEC public
 
