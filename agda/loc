@@ -4,7 +4,7 @@
 cd "$(dirname "$0")"
 
 filter() {
-    egrep --no-filename -v -- '^ *(--.*)?$' "$@"
+    egrep --no-filename -v -- '^\s*(--.*)?$' "$@"
 }
 
 find * -iname '*.agda' '!' -name '.*' |
