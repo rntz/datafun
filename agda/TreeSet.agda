@@ -12,6 +12,7 @@ data Tree (a : Set) : Set where
 
 module Trees (C : Proset) where
   private instance cc = C
+
   data _⊑_ : Rel (Tree (Obj C)) zero where
     empty≤ : ∀{t} -> empty ⊑ t
     leaf≤ : ∀{x y} -> x ≤ y -> leaf x ⊑ leaf y
@@ -67,12 +68,12 @@ module Trees (C : Proset) where
     ... | no ¬x≤y = no λ { (leaf≤ x≤y) → ¬x≤y x≤y }
     tree≤? (leaf x) (node l r) with tree≤? (leaf x) l | tree≤? (leaf x) r
     ... | yes p | _ = yes (split₁ p)
-    ... | _ | yes p = yes (split₂ p)
+    ... | no _ | yes p = yes (split₂ p)
     ... | no ¬p | no ¬q = no λ { (split₁ p) → ¬p p ; (split₂ q) → ¬q q }
     tree≤? (node l r) y with tree≤? l y | tree≤? r y
     ... | yes p | yes q = yes (node≤ p q)
     ... | no ¬p | _ = no (unsplit • π₁ • ¬p)
-    ... | _ | no ¬q = no (unsplit • π₂ • ¬q)
+    ... | yes _ | no ¬q = no (unsplit • π₂ • ¬q)
 
 open Trees public renaming (_⊑_ to Tree≤) hiding (unsplit)
 
