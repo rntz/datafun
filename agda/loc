@@ -1,0 +1,18 @@
+#!/bin/bash
+# counts lines of code, ignoring whitespace & comments
+
+cd "$(dirname "$0")"
+
+filter() {
+    egrep --no-filename -v -- '^ *(--.*)?$' "$@"
+}
+
+find * -iname '*.agda' '!' -name '.*' |
+    while read name; do
+        modname=${name%.agda}
+        modname=${modname//\//.}
+        printf "%5d %s\n" $(filter "$name" | wc -l) "$modname"
+    done |
+    sort -n
+
+printf "%5d total\n" $(filter $(find * -iname '*.agda' '!' -name '.*') | wc -l)
