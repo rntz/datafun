@@ -32,8 +32,8 @@ instance
   lub change-sums a b .∨I₂ = cfun in₂ (π₂ • in₂) rel₂
   lub change-sums a b .∨E f g .funct = [ funct f , funct g ]
   lub change-sums a b .∨E {C} f g .deriv
-    = uncurry (isos/∨ • [ flip [ use f , fail ] , flip [ fail , use g ] ])
-    where use : ∀{A} -> A ≤ C -> 𝑫 A ⇒ isos (𝑶 A) ⇨ 𝑫 C
+    = uncurry (iso/∨ • [ flip [ use f , fail ] , flip [ fail , use g ] ])
+    where use : ∀{A} -> A ≤ C -> 𝑫 A ⇒ iso (𝑶 A) ⇨ 𝑫 C
           use f = curry (swap • deriv f)
           fail : ∀{A B} -> A ≤ B ⇨ (𝑫 C)
           fail = curry (constant (dummy C))
@@ -60,9 +60,9 @@ instance
  -- Showing that □ is a comonad on the category of changes.
 Change□ : changes ≤ changes
 ap  Change□ = change□
-map Change□ {A}{B} (cfun f df ok) = cfun (map Isos f) (∧/isos • map Isos df) ok
+map Change□ {A}{B} (cfun f df ok) = cfun (map Iso f) (∧/iso • map Iso df) ok
 
 instance
   Change□-comonad : Comonad Change□
-  Comonad.dup Change□-comonad = cfun (dup Isos) (π₂ • dup Isos) id
-  Comonad.extract Change□-comonad = cfun (extract Isos) (π₂ • extract Isos) id
+  Comonad.dup Change□-comonad = cfun (dup Iso) (π₂ • dup Iso) id
+  Comonad.extract Change□-comonad = cfun (extract Iso) (π₂ • extract Iso) id

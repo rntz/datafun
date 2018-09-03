@@ -33,8 +33,8 @@ wipe-sym f (Var {mono} ())
 -- Argh!
 wipe-sym f (Var {disc} p) = swap {{sets}} (f (Var {disc} p))
 
-wipe⇒isos : ∀{X} -> ⟦ wipe X ⟧ ⇒ isos ⟦ wipe X ⟧
-wipe⇒isos = fun ⟨ id , wipe-sym ⟩
+wipe⇒iso : ∀{X} -> ⟦ wipe X ⟧ ⇒ iso ⟦ wipe X ⟧
+wipe⇒iso = fun ⟨ id , wipe-sym ⟩
 
 lambda : ∀{x c} -> ⟦ hyp x ⟧ ⇨ c ⇒ ⟦ x ⟧₁ ⇨ c
 lambda = precompose singleton
@@ -51,9 +51,9 @@ eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ⇒ type a
 eval tt = constant TT
 eval (M , N) = ⟨ eval M , eval N ⟩
 eval (bind M) = curry (cons • eval M)
-eval (box M) = comap⟦ extract Wipe ⟧ • wipe⇒isos • map Isos (eval M)
+eval (box M) = comap⟦ extract Wipe ⟧ • wipe⇒iso • map Iso (eval M)
 eval (var mono p) = lookup p
-eval (var disc p) = lookup p • extract Isos
+eval (var disc p) = lookup p • extract Iso
 eval (form ! M) = eval M • eval⊩ form
 
 eval⊩ lam = lambda

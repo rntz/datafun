@@ -67,7 +67,7 @@ record IsSL (A : Change) : Set where
     -- δ(⊥) = ⊥
     eps-func : ⊤ ⇒ 𝑶 A
     eps-func = constant ⊥
-    eps-deriv : isos ⊤ ∧ ⊤ ⇒ 𝑫 A
+    eps-deriv : iso ⊤ ∧ ⊤ ⇒ 𝑫 A
     eps-deriv = constant ⊥
 
   field eps-ok : IdPath (change→ ⊤ A) eps-deriv eps-func
@@ -82,7 +82,7 @@ open IsSL public
 
 slSL : ∀ A S -> IsSL (change-SL A S)
 slSL A S = IsSL: (λ _ → a∨⊥≈a) (λ { (p , q) → juggle∨≈ • ∨≈ p q })
-  where private instance aa = A; ss = S; isosaa = isos A
+  where private instance aa = A; ss = S; isoaa = iso A
 
 sl× : ∀ {A B} (P : IsSL A) (Q : IsSL B) -> IsSL (A ∧ B)
 sl× P Q .𝑶-sums = cat×-sums (𝑶-sums P) (𝑶-sums Q)
@@ -104,19 +104,19 @@ record IsDEC (A : Change) : Set where
 
   -- field find-zero : 𝑶 A ⇒ 𝑫 A
   -- do we need this to be monotone?
-  field change : isos (𝑶 A) ∧ 𝑶 A ⇒ 𝑫 A
+  field change : iso (𝑶 A) ∧ 𝑶 A ⇒ 𝑫 A
   field is-change : ∀{a b} -> (a≤b : a ≤ b) -> Path A (ap change (a , b)) a b
 
-  field plus : isos (𝑶 A) ∧ 𝑫 A ⇒ 𝑶 A
+  field plus : iso (𝑶 A) ∧ 𝑫 A ⇒ 𝑶 A
   field is-plus : ∀{da a b} (ok : Path A da a b) -> b ≈ ap plus (a , da)
 
   -- for Datafun, this could probably be semantically monotone? but ugh.
-  find-zero : isos (𝑶 A) ⇒ 𝑫 A
-  find-zero = map Isos ∇ • isos/∧ • map∧ id (extract Isos) • change
+  find-zero : iso (𝑶 A) ⇒ 𝑫 A
+  find-zero = map Iso ∇ • iso/∧ • map∧ id (extract Iso) • change
 
   module _ (sl : IsSL A) where
     from-zero : 𝑶 A ⇒ 𝑫 A
-    from-zero = ⟨ ≤⊤ • ⊤⇒isos • map Isos (eps sl .funct) , id ⟩ • change
+    from-zero = ⟨ ≤⊤ • ⊤⇒iso • map Iso (eps sl .funct) , id ⟩ • change
 
 open IsDEC public
 
@@ -139,8 +139,8 @@ is! : ∀{C a} -> Is C a -> class C (type a)
 is! {c , d} (x , y) = is! x , is! y
 
 -- is! {DEC} bool = bool≤?
--- is! {DEC} (set a p) = tree≤? _ (isos≤? (type a .𝑶) (is! p))
--- is! {DEC} (□ a p) = isos≤? (type a .𝑶) (is! p)
+-- is! {DEC} (set a p) = tree≤? _ (iso≤? (type a .𝑶) (is! p))
+-- is! {DEC} (□ a p) = iso≤? (type a .𝑶) (is! p)
 -- is! {DEC} (a * b) = decidable× (is! a) (is! b)
 -- is! {DEC} (a + b) = decidable+ (is! a) (is! b)
 is! {DEC} bool .decide≤ = bool≤?
@@ -148,7 +148,7 @@ is! {DEC} bool .decide≤ = bool≤?
 is! {DEC} bool .change = π₂
 -- argh
 is! {DEC} bool .is-change {a}{b} a≤b = [ a≤b , id ] , in₂ {a = a}
-is! {DEC} bool .plus = map∧ (extract Isos) id • functor∨
+is! {DEC} bool .plus = map∧ (extract Iso) id • functor∨
 is! {DEC} bool .is-plus = TODO
 is! {DEC} (set a p) = TODO
 is! {DEC} (□ a p) = TODO

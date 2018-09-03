@@ -82,19 +82,6 @@ iso = at tone-iso; op = at tone-op
 Iso Op : ∀{i j} → cats {i}{j} ≤ cats
 Iso = functor tone-iso; Op = functor tone-op
 
-instance
-  -- This comonad factors into an adjunction to groupoids, I believe.
-  Iso-comonad : ∀{i j} -> Comonad (Iso {i}{j})
-  Comonad.dup Iso-comonad = fun ⟨ id , swap ⟩
-  Comonad.extract Iso-comonad = fun proj₁
-
--- TODO: derive Iso, Path, isos, paths, etc. from these. Then remove those from
--- Cat & Prosets and put them here. Rename this to Tones.agda, and rename
--- "tones" (the syntactic things) to "modes".
---
--- 1. rename "isos" to "iso"
--- 2. rename "Isos" to "Iso"
-
 
 -- TODO: Is this necessary? Remove if not.
 instance
@@ -104,35 +91,37 @@ instance
   ident tones = id
   compo tones T≤U U≤V = T≤U • U≤V
 
-
-isos = iso                      -- TODO: fix all uses of "isos" to use "iso".
-Isos = Iso                      -- TODO: fix all uses of "Isos" to use "Iso".
+ -- Some lemmas about iso.
+instance
+  -- This comonad factors into an adjunction to groupoids, I believe.
+  Iso-comonad : ∀{i j} -> Comonad (Iso {i}{j})
+  Comonad.dup Iso-comonad = fun ⟨ id , swap ⟩
+  Comonad.extract Iso-comonad = fun proj₁
 
-isos≤? : ∀{i j} (A : Cat i j) -> Decidable≤ A -> Decidable≤ (isos A)
-isos≤? _ test x y = dec× (test x y) (test y x)
+iso≤? : ∀{i j} (A : Cat i j) -> Decidable≤ A -> Decidable≤ (iso A)
+iso≤? _ test x y = dec× (test x y) (test y x)
 
- -- Some lemmas about isos.
-⊤⇒isos : ⊤ ⇒ isos ⊤
-⊤⇒isos = fun (λ {TT  → TT , TT})
+⊤⇒iso : ⊤ ⇒ iso ⊤
+⊤⇒iso = fun (λ {TT  → TT , TT})
 
 juggle : ∀{i j k l} {A B C D}
        -> Σ {i}{j} A C × Σ {k}{l} B D
        -> Σ (A × B) λ { (a , b) -> C a × D b }
 juggle ((a , c) , (b , d)) = (a , b) , (c , d)
 
-∧/isos : ∀{A B} -> isos A ∧ isos B ⇒ isos (A ∧ B)
-∧/isos = fun juggle
+∧/iso : ∀{A B} -> iso A ∧ iso B ⇒ iso (A ∧ B)
+∧/iso = fun juggle
 
-isos/∧ : ∀{A B} -> isos (A ∧ B) ⇒ isos A ∧ isos B
-isos/∧ = fun juggle
+iso/∧ : ∀{A B} -> iso (A ∧ B) ⇒ iso A ∧ iso B
+iso/∧ = fun juggle
 
-isos/∨ : ∀{A B} -> isos (A ∨ B) ⇒ isos A ∨ isos B
-isos/∨ .ap = id
-isos/∨ .map (rel₁ p , rel₁ q) = rel₁ (p , q)
-isos/∨ .map (rel₂ p , rel₂ q) = rel₂ (p , q)
+iso/∨ : ∀{A B} -> iso (A ∨ B) ⇒ iso A ∨ iso B
+iso/∨ .ap = id
+iso/∨ .map (rel₁ p , rel₁ q) = rel₁ (p , q)
+iso/∨ .map (rel₂ p , rel₂ q) = rel₂ (p , q)
 
-isojuggle : ∀{A B C D} -> (isos A ∧ B) ∧ (isos C ∧ D) ⇒ isos (A ∧ C) ∧ (B ∧ D)
-isojuggle = fun juggle • map∧ ∧/isos id
+isojuggle : ∀{A B C D} -> (iso A ∧ B) ∧ (iso C ∧ D) ⇒ iso (A ∧ C) ∧ (B ∧ D)
+isojuggle = fun juggle • map∧ ∧/iso id
 
 module _ {i j} {{A : Cat i j}} {{Prod : Products A}} where
   ∧≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∧ b) ≈ (a' ∧ b')
@@ -148,8 +137,8 @@ module _ {i j} {{A : Cat i j}} {{Sum : Sums A}} where
 
 -- Lifts an arbitrary function over an antisymmetric domain into a monotone map
 -- over its preorder of isomorphisms.
-antisym⇒ : ∀{A B} -> Antisymmetric _≡_ (Hom A) -> (Obj A -> Obj B) -> isos A ⇒ B
+antisym⇒ : ∀{A B} -> Antisymmetric _≡_ (Hom A) -> (Obj A -> Obj B) -> iso A ⇒ B
 antisym⇒ {A}{B} antisym f = Fun: f helper
-  where helper : ∀{x y} -> Hom (isos A) x y -> Hom B (f x) (f y)
+  where helper : ∀{x y} -> Hom (iso A) x y -> Hom B (f x) (f y)
         helper (x , y) with antisym x y
         ... | refl = ident B

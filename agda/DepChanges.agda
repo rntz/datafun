@@ -40,7 +40,7 @@ change-tree : Change -> Change
 change-tree A = change-SL (trees (𝑶 A)) (tree-sums (𝑶 A))
 
 change□ : Change -> Change
-change□ A .𝑶 = isos (𝑶 A)
+change□ A .𝑶 = iso (𝑶 A)
 change□ A .𝑫 a b = 𝑫 A a b × 𝑫 A b a
 change□ A .path = ∧≈ (path A) (path A)
 

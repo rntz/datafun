@@ -56,8 +56,8 @@ instance
   lub change-sums a b .∨I₂ = cfun in₂ (π₂ • in₂) rel₂
   lub change-sums a b .∨E f g .funct = [ funct f , funct g ]
   lub change-sums a b .∨E {C} f g .deriv
-    = uncurry (isos/∨ • [ flip [ use f , fail ] , flip [ fail , use g ] ])
-    where use : ∀{A} -> A ≤ C -> 𝑫 A ⇒ isos (𝑶 A) ⇨ 𝑫 C
+    = uncurry (iso/∨ • [ flip [ use f , fail ] , flip [ fail , use g ] ])
+    where use : ∀{A} -> A ≤ C -> 𝑫 A ⇒ iso (𝑶 A) ⇨ 𝑫 C
           use f = curry (swap • deriv f)
           fail : ∀{A B} -> A ≤ B ⇨ (𝑫 C)
           fail = curry (constant (dummy C))
@@ -85,15 +85,15 @@ instance
 Change□ : changes ≤ changes
 ap  Change□ = change□
 map Change□ (cfun f df ok) =
-  cfun (map Isos f) (∧/isos • map Isos df) (map∧ ok (map Isos f .map))
+  cfun (map Iso f) (∧/iso • map Iso df) (map∧ ok (map Iso f .map))
 
 instance
   Change□-comonad : Comonad Change□
-  Comonad.dup Change□-comonad .funct = dup Isos
-  Comonad.dup Change□-comonad .deriv = π₂ • dup Isos
+  Comonad.dup Change□-comonad .funct = dup Iso
+  Comonad.dup Change□-comonad .deriv = π₂ • dup Iso
   -- agh.
   Comonad.dup Change□-comonad .is-id p@(da:a→b , a≈b) = p , a≈b , swap {{sets}} a≈b
-  Comonad.extract Change□-comonad = cfun (extract Isos) (π₂ • extract Isos) proj₁
+  Comonad.extract Change□-comonad = cfun (extract Iso) (π₂ • extract Iso) proj₁
 
 
 -- Antisymmetry

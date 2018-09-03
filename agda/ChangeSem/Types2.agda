@@ -65,7 +65,7 @@ record IsSL (A : Change) : Set where
     -- δ(⊥) = ⊥
     eps-func : ⊤ ⇒ 𝑶 A
     eps-func = constant ⊥
-    eps-deriv : isos ⊤ ∧ ⊤ ⇒ 𝑫 A
+    eps-deriv : iso ⊤ ∧ ⊤ ⇒ 𝑫 A
     eps-deriv = constant (Sums.⊥ 𝑫-sums)
 
   field eps-ok : IdPath (change→ ⊤ A) eps-func eps-deriv
@@ -80,7 +80,7 @@ open IsSL public
 
 slSL : ∀ A S -> IsSL (change-SL A S)
 slSL A S = IsSL: S (λ _ → idem∨ , in₁) (λ { (p , q) → juggle∨≈ • ∨≈ p q })
-  where private instance aa = A; ss = S; isosaa = isos A
+  where private instance aa = A; ss = S; isoaa = iso A
 
 sl× : ∀ {A B} (P : IsSL A) (Q : IsSL B) -> IsSL (A ∧ B)
 sl× P Q .𝑶-sums = cat×-sums (𝑶-sums P) (𝑶-sums Q)
@@ -119,8 +119,8 @@ is! : ∀{C a} -> Is C a -> class C (type a)
 is! {c , d} (x , y) = is! x , is! y
 
 is! {DEC} bool = bool≤?
-is! {DEC} (set a p) = tree≤? _ (isos≤? (type a .𝑶) (is! p))
-is! {DEC} (□ a p) = isos≤? (type a .𝑶) (is! p)
+is! {DEC} (set a p) = tree≤? _ (iso≤? (type a .𝑶) (is! p))
+is! {DEC} (□ a p) = iso≤? (type a .𝑶) (is! p)
 is! {DEC} (a * b) = decidable× (is! a) (is! b)
 is! {DEC} (a + b) = decidable+ (is! a) (is! b)
 

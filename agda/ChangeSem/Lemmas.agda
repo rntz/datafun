@@ -48,10 +48,10 @@ lambda c = precompose {c = type c} singleton
 
 
 -- TODO: clean up / refactor / inline
-boolπ : ∀{A} -> isos bools ⇒ ((A ∧ A) ⇨ A)
+boolπ : ∀{A} -> iso bools ⇒ ((A ∧ A) ⇨ A)
 boolπ = antisym⇒ antisym:bool≤ (λ x → if x then π₁ else π₂)
 
-if⇒ : ∀{Γ a} -> (N : Γ ≤ a ∧ a) -> isos bools ∧ Γ ⇒ a
+if⇒ : ∀{Γ a} -> (N : Γ ≤ a ∧ a) -> iso bools ∧ Γ ⇒ a
 if⇒ N = map∧ id N • uncurry boolπ
 
 from-bool : ∀{{A}} {{S : Sums A}} -> bools ∧ A ⇒ A

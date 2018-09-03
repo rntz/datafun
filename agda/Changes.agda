@@ -60,8 +60,8 @@ change-tree : Change -> Change
 change-tree A = change-SL (trees (𝑶 A)) (tree-sums (𝑶 A))
 
 change□ : Change -> Change
-change□ A .𝑶 = isos (𝑶 A)
-change□ A .𝑫 = isos (𝑫 A)
+change□ A .𝑶 = iso (𝑶 A)
+change□ A .𝑫 = iso (𝑫 A)
 change□ A .Path da a b = Path A da a b ∧ (a ≈ b)
 change□ A .dummy = dummy A
 
@@ -73,7 +73,7 @@ module _ (A B : Change) where
   change+ = Change: {{𝑶 A ∨ 𝑶 B}} {{(𝑫 A ∨ 𝑫 B)}} (rel3+ (Path A) (Path B)) (inj₁ (dummy A))
 
   𝑶 change→ = 𝑶 A ⇨ 𝑶 B
-  𝑫 change→ = (isos (𝑶 A) ∧ 𝑫 A) ⇨ 𝑫 B
+  𝑫 change→ = (iso (𝑶 A) ∧ 𝑫 A) ⇨ 𝑫 B
   Path change→ df f g = ∀{da a b} (da:a→b : Path A da a b)
                       -> Path B (ap df (a , da)) (ap f a) (ap g b)
   dummy change→ = constant (dummy B)
@@ -94,11 +94,11 @@ Deriv A B f = Zero (change→ A B) f
 record ChangeFun (A B : Change) : Set where
   constructor cfun
   field funct  : 𝑶 A ⇒ 𝑶 B
-  field deriv : isos (𝑶 A) ∧ 𝑫 A ⇒ 𝑫 B
+  field deriv : iso (𝑶 A) ∧ 𝑫 A ⇒ 𝑫 B
   field is-id : Path (change→ A B) deriv funct funct
 
-  func&deriv : isos (𝑶 A) ∧ 𝑫 A ⇒ isos (𝑶 B) ∧ 𝑫 B
-  func&deriv = ⟨ π₁ • map Isos funct , deriv ⟩
+  func&deriv : iso (𝑶 A) ∧ 𝑫 A ⇒ iso (𝑶 B) ∧ 𝑫 B
+  func&deriv = ⟨ π₁ • map Iso funct , deriv ⟩
 
   cfun→zero : Deriv A B funct
   cfun→zero = deriv , is-id

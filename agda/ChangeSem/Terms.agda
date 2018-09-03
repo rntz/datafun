@@ -18,7 +18,7 @@ open import Booleans
 whenn : ∀{A} -> class (DEC , SL) A -> (change-bool ∧ A) ≤ A
 whenn (dec , sl) .funct = from-bool
 whenn {A} (dec , sl) .deriv =
-  map∧ isos/∧ id • juggle∧ • assoc∧r
+  map∧ iso/∧ id • juggle∧ • assoc∧r
   • if⇒ ⟨ π₂ • π₂ , map∧ id (plus dec • from-zero dec sl)
                   • from-bool {{A = 𝑫 A}} {{S = 𝑫-sums sl}} ⟩ -- argh!
  -- Path A (ap (whenn (dec , sl) .deriv) (a , da))
@@ -66,8 +66,8 @@ eval⊩ (case {a}{b}{c})
       = distrib-∧/∨ {a = type a} {b = type b}
            • [ map∧ singleton π₁ • swapply
              , map∧ singleton (π₂ {a = ⟦ _ ⟧ ⇨ type c}) • swapply ]
-eval⊩ splitsum .funct = isos/∨
-eval⊩ splitsum .deriv = π₂ • isos/∨
+eval⊩ splitsum .funct = iso/∨
+eval⊩ splitsum .deriv = π₂ • iso/∨
 eval⊩ splitsum .is-id (rel₁ x , rel₁ y , rel₁ z) = rel₁ (x , y , z)
 eval⊩ splitsum .is-id (rel₂ x , rel₂ y , rel₂ z) = rel₂ (x , y , z)
 eval⊩ (bool x) = const-cfun x false a∨⊥≈a
@@ -80,7 +80,7 @@ eval⊩ (single p) .deriv = constant empty
 -- TODO: simplify
 eval⊩ (single {a} p) .is-id (da:a→b , a≈b) = [ leaf≤ a≈b , empty≤ ]
                                              , leaf≤ (swap {{sets}} a≈b) • in₁
-  where instance x = trees (isos (type a .𝑶))
+  where instance x = trees (iso (type a .𝑶))
 eval⊩ (for-in p q) = {!!}
 eval⊩ (empty sl) = eps (is! sl)
 eval⊩ (join sl) = vee (is! sl)

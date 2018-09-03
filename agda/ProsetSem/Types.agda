@@ -16,15 +16,15 @@ pattern Var {o} {a} p = (o , a) , p
 
 type : Type -> Proset
 type bool = bools
-type (set a p) = trees (isos (type a))
-type (□ a) = isos (type a)
+type (set a p) = trees (iso (type a))
+type (□ a) = iso (type a)
 type (a ⊃ b) = type a ⇨ type b
 type (a * b) = type a ∧ type b
 type (a + b) = type a ∨ type b
 
 ⟦_⟧₁ : Mode × Type -> Proset
 ⟦ mono , a ⟧₁ = type a
-⟦ disc , a ⟧₁ = isos (type a)
+⟦ disc , a ⟧₁ = iso (type a)
 
 ⟦_⟧ : Cx -> Proset
 ⟦ X ⟧ = catΠ (Vars X) (λ v -> ⟦ proj₁ v ⟧₁)
@@ -32,7 +32,7 @@ type (a + b) = type a ∨ type b
 ⟦_⟧+ : Premise -> Proset
 ⟦ nil ⟧+    = ⊤
 ⟦ P , Q ⟧+  = cat× ⟦ P ⟧+ ⟦ Q ⟧+
-⟦ □ P ⟧+    = isos ⟦ P ⟧+
+⟦ □ P ⟧+    = iso ⟦ P ⟧+
 ⟦ X ▷ P ⟧+  = ⟦ X ⟧ ⇨ ⟦ P ⟧+
 ⟦ term a ⟧+ = type a
 
@@ -48,13 +48,13 @@ class (C , D) P = class C P × class D P
 
 is! : ∀{C a} -> Is C a -> class C (type a)
 is! {DEC} bool = bool≤?
-is! {DEC} (set a p) = tree≤? (isos (type a)) (isos≤? (type a) (is! p))
-is! {DEC} (□ a p) = isos≤? (type a) (is! p)
+is! {DEC} (set a p) = tree≤? (iso (type a)) (iso≤? (type a) (is! p))
+is! {DEC} (□ a p) = iso≤? (type a) (is! p)
 is! {DEC} (a * b) = decidable× (is! a) (is! b)
 is! {DEC} (a + b) = decidable+ (is! a) (is! b)
 
 is! {SL} bool     = bool-sums
-is! {SL} (set a)  = tree-sums (isos (type a))
+is! {SL} (set a)  = tree-sums (iso (type a))
 is! {SL} (a * b)  = cat×-sums (is! a) (is! b)
 is! {SL} (a ⊃ b)  = cat→-sums (is! b)
 
@@ -85,6 +85,6 @@ is! {C , D} (x , y) = is! x , is! y
 
 -- is-sl : ∀ {a} -> Is SL a -> IsSemilattice (type a)
 -- is-sl bool = bool-sums
--- is-sl (set a) = tree-sums (isos (type a))
+-- is-sl (set a) = tree-sums (iso (type a))
 -- is-sl (a * b) = cat×-sums (is-sl a) (is-sl b)
 -- is-sl (a ⊃ b) = proset→-sums (is-sl b)

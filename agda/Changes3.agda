@@ -48,8 +48,8 @@ change-tree A = change-SL (trees (𝑶 A)) (tree-sums (𝑶 A))
 
 module _ (A : Change) where
   change□ : Change
-  𝑶 change□ = isos (𝑶 A)
-  𝑫 change□ = isos (𝑫 A)
+  𝑶 change□ = iso (𝑶 A)
+  𝑫 change□ = iso (𝑫 A)
   -- should this be (Path A a≤b da ∧ Path A b≤a da)?
   Path change□ a≈b@(a≤b , b≤a) da = Path A a≤b da
   dummy change□ = dummy A
@@ -69,7 +69,7 @@ module _ (A B : Change) where
   change+ = Change: {{𝑶 A ∨ 𝑶 B}} (𝑫 A ∨ 𝑫 B) Path+ (inj₁ (dummy A))
 
   𝑶 change→ = 𝑶 A ⇨ 𝑶 B
-  𝑫 change→ = (isos (𝑶 A) ∧ 𝑫 A) ⇨ 𝑫 B
+  𝑫 change→ = (iso (𝑶 A) ∧ 𝑫 A) ⇨ 𝑫 B
   Path change→ f≤g df = ∀{a b} .{{a≤b : a ≤ b}} {da} (da-ok : Path A a≤b da)
                       -> Path B (f≤g a≤b) (ap df (a , da))
   dummy change→ = constant (dummy B)
@@ -90,11 +90,11 @@ Deriv A B f = Zero (change→ A B) f
 record ChangeFun (A B : Change) : Set where
   constructor cfun
   field funct  : 𝑶 A ⇒ 𝑶 B
-  field deriv : isos (𝑶 A) ∧ 𝑫 A ⇒ 𝑫 B
+  field deriv : iso (𝑶 A) ∧ 𝑫 A ⇒ 𝑫 B
   field is-id : IdPath (change→ A B) funct deriv
 
-  func&deriv : isos (𝑶 A) ∧ 𝑫 A ⇒ isos (𝑶 B) ∧ 𝑫 B
-  func&deriv = ⟨ π₁ • map Isos funct , deriv ⟩
+  func&deriv : iso (𝑶 A) ∧ 𝑫 A ⇒ iso (𝑶 B) ∧ 𝑫 B
+  func&deriv = ⟨ π₁ • map Iso funct , deriv ⟩
 
   cfun→zero : Deriv A B funct
   cfun→zero = deriv , is-id
