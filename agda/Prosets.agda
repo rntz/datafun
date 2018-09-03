@@ -5,6 +5,7 @@ open import Prelude
 open import Cat
 open import Decidability
 open import Monads
+open import ToneSem2
 
 Proset : Set1
 Proset = Cat zero zero
@@ -57,24 +58,17 @@ module _ {A B : Proset} (bs : Sums B) where
 -- The "equivalence quotient" of a proset. Not actually a category of
 -- isomorphisms, since we don't require that the arrows be inverses. But *if* we
 -- were gonna put equations on arrows, that's what we'd require.
-isos : ∀{i j} -> Cat i j -> Cat i j
-isos C .Obj = Obj C
-isos C .Hom x y = Iso C x y
-isos C .ident = ident C , ident C
-isos C .compo (f₁ , f₂) (g₁ , g₂) = compo C f₁ g₁ , compo C g₂ f₂
+isos = iso                      -- TODO: fix all uses of "isos" to use "iso".
+Isos = Iso                      -- TODO: fix all uses of "Isos" to use "Iso".
 
 isos≤? : ∀{i j} (A : Cat i j) -> Decidable≤ A -> Decidable≤ (isos A)
 isos≤? _ test x y = dec× (test x y) (test y x)
 
--- If (f : a -> b) is monotone, then (f : isos a -> isos b) is also monotone.
-Isos : ∀{i j} -> cats {i}{j} ≤ cats
-Isos = Fun: isos (λ f → fun (λ { (x , y) -> map f x , map f y }))
-
 instance
   -- This comonad factors into an adjunction to groupoids, I believe.
-  Isos-comonad : ∀{i j} -> Comonad (Isos {i}{j})
-  Comonad.dup Isos-comonad = fun ⟨ id , swap ⟩
-  Comonad.extract Isos-comonad = fun proj₁
+  Iso-comonad : ∀{i j} -> Comonad (Iso {i}{j})
+  Comonad.dup Iso-comonad = fun ⟨ id , swap ⟩
+  Comonad.extract Iso-comonad = fun proj₁
 
  -- Some lemmas about isos.
 ⊤⇒isos : ⊤ ⇒ isos ⊤
@@ -101,7 +95,7 @@ isojuggle = fun juggle • map∧ ∧/isos id
 
 module _ {i j} {{A : Cat i j}} {{Prod : Products A}} where
   ∧≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∧ b) ≈ (a' ∧ b')
-  ∧≈ f g = map Isos functor∧ .map (juggle (f , g))
+  ∧≈ f g = map Iso functor∧ .map (juggle (f , g))
 
 module _ {i j} {{A : Cat i j}} {{Sum : Sums A}} where
   juggle∨≈ : ∀{a b c d : Obj A} -> (a ∨ b) ∨ (c ∨ d) ≈ (a ∨ c) ∨ (b ∨ d)
@@ -109,7 +103,7 @@ module _ {i j} {{A : Cat i j}} {{Sum : Sums A}} where
 
   -- Used in ChangeSem/Types*.agda
   ∨≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∨ b) ≈ (a' ∨ b')
-  ∨≈ f g = map Isos functor∨ .map (juggle (f , g))
+  ∨≈ f g = map Iso functor∨ .map (juggle (f , g))
 
 
 -- Lifts an arbitrary function over an antisymmetric domain into a monotone map

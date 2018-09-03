@@ -34,12 +34,9 @@ constant {D = D} x = Fun: (const x) (λ _ → ident D)
 
 -- This isn't really an isomorphism, it's just a pair of arrows in both
 -- directions. But since we're lawless, we can't tell the difference.
-Iso : ∀ {i j} (C : Cat i j) (a b : Obj C) -> Set j
-Iso C a b = Hom C a b × Hom C b a
-
 infix 1 _≈_
 _≈_ : ∀{i j} {{C : Cat i j}} (a b : Obj C) -> Set j
-_≈_ {{C}} = Iso C
+_≈_ {{C}} a b = Hom C a b × Hom C b a
 
  -- Constructions on relations & categories
 rel× : ∀{a b c d r s} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
