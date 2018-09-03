@@ -12,15 +12,19 @@ record Tone : Set1 where
   field at : Proset -> Proset
 
   -- (2) ... which preserves their elements...
-  field {{id/Obj}} : ∀{A} -> Obj A ≡ at A .Obj
+  field {{id/Obj}} : ∀{A} -> at A .Obj ≡ Obj A
   at-map : ∀{A B} -> (Obj A -> Obj B) -> Obj (at A) -> Obj (at B)
-  at-map f = coerce (Eq.cong₂ Function id/Obj id/Obj) f
+  at-map f = coerce (Eq.cong₂ Function (Eq.sym id/Obj) (Eq.sym id/Obj)) f
 
-  -- (3) ... and is functorial.
+  rel : (A : Proset) → Rel (Obj A) zero
+  rel A = coerce (Eq.cong (λ x → Rel x zero) id/Obj) (Hom (at A))
+
+  -- (3) ... and is functorial, without changing function behavior.
   field functorial : ∀{A B} (f : A ⇒ B) -> Hom (at A) =[ at-map (ap f) ]⇒ Hom (at B)
+
   functor : prosets ≤ prosets
   ap functor = at
-  map functor f = fun (functorial f)
+  map functor f = Fun: (at-map (ap f)) (functorial f)
 
 open Tone
 
@@ -56,10 +60,14 @@ t-op = Tone: opp (λ f → map f)
 t-iso = Tone: isos (map ∘ map Isos)
 t-path = Tone: paths (λ f → path-fold _ (path-by ∘ map f) path⁻¹ path-•)
 
--- TODO: the category of tones!
+-- The top & bottom tones, semantically: discreteness & indiscreteness
+t-disc t-indisc : Tone
+t-disc = Tone: (discrete ∘ Obj) λ { _ refl → refl }
+t-indisc = Tone: (indiscrete ∘ Obj) λ { _ tt → tt }
+
 instance
   tones : Cat _ _
   Obj tones = Tone
-  Hom tones = {!!}
-  ident tones = {!!}
-  compo tones = {!!}
+  Hom tones T U = ∀{A} → at T A ≤ at U A
+  ident tones = id
+  compo tones T≤U U≤V = T≤U • U≤V
