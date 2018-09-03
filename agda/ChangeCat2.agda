@@ -7,6 +7,7 @@ open import Prosets
 open import TreeSet
 open import Changes2
 open import Monads
+open import Tones
 
  -- Category of changes
 instance

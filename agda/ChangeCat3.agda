@@ -2,11 +2,12 @@
 module ChangeCat3 where
 
 open import Cat
-open import Prelude
-open import Prosets
-open import TreeSet
 open import Changes3
 open import Monads
+open import Prelude
+open import Prosets
+open import Tones
+open import TreeSet
 
  -- Category of changes
 instance

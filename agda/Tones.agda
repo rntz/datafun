@@ -1,8 +1,9 @@
 {-# OPTIONS --postfix-projections #-}
-module ToneSem2 where
+module Tones where
 
 open import Prelude
 open import Cat
+open import Monads
 
 -- A tone is...
 record Tone i j : Set (suc (i ⊔ j)) where
@@ -31,17 +32,17 @@ open Tone
 
 -- Bidirectional paths in a category.
 module _  {i j} (C : Cat i j) where
-  data Path : (a b : Obj C) -> Set (i ⊔ j) where
-    path-by : ∀{a b} -> Hom C a b -> Path a b
-    path⁻¹ : ∀{a b} -> Path a b -> Path b a
-    path-• : ∀{a b c} -> Path a b -> Path b c -> Path a c
+  data Pathto : (a b : Obj C) -> Set (i ⊔ j) where
+    path-by : ∀{a b} -> Hom C a b -> Pathto a b
+    path⁻¹ : ∀{a b} -> Pathto a b -> Pathto b a
+    path-• : ∀{a b c} -> Pathto a b -> Pathto b c -> Pathto a c
 
 module _ {i j k} {C : Cat i j}
          (F : (a b : Obj C) -> Set k)
          (hom→F : ∀{a b} -> Hom C a b -> F a b)
          (F-symm : Symmetric F)
          (F-trans : Transitive F) where
-  path-fold : ∀{a b} -> Path C a b -> F a b
+  path-fold : ∀{a b} -> Pathto C a b -> F a b
   path-fold (path-by x) = hom→F x
   path-fold (path⁻¹ p) = F-symm (path-fold p)
   path-fold (path-• p q) = F-trans (path-fold p) (path-fold q)
@@ -63,7 +64,7 @@ tone-iso .rel• (f₁ , f₂) (g₁ , g₂) = f₁ • g₁ , g₂ • f₂
 tone-iso .functorial f (i≤j , j≤i) = map f i≤j , map f j≤i
 
 tone-path : ∀{i} → Tone i i
-tone-path .rel = Path
+tone-path .rel = Pathto
 tone-path .rel-id = path-by id
 tone-path .rel• = path-•
 tone-path .functorial f = path-fold _ (path-by ∘ map f) path⁻¹ path-•
@@ -78,41 +79,24 @@ iso = at tone-iso; op = at tone-op
 Iso Op : ∀{i j} → cats {i}{j} ≤ cats
 Iso = functor tone-iso; Op = functor tone-op
 
+instance
+  -- This comonad factors into an adjunction to groupoids, I believe.
+  Iso-comonad : ∀{i j} -> Comonad (Iso {i}{j})
+  Comonad.dup Iso-comonad = fun ⟨ id , swap ⟩
+  Comonad.extract Iso-comonad = fun proj₁
+
+
+-- TODO: Is this necessary? Remove if not.
+instance
+  tones : ∀{i j} → Cat _ _
+  Obj (tones {i}{j}) = Tone i j
+  Hom tones T U = ∀{A} → at T A ≤ at U A
+  ident tones = id
+  compo tones T≤U U≤V = T≤U • U≤V
+
 -- TODO: derive Iso, Path, isos, paths, etc. from these. Then remove those from
 -- Cat & Prosets and put them here. Rename this to Tones.agda, and rename
 -- "tones" (the syntactic things) to "modes".
 --
 -- 1. rename "isos" to "iso"
 -- 2. rename "Isos" to "Iso"
-
--- t-id t-op t-iso t-path : Tone
--- t-id = Tone: id map
--- t-op = Tone: opp (λ f → map f)
--- t-iso = Tone: isos (map ∘ map Isos)
--- t-path = Tone: paths (λ f → path-fold _ (path-by ∘ map f) path⁻¹ path-•)
-
--- -- The top & bottom tones, semantically: discreteness & indiscreteness
--- t-disc t-indisc : Tone
--- t-disc = Tone: (discrete ∘ Obj) λ { _ refl → refl }
--- t-indisc = Tone: (indiscrete ∘ Obj) λ { _ tt → tt }
-
--- instance
---   tones : Cat _ _
---   Obj tones = Tone
---   Hom tones T U = ∀{A} → at T A ≤ at U A
---   ident tones = id
---   compo tones T≤U U≤V = T≤U • U≤V
-
---   -- tone-sums : Sums tones
---   -- bottom tone-sums .proj₁ = t-disc
---   -- bottom tone-sums .proj₂ {T} {A} .ap rewrite id/Obj T {A} = id
---   -- bottom tone-sums .proj₂ {T} {A} .map refl = ident (at T A)
---   -- lub tone-sums T U .a∨b .at A .Obj = Obj A
---   -- lub tone-sums T U .a∨b .at A .Hom a b = rel T A a b ⊎ rel U A a b
---   -- lub tone-sums T U .a∨b .at A .ident = inj₁ {!ident (at T A)!}
---   -- lub tone-sums T U .a∨b .at A .compo = {!!}
---   -- lub tone-sums T U .a∨b .id/Obj = refl
---   -- lub tone-sums T U .a∨b .functorial = {!!}
---   -- lub tone-sums T U .∨I₁ = {!!}
---   -- lub tone-sums T U .∨I₂ = {!!}
---   -- lub tone-sums T U .∨E = {!!}

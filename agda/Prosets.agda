@@ -5,7 +5,9 @@ open import Prelude
 open import Cat
 open import Decidability
 open import Monads
-open import ToneSem2
+open import Tones
+
+-- TODO: probably most of this belongs in either Tones.agda or Cat.agda
 
 Proset : Set1
 Proset = Cat zero zero
@@ -64,13 +66,7 @@ Isos = Iso                      -- TODO: fix all uses of "Isos" to use "Iso".
 isos≤? : ∀{i j} (A : Cat i j) -> Decidable≤ A -> Decidable≤ (isos A)
 isos≤? _ test x y = dec× (test x y) (test y x)
 
-instance
-  -- This comonad factors into an adjunction to groupoids, I believe.
-  Iso-comonad : ∀{i j} -> Comonad (Iso {i}{j})
-  Comonad.dup Iso-comonad = fun ⟨ id , swap ⟩
-  Comonad.extract Iso-comonad = fun proj₁
-
- -- Some lemmas about isos.
+ -- Some lemmas about isos. TODO: these belong in Tones.agda.
 ⊤⇒isos : ⊤ ⇒ isos ⊤
 ⊤⇒isos = fun (λ {TT  → TT , TT})
 
@@ -107,7 +103,7 @@ module _ {i j} {{A : Cat i j}} {{Sum : Sums A}} where
 
 
 -- Lifts an arbitrary function over an antisymmetric domain into a monotone map
--- over its discrete preorder.
+-- over its preorder of isomorphisms.
 antisym⇒ : ∀{A B} -> Antisymmetric _≡_ (Hom A) -> (Obj A -> Obj B) -> isos A ⇒ B
 antisym⇒ {A}{B} antisym f = Fun: f helper
   where helper : ∀{x y} -> Hom (isos A) x y -> Hom B (f x) (f y)
@@ -116,6 +112,7 @@ antisym⇒ {A}{B} antisym f = Fun: f helper
 
 
 -- The booleans, ordered false < true.
+-- TODO: put these in their own module?
 data bool≤ : Rel Bool zero where
   f≤* : ∀{a} -> bool≤ false a
   t≤t : bool≤ true true
@@ -152,7 +149,7 @@ bool⇒ {A} a≤b .map {.false} {false} f≤* = ident A
 bool⇒ {A} a≤b .map t≤t = ident A
 
 
--- Natural numbers
+-- Natural numbers. TODO: put these in their own module?
 open import Data.Nat as Nat using (ℕ; z≤n; s≤s) renaming (_≤_ to _≤'_; _⊔_ to _⊔'_)
 open import Data.Nat.Properties as ℕProp
 

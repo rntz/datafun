@@ -24,23 +24,24 @@ whenn {A} (dec , sl) .deriv =
  --        (ap (whenn (dec , sl) .funct) a)
  --        (ap (whenn (dec , sl) .funct) b)
 
-whenn (dec , sl) .is-id {false , dx} {false , x} {false , y} ((f≤* , f≤*) , r) = eps-ok sl tt
+whenn (dec , sl) .is-id {false , dx} {false , x} {false , y} ((f≤* , f≤*) , r) = eps-ok sl TT
 -- WTF: Path A (change (⊥ , (x + dx))) ⊥ y
 -- aha, we need to show y = x + dx.
 -- ah crap, don't we need to compose paths?! no, we just need
 -- if (Path da a b) and (b ≈ c) then (Path da a c).
-whenn (dec , sl) .is-id {true , dx} {false , x} {true , y} ((t≤t , t≤t) , r) = {!!}
-whenn (dec , sl) .is-id {_ , dx} {true , x} {.true , y} ((t≤t , t≤t) , r) = r
-whenn (dec , sl) .is-id {true ,  dx} {false , x} {false , y} ((() , f≤*) , r)
-whenn (dec , sl) .is-id {false , dx} {false , x} {true ,  y} ((f≤* , ()) , r)
+whenn (dec , sl) .is-id = {!!}
 
+-- whenn (dec , sl) .is-id {true , dx} {false , x} {true , y} ((t≤t , t≤t) , r) = {!!}
+-- whenn (dec , sl) .is-id {_ , dx} {true , x} {.true , y} ((t≤t , t≤t) , r) = r
+-- whenn (dec , sl) .is-id {true ,  dx} {false , x} {false , y} ((() , f≤*) , r)
+-- whenn (dec , sl) .is-id {false , dx} {false , x} {true ,  y} ((f≤* , ()) , r)
 
 
 -- Semantics of terms
 eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ≤ ⟦ P ⟧+
 eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ≤ type a
 
-eval tt = const-cfun TT TT tt
+eval tt = const-cfun TT TT TT
 eval (M , N) = ⟨ eval M , eval N ⟩
 eval (bind M) = curry (cons • eval M)
 -- what is the type of comap⟦ extract Wipe ⟧?

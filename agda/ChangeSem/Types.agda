@@ -10,6 +10,7 @@ open import Monads
 open import Prelude
 open import Prosets
 open import TreeSet
+open import Tones
 
  ---------- Denotations of types & modes ----------
 Vars : Cx -> Set
