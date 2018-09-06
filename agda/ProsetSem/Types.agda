@@ -56,7 +56,7 @@ is! {DEC} (a + b) = decidable+ (is! a) (is! b)
 is! {SL} bool     = bool-sums
 is! {SL} (set a)  = tree-sums (iso (type a))
 is! {SL} (a * b)  = cat×-sums (is! a) (is! b)
-is! {SL} (a ⊃ b)  = cat→-sums (is! b)
+is! {SL} (a ⊃ b)  = cat→sums (is! b)
 
 is! {FIN} a = TODO
 

@@ -68,14 +68,17 @@ cat+ C D .ident {inj₂ _} = rel₂ (ident D)
 cat+ C D .compo (rel₁ x) (rel₁ y) = rel₁ (compo C x y)
 cat+ C D .compo (rel₂ x) (rel₂ y) = rel₂ (compo D x y)
 
--- Functor category, sans the naturality condition. (Lawless, natch.)
+-- Functor category, sans the naturality condition.
 cat→ : ∀{i j k l} (A : Cat i j) (B : Cat k l) -> Cat (i ⊔ j ⊔ k ⊔ l) _
 cat→ A B .Obj = Fun A B
--- The more usual pointwise definition makes it harder to prove that prosets is
--- cartesian closed.
-cat→ A B .Hom F G = ∀ {x y} -> Hom A x y -> Hom B (ap F x) (ap G y)
-cat→ A B .ident {F} = map F
-cat→ A B .compo {F}{G}{H} F≤G G≤H {x}{y} x≤y = compo B (F≤G x≤y) (G≤H (ident A))
+cat→ A B .Hom F G = ∀{x} -> Hom B (ap F x) (ap G x)
+cat→ A B .ident = ident B
+cat→ A B .compo F≤G G≤H = compo B F≤G G≤H
+-- -- The more usual pointwise definition makes it harder to prove that prosets is
+-- -- cartesian closed.
+-- cat→ A B .Hom F G = ∀{x y} -> Hom A x y -> Hom B (ap F x) (ap G y)
+-- cat→ A B .ident {F} = map F
+-- cat→ A B .compo {F}{G}{H} F≤G G≤H {x}{y} x≤y = compo B (F≤G x≤y) (G≤H (ident A))
 
 -- Indexed product of categories.
 catΠ : ∀{i j k} (A : Set i) (B : A -> Cat j k) -> Cat (j ⊔ i) (k ⊔ i)
@@ -278,13 +281,19 @@ instance
   cat-cc : ∀{i} -> CC (cats {i}{i})
   CC.products cat-cc = cat-products
   _⇨_   {{cat-cc}} = cat→
-  -- apply or eval
   apply {{cat-cc}} .ap (F , a) = ap F a
-  apply {{cat-cc}} .map (F≤G , a≤a') = F≤G a≤a'
-  -- curry or λ
-  curry {{cat-cc}} {A}{B}{C} F .ap a .ap b    = ap F (a , b)
-  curry {{cat-cc}} {A}{B}{C} F .ap a .map b   = map F (ident A , b)
-  curry {{cat-cc}} {A}{B}{C} F .map a≤a' b≤b' = map F (a≤a' , b≤b')
+  apply {{cat-cc}} {A}{B} .map {F , _} {G , _} (F≤G , a≤b) = compo B F≤G (map G a≤b)
+  curry {{cat-cc}} F .ap a .ap b = ap F (a , b)
+  curry {{cat-cc}} {A}{B} F .ap a .map b≤b' = map F (ident A , b≤b')
+  curry {{cat-cc}} {A}{B} F .map a≤a' = map F (a≤a' , ident B)
+
+  -- -- apply or eval
+  -- apply {{cat-cc}} .ap (F , a) = ap F a
+  -- apply {{cat-cc}} .map (F≤G , a≤a') = F≤G a≤a'
+  -- -- curry or λ
+  -- curry {{cat-cc}} {A}{B}{C} F .ap a .ap b    = ap F (a , b)
+  -- curry {{cat-cc}} {A}{B}{C} F .ap a .map b   = map F (ident A , b)
+  -- curry {{cat-cc}} {A}{B}{C} F .map a≤a' b≤b' = map F (a≤a' , b≤b')
 
   cat-Π : ∀{i j k} -> SetΠ k (cats {i ⊔ k} {j ⊔ k})
   cat-Π = SetΠ: catΠ (λ Γ→P → fun (λ γ a → Γ→P a .map γ)) (λ a → fun (λ ∀P≤ → ∀P≤ a))
@@ -303,13 +312,22 @@ module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
 -- If B has sums, then (A ⇒ B) has sums too. Used in ProsetSem.Types.
 module _ {i j k l} {A : Cat i j} {B} (bs : Sums {k}{l} B) where
   private instance b' = B; bs' = bs
-  cat→-sums : Sums (cat→ A B)
-  lub cat→-sums F G .a∨b .ap x = ap F x ∨ ap G x
-  lub cat→-sums F G .a∨b .map x≤y = map∨ (map F x≤y) (map G x≤y)
-  lub cat→-sums F G .∨I₁ x≤y = map F x≤y • in₁
-  lub cat→-sums F G .∨I₂ x≤y = map G x≤y • in₂
-  lub cat→-sums F G .∨E F≤H G≤H x≤y = [ F≤H x≤y , G≤H x≤y ]
-  bottom cat→-sums = constant ⊥ , λ _ → ⊥≤
+  instance
+    cat→sums : Sums (cat→ A B)
+    bottom cat→sums = constant ⊥ , ⊥≤
+    -- bottom cat→sums = constant ⊥ , λ _ → ⊥≤
+    lub cat→sums F G .a∨b .ap x = ap F x ∨ ap G x
+    lub cat→sums F G .a∨b .map x≤y = map∨ (map F x≤y) (map G x≤y)
+    lub cat→sums F G .∨I₁ = in₁
+    lub cat→sums F G .∨I₂ = in₂
+    lub cat→sums F G .∨E F≤H G≤H = [ F≤H , G≤H ]
+    -- lub cat→sums F G .∨I₁ x≤y = map F x≤y • in₁
+    -- lub cat→sums F G .∨I₂ x≤y = map G x≤y • in₁
+    -- lub cat→sums F G .∨E F≤H G≤H x≤y = [ F≤H x≤y , G≤H x≤y ]
+
+-- map• : ∀{i j k l A B} (F : Fun {i}{j}{k}{l} A B) {x y z}
+--      → Hom B (ap F y) z → Hom A x y → Hom B (ap F x) z
+-- map• {B = B} F G x≤y = compo B (map F x≤y) G
 
 -- Discrete category on a given set.
 discrete : ∀{i} → Set i → Cat _ _

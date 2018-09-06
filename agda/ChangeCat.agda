@@ -67,9 +67,15 @@ instance
   change-cc : CC changes
   CC.products change-cc = change-products
   _⇨_ {{change-cc}} = change→
+  -- apply {{change-cc}} .funct = apply
+  -- apply {{change-cc}} .deriv .ap ((f , a) , df , da) = ap df (a , da)
+  -- apply {{change-cc}} .is-id (df:f→g , dx:x→y) = df:f→g dx:x→y
+  -- curry {{change-cc}} (cfun f df ok) =
+  --   cfun (curry f) (curry (isojuggle • df)) (λ da db → ok (da , db))
   apply {{change-cc}} .funct = apply
   apply {{change-cc}} .deriv .ap ((f , a) , df , da) = ap df (a , da)
-  apply {{change-cc}} .deriv .map (fa≈gb , df≤ , da≤) = df≤ (juggle fa≈gb .proj₂ , da≤)
+  -- apply {{change-cc}} .deriv .map (fa≈gb , df≤ , da≤) = df≤ (juggle fa≈gb .proj₂ , da≤)
+  apply {{change-cc}} .deriv .map {_} {(g , b) , (dg , db)} (fa≈gb , df≤dg , da≤db) = df≤dg • map dg (juggle fa≈gb .proj₂ , da≤db)
   apply {{change-cc}} .is-id (df:f→g , dx:x→y) = df:f→g dx:x→y
   curry {{change-cc}} (cfun f df ok) =
     cfun (curry f) (curry (isojuggle • df)) (λ da db → ok (da , db))
