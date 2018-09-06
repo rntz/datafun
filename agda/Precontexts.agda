@@ -9,20 +9,20 @@ private instance types-instance = types
 
 ---------- Contexts ----------
 instance
-  contexts : Cat (suc zero) zero
-  contexts = cat→ types (sets {zero})
+  cxs : Cat (suc zero) zero
+  cxs = cat→ types (sets {zero})
 
-context-sums : Sums contexts
-context-sums = it
+cx-sums : Sums cxs
+cx-sums = it
 
 Cx : Set1
-Cx = Obj contexts
+Cx = Obj cxs
 
 hyp : Type → Cx
 hyp a .ap b = a ≤ b
 hyp a .map a≤b b≤c = b≤c • a≤b
 
-Hyp : Fun (op types) contexts
+Hyp : Fun (op types) cxs
 ap Hyp = hyp
 map Hyp b≤a a≤c = b≤a • a≤c
 -- map Hyp b≤a c≤d a≤c = b≤a • a≤c • c≤d

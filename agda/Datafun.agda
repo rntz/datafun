@@ -11,7 +11,13 @@ data _≺_ : (o p : Mode) -> Set where
   mode-refl : ∀{o} -> o ≺ o
   mode-disc : ∀{o} -> disc ≺ o
 
--- NB. ≺ forms a Preorder but I haven't needed an instance for it... yet.
+instance
+  modes : Proset
+  Obj modes = Mode
+  Hom modes = _≺_
+  ident modes = mode-refl
+  compo modes mode-refl b = b
+  compo modes mode-disc b = mode-disc
 
 _≺?_ : ∀ o p -> Dec (o ≺ p)
 mono ≺? mono = yes mode-refl

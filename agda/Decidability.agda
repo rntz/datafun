@@ -2,6 +2,7 @@ module Decidability where
 
 open import Prelude
 open import Cat
+import Data.Sum
 
 -- Decidability of the hom-sets of a proset/category.
 Decidable≤ : ∀{i j} -> Cat i j -> Set _
@@ -15,6 +16,11 @@ dec× : ∀{i j P Q} -> Dec {i} P -> Dec {j} Q -> Dec (P × Q)
 dec× (yes p) (yes q) = yes (p , q)
 dec× (no ¬p) _ = no (λ { (x , y) -> ¬p x })
 dec× _ (no ¬p) = no (λ { (x , y) -> ¬p y })
+
+dec+ : ∀{i j P Q} → Dec {i} P → Dec {j} Q → Dec (P ⊎ Q)
+dec+ (yes p) q = yes (inj₁ p)
+dec+ (no ¬p) (yes p) = yes (inj₂ p)
+dec+ (no ¬p) (no ¬q) = no Data.Sum.[ ¬p , ¬q ]
 
 instance
   decidable× : ∀{i j k l A B} {R : Rel {i} A j} {S : Rel {k} B l}

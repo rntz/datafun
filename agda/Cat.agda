@@ -29,6 +29,11 @@ record Fun {i j k l} (C : Cat i j) (D : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l) whe
 open Fun public
 pattern fun {F} f = Fun: F f
 
+-- Composition of functors across different levels.
+_⊚_ : ∀{i j k l m n A B C} → Fun {k}{l}{m}{n} B C → Fun {i}{j} A B → Fun A C
+ap (F ⊚ G) = ap F ∘ ap G
+map (F ⊚ G) = map F ∘ map G
+
  -- Conveniences.
 Proset : Set1
 Proset = Cat zero zero
