@@ -1,3 +1,4 @@
+{-# OPTIONS --postfix-projections #-}
 module Cat where
 
 open import Prelude
@@ -124,8 +125,11 @@ module _ {i j} (C : Cat i j) where
     idem∨ : ∀{a} -> a ∨ a ≤ a;    idem∨ = [ id , id ]
     a∨⊥≈a : ∀{a} -> a ∨ ⊥ ≈ a;    a∨⊥≈a = [ id , ⊥≤ ] , in₁
 
-    map∨ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∨ b ≤ c ∨ d
+    map∨ : ∀{a₁ b₁} → a₁ ≤ b₁ → ∀{a₂ b₂} → a₂ ≤ b₂ → a₁ ∨ a₂ ≤ b₁ ∨ b₂
     map∨ f g = [ f • in₁ , g • in₂ ]
+
+    map∨₂ : ∀{L R} → L ≤ R → ∀{X} → X ∨ L ≤ X ∨ R
+    map∨₂ f = map∨ id f
 
     -- Used in Prosets.agda in ∨≈.
     functor∨ : Fun (cat× C C) C
