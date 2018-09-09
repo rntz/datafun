@@ -76,6 +76,9 @@ module Trees (C : Proset) where
 
 open Trees public renaming (_⊑_ to Tree≤) hiding (unsplit)
 
+_∈_ : {{C : Proset}} → Obj C → Tree (Obj C) → Set
+_∈_ {{C}} a X = Tree≤ C (leaf a) X
+
 
 -- Functoriality
 tree-map : ∀{A B} → A ⇒ B → trees A ⇒ trees B
