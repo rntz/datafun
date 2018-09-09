@@ -123,9 +123,3 @@ map (Tree-map {A} {B}) {f} {g} f≤g {leaf x} = leaf≤ f≤g
 map (Tree-map {A} {B}) {f} {g} f≤g {node l r} =
   node≤ (split₁ (Tree-map {A} .map f≤g {l}))
         (split₂ (Tree-map {A} .map f≤g {r}))
-
--- map Tree-map f≤g empty≤ = empty≤
--- map Tree-map f≤g (leaf≤ x≤y) = leaf≤ (f≤g x≤y)
--- map Tree-map f≤g (node≤ t≤u t≤v) = node≤ (map Tree-map f≤g t≤u) (map Tree-map f≤g t≤v)
--- map Tree-map f≤g (split₁ t≤u) = split₁ (map Tree-map f≤g t≤u)
--- map Tree-map f≤g (split₂ t≤u) = split₂ (map Tree-map f≤g t≤u)
