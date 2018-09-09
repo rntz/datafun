@@ -18,9 +18,9 @@ open import Booleans
 whenn : ∀{A} -> class (DEC , SL) A -> (change-bool ∧ A) ≤ A
 whenn (dec , sl) .funct = from-bool
 whenn {A} (dec , sl) .deriv =
-  map∧ iso/∧ id • juggle∧ • assoc∧r
-  • if⇒ ⟨ π₂ • π₂ , map∧ id (plus dec • from-zero dec sl)
-                  • from-bool {{A = 𝑫 A}} {{S = 𝑫-sums sl}} ⟩ -- argh!
+  map∧ iso/∧ id ∙ juggle∧ ∙ assoc∧r
+  ∙ if⇒ ⟨ π₂ ∙ π₂ , map∧ id (plus dec ∙ from-zero dec sl)
+                  ∙ from-bool {{A = 𝑫 A}} {{S = 𝑫-sums sl}} ⟩ -- argh!
  -- Path A (ap (whenn (dec , sl) .deriv) (a , da))
  --        (ap (whenn (dec , sl) .funct) a)
  --        (ap (whenn (dec , sl) .funct) b)
@@ -44,19 +44,19 @@ eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ≤ type a
 
 eval tt = const-cfun TT TT TT
 eval (M , N) = ⟨ eval M , eval N ⟩
-eval (bind M) = curry (cons • eval M)
+eval (bind M) = curry (cons ∙ eval M)
 -- what is the type of comap⟦ extract Wipe ⟧?
 -- is this the only place I use comap⟦_⟧?
 -- Can I specialize it for simpler code?
-eval (box M) = comap⟦ extract Wipe ⟧ • wipe≤□ • map Change□ (eval M)
-eval (form ! M) = eval M • eval⊩ form
+eval (box M) = comap⟦ extract Wipe ⟧ ∙ wipe≤□ ∙ map Change□ (eval M)
+eval (form ! M) = eval M ∙ eval⊩ form
 eval (var mono p) = lookup p
-eval (var disc p) = lookup p • extract Change□
+eval (var disc p) = lookup p ∙ extract Change□
 
 eval⊩ (lam {a}{b}) = lambda b
 eval⊩ app = apply
 eval⊩ box = id
-eval⊩ (letbox {a}{b}) = map∧ id (lambda b) • swapply
+eval⊩ (letbox {a}{b}) = map∧ id (lambda b) ∙ swapply
 eval⊩ pair = id
 eval⊩ (proj true) = π₁
 eval⊩ (proj false) = π₂
@@ -64,10 +64,10 @@ eval⊩ (inj {a}{b} true) = in₁ {b = type b}
 eval⊩ (inj false) = in₂
 eval⊩ (case {a}{b}{c})
       = distrib-∧/∨ {a = type a} {b = type b}
-           • [ map∧ singleton π₁ • swapply
-             , map∧ singleton (π₂ {a = ⟦ _ ⟧ ⇨ type c}) • swapply ]
+           ∙ [ map∧ singleton π₁ ∙ swapply
+             , map∧ singleton (π₂ {a = ⟦ _ ⟧ ⇨ type c}) ∙ swapply ]
 eval⊩ splitsum .funct = iso/∨
-eval⊩ splitsum .deriv = π₂ • iso/∨
+eval⊩ splitsum .deriv = π₂ ∙ iso/∨
 eval⊩ splitsum .is-id (rel₁ x , rel₁ y , rel₁ z) = rel₁ (x , y , z)
 eval⊩ splitsum .is-id (rel₂ x , rel₂ y , rel₂ z) = rel₂ (x , y , z)
 eval⊩ (bool x) = const-cfun x false a∨⊥≈a
@@ -79,7 +79,7 @@ eval⊩ (single p) .deriv = constant empty
 -- this pattern comes up somewhere else, but I can't remember where...
 -- TODO: simplify
 eval⊩ (single {a} p) .is-id (da:a→b , a≈b) = [ leaf≤ a≈b , empty≤ ]
-                                             , leaf≤ (swap {{sets}} a≈b) • in₁
+                                             , leaf≤ (swap {{sets}} a≈b) ∙ in₁
   where instance x = trees (iso (type a .𝑶))
 eval⊩ (for-in p q) = {!!}
 eval⊩ (empty sl) = eps (is! sl)

@@ -52,11 +52,11 @@ module DefnWf where
 
     -- _<_ : 
 
-    ≤•< : ∀{a b c} -> a ≤ b -> Hom< A b c -> Hom< A a c
-    ≤•< a≤b b<c = a≤b • proj₁ b<c , λ c≤a → proj₂ b<c (c≤a • a≤b)
+    ≤∙< : ∀{a b c} -> a ≤ b -> Hom< A b c -> Hom< A a c
+    ≤∙< a≤b b<c = a≤b ∙ proj₁ b<c , λ c≤a → proj₂ b<c (c≤a ∙ a≤b)
 
-    access•≤ : ∀{a b} -> Access A a -> a ≤ b -> Access A b
-    access•≤ acc-a a≤b .acc b<c = acc-a .acc (≤•< a≤b b<c)
+    access∙≤ : ∀{a b} -> Access A a -> a ≤ b -> Access A b
+    access∙≤ acc-a a≤b .acc b<c = acc-a .acc (≤∙< a≤b b<c)
 
     module _ (≤? : Decidable≤ A) where
       Hom<? : Decidable (Hom< A)
@@ -89,7 +89,7 @@ module DefnWf where
             -> Access (A ∧ B) (a' , b')
       bar {b' = b'} a-rec b-rec p with lem p
       ... | inj₁ a<a' = a-rec a<a' b'
-      ... | inj₂ b<b' = access•≤ (b-rec b<b') (proj₁ p .proj₁ , ident B)
+      ... | inj₂ b<b' = access∙≤ (b-rec b<b') (proj₁ p .proj₁ , ident B)
 
       foo : ∀ a b -> Access (A ∧ B) (a , b)
       foo = acc-rec P (λ a → ∀ b → Access (A ∧ B) (a , b))
@@ -140,14 +140,14 @@ module DefnClassical where
     -- this works but is ugly
     acc× : ACC (A ∧ B)
     acc× C non-stop =
-      P (C • π₁) λ i stops-at-i →
-      Q (C • π₂) λ j stops-at-j →
+      P (C ∙ π₁) λ i stops-at-i →
+      Q (C ∙ π₂) λ j stops-at-j →
       let stop = i Nat.⊔ j in
       non-stop   stop λ k i⊔j≤k Ck≰Ci⊔j →
-      stops-at-i k (in₁ • i⊔j≤k) λ Ck₁≤Ci₁ →
-      stops-at-j k (in₂ {a = i} • i⊔j≤k) λ Ck₂≤Cj₂ →
-      Ck≰Ci⊔j (Ck₁≤Ci₁ • map C in₁ .proj₁ ,
-               Ck₂≤Cj₂ • map C (in₂ {a = i}) .proj₂)
+      stops-at-i k (in₁ ∙ i⊔j≤k) λ Ck₁≤Ci₁ →
+      stops-at-j k (in₂ {a = i} ∙ i⊔j≤k) λ Ck₂≤Cj₂ →
+      Ck≰Ci⊔j (Ck₁≤Ci₁ ∙ map C in₁ .proj₁ ,
+               Ck₂≤Cj₂ ∙ map C (in₂ {a = i}) .proj₂)
 
 
 module DefnStream where

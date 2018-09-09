@@ -47,7 +47,7 @@ iso/∨ .map (rel₁ p , rel₁ q) = rel₁ (p , q)
 iso/∨ .map (rel₂ p , rel₂ q) = rel₂ (p , q)
 
 isojuggle : ∀{A B C D} -> (iso A ∧ B) ∧ (iso C ∧ D) ⇒ iso (A ∧ C) ∧ (B ∧ D)
-isojuggle = fun juggle • map∧ ∧/iso id
+isojuggle = fun juggle ∙ map∧ ∧/iso id
 
 module _ {i j} {{A : Cat i j}} {{Prod : Products A}} where
   ∧≈ : ∀{a b a' b' : Obj A} -> a ≈ a' -> b ≈ b' -> (a ∧ b) ≈ (a' ∧ b')

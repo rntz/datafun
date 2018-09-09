@@ -21,7 +21,7 @@ lookup : ∀{X x} -> X x -> ⟦ X ⟧ ≤ ⟦ x ⟧₁
 lookup p = Πe (Var p)
 
 cons : ∀{X Y} -> ⟦ X ⟧ ∧ ⟦ Y ⟧ ≤ ⟦ Y ∪ X ⟧
-cons = Πi {P = ⟦_⟧v} λ { (, inj₁ x) → π₂ • lookup x ; (, inj₂ y) → π₁ • lookup y }
+cons = Πi {P = ⟦_⟧v} λ { (, inj₁ x) → π₂ ∙ lookup x ; (, inj₂ y) → π₁ ∙ lookup y }
 
 singleton : ∀{x} -> ⟦ x ⟧₁ ≤ ⟦ hyp x ⟧
 singleton = Πi duh
@@ -31,10 +31,10 @@ singleton = Πi duh
 -- Lemmas for wipe≤□.
 Π/□ : ∀{A} P -> Π A (λ a -> change□ (P a)) ≤ change□ (Π A P)
 -- I find this slightly incomprehensible myself.
-Π/□ _ = cfun (fun Π/∧) (π₂ • fun Π/∧) (Π/∧ • map∧ id Π/∧)
+Π/□ _ = cfun (fun Π/∧) (π₂ ∙ fun Π/∧) (Π/∧ ∙ map∧ id Π/∧)
 
 Π≤□ : ∀{A P} -> (∀ a -> P a ≤ change□ (P a)) -> Π A P ≤ change□ (Π A P)
-Π≤□ {P = P} F = suffixΠ F • Π/□ P
+Π≤□ {P = P} F = suffixΠ F ∙ Π/□ P
 
 wipevar : ∀{X} (v : Vars (wipe X)) -> ⟦ v ⟧v ≤ change□ ⟦ v ⟧v
 wipevar (Var {mono} ())
@@ -52,7 +52,7 @@ boolπ : ∀{A} -> iso bools ⇒ ((A ∧ A) ⇨ A)
 boolπ = antisym⇒ antisym:bool≤ (λ x → if x then π₁ else π₂)
 
 if⇒ : ∀{Γ a} -> (N : Γ ≤ a ∧ a) -> iso bools ∧ Γ ⇒ a
-if⇒ N = map∧ id N • uncurry boolπ
+if⇒ N = map∧ id N ∙ uncurry boolπ
 
 from-bool : ∀{{A}} {{S : Sums A}} -> bools ∧ A ⇒ A
 from-bool .ap (c , x) = if c then x else ⊥

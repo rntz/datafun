@@ -1,4 +1,4 @@
-module Datafun where
+module Datafun-with-Trees where
 
 open import Prelude
 open import Cat
@@ -198,11 +198,11 @@ rename f tt         = tt
 rename f (M , N)    = rename f M , rename f N
 rename f (bind M)   = bind (rename (map∨₂ f) M)
 --rename f (box M)    = box (rename (map Wipe f) M)
-rename {X} {Y} {P} f (box M)    = ?
+rename {X} {Y} {P} f (box M)    = TODO
 rename f (form ! M) = form ! rename f M
 --rename f (var o p)  = var o (f (o , _) p)
-rename f (var o p)  = var o (p • f)
--- rename f (var o p) = var o (≤→∈ (∈→≤ p • f))
+rename f (var o p)  = var o (p ∙ f)
+-- rename f (var o p) = var o (≤→∈ (∈→≤ p ∙ f))
 
 -- rename-at : ∀{X Y} o {a} -> X ≤ Y -> X at o ⊢ a -> Y at o ⊢ a
 -- rename-at mono f M = rename f M

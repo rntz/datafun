@@ -29,9 +29,9 @@ module _ (P : Proset) (S : Sums P) where
   𝑶 change-SL = P
   𝑫 change-SL a b = Σ[ da ∈ Obj P ] (a ∨ da ≈ b)
   path change-SL .proj₁ a≤b = _ , [ a≤b , id ] , in₂
-  path change-SL .proj₂ (da , a∨da≈b) = in₁ • proj₁ a∨da≈b
+  path change-SL .proj₂ (da , a∨da≈b) = in₁ ∙ proj₁ a∨da≈b
   -- path change-SL {a}{b} a≤b = b , [ a≤b , id ] , in₂
-  -- path≤ change-SL (da , a∨da≈b) = in₁ • proj₁ a∨da≈b
+  -- path≤ change-SL (da , a∨da≈b) = in₁ ∙ proj₁ a∨da≈b
 
 change-bool : Change
 change-bool = change-SL bools bool-sums
@@ -63,5 +63,5 @@ module _ (A B : Change) where
 --   change→ : Change
 --   change→ .𝑶 = 𝑶 A ⇨ 𝑶 B
 --   change→ .𝑫 f g = ∀{a b} (da : 𝑫 A a b) -> 𝑫 B (ap f a) (ap g b)
---   change→ .path f≤g = path≤ A • f≤g • path B
+--   change→ .path f≤g = path≤ A ∙ f≤g ∙ path B
 --   change→ .path≤ da x≤y = {!path≤ B (da (path A x≤y))!}

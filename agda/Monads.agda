@@ -12,7 +12,7 @@ record Monad {i j C} (◇ : Fun {i}{j} C C) : Set (i ⊔ j) where
 
   infixr 3 bind
   bind : ∀{a b} -> a ≤ ap ◇ b -> ap ◇ a ≤ ap ◇ b
-  bind f = map ◇ f • join
+  bind f = map ◇ f ∙ join
 
 -- Comonads are the dual of Monads, ie. Monads on the opposite category.
 Comonad : ∀{i j C} (□ : Fun {i}{j} C C) → Set (i ⊔ j)
@@ -51,4 +51,4 @@ module Tests where
     shub : Comonad □; shub = it
     instance opc = op C
     □-extend : ∀{a b} → ap □ a ≤ b → ap □ a ≤ ap □ b
-    □-extend f = dup □ • map □ f
+    □-extend f = dup □ ∙ map □ f

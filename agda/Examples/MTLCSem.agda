@@ -70,16 +70,16 @@ eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ⇒ type a
 
 eval tt = constant TT
 eval (M , N) = ⟨ eval M , eval N ⟩
-eval (bind M) = curry (cons • eval M)
-eval (box M) = comap⟦ extract Wipe ⟧ • wipe⇒iso • map Iso (eval M)
+eval (bind M) = curry (cons ∙ eval M)
+eval (box M) = comap⟦ extract Wipe ⟧ ∙ wipe⇒iso ∙ map Iso (eval M)
 eval (var mono p) = lookup p
-eval (var disc p) = lookup p • extract Iso
-eval (form ! M) = eval M • eval⊩ form
+eval (var disc p) = lookup p ∙ extract Iso
+eval (form ! M) = eval M ∙ eval⊩ form
 
 eval⊩ lam = lambda
 eval⊩ app = apply
 eval⊩ box = id
-eval⊩ letbox = map∧ id lambda • swap • apply
+eval⊩ letbox = map∧ id lambda ∙ swap ∙ apply
 eval⊩ pair = id
 eval⊩ (proj true)  = π₁
 eval⊩ (proj false) = π₂
@@ -88,8 +88,8 @@ eval⊩ if = uncurry (antisym⇒ antisym:bool≤ (λ x -> if x then π₁ else �
 eval⊩ (inj true)  = in₁
 eval⊩ (inj false) = in₂
 eval⊩ case = distrib-∧/∨
-           • [ map∧ singleton π₁ • swap • apply
-             , map∧ singleton π₂ • swap • apply ]
+           ∙ [ map∧ singleton π₁ ∙ swap ∙ apply
+             , map∧ singleton π₂ ∙ swap ∙ apply ]
 eval⊩ splitsum .ap x = x
 eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
 eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)

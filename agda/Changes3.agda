@@ -95,7 +95,7 @@ record ChangeFun (A B : Change) : Set where
   field is-id : IdPath (change→ A B) funct deriv
 
   func&deriv : iso (𝑶 A) ∧ 𝑫 A ⇒ iso (𝑶 B) ∧ 𝑫 B
-  func&deriv = ⟨ π₁ • map Iso funct , deriv ⟩
+  func&deriv = ⟨ π₁ ∙ map Iso funct , deriv ⟩
 
   cfun→zero : Deriv A B funct
   cfun→zero = deriv , is-id

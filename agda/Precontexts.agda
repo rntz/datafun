@@ -20,12 +20,12 @@ Cx = Obj cxs
 
 hyp : Type → Cx
 hyp a .ap b = a ≤ b
-hyp a .map a≤b b≤c = b≤c • a≤b
+hyp a .map a≤b b≤c = b≤c ∙ a≤b
 
 Hyp : Fun (op types) cxs
 ap Hyp = hyp
-map Hyp b≤a a≤c = b≤a • a≤c
--- map Hyp b≤a c≤d a≤c = b≤a • a≤c • c≤d
+map Hyp b≤a a≤c = b≤a ∙ a≤c
+-- map Hyp b≤a c≤d a≤c = b≤a ∙ a≤c ∙ c≤d
 
 infixr 4 _∷_
 _∷_ : Type -> Cx -> Cx

@@ -34,10 +34,10 @@ module Trees (C : Proset) where
   ident trees {leaf x} = leaf≤ id
   ident trees {node l r} = node≤ (split₁ id) (split₂ id)
   compo trees empty≤ _ = empty≤
-  compo trees (leaf≤ x) (leaf≤ y) = leaf≤ (x • y)
-  compo trees x (≤node p) = ≤node (map∨ (x •_) (x •_) p)
-  compo trees (node≤ l r) x = node≤ (l • x) (r • x)
-  compo trees (≤node p) (node≤ y z) = [ _• y , _• z ] p
+  compo trees (leaf≤ x) (leaf≤ y) = leaf≤ (x ∙ y)
+  compo trees x (≤node p) = ≤node (map∨ (x ∙_) (x ∙_) p)
+  compo trees (node≤ l r) x = node≤ (l ∙ x) (r ∙ x)
+  compo trees (≤node p) (node≤ y z) = [ _∙ y , _∙ z ] p
 
   instance
     tree-sums : Sums trees
@@ -54,8 +54,8 @@ module Trees (C : Proset) where
     map tree-⋁ empty≤ = ⊥≤
     map tree-⋁ (leaf≤ x≤y) = x≤y
     map tree-⋁ (node≤ t≤u t≤v) = [ map tree-⋁ t≤u , map tree-⋁ t≤v ]
-    map tree-⋁ (split₁ t≤u) = map tree-⋁ t≤u • in₁
-    map tree-⋁ (split₂ t≤u) = map tree-⋁ t≤u • in₂
+    map tree-⋁ (split₁ t≤u) = map tree-⋁ t≤u ∙ in₁
+    map tree-⋁ (split₂ t≤u) = map tree-⋁ t≤u ∙ in₂
 
   -- Decidability
   module _ (≤? : Decidable≤ C) where
@@ -71,8 +71,8 @@ module Trees (C : Proset) where
     ... | no ¬p | no ¬q = no λ { (≤node pq) → [ ¬p , ¬q ] pq }
     tree≤? (node l r) y with tree≤? l y | tree≤? r y
     ... | yes p | yes q = yes (node≤ p q)
-    ... | no ¬p | _ = no (unsplit • π₁ • ¬p)
-    ... | yes _ | no ¬q = no (unsplit • π₂ • ¬q)
+    ... | no ¬p | _ = no (unsplit ∙ π₁ ∙ ¬p)
+    ... | yes _ | no ¬q = no (unsplit ∙ π₂ ∙ ¬q)
 
 open Trees public renaming (_⊑_ to Tree≤) hiding (unsplit)
 
@@ -98,7 +98,7 @@ _∈_ {{C}} a X = Tree≤ C (leaf a) X
 --   open import Tones
 --   Tree∈ : Fun (op C ∧ trees C) sets
 --   ap Tree∈ (a , T) = a ∈ T
---   map Tree∈ {b , T} {a , U} (a≤b , T≤U) a∈T = ≤→∈ (leaf≤ a≤b • ∈→≤ a∈T • T≤U)
+--   map Tree∈ {b , T} {a , U} (a≤b , T≤U) a∈T = ≤→∈ (leaf≤ a≤b ∙ ∈→≤ a∈T ∙ T≤U)
 
 
 -- Trees is a functor.

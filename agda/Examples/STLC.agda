@@ -73,8 +73,8 @@ map cons (env , x) (at (next p)) = env (at p)
 
 eval : ∀{X a} -> X ⊢ a -> ⟦ X ⟧* ≤ ⟦ a ⟧
 eval (var x) = lookup x
-eval (app M N) = ⟨ eval M , eval N ⟩ • apply
-eval (lam M) = curry (cons • eval M)
+eval (app M N) = ⟨ eval M , eval N ⟩ ∙ apply
+eval (lam M) = curry (cons ∙ eval M)
 eval (pair M N) = ⟨ eval M , eval N ⟩
-eval (proj true  M) = eval M • π₁
-eval (proj false M) = eval M • π₂
+eval (proj true  M) = eval M ∙ π₁
+eval (proj false M) = eval M ∙ π₂

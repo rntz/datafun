@@ -60,7 +60,7 @@ record IsSL (A : Change) : Set where
   private
     -- δ(a ∨ b) = δa ∨ δb
     vee-deriv : ((A ∧ A) ⇨ A) .𝑫 .Obj
-    vee-deriv = π₂ • Sums.functor∨ 𝑫-sums
+    vee-deriv = π₂ ∙ Sums.functor∨ 𝑫-sums
 
     -- δ(⊥) = ⊥
     eps-func : ⊤ ⇒ 𝑶 A
@@ -79,14 +79,14 @@ record IsSL (A : Change) : Set where
 open IsSL public
 
 slSL : ∀ A S -> IsSL (change-SL A S)
-slSL A S = IsSL: S (λ _ → idem∨ , in₁) (λ { (p , q) → juggle∨≈ • ∨≈ p q })
+slSL A S = IsSL: S (λ _ → idem∨ , in₁) (λ { (p , q) → juggle∨≈ ∙ ∨≈ p q })
   where private instance aa = A; ss = S; isoaa = iso A
 
 sl× : ∀ {A B} (P : IsSL A) (Q : IsSL B) -> IsSL (A ∧ B)
 sl× P Q .𝑶-sums = cat×-sums (𝑶-sums P) (𝑶-sums Q)
 sl× P Q .𝑫-sums = cat×-sums (𝑫-sums P) (𝑫-sums Q)
 sl× P Q .eps-ok = is-id ⟨ eps P , eps Q ⟩
-sl× P Q .vee-ok = is-id (juggle∧ • map∧ (vee P) (vee Q))
+sl× P Q .vee-ok = is-id (juggle∧ ∙ map∧ (vee P) (vee Q))
 
 sl→ : ∀ A {B} (P : IsSL B) -> IsSL (change→ A B)
 sl→ A P .𝑶-sums = proset→-sums (𝑶-sums P)

@@ -30,7 +30,7 @@ X ⊆ Y = ∀ a -> X a -> Y a
 
 instance
   cxs : Cat _ _
-  cxs = Cat: Cx _⊆_ (λ _ → id) (λ X⊆Y Y⊆Z x → X⊆Y x • Y⊆Z x)
+  cxs = Cat: Cx _⊆_ (λ _ → id) (λ X⊆Y Y⊆Z x → X⊆Y x ∙ Y⊆Z x)
 
   cx-sums : Sums cxs
   bottom cx-sums = (λ a → ⊥) , λ _ ()

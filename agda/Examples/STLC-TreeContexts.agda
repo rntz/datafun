@@ -72,7 +72,7 @@ module STLC {i j} (context : Context Type i j) where
 
   -- Renaming terms.
   rename : ∀{X Y a} -> X ≤ Y -> X ⊢ a -> Y ⊢ a
-  rename ρ (var x) = var (x • ρ)
+  rename ρ (var x) = var (x ∙ ρ)
   rename ρ (app M N) = app (rename ρ M) (rename ρ N)
   rename ρ (lam M) = lam (rename (map∨ id ρ) M)
 
@@ -83,7 +83,7 @@ module STLC {i j} (context : Context Type i j) where
 
   ∷/⊢* : ∀{X Y} → X ⊢* Y → ∀{a} → a ∷ X ⊢* a ∷ Y
   ∷/⊢* {X}{Y} σ {a} {b} v with split v
-  ... | inj₁ x = var (x • in₁)
+  ... | inj₁ x = var (x ∙ in₁)
   ... | inj₂ y = rename in₂ (σ y)
 
   subst : ∀{X Y a} → X ⊢* Y → Y ⊢ a → X ⊢ a

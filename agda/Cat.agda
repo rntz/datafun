@@ -18,7 +18,7 @@ record Cat i j : Set (suc (i ⊔ j)) where
   ≡→ident refl = ident
 
 open Cat public
-open Cat {{...}} public using () renaming (Hom to _≤_; ident to id; compo to _•_)
+open Cat {{...}} public using () renaming (Hom to _≤_; ident to id; compo to _∙_)
 
 -- Functors
 record Fun {i j k l} (C : Cat i j) (D : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l) where
@@ -127,7 +127,7 @@ module _ {i j} (C : Cat i j) where
     a∨⊥≈a : ∀{a} -> a ∨ ⊥ ≈ a;    a∨⊥≈a = [ id , ⊥≤ ] , in₁
 
     map∨ : ∀{a₁ b₁} → a₁ ≤ b₁ → ∀{a₂ b₂} → a₂ ≤ b₂ → a₁ ∨ a₂ ≤ b₁ ∨ b₂
-    map∨ f g = [ f • in₁ , g • in₂ ]
+    map∨ f g = [ f ∙ in₁ , g ∙ in₂ ]
 
     map∨₂ : ∀{L R} → L ≤ R → ∀{X} → X ∨ L ≤ X ∨ R
     map∨₂ f = map∨ id f
@@ -156,10 +156,10 @@ module _ {i j} (C : Cat i j) where
 
     -- Maybe factor out associativity into a separate structure?
     assoc∧r : ∀{a b c} -> (a ∧ b) ∧ c ≤ a ∧ (b ∧ c)
-    assoc∧r = ⟨ π₁ • π₁ , ⟨ (π₁ • π₂) , π₂ ⟩ ⟩
+    assoc∧r = ⟨ π₁ ∙ π₁ , ⟨ (π₁ ∙ π₂) , π₂ ⟩ ⟩
 
     map∧ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∧ b ≤ c ∧ d
-    map∧ f g = ⟨ π₁ • f , π₂ • g ⟩
+    map∧ f g = ⟨ π₁ ∙ f , π₂ ∙ g ⟩
 
     functor∧ : Fun (cat× C C) C
     functor∧ = fun λ { (f , g) -> map∧ f g }
@@ -188,23 +188,23 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   field curry : ∀{Γ a b} -> Γ ∧ a ≤ b -> Γ ≤ hom a b
 
   call : ∀{Γ a b} -> Γ ≤ hom a b -> Γ ≤ a -> Γ ≤ b
-  call f a = ⟨ f , a ⟩ • apply
+  call f a = ⟨ f , a ⟩ ∙ apply
 
   swapply : ∀{a b} -> a ∧ hom a b ≤ b
-  swapply = swap • apply
+  swapply = swap ∙ apply
 
   uncurry : ∀{a b c} -> a ≤ hom b c -> a ∧ b ≤ c
-  uncurry f = map∧ f id • apply
+  uncurry f = map∧ f id ∙ apply
 
   flip : ∀{a b c} -> a ≤ hom b c -> b ≤ hom a c
-  flip f = curry (swap • uncurry f)
+  flip f = curry (swap ∙ uncurry f)
 
   precompose : ∀{a b c} -> a ≤ b -> hom b c ≤ hom a c
-  precompose f = curry (map∧ id f • apply)
+  precompose f = curry (map∧ id f ∙ apply)
 
   module _ {{S : Sums C}} where
     distrib-∧/∨ : ∀{a b c} -> (a ∨ b) ∧ c ≤ (a ∧ c) ∨ (b ∧ c)
-    distrib-∧/∨ = map∧ [ curry in₁ , curry in₂ ] id • apply
+    distrib-∧/∨ = map∧ [ curry in₁ , curry in₂ ] id ∙ apply
 
 open CC public using (hom)
 module _ {i j} {{C : Cat i j}} {{cc : CC C}} where
@@ -219,7 +219,7 @@ record SetΠ k {i j} (C : Cat i j) : Set (i ⊔ j ⊔ suc k) where
   field Πe : ∀{A P} (a : A) -> Π A P ≤ P a
 
   mapΠ : ∀{A B P Q} (F : B -> A) (G : ∀ b -> P (F b) ≤ Q b) -> Π A P ≤ Π B Q
-  mapΠ F G = Πi λ b → Πe (F b) • G b
+  mapΠ F G = Πi λ b → Πe (F b) ∙ G b
 
   prefixΠ : ∀{A B P} (f : B -> A) -> Π A P ≤ Π B (P ∘ f)
   prefixΠ f = Πi (Πe ∘ f) -- mapΠ f (λ _ → id)
@@ -236,7 +236,7 @@ record SetΠ k {i j} (C : Cat i j) : Set (i ⊔ j ⊔ suc k) where
     -- ∧/Π = Πi λ a → map∧ (Πe a) (Πe a)
 
     -- fwiddle : ∀{A B P Q} -> Π A P ∧ Π B Q ≤ Π (A ⊎ B) Data.Sum.[ P , Q ]
-    -- fwiddle = Πi Data.Sum.[ (λ x → π₁ • Πe x) , (λ x → π₂ • Πe x) ]
+    -- fwiddle = Πi Data.Sum.[ (λ x → π₁ ∙ Πe x) , (λ x → π₂ ∙ Πe x) ]
 
 module _ {i j k} {{C : Cat i j}} {{Pi : SetΠ k C}} where open SetΠ Pi public
 
@@ -266,7 +266,7 @@ instance
   set-Π = SetΠ: (λ A P → (x : A) -> P x) (λ Γ→P γ a → Γ→P a γ) (λ a ∀P → ∀P a)
 
   cats : ∀{i j} -> Cat (suc (i ⊔ j)) (i ⊔ j)
-  cats {i}{j} = Cat: (Cat i j) Fun (fun id) λ { (fun f) (fun g) → fun (f • g) }
+  cats {i}{j} = Cat: (Cat i j) Fun (fun id) λ { (fun f) (fun g) → fun (f ∙ g) }
 
 ⊤-cat ⊥-cat : ∀{i j} -> Cat i j
 ⊥-cat = Cat: ⊥ (λ{()}) (λ { {()} }) λ { {()} }

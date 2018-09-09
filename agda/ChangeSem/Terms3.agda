@@ -21,7 +21,7 @@ lookup : ∀{X x} -> X x -> ⟦ X ⟧ ≤ ⟦ x ⟧₁
 lookup p = Πe {P = ⟦_⟧v} (Var p)
 
 cons : ∀{X Y} -> ⟦ X ⟧ ∧ ⟦ Y ⟧ ≤ ⟦ Y ∪ X ⟧
-cons = Πi {P = ⟦_⟧v} λ { (, inj₁ x) → π₂ • lookup x ; (, inj₂ y) → π₁ • lookup y }
+cons = Πi {P = ⟦_⟧v} λ { (, inj₁ x) → π₂ ∙ lookup x ; (, inj₂ y) → π₁ ∙ lookup y }
 
 --singleton : ∀{o a} -> ⟦ o , a ⟧₁ ≤ ⟦ hyp (o , a) ⟧
 singleton : ∀{x} -> ⟦ x ⟧₁ ≤ ⟦ hyp x ⟧
@@ -40,7 +40,7 @@ wipe-dsym f (Var {disc} p) = swap {{sets}} (f (Var {disc} p))
 
 wipe⇒□ : ∀{X} -> ⟦ wipe X ⟧ ≤ change□ ⟦ wipe X ⟧
 wipe⇒□ .funct = fun ⟨ id , wipe-sym ⟩
-wipe⇒□ .deriv = π₂ • fun (⟨ id , wipe-dsym ⟩)
+wipe⇒□ .deriv = π₂ ∙ fun (⟨ id , wipe-dsym ⟩)
 wipe⇒□ .is-id = id
 -- end horrible proof
 

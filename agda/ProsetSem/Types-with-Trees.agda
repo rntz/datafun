@@ -1,9 +1,9 @@
 -- Denotational semantics for types in core Datafun.
-module ProsetSem.Types where
+module ProsetSem.Types-with-Trees where
 
 open import Booleans
 open import Cat
-open import Datafun
+open import Datafun-with-Trees
 open import Decidability
 open import Prelude
 open import Tones
@@ -24,9 +24,10 @@ type (a * b) = type a ∧ type b
 type (a + b) = type a ∨ type b
 
 -- Denotation of a singleton context.
-singleton : Fun hyps cats
-ap singleton (T , a) = Tone.at (ap mode⇒tone T) (type a)
-map singleton (T≤U , refl) = map mode⇒tone T≤U
+singleton : Fun hyps (cats {zero} {zero})
+singleton = TODO
+-- ap singleton (T , a) = Tone.at (ap mode⇒tone T) (type a)
+-- map singleton (T≤U , refl) = map mode⇒tone T≤U
 
 -- ⟦_⟧₁ : Mode × Type -> Proset
 ⟦_⟧₁ = ap singleton

@@ -49,7 +49,7 @@ foo : ∀{X Y : Cx} (ρ : X ≤ Y) (f : ∀{a} → Y a → Mode) {a} (M : X ⊢ 
 rename ρ (var x) = var (ρ _ x)
 rename ρ (app M N) = app (rename ρ M) (rename ρ N)
 -- I need a lemma about the interaction of usage and rename!
-rename ρ (lam M p) = lam (rename (λ a → map∨ id (ρ a)) M) (p • {!foo!})
+rename ρ (lam M p) = lam (rename (λ a → map∨ id (ρ a)) M) (p ∙ {!foo!})
 rename ρ (box T M) = box T (rename ρ M)
 rename ρ (unbox U M) = unbox U (rename ρ M)
 
@@ -96,7 +96,7 @@ foo ρ f (unbox U M) = {!!}
 --     Obj usages = ∀{a} → a ∈ X → Mode
 --     Hom usages f g = ∀{a} x → f {a} x ≤ g x
 --     ident usages _ = id
---     compo usages f≤g g≤h x = f≤g x • g≤h x
+--     compo usages f≤g g≤h x = f≤g x ∙ g≤h x
 
 --     usage-products : Products usages
 --     top usage-products = const ◇ , λ _ → ≺◇
