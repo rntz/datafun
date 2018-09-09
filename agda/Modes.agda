@@ -1,8 +1,10 @@
+{-# OPTIONS --postfix-projections #-}
 module Modes where
 
 open import Prelude
 open import Cat
 open import Action
+open import Tones
 
 data Mode : Set where
   ID OP □ ◇ : Mode
@@ -19,7 +21,7 @@ instance
   _≺?_ : (T U : Mode) -> Dec (T ≺ U)
   _≺?_ = λ { ID ID → yes ≺refl ; ID OP → no λ () ; ID □ → no λ () ; ID ◇ → yes ≺◇ ; OP ID → no λ () ; OP OP → yes ≺refl ; OP □ → no λ () ; OP ◇ → yes ≺◇ ; □ y → yes □≺ ; ◇ ID → no λ () ; ◇ OP → no λ () ; ◇ □ → no λ () ; ◇ ◇ → yes ≺refl }
 
-  modes : Cat _ _
+  modes : Proset
   modes = Cat: Mode _≺_ ≺refl λ { ≺refl g → g ; □≺ g → □≺ ; ≺◇ ≺refl → ≺◇ ; ≺◇ ≺◇ → ≺◇ }
 
   mode-sums : Sums modes
@@ -53,4 +55,14 @@ instance
   action mode-compose ◇ OP = ◇
   action mode-compose OP OP = ID
 
--- TODO: denotation of modes as tones.
+-- Denotation of modes as tones.
+den : ∀{i} → Fun modes (tones {i}{i})
+ap den ID = tone-id; ap den OP = tone-op; ap den □ = tone-iso; ap den ◇ = tone-path
+map den ≺refl = id
+map den {□} {◇} _ = fun {id} (path-by ∘ proj₁)
+map den {ID} ≺◇ = fun path-by
+map den {OP} ≺◇ = fun (path⁻¹ ∘ path-by)
+map den {◇} ≺◇ = id
+map den {.□} {□} □≺ = id
+map den {.□} {ID} □≺ = fun proj₁
+map den {.□} {OP} □≺ = fun proj₂

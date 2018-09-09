@@ -16,8 +16,10 @@ module Trees (C : Proset) where
     empty≤ : ∀{t} -> empty ⊑ t
     leaf≤ : ∀{x y} -> x ≤ y -> leaf x ⊑ leaf y
     node≤ : ∀{l r t} -> l ⊑ t -> r ⊑ t -> node l r ⊑ t
-    split₁ : ∀{t l r} -> t ⊑ l -> t ⊑ node l r
-    split₂ : ∀{t l r} -> t ⊑ r -> t ⊑ node l r
+    ≤node : ∀{t u v} → t ⊑ u ⊎ t ⊑ v → t ⊑ node u v
+
+  pattern split₁ p = ≤node (inj₁ p)
+  pattern split₂ p = ≤node (inj₂ p)
 
   unsplit : ∀{l r t} -> node l r ⊑ t -> l ⊑ t × r ⊑ t
   unsplit (node≤ l r) = l , r
@@ -33,11 +35,9 @@ module Trees (C : Proset) where
   ident trees {node l r} = node≤ (split₁ id) (split₂ id)
   compo trees empty≤ _ = empty≤
   compo trees (leaf≤ x) (leaf≤ y) = leaf≤ (x • y)
-  compo trees x (split₁ y) = split₁ (x • y)
-  compo trees x (split₂ y) = split₂ (x • y)
+  compo trees x (≤node p) = ≤node (map∨ (x •_) (x •_) p)
   compo trees (node≤ l r) x = node≤ (l • x) (r • x)
-  compo trees (split₁ x) (node≤ y z) = x • y
-  compo trees (split₂ x) (node≤ y z) = x • z
+  compo trees (≤node p) (node≤ y z) = [ _• y , _• z ] p
 
   instance
     tree-sums : Sums trees
@@ -68,7 +68,7 @@ module Trees (C : Proset) where
     tree≤? (leaf x) (node l r) with tree≤? (leaf x) l | tree≤? (leaf x) r
     ... | yes p | _ = yes (split₁ p)
     ... | no _ | yes p = yes (split₂ p)
-    ... | no ¬p | no ¬q = no λ { (split₁ p) → ¬p p ; (split₂ q) → ¬q q }
+    ... | no ¬p | no ¬q = no λ { (≤node pq) → [ ¬p , ¬q ] pq }
     tree≤? (node l r) y with tree≤? l y | tree≤? r y
     ... | yes p | yes q = yes (node≤ p q)
     ... | no ¬p | _ = no (unsplit • π₁ • ¬p)
@@ -78,26 +78,22 @@ open Trees public renaming (_⊑_ to Tree≤) hiding (unsplit)
 
 
 -- Functoriality
+tree-map : ∀{A B} → A ⇒ B → trees A ⇒ trees B
+tree-map F .ap empty = empty
+tree-map F .ap (leaf x) = leaf (ap F x)
+tree-map F .ap (node T U) = node (tree-map F .ap T) (tree-map F .ap U)
+tree-map F .map empty≤ = empty≤
+tree-map F .map (leaf≤ x) = leaf≤ (map F x)
+tree-map F .map (node≤ x y) = node≤ (tree-map F .map x) (tree-map F .map y)
+tree-map F .map (≤node p) = ≤node (map∨ (tree-map F .map) (tree-map F .map) p)
+
 Trees : cats ≤ cats
 ap Trees = trees
-map Trees F .ap empty = empty
-map Trees F .ap (leaf x) = leaf (ap F x)
-map Trees F .ap (node t u) = node (map Trees F .ap t) (map Trees F .ap u)
-map Trees F .map empty≤ = empty≤
-map Trees F .map (leaf≤ x) = leaf≤ (map F x)
-map Trees F .map (node≤ x y) = node≤ (map Trees F .map x) (map Trees F .map y)
-map Trees F .map (split₁ x) = split₁ (map Trees F .map x)
-map Trees F .map (split₂ x) = split₂ (map Trees F .map x)
+map Trees = tree-map
 
 -- I think this is 2-functoriality? Not sure.
 Tree-map : ∀{A B} -> A ⇨ B ⇒ trees A ⇨ trees B
-ap Tree-map = map Trees
--- map Tree-map f≤g empty≤ = empty≤
--- map Tree-map f≤g (leaf≤ x≤y) = leaf≤ (f≤g x≤y)
--- map Tree-map f≤g (node≤ t≤u t≤v) = node≤ (map Tree-map f≤g t≤u) (map Tree-map f≤g t≤v)
--- map Tree-map f≤g (split₁ t≤u) = split₁ (map Tree-map f≤g t≤u)
--- map Tree-map f≤g (split₂ t≤u) = split₂ (map Tree-map f≤g t≤u)
-
+ap Tree-map = tree-map
 map (Tree-map {A} {B}) {f} {g} f≤g {empty} = empty≤
 map (Tree-map {A} {B}) {f} {g} f≤g {leaf x} = leaf≤ f≤g
 map (Tree-map {A} {B}) {f} {g} f≤g {node l r} =

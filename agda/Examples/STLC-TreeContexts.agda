@@ -46,8 +46,7 @@ TreeContext : Context Type _ _
 Context.cat TreeContext = tree-cxs
 Context.sums TreeContext = it
 Context.hyp TreeContext = leaf
-Context.split TreeContext (split₁ f) = inj₁ f
-Context.split TreeContext (split₂ f) = inj₂ f
+Context.split TreeContext (≤node p) = p
 
 import Contexts
 SetContext : Context Type _ _

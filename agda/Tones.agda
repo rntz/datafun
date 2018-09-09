@@ -85,7 +85,7 @@ Iso = functor tone-iso; Op = functor tone-op
 
 -- TODO: Is this necessary? Remove if not.
 instance
-  tones : ∀{i j} → Cat _ _
+  tones : ∀{i j} → Cat (suc (i ⊔ j)) (suc (i ⊔ j))
   Obj (tones {i}{j}) = Tone i j
   Hom tones T U = ∀{A} → at T A ≤ at U A
   ident tones = id
