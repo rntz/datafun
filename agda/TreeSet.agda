@@ -79,6 +79,27 @@ open Trees public renaming (_⊑_ to Tree≤) hiding (unsplit)
 _∈_ : {{C : Proset}} → Obj C → Tree (Obj C) → Set
 _∈_ {{C}} a X = Tree≤ C (leaf a) X
 
+-- -- TODO: Do I really need this, rather than just saying (a ∈ X = leaf a ≤ X)?
+-- module _ {{C : Proset}} where
+--   _∈_ : Obj C → Tree (Obj C) → Set
+--   a ∈ empty = ∅
+--   a ∈ leaf b = a ≤ b
+--   a ∈ node T U = a ∈ T ⊎ a ∈ U
+
+--   ∈→≤ : ∀{T a} → a ∈ T → leaf a ≤ T
+--   ∈→≤ {empty} ()
+--   ∈→≤ {leaf b} a≤b = leaf≤ a≤b
+--   ∈→≤ {node T U} = ≤node ∘ map∨ ∈→≤ ∈→≤
+
+--   ≤→∈ : ∀{a T} → leaf a ≤ T → a ∈ T
+--   ≤→∈ (leaf≤ x) = x
+--   ≤→∈ (≤node p) = map∨ ≤→∈ ≤→∈ p
+
+--   open import Tones
+--   Tree∈ : Fun (op C ∧ trees C) sets
+--   ap Tree∈ (a , T) = a ∈ T
+--   map Tree∈ {b , T} {a , U} (a≤b , T≤U) a∈T = ≤→∈ (leaf≤ a≤b • ∈→≤ a∈T • T≤U)
+
 
 -- Functoriality
 tree-map : ∀{A B} → A ⇒ B → trees A ⇒ trees B
@@ -102,3 +123,9 @@ map (Tree-map {A} {B}) {f} {g} f≤g {leaf x} = leaf≤ f≤g
 map (Tree-map {A} {B}) {f} {g} f≤g {node l r} =
   node≤ (split₁ (Tree-map {A} .map f≤g {l}))
         (split₂ (Tree-map {A} .map f≤g {r}))
+
+-- map Tree-map f≤g empty≤ = empty≤
+-- map Tree-map f≤g (leaf≤ x≤y) = leaf≤ (f≤g x≤y)
+-- map Tree-map f≤g (node≤ t≤u t≤v) = node≤ (map Tree-map f≤g t≤u) (map Tree-map f≤g t≤v)
+-- map Tree-map f≤g (split₁ t≤u) = split₁ (map Tree-map f≤g t≤u)
+-- map Tree-map f≤g (split₂ t≤u) = split₂ (map Tree-map f≤g t≤u)
