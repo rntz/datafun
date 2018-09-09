@@ -9,8 +9,6 @@
 
 - WTF is going on with DepChanges, Changes{1,2,3}, and so forth?
 
-- rename "bullet" • to "bullet operator" ∙
-
 - try replacing Contexts with Precontexts in Datafun, giving the ordering on
   modes. This should allow renaming to replace a monotone var with a discrete
   one.
