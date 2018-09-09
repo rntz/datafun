@@ -7,8 +7,8 @@ open import Datafun
 open import Monads
 open import Prelude
 open import ProsetSem.Types
-open import Tones
 open import TreeSet
+open import Iso
 
 
 ---------- Lemmas for denotational semantics of terms ----------
@@ -85,7 +85,7 @@ eval⊩ (for-in _ (_ , b-sl)) =
   • swapply
   • tree-⋁ _ (is! b-sl)
 eval⊩ (empty sl) = constant (Sums.⊥ (is! sl))
-eval⊩ (join sl) = functor∨ {{S = is! sl}}
+eval⊩ (lubOf sl) = functor∨ {{S = is! sl}}
 -- TODO
 eval⊩ (fix is-fix) = {!!}
 eval⊩ (fix≤ is-fix≤) = {!!}

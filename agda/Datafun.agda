@@ -156,7 +156,7 @@ data _⊩_ : Premise -> Type -> Set where
   --
   -- So it looks like no.
   empty : ∀{a} -> Is SL a -> nil ⊩ a
-  join   : ∀{a} -> Is SL a -> term a , term a ⊩ a
+  lubOf  : ∀{a} -> Is SL a -> term a , term a ⊩ a
   -- fixed points
   fix    : ∀{a} -> Is FIX a -> a is mono ▷ term a ⊩ a
   fix≤   : ∀{a} -> Is FIX≤ a -> term a , a is mono ▷ term a ⊩ a

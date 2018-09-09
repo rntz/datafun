@@ -6,8 +6,8 @@ open import Cat
 open import Datafun
 open import Decidability
 open import Prelude
-open import Tones
 open import TreeSet
+open import Iso
 
  ---------- Denotations of types & modes ----------
 Vars : Cx -> Set

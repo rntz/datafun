@@ -7,6 +7,8 @@ open import Decidability
 
 module Iso where
 
+open import Tones using (iso; Iso) public
+
 instance
   -- This comonad factors into an adjunction to groupoids, I believe.
   Iso-comonad : ∀{i j} -> Comonad (Iso {i}{j})
