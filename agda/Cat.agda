@@ -90,6 +90,7 @@ catΠ A B .compo f g x = B x .compo (f x) (g x)
 
  -- Cartesian structures.
 --- Sums and products
+--- TODO: define sums as the dual of products.
 module _ {i j} (C : Cat i j) where
   private instance the-cat = C
 
