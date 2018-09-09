@@ -56,13 +56,16 @@ instance
   action mode-compose OP OP = ID
 
 -- Denotation of modes as tones.
-den : ∀{i} → Fun modes (tones {i}{i})
-ap den ID = tone-id; ap den OP = tone-op; ap den □ = tone-iso; ap den ◇ = tone-path
-map den ≺refl = id
-map den {□} {◇} _ = fun {id} (path-by ∘ proj₁)
-map den {ID} ≺◇ = fun path-by
-map den {OP} ≺◇ = fun (path⁻¹ ∘ path-by)
-map den {◇} ≺◇ = id
-map den {.□} {□} □≺ = id
-map den {.□} {ID} □≺ = fun proj₁
-map den {.□} {OP} □≺ = fun proj₂
+mode⇒tone : ∀{i} → Fun modes (tones {i}{i})
+ap mode⇒tone ID = tone-id
+ap mode⇒tone OP = tone-op
+ap mode⇒tone □ = tone-iso
+ap mode⇒tone ◇ = tone-path
+map mode⇒tone ≺refl = id
+map mode⇒tone {□} {◇} _ = fun {id} (path-by ∘ proj₁)
+map mode⇒tone {ID} ≺◇ = fun path-by
+map mode⇒tone {OP} ≺◇ = fun (path⁻¹ ∘ path-by)
+map mode⇒tone {◇} ≺◇ = id
+map mode⇒tone {.□} {□} □≺ = id
+map mode⇒tone {.□} {ID} □≺ = fun proj₁
+map mode⇒tone {.□} {OP} □≺ = fun proj₂
