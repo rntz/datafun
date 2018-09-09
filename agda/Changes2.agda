@@ -1,5 +1,6 @@
 module Changes2 where
 
+open import Booleans
 open import Cat
 open import Prelude
 open import Tones

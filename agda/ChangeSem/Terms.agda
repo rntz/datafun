@@ -9,7 +9,7 @@ open import Changes
 open import Datafun
 open import Monads
 open import Prelude
-open import Tones
+open import Iso
 open import TreeSet
 open import Booleans
 
@@ -83,6 +83,6 @@ eval⊩ (single {a} p) .is-id (da:a→b , a≈b) = [ leaf≤ a≈b , empty≤ ]
   where instance x = trees (iso (type a .𝑶))
 eval⊩ (for-in p q) = {!!}
 eval⊩ (empty sl) = eps (is! sl)
-eval⊩ (join sl) = vee (is! sl)
+eval⊩ (lubOf sl) = vee (is! sl)
 eval⊩ (fix is-fix) = {!!}
 eval⊩ (fix≤ is-fix≤) = {!!}

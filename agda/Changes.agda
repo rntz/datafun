@@ -1,10 +1,10 @@
 module Changes where
 
-open import Cat
-open import Prelude
-open import Tones
-open import TreeSet
 open import Booleans
+open import Cat
+open import Iso
+open import Prelude
+open import TreeSet
 
  -- Prosets equipped with change structures
 record Change : Set1 where

@@ -8,10 +8,10 @@ open import Datafun
 open import Decidability
 open import Monads
 open import Prelude
-open import Tones
 open import TreeSet
 open import Tones
 open import Booleans
+open import Iso
 
  ---------- Denotations of types & modes ----------
 Vars : Cx -> Set
@@ -91,8 +91,8 @@ sl× P Q .eps-ok = is-id ⟨ eps P , eps Q ⟩
 sl× P Q .vee-ok = is-id (juggle∧ • map∧ (vee P) (vee Q))
 
 sl→ : ∀ A {B} (P : IsSL B) -> IsSL (change→ A B)
-sl→ A P .𝑶-sums = cat→-sums (𝑶-sums P)
-sl→ A P .𝑫-sums = cat→-sums (𝑫-sums P)
+sl→ A P .𝑶-sums = cat→sums (𝑶-sums P)
+sl→ A P .𝑫-sums = cat→sums (𝑫-sums P)
 sl→ A P .eps-ok TT _ = eps-ok P TT
 sl→ A P .vee-ok (df-ok , dg-ok) da-ok = vee-ok P (df-ok da-ok , dg-ok da-ok)
 

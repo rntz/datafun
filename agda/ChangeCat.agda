@@ -6,7 +6,7 @@ open import Prelude
 open import TreeSet
 open import Changes
 open import Monads
-open import Tones
+open import Iso
 
 -- There is a very simple pattern that comes up in many change functions, where
 -- the derivative is "boring" - it's the same as the function itself, but
