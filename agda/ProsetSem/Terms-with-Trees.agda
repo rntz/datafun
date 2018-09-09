@@ -7,7 +7,6 @@ open import Datafun-with-Trees
 open import Monads
 open import Prelude
 open import ProsetSem.Types-with-Trees
-open import Tones
 open import TreeSet
 
 

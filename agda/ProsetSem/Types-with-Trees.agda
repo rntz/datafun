@@ -6,7 +6,6 @@ open import Cat
 open import Datafun-with-Trees
 open import Decidability
 open import Prelude
-open import Tones
 open import TreeSet
 open import Iso
 

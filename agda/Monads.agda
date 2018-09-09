@@ -2,7 +2,6 @@ module Monads where
 
 open import Prelude
 open import Cat
-open import Tones
 
 record Monad {i j C} (◇ : Fun {i}{j} C C) : Set (i ⊔ j) where
   constructor Monad:

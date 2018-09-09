@@ -3,7 +3,6 @@ module Datafun-with-Trees where
 open import Prelude
 open import Cat
 open import Monads
-open import Tones
 
  ---------- Modes ----------
 data Mode : Set where mono disc : Mode

@@ -5,7 +5,6 @@ open import Cat
 open import Changes3
 open import Monads
 open import Prelude
-open import Tones
 open import TreeSet
 
  -- Category of changes

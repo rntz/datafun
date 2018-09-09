@@ -3,9 +3,9 @@ module DepChanges where
 
 open import Cat
 open import Prelude
-open import Tones
 open import TreeSet
 open import Booleans
+open import Iso
 
  -- Prosets equipped with dependent change structures
 record Change : Set1 where

@@ -1,6 +1,5 @@
 open import Prelude
 open import Cat
-open import Tones
 
 module Precontexts (types : Proset) where
 

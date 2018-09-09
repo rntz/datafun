@@ -4,7 +4,6 @@ module Modes where
 open import Prelude
 open import Cat
 open import Action
-open import Tones
 
 data Mode : Set where
   ID OP □ ◇ : Mode

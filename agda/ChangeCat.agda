@@ -51,18 +51,18 @@ instance
 
   change-sums : Sums changes
   bottom change-sums = ⊥-change , cfun ⊥≤ (π₁ ∙ Fun: ⊥≤ λ { {()} }) λ { {_} {()} }
-  lub change-sums a b .a∨b = change+ a b
-  lub change-sums a b .∨I₁ = cfun in₁ (π₂ ∙ in₁) rel₁
-  lub change-sums a b .∨I₂ = cfun in₂ (π₂ ∙ in₂) rel₂
-  lub change-sums a b .∨E f g .funct = [ funct f , funct g ]
-  lub change-sums a b .∨E {C} f g .deriv
+  lub change-sums a b .a∧b = change+ a b
+  lub change-sums a b .∧E₁ = cfun in₁ (π₂ ∙ in₁) rel₁
+  lub change-sums a b .∧E₂ = cfun in₂ (π₂ ∙ in₂) rel₂
+  lub change-sums a b .∧I f g .funct = [ funct f , funct g ]
+  lub change-sums a b .∧I {C} f g .deriv
     = uncurry (iso/∨ ∙ [ flip [ use f , fail ] , flip [ fail , use g ] ])
     where use : ∀{A} -> A ≤ C -> 𝑫 A ⇒ iso (𝑶 A) ⇨ 𝑫 C
           use f = curry (swap ∙ deriv f)
           fail : ∀{A B} -> A ≤ B ⇨ (𝑫 C)
           fail = curry (constant (dummy C))
-  lub change-sums a b .∨E f g .is-id (rel₁ da) = is-id f da
-  lub change-sums a b .∨E f g .is-id (rel₂ db) = is-id g db
+  lub change-sums a b .∧I f g .is-id (rel₁ da) = is-id f da
+  lub change-sums a b .∧I f g .is-id (rel₂ db) = is-id g db
 
   change-cc : CC changes
   CC.products change-cc = change-products

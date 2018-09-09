@@ -35,8 +35,23 @@ ap (F ⊚ G) = ap F ∘ ap G
 map (F ⊚ G) = map F ∘ map G
 
  -- Conveniences.
+pattern TT = lift tt
+
+instance
+  sets : ∀{i} -> Cat (suc i) i
+  Obj (sets {i}) = Set i
+  Hom sets a b = a -> b
+  ident sets x = x
+  compo sets f g x = g (f x)
+
+  cats : ∀{i j} -> Cat (suc (i ⊔ j)) (i ⊔ j)
+  cats {i}{j} = Cat: (Cat i j) Fun (fun id) λ { (fun f) (fun g) → fun (f ∙ g) }
+
 Proset : Set1
 Proset = Cat zero zero
+
+prosets : Cat _ _
+prosets = cats {zero} {zero}
 
 infix 1 _⇒_
 _⇒_ : Rel Proset _
@@ -88,21 +103,90 @@ catΠ A B .Hom f g = ∀ x -> B x .Hom (f x) (g x)
 catΠ A B .ident x     = B x .ident
 catΠ A B .compo f g x = B x .compo (f x) (g x)
 
- -- Cartesian structures.
---- Sums and products
---- TODO: define sums as the dual of products.
+-- Weak connectedness.
+module _  {i j} (C : Cat i j) where
+  data Connected : (a b : Obj C) -> Set (i ⊔ j) where
+    path-by : ∀{a b} -> Hom C a b -> Connected a b
+    path⁻¹ : ∀{a b} -> Connected a b -> Connected b a
+    path∙ : ∀{a b c} -> Connected a b -> Connected b c -> Connected a c
+
+module _ {i j k} {C : Cat i j}
+         (F : (a b : Obj C) -> Set k)
+         (hom→F : ∀{a b} -> Hom C a b -> F a b)
+         (F-symm : Symmetric F)
+         (F-trans : Transitive F) where
+  path-fold : ∀{a b} -> Connected C a b -> F a b
+  path-fold (path-by x) = hom→F x
+  path-fold (path⁻¹ p) = F-symm (path-fold p)
+  path-fold (path∙ p q) = F-trans (path-fold p) (path-fold q)
+
+ ---------- Tones ----------
+record Tone i j : Set (suc (i ⊔ j)) where
+  constructor Tone:
+
+  -- A tone is...
+  -- (1) A parametric transformation on orderings of a set...
+  field rel : (A : Cat i j) → Rel (Obj A) j
+  field rel-id : ∀{{A : Cat i j}} {a} → rel A a a
+  field rel∙ : ∀{{A : Cat i j}} {a b c} → rel A a b → rel A b c → rel A a c
+
+  -- (2) ... which is functorial, without changing function behavior.
+  field covary : ∀{A B} (f : Fun A B) -> rel A =[ ap f ]⇒ rel B
+
+  at : Cat i j -> Cat i j
+  at A .Obj = Obj A
+  at A .Hom = rel A
+  at A .ident = rel-id
+  at A .compo = rel∙
+
+  functor : cats ≤ cats
+  ap functor = at
+  map functor f = fun (covary f)
+
+
+-- Four tones.
+tone-id tone-op tone-iso : ∀{i j} → Tone i j
+tone-id = Tone: Hom id _∙_ map
+
+Tone.rel tone-op A x y = Hom A y x
+Tone.rel-id tone-op = id
+Tone.rel∙ tone-op f g = g ∙ f
+Tone.covary tone-op f = map f
+
+-- The "equivalence quotient" of a proset. Not actually a category of
+-- isomorphisms, since we don't require that the arrows be inverses. But *if* we
+-- were gonna put equations on arrows, that's what we'd require.
+Tone.rel tone-iso A x y = Hom A x y × Hom A y x -- Same as _≈_.
+Tone.rel-id tone-iso = id , id
+Tone.rel∙ tone-iso (f₁ , f₂) (g₁ , g₂) = f₁ ∙ g₁ , g₂ ∙ f₂
+Tone.covary tone-iso f (i≤j , j≤i) = map f i≤j , map f j≤i
+
+tone-path : ∀{i} → Tone i i
+Tone.rel tone-path = Connected
+Tone.rel-id tone-path = path-by id
+Tone.rel∙ tone-path = path∙
+Tone.covary tone-path f = path-fold _ (path-by ∘ map f) path⁻¹ path∙
+
+-- Tone functors.
+iso op : ∀{i j} → Cat i j → Cat i j
+iso = Tone.at tone-iso; op = Tone.at tone-op
+
+Iso Op : ∀{i j} → cats {i}{j} ≤ cats
+Iso = Tone.functor tone-iso; Op = Tone.functor tone-op
+
+instance -- The category of tones.
+  tones : ∀{i j} → Cat (suc (i ⊔ j)) (suc (i ⊔ j))
+  Obj (tones {i}{j}) = Tone i j
+  Hom tones T U = ∀{A} → Tone.at T A ≤ Tone.at U A
+  ident tones = id
+  compo tones T≤U U≤V = T≤U ∙ U≤V
+
+ ---------- Cartesian structures ----------
+-- Products!
 module _ {i j} (C : Cat i j) where
   private instance the-cat = C
 
   infix 0 _/_/_/_
-  record SumOf (a b : Obj C) : Set (i ⊔ j) where
-    constructor _/_/_/_
-    infixr 2 a∨b
-    field a∨b : Obj C
-    field ∨I₁ : a ≤ a∨b
-    field ∨I₂ : b ≤ a∨b
-    field ∨E : ∀{c} → a ≤ c → b ≤ c → a∨b ≤ c
-
   record ProductOf (a b : Obj C) : Set (i ⊔ j) where
     constructor _/_/_/_
     -- TODO: ∧/∨ should have distinct precedences.
@@ -112,32 +196,7 @@ module _ {i j} (C : Cat i j) where
     field ∧E₂ : a∧b ≤ b
     field ∧I : ∀{Γ} → Γ ≤ a → Γ ≤ b → Γ ≤ a∧b
 
-  open SumOf public; open ProductOf public
-
-  record Sums : Set (i ⊔ j) where
-    constructor Sums:
-    field bottom : Σ[ ⊥ ∈ _ ] ∀{a} → ⊥ ≤ a
-    field lub : ∀ a b → SumOf a b
-
-    open Σ bottom public using () renaming (proj₁ to ⊥; proj₂ to ⊥≤)
-    module _ (a b : Obj C) where open SumOf (lub a b) public using () renaming (a∨b to _∨_)
-    module _ {a b : Obj C} where open SumOf (lub a b) public using () renaming (∨I₁ to in₁; ∨I₂ to in₂; ∨E to [_,_])
-
-    idem∨ : ∀{a} -> a ∨ a ≤ a;    idem∨ = [ id , id ]
-    a∨⊥≈a : ∀{a} -> a ∨ ⊥ ≈ a;    a∨⊥≈a = [ id , ⊥≤ ] , in₁
-
-    map∨ : ∀{a₁ b₁} → a₁ ≤ b₁ → ∀{a₂ b₂} → a₂ ≤ b₂ → a₁ ∨ a₂ ≤ b₁ ∨ b₂
-    map∨ f g = [ f ∙ in₁ , g ∙ in₂ ]
-
-    map∨₂ : ∀{L R} → L ≤ R → ∀{X} → X ∨ L ≤ X ∨ R
-    map∨₂ f = map∨ id f
-
-    -- Used in Prosets.agda in ∨≈.
-    functor∨ : Fun (cat× C C) C
-    functor∨ = fun λ { (f , g) -> map∨ f g }
-
-    juggle∨ : ∀{a b c d} -> (a ∨ b) ∨ (c ∨ d) ≤ (a ∨ c) ∨ (b ∨ d)
-    juggle∨ = [ map∨ in₁ in₁ , map∨ in₂ in₂ ]
+  open ProductOf public
 
   record Products : Set (i ⊔ j) where
     constructor Products:
@@ -151,6 +210,9 @@ module _ {i j} (C : Cat i j) where
     ∇ : ∀{a} -> a ≤ a ∧ a
     ∇ = ⟨ id , id ⟩
 
+    a∧⊤≈a : ∀{a} → a ∧ ⊤ ≈ a
+    a∧⊤≈a = π₁ , ⟨ id , ≤⊤ ⟩
+
     swap : ∀{a b} -> a ∧ b ≤ b ∧ a
     swap = ⟨ π₂ , π₁ ⟩
 
@@ -161,18 +223,39 @@ module _ {i j} (C : Cat i j) where
     map∧ : ∀{a b c d} -> a ≤ c -> b ≤ d -> a ∧ b ≤ c ∧ d
     map∧ f g = ⟨ π₁ ∙ f , π₂ ∙ g ⟩
 
+    map∧₂ : ∀{a b₁ b₂} → b₁ ≤ b₂ → a ∧ b₁ ≤ a ∧ b₂
+    map∧₂ = map∧ id
+
     functor∧ : Fun (cat× C C) C
     functor∧ = fun λ { (f , g) -> map∧ f g }
 
     juggle∧ : ∀{a b c d} -> (a ∧ b) ∧ (c ∧ d) ≤ (a ∧ c) ∧ (b ∧ d)
     juggle∧ = ⟨ map∧ π₁ π₁ , map∧ π₂ π₂ ⟩
 
+-- Sums are the dual of products, ie. products in the opposite category.
+Sums : ∀{i j} (C : Cat i j) → Set (i ⊔ j)
+Sums C = Products (op C)
+
+module Sums {i j C} (S : Sums {i}{j} C) where
+  open Products S public using () renaming
+    ( top to bottom; glb to lub
+    ; ⊤ to ⊥; ≤⊤ to ⊥≤
+    ; _∧_ to _∨_; ⟨_,_⟩ to [_,_]; π₁ to in₁; π₂ to in₂
+    ; ∇ to idem∨ ; a∧⊤≈a to a∨⊥≈a ; swap to comm∨ ; assoc∧r to assoc∨r
+    ; map∧ to map∨ ; map∧₂ to map∨₂
+    ; juggle∧ to juggle∨ )
+
+  functor∨ : Fun (cat× C C) C
+  functor∨ = fun (Products.functor∧ S .map)
+
 open Products public using (top; glb)
 open Sums public using (bottom; lub)
 
+-- TODO: auto-conversion from products to sums in opposite category? or vice-versa?
+
 module _ {i j} {{C : Cat i j}} where
-  module _ {{S : Sums C}} where open Sums S public
   module _ {{P : Products C}} where open Products P public
+  module _ {{S : Sums C}} where open Sums S public
 
  --- CC means "cartesian closed".
 record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
@@ -190,20 +273,20 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   call : ∀{Γ a b} -> Γ ≤ hom a b -> Γ ≤ a -> Γ ≤ b
   call f a = ⟨ f , a ⟩ ∙ apply
 
-  swapply : ∀{a b} -> a ∧ hom a b ≤ b
+  swapply : ∀{a b : Obj C} -> a ∧ hom a b ≤ b
   swapply = swap ∙ apply
 
-  uncurry : ∀{a b c} -> a ≤ hom b c -> a ∧ b ≤ c
+  uncurry : ∀{a b c : Obj C} -> a ≤ hom b c -> a ∧ b ≤ c
   uncurry f = map∧ f id ∙ apply
 
-  flip : ∀{a b c} -> a ≤ hom b c -> b ≤ hom a c
+  flip : ∀{a b c : Obj C} -> a ≤ hom b c -> b ≤ hom a c
   flip f = curry (swap ∙ uncurry f)
 
-  precompose : ∀{a b c} -> a ≤ b -> hom b c ≤ hom a c
+  precompose : ∀{a b c : Obj C} -> a ≤ b -> hom b c ≤ hom a c
   precompose f = curry (map∧ id f ∙ apply)
 
   module _ {{S : Sums C}} where
-    distrib-∧/∨ : ∀{a b c} -> (a ∨ b) ∧ c ≤ (a ∧ c) ∨ (b ∧ c)
+    distrib-∧/∨ : ∀{a b c : Obj C} -> (a ∨ b) ∧ c ≤ (a ∧ c) ∨ (b ∧ c)
     distrib-∧/∨ = map∧ [ curry in₁ , curry in₂ ] id ∙ apply
 
 open CC public using (hom)
@@ -240,16 +323,8 @@ record SetΠ k {i j} (C : Cat i j) : Set (i ⊔ j ⊔ suc k) where
 
 module _ {i j k} {{C : Cat i j}} {{Pi : SetΠ k C}} where open SetΠ Pi public
 
- -- Some useful categories & their structures.
-pattern TT = lift tt
-
+ -- Structure of basic categories.
 instance
-  sets : ∀{i} -> Cat (suc i) i
-  Obj (sets {i}) = Set i
-  Hom sets a b = a -> b
-  ident sets x = x
-  compo sets f g x = g (f x)
-
   set-products : ∀{i} -> Products (sets {i})
   top set-products = Lift Unit , _
   glb set-products a b = a × b / proj₁ / proj₂ / Data.Product.<_,_>
@@ -265,11 +340,8 @@ instance
   set-Π : ∀{i} -> SetΠ i (sets {i})
   set-Π = SetΠ: (λ A P → (x : A) -> P x) (λ Γ→P γ a → Γ→P a γ) (λ a ∀P → ∀P a)
 
-  cats : ∀{i j} -> Cat (suc (i ⊔ j)) (i ⊔ j)
-  cats {i}{j} = Cat: (Cat i j) Fun (fun id) λ { (fun f) (fun g) → fun (f ∙ g) }
-
 ⊤-cat ⊥-cat : ∀{i j} -> Cat i j
-⊥-cat = Cat: ⊥ (λ{()}) (λ { {()} }) λ { {()} }
+⊥-cat = Cat: (Lift ∅) (λ{()}) (λ { {()} }) λ { {()} }
 ⊤-cat = Cat: (Lift Unit) (λ _ _ -> Lift Unit) TT const
 
 instance
@@ -295,7 +367,6 @@ instance
   cat-Π : ∀{i j k} -> SetΠ k (cats {i ⊔ k} {j ⊔ k})
   cat-Π = SetΠ: catΠ (λ Γ→P → fun (λ γ a → Γ→P a .map γ)) (λ a → fun (λ ∀P≤ → ∀P≤ a))
 
-
  -- Preserving cartesian structure over operations on categories.
 module _ {i j k l C D} (P : Sums {i}{j} C) (Q : Sums {k}{l} D) where
   private instance cc = C; cs = P; dd = D; ds = Q
@@ -313,12 +384,13 @@ module _ {i j k l} {A : Cat i j} {B} (bs : Sums {k}{l} B) where
     cat→sums : Sums (cat→ A B)
     bottom cat→sums = constant ⊥ , ⊥≤
     -- bottom cat→sums = constant ⊥ , λ _ → ⊥≤
-    lub cat→sums F G .a∨b .ap x = ap F x ∨ ap G x
-    lub cat→sums F G .a∨b .map x≤y = map∨ (map F x≤y) (map G x≤y)
-    lub cat→sums F G .∨I₁ = in₁
-    lub cat→sums F G .∨I₂ = in₂
-    lub cat→sums F G .∨E F≤H G≤H = [ F≤H , G≤H ]
+    lub cat→sums F G .a∧b .ap x = ap F x ∨ ap G x
+    lub cat→sums F G .a∧b .map x≤y = map∨ (map F x≤y) (map G x≤y)
+    lub cat→sums F G .∧E₁ = in₁
+    lub cat→sums F G .∧E₂ = in₂
+    lub cat→sums F G .∧I F≤H G≤H = [ F≤H , G≤H ]
 
+
 -- Discrete category on a given set.
 discrete : ∀{i} → Set i → Cat _ _
 discrete A .Obj = A

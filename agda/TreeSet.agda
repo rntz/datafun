@@ -95,7 +95,6 @@ _∈_ {{C}} a X = Tree≤ C (leaf a) X
 --   ≤→∈ (leaf≤ x) = x
 --   ≤→∈ (≤node p) = map∨ ≤→∈ ≤→∈ p
 
---   open import Tones
 --   Tree∈ : Fun (op C ∧ trees C) sets
 --   ap Tree∈ (a , T) = a ∈ T
 --   map Tree∈ {b , T} {a , U} (a≤b , T≤U) a∈T = ≤→∈ (leaf≤ a≤b ∙ ∈→≤ a∈T ∙ T≤U)

@@ -9,7 +9,6 @@ open import Decidability
 open import Monads
 open import Prelude
 open import TreeSet
-open import Tones
 open import Booleans
 open import Iso
 

@@ -4,8 +4,8 @@ open import Prelude
 open import Cat
 open import Examples.MTLC
 open import Monads
-open import Tones
 open import Booleans
+open import Iso
 
 
 ---------- Denotations of types & tones ----------

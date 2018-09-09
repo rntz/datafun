@@ -1,13 +1,10 @@
 -- Some lemmas about Tones.iso
 open import Prelude
 open import Cat
-open import Tones
 open import Monads
 open import Decidability
 
 module Iso where
-
-open import Tones using (iso; Iso) public
 
 instance
   -- This comonad factors into an adjunction to groupoids, I believe.
