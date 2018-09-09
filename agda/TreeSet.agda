@@ -101,7 +101,7 @@ _∈_ {{C}} a X = Tree≤ C (leaf a) X
 --   map Tree∈ {b , T} {a , U} (a≤b , T≤U) a∈T = ≤→∈ (leaf≤ a≤b • ∈→≤ a∈T • T≤U)
 
 
--- Functoriality
+-- Trees is a functor.
 tree-map : ∀{A B} → A ⇒ B → trees A ⇒ trees B
 tree-map F .ap empty = empty
 tree-map F .ap (leaf x) = leaf (ap F x)
@@ -123,3 +123,23 @@ map (Tree-map {A} {B}) {f} {g} f≤g {leaf x} = leaf≤ f≤g
 map (Tree-map {A} {B}) {f} {g} f≤g {node l r} =
   node≤ (split₁ (Tree-map {A} .map f≤g {l}))
         (split₂ (Tree-map {A} .map f≤g {r}))
+
+
+-- Trees is a monad. TODO: used anywhere?
+tree-join : ∀{A} → Tree (Tree A) → Tree A
+tree-join empty = empty
+tree-join (leaf X) = X
+tree-join (node X Y) = node (tree-join X) (tree-join Y)
+
+Tree-join : ∀{{C}} → trees (trees C) ⇒ trees C
+Tree-join .ap = tree-join
+Tree-join .map empty≤ = empty≤
+Tree-join .map (leaf≤ x≤y) = x≤y
+Tree-join .map (node≤ p q) = node≤ (map Tree-join p) (map Tree-join q)
+Tree-join .map (≤node x) = ≤node (map∨ (map Tree-join) (map Tree-join) x)
+
+open import Monads
+instance
+  Tree-monad : Monad Trees
+  Monad.pure Tree-monad = fun leaf≤
+  Monad.join Tree-monad = Tree-join
