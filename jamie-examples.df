@@ -1,0 +1,125 @@
+# Examples for Jamie:
+# DONE - transitive closure
+# - flow analysis, liveness analysis, constant analysis
+# DONE - parsing
+# DONE - DFA equivalence
+# DONE - shortest path
+# - treeP from semmle
+# - find those examples from the physicist on my gist
+
+## Builtin types
+# op A = A where (x ≤ y : op A) iff (y ≤ x : A)
+#
+# data Maybe A where
+#   just : A -> Maybe A
+#   none : Maybe A
+# ordered
+#   none ≤ just x       ∀x
+#   just x ≤ just y     if x ≤ y
+
+## Builtin functions
+# 1. len : string -> nat
+# 2. substring : string -> nat,nat -> string
+# 3. _+_ : nat => nat => nat
+# 4. not : op bool -> bool
+#
+# And for any first-order type A:
+# 5. _=_ : A -> A -> bool
+# 6. _in?_ : A -> {A} => bool
+#
+# A type is first-order if it doesn't contain functions. I think restricting
+# first-order types not to contain sets is also fine for these examples.
+
+
+# ---------- Utility functions ----------
+# `range` wouldn't pass Datafun's termination checker.
+def range: (-nat, +nat) => {nat}
+fn (lo,hi) => fix self as
+  {x | x in {lo} or {x+1 | x in self}, x <= hi}
+
+# Not particularly useful. Also wouldn't pass the termination checker.
+def subsets: {nat} => {{nat}}
+fn univ => self as
+ or {{}}
+ or {{x} | univ[x]}
+ or {x or y | univ[x], univ[y]}
+
+# Includes empty substrings. All (1 + length s) of them. It would be a stupid
+# idea to compute this directly, but inlining it and doing some optimisation
+# could probably turn most invocations into calls to `substring`.
+def substrings: string -> {nat,nat: string}
+fn s => { i,j: substring s (i,j)
+        | i in range (0, len string)
+        , j in range (i, len string)}
+
+
+# ---------- Transitive closure, naive and semi-naive ----------
+
+# reachable-naive is faster under naive evaluation, because it takes
+# log2(max path length) iterations. reachable-seminaive is faster under
+# seminaive evaluation, because it's "linear" (it uses itself recursively "at
+# most once") and so has a derivative that doesn't involve recomputation.
+# This is all exactly analogous to Datalog.
+
+def reachable-naive : {nat,nat} => {nat,nat}
+fn edges => paths as edges or {(x,z) | paths[x,y], paths[y,z]}
+
+def reachable-seminaive : {nat,nat} => {nat,nat}
+fn edges => paths as edges or {(x,z) | edges[x,y], paths[y,z]}
+
+
+# ---------- Parsing ----------
+type symbol = string
+type rule = String(string) | Cat(symbol, symbol)
+type grammar = {symbol, rule}
+
+def parse: grammar -> string -> {symbol, nat, nat}
+fn G text => chart as
+  for X, rule in G do
+  case rule
+  | String s => {(i,j) | substrings text [i,j: s]}
+  | Cat(Y,Z) => {(i,k) | self[X,i,j], self[Y,j,k]}
+
+
+# ---------- Shortest path ----------
+# This is not Dijkstra's algorithm, unless interpreted very intelligently.
+
+# This depends on nat being able to take fixed points whose values are
+# dictionaries into a non-powerset semilattice (namely, distances under min). In
+# principle, distances are 0 ≤ 1 ≤ 2 ≤ ... ≤ ∞, where ∞ means "disconnected".
+# However, we need to invert this order; ∞ ≤ ... ≤ 2 ≤ 1 ≤ 0. This is because
+# our fixed point computations start from the least value and move upward. We
+# should start by assuming everything is disconnected and move in the direction
+# of shorter paths.
+#
+# Put another way, Datafun computes _least_ fixed points. Saying "everything is
+# distance 0 to everything else" is clearly a fixed point (nothing can get any
+# closer), so if 0 were the least value, it would be the least fixed point!
+#
+# Finally, we don't need an explicit ∞ because we can represent
+# "disconnectedness" by _absence_ (from a set or dictionary). So our distance
+# type is simply (op nat).
+type dist = op nat
+type node = nat
+
+def shortest-paths: {node, node, dist} => {node, node: dist}
+fn edges => self as
+  or {u,v: d | edges[x,y,d]}
+  or {u,w: (d1 + d2) | self[u,v: d1], self[v,w: d2]}
+
+
+# ---------- DFA (in)equivalence ----------
+type dfa = ( states: {node}
+           , final: node -> bool
+           , trans: {node,char: node} )
+
+# Given a single DFA, finds all state-pairs (u,v) such that u is NOT equivalent
+# to v. Works by assuming all states are equivalent and ruling out equivalences.
+# Probably very inefficient. Is there an inverse way to do this - start out
+# assuming all states are distinct and proving equivalences?
+def distinct : dfa -> {node, node}
+fn dfa => distinct as
+ # two states are distinct if one is final & the other not
+ or {u,v | states[u], states[v], final u /= final v}
+ # or if they transition to distinct states under the same character
+ or {u,v | distinct[w1,w2], trans[u,c]: w1, trans[v,c]: w2}
