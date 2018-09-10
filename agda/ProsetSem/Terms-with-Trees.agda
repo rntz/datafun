@@ -8,6 +8,7 @@ open import Monads
 open import Prelude
 open import ProsetSem.Types-with-Trees
 open import TreeSet
+open import Iso
 
 
 ---------- Lemmas for denotational semantics of terms ----------
@@ -26,8 +27,6 @@ lookup = comap⟦_⟧
 
 cons : ∀{X Y} -> ⟦ X ⟧ ∧ ⟦ Y ⟧ ⇒ ⟦ Y ∨ X ⟧
 cons = swap
-
--- Singleton is just the identity function.
 
 -- wipe-sym : ∀{X x y} -> Hom ⟦ wipe X ⟧ x y -> Hom ⟦ wipe X ⟧ y x
 -- wipe-sym f (Var {mono} ())

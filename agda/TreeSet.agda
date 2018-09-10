@@ -124,15 +124,21 @@ map (Tree-map {A} {B}) {f} {g} f≤g {node l r} =
         (split₂ (Tree-map {A} .map f≤g {r}))
 
 
+-- Or foldMap, to a Haskeller.
+mapreduce : ∀{i j} {{A B}} {{S : Sums {i}{j} B}} → Fun A B → Fun (trees A) B
+mapreduce F .ap empty = ⊥
+mapreduce F .ap (leaf x) = ap F x
+mapreduce F .ap (node X Y) = mapreduce F .ap X ∨ mapreduce F .ap Y
+mapreduce F .map empty≤ = ⊥≤
+mapreduce F .map (leaf≤ x≤y) = map F x≤y
+mapreduce F .map (node≤ p q) = [ mapreduce F .map p , mapreduce F .map q ]
+mapreduce F .map (split₁ p) = mapreduce F .map p ∙ in₁
+mapreduce F .map (split₂ p) = mapreduce F .map p ∙ in₂
+
+
 -- Trees is a monad. TODO: used anywhere?
 tree-join : ∀{{C}} → trees (trees C) ⇒ trees C
-ap tree-join empty = empty
-ap tree-join (leaf X) = X
-ap tree-join (node X Y) = node (ap tree-join X) (ap tree-join Y)
-map tree-join empty≤ = empty≤
-map tree-join (leaf≤ x≤y) = x≤y
-map tree-join (node≤ p q) = node≤ (map tree-join p) (map tree-join q)
-map tree-join (≤node x) = ≤node (map∨ (map tree-join) (map tree-join) x)
+tree-join = mapreduce id
 
 open import Monads
 instance

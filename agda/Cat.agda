@@ -121,6 +121,8 @@ module _ {i j k} {C : Cat i j}
   path-fold (path∙ p q) = F-trans (path-fold p) (path-fold q)
 
  ---------- Tones ----------
+-- ARGH! Without eta-equality on categories, (Tone.at tone-id C) isn't
+-- definitionally equal to C!
 record Tone i j : Set (suc (i ⊔ j)) where
   constructor Tone:
 

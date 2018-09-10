@@ -92,7 +92,7 @@ instance
   hyps = op modes ∧ discrete Type
 
 open import TreeSet
-open Trees (hyps) using () renaming (trees to cxs)
+open Trees (hyps) using () renaming (trees to cxs) public
 instance -cxs = cxs
 Cx = Obj cxs
 

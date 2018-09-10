@@ -1,7 +1,7 @@
 module Action where
 
-open import Level
-open import Function
+open import Level using (_⊔_)
+open import Function using (_∘_)
 
 record Action {i j} (A : Set i) (B : Set j) : Set (i ⊔ j) where
   field action : A → B → B
