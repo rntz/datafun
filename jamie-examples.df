@@ -54,9 +54,9 @@ fn s => not (for x in s do true)
 # Not particularly useful. Also wouldn't pass the termination checker.
 def subsets: {nat} => {{nat}}
 fn univ => self as
- or {{}}
- or {{x} | univ[x]}
- or {x or y | self[x], self[y]}
+  or {{}}
+  or {{x} | univ[x]}
+  or {x or y | self[x], self[y]}
 
 # NB:
 #
@@ -130,10 +130,10 @@ type dfa = ({node}, (node -> bool), {node,char: node})
 # assuming all states are distinct and proving equivalences?
 def distinct : dfa -> {node, node}
 fn (states, final?, trans) => distinct as
- # two states are distinct if one is final & the other not
- or {u,v | states[u], states[v], final? u /= final? v}
- # or if they transition to distinct states under the same character
- or {u,v | distinct[w1,w2], trans[u,c]: w1, trans[v,c]: w2}
+  # two states are distinct if one is final & the other not
+  or {u,v | states[u], states[v], final? u /= final? v}
+  # or if they transition to distinct states under the same character
+  or {u,v | distinct[w1,w2], trans[u,c]: w1, trans[v,c]: w2}
 
 # If you want to find out if two DFAs are equivalent, just disjoint-union them
 # into one DFA, and ask whether their start states are distinct.
@@ -151,7 +151,7 @@ fn (states, final?, trans) => distinct as
 
 def treeP: {node, node} -> {node} => {node}
 fn child p => self as
- {x | p[x], empty? {y | child[x,y], not (y in? self)}}
+  {x | p[x], empty? {y | child[x,y], not (y in? self)}}
 
 
 # ---------- Simple static analyses ----------
