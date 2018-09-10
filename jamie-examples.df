@@ -21,7 +21,7 @@
 # 1. len : string -> nat
 # 2. substring : string -> nat,nat -> string
 # 3. _+_ : nat => nat => nat
-# 4. not : op bool -> bool
+# 4. not : op bool => bool
 #
 # And for any first-order type A:
 # 5. _=_ : A -> A -> bool
@@ -37,13 +37,17 @@ def range: (op nat, nat) => {nat}
 fn (lo,hi) => fix self as
   {x | x in {lo} or {x+1 | x in self}, x <= hi}
 
-# Includes empty substrings. All (1 + length s) of them. It would be a stupid
-# idea to compute this directly, but inlining it and doing some optimisation
-# could probably turn most invocations into calls to `substring`.
+# All substrings, including empty ones, indexed by bounds. Computing this
+# directly is stupid, but inlining it and optimising could probably turn most
+# invocations into calls to `substring`.
 def substrings: string -> {nat,nat: string}
 fn s => { i,j: substring s (i,j)
         | i in range (0, len string)
         , j in range (i, len string)}
+
+# Pretend A stands for any type.
+def empty?: op {A} => bool
+fn s => not (for x in s do true)
 
 # Not particularly useful. Also wouldn't pass the termination checker.
 def subsets: {nat} => {{nat}}
@@ -76,7 +80,7 @@ def reachable-seminaive : {nat,nat} => {nat,nat}
 fn edges => paths as edges or {(x,z) | edges[x,y], paths[y,z]}
 
 
-# ---------- Parsing ----------
+# ---------- Parsing, the CYK algorithm ----------
 type symbol = string
 type rule = String(string) | Cat(symbol, symbol)
 type grammar = {symbol, rule}
@@ -131,3 +135,21 @@ fn dfa => distinct as
  or {u,v | states[u], states[v], final u /= final v}
  # or if they transition to distinct states under the same character
  or {u,v | distinct[w1,w2], trans[u,c]: w1, trans[v,c]: w2}
+
+# If you want to find out if two DFAs are equivalent, just disjoint-union them
+# into one DFA, and ask whether their start states are distinct.
+
+
+# ---------- treeP ----------
+# I got this example from the folks at Semmle.
+#
+# Given a digraph and a predicate on nodes, find all nodes such that the
+# subgraph reachable from them is a DAG all of whose nodes satisfy P.
+#
+# Note that this fixed point is monotone, but only by double negation. empty? is
+# antitone, and not is antitone, thus (empty? {y | child[x,y], not (y in? self)}) is
+# monotone in `self`.
+
+def treeP: {node, node} -> {node} => {node}
+fn child P => self as
+ {x | P[x], empty? {y | child[x,y], not (y in? self)}}
