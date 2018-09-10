@@ -55,7 +55,7 @@ def subsets: {nat} => {{nat}}
 fn univ => self as
  or {{}}
  or {{x} | univ[x]}
- or {x or y | univ[x], univ[y]}
+ or {x or y | self[x], self[y]}
 
 # NB:
 #
