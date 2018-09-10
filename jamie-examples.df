@@ -33,16 +33,9 @@
 
 # ---------- Utility functions ----------
 # `range` wouldn't pass Datafun's termination checker.
-def range: (-nat, +nat) => {nat}
+def range: (op nat, nat) => {nat}
 fn (lo,hi) => fix self as
   {x | x in {lo} or {x+1 | x in self}, x <= hi}
-
-# Not particularly useful. Also wouldn't pass the termination checker.
-def subsets: {nat} => {{nat}}
-fn univ => self as
- or {{}}
- or {{x} | univ[x]}
- or {x or y | univ[x], univ[y]}
 
 # Includes empty substrings. All (1 + length s) of them. It would be a stupid
 # idea to compute this directly, but inlining it and doing some optimisation
@@ -51,6 +44,21 @@ def substrings: string -> {nat,nat: string}
 fn s => { i,j: substring s (i,j)
         | i in range (0, len string)
         , j in range (i, len string)}
+
+# Not particularly useful. Also wouldn't pass the termination checker.
+def subsets: {nat} => {{nat}}
+fn univ => self as
+ or {{}}
+ or {{x} | univ[x]}
+ or {x or y | univ[x], univ[y]}
+
+# NB:
+#
+#             {... | foo[x,y]}    ==  {... | (x,y) in foo}
+#           (for foo[x,y] do ...) == (for x,y in foo do ...)
+#
+# I sometimes prefer this notation for its brevity and similarity to
+# {Pro,Data}log's "foo(x,y)".
 
 
 # ---------- Transitive closure, naive and semi-naive ----------
@@ -74,10 +82,10 @@ type rule = String(string) | Cat(symbol, symbol)
 type grammar = {symbol, rule}
 
 def parse: grammar -> string -> {symbol, nat, nat}
-fn G text => chart as
-  for X, rule in G do
+fn grammar text => chart as
+  for X, rule in grammar do
   case rule
-  | String s => {(i,j) | substrings text [i,j: s]}
+  | String s => {(i,j) | substrings text [i,j]: s}
   | Cat(Y,Z) => {(i,k) | self[X,i,j], self[Y,j,k]}
 
 
@@ -105,7 +113,7 @@ type node = nat
 def shortest-paths: {node, node, dist} => {node, node: dist}
 fn edges => self as
   or {u,v: d | edges[x,y,d]}
-  or {u,w: (d1 + d2) | self[u,v: d1], self[v,w: d2]}
+  or {u,w: (d1 + d2) | self[u,v]: d1, self[v,w]: d2}
 
 
 # ---------- DFA (in)equivalence ----------
