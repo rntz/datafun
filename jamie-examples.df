@@ -23,9 +23,10 @@
 # 3. _+_ : nat => nat => nat
 # 4. not : op bool => bool
 #
-# And for any first-order type A:
+# For any first-order type A:
 # 5. _=_ : A -> A -> bool
-# 6. _in?_ : A -> {A} => bool
+# 6. _in?_ : A -> {A} => bool           set membership
+# 7. _\_ : {A} => op {A} => {A}         set difference
 #
 # A type is first-order if it doesn't contain functions. I think restricting
 # first-order types not to contain sets is also fine for these examples.
@@ -178,31 +179,33 @@ fn prog =>
   | Return -> {}
 
 # ----- Liveness analysis -----
-type how = In | Out
-
 def uses: expr -> {var}
 fn e => case e | Var(v) => {v} | Op(_,v1,v2) => {v1,v2}
 
-# Given a set of live variables, says what variables a statements needs to be
-# defined.
+# Is some info about a variable flowing INTO a line, or OUT OF a line?
+type how = In | Out
+
+# How a given statement changes what variables are live. Given what variables
+# are live after it, returns what variables are live before it.
 def needs: stmt -> {var} => {var}
-fn stmt live =>
+fn stmt after =>
   case stmt
+  # Skip & goto do nothing.
+  | Skip | Goto(_) -> after
   # Return statements and conditionals always need their variables.
-  | Return(v) | If(v,_,_) -> {v}
-  # Assignments need their sources if their destination is live.
-  | Assign(v, e) -> if v in? live do uses e
-  # Skip & goto need nothing.
-  | Skip | Goto(_) -> {}
+  | Return(v) | If(v,_,_) -> {v} or after
+  | Assign(v, e) ->
+    # We supply the value of v.
+    or (after \ {v})
+    # We need our sources, if our destination is live.
+    or (if v in? after do uses e)
 
 def live: prog -> flow -> {line, how, var}
 fn prog flows => self as
-  # Propagate in to out.
-  or {(i, Out, v) | flows[i,j], (j, In, v)}
+  # Propagate liveness info backwards.
+  or {(i, Out, v) | flows[i,j], self[j, In, v]}
   # Analyse statements.
-  or {(i, In, v)
-     | prog[i]: stmt
-     , needs stmt {v | self[i, Out, v]} }
+  or {(i, In, v) | prog[i]: stmt, v in needs stmt {v | self[i, Out, v]} }
 
 # ----- TODO: Reaching assignment analysis -----
 # ----- TODO: Constant variable analysis -----
