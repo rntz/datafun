@@ -1,8 +1,6 @@
 - Get Changes* working again. I've switched to the pointwise definition of cat→,
   unintentionally, and now they don't type-check!
 
-- Cat.agda: define Sums as the dual of Products (like Monads vs Comonads)
-
 - Figure out whether Datafun-with-Trees (& its ProsetSem cousins) are useful or not.
 
 - Figure out whether Precontexts is useful or not.
