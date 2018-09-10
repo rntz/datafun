@@ -14,9 +14,6 @@ record Cat i j : Set (suc (i ⊔ j)) where
   field ident : ∀{a} -> Hom a a
   field compo : ∀{a b c} (f : Hom a b) (g : Hom b c) -> Hom a c
 
-  ≡→ident : ∀{a b} -> a ≡ b -> Hom a b
-  ≡→ident refl = ident
-
 open Cat public
 open Cat {{...}} public using () renaming (Hom to _≤_; ident to id; compo to _∙_)
 
