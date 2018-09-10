@@ -25,8 +25,9 @@ type (□ a) = iso (type a)
 ⟦ disc , a ⟧₁ = iso (type a)
 
 ⟦_⟧ : Cx -> Proset
-⟦_⟧+ : Premise -> Proset
 ⟦ X ⟧ = Π (Vars X) (λ v -> ⟦ proj₁ v ⟧₁)
+
+⟦_⟧+ : Premise -> Proset
 ⟦ nil ⟧+    = ⊤-cat
 ⟦ P , Q ⟧+  = cat× ⟦ P ⟧+ ⟦ Q ⟧+
 ⟦ □ P ⟧+    = iso ⟦ P ⟧+
