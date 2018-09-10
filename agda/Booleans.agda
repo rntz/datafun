@@ -4,7 +4,6 @@ open import Cat
 module Booleans where
 
 -- The booleans, ordered false < true.
--- TODO: put these in their own module?
 data bool≤ : Rel Bool zero where
   f≤* : ∀{a} -> bool≤ false a
   t≤t : bool≤ true true
@@ -40,3 +39,12 @@ bool⇒ a≤b .map {.false} {true} f≤* = a≤b
 bool⇒ {A} a≤b .map {.false} {false} f≤* = ident A
 bool⇒ {A} a≤b .map t≤t = ident A
 
+module _ {Γ : Proset} {{A : Proset}} where
+  private instance zub = cat→ Γ A
+  If : (F G : Γ ⇒ A) → G ≤ F → Γ ⇒ (bools ⇨ A)
+  If F G F≤G .ap γ = bool⇒ (F≤G {γ})
+  If F G F≤G .map γ≤η {true} = map F γ≤η
+  If F G F≤G .map γ≤η {false} = map G γ≤η
+
+When : ∀{{A}} {{S : Sums A}} {Γ} → Γ ⇒ bools → Γ ⇒ A → Γ ⇒ A
+When cond then = call (If then (constant ⊥) ⊥≤) cond

@@ -125,41 +125,33 @@ map (Tree-map {A} {B}) {f} {g} f≤g {node l r} =
 
 
 -- Trees is a monad. TODO: used anywhere?
-tree-join : ∀{A} → Tree (Tree A) → Tree A
-tree-join empty = empty
-tree-join (leaf X) = X
-tree-join (node X Y) = node (tree-join X) (tree-join Y)
-
-Tree-join : ∀{{C}} → trees (trees C) ⇒ trees C
-Tree-join .ap = tree-join
-Tree-join .map empty≤ = empty≤
-Tree-join .map (leaf≤ x≤y) = x≤y
-Tree-join .map (node≤ p q) = node≤ (map Tree-join p) (map Tree-join q)
-Tree-join .map (≤node x) = ≤node (map∨ (map Tree-join) (map Tree-join) x)
+tree-join : ∀{{C}} → trees (trees C) ⇒ trees C
+ap tree-join empty = empty
+ap tree-join (leaf X) = X
+ap tree-join (node X Y) = node (ap tree-join X) (ap tree-join Y)
+map tree-join empty≤ = empty≤
+map tree-join (leaf≤ x≤y) = x≤y
+map tree-join (node≤ p q) = node≤ (map tree-join p) (map tree-join q)
+map tree-join (≤node x) = ≤node (map∨ (map tree-join) (map tree-join) x)
 
 open import Monads
 instance
   Tree-monad : Monad Trees
   Monad.pure Tree-monad = fun leaf≤
-  Monad.join Tree-monad = Tree-join
+  Monad.join Tree-monad = tree-join
+
+-- 2-monadicity?
+Tree-bind : ∀{A B} → (A ⇨ trees B) ⇒ (trees A ⇨ trees B)
+ap Tree-bind = Monad.bind Tree-monad
+map Tree-bind {f} {g} f≤g {empty} = empty≤
+map Tree-bind {f} {g} f≤g {leaf x} = f≤g
+map (Tree-bind {A}{B}) {f} {g} f≤g {node X Y} =
+  Sums.map∨ (tree-sums B) (map Tree-bind {f}{g} f≤g {X})
+                          (map Tree-bind {f}{g} f≤g {Y})
 
 
--- TODO: Filtering a tree.
--- -- I should express this as (join (map (guard f))), or something.
--- tree-filter : ∀{A} (f : A → Bool) → Tree A → Tree A
--- tree-filter f empty = empty
--- tree-filter f (leaf x) = if f x then leaf x else empty
--- tree-filter f (node X Y) = node (tree-filter f X) (tree-filter f Y)
-
--- open import Booleans
-
--- -- It would be nice to show this is also monotone in the filtering function.
--- Tree-filter : ∀ {{C}} → (C ⇨ bools) ∧ trees C ⇒ trees C
--- ap Tree-filter (f , X) = tree-filter (ap f) X
--- map Tree-filter (f≤g , empty≤) = empty≤
--- map Tree-filter (f≤g , leaf≤ x≤y) = {!!}
--- map Tree-filter {f , _} {g , _} (f≤g , node≤ p q) =
---   node≤ (map Tree-filter {f , _} {g , _} (f≤g , p))
---         (map Tree-filter {f , _} {g , _} (f≤g , q))
--- map Tree-filter (f≤g , split₁ x) = split₁ (map Tree-filter (f≤g , x))
--- map Tree-filter (f≤g , split₂ y) = {!!}
+-- Filtering a tree.
+open import Booleans
+Tree-filter : ∀{{A}} → (A ⇨ bools) ⇒ (trees A ⇨ trees A)
+Tree-filter {{A}} = curry (When apply (π₂ ∙ fun leaf≤)) ∙ Tree-bind
+  where instance -trees = trees A
