@@ -45,7 +45,8 @@ fn s => { i,j: substring s (i,j)
         | i in range (0, len string)
         , j in range (i, len string)}
 
-# Pretend A stands for any type.
+# Pretend A stands for any type. This would be better implemented as a
+# primitive, of course.
 def empty?: op {A} => bool
 fn s => not (for x in s do true)
 
@@ -87,10 +88,8 @@ type grammar = {symbol, rule}
 
 def parse: grammar -> string -> {symbol, nat, nat}
 fn grammar text => chart as
-  for X, rule in grammar do
-  case rule
-  | String s => {(i,j) | substrings text [i,j]: s}
-  | Cat(Y,Z) => {(i,k) | self[X,i,j], self[Y,j,k]}
+  {(i,j) | grammar[x, String(s)], substrings text [i,j]: s}
+  {(i,k) | grammar[x, Cat(y,z)], chart[x,i,j], chart[y,j,k]}
 
 
 # ---------- Shortest path ----------
@@ -150,5 +149,5 @@ fn (states, final?, trans) => distinct as
 # monotone in `self`.
 
 def treeP: {node, node} -> {node} => {node}
-fn child P => self as
- {x | P[x], empty? {y | child[x,y], not (y in? self)}}
+fn child p => self as
+ {x | p[x], empty? {y | child[x,y], not (y in? self)}}
