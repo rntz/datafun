@@ -16,12 +16,13 @@ module _ {i j} {{C : Cat i j}} {{P : Products C}} where
 
 module _ {i j} {{C : Cat i j}} where
   module _ {{cc : CC C}} where
-    fn : ∀{Γ a b : Obj C} -> (Γ ∧ a) ≤ b -> Γ ≤ (a ⇨ b)
-    fn = curry
+    -- TODO: find the right infixity for _$_
+    open CC cc public using () renaming (curry to fn; call to _$_)
 
-    -- TODO: find the right infixity
-    _$_ : ∀{Γ a b : Obj C} -> Γ ≤ a ⇨ b -> Γ ≤ a -> Γ ≤ b
-    _$_ = call
+    -- fn : ∀{Γ a b : Obj C} -> (Γ ∧ a) ≤ b -> Γ ≤ (a ⇨ b)
+    -- fn = curry
+    -- _$_ : ∀{Γ a b : Obj C} -> Γ ≤ a ⇨ b -> Γ ≤ a -> Γ ≤ b
+    -- _$_ = call
 
   module _ {{sums : Sums C}} where
     inl : ∀{Γ a b : Obj C} -> Γ ≤ a -> Γ ≤ a ∨ b; inl x = x ∙ in₁
