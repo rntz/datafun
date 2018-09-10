@@ -151,3 +151,58 @@ fn (states, final?, trans) => distinct as
 def treeP: {node, node} -> {node} => {node}
 fn child p => self as
  {x | p[x], empty? {y | child[x,y], not (y in? self)}}
+
+
+# ---------- Simple static analyses ----------
+type var = string
+type line = nat
+type op = Add | Sub | Mul | Div | Eq | Neq
+type expr = Var(var) | Op(op, var, var)
+type stmt = Skip
+          | Assign(var, expr)
+          | Return(var)
+          | If(var, line, line)
+          | Goto(line)
+type prog = {line: stmt}
+
+# ----- 1-step control flow -----
+type flow = {line, line}
+
+def flow: prog -> flow
+fn prog =>
+  for prog[i]: stmt do
+  case stmt
+  | Goto(j) -> {(i,k)}
+  | If(_,j,k) -> {(i,j), (i,k)}
+  | Skip | Assign(_) -> {(i,i+1)}
+  | Return -> {}
+
+# ----- Liveness analysis -----
+type how = In | Out
+
+def uses: expr -> {var}
+fn e => case e | Var(v) => {v} | Op(_,v1,v2) => {v1,v2}
+
+# Given a set of live variables, says what variables a statements needs to be
+# defined.
+def needs: stmt -> {var} => {var}
+fn stmt live =>
+  case stmt
+  # Return statements and conditionals always need their variables.
+  | Return(v) | If(v,_,_) -> {v}
+  # Assignments need their sources if their destination is live.
+  | Assign(v, e) -> if v in? live do uses e
+  # Skip & goto need nothing.
+  | Skip | Goto(_) -> {}
+
+def live: prog -> flow -> {line, how, var}
+fn prog flows => self as
+  # Propagate in to out.
+  or {(i, Out, v) | flows[i,j], (j, In, v)}
+  # Analyse statements.
+  or {(i, In, v)
+     | prog[i]: stmt
+     , needs stmt {v | self[i, Out, v]} }
+
+# ----- TODO: Reaching assignment analysis -----
+# ----- TODO: Constant variable analysis -----
