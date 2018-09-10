@@ -4,7 +4,7 @@
 # DONE - parsing
 # DONE - DFA equivalence
 # DONE - shortest path
-# - treeP from semmle
+# DONE - treeP from semmle
 # - find those examples from the physicist on my gist
 
 ## Builtin types
@@ -121,18 +121,17 @@ fn edges => self as
 
 
 # ---------- DFA (in)equivalence ----------
-type dfa = ( states: {node}
-           , final: node -> bool
-           , trans: {node,char: node} )
+# A DFA is a tuple (states, final?, transitions).
+type dfa = ({node}, (node -> bool), {node,char: node})
 
 # Given a single DFA, finds all state-pairs (u,v) such that u is NOT equivalent
 # to v. Works by assuming all states are equivalent and ruling out equivalences.
 # Probably very inefficient. Is there an inverse way to do this - start out
 # assuming all states are distinct and proving equivalences?
 def distinct : dfa -> {node, node}
-fn dfa => distinct as
+fn (states, final?, trans) => distinct as
  # two states are distinct if one is final & the other not
- or {u,v | states[u], states[v], final u /= final v}
+ or {u,v | states[u], states[v], final? u /= final? v}
  # or if they transition to distinct states under the same character
  or {u,v | distinct[w1,w2], trans[u,c]: w1, trans[v,c]: w2}
 
