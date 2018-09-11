@@ -5,6 +5,10 @@ open import Prelude
 import Data.Sum
 
 record Cat i j : Set (suc (i ⊔ j)) where
+  -- no-eta-equality cons: requires annoying eta-expansion or coercion because
+  -- some equalities no longer hold definitionally.
+  --
+  -- no-eta-equality pros: makes inferred types of holes not total rubbish.
   no-eta-equality
   constructor Cat:
   infix  1 Hom
@@ -26,10 +30,11 @@ record Fun {i j k l} (C : Cat i j) (D : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l) whe
 open Fun public
 pattern fun {F} f = Fun: F f
 
--- Composition of functors across different levels.
-_⊚_ : ∀{i j k l m n A B C} → Fun {k}{l}{m}{n} B C → Fun {i}{j} A B → Fun A C
-ap (F ⊚ G) = ap F ∘ ap G
-map (F ⊚ G) = map F ∘ map G
+-- TODO: remove if unused.
+-- -- Composition of functors across different levels.
+-- _⊚_ : ∀{i j k l m n A B C} → Fun {k}{l}{m}{n} B C → Fun {i}{j} A B → Fun A C
+-- ap (F ⊚ G) = ap F ∘ ap G
+-- map (F ⊚ G) = map F ∘ map G
 
  -- Conveniences.
 pattern TT = lift tt
