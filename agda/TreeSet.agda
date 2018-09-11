@@ -148,7 +148,7 @@ instance
 
 -- 2-monadicity?
 Tree-bind : ∀{A B} → (A ⇨ trees B) ⇒ (trees A ⇨ trees B)
-ap Tree-bind = Monad.bind Tree-monad
+ap Tree-bind = mapreduce
 map Tree-bind {f} {g} f≤g {empty} = empty≤
 map Tree-bind {f} {g} f≤g {leaf x} = f≤g
 map (Tree-bind {A}{B}) {f} {g} f≤g {node X Y} =
