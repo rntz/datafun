@@ -1,0 +1,413 @@
+%% TODO:
+%% - charter or palatino for body font
+%% - understand layout commands
+%% - figure out what goes on poster & where
+
+% Based on the Gemini theme, https://github.com/anishathalye/gemini
+
+\documentclass[final,dvipsnames]{beamer}
+
+% ====================
+% Packages
+% ====================
+
+\usepackage[T1]{fontenc}
+%\usepackage{lmodern}
+\usepackage{nccmath} %fix spacing issues. needs to load before beamerposter.
+
+%% Paper sizes:
+%\usepackage[size=a0, scale=1.25]{beamerposter}
+%% 24 x 36" = 60.96 x 91.44cm
+%\usepackage[size=custom, width=60.96, height=91.44, scale=1]{beamerposter}
+%\usepackage[size=custom, height=60.96, width=91.44, scale=1]{beamerposter}
+%% 36 x 48" = 91.44 x 121.92cm
+\usepackage[size=custom, width=91.44, height=121.92, scale=1.3]{beamerposter}
+%\usepackage[size=custom, height=91.44, width=121.92, scale=1.25]{beamerposter}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tikz}
+%\usepackage{pgfplots}
+\usepackage{mathpartir}
+\usepackage{multirow}
+
+%% Argh, these define commands so I have to include them.
+\usetheme{gemini}
+\usecolortheme{gemini}          %gemini, mit, labsix
+
+%% \usepackage{PTSans,PTSerif}
+%% \usepackage{fbb}
+%% \usepackage{cochineal}
+%% \usepackage{newpxtext}
+
+%% Load newpxtext last so it gets used by eulervm.
+\usepackage{librebaskerville}
+\usepackage[scaled=0.95]{sourcesanspro}
+\usepackage{eulervm}
+
+\newfontfamily\SSP{SourceSansPro}
+\newfontfamily\Baskerville[Scale=0.855]{LibreBaskerville}
+%% \newfontfamily\Charter{XCharter}
+\newfontfamily\Palatino[Scale=0.98]{TeXGyrePagellaX}
+%% % consider bumping scale if I only use this for the title.
+%% \newfontfamily{\PTSans}{PTSans}
+%% \newfontfamily{\PTSerif}{PTSerif}
+%% \newfontfamily{\FBB}{fbb}
+%% \newfontfamily{\Cochineal}{Cochineal}
+%% \newfontfamily{\Noto}[Scale=0.9]{Noto Sans}
+
+\setbeamerfont{headline}{family=\Baskerville}
+\setbeamerfont{block title}{family=\SSP,size=\Large}
+\setbeamerfont{heading}{family=\SSP}
+\setbeamerfont{block body}{family=\SSP}
+%\setbeamerfont{block body}{family=\Baskerville}
+%\setbeamerfont{block body}{family=\Palatino}
+
+\definecolor{labsixorange}{RGB}{243, 111, 33}
+\definecolor{mitred}{cmyk}{0.24, 1.0, 0.78, 0.17}
+
+\setbeamercolor{headline}{fg=lightgray,bg=darkblue}
+\setbeamercolor{headline rule}{bg=gray}
+\setbeamercolor{block title}{fg=darkblue,bg=white}
+\setbeamercolor{block alerted title}{fg=mitred,bg=lightgray}
+
+
+% ====================
+% Lengths
+% ====================
+
+% If you have N columns, choose \sepwidth and \colwidth such that
+% (N+1)*\sepwidth + N*\colwidth = \paperwidth
+\newlength{\sepwidth}
+\newlength{\colwidth}
+% 2 columns
+\setlength{\sepwidth}{0.03\paperwidth}
+\setlength{\colwidth}{0.455\paperwidth}
+%% % 3 columns
+%% \setlength{\sepwidth}{0.025\paperwidth}
+%% \setlength{\colwidth}{0.3\paperwidth}
+
+\newcommand{\separatorcolumn}{\begin{column}{\sepwidth}\end{column}}
+
+% ====================
+% Title
+% ====================
+
+\title{Type inference for monotonicity}
+\author{Michael Arntzenius}
+\institute[shortinst]{University of Birmingham}
+
+
+%% ========== Commands ==========
+
+\newcommand\rulestyle{\sffamily\scshape}
+\newcommand\rulename[1]{{\rulestyle#1}}
+\newcommand{\catname}[1]{\textbf{#1}}
+\newcommand{\Preorder}{\catname{Preorder}}
+
+\newcommand\N{\mathbb{N}}
+\newcommand\R{\mathbb{R}}
+\newcommand\x\times
+\newcommand\todo[1]{{\color{Red}#1}}
+\newcommand\G\Gamma
+\newcommand\D\Delta
+\newcommand\mto{\overset{+}{\to}}
+
+\newcommand{\opcolor}{\color{ForestGreen}}
+\newcommand{\isocolor}{\color{NavyBlue}}
+\newcommand{\pathcolor}{\color{Bittersweet}}
+
+\newcommand{\id}{\mathrm{id}}
+\newcommand{\op}{\mathrm{\opcolor op}}
+\newcommand{\iso}{{\texorpdfstring{\ensuremath{\isocolor\Box}}{iso}}}
+\renewcommand{\path}{{\texorpdfstring{\ensuremath{\pathcolor\lozenge}}{path}}}
+
+\newcommand{\idof}{\id\,}
+\newcommand{\opof}{\op\,}
+\newcommand{\isof}{\iso}
+\newcommand{\pathof}{\path}
+
+%% TODO: remove these.
+\newcommand{\cid}{\id}
+\newcommand{\cop}{{\opcolor\op}}
+\newcommand{\ciso}{{\isocolor\iso}}
+\newcommand{\cpath}{{\pathcolor\path}}
+
+\newcommand\subtype{\mathrel{<:}}
+\newcommand\fname[1]{\ensuremath{\mathrm{#1}}}
+\newcommand\fn\lambda
+\newcommand\fnof[1]{\fn{#1}.~}
+\newcommand\kw[1]{\fname{#1}}
+
+\newcommand\toiso{\overset\ciso\to}
+\newcommand\toid{\overset\cid\to}
+\newcommand\toop{\overset\cop\to}
+
+
+% ====================
+% Body
+% ====================
+
+\begin{document}
+
+\begin{frame}[t]
+\begin{columns}[t]
+\separatorcolumn
+
+
+
+\begin{column}{\colwidth}
+
+  \begin{block}{Problem: Ensuring functions are monotone}
+
+    \todo{idunno}
+
+  \end{block}
+
+  \begin{block}{Modes of (non-)monotonicity}
+    I consider four \strong{modes}, ways a function may respect the order on its domain:
+    \begin{itemize}
+    \item $\cid$ is monotone, or order-preserving. For example, $(\fnof{x} x)$.
+    \item $\cop$ is antitone, or order-inverting. For example, $\fname{not} : \fname{bool} \to \fname{bool}$.
+    \item $\ciso$ is equivariant, preserving only equivalence. Usually, \emph{all} functions are equivariant.
+    \item $\cpath$ is bivariant, or both mono- and antitone. The constant
+      function $\fnof{x} 42$, for example.
+    \end{itemize}
+
+    Formally, modes alter \strong{preorderings} (reflexive, transitive
+    relations), as shown in Figure~\ref{fig:mode-ops}. We say $f : A \to B$ has
+    mode $T$ iff $f$ is monotone from $TA \to B$.
+
+    %% TODO: diagrams for what each mode does to a specific ordering, like Kevin
+    %% Clancy's. Maybe make sure that we have a fencepost-like example, for path?
+  \end{block}
+  
+  \begin{block}{Approach 1: Annotate the arrows}
+    We can annotate function types with their mode: $A \toid B$ for monotone
+    maps; $A \toop B$ for antitone maps; $A \toiso B$ for arbitrary maps. This
+    suffices for simple functions:
+
+    \[
+      \begin{array}{l}
+        \fname{setMap} ~:~
+        (A \toiso B) \toiso \fname{Set}~A \toid \fname{Set}~B\\
+        \fname{setMap}~f~xs ~=~ \kw{do}~x \leftarrow xs\\
+        \phantom{\fname{setMap}~f~xs ~=~ \kw{do}~}\fname{return}~(f\;x)
+      \end{array}
+    \]
+
+    But it cannot capture more complex input-output ordering relationships:
+
+    \[
+      \begin{array}{l}
+        \fname{subtractEach} ~:~
+        \fname{List}~(\N \x {\opcolor \N}) \overset{???}{\to} \fname{List}~\N
+        \\
+        \fname{subtractEach}~ xs ~=~ \fname{map}~(\fn (x,y).~ x-y) ~xs
+      \end{array}
+    \]
+
+    Annotating the arrow cannot indicate this function is \strong{monotone} in
+    the first half of each $(\N \x \N)$ pair, but \strong{\opcolor antitone} in
+    the second.
+
+    %% TODO: give subtractEach a red/yellow background \& setMap a green one.
+    %% or, use green/red marker to put a check mark next to setMap & an X next
+    %% to subtractEach.
+    %%
+    %% TODO: cite Datafun and variance typing as examples of this approach.
+  \end{block}
+
+  \begin{block}{Approach 2: Modal types}
+    Alternatively, we can make \strong{all} functions monotone, and apply modes
+    directly to types. For example, $\opof A$ is $A$ with its ordering inverted.
+    The \strong{\opcolor antitone} maps $(A \toop B)$ are exactly the
+    \strong{monotone} maps $(\opof A \to B)$. Now we can give a precise type to
+    \fname{subtractEach}!
+
+    \[ \fname{subtractEach} ~:~ \fname{List}~(\N \x {\opof \N}) \to \fname{List}~\N \]
+
+    Now that modes are type constructors, they have \strong{explicit intro and
+      elim forms} (Pfenning \& Davies, 2001). This clutters the definition of
+    simple functions like \fname{setMap}:
+
+    \[
+      \begin{array}{l}
+        \fname{setMap} ~:~
+        \iso(\iso A \to B) \to \fname{Set}~A \to \fname{Set}~B\\
+        \fname{setMap}~f~xs =\\
+        \quad\kw{let}~\kw{box}~g = f ~\kw{in}\\
+        \quad
+        \kw{do}~x \leftarrow xs\\
+        \quad\phantom{\kw{do}~}\kw{let}~\kw{box}~y = x\\
+        \quad\phantom{\kw{do}~}\fname{return}~(\kw{box}~(f~(\kw{box}~y)))
+      \end{array}
+    \]
+
+    %% TODO: cite Pfenning-Davies in bibliography.
+
+    %% TODO: show the Pf-D typing rules? explain Set A = Downset(\iso A)?
+  \end{block}
+
+  \begin{block}{Our approach: Modal subtyping!}
+    \strong{Goal:} Handle functions which are monotone in only part of their
+    input \emph{without} clunky term annotations.
+
+    \strong{Method:} Construct and eliminate modal types \emph{implicitly} via \emph{subtyping}.
+
+    \todo{TODO: challenges? 1. how do you \emph{introduce} a box by subtyping?\\
+    2. function application.\\
+    3. pattern-matching (probably leave out).}
+  \end{block}
+
+\end{column}
+
+\separatorcolumn
+
+
+\begin{column}{\colwidth}
+    \begin{figure}
+      \vspace{-1em}
+      \begin{mathpar}
+        \begin{array}{llc}
+        a \le b : \idof A &\iff& a \le b : A\\
+        a \le b : \opof A &\iff& a \ge b : A\\
+        a \le b : \isof A &\iff& a \le b \wedge a \ge b : A\\
+        a \le b : \pathof A &\impliedby& a \le b \vee b \le a : A
+        \end{array}
+
+        \begin{tikzpicture}[scale=2.5,baseline=(current bounding box.center)]
+          \node (top)  at ( 0, 1) {$\cpath$};
+          \node (bot)  at ( 0,-1) {$\ciso$};
+          \node (-1)   at (-1, 0) {$\cid$};
+          \node (1)    at ( 1, 0) {$\cop$};
+          \draw (top) -- (-1) -- (bot) -- (1) -- (top);
+        \end{tikzpicture}
+
+        \begin{array}{cr|cccc}
+          \multicolumn{2}{c|}{\multirow{2}{*}{$UT$}}
+          & \multicolumn{4}{c}{T}\\
+          && \cid & \cop & \ciso & \cpath\\\hline
+          \multirow{4}{*}{$U$}
+          & \cid & \cid & \cop & \ciso & \cpath\\
+          & \cop & \cop & \cid & \ciso & \cpath\\
+          & \ciso & \ciso & \ciso & \ciso & \cpath\\
+          & \cpath & \cpath & \cpath & \ciso & \cpath
+        \end{array}
+      \end{mathpar}
+
+      \caption{\ Modes, the mode lattice, and mode composition}
+      \label{fig:mode-ops}
+    \end{figure}
+
+  \begin{block}{Problem: Function application is ambiguous!}
+    Consider applying a function $f : \iso(A \to B)$. Which of these two valid
+    subtypings should we apply to determine the expected argument and return
+    types?
+
+    \begin{align*}
+      \iso(A \to B) &\subtype A \to B & \text{because $\iso C \subtype C$ for any $C$}\\
+      \iso(A \to B) &\subtype \iso A \to \iso B
+      & \text{by functoriality of $\iso$}
+    \end{align*}
+
+    Neither type is more specific, and both usages occur in practice.
+  \end{block}
+
+  \begin{block}{Future work}
+    \heading{Is modal subtyping useful elsewhere?}
+
+    \heading{Hybridize with SMT-based approaches}
+    \todo{LiquidHaskell and other lightweight verification techniques. Probably
+      necessary for complex code, but can we verify simple code without
+      appealing to an SMT solver? Future work: a hybrid approach.}
+  \end{block}
+
+\end{column}
+
+\separatorcolumn
+
+
+\begin{column}{\colwidth}
+  \begin{block}{wat}
+    testing
+  \end{block}
+
+  %% \begin{block}{A block containing some math}
+
+  %%   Nullam non est elit. In eu ornare justo. Maecenas porttitor sodales lacus,
+  %%   ut cursus augue sodales ac.
+
+  %%   $$
+  %%   \int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
+  %%   $$
+
+  %%   Interdum et malesuada fames $\{1, 4, 9, \ldots\}$ ac ante ipsum primis in
+  %%   faucibus. Cras eleifend dolor eu nulla suscipit suscipit. Sed lobortis non
+  %%   felis id vulputate.
+
+  %%   \heading{A heading inside a block}
+
+  %%   Praesent consectetur mi $x^2 + y^2$ metus, nec vestibulum justo viverra
+  %%   nec. Proin eget nulla pretium, egestas magna aliquam, mollis neque. Vivamus
+  %%   dictum $\mathbf{u}^\intercal\mathbf{v}$ sagittis odio, vel porta erat
+  %%   congue sed. Maecenas ut dolor quis arcu auctor porttitor.
+
+  %%   \heading{Another heading inside a block}
+
+  %%   Sed augue erat, scelerisque a purus ultricies, placerat porttitor neque.
+  %%   Donec $P(y \mid x)$ fermentum consectetur $\nabla_x P(y \mid x)$ sapien
+  %%   sagittis egestas. Duis eget leo euismod nunc viverra imperdiet nec id
+  %%   justo.
+
+  %% \end{block}
+
+  %% \begin{block}{Nullam vel erat at velit convallis laoreet}
+
+  %%   Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
+  %%   inceptos himenaeos. Phasellus libero enim, gravida sed erat sit amet,
+  %%   scelerisque congue diam. Fusce dapibus dui ut augue pulvinar iaculis.
+
+  %%   \begin{table}
+  %%     \centering
+  %%     \begin{tabular}{l r r c}
+  %%       \toprule
+  %%       \textbf{First column} & \textbf{Second column} & \textbf{Third column} & \textbf{Fourth} \\
+  %%       \midrule
+  %%       Foo & 13.37 & 384,394 & \alpha \\
+  %%       Bar & 2.17 & 1,392 & \beta \\
+  %%       Baz & 3.14 & 83,742 & \delta \\
+  %%       Qux & 7.59 & 974 & \gamma \\
+  %%       \bottomrule
+  %%     \end{tabular}
+  %%     \caption{A table caption.}
+  %%   \end{table}
+
+  %%   Donec quis posuere ligula. Nunc feugiat elit a mi malesuada consequat. Sed
+  %%   imperdiet augue ac nibh aliquet tristique. Aenean eu tortor vulputate,
+  %%   eleifend lorem in, dictum urna. Proin auctor ante in augue tincidunt
+  %%   tempor. Proin pellentesque vulputate odio, ac gravida nulla posuere
+  %%   efficitur. Aenean at velit vel dolor blandit molestie. Mauris laoreet
+  %%   commodo quam, non luctus nibh ullamcorper in. Class aptent taciti sociosqu
+  %%   ad litora torquent per conubia nostra, per inceptos himenaeos.
+
+  %%   Nulla varius finibus volutpat. Mauris molestie lorem tincidunt, iaculis
+  %%   libero at, gravida ante. Phasellus at felis eu neque suscipit suscipit.
+  %%   Integer ullamcorper, dui nec pretium ornare, urna dolor consequat libero,
+  %%   in feugiat elit lorem euismod lacus. Pellentesque sit amet dolor mollis,
+  %%   auctor urna non, tempus sem.
+
+  %% \end{block}
+
+  %% \begin{block}{References}
+  %%   \nocite{*}
+  %%   \footnotesize{\bibliographystyle{plain}\bibliography{poster}}
+  %% \end{block}
+
+\end{column}
+
+\separatorcolumn
+\end{columns}
+\end{frame}
+
+\end{document}
