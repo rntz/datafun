@@ -41,14 +41,14 @@
 %% \usepackage{newpxtext}
 
 %% Load newpxtext last so it gets used by eulervm.
-\usepackage{librebaskerville}
+%\usepackage{librebaskerville}
 \usepackage[scaled=0.95]{sourcesanspro}
 \usepackage{eulervm}
 
 \newfontfamily\SSP{SourceSansPro}
 \newfontfamily\Baskerville[Scale=0.855]{LibreBaskerville}
-%% \newfontfamily\Charter{XCharter}
-\newfontfamily\Palatino[Scale=0.98]{TeXGyrePagellaX}
+\newfontfamily\Charter[Scale=0.98]{XCharter}
+\newfontfamily\Palatino[Scale=0.96]{TeXGyrePagellaX}
 %% % consider bumping scale if I only use this for the title.
 %% \newfontfamily{\PTSans}{PTSans}
 %% \newfontfamily{\PTSerif}{PTSerif}
@@ -56,12 +56,13 @@
 %% \newfontfamily{\Cochineal}{Cochineal}
 %% \newfontfamily{\Noto}[Scale=0.9]{Noto Sans}
 
-\setbeamerfont{headline}{family=\Baskerville}
-\setbeamerfont{block title}{family=\SSP,size=\Large}
+\setbeamerfont{headline}{family=\Charter}
+\setbeamerfont{block title}{family=\SSP}
 \setbeamerfont{heading}{family=\SSP}
 \setbeamerfont{block body}{family=\SSP}
-%\setbeamerfont{block body}{family=\Baskerville}
-%\setbeamerfont{block body}{family=\Palatino}
+
+%% \setbeamerfont{block title}{family=\Charter}
+%% \setbeamerfont{block body}{family=\Charter}
 
 \definecolor{labsixorange}{RGB}{243, 111, 33}
 \definecolor{mitred}{cmyk}{0.24, 1.0, 0.78, 0.17}
@@ -143,6 +144,8 @@
 \newcommand\toid{\overset\cid\to}
 \newcommand\toop{\overset\cop\to}
 
+\newcommand\isovar[1]{\mathbold{#1}}
+
 
 % ====================
 % Body
@@ -159,19 +162,32 @@
 \begin{column}{\colwidth}
 
   \begin{block}{Problem: Ensuring functions are monotone}
+    \strong{Monotonicity} crops up in a variety of interesting places:
+    \begin{enumerate}
+    \item In Datafun~\cite{datafun}, a functional query language generalising
+      Datalog, monotonicity is needed to ensure fixed-point expressions
+      terminate.
 
-    \todo{idunno}
+    \item In abstract interpretation, static analyses are phrased as monotone
+      maps on lattices.
+
+    \item For ensuring eventual consistency in distributed systems \cite{bloom}
+      and determinism in concurrent systems \cite{lvars}.
+    \end{enumerate}
+
+    In all these contexts, it's useful to be able to guarantee a function is monotone. So: \strong{how can we ensure monotonicity using types?}
 
   \end{block}
 
   \begin{block}{Modes of (non-)monotonicity}
     I consider four \strong{modes}, ways a function may respect the order on its domain:
     \begin{itemize}
-    \item $\cid$ is monotone, or order-preserving. For example, $(\fnof{x} x)$.
-    \item $\cop$ is antitone, or order-inverting. For example, $\fname{not} : \fname{bool} \to \fname{bool}$.
-    \item $\ciso$ is equivariant, preserving only equivalence. Usually, \emph{all} functions are equivariant.
-    \item $\cpath$ is bivariant, or both mono- and antitone. The constant
-      function $\fnof{x} 42$, for example.
+    \item $\cid$ is monotone, or order-preserving. For example, $\fnof{x} x$.
+    \item $\cop$ is {\opcolor antitone}, or order-inverting. For example,
+      $\fname{not} : \fname{bool} \to \fname{bool}$.
+    \item $\ciso$ is {\isocolor equivariant}, preserving only equivalence.
+      Usually, \emph{all} functions are equivariant.
+    \item $\cpath$ is {\pathcolor bivariant}, or both mono- and antitone. For example, $\fnof{x} 42$.
     \end{itemize}
 
     Formally, modes alter \strong{preorderings} (reflexive, transitive
@@ -183,9 +199,7 @@
   \end{block}
   
   \begin{block}{Approach 1: Annotate the arrows}
-    We can annotate function types with their mode: $A \toid B$ for monotone
-    maps; $A \toop B$ for antitone maps; $A \toiso B$ for arbitrary maps. This
-    suffices for simple functions:
+    Annotating function types with their mode is the obvious approach:
 
     \[
       \begin{array}{l}
@@ -207,7 +221,7 @@
       \end{array}
     \]
 
-    Annotating the arrow cannot indicate this function is \strong{monotone} in
+    A mode on the arrow cannot indicate this function is \strong{monotone} in
     the first half of each $(\N \x \N)$ pair, but \strong{\opcolor antitone} in
     the second.
 
@@ -219,28 +233,27 @@
   \end{block}
 
   \begin{block}{Approach 2: Modal types}
-    Alternatively, we can make \strong{all} functions monotone, and apply modes
-    directly to types. For example, $\opof A$ is $A$ with its ordering inverted.
-    The \strong{\opcolor antitone} maps $(A \toop B)$ are exactly the
-    \strong{monotone} maps $(\opof A \to B)$. Now we can give a precise type to
-    \fname{subtractEach}!
+    Let $(\opof A)$ be $A$ with its ordering inverted. The \strong{\opcolor
+      antitone} maps $(A \toop B)$ are exactly the \strong{monotone} maps
+    $(\opof A \to B)$. Instead of annotating arrows, we can make \strong{all}
+    functions monotone, and apply modes directly to types! Now
+    \fname{subtractEach} has a precise type:
 
     \[ \fname{subtractEach} ~:~ \fname{List}~(\N \x {\opof \N}) \to \fname{List}~\N \]
 
-    Now that modes are type constructors, they have \strong{explicit intro and
-      elim forms} (Pfenning \& Davies, 2001). This clutters the definition of
-    simple functions like \fname{setMap}:
+    However, needing to \strong{explicitly introduce and eliminate} modal types \cite{jrml} clutters up functions like \fname{setMap}:
 
     \[
       \begin{array}{l}
         \fname{setMap} ~:~
         \iso(\iso A \to B) \to \fname{Set}~A \to \fname{Set}~B\\
         \fname{setMap}~f~xs =\\
-        \quad\kw{let}~\kw{box}~g = f ~\kw{in}\\
+        \quad\kw{let}~\kw{box}~\isovar{g} = f ~\kw{in}\\
         \quad
         \kw{do}~x \leftarrow xs\\
-        \quad\phantom{\kw{do}~}\kw{let}~\kw{box}~y = x\\
-        \quad\phantom{\kw{do}~}\fname{return}~(\kw{box}~(f~(\kw{box}~y)))
+        \quad\phantom{\kw{do}~}\kw{let}~\kw{box}~\isovar{y} = x\\
+        \quad\phantom{\kw{do}~}
+        \fname{return}~(\kw{box}~(\isovar{g}~(\kw{box}~\isovar{y})))
       \end{array}
     \]
 
@@ -253,11 +266,15 @@
     \strong{Goal:} Handle functions which are monotone in only part of their
     input \emph{without} clunky term annotations.
 
-    \strong{Method:} Construct and eliminate modal types \emph{implicitly} via \emph{subtyping}.
+    \strong{Method:} Construct and eliminate modal types \emph{implicitly} via \strong{subtyping}.
+    %
+    Since types are preorders, subtyping means \emph{subpreordering}:
+    \begin{center}
+      $A \subtype B$ iff $A \subseteq B$ and $x \le y : A \implies x \le y : B$
+    \end{center}
 
-    \todo{TODO: challenges? 1. how do you \emph{introduce} a box by subtyping?\\
-    2. function application.\\
-    3. pattern-matching (probably leave out).}
+    For example, $\isof A <: A$, because $x \le y \wedge y \le x : A \implies x
+    \le y : A$. This lets us \emph{eliminate} $\isof A$ via subtyping.
   \end{block}
 
 \end{column}
@@ -266,39 +283,45 @@
 
 
 \begin{column}{\colwidth}
-    \begin{figure}
-      \vspace{-1em}
-      \begin{mathpar}
-        \begin{array}{llc}
+  \begin{figure}
+    \vspace{-1em}
+    \begin{mathpar}
+      \begin{array}{llc}
         a \le b : \idof A &\iff& a \le b : A\\
         a \le b : \opof A &\iff& a \ge b : A\\
         a \le b : \isof A &\iff& a \le b \wedge a \ge b : A\\
         a \le b : \pathof A &\impliedby& a \le b \vee b \le a : A
-        \end{array}
+      \end{array}
 
-        \begin{tikzpicture}[scale=2.5,baseline=(current bounding box.center)]
-          \node (top)  at ( 0, 1) {$\cpath$};
-          \node (bot)  at ( 0,-1) {$\ciso$};
-          \node (-1)   at (-1, 0) {$\cid$};
-          \node (1)    at ( 1, 0) {$\cop$};
-          \draw (top) -- (-1) -- (bot) -- (1) -- (top);
-        \end{tikzpicture}
+      \begin{tikzpicture}[scale=2.5,baseline=(current bounding box.center)]
+        \node (top)  at ( 0, 1) {$\cpath$};
+        \node (bot)  at ( 0,-1) {$\ciso$};
+        \node (-1)   at (-1, 0) {$\cid$};
+        \node (1)    at ( 1, 0) {$\cop$};
+        \draw (top) -- (-1) -- (bot) -- (1) -- (top);
+      \end{tikzpicture}
 
-        \begin{array}{cr|cccc}
-          \multicolumn{2}{c|}{\multirow{2}{*}{$UT$}}
-          & \multicolumn{4}{c}{T}\\
-          && \cid & \cop & \ciso & \cpath\\\hline
-          \multirow{4}{*}{$U$}
-          & \cid & \cid & \cop & \ciso & \cpath\\
-          & \cop & \cop & \cid & \ciso & \cpath\\
-          & \ciso & \ciso & \ciso & \ciso & \cpath\\
-          & \cpath & \cpath & \cpath & \ciso & \cpath
-        \end{array}
-      \end{mathpar}
+      \begin{array}{cr|cccc}
+        \multicolumn{2}{c|}{\multirow{2}{*}{$UT$}}
+        & \multicolumn{4}{c}{T}\\
+        && \cid & \cop & \ciso & \cpath\\\hline
+        \multirow{4}{*}{$U$}
+        & \cid & \cid & \cop & \ciso & \cpath\\
+        & \cop & \cop & \cid & \ciso & \cpath\\
+        & \ciso & \ciso & \ciso & \ciso & \cpath\\
+        & \cpath & \cpath & \cpath & \ciso & \cpath
+      \end{array}
+    \end{mathpar}
 
-      \caption{\ Modes, the mode lattice, and mode composition}
-      \label{fig:mode-ops}
-    \end{figure}
+    \caption{\ Modes, the mode lattice, and mode composition}
+    \label{fig:mode-ops}
+  \end{figure}
+
+  \begin{block}{Problem: Introducing $\iso$ via subtyping}
+    \todo{TODO: challenges? 1. how do you \emph{introduce} a box by subtyping?\\
+    2. function application.\\
+    3. pattern-matching (probably leave out).}
+  \end{block}
 
   \begin{block}{Problem: Function application is ambiguous!}
     Consider applying a function $f : \iso(A \to B)$. Which of these two valid
@@ -323,90 +346,94 @@
       appealing to an SMT solver? Future work: a hybrid approach.}
   \end{block}
 
+  \begin{block}{References}
+    \footnotesize{\bibliographystyle{plain}\bibliography{poster}}
+  \end{block}
+
 \end{column}
 
 \separatorcolumn
 
 
-\begin{column}{\colwidth}
-  \begin{block}{wat}
-    testing
-  \end{block}
+%% \begin{column}{\colwidth}
+%%   \begin{block}{wat}
+%%     testing
+%%   \end{block}
 
-  %% \begin{block}{A block containing some math}
+%%   \begin{block}{A block containing some math}
 
-  %%   Nullam non est elit. In eu ornare justo. Maecenas porttitor sodales lacus,
-  %%   ut cursus augue sodales ac.
+%%     Nullam non est elit. In eu ornare justo. Maecenas porttitor sodales lacus,
+%%     ut cursus augue sodales ac.
 
-  %%   $$
-  %%   \int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
-  %%   $$
+%%     $$
+%%     \int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
+%%     $$
 
-  %%   Interdum et malesuada fames $\{1, 4, 9, \ldots\}$ ac ante ipsum primis in
-  %%   faucibus. Cras eleifend dolor eu nulla suscipit suscipit. Sed lobortis non
-  %%   felis id vulputate.
+%%     Interdum et malesuada fames $\{1, 4, 9, \ldots\}$ ac ante ipsum primis in
+%%     faucibus. Cras eleifend dolor eu nulla suscipit suscipit. Sed lobortis non
+%%     felis id vulputate.
 
-  %%   \heading{A heading inside a block}
+%%     \heading{A heading inside a block}
 
-  %%   Praesent consectetur mi $x^2 + y^2$ metus, nec vestibulum justo viverra
-  %%   nec. Proin eget nulla pretium, egestas magna aliquam, mollis neque. Vivamus
-  %%   dictum $\mathbf{u}^\intercal\mathbf{v}$ sagittis odio, vel porta erat
-  %%   congue sed. Maecenas ut dolor quis arcu auctor porttitor.
+%%     Praesent consectetur mi $x^2 + y^2$ metus, nec vestibulum justo viverra
+%%     nec. Proin eget nulla pretium, egestas magna aliquam, mollis neque. Vivamus
+%%     dictum $\mathbf{u}^\intercal\mathbf{v}$ sagittis odio, vel porta erat
+%%     congue sed. Maecenas ut dolor quis arcu auctor porttitor.
 
-  %%   \heading{Another heading inside a block}
+%%     \heading{Another heading inside a block}
 
-  %%   Sed augue erat, scelerisque a purus ultricies, placerat porttitor neque.
-  %%   Donec $P(y \mid x)$ fermentum consectetur $\nabla_x P(y \mid x)$ sapien
-  %%   sagittis egestas. Duis eget leo euismod nunc viverra imperdiet nec id
-  %%   justo.
+%%     Sed augue erat, scelerisque a purus ultricies, placerat porttitor neque.
+%%     Donec $P(y \mid x)$ fermentum consectetur $\nabla_x P(y \mid x)$ sapien
+%%     sagittis egestas. Duis eget leo euismod nunc viverra imperdiet nec id
+%%     justo.
 
-  %% \end{block}
+%%   \end{block}
 
-  %% \begin{block}{Nullam vel erat at velit convallis laoreet}
+%%   \begin{block}{Nullam vel erat at velit convallis laoreet}
 
-  %%   Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-  %%   inceptos himenaeos. Phasellus libero enim, gravida sed erat sit amet,
-  %%   scelerisque congue diam. Fusce dapibus dui ut augue pulvinar iaculis.
+%%     Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
+%%     inceptos himenaeos. Phasellus libero enim, gravida sed erat sit amet,
+%%     scelerisque congue diam. Fusce dapibus dui ut augue pulvinar iaculis.
 
-  %%   \begin{table}
-  %%     \centering
-  %%     \begin{tabular}{l r r c}
-  %%       \toprule
-  %%       \textbf{First column} & \textbf{Second column} & \textbf{Third column} & \textbf{Fourth} \\
-  %%       \midrule
-  %%       Foo & 13.37 & 384,394 & \alpha \\
-  %%       Bar & 2.17 & 1,392 & \beta \\
-  %%       Baz & 3.14 & 83,742 & \delta \\
-  %%       Qux & 7.59 & 974 & \gamma \\
-  %%       \bottomrule
-  %%     \end{tabular}
-  %%     \caption{A table caption.}
-  %%   \end{table}
+%%     \begin{table}
+%%       \centering
+%%       \begin{tabular}{l r r c}
+%%         \toprule
+%%         \textbf{First column} & \textbf{Second column} & \textbf{Third column} & \textbf{Fourth} \\
+%%         \midrule
+%%         Foo & 13.37 & 384,394 & \alpha \\
+%%         Bar & 2.17 & 1,392 & \beta \\
+%%         Baz & 3.14 & 83,742 & \delta \\
+%%         Qux & 7.59 & 974 & \gamma \\
+%%         \bottomrule
+%%       \end{tabular}
+%%       \caption{A table caption.}
+%%     \end{table}
 
-  %%   Donec quis posuere ligula. Nunc feugiat elit a mi malesuada consequat. Sed
-  %%   imperdiet augue ac nibh aliquet tristique. Aenean eu tortor vulputate,
-  %%   eleifend lorem in, dictum urna. Proin auctor ante in augue tincidunt
-  %%   tempor. Proin pellentesque vulputate odio, ac gravida nulla posuere
-  %%   efficitur. Aenean at velit vel dolor blandit molestie. Mauris laoreet
-  %%   commodo quam, non luctus nibh ullamcorper in. Class aptent taciti sociosqu
-  %%   ad litora torquent per conubia nostra, per inceptos himenaeos.
+%%     Donec quis posuere ligula. Nunc feugiat elit a mi malesuada consequat. Sed
+%%     imperdiet augue ac nibh aliquet tristique. Aenean eu tortor vulputate,
+%%     eleifend lorem in, dictum urna. Proin auctor ante in augue tincidunt
+%%     tempor. Proin pellentesque vulputate odio, ac gravida nulla posuere
+%%     efficitur. Aenean at velit vel dolor blandit molestie. Mauris laoreet
+%%     commodo quam, non luctus nibh ullamcorper in. Class aptent taciti sociosqu
+%%     ad litora torquent per conubia nostra, per inceptos himenaeos.
 
-  %%   Nulla varius finibus volutpat. Mauris molestie lorem tincidunt, iaculis
-  %%   libero at, gravida ante. Phasellus at felis eu neque suscipit suscipit.
-  %%   Integer ullamcorper, dui nec pretium ornare, urna dolor consequat libero,
-  %%   in feugiat elit lorem euismod lacus. Pellentesque sit amet dolor mollis,
-  %%   auctor urna non, tempus sem.
+%%     Nulla varius finibus volutpat. Mauris molestie lorem tincidunt, iaculis
+%%     libero at, gravida ante. Phasellus at felis eu neque suscipit suscipit.
+%%     Integer ullamcorper, dui nec pretium ornare, urna dolor consequat libero,
+%%     in feugiat elit lorem euismod lacus. Pellentesque sit amet dolor mollis,
+%%     auctor urna non, tempus sem.
 
-  %% \end{block}
+%%   \end{block}
 
-  %% \begin{block}{References}
-  %%   \nocite{*}
-  %%   \footnotesize{\bibliographystyle{plain}\bibliography{poster}}
-  %% \end{block}
+%%   \begin{block}{References}
+%%     \nocite{*}
+%%     \footnotesize{\bibliographystyle{plain}\bibliography{poster}}
+%%   \end{block}
 
-\end{column}
+%% \end{column}
 
-\separatorcolumn
+%% \separatorcolumn
 \end{columns}
 \end{frame}
 
