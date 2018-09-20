@@ -22,7 +22,7 @@
 %\usepackage[size=custom, height=60.96, width=91.44, scale=1]{beamerposter}
 %% 36 x 48" = 91.44 x 121.92cm
 \usepackage[size=custom, width=91.44, height=121.92, scale=1.3]{beamerposter}
-%\usepackage[size=custom, height=91.44, width=121.92, scale=1.25]{beamerposter}
+%\usepackage[size=custom, height=91.44, width=121.92, scale=1.3]{beamerposter}
 
 \usepackage{graphicx}
 \usepackage{booktabs}
@@ -199,7 +199,7 @@
   \end{block}
   
   \begin{block}{Approach 1: Annotate the arrows}
-    Annotating function types with their mode is the obvious approach:
+    Annotating function types with their mode is the obvious approach, used in Datafun~\cite{datafun} and variance typing \cite{DBLP:conf/csr/Abel06}:
 
     \[
       \begin{array}{l}
@@ -241,7 +241,21 @@
 
     \[ \fname{subtractEach} ~:~ \fname{List}~(\N \x {\opof \N}) \to \fname{List}~\N \]
 
-    However, needing to \strong{explicitly introduce and eliminate} modal types \cite{jrml} clutters up functions like \fname{setMap}:
+    A key feature of modal type systems \cite{jrml} is \strong{multiple typing
+      contexts} — $\Delta$ for equivariant variables, $\Gamma$ for monotone —
+    which are manipulated by the intro and elim rules for $\isof A$:
+    \vspace{.5em}
+    \begin{mathpar}
+      \infer{\Delta;\emptyset \vdash M : A}
+            {\Delta;\Gamma \vdash \kw{box}~M : \isof A}
+
+      \infer{\Delta;\Gamma \vdash M : \isof A \\
+      \Delta, \isovar{x} : A;\Gamma \vdash N : C}
+      {\Delta;\Gamma \vdash \kw{let}~\kw{box}~\isovar{x} = M ~\kw{in}~N : C}
+    \end{mathpar}
+
+    However, needing to \strong{explicitly introduce and eliminate} modal types
+    clutters up functions like \fname{setMap}:
 
     \[
       \begin{array}{l}
@@ -352,88 +366,15 @@
 
 \end{column}
 
-\separatorcolumn
-
 
+%% \separatorcolumn
+
 %% \begin{column}{\colwidth}
-%%   \begin{block}{wat}
-%%     testing
-%%   \end{block}
-
-%%   \begin{block}{A block containing some math}
-
-%%     Nullam non est elit. In eu ornare justo. Maecenas porttitor sodales lacus,
-%%     ut cursus augue sodales ac.
-
-%%     $$
-%%     \int_{-\infty}^{\infty} e^{-x^2}\,dx = \sqrt{\pi}
-%%     $$
-
-%%     Interdum et malesuada fames $\{1, 4, 9, \ldots\}$ ac ante ipsum primis in
-%%     faucibus. Cras eleifend dolor eu nulla suscipit suscipit. Sed lobortis non
-%%     felis id vulputate.
-
-%%     \heading{A heading inside a block}
-
-%%     Praesent consectetur mi $x^2 + y^2$ metus, nec vestibulum justo viverra
-%%     nec. Proin eget nulla pretium, egestas magna aliquam, mollis neque. Vivamus
-%%     dictum $\mathbf{u}^\intercal\mathbf{v}$ sagittis odio, vel porta erat
-%%     congue sed. Maecenas ut dolor quis arcu auctor porttitor.
-
-%%     \heading{Another heading inside a block}
-
-%%     Sed augue erat, scelerisque a purus ultricies, placerat porttitor neque.
-%%     Donec $P(y \mid x)$ fermentum consectetur $\nabla_x P(y \mid x)$ sapien
-%%     sagittis egestas. Duis eget leo euismod nunc viverra imperdiet nec id
-%%     justo.
-
-%%   \end{block}
-
-%%   \begin{block}{Nullam vel erat at velit convallis laoreet}
-
-%%     Class aptent taciti sociosqu ad litora torquent per conubia nostra, per
-%%     inceptos himenaeos. Phasellus libero enim, gravida sed erat sit amet,
-%%     scelerisque congue diam. Fusce dapibus dui ut augue pulvinar iaculis.
-
-%%     \begin{table}
-%%       \centering
-%%       \begin{tabular}{l r r c}
-%%         \toprule
-%%         \textbf{First column} & \textbf{Second column} & \textbf{Third column} & \textbf{Fourth} \\
-%%         \midrule
-%%         Foo & 13.37 & 384,394 & \alpha \\
-%%         Bar & 2.17 & 1,392 & \beta \\
-%%         Baz & 3.14 & 83,742 & \delta \\
-%%         Qux & 7.59 & 974 & \gamma \\
-%%         \bottomrule
-%%       \end{tabular}
-%%       \caption{A table caption.}
-%%     \end{table}
-
-%%     Donec quis posuere ligula. Nunc feugiat elit a mi malesuada consequat. Sed
-%%     imperdiet augue ac nibh aliquet tristique. Aenean eu tortor vulputate,
-%%     eleifend lorem in, dictum urna. Proin auctor ante in augue tincidunt
-%%     tempor. Proin pellentesque vulputate odio, ac gravida nulla posuere
-%%     efficitur. Aenean at velit vel dolor blandit molestie. Mauris laoreet
-%%     commodo quam, non luctus nibh ullamcorper in. Class aptent taciti sociosqu
-%%     ad litora torquent per conubia nostra, per inceptos himenaeos.
-
-%%     Nulla varius finibus volutpat. Mauris molestie lorem tincidunt, iaculis
-%%     libero at, gravida ante. Phasellus at felis eu neque suscipit suscipit.
-%%     Integer ullamcorper, dui nec pretium ornare, urna dolor consequat libero,
-%%     in feugiat elit lorem euismod lacus. Pellentesque sit amet dolor mollis,
-%%     auctor urna non, tempus sem.
-
-%%   \end{block}
-
-%%   \begin{block}{References}
-%%     \nocite{*}
-%%     \footnotesize{\bibliographystyle{plain}\bibliography{poster}}
-%%   \end{block}
 
 %% \end{column}
 
-%% \separatorcolumn
+
+\separatorcolumn
 \end{columns}
 \end{frame}
 
