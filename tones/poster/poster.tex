@@ -27,6 +27,7 @@
 \usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{tikz}
+\usetikzlibrary{arrows.meta}
 %\usepackage{pgfplots}
 \usepackage{mathpartir}
 \usepackage{multirow}
@@ -162,11 +163,10 @@
 \begin{column}{\colwidth}
 
   \begin{block}{Problem: Ensuring functions are monotone}
-    \strong{Monotonicity} crops up in a variety of interesting places:
+    \strong{Monotonicity} crops up in interesting places:
     \begin{enumerate}
-    \item In Datafun~\cite{datafun}, a functional query language generalising
-      Datalog, monotonicity is needed to ensure fixed-point expressions
-      terminate.
+    \item In the query languages Datalog and Datafun~\cite{datafun},
+      monotonicity is needed to ensure recursive queries terminate.
 
     \item In abstract interpretation, static analyses are phrased as monotone
       maps on lattices.
@@ -193,9 +193,6 @@
     Formally, modes alter \strong{preorderings} (reflexive, transitive
     relations), as shown in Figure~\ref{fig:mode-ops}. We say $f : A \to B$ has
     mode $T$ iff $f$ is monotone from $TA \to B$.
-
-    %% TODO: diagrams for what each mode does to a specific ordering, like Kevin
-    %% Clancy's. Maybe make sure that we have a fencepost-like example, for path?
   \end{block}
   
   \begin{block}{Approach 1: Annotate the arrows}
@@ -228,16 +225,14 @@
     %% TODO: give subtractEach a red/yellow background \& setMap a green one.
     %% or, use green/red marker to put a check mark next to setMap & an X next
     %% to subtractEach.
-    %%
-    %% TODO: cite Datafun and variance typing as examples of this approach.
   \end{block}
 
   \begin{block}{Approach 2: Modal types}
-    Let $(\opof A)$ be $A$ with its ordering inverted. The \strong{\opcolor
-      antitone} maps $(A \toop B)$ are exactly the \strong{monotone} maps
-    $(\opof A \to B)$. Instead of annotating arrows, we can make \strong{all}
-    functions monotone, and apply modes directly to types! Now
-    \fname{subtractEach} has a precise type:
+    Let $(\opof A)$ be $A$ with its ordering inverted. \strong{\opcolor
+      Antitone} maps $(A \toop B)$ are just \strong{monotone} maps $(\opof A \to
+    B)$. Instead of annotating arrows, we can make \strong{all} functions
+    monotone, and apply modes directly to types! Now \fname{subtractEach} has a
+    precise type:
 
     \[ \fname{subtractEach} ~:~ \fname{List}~(\N \x {\opof \N}) \to \fname{List}~\N \]
 
@@ -254,7 +249,7 @@
       {\Delta;\Gamma \vdash \kw{let}~\kw{box}~\isovar{x} = M ~\kw{in}~N : C}
     \end{mathpar}
 
-    However, needing to \strong{explicitly introduce and eliminate} modal types
+    However, needing to \strong{explicitly introduce and eliminate} $\iso$
     clutters up functions like \fname{setMap}:
 
     \[
@@ -270,10 +265,6 @@
         \fname{return}~(\kw{box}~(\isovar{g}~(\kw{box}~\isovar{y})))
       \end{array}
     \]
-
-    %% TODO: cite Pfenning-Davies in bibliography.
-
-    %% TODO: show the Pf-D typing rules? explain Set A = Downset(\iso A)?
   \end{block}
 
   \begin{block}{Our approach: Modal subtyping!}
@@ -312,7 +303,7 @@
         \node (bot)  at ( 0,-1) {$\ciso$};
         \node (-1)   at (-1, 0) {$\cid$};
         \node (1)    at ( 1, 0) {$\cop$};
-        \draw (top) -- (-1) -- (bot) -- (1) -- (top);
+        \draw [very thick] (top) -- (-1) -- (bot) -- (1) -- (top);
       \end{tikzpicture}
 
       \begin{array}{cr|cccc}
@@ -329,6 +320,76 @@
 
     \caption{\ Modes, the mode lattice, and mode composition}
     \label{fig:mode-ops}
+  \end{figure}
+
+  %% TODO: diagrams for what each mode does to a specific ordering, like Kevin
+  %% Clancy's. Maybe make sure that we have a fencepost-like example, for path?
+
+  \begin{figure}
+    \vspace{-1em}
+    \begin{mathpar}
+      \begin{tikzpicture}[scale=2, baseline=(current bounding box.center)]
+        \node (a) at (0, 0) {a};
+        \node (b) at (0.67, 1.25) {b};
+        \node (c) at (1.33, 0) {c};
+        \node (d) at (2.33, 0.625) {m};
+        \node (e) at (3.67, 0.625) {n};
+        %% bounding box
+        \node [above] at (1.835, 1.75) {$A$};
+        \draw (-0.5, 1.75) -- (4.17, 1.75) -- (4.17, -0.5) -- (-0.5, -0.5) -- cycle;
+        %% arrows
+        \draw [ultra thick, -{Latex[width=5mm,length=4mm]}] (a) -- (b);
+        \draw [ultra thick, -{Latex[width=5mm,length=4mm]}] (c) -- (b);
+        \draw [ultra thick, {Latex[width=5mm,length=4mm]}-{Latex[width=5mm,length=4mm]}] (d) -- (e);
+      \end{tikzpicture}
+
+      \begin{tikzpicture}[scale=2, baseline=(current bounding box.center)]
+        \node (a) at (0, 0) {a};
+        \node (b) at (0.67, 1.25) {b};
+        \node (c) at (1.33, 0) {c};
+        \node (d) at (2.33, 0.625) {m};
+        \node (e) at (3.67, 0.625) {n};
+        %% bounding box
+        \node [above] at (1.835, 1.75) {$\opof A$};
+        \draw (-0.5, 1.75) -- (4.17, 1.75) -- (4.17, -0.5) -- (-0.5, -0.5) -- cycle;
+        %% arrows
+        \draw [ultra thick, {Latex[width=5mm,length=4mm]}-] (a) -- (b);
+        \draw [ultra thick, {Latex[width=5mm,length=4mm]}-] (c) -- (b);
+        \draw [ultra thick, {Latex[width=5mm,length=4mm]}-{Latex[width=5mm,length=4mm]}] (d) -- (e);
+      \end{tikzpicture}
+
+      \begin{tikzpicture}[scale=2, baseline=(current bounding box.center)]
+        \node (a) at (0, 0) {a};
+        \node (b) at (0.67, 1.25) {b};
+        \node (c) at (1.33, 0) {c};
+        \node (d) at (2.33, 0.625) {m};
+        \node (e) at (3.67, 0.625) {n};
+        %% bounding box
+        \node [above] at (1.835, 1.75) {$\isof A$};
+        \draw (-0.5, 1.75) -- (4.17, 1.75) -- (4.17, -0.5) -- (-0.5, -0.5) -- cycle;
+        %% arrows
+        \draw [ultra thick, {Latex[width=5mm,length=4mm]}-{Latex[width=5mm,length=4mm]}] (d) -- (e);
+      \end{tikzpicture}
+
+      \begin{tikzpicture}[scale=2, baseline=(current bounding box.center)]
+        \node (a) at (0, 0) {a};
+        \node (b) at (0.67, 1.25) {b};
+        \node (c) at (1.33, 0) {c};
+        \node (d) at (2.33, 0.625) {m};
+        \node (e) at (3.67, 0.625) {n};
+        %% bounding box
+        \node [above] at (1.835, 1.75) {$\pathof A$};
+        \draw (-0.5, 1.75) -- (4.17, 1.75) -- (4.17, -0.5) -- (-0.5, -0.5) -- cycle;
+        %% arrows
+        \draw [ultra thick, {Latex[width=5mm,length=4mm]}-{Latex[width=5mm,length=4mm]}] (a) -- (b);
+        \draw [ultra thick, {Latex[width=5mm,length=4mm]}-{Latex[width=5mm,length=4mm]}] (c) -- (b);
+        \draw [ultra thick, {Latex[width=5mm,length=4mm]}-{Latex[width=5mm,length=4mm]}] (a) -- (c);
+        \draw [ultra thick, {Latex[width=5mm,length=4mm]}-{Latex[width=5mm,length=4mm]}] (d) -- (e);
+      \end{tikzpicture}
+    \end{mathpar}
+
+    \caption{\ Example of applying various modes to a preorder}
+    \label{fig:mode-example}
   \end{figure}
 
   \begin{block}{Problem: Introducing $\iso$ via subtyping}
@@ -351,19 +412,18 @@
     Neither type is more specific, and both usages occur in practice.
   \end{block}
 
-  \begin{block}{Future work}
-    \heading{Is modal subtyping useful elsewhere?}
+  %% \begin{block}{Future work}
+  %%   \heading{Is modal subtyping useful elsewhere?}
 
-    \heading{Hybridize with SMT-based approaches}
-    \todo{LiquidHaskell and other lightweight verification techniques. Probably
-      necessary for complex code, but can we verify simple code without
-      appealing to an SMT solver? Future work: a hybrid approach.}
-  \end{block}
+  %%   \heading{Hybridize with SMT-based approaches}
+  %%   \todo{LiquidHaskell and other lightweight verification techniques. Probably
+  %%     necessary for complex code, but can we verify simple code without
+  %%     appealing to an SMT solver? Future work: a hybrid approach.}
+  %% \end{block}
 
   \begin{block}{References}
     \footnotesize{\bibliographystyle{plain}\bibliography{poster}}
   \end{block}
-
 \end{column}
 
 
