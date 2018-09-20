@@ -430,36 +430,84 @@
     \emph{introduce} $\iso$? To do that, just like our intro and elim rules, we
     must let subtyping \strong{alter the modes in the typing context}.
 
-    \end{block}
-  \begin{block}{Modal subtyping alters the context}
+    \heading{Modal subtyping alters the context}
 
     We \emph{generalize} our subtyping judgment to $[T]A \subtype B$, giving the
     \strong{greatest} tone $T$ such that $TA \subtype B$.
+    \vspace{.5em}
+    \begin{mathpar}
+      \infer[subsumption]{x : [T] A \vdash M : B \\ [U]B \subtype C}
+            {x : [UT] A \vdash M : C }
 
-    \[
-    \infer[subsumption]{x : [T] A \vdash M : B \\ [U]B \subtype C}
-          {x : [UT] A \vdash M : C }
-    \]
+      \infer[$\iso$-injection]{[T] A \subtype B}{[\iso T] A \subtype \isof B}
 
+      \infer[$\iso$-extraction]{[T] A \subtype B}{[T \path] \isof A \subtype B}
+    \end{mathpar}
 
     %% \todo{TODO: challenges? 1. how do you \emph{introduce} a box by subtyping?\\
     %% 2. function application.\\
     %% 3. pattern-matching (probably leave out).}
   \end{block}
 
-  \begin{block}{Problem: Function application is ambiguous!}
-    Consider applying a function $f : \iso(A \to B)$. Which of these two valid
-    subtypings should we apply to determine the expected argument and return
-    types?
+  \begin{block}{Example typing and subtyping rules}
+    I now drop the pretense that contexts have only one variable.
+    \vspace{.5em}
+    \begin{mathpar}
+      T(x_i : [U_i] A_i)_i = (x_i : [TU_i] A_i)_i
 
-    \begin{align*}
-      \iso(A \to B) &\subtype A \to B & \text{because $\iso C \subtype C$ for any $C$}\\
-      \iso(A \to B) &\subtype \iso A \to \iso B
-      & \text{by functoriality of $\iso$}
-    \end{align*}
+      \infer{x : [T] A \in \G \quad T \le \cid}{\G \vdash x : A}
 
-    Neither type is more specific, and both usages occur in practice.
+      \infer{\G, y : [U] B \vdash M : C \quad \cid \le U}{
+        \G \vdash \fnof{y} M : B \to C
+      }
+
+      \infer{\G_1 \vdash M : A \quad [T]A \subtype B \to C \quad \G_2 \vdash N : B}{
+        T\G_1 \wedge \G_2 \vdash M~N : C
+      }
+
+      %% \infer{\G_1 \vdash e_1 : B_1 \quad \G_2 \vdash e_2 : B_2}{
+      %%   \G_1 \wedge \G_2 \vdash (e_1,e_2) : B_1 \x B_2}
+      %%
+      \infer{\G_1 \vdash M : A \quad \G_2, x : [T] A \vdash N : B}{
+        T\G_1 \wedge \G_2 \vdash \kw{let}~x = M ~\kw{in}~N : B
+      }
+    \end{mathpar}
+
+    %\heading{Subtyping rules}
+    \begin{mathpar}
+      \infer{}{[\cid]A \subtype A}
+
+      \infer{[T] A \subtype B}{[UT] A \subtype UB}
+
+      \infer{[T] A \subtype B \quad U \dashv V}{[TU] VA \subtype B}
+
+      \infer{U \in \{\cid,\cop,\cpath\}
+        \quad U \le T
+        \quad [T] A_2 \subtype A_1
+        \quad [U] B_1 \subtype B_2
+      }{
+        [U] (A_1 \to B_1) \subtype A_2 \to B_2
+      }
+
+      \infer{[\cpath] A_2 \subtype A_1 \quad [\ciso] B_1 \subtype B_2}{
+        [\ciso] (A_1 \to B_1) \subtype A_2 \to B_2
+      }
+    \end{mathpar}
   \end{block}
+
+  %% \begin{block}{Problem: Function application is ambiguous!}
+  %%   Consider applying a function $f : \iso(A \to B)$. Which of these two valid
+  %%   subtypings should we apply to determine the expected argument and return
+  %%   types?
+
+  %%   \begin{align*}
+  %%     \iso(A \to B) &\subtype A \to B & \text{because $\iso C \subtype C$ for any $C$}\\
+  %%     \iso(A \to B) &\subtype \iso A \to \iso B
+  %%     & \text{by functoriality of $\iso$}
+  %%   \end{align*}
+
+  %%   Neither type is more specific, and both usages occur in practice.
+  %% \end{block}
 
   %% \begin{block}{Future work}
   %%   \heading{Is modal subtyping useful elsewhere?}
