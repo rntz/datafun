@@ -190,9 +190,27 @@
     \item $\cpath$ is {\pathcolor bivariant}, or both mono- and antitone. For example, $\fnof{x} 42$.
     \end{itemize}
 
+    \heading{Modes as preorder transformations}
+
     Formally, modes alter \strong{preorderings} (reflexive, transitive
-    relations), as shown in Figure~\ref{fig:mode-ops}. We say $f : A \to B$ has
-    mode $T$ iff $f$ is monotone from $TA \to B$.
+    relations), as shown in Figures~\ref{fig:mode-ops} and
+    \ref{fig:mode-example}. We say $f : A \to B$ has mode $T$ iff $f$ is
+    monotone from $TA \to B$.
+
+    Modes are \emph{ordered} by what they do to preorders: $T \le U$ iff $x
+    \le y : TA \implies x \le y : UA$.
+%
+    Modes can also be \emph{composed}: If $f : A \to B$ has mode $T$ and $g : B
+    \to C$ has mode $U$, then $g \circ f$ has mode $UT$.
+
+    \heading{Variables get usage modes, too}
+
+    Besides types, we also care about the \emph{mode} at which a variable is
+    used. To simplify our examples, we consider only single-variable contexts.
+    The typing judgment is then:
+
+    \[ x : [T] A \vdash M : B \]
+
   \end{block}
   
   \begin{block}{Approach 1: Annotate the arrows}
@@ -236,20 +254,25 @@
 
     \[ \fname{subtractEach} ~:~ \fname{List}~(\N \x {\opof \N}) \to \fname{List}~\N \]
 
-    A key feature of modal type systems \cite{jrml} is \strong{multiple typing
-      contexts} — $\Delta$ for equivariant variables, $\Gamma$ for monotone —
-    which are manipulated by the intro and elim rules for $\isof A$:
+    A key feature of modal type systems \cite{jrml} is that the intro and elim
+    rules for modal types \strong{manipulate the modes in the typing context}:
     \vspace{.5em}
     \begin{mathpar}
-      \infer{\Delta;\emptyset \vdash M : A}
-            {\Delta;\Gamma \vdash \kw{box}~M : \isof A}
+      \infer{x : [T] A \vdash M : B}{x : [\iso T] \vdash \kw{box}~M : \isof B}
 
-      \infer{\Delta;\Gamma \vdash M : \isof A \\
-      \Delta, \isovar{x} : A;\Gamma \vdash N : C}
-      {\Delta;\Gamma \vdash \kw{let}~\kw{box}~\isovar{x} = M ~\kw{in}~N : C}
+      \infer{x : [T] A \vdash M : \isof B \\
+        y : [\iso] B \vdash N : C}{
+        x : [T] A \vdash \kw{let}~\kw{box}~y = M ~\kw{in}~N : C
+      }
+      %% \infer{\Delta;\emptyset \vdash M : A}
+      %%       {\Delta;\Gamma \vdash \kw{box}~M : \isof A}
+      %% 
+      %% \infer{\Delta;\Gamma \vdash M : \isof A \\
+      %% \Delta, \isovar{x} : A;\Gamma \vdash N : C}
+      %% {\Delta;\Gamma \vdash \kw{let}~\kw{box}~\isovar{x} = M ~\kw{in}~N : C}
     \end{mathpar}
 
-    However, needing to \strong{explicitly introduce and eliminate} $\iso$
+    However, needing to \strong{explicitly introduce and eliminate} modal types
     clutters up functions like \fname{setMap}:
 
     \[
@@ -267,20 +290,6 @@
     \]
   \end{block}
 
-  \begin{block}{Our approach: Modal subtyping!}
-    \strong{Goal:} Handle functions which are monotone in only part of their
-    input \emph{without} clunky term annotations.
-
-    \strong{Method:} Construct and eliminate modal types \emph{implicitly} via \strong{subtyping}.
-    %
-    Since types are preorders, subtyping means \emph{subpreordering}:
-    \begin{center}
-      $A \subtype B$ iff $A \subseteq B$ and $x \le y : A \implies x \le y : B$
-    \end{center}
-
-    For example, $\isof A <: A$, because $x \le y \wedge y \le x : A \implies x
-    \le y : A$. This lets us \emph{eliminate} $\isof A$ via subtyping.
-  \end{block}
 
 \end{column}
 
@@ -335,7 +344,7 @@
         \node (d) at (2.33, 0.625) {m};
         \node (e) at (3.67, 0.625) {n};
         %% bounding box
-        \node [above] at (1.835, 1.75) {$A$};
+        \node [above] at (1.835, 1.75) {$A = \idof A$};
         \draw (-0.5, 1.75) -- (4.17, 1.75) -- (4.17, -0.5) -- (-0.5, -0.5) -- cycle;
         %% arrows
         \draw [ultra thick, -{Latex[width=5mm,length=4mm]}] (a) -- (b);
@@ -388,14 +397,54 @@
       \end{tikzpicture}
     \end{mathpar}
 
-    \caption{\ Example of applying various modes to a preorder}
+    \caption{\ Applying various modes to a preorder}
     \label{fig:mode-example}
   \end{figure}
 
-  \begin{block}{Problem: Introducing $\iso$ via subtyping}
-    \todo{TODO: challenges? 1. how do you \emph{introduce} a box by subtyping?\\
-    2. function application.\\
-    3. pattern-matching (probably leave out).}
+  \begin{block}{Our approach: Modal subtyping!}
+    \strong{Goal:} Handle functions which are monotone in only part of their
+    input \emph{without} clunky term annotations:
+    \vspace{.5em}
+    \begin{mathpar}
+      \begin{array}{l}
+        \fname{subtractEach} ~:~ \fname{List}~(\N \x {\opof \N}) \to \fname{List}~\N\\
+        \fname{subtractEach}~ xs ~=~ \fname{map}~(\fn (x,y).~ x-y) ~xs
+      \end{array}
+
+      \begin{array}{l}
+        \fname{setMap} ~:~
+        \iso(\isof A \to B) \to \fname{Set}~A \to \fname{Set}~B\\
+        \fname{setMap}~f~xs ~=~ \kw{do}~x \leftarrow xs; \fname{return}~(f\;x)
+      \end{array}
+    \end{mathpar}
+
+    \strong{Method:} Construct and eliminate modal types \emph{implicitly} via \strong{subtyping}.
+    %
+    Since types are preorders, subtyping means \emph{subpreordering}:
+    \begin{center}
+      $A \subtype B$ iff $A \subseteq B$ and $x \le y : A \implies x \le y : B$
+    \end{center}
+
+    For example, $\isof A <: A$, because $x \le y \wedge y \le x : A \implies x
+    \le y : A$. This lets subtyping \emph{eliminate} $\isof A$. But, how can it
+    \emph{introduce} $\iso$? To do that, just like our intro and elim rules, we
+    must let subtyping \strong{alter the modes in the typing context}.
+
+    \end{block}
+  \begin{block}{Modal subtyping alters the context}
+
+    We \emph{generalize} our subtyping judgment to $[T]A \subtype B$, giving the
+    \strong{greatest} tone $T$ such that $TA \subtype B$.
+
+    \[
+    \infer[subsumption]{x : [T] A \vdash M : B \\ [U]B \subtype C}
+          {x : [UT] A \vdash M : C }
+    \]
+
+
+    %% \todo{TODO: challenges? 1. how do you \emph{introduce} a box by subtyping?\\
+    %% 2. function application.\\
+    %% 3. pattern-matching (probably leave out).}
   \end{block}
 
   \begin{block}{Problem: Function application is ambiguous!}
