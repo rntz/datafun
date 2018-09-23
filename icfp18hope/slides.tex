@@ -13,6 +13,7 @@
 \usepackage{booktabs}           % \midrule
 \usepackage{nccmath}            % fix spacing
 \usepackage{multirow}
+\usepackage[b]{esvect}
 
 %\usepackage{stmaryrd} % semantic brackets
 %\usepackage{accents} % \underaccent
@@ -44,15 +45,19 @@
 \newcommand{\setfor}[2]{\{#1 ~|~ #2\}}
 
 \newcommand\kw[1]{\ensuremath{\mathbf{#1}}}
-\newcommand\fname[1]{\text{#1}}
-\newcommand\xname[1]{\text{#1}}
+\newcommand\fname[1]{\ensuremath{\mathrm{#1}}}
+\newcommand\xname[1]{\ensuremath{\mathrm{#1}}}
 \newcommand\rel[1]{\ensuremath{\mathit{#1}}}
 \newcommand\aname[1]{\ensuremath{\mathit{#1}}}
+\newcommand\tpname[1]{\mathrm{#1}}
+\newcommand\tset{\tpname{Set}~}
+\newcommand\zero{\mb{0}}
 
 \newcommand\naive{na\"ive}
 \newcommand\Naive{Na\"ive}
 
 \newcommand\hil{\color{Orange}}
+\newcommand{\changecolor}{\color{ForestGreen}}
 
 
 \title{Finding fixed points faster}
@@ -170,11 +175,8 @@
 
 
 \begin{frame}
-  \huge\centering\scshape congratulations!\\you now understand datalog % Datafun
+  \Huge\centering\scshape ii. datafun
 \end{frame}
-
-\newcommand\tpname[1]{\mathrm{#1}}
-\newcommand\tset{\tpname{Set}~}
 
 \begin{frame}
   \Large
@@ -187,10 +189,9 @@
   \]
 
   \alt<2>{\textbf{Datafun}}{\phantom{Datafun}}
-  \[\setlength\arraycolsep{.2em}\begin{array}{lcl}
-    \xname{path} &=& \xname{edge} \cup \setfor{(x,z)}{(x,y) \in \xname{edge}, (y,z) \in \xname{path}}
-  \end{array}\]
-
+  \[
+    \xname{path} = \xname{edge} \cup \setfor{(x,z)}{(x,y) \in \xname{edge}, (y,z) \in \xname{path}}
+  \]
 \end{frame}
 
 \begin{frame}
@@ -208,6 +209,158 @@
   \\[1em]
   \textsuperscript{\textdagger}Come to my poster presentation on Monday to learn about types for monotonicity!
 \end{frame}
+
+\begin{frame}\Large
+  \[
+  \begin{array}{l}
+    \alt<1>{\xname{path}
+    = \xname{edge} \cup \setfor{(x,z)}{(x,y) \in \xname{edge}, (y,z) \in \xname{path}}
+}{\fname{step}\;S =
+    \xname{edge} \cup \setfor{(x,z)}{(x,y) \in \xname{edge}, (y,z) \in S}\hspace{.49em}}
+    \pause\\
+    \xname{path} = \kw{fix}~\fname{step}
+  \end{array}
+  \]
+
+  \pause\vspace{1em}
+  {How do we compute $(\kw{fix}~f)$, \naive{}ly?}
+  \begin{mathpar}
+    x_0 = \emptyset
+
+    x_{i+1} = f(x_i)
+  \end{mathpar}
+
+  Iterate until $x_i = x_{i+1}$.
+\end{frame}
+
+\begin{frame}
+  \begin{center}\Huge
+    Incremental $\lambda$-Calculus
+  \end{center}
+
+  \large {``A Theory of Changes for Higher-Order Languages''}, PLDI '14\\
+  Yufei Cai, Paulo Giarrusso, Tillman Rendel, Klaus Ostermann
+
+  \LARGE
+  \begin{align*}
+    f &: A \to B\\
+    \changecolor \delta f &\changecolor: A \to \Delta A \to \Delta B
+  \end{align*}
+\end{frame}
+
+\begin{frame}
+  \Large
+  \begin{align*}
+    f &: \tset{A} \to \tset{A}\\
+    \delta f &: \tset{A} \to {\changecolor\tset{A}} \to {\changecolor\tset{A}}
+  \end{align*}
+
+  \pause
+  \vspace{.5em}
+  \[\begin{array}{lcl@{\hspace{2em}}lcl}
+    x_0 &=& \emptyset
+    & dx_0 &=& f ~\emptyset\\
+    x_{i+1} &=& x_i \cup dx_i
+    & dx_{i+1} &=& \delta f ~x_i ~dx_i\\
+  \end{array}\]
+
+  \vspace{1em}
+  \textbf{Theorem:} $x_i = f^i~x$
+\end{frame}
+
+
+\begin{frame}
+  \centering\huge{\scshape iii. details and complications}
+
+  \Large
+  \textbf{\itshape Pick your poison!}
+  \begin{enumerate}
+  \item Precise vs. cheap derivatives
+  \item Monotonicity and ordering
+  \item Sum types are tricky
+  \item Sets of functions are impossible
+  \item Derivatives suck if you don't optimise them
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}\Large
+  For every type $A$
+  \begin{itemize}
+  \item a \emph{change type} $\D A$
+  \item a \emph{zero} function $\zero : A \to \D A$
+  \item and an \emph{update} function $\oplus : A \to \D A \to A$
+  \end{itemize}
+  \vspace{1.5em}
+
+  For every term $x : A \vdash M : B$,
+  \begin{itemize}
+  \item a derivative $x : A, dx : \D\G \vdash \delta M : \D A$
+  \item such that $M \oplus \delta M = M[(x\oplus dx)/x]$
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{1. Precise vs cheap derivatives}
+  \Large\centering
+  \[\delta(M \cup N) = \delta M \cup \delta N\]
+
+  \textbf{vs}
+
+  \[\delta(M \cup N) = (\delta M \setminus N) \cup (\delta N \setminus M)\]
+\end{frame}
+
+\newcommand\mto{\overset{+}{\to}}
+\begin{frame}{2. Monotonicity and ordering}\Large
+  {\centering
+  $A \to B$ ~\textbf{vs}~ $A \mto B$
+
+  \begin{align*}
+    \D(A \to B) &= A \to \D A \to \D B\\
+    \D(A \mto B) &= A \to \D A \mto \D B
+  \end{align*}
+
+  $(dx \le dy : \D A \iff (\forall a)~ a \oplus da \le a \oplus db : A)$?
+  \par}
+
+  \vspace{1em}\large
+  Increasing changes only? What about incrementalizing Datafun?
+
+  \vspace{1em}
+  Why do discrete functions need derivatives if their arguments can't change?
+
+  %% 1. increasing changes only
+  %%
+  %% 2. different derivatives for A \to B & A \mto B
+  %%
+  %% 3. ordering on changes wants to line up with their effects on values!
+  %%    da \le db \implies \forall a. a \oplus da \le a \oplus db
+  %%
+  %% 4. even though arguments to discrete functions don't change during
+  %% iteration, we still need to give them derivatives?
+\end{frame}
+
+\begin{frame}{3. Sum types are tricky}
+  \Large
+  \begin{align*}
+    \D(A + B) &= \D A \x \D B ?\\
+    &= \D A \cup \D B ?\\
+    &\color{ForestGreen} = \D A + \D B
+  \end{align*}
+
+  \[\begin{array}{ll}
+    \multicolumn{2}{l}{\delta(\kw{case}~ M \mathrel{\kw{of}}
+    \fname{in}_1~x \to N_1; \fname{in}_2~y \to N_2)}\\
+    =& \kw{case}~ (M, \delta M) \mathrel{\kw{of}}\\
+    & \quad(\fname{in}_1~x, \fname{in}_1~dx) \to \delta N_1\\
+    & \quad(\fname{in}_2~y, \fname{in}_2~dy) \to \delta N_2\\
+    & \quad(\fname{in}_1~x, \fname{in}_2~dy) \to {???}\\
+    & \quad(\fname{in}_2~x, \fname{in}_1~dy) \to {???}
+  \end{array}\]
+\end{frame}
+
+%% \begin{frame}{4. }
+  
+%% \end{frame}
 
 
 \begin{frame}
@@ -215,222 +368,222 @@
 \end{frame}
 
 
-%% The naive implementation
-\begin{frame}{\Large Na\"ive implementation}\large
-  \[
-  \begin{array}{l}
-    \text{step} ~:~ \ms{Set}\; (\ms{Node} \x \ms{Node}) \to
-    \ms{Set}\; (\ms{Node} \x \ms{Node})\\
-    \text{step}\; \aname{path} =
-    {\color<2->{red} \setfor{(x,y)}{(x,y) \in \aname{edge}}}\\
-    \phantom{\text{step}\;path} \hspace{1.15pt}\cup\hspace{1.15pt}
-    {\color<2->{orange} \setfor{(x,z)}{(x,y) \in \aname{edge}, (y,z) \in \aname{path}}}\\
-    \\
-    \text{fix} ~:~ (\alpha \to \alpha) \to \alpha \to \alpha\\
-    %% \text{fix} \; f \; current =
-    %% \mathbf{let}~ next = {\color<2->{red}f \; current} ~\mathbf{in}\\
-    %% \phantom{\text{fix} \; f \; current ={ }}
-    %% \mathbf{if}~next = current ~\mathbf{then}~ current\\
-    %% \phantom{\text{fix} \; f \; current ={ }}
-    %% \mathbf{else}~ \text{fix}\; f\; next\\
-    \fname{fix}~f~x =
-    \kw{if}~ (x = f~x) \mathrel{\kw{then}} x \mathrel{\kw{else}} \fname{fix}~f~(f~x)\\
-    \\
-    \text{path} ~:~ \ms{Set} \; (\ms{Node} \x \ms{Node})\\
-    \text{path} = \text{fix} \; \text{step} \; \emptyset
-  \end{array}
-  \]\vspace{0em}
+%% %% The naive implementation
+%% \begin{frame}{\Large Na\"ive implementation}\large
+%%   \[
+%%   \begin{array}{l}
+%%     \text{step} ~:~ \ms{Set}\; (\ms{Node} \x \ms{Node}) \to
+%%     \ms{Set}\; (\ms{Node} \x \ms{Node})\\
+%%     \text{step}\; \aname{path} =
+%%     {\color<2->{red} \setfor{(x,y)}{(x,y) \in \aname{edge}}}\\
+%%     \phantom{\text{step}\;path} \hspace{1.15pt}\cup\hspace{1.15pt}
+%%     {\color<2->{orange} \setfor{(x,z)}{(x,y) \in \aname{edge}, (y,z) \in \aname{path}}}\\
+%%     \\
+%%     \text{fix} ~:~ (\alpha \to \alpha) \to \alpha \to \alpha\\
+%%     %% \text{fix} \; f \; current =
+%%     %% \mathbf{let}~ next = {\color<2->{red}f \; current} ~\mathbf{in}\\
+%%     %% \phantom{\text{fix} \; f \; current ={ }}
+%%     %% \mathbf{if}~next = current ~\mathbf{then}~ current\\
+%%     %% \phantom{\text{fix} \; f \; current ={ }}
+%%     %% \mathbf{else}~ \text{fix}\; f\; next\\
+%%     \fname{fix}~f~x =
+%%     \kw{if}~ (x = f~x) \mathrel{\kw{then}} x \mathrel{\kw{else}} \fname{fix}~f~(f~x)\\
+%%     \\
+%%     \text{path} ~:~ \ms{Set} \; (\ms{Node} \x \ms{Node})\\
+%%     \text{path} = \text{fix} \; \text{step} \; \emptyset
+%%   \end{array}
+%%   \]\vspace{0em}
 
-  \uncover<2->{\Huge \centering \color{red}  Unnecessary recomputation!}
-\end{frame}
+%%   \uncover<2->{\Huge \centering \color{red}  Unnecessary recomputation!}
+%% \end{frame}
 
-
-\begin{frame}{\Large Semi-na\"ive implementation}\large
-  \[
-  \begin{array}{l}
-    \textsf{small-step} ~:~ \ms{Set}\;(\ms{Node} \x \ms{Node})
-    \to \ms{Set}\;(\ms{Node} \x \ms{Node})\\
-    \textsf{small-step} \; new =
-    \setfor{(x,z)}{(x,y) \in edges, (y,z) \in new}\\
-    \\
-    \pause
-    \textsf{fix-faster} : (\ms{Set}\,\alpha \to \ms{Set}\,\alpha \to \ms{Set} \,\alpha)
-    \to \ms{Set}\,\alpha \to \ms{Set}\,\alpha \to \ms{Set}\,\alpha\\
-    \textsf{fix-faster} \; f \; current \; new =\\
-    \quad \mathbf{let}~\textit{to-add} = f \; current \; new ~\mathbf{in}\\
-    \quad \mathbf{if}~ \textit{to-add} \subseteq current ~\mathbf{then}~ current\\
-    \quad \mathbf{else}~ \textsf{fix-faster}\; f \; (current \cup \textit{to-add}) \; \textit{to-add}\\
-    \\
-    \pause
-    \textsf{path} ~:~ \ms{Set}\; (\ms{Node} \x \ms{Node})\\
-    \textsf{path} = \textsf{fix-faster}\; (\lambda x\, dx.\; \textsf{small-step}\; dx)
-    \; edge \; edge
-  \end{array}
-  \]
-\end{frame}
+%% 
+%% \begin{frame}{\Large Semi-na\"ive implementation}\large
+%%   \[
+%%   \begin{array}{l}
+%%     \textsf{small-step} ~:~ \ms{Set}\;(\ms{Node} \x \ms{Node})
+%%     \to \ms{Set}\;(\ms{Node} \x \ms{Node})\\
+%%     \textsf{small-step} \; new =
+%%     \setfor{(x,z)}{(x,y) \in edges, (y,z) \in new}\\
+%%     \\
+%%     \pause
+%%     \textsf{fix-faster} : (\ms{Set}\,\alpha \to \ms{Set}\,\alpha \to \ms{Set} \,\alpha)
+%%     \to \ms{Set}\,\alpha \to \ms{Set}\,\alpha \to \ms{Set}\,\alpha\\
+%%     \textsf{fix-faster} \; f \; current \; new =\\
+%%     \quad \mathbf{let}~\textit{to-add} = f \; current \; new ~\mathbf{in}\\
+%%     \quad \mathbf{if}~ \textit{to-add} \subseteq current ~\mathbf{then}~ current\\
+%%     \quad \mathbf{else}~ \textsf{fix-faster}\; f \; (current \cup \textit{to-add}) \; \textit{to-add}\\
+%%     \\
+%%     \pause
+%%     \textsf{path} ~:~ \ms{Set}\; (\ms{Node} \x \ms{Node})\\
+%%     \textsf{path} = \textsf{fix-faster}\; (\lambda x\, dx.\; \textsf{small-step}\; dx)
+%%     \; edge \; edge
+%%   \end{array}
+%%   \]
+%% \end{frame}
 
-
-\begin{frame}
-  \Huge\centering
-  $\ms{fix} : (\alpha \to \alpha) \to \alpha \to \alpha$
+%% 
+%% \begin{frame}
+%%   \Huge\centering
+%%   $\ms{fix} : (\alpha \to \alpha) \to \alpha \to \alpha$
 
-  \vspace{0.66em}
-  \huge
-  as iteration, not laziness
-\end{frame}
+%%   \vspace{0.66em}
+%%   \huge
+%%   as iteration, not laziness
+%% \end{frame}
 
-\begin{frame}
-  \Huge 
-  \begin{center} \textbf{Datafun} \end{center}
+%% \begin{frame}
+%%   \Huge 
+%%   \begin{center} \textbf{Datafun} \end{center}
 
-  \LARGE
-  \begin{itemize}
-  \item Simply-typed $\lambda$-calculus
-  \item finite sets \& monadic set comprehensions
-  \item monotone\textsuperscript{\textdagger} iterative fixed points
-  \end{itemize}
-  \vspace{0.5cm}
+%%   \LARGE
+%%   \begin{itemize}
+%%   \item Simply-typed $\lambda$-calculus
+%%   \item finite sets \& monadic set comprehensions
+%%   \item monotone\textsuperscript{\textdagger} iterative fixed points
+%%   \end{itemize}
+%%   \vspace{0.5cm}
 
-  \normalsize For more, see \emph{Datafun: A functional Datalog} [ICFP '16]!
-  \\[1em]
-  \textsuperscript{\textdagger}Come to my poster presentation on Monday to learn about types for monotonicity!
-\end{frame}
+%%   \normalsize For more, see \emph{Datafun: A functional Datalog} [ICFP '16]!
+%%   \\[1em]
+%%   \textsuperscript{\textdagger}Come to my poster presentation on Monday to learn about types for monotonicity!
+%% \end{frame}
 
-\begin{frame}[fragile]
-  \Large\textbf{Datalog:}
-\begin{verbatim}
-path(X,Y) :- edge(X,Y).
-path(X,Z) :- edge(X,Y), path(Y,Z).
-\end{verbatim}
-\vspace{0.4cm}
+%% \begin{frame}[fragile]
+%%   \Large\textbf{Datalog:}
+%% \begin{verbatim}
+%% path(X,Y) :- edge(X,Y).
+%% path(X,Z) :- edge(X,Y), path(Y,Z).
+%% \end{verbatim}
+%% \vspace{0.4cm}
 
-\Large\textbf{Datafun:}
-  \[
-  \begin{array}{l}
-    \mb{fix}~path~\mb{is}~edge\\
-    \phantom{\mb{fix}~path}\,\cup~\setfor{(x,z)}{(x,y) \in edge, (y,z) \in path}
-  \end{array}
-  \]
-\end{frame}
+%% \Large\textbf{Datafun:}
+%%   \[
+%%   \begin{array}{l}
+%%     \mb{fix}~path~\mb{is}~edge\\
+%%     \phantom{\mb{fix}~path}\,\cup~\setfor{(x,z)}{(x,y) \in edge, (y,z) \in path}
+%%   \end{array}
+%%   \]
+%% \end{frame}
 
 
-\begin{frame}
-  \Large
-  Na\"ive implementation strategy for
-  \[
-  \begin{array}{l}
-    \mb{fix}~path~\mb{is}~edge\\
-    \phantom{\mb{fix}~path}\,\cup~\setfor{(x,z)}{(x,y) \in edge, (y,z) \in path}
-  \end{array}
-  \]
+%% \begin{frame}
+%%   \Large
+%%   Na\"ive implementation strategy for
+%%   \[
+%%   \begin{array}{l}
+%%     \mb{fix}~path~\mb{is}~edge\\
+%%     \phantom{\mb{fix}~path}\,\cup~\setfor{(x,z)}{(x,y) \in edge, (y,z) \in path}
+%%   \end{array}
+%%   \]
 
-  is
-  \[
-  \begin{array}{l}
-    \textsf{fix}\; (\lambda\, path.\\
-    \phantom{\textsf{fix}\; (\lambda\, } edge \cup \setfor{(x,z)}{(x,y) \in edge, (y,z) \in path})
-    \\ \phantom{\textsf{fix}\;}\emptyset
-  \end{array}
-  \]
+%%   is
+%%   \[
+%%   \begin{array}{l}
+%%     \textsf{fix}\; (\lambda\, path.\\
+%%     \phantom{\textsf{fix}\; (\lambda\, } edge \cup \setfor{(x,z)}{(x,y) \in edge, (y,z) \in path})
+%%     \\ \phantom{\textsf{fix}\;}\emptyset
+%%   \end{array}
+%%   \]
 
-  using our iterative `$\mathsf{fix}$' function from earlier.
-  \vspace{1em}
+%%   using our iterative `$\mathsf{fix}$' function from earlier.
+%%   \vspace{1em}
 
-  \textbf{Is there an analogue of {\normalfont faster-fix}?}
-\end{frame}
+%%   \textbf{Is there an analogue of {\normalfont faster-fix}?}
+%% \end{frame}
 
-
-\begin{frame}
-  \Huge \centering
-  Incremental $\lambda$-Calculus\vspace{0.5cm}
+%% 
+%% \begin{frame}
+%%   \Huge \centering
+%%   Incremental $\lambda$-Calculus\vspace{0.5cm}
 
-  \large ``A Theory of Changes for Higher-Order Languages'', PLDI'14\\Yufei
-  Cai, Paulo Giarrusso, Tillman Rendel, Klaus Ostermann
-\end{frame}
+%%   \large ``A Theory of Changes for Higher-Order Languages'', PLDI'14\\Yufei
+%%   Cai, Paulo Giarrusso, Tillman Rendel, Klaus Ostermann
+%% \end{frame}
 
-\begin{frame}
-  \Large For every type $A$
-  \begin{itemize}
-  \item a \emph{change type} $\Delta A$ 
-  \item and operator $\oplus : A \to \Delta A \to A$.
-  \end{itemize}
-  \vspace{0.5cm}
+%% \begin{frame}
+%%   \Large For every type $A$
+%%   \begin{itemize}
+%%   \item a \emph{change type} $\Delta A$ 
+%%   \item and operator $\oplus : A \to \Delta A \to A$.
+%%   \end{itemize}
+%%   \vspace{0.5cm}
 
-  Given term $f : A \to B$\\
-  \begin{itemize}
-  \item $\delta f : A \to \Delta A \to \Delta B$
-  \item such that $f(x \oplus dx) = f\; x \oplus \delta f\; x\; dx$
-  \end{itemize}
-  if one knows $v = f\; x$, often cheaper to compute RHS!
-\end{frame}
+%%   Given term $f : A \to B$\\
+%%   \begin{itemize}
+%%   \item $\delta f : A \to \Delta A \to \Delta B$
+%%   \item such that $f(x \oplus dx) = f\; x \oplus \delta f\; x\; dx$
+%%   \end{itemize}
+%%   if one knows $v = f\; x$, often cheaper to compute RHS!
+%% \end{frame}
 
-\begin{frame}
-  \centering {\huge
-  $(\lambda x\, dx.\; \textsf{small-step}\;dx) \approx \delta(\textsf{step})$~{\bf !}}
+%% \begin{frame}
+%%   \centering {\huge
+%%   $(\lambda x\, dx.\; \textsf{small-step}\;dx) \approx \delta(\textsf{step})$~{\bf !}}
 
-  \pause
-  \large
-  \[\begin{array}{l}
-    \text{step}\; path =
-    \setfor{(x,y)}{(x,y) \in edge}\\
-    \phantom{\text{step}\;path} \hspace{1.15pt}\cup\hspace{1.15pt}
-    \setfor{(x,z)}{(x,y) \in edge, (y,z) \in path}\\
-    \\
-    \textsf{small-step} ~:~ \ms{Set}\;(\ms{Node} \x \ms{Node})
-    \to \ms{Set}\;(\ms{Node} \x \ms{Node})\\
-    \textsf{small-step} \; new =
-    \setfor{(x,z)}{(x,y) \in edges, (y,z) \in new}\\
-  \end{array}\]
-  \vspace{0cm}
+%%   \pause
+%%   \large
+%%   \[\begin{array}{l}
+%%     \text{step}\; path =
+%%     \setfor{(x,y)}{(x,y) \in edge}\\
+%%     \phantom{\text{step}\;path} \hspace{1.15pt}\cup\hspace{1.15pt}
+%%     \setfor{(x,z)}{(x,y) \in edge, (y,z) \in path}\\
+%%     \\
+%%     \textsf{small-step} ~:~ \ms{Set}\;(\ms{Node} \x \ms{Node})
+%%     \to \ms{Set}\;(\ms{Node} \x \ms{Node})\\
+%%     \textsf{small-step} \; new =
+%%     \setfor{(x,z)}{(x,y) \in edges, (y,z) \in new}\\
+%%   \end{array}\]
+%%   \vspace{0cm}
 
-  \pause
-  \huge\bf Find fixed points faster by static incrementalization!
-\end{frame}
+%%   \pause
+%%   \huge\bf Find fixed points faster by static incrementalization!
+%% \end{frame}
 
-
-\begin{frame}
-  \large
-  \[\begin{array}{l}
-  \textsf{faster-fix} ~:~ (\alpha \to \Delta \alpha \to \Delta \alpha)
-  \to \alpha \to \Delta \alpha \to \alpha\\
-  \textsf{faster-fix} \; df \; current \; change =\\
-  \quad \mb{let}~ next = current \oplus change ~\mb{in}\\
-  \quad \mb{if}~ next \le current ~\mb{then}~ current\\
-  \quad \mb{else}~ \textsf{faster-fix} \; df \; next \; (df \; current \; change)
-  \end{array}\]
+%% 
+%% \begin{frame}
+%%   \large
+%%   \[\begin{array}{l}
+%%   \textsf{faster-fix} ~:~ (\alpha \to \Delta \alpha \to \Delta \alpha)
+%%   \to \alpha \to \Delta \alpha \to \alpha\\
+%%   \textsf{faster-fix} \; df \; current \; change =\\
+%%   \quad \mb{let}~ next = current \oplus change ~\mb{in}\\
+%%   \quad \mb{if}~ next \le current ~\mb{then}~ current\\
+%%   \quad \mb{else}~ \textsf{faster-fix} \; df \; next \; (df \; current \; change)
+%%   \end{array}\]
 
-  %% \vspace{0.5cm}
+%%   %% \vspace{0.5cm}
 
-  %% Then $(\mb{fix}~x~\mb{is}~f\; x)$ becomes
-  %% $(\textsf{faster-fix} \; \delta f \; \emptyset \; (f\; \emptyset))$
+%%   %% Then $(\mb{fix}~x~\mb{is}~f\; x)$ becomes
+%%   %% $(\textsf{faster-fix} \; \delta f \; \emptyset \; (f\; \emptyset))$
 
-  \vspace{0.5cm}
+%%   \vspace{0.5cm}
 
-  \small (I have a proof in my notes that
-  this slide is too small to contain.)
-\end{frame}
+%%   \small (I have a proof in my notes that
+%%   this slide is too small to contain.)
+%% \end{frame}
 
-\begin{frame}{Applying this to Datafun}
-  \large
-  \begin{itemize}
-  \item Monotonicity $\to$ increasing changes only!\\
-    $\Delta(\ms{Set}\; \alpha) = \ms{Set}\;\alpha$
+%% \begin{frame}{Applying this to Datafun}
+%%   \large
+%%   \begin{itemize}
+%%   \item Monotonicity $\to$ increasing changes only!\\
+%%     $\Delta(\ms{Set}\; \alpha) = \ms{Set}\;\alpha$
 
-    \vspace{0.2cm}
+%%     \vspace{0.2cm}
 
-  \item $\Delta(\square A) = 1$? No!
+%%   \item $\Delta(\square A) = 1$? No!
 
-    \textbf{Zero-changes are not trivial!}
+%%     \textbf{Zero-changes are not trivial!}
 
-    \vspace{0.2cm}
+%%     \vspace{0.2cm}
 
-  \item $\delta (\bigvee(x \in e_1)\; e_2)$?
+%%   \item $\delta (\bigvee(x \in e_1)\; e_2)$?
 
-    In particular, if $e_1 : \ms{Set}\; (A \to B)$.
+%%     In particular, if $e_1 : \ms{Set}\; (A \to B)$.
 
-    \vspace{0.2cm}
+%%     \vspace{0.2cm}
 
-  \end{itemize}
-\end{frame}
+%%   \end{itemize}
+%% \end{frame}
 
 \end{document}
