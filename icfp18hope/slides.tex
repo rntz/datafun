@@ -1,65 +1,58 @@
-\documentclass{beamer}
-%% apparently this magic helps avoid the dreaded
-%% ``Too many math alphabets used in version normal''
-%% error. Yuk.
-\newcommand\hmmax{0}
-\newcommand\bmmax{0}
-%% end magic
+\documentclass[dvipsnames]{beamer}
 
-\usepackage{amssymb,amsmath,amsthm}
-\usepackage{latexsym}
+%% %% apparently this magic helps avoid the dreaded
+%% %% ``Too many math alphabets used in version normal''
+%% %% error. Yuk.
+%% \newcommand\hmmax{0}
+%% \newcommand\bmmax{0}
+%% %% end magic
 
-\usepackage{array}
+\usepackage{amssymb,amsmath,amsthm,latexsym}
+\usepackage{url,hyperref}
+\usepackage{mathpartir}         % \mathpar, \infer
+\usepackage{booktabs}           % \midrule
+\usepackage{nccmath}            % fix spacing
+\usepackage{multirow}
 
-\usepackage{url}
-\usepackage{hyperref}
+%\usepackage{stmaryrd} % semantic brackets
+%\usepackage{accents} % \underaccent
+%\usepackage{mathtools} % \dblcolon
+%\usepackage{tikz}
 
-%% %% uses the AMS Euler math font.
-%% \usepackage{eulervm}
-
-%% %% Font fiddling
-%% \usefonttheme{professionalfonts}
-%% \renewcommand{\familydefault}{\rmdefault}
-%% \usepackage[scaled=0.92]{XCharter}
-
-\newcommand\kw[1]{\mathbf{#1}}
-\newcommand\fname[1]{\text{#1}}
-\newcommand\aname[1]{\mathit{#1}}
-
-\usepackage[semibold,scaled=0.968]{sourcesanspro}
+%% Font fiddling
+\usefonttheme{professionalfonts}
+\renewcommand{\familydefault}{\rmdefault}
+\usepackage[scaled=0.92]{XCharter}
+\usepackage[semibold,scaled=0.91]{sourcesanspro}
 \usepackage[scaled=1.0328,varqu,var0]{inconsolata}
-\usepackage{eulervm}%\makeatletter\edef\zeu@Scale{1.0341}\makeatother
+\usepackage{eulervm}\makeatletter\edef\zeu@Scale{.971}\makeatother
+\usepackage[bb=boondox]{mathalfa} % or bb=ams
+\usepackage[T1]{fontenc}
+
+\usepackage{microtype}
 \frenchspacing
 
-%% for coloneqq
-%% \usepackage{mathtools}
-
-%% %% for \underaccent
-%% \usepackage{accents}
-
-% for semantic brackets
-%% \usepackage{stmaryrd}
-
-% for inference rules
-\usepackage{proof}
-
-%% for mathpar environment
-\usepackage{mathpartir}
-
-% for \scalebox, \rotatebox
-%% \usepackage{graphicx}
-
-%% for colors
-\usepackage{color}
-
-%% for drawing Hasse diagram
-% \usepackage{tikz}
-
 
+%% ===== COMMANDS =====
+\newcommand\N{\mathbb{N}}
+\newcommand\x\times
+\newcommand\G\Gamma
+\newcommand\D\Delta
+
 \newcommand{\ms}{\mathsf}
 \newcommand{\mb}{\mathbf}
-\newcommand{\x}{\times}
 \newcommand{\setfor}[2]{\{#1 ~|~ #2\}}
+
+\newcommand\kw[1]{\ensuremath{\mathbf{#1}}}
+\newcommand\fname[1]{\text{#1}}
+\newcommand\xname[1]{\text{#1}}
+\newcommand\rel[1]{\ensuremath{\mathit{#1}}}
+\newcommand\aname[1]{\ensuremath{\mathit{#1}}}
+
+\newcommand\naive{na\"ive}
+\newcommand\Naive{Na\"ive}
+
+\newcommand\hil{\color{Orange}}
 
 
 \title{Finding fixed points faster}
@@ -70,6 +63,15 @@
 \begin{document}
 \maketitle
 
+%% Instead of a \subseteq, what about a commuting diagram?
+%%
+%%          seminaive
+%% Datalog  ------>  Seminaive Datalog
+%%   |                      |
+%%   | λ                    | λ
+%%   V                      V
+%% Datafun ------->  Seminaive Datafun
+%%      incremental λ-calc
 \begin{frame}
   \huge
   \begin{center}
@@ -107,15 +109,109 @@
   predicates = finite sets
 \end{frame}
 
-\begin{frame}[fragile]
+\begin{frame}
+  \LARGE
+  Transitive closure of \rel{edge}:
+  \[
+  \begin{array}{l}
+    \rel{path}(x,z) \leftarrow \rel{edge}(x,z)\\
+    \rel{path}(x,z) \leftarrow \rel{edge}(x,y) \wedge \rel{path}(y,z)
+  \end{array}
+  \]
+\end{frame}
+
+\begin{frame}
+  \LARGE
+  Transitive closure of \rel{edge}, \naive{}ly:
+  \[
+  \begin{array}{l}
+    \rel{path}_{\hil i+1}(x,z) \leftarrow \rel{edge}(x,z)\\
+    \rel{path}_{\hil i+1}(x,z) \leftarrow \rel{edge}(x,y) \wedge \rel{path}_{\hil i}(y,z)
+  \end{array}
+  \]
+\end{frame}
+
+\begin{frame}
   \Large
-  \begin{center}
-\begin{verbatim}
-% Transitive closure of `edge'.
-path(X,Y) :- edge(X,Y).
-path(X,Z) :- edge(X,Y), path(Y,Z).
-\end{verbatim}
-  \end{center}
+  \[
+  \def\arraystretch{1.3}
+  \setlength\arraycolsep{.667em}
+  \begin{array}{r|l}
+    \multicolumn{2}{c}{\vdots}\\
+    i = 3 &
+    \rel{path}_3(2,4) \leftarrow \rel{edge}(2,3) \wedge \rel{path}_2(3,4)\\
+    i = 4 &
+    \rel{path}_4(2,4) \leftarrow \rel{edge}(2,3) \wedge \rel{path}_3(3,4)\\
+    i = 5 &
+    \rel{path}_5(2,4) \leftarrow \rel{edge}(2,3) \wedge \rel{path}_4(3,4)\\
+    \multicolumn{2}{c}{\vdots}
+  \end{array}
+  \]
+
+  \color{red} Wastefully re-deducing old facts makes me :(
+\end{frame}
+
+\begin{frame}
+  \Large
+  Transitive closure of \rel{edge}, semi\naive{}ly:\vspace{1em}
+
+  \[
+  \begin{array}{l}
+    \D\rel{path}_{\hil 0}(x,z) \leftarrow \rel{edge}(x,z)\\
+    \D\rel{path}_{\hil i+1}(x,z) \leftarrow \rel{edge}(x,y) \wedge \D\rel{path}_{\hil i}(y,z)
+    \\[1em]
+    \rel{path}_{i+1}(x,y) \leftarrow \rel{path}_i(x,y) \vee \D\rel{path}_i(x,y)
+  \end{array}
+  \]
+
+  \vspace{1em}
+  Computes the changes \textbf{between} \naive{} iterations!
+\end{frame}
+
+
+\begin{frame}
+  \huge\centering\scshape congratulations!\\you now understand datalog % Datafun
+\end{frame}
+
+\newcommand\tpname[1]{\mathrm{#1}}
+\newcommand\tset{\tpname{Set}~}
+
+\begin{frame}
+  \Large
+  \alt<2>{\textbf{Datalog}}{\phantom{Datalog}}
+  \[
+  \begin{array}{l}
+    \rel{path}(x,z) \leftarrow \rel{edge}(x,z)\\
+    \rel{path}(x,z) \leftarrow \rel{edge}(x,y) \wedge \rel{path}(y,z)
+  \end{array}
+  \]
+
+  \alt<2>{\textbf{Datafun}}{\phantom{Datafun}}
+  \[\setlength\arraycolsep{.2em}\begin{array}{lcl}
+    \xname{path} &=& \xname{edge} \cup \setfor{(x,z)}{(x,y) \in \xname{edge}, (y,z) \in \xname{path}}
+  \end{array}\]
+
+\end{frame}
+
+\begin{frame}
+  \huge
+  \begin{center} \textbf{Datafun} \end{center}
+  \LARGE
+  \begin{itemize}
+  \item Simply-typed $\lambda$-calculus
+  \item finite sets \& monadic set comprehensions
+  \item monotone\textsuperscript{\textdagger} iterative fixed points
+  \end{itemize}
+  \vspace{0.5cm}
+
+  \normalsize For more, see \emph{Datafun: A functional Datalog} [ICFP '16]!
+  \\[1em]
+  \textsuperscript{\textdagger}Come to my poster presentation on Monday to learn about types for monotonicity!
+\end{frame}
+
+
+\begin{frame}
+  \centering \huge \scshape fin
 \end{frame}
 
 
@@ -185,17 +281,19 @@ path(X,Z) :- edge(X,Y), path(Y,Z).
 
 \begin{frame}
   \Huge 
-  \begin{center} Datafun \end{center}
+  \begin{center} \textbf{Datafun} \end{center}
 
-  \huge
+  \LARGE
   \begin{itemize}
   \item Simply-typed $\lambda$-calculus
-  \item with iterative fixed points
-  \item and monotonicity typing
+  \item finite sets \& monadic set comprehensions
+  \item monotone\textsuperscript{\textdagger} iterative fixed points
   \end{itemize}
   \vspace{0.5cm}
 
-  \large (and other stuff, see ICFP'16 paper)
+  \normalsize For more, see \emph{Datafun: A functional Datalog} [ICFP '16]!
+  \\[1em]
+  \textsuperscript{\textdagger}Come to my poster presentation on Monday to learn about types for monotonicity!
 \end{frame}
 
 \begin{frame}[fragile]
