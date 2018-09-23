@@ -278,7 +278,7 @@
   \item Precise vs. cheap derivatives
   \item Monotonicity and ordering
   \item Sum types are tricky
-  \item Sets of functions are impossible
+  \item Sets of functions are inefficient
   \item Derivatives suck if you don't optimise them
   \end{enumerate}
 \end{frame}
@@ -353,24 +353,50 @@
     =& \kw{case}~ (M, \delta M) \mathrel{\kw{of}}\\
     & \quad(\fname{in}_1~x, \fname{in}_1~dx) \to \delta N_1\\
     & \quad(\fname{in}_2~y, \fname{in}_2~dy) \to \delta N_2\\
-    & \quad(\fname{in}_1~x, \fname{in}_2~dy) \to {???}\\
-    & \quad(\fname{in}_2~x, \fname{in}_1~dy) \to {???}
+    & \quad(\fname{in}_1~x, \fname{in}_2~dy) \to {\color{red} ???}\\
+    & \quad(\fname{in}_2~x, \fname{in}_1~dy) \to {\color{red} ???}
   \end{array}\]
 \end{frame}
 
-\begin{frame}{4. Sets of functions are impossible}
-  \huge\centering
-  {\color{red} TODO}
+\newcommand\For[1]{{\textstyle\bigcup}(#1)~}
+
+\begin{frame}{4. Sets of functions are inefficient}
+  \Large
+  \[\setlength\arraycolsep{.2em}\begin{array}{ll}
+  \multicolumn{2}{l}{\delta\left(\For{x \in M} N\right)}\\
+    =& \left(\For{x \in \delta M} N\right)\\
+    \cup& \left(\For{x \in M \cup \delta M}
+    \kw{let}~ dx = \zero~x \mathrel{\kw{in}}
+    \delta N\right)\\
+  \end{array}\]
+
+  \pause\vspace{1em}
+  \centering What is $(\zero~f)$ for $f : A \to B$?
+
+  \vspace{.5em} It's the derivative of $f$.
 \end{frame}
 
 \begin{frame}{5. Derivatives suck if you don't optimise them}
-  \huge\centering
-  {\color{red} TODO}
+  \begin{align*}
+    X \cap Y
+    &= \setfor{x}{x \in X, x \in Y}\\
+    &= \textstyle\For{x \in X} \For{y \in Y} \kw{if}~ x = y \mathrel{\kw{then}} \{x\} \mathrel{\kw{else}} \emptyset
+    \\[1em]
+    {\delta\left(\For{x \in M} N\right)}
+    &\textstyle = \left(\For{x \in \delta M} N\right)\\
+    &\textstyle \cup \hspace{2pt}\left(\For{x \in M \cup \delta M}
+    \kw{let}~ dx = \zero~x \mathrel{\kw{in}}
+    \delta N\right)
+    \\[1em]
+    \delta(X \cap Y) &= \textit{horrible!}
+  \end{align*}
+
+  %% TODO: the optimised derivative!
 \end{frame}
 
 
 \begin{frame}
-  \centering \huge \scshape fin
+  \centering \Huge \scshape fin
 \end{frame}
 
 
