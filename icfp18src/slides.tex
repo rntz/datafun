@@ -1,7 +1,7 @@
 \documentclass[xcolor={dvipsnames}]{beamer}
 
 \usefonttheme{serif}
-\usepackage[pteuler]{rntzfont} % pteuler, charter work well
+\usepackage[cochineal]{rntzfont} % pteuler, charter work well
 %\usepackage{PTSans}
 \usepackage[semibold]{sourcesanspro}
 
@@ -72,7 +72,6 @@
 \Large
 
 \begin{frame}{}
-  \LARGE
   It's just the simply-typed $\lambda$-calculus!
   \[\begin{array}{rcll}
     \den{A} &\in& \mathbf{Poset}\vspace{.2em}\\
@@ -145,5 +144,42 @@
   \uncover<1>{(\kw{box}~}\alt<1>{\isovar{y}}{x})\uncover<1>{))}
   \end{array}\]
 \end{frame}
+
+\begin{frame}
+  \Huge
+  \begin{mathpar}
+    \uncover<2>{[T]}{} A \subtype B
+    \\
+    \fname{id} : \uncover<2>{T}{}A \to B
+    \\\pause
+    T \in \{\id,\op,\iso,...\}
+  \end{mathpar}
+\end{frame}
+
+\begin{frame}
+  \textbf{Monotonicity tames dragons!}
+  \begin{enumerate}
+  \item \hil{Eventual consistency} in \hil{distributed systems}\\
+    {\small\url{http://bloom-lang.net/calm/}\par}
+
+  \item \Large\hil{Determinism} in \hil{parallel programs}\\
+    {\small\emph{LVars: Lattice-based Data Structures for Deterministic
+        Parallelism}, Lindsey Kuper \& Ryan Newton\par}
+    
+  \item \Large\hil{Recursive queries} in \hil{Datalog \& Datafun}\\
+    {\small\url{http://www.rntz.net/datafun}\par}
+
+  \item \hil{Paradoxes of self-reference}
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  \Huge\centering\scshape fin
+\end{frame}
+
+
+%% TODO: subtractEach
+%% lattice and composition operators
+%% subsumption rule
 
 \end{document}
