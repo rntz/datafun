@@ -1,0 +1,22 @@
+1. WHAT is monotonicity
+   grow input => grow output
+   type determines order, e.g. (Set A) grows by adding elements
+
+2. EXAMPLE functions
+   subtractEach, setMap
+
+3. HOW: modal types
+   op, iso
+
+   f : A -> B antitone = f : op A -> B monotone
+   f : A -> B any fn   = f : iso A -> B monotone
+
+4. HOW: modal subtyping
+
+ normally, get intro & elim rules
+ but this clutters defn of setMap!
+ _implicitly_ construct & deconstruct?
+ subtyping!
+ □A <: A, but what about <: □A?
+ generalize subtyping: [T]A <: B.
+ subsumption.
