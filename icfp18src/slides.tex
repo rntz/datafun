@@ -50,11 +50,12 @@
 
 \newcommand\opcolor{\color{ForestGreen}}
 \newcommand\isocolor{\color{NavyBlue}}
+\newcommand\pathcolor{\color{Bittersweet}}
 
 \newcommand{\id}{\text{id}}
 \newcommand{\op}{{\text{\opcolor op}}}
 \newcommand{\iso}{\ensuremath{{\isocolor\Box}}}
-\renewcommand{\path}{\ensuremath{\lozenge}}
+\renewcommand{\path}{\ensuremath{{\pathcolor\lozenge}}}
 
 \newcommand{\idof}{\mathop{\id}}
 \newcommand{\opof}{\mathop{\op}}
@@ -127,8 +128,6 @@
   i.e. \textbf{always}!
 \end{frame}
 
-%% TODO: subtractEach?
-
 \begin{frame}
   \[\begin{array}{l}
   \fname{setMap} ~:~
@@ -157,6 +156,17 @@
 \end{frame}
 
 \begin{frame}
+  \huge
+  \begin{mathpar}
+    f : TA \to B
+
+    g : UB \to C
+    \\
+    (g \circ f) : (UT) A \to C
+  \end{mathpar}
+\end{frame}
+
+\begin{frame}
   \textbf{Monotonicity tames dragons!}
   \begin{enumerate}
   \item \hil{Eventual consistency} in \hil{distributed systems}\\
@@ -178,8 +188,57 @@
 \end{frame}
 
 
-%% TODO: subtractEach
-%% lattice and composition operators
+\newcommand\Z{\mathbb{Z}}
+
+\begin{frame}
+  \[\begin{array}{l}
+    \fname{subtractEach} ~:~ \fname{List}~(\Z \x \opof\Z) \to \fname{List}~\Z
+    \\
+    \fname{subtractEach}~xs = [x-y ~|~ (x,y) \leftarrow xs]
+  \end{array}\]
+\end{frame}
+
+\begin{frame}
+  \large
+  \begin{mathpar}
+    \begin{array}{llc}
+      a \le b : \idof A &\iff& a \le b : A\\
+      a \le b : \opof A &\iff& a \ge b : A\\
+      a \le b : \isof A &\iff& a \le b \wedge a \ge b : A\\
+      a \le b : \pathof A &\impliedby& a \le b \vee b \le a : A
+    \end{array}
+
+    \begin{tikzpicture}[baseline=(current bounding box.center)]
+      \node (top)  at ( 0, 1) {$\path$};
+      \node (bot)  at ( 0,-1) {$\iso$};
+      \node (-1)   at (-1, 0) {$\id$};
+      \node (1)    at ( 1, 0) {$\op$};
+      \draw (top) -- (-1) -- (bot) -- (1) -- (top);
+    \end{tikzpicture}
+
+    \begin{array}{cr|cccc}
+      \multicolumn{2}{c|}{\multirow{2}{*}{$UT$}}
+      & \multicolumn{4}{c}{T}\\
+      && \id & \op & \iso & \path\\\hline
+      \multirow{4}{*}{$U$}
+      & \id & \id & \op & \iso & \path\\
+      & \op & \op & \id & \iso & \path\\
+      & \iso & \iso & \iso & \iso & \path\\
+      & \path & \path & \path & \iso & \path
+    \end{array}
+  \end{mathpar}
+\end{frame}
+
+\begin{frame}
+  \[
+    \infer[\Large subsumption]
+          {\G \vdash M : A \\ [T]A \subtype B}
+          {T\G \vdash M : C}
+  \]
+\end{frame}
+
+
+%% TODO
 %% subsumption rule
 
 \end{document}
