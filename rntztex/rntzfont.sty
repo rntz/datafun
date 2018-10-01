@@ -30,6 +30,9 @@
 
 
 %% ---------- 2. Miscellany ----------
+%% Default linespread.
+\linespread{1.13}
+
 %% Utilities for scaling used inside this file.
 \newcommand{\@scaled}[1]{\fpeval{#1*\rntz@fontscale}}
 \edef\rntz@eulerscale{1}
@@ -55,7 +58,6 @@
 % Baskervaldx is too heavy, baskervillef is way too light. I like
 % librebaskerville, but it doesn't have small caps :(.
 \ifdefstring{\rntz@font}{baskerville}{
-  \linespread{\@scaled{1.07}}
   %\RequirePackage[p,osf,scaled=1.0526]{Baskervaldx}
   \RequirePackage[scaled=\@scaled{0.8717815}]{librebaskerville}
   \RequirePackage[p,osf,scaled=\@scaled{1.063126}]{biolinum}
@@ -68,7 +70,6 @@
 }{}
 
 \ifdefstring{\rntz@font}{charter}{
-  \linespread{\@scaled{1.06}} % 1.09395? 1.04-1.12?
   %% XCharter can be scaled. It has an option [osf] for old-style proportional
   %% figures, but lacks proportional lining figures, and so doesn't respect
   %% fontaxes' \tbfigures or \lnfigures.
@@ -82,7 +83,6 @@
 }{}
 
 \ifdefstring{\rntz@font}{cochineal}{
-  \linespread{\@scaled{1.13}}
   \RequirePackage[p,osf,sups,scale=\@scaled{1.13}]{cochineal}
   \RequirePackage[p,osf,scaled=\@scaled{1.12}]{biolinum}
   \RequirePackage[scaled=\@scaled{1.0622}]{inconsolata}
@@ -93,7 +93,6 @@
 }{}
 
 \ifdefstring{\rntz@font}{fbb}{
-  \linespread{\@scaled{1.166}}
   \RequirePackage[p,osf,scaled=\@scaled{1.06}]{fbb}
   \RequirePackage[p,osf,scaled=\@scaled{1.0812}]{biolinum}
   \RequirePackage[scaled=\@scaled{1.023}]{inconsolata}
@@ -104,7 +103,6 @@
 }{}
 
 \ifdefstring{\rntz@font}{libertine}{
-  \linespread{\@scaled{1.06}} % 1.1021?
   % libertine[osf] makes newtxmath use old-style figures in math mode :(
   % Other options: semibold.
   \RequirePackage[p,mono=false,llscale=\@scaled{1.0842},scale=\@scaled{1.0842}]
@@ -117,7 +115,6 @@
 }{}
 
 \ifdefstring{\rntz@font}{palatino}{
-  \linespread{\@scaled{1.08333}}
   \RequirePackage[scaled=\@scaled{1}]{newpxtext}
   \RequirePackage[scaled=\@scaled{1.067}]{biolinum}
   \RequirePackage[scaled=\@scaled{1.012}]{inconsolata}
@@ -133,7 +130,6 @@
 }{}
 
 \ifdefstring{\rntz@font}{pt}{
-  \linespread{\@scaled{1.07}}
   \RequirePackage[scaled=\@scaled{0.995}]{PTSerif}
   \RequirePackage[scaled=\@scaled{0.995}]{PTSans}
   %% PTSans doesn't have small caps; could use biolinum or sourcesanspro instead.
