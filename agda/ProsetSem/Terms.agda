@@ -14,14 +14,14 @@ open import Iso
 ---------- Lemmas for denotational semantics of terms ----------
 -- ⟦_⟧ is a functor, Cx^op -> Proset
 comap⟦_⟧ : ∀{X Y} -> X ⊆ Y -> ⟦ Y ⟧ ⇒ ⟦ X ⟧
-comap⟦ f ⟧ = prefixΠ (∃-map f)
+comap⟦_⟧ f = prefixΠ {P = ⟦_⟧₁ ∘ proj₁} (∃-map f)
 
 -- Managing environments.
 lookup : ∀{X x} -> X x -> ⟦ X ⟧ ⇒ ⟦ x ⟧₁
 lookup p = Πe (Var p)
 
 cons : ∀{X Y} -> ⟦ X ⟧ ∧ ⟦ Y ⟧ ⇒ ⟦ Y ∪ X ⟧
-cons = Πi λ { (, inj₁ x) → π₂ ∙ lookup x ; (, inj₂ y) → π₁ ∙ lookup y }
+cons = Πi {P = ⟦_⟧₁ ∘ proj₁} λ { (, inj₁ x) → π₂ ∙ lookup x ; (, inj₂ y) → π₁ ∙ lookup y }
 
 --singleton : ∀{x} -> ⟦ x ⟧₁ ⇒ ⟦ hyp x ⟧
 singleton : ∀{o a} -> ⟦ o , a ⟧₁ ⇒ ⟦ hyp (o , a) ⟧
@@ -38,11 +38,6 @@ wipe⇒iso = fun ⟨ id , wipe-sym ⟩
 
 lambda : ∀{x c} -> ⟦ hyp x ⟧ ⇨ c ⇒ ⟦ x ⟧₁ ⇨ c
 lambda = precompose singleton
-
-from-bool : ∀{a} (S : Sums a) -> bools ∧ a ⇒ a
-from-bool S .ap (c , x) = if c then x else Sums.⊥ S
-from-bool S .map (f≤* , x≤y) = Sums.⊥≤ S
-from-bool S .map (t≤t , x≤y) = x≤y
 
  ---------- Denotations of terms, premises, and term formers ----------
 eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ⇒ ⟦ P ⟧+
@@ -77,15 +72,13 @@ eval⊩ case = cases π₁ (map∧ (π₂ ∙ π₁) singleton ∙ apply)
 eval⊩ splitsum .ap x = x
 eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
 eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)
-eval⊩ (when (_ , sl)) = from-bool (is! sl)
+eval⊩ (when {a} (_ , sl)) = When {{A = type a}} {{S = is! sl}} π₁ π₂
 eval⊩ (single _) .ap = leaf
 eval⊩ (single _) .map = leaf≤
 eval⊩ (for-in _ (_ , b-sl)) =
-  map∧ id (lambda ∙ Tree-map)
-  ∙ swapply
-  ∙ tree-⋁ _ (is! b-sl)
+  map∧ id (lambda ∙ Tree-map) ∙ swapply ∙ tree-⋁ _ (is! b-sl)
 eval⊩ (empty sl) = constant (Sums.⊥ (is! sl))
-eval⊩ (lubOf sl) = functor∨ {{S = is! sl}}
+eval⊩ (lubOf {a} sl) = functor∨ {{C = type a}} {{S = is! sl}}
 -- TODO
 eval⊩ (fix is-fix) = {!!}
 eval⊩ (fix≤ is-fix≤) = {!!}
