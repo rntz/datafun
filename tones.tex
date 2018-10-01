@@ -3,9 +3,9 @@
 %\usepackage[b5,width=365pt]{rntzgeometry}
 \usepackage[a5,width=115mm]{rntzgeometry}
 
-% Options: charter, cochineal, palatino, libertine.
+% Options: charter, palatino, cochineal, libertine.
 % pt is nice but lacks small caps.
-\usepackage[charter]{rntzfont}
+\usepackage[palatino]{rntzfont}
 
 %% \documentclass{article}
 %% \usepackage[b5paper]{geometry}
@@ -42,6 +42,7 @@
 \usepackage{stmaryrd}           % \llbracket, \rrbracket, \oast
 \usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
 \usepackage[b]{esvect}          % Wide vector via \vv.
+\usepackage{nccmath}            % Fix spacing issues.
 
 %% vectors with subscripts. \vv* doesn't look quite right.
 \newcommand{\vvsub}[2]{\vv*{#1}{\!#2}}
@@ -89,45 +90,28 @@
 \newcommand{\Tone}{\cat{tone}}
 \newcommand{\Cat}{\cat{cat}}
 
-\newcommand{\idfn}{\mi{id}}
-\newcommand{\isoto}{\simeq}
-\newcommand{\pathto}{\sim}
+\newcommand\idfn{\mi{id}}
+\newcommand\isoto{\simeq}
+\newcommand\pathto{\sim}
 
 %% Tone functors. \textsf? \textrm? \textit? \textsc?
-\newcommand{\id}{\ensuremath{\textrm{id}}}
-\newcommand{\op}{\ensuremath{\textrm{op}}}
-\newcommand{\iso}{\ensuremath{\textrm{iso}}}     % iso, core, inv, eq
-\renewcommand{\path}{\ensuremath{\textrm{path}}} % path, loc, biv, bi
+\newcommand\opcolor{\color{ForestGreen}}
+\newcommand\isocolor{\color{NavyBlue}}
+\newcommand\pathcolor{\color{Bittersweet}}
 
-\renewcommand{\iso}{\texorpdfstring{\ensuremath{\Box}}{iso}}
-\renewcommand{\path}{\texorpdfstring{\ensuremath{\lozenge}}{path}}
+\newcommand\id{\ensuremath{\mathrm{id}}}
+\newcommand\op{\ensuremath{\mathrm{\opcolor op}}}
+\newcommand\iso{\texorpdfstring{\ensuremath{{\isocolor\Box}}}{iso}}
+\renewcommand\path{\texorpdfstring{\ensuremath{{\pathcolor\lozenge}}}{path}}
 
-% \kern0pt is a hack to make TeX not vertically center the argument if it's only
-% a single character.
-\newcommand{\toneof}[2]{#1 #2}
-%% \newcommand{\idof}[1]{\toneof{\id}{#1}}
-%% \newcommand{\opof}[1]{\toneof{\op}{#1}}
-%% \newcommand{\isof}[1]{\toneof{\iso}{#1}}
-%% \newcommand{\pathof}[1]{\toneof{\path}{#1}}
-\newcommand{\idof}{\id\,}
-\newcommand{\opof}{\op\,}
-\newcommand{\isof}{\iso}
-\newcommand{\pathof}{\path}
+\newcommand\idof{\id\,}
+\newcommand\opof{\op\,}
+\newcommand\isof{\iso}
+\newcommand\pathof{\path}
 
-% Sensible combinations:
-% {bi, eq}: suggestive, short.
-%           DISLIKE: "bi" ambiguous. "eq" suggests equality.
-% {inv, biv}: invariant, bivariant. DISLIKE: functor meaning nonobvious.
-% {iso, path}: suggestive of generalization to categories
-% {core, loc}: established-ish category theory notation. DISLIKE: opaque.
-
-\newcommand{\tc}{\circ}                      % tone composition
-\newcommand{\tmeet}{\wedge}                  % tone meet
-\newcommand{\bigmeet}{\bigwedge}             % tone meet
-\newcommand{\tm}{\id}                        % monotone / id
-\newcommand{\ta}{{\color{ForestGreen}\op}}   % antitone / op
-\newcommand{\ti}{{\color{NavyBlue}\iso}}     % invariant/ iso
-\newcommand{\tb}{{\color{Bittersweet}\path}} % bivariant/ path
+\newcommand\tc{\circ}                      % tone composition
+\newcommand\tmeet{\wedge}                  % tone meet
+\newcommand\bigmeet{\bigwedge}             % tone meet
 
 
 %% ---- Front matter ----
@@ -177,7 +161,7 @@ between categories.
 \section{Tones}\label{sec:tones}
 
 Tones are ways a function $f$ may respect a preorder. I will consider four
-tones: \tm, \ta, \ti{} (pronounced ``iso''), and \tb{} (pronounced ``path'').
+tones: \id, \op, \iso{} (pronounced ``iso''), and \path{} (pronounced ``path'').
 
 \begin{center}
   \begin{tabular}{clc@{\hskip 0.25em}c@{\hskip 0.25em}c}
@@ -186,19 +170,19 @@ tones: \tm, \ta, \ti{} (pronounced ``iso''), and \tb{} (pronounced ``path'').
     %% & \multicolumn{1}{c}{\textbf{Respects}}
     & \multicolumn{3}{c}{\textit{Property of $f$}}
     \\\midrule
-    \tm & \text{Monotone}
+    \id & \text{Monotone}
     %% & \text{ordering}
     & $x \le y$ &$\implies$& $f(x) \le f(y)$
     \\
-    \ta & \text{Antitone}
+    \op & \text{Antitone}
     %% & \text{opposite ordering}
     & $x \ge y$ &$\implies$& $f(x) \le f(y)$
     \\
-    \ti & \text{Invariant}
+    \iso & \text{Invariant}
     %% & \text{induced equivalence or ``isomorphisms''}
     & $x \le y \wedge y \le x$ &$\implies$& $f(x) \le f(y)$
     \\
-    \tb & \text{Bivariant}
+    \path & \text{Bivariant}
     %% & \text{equivalence closure or ``paths''}
     & $x \le y \vee y \le x$ &$\implies$& $f(x) \le f(y)$
   \end{tabular}
@@ -206,14 +190,14 @@ tones: \tm, \ta, \ti{} (pronounced ``iso''), and \tb{} (pronounced ``path'').
 
 \noindent Informally,
 \begin{enumerate}
-\item $\tm$ is monotone (order-preserving).
-\item $\ta$ is antitone (order-inverting).
-\item $\ti$ is invariant, preserving only equivalence.
-\item $\tb$ is bivariant: both monotone and antitone.
+\item $\id$ is monotone (order-preserving).
+\item $\op$ is antitone (order-inverting).
+\item $\iso$ is invariant, preserving only equivalence.
+\item $\path$ is bivariant: both monotone and antitone.
 \end{enumerate}
 
 %% In posets, antisymmetry trivializes invariance (because $x \le y \wedge y \le x
-%% \implies x = y \implies f(x) = f(y)$), so we sometimes call $\ti$ the
+%% \implies x = y \implies f(x) = f(y)$), so we sometimes call $\iso$ the
 %% ``discrete'' tone, because it respects only the discrete ordering.
 
 
@@ -232,7 +216,7 @@ that
 
 So ``antitone'' is a special case of ``monotone''! This observation generalizes:
 every tone is really monotonicity with a transformation applied to the domain's
-ordering. So \textbf{tones transform orders}. I write $\toneof{T}{A}$ for
+ordering. So \textbf{tones transform orders}. I write $TA$ for
 the preorder $A$ transformed by the tone $T$, defined:
 
 \begin{center}
@@ -241,18 +225,18 @@ the preorder $A$ transformed by the tone $T$, defined:
     & {\textit{Meaning}}
     & \multicolumn{3}{c}{\textit{Transformation on $A$}}
     \\\midrule
-    \tm & \text{same ordering}
+    \id & \text{same ordering}
     & $a \le b : A$ &$\iff$& $a \le b : \idof A$
     \\
-    \ta
+    \op
     & \text{opposite ordering}
     & $a \ge b : A$ &$\iff$& $a \le b : \opof A$
     \\
-    \ti
+    \iso
     & \text{induced equivalence}
     & $a \le b \wedge b \le a : A$ &$\iff$& $a \le b : \isof A$
     \\
-    \tb{}
+    \path{}
     & \text{equivalence closure}
     & $a \le b \vee b \le a : A$ &$\ \implies$& $a \le b : \pathof A$
     %% & {\small\itshape see \ref{sec:defining-path}}
@@ -268,44 +252,44 @@ With this, we can state the theorem generalizing our observation:
 
     \nopagebreak\emph{iff}\nopagebreak
 
-    $f : \toneof{T}{A} \to B$ is monotone
+    $f : TA \to B$ is monotone
   \end{center}
 \end{theorem}
 
 From this point on, when I write $f : A \to B$, I mean implicitly that $f$ is
-monotone; and therefore $f : \toneof{T}{A} \to B$ means that $f$ has tone $s$.
+monotone; and therefore $f : TA \to B$ means that $f$ has tone $s$.
 
 Here are a few more useful properties of tones, which I invite you to verify:
 
 \begin{theorem}[Functoriality of tones]\label{thm:tone-functoriality}
-  If $f : A \to B$ then $f : \toneof{T}{A} \to \toneof{T}{B}$.
+  If $f : A \to B$ then $f : TA \to TB$.
 \end{theorem}
 
 \begin{theorem}[Tones distribute over $\x$ and $+$]\label{thm:tones-monoidal}
   \begin{eqnarray*}
-    \toneof{T}{(A + B)} = \toneof{T}{A} + \toneof{T}{B}\\
-    \toneof{T}{(A \x B)} = \toneof{T}{A} \x \toneof{T}{B}
+    T(A + B) = TA + TB\\
+    T(A \x B) = TA \x TB
   \end{eqnarray*}
 \end{theorem}
 
 \subsection{Understanding \iso{} and \path{}}
 
-\todo{An intuition about $\ti$ and $\tb$: $\ti$ keeps only the \emph{strongly
-    connected components}, while $\tb$ turns \emph{weakly} connected components
+\todo{An intuition about $\iso$ and $\path$: $\iso$ keeps only the \emph{strongly
+    connected components}, while $\path$ turns \emph{weakly} connected components
   into \emph{strong} ones. I should use an example, with diagrams. I should also
   mention that \iso{} and \path{} turn preorders into equivalence relations, and
   the corresponding cate\-gory-and-functor diagram.}
 
 \subsection{Defining \path{}} \label{sec:defining-path}
 
-$\pathof{A}$ is the smallest preorder satisfying
+$\pathof{A}$ is the symmetric, transitive closure of $A$, the smallest preorder
+satisfying:
+
 \[ a \le b \vee b \le a : A \implies a \le b : \pathof{A} \]
 
-Unfortunately $\pathof{A}$ is not so easy to define directly (without language
-like ``the smallest preorder satisfying'') because the reverse implication, from
-$a \le b : \pathof{A}$ to $a \le b \vee b \le a : A$, does not always hold. A
-good counterexample is the \textsf{fencepost} preorder on $\N$, where $a < a+1$
-for even $a$, and $a > a+1$ for odd $a$:
+The reverse direction, $a \le b : \pathof{A} \implies a \le b \vee b \le a : A$,
+does not always hold. A good counterexample is the \textsf{fencepost} preorder
+on $\N$, where $a < a+1$ for even $a$, and $a > a+1$ for odd $a$:
 
 \begin{center}
   \begin{tikzpicture}
@@ -333,40 +317,36 @@ a_{i+1} : A$. Then $a \le b : \pathof{A}$ iff there is a path from $a$ to $b$.
 
 \subsection{Tone operators}
 
-%% \renewcommand{\ta}{{\op}}   % antitone / op
-%% \renewcommand{\ti}{{\iso}}     % invariant/ iso
-%% \renewcommand{\tb}{{\path}} % bivariant/ path
-
 \begin{figure*}[t]
   \begin{mathpar}
     %% "baseline=(current bounding box.center)" incantation taken from
     %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
     \begin{tikzpicture}[scale=1,baseline=(current bounding box.center)]
-      \node (top)  at ( 0, 1) {$\tb$};
-      \node (bot)  at ( 0,-1) {$\ti$};
-      \node (-1)   at (-1, 0) {$\tm$};
-      \node (1)    at ( 1, 0) {$\ta$};
+      \node (top)  at ( 0, 1) {$\path$};
+      \node (bot)  at ( 0,-1) {$\iso$};
+      \node (-1)   at (-1, 0) {$\id$};
+      \node (1)    at ( 1, 0) {$\op$};
       \draw (top) -- (-1) -- (bot) -- (1) -- (top);
     \end{tikzpicture}
 
     \begin{array}{r|cccc}
       T \tmeet U
-      & \tm & \tb & \ta & \ti\\\hline
-      \tm & \tm & \tm & \ti & \ti\\
-      \tb & \tm & \tb & \ta & \ti\\
-      \ta & \ti & \ta & \ta & \ti\\
-      \ti & \ti & \ti & \ti & \ti
+      & \id & \path & \op & \iso\\\hline
+      \id & \id & \id & \iso & \iso\\
+      \path & \id & \path & \op & \iso\\
+      \op & \iso & \op & \op & \iso\\
+      \iso & \iso & \iso & \iso & \iso
     \end{array}
 
     \begin{array}{cr|cccc}
-      \multicolumn{2}{c|}{\multirow{2}{*}{$TU$}}
-      & \multicolumn{4}{c}{U}\\
-      && \tm & \ta & \ti & \tb\\\hline
-      \multirow{4}{*}{$T$}
-      & \tm & \tm & \ta & \ti & \tb\\
-      & \ta & \ta & \tm & \ti & \tb\\
-      & \ti & \ti & \ti & \ti & \tb\\
-      & \tb & \tb & \tb & \ti & \tb
+      \multicolumn{2}{c|}{\multirow{2}{*}{$UT$}}
+      & \multicolumn{4}{c}{T}\\
+      && \id & \op & \iso & \path\\\hline
+      \multirow{4}{*}{$U$}
+      & \id & \id & \op & \iso & \path\\
+      & \op & \op & \id & \iso & \path\\
+      & \iso & \iso & \iso & \iso & \path\\
+      & \path & \path & \path & \iso & \path
     \end{array}
   \end{mathpar}
   \caption{Tone lattice, meet, and composition}
@@ -375,22 +355,21 @@ a_{i+1} : A$. Then $a \le b : \pathof{A}$ iff there is a path from $a$ to $b$.
 
 \Cref{fig:tone-ops} defines two operators on tones:
 \begin{enumerate}
-\item Meet $T \tmeet U$ is greatest lower bound in the lattice ordered $\ti <
-  \{\tm, \ta\} < \tb$. This gives the general tone of the pairing $\langle f,
-  g\rangle : \toneof{(T \tmeet U)}{A} \to B \times C$ of two functions $f :
-  \toneof{T}{A} \to B$ and $g : \toneof{U}{A} \to C$.
+\item Meet $T \tmeet U$ is the greatest lower bound in the lattice ordered $\iso
+  < \{\id, \op\} < \path$. This finds the tone of the pairing $\langle f, g\rangle
+  : (T \tmeet U)A \to B \times C$ of two functions $f : TA \to B$ and $g : UA
+  \to C$.
 
   %% TODO FIXME: ordering of tone composition is wrong! need to fix this goddamn
   %% everywhere, and I may have already messed up a few places, so double-check
   %% while I'm at it.
-\item Composition $UT$ gives the tone of a composed function $g \circ f :
-  \toneof{UT}{A} \to C$ when $f : \toneof{T}{A} \to B$ and $g : \toneof{U}{B}
-  \to C$. Equivalently, $\toneof{UT}{A} = \toneof{U}{(\toneof{T}{A})}$ for any
-  preorder $A$.
+\item Composition $UT$ gives the tone of a composed function $g \circ f : UTA
+  \to C$ when $f : TA \to B$ and $g : UB \to C$. Equivalently, $(UT)A = U(TA)$
+  for any preorder $A$.
 \end{enumerate}
 
-We sometimes write $TU$ as $T \tc U$ for clarity. Composition binds tighter than
-meet, thus $TU \tmeet V = (T \tc U) \tmeet V = T \tc U \tmeet V$.
+We sometimes write $UT$ as $U \tc T$ for clarity. Composition binds tighter than
+meet, so $TU \tmeet V = (TU) \tmeet V$.
 %
 Together, $\tmeet$ and $\tc$ form a semiring whose properties are given in
 \cref{fig:tone-op-laws}. \todo{TODO: Reference all those other works which use
@@ -406,18 +385,18 @@ Together, $\tmeet$ and $\tc$ form a semiring whose properties are given in
       \text{Associativity} & (T \tmeet U) \tmeet V &=& T \tmeet (U \tmeet V)\\
       \text{Commutativity} & T \tmeet U &=& U \tmeet T\\
       \text{Idempotence} & T \tmeet T &=& T\\
-      \tb~\text{is identity} & \tb \tmeet T &=& T\\
-      \ti~\text{absorbs} & \ti \tmeet T &=& \ti\\
+      \path~\text{is identity} & \path \tmeet T &=& T\\
+      \iso~\text{absorbs} & \iso \tmeet T &=& \iso\\
     \end{array}
 
     \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
       \multicolumn{4}{c}{\textit{\normalsize Properties of ${}\tc{}$}}
       \vspace{2pt}\\
       \text{Associativity} & (TU)V &=& T(UV)\\
-      \text{Identity} & \multicolumn{3}{c}{\tm \tc T = T = T \tc \tm}\\
-      \tb~ \text{left-absorbs} & T\tb &=& \tb\\
-      \ti~ \text{left-absorbs} & T\ti &=& \ti\\
-      \ta~ \text{involutive} & \ta \tc \ta &=& \tm\\
+      \text{Identity} & \multicolumn{3}{c}{\id \tc T = T = T \tc \id}\\
+      \path~ \text{left-absorbs} & T\path &=& \path\\
+      \iso~ \text{left-absorbs} & T\iso &=& \iso\\
+      \op~ \text{involutive} & \op \tc \op &=& \id\\
     \end{array}
 
     \begin{array}{lr@{\hskip 0.5em}c@{\hskip 0.5em}l}
@@ -441,13 +420,13 @@ $a \le b$ for all $a,b$).\footnote{Indiscreteness and its dual, discreteness,
   are also tones --- that is, functorial transformations on the ordering
   component of a preorder --- but they complicate things, so I omit them.
 
-  Note also that discreteness and $\ti$ coincide on posets; many intuitions
+  Note also that discreteness and $\iso$ coincide on posets; many intuitions
   transfer from one to the other.}
 %
 Interestingly, because constancy is so much stricter than bivariance, their
 composition operator is commutative.
 
-They write $\uparrow$ for $\tm$, $\downarrow$ for $\ta$, $?$ for $\ti$, and
+They write $\uparrow$ for $\id$, $\downarrow$ for $\op$, $?$ for $\iso$, and
 $\sim$ for constancy. They also add $=$ for the ``tone'' that \emph{only the
   identity function} has. This doesn't fit my framework; it cannot be phrased as
 a transformation on orderings. However, it seems related to subtyping.
@@ -477,23 +456,18 @@ function properties.
 \begin{definition}[Tones]\label{def:tone}
   A tone is a functor $T : \Pre \to \Pre$ such that $\elems{T-} =
   \elemsfn$.\footnote{A more categorical approach might require only a natural
-    isomorphism \(\iota : \elemsfn T \isoto \elemsfn\). I'm not
-    yet comfortable generalizing that far. }
-\end{definition}
-
-\begin{corollary}
-  For any preorder $A$ and monotone map $f$,
+    isomorphism \(\iota : \elems{T-} \isoto \elemsfn\). I'm not yet comfortable
+    generalizing that far.} That is, for any preorder $A$ and monotone map $f$,
   \begin{enumerate}
   \item $\elems{TA} = \elems{A}$: tone functors alter a preorder's
     \emph{ordering}, not its elements.
   \item $\elems{Tf} = \elems{f}$: tone functors do not alter functions'
     behavior.
   \end{enumerate}
-\end{corollary}
-
-\begin{definition}
-  A function $f$ from $A$ to $B$ has tone $T$ iff $f : TA \to B$ is monotone.
 \end{definition}
+
+%% We say a function $f$ from $A$ to $B$ has tone $T$ iff $f : TA \to B$ is
+%% monotone.
 
 %% It's also unclear how to generalize this definition to tones of functors on
 %% \Cat{}.
@@ -528,10 +502,10 @@ as morphisms. However, \Tone{} is but a fa\c{c}ade over this partial order:
 \end{theorem}
 
 \begin{proof}
-  Expanding definitions, $T \le U$ means $\fnof{x} x : \toneof{T}{A} \to
-  \toneof{U}{A}$ for all $A : \Pre$. By \cref{lem:tone-transformations-are-id},
-  any $\eta : \Tone(T,U)$ is of the form $\eta_A = \fnof{x} x : \toneof{T}{A}
-  \to \toneof{U}{A}$.
+  Expanding definitions, $T \le U$ means $\fnof{x} x : TA \to
+  UA$ for all $A : \Pre$. By \cref{lem:tone-transformations-are-id},
+  any $\eta : \Tone(T,U)$ is of the form $\eta_A = \fnof{x} x : TA
+  \to UA$.
 \end{proof}
 
 The crux here is that natural transformations between tones are \emph{boring}:
@@ -583,9 +557,9 @@ transitive relations is itself reflexive and transitive), and $TU$ corresponds
 to functor composition.
 %
 \begin{eqnarray*}
-  a \le b : \toneof{(T \tmeet U)}{A} %% \iff a \le b : A^s \cap A^t
-  &\iff& a \le b : \toneof{T}{A} \wedge a \le b : \toneof{U}{A}\\
-  a \le b : \toneof{(TU)}{A} &\iff& a \le b : \toneof{T}{(\toneof{U}{A})}
+  a \le b : (T \tmeet U)A %% \iff a \le b : A^s \cap A^t
+  &\iff& a \le b : TA \wedge a \le b : UA\\
+  a \le b : (TU)A &\iff& a \le b : T(UA)
 \end{eqnarray*}
 
 \begin{conjecture}
@@ -597,8 +571,8 @@ to functor composition.
 
 \begin{conjecture}
   The definitions of meet and compose in \cref{fig:tone-ops} coincide with their
-  semantic definitions, applied to the semantic interpretation of $\tm$, $\ta$,
-  $\tb$, and $\ti$.
+  semantic definitions, applied to the semantic interpretation of $\id$, $\op$,
+  $\path$, and $\iso$.
 \end{conjecture}
 
 
@@ -669,7 +643,7 @@ sequences of numbers to numbers.%
 \begin{mathpar}
   \mcx{T}{\xbar{i}{\mtp{U_i}{A_i}}} = \xbar{i}{\mtp{TU_i}{A_i}}\\
 
-  \infer[Hypothesis]{T \le \tm}{\extend{\GG}{\mtp{T}{A}} \vdash A}
+  \infer[Hypothesis]{T \le \id}{\extend{\GG}{\mtp{T}{A}} \vdash A}
 
   \infer[$T$-Right]{\GG \vdash A}{\mcx{T}{\GG} \vdash \T{T} A}
 
@@ -732,7 +706,7 @@ simply typed $\lambda$-calculus.
     \text{base types} & P
     \vspace{0.5em}\\
 
-    \text{tones} & T,U,V & \bnfeq & \tm \pipe \ta \pipe \tb \pipe \ti
+    \text{tones} & T,U,V & \bnfeq & \id \pipe \op \pipe \path \pipe \iso
     \vspace{1pt}\\
     \text{cartesian ops} & \mbinop &\bnfeq& {+} \pipe {\x}
     \vspace{1pt}\\
@@ -775,7 +749,7 @@ simply typed $\lambda$-calculus.
   \infer{\checks{m}{\GG}{A}}{\infers{m : A}{\GG}{A}}
 
   %% variables
-  \infer{ }{\infers{x}{\h{x}{\tm}{A}}{A}}
+  \infer{ }{\infers{x}{\h{x}{\id}{A}}{A}}
 
   %% projection
   \infer{\infers{e}{\GG}{A} \\ \mtp{T}{A} \strips B_1 \x B_2}
@@ -805,7 +779,7 @@ simply typed $\lambda$-calculus.
         {\checks{\mb{let}~x = e~\mb{in}~m}{\mcx{T}{\GG_1} \tmeet \GG_2}{C}}
 
   %% lambdas
-  \infer{\checks{m}{\extend{\GG}{\h{x}{T}{A}}}{B} \\ \tm \le T}
+  \infer{\checks{m}{\extend{\GG}{\h{x}{T}{A}}}{B} \\ \id \le T}
         {\checks{\fnof{x} m}{\GG}{A \to B}}
 
   %% pairs
@@ -833,17 +807,17 @@ simply typed $\lambda$-calculus.
   for tone adjunction.}
 %
 \begin{mathpar}
-\adjoint{\tm}{\tm}
+\adjoint{\id}{\id}
 
-\adjoint{\ta}{\ta}
+\adjoint{\op}{\op}
 
-\adjoint{\tb}{\ti}
+\adjoint{\path}{\iso}
 
 \infer{}{T \le T}
 
-\infer{}{\ti \le T}
+\infer{}{\iso \le T}
 
-\infer{}{T \le \tb}
+\infer{}{T \le \path}
 \end{mathpar}
 
 
@@ -864,7 +838,7 @@ is output. In each rule I've marked the connective being analysed in
 \focus{pink}.
 %
 \begin{mathpar}
-  \infer[refl]{}{\mtp{\tm}{A} \subtype {A}}
+  \infer[refl]{}{\mtp{\id}{A} \subtype {A}}
 
   \infer[t-right]
         {\mtp{T}{A} \subtype B}
@@ -885,9 +859,9 @@ The semantic justification for \textsc{adjoint} is as follows.
 %
 Note that $\fnof{x} x : VA \to VA$. Applying $U \dashv V$ we have $\fnof{x} x :
 UVA \to A$, thus $UVA \le A$, and so finally $TUVA \le TA \le B$. \todo{Clean up
-  this explanation. Explain that we use adjunction rather than $st \le \tm$
+  this explanation. Explain that we use adjunction rather than $st \le \id$
   directly because adjunction gives us the \emph{most informative} result; $st
-  \le \tm$ is declarative, $\adjoint{t}{s}$ is algorithmic. Give explanations
+  \le \id$ is declarative, $\adjoint{t}{s}$ is algorithmic. Give explanations
   for each other rule as well.}
 
 Function subtyping, $\mtp{T}{A_1 \mathrel{\focus{\to}} B_1} \subtype A_2
@@ -895,25 +869,25 @@ Function subtyping, $\mtp{T}{A_1 \mathrel{\focus{\to}} B_1} \subtype A_2
 $\mtp{T}{B_1} \subtype B_2$:
 %
 \begin{mathpar}
-  \infer{\tm \le T \\ \mtp{T}{A_2} \subtype A_1 \\ \mtp{\tm}{B_1} \subtype B_2}
-        {\mtp{\tm}{A_1 \to B_1} \subtype A_2 \to B_2}
+  \infer{\id \le T \\ \mtp{T}{A_2} \subtype A_1 \\ \mtp{\id}{B_1} \subtype B_2}
+        {\mtp{\id}{A_1 \to B_1} \subtype A_2 \to B_2}
 
-  \infer{\ta \le T \\ \mtp{T}{A_2} \subtype A_1 \\ \mtp{\ta}{B_1} \subtype B_2}
-        {\mtp{\ta}{A_1 \to B_1} \subtype A_2 \to B_2}
+  \infer{\op \le T \\ \mtp{T}{A_2} \subtype A_1 \\ \mtp{\op}{B_1} \subtype B_2}
+        {\mtp{\op}{A_1 \to B_1} \subtype A_2 \to B_2}
 
-  \infer{\tb T = \tb \\ \mtp{T}{A_2} \subtype A_1 \\ \mtp{\tb}{B_1} \subtype B_2}
-        {\mtp{\tb}{A_1 \to B_1} \subtype A_2 \to B_2}
+  \infer{\path T = \path \\ \mtp{T}{A_2} \subtype A_1 \\ \mtp{\path}{B_1} \subtype B_2}
+        {\mtp{\path}{A_1 \to B_1} \subtype A_2 \to B_2}
 
-  \infer{\mtp{\tb}{A_2} \subtype A_1 \\ \mtp{\ti}{B_1} \subtype B_2}
-        {\mtp{\ti}{A_1 \to B_1} \subtype A_2 \to B_2}
+  \infer{\mtp{\path}{A_2} \subtype A_1 \\ \mtp{\iso}{B_1} \subtype B_2}
+        {\mtp{\iso}{A_1 \to B_1} \subtype A_2 \to B_2}
 \end{mathpar}
 
-The premise $\tb T = \tb$ of the third rule holds for $T \ne \ti$ in our system;
-however, $\tb T = \tb$ captures more exactly \emph{why} the rule is valid.
+The premise $\path T = \path$ of the third rule holds for $T \ne \iso$ in our system;
+however, $\path T = \path$ captures more exactly \emph{why} the rule is valid.
 \todo{TODO: Give proofs each of these rules are valid.}
 
 \todo{Are there also more precise/suggestive versions of the other premises? Can
-  the $U \le T$ constraints be turned into ``composing with $V$ is $\ge \tm$'',
+  the $U \le T$ constraints be turned into ``composing with $V$ is $\ge \id$'',
   for some choice of $V$ depending on $U$?}
 
 Subtyping at base types will depend on the base types you choose. Frequently,
@@ -921,7 +895,7 @@ some base types' preorders will be symmetric (or even discrete, $x \le y \iff x
 = y$), and therefore equivalence relations. Let ``$P~\text{equiv}$'' hold if
 $P$'s order is symmetric. Then the following refinement of \textsc{refl} is
 useful:
-\[ \infer{P~\text{equiv}}{\mtp{\tb}{P} \subtype P} \]
+\[ \infer{P~\text{equiv}}{\mtp{\path}{P} \subtype P} \]
 
 
 \subsection{Mode stripping}
@@ -931,13 +905,13 @@ strips off modal operators on $A$, turning them into transformations on $T$. As
 in subtyping, $A$ is an input and $T$ an output; however, $B$ is now an output.
 %
 \begin{mathpar}
-  \infer{\fapremise{T,B} A \ne \T{T} B}{\mtp{\tm}{A} \strips A}
+  \infer{\fapremise{T,B} A \ne \T{T} B}{\mtp{\id}{A} \strips A}
 
   \infer{\mtp{T}{A} \strips B \\ \adjoint{U}{V}}
         {\mtp{TU}{\T{V} A} \strips B}
 \end{mathpar}
 
-\todo{TODO: note that we cannot strip the mode $\tb$. $\tb$ is basically a
+\todo{TODO: note that we cannot strip the mode $\path$. $\path$ is basically a
   pariah; we cannot eliminate it through mode stripping, and we don't have an
   explicit elimination rule.}
 
@@ -955,7 +929,7 @@ Here are two more general variations on the $\fn$ rule I've considered:
   \infer[Fn-2]
         {\checks{m}{\extend{\GG}{\h{x}{U}{A}}}{B}
          \\ \mtp{T}{A} \subtype A
-         \\ \tm \le T U}
+         \\ \id \le T U}
         {\checks{\fnof{x} m}{\GG}{A \to B}}
 \end{mathpar}
 \textsc{Fn-1} requires a new judgment, $A \le \mtp{T}{B}$, where $A,B,T$ are all
@@ -966,19 +940,19 @@ However, it's not clear to me I need to generalize the $\fn$ rule. The reason I
 thought I did was to justify something like the following:
 \begin{mathpar}
   \infer*{\infer*{\vdots}
-           {{\extend{\GG}{\h{x}{\ti}{A}}} \vdash {m} : {B}}}
-         {{\GG} \vdash {\fnof{x}{m}} : {\T{\ti} A \to B}}
+           {{\extend{\GG}{\h{x}{\iso}{A}}} \vdash {m} : {B}}}
+         {{\GG} \vdash {\fnof{x}{m}} : {\T{\iso} A \to B}}
 \end{mathpar}
 
 But this \emph{could} check as follows:
 \begin{mathpar}
-  \infer*{\infer*{\vdots}{\checks{m}{\extend{\GG}{\h{x}{T}{(\T{\ti} A)}}}{B}}
-          \\ \tm \le T}
-         {\checks{\fnof{x}{m}}{\GG}{\T{\ti} A \to B}}
+  \infer*{\infer*{\vdots}{\checks{m}{\extend{\GG}{\h{x}{T}{(\T{\iso} A)}}}{B}}
+          \\ \id \le T}
+         {\checks{\fnof{x}{m}}{\GG}{\T{\iso} A \to B}}
 \end{mathpar}
 
-So the crucial question is: can we always substitute $\h{x}{\tm}{\T{\ti} A}$
-for $\h{x}{\ti}{A}$?
+So the crucial question is: can we always substitute $\h{x}{\id}{\T{\iso} A}$
+for $\h{x}{\iso}{A}$?
 %
 It would suffice to prove the subtyping and substitution principles given in
 \cref{sec:principles}. Can we prove these with our original, subtyping-less
@@ -1186,7 +1160,7 @@ to a morphism $\GG \x TA \to 1 + \phi$. \todo{However, at this point our rules
 
 \begin{mathpar}
   \infer{x \not\in \phi}{
-    \pcheckio{x}{\tm}{A}{\mprecx{\vv{\tb}}{\phi}}{x : A}}
+    \pcheckio{x}{\id}{A}{\mprecx{\vv{\path}}{\phi}}{x : A}}
 
   \infer{\mdist{A}{A_1 + A_2} \\
          \pcheckio{p}{T}{A_i}{\GG}{\phi}}
@@ -1197,9 +1171,9 @@ to a morphism $\GG \x TA \to 1 + \phi$. \todo{However, at this point our rules
          \pcheckio{q}{U}{C}{\GG_2, \mprecx{\vv{V}}{\phi}}{\psi}
   }{\textstyle
     \pcheckio{(p,q)}
-             {\left(\tm \tmeet \bigmeet\!\vv{V}\right) T \tmeet U}
+             {\left(\id \tmeet \bigmeet\!\vv{V}\right) T \tmeet U}
              {A}
-             {\mcx{\tm \tmeet \bigmeet\!\vv{V}}{\GG_1} \tmeet \GG_2}
+             {\mcx{\id \tmeet \bigmeet\!\vv{V}}{\GG_1} \tmeet \GG_2}
              {\phi, \psi}}
 
   \infer{\pcheckio{p}{T}{A}{\GG_1}{\phi} \\
@@ -1207,10 +1181,10 @@ to a morphism $\GG \x TA \to 1 + \phi$. \todo{However, at this point our rules
   }{\textstyle
     \pcheckio
         {\pif{p}{m}}
-        %{\left(\tm \tmeet \tb{\bigmeet\!\vv{U}} \right) T}
-        {T \tmeet \tb\bigmeet\!\vv{U}T}
+        %{\left(\id \tmeet \path{\bigmeet\!\vv{U}} \right) T}
+        {T \tmeet \path\bigmeet\!\vv{U}T}
         {A}
-        {\mcx{\tm \tmeet \tb\bigmeet\!\vv{U}}{\GG_1} \tmeet \mcx{\tb}\GG_2}
+        {\mcx{\id \tmeet \path\bigmeet\!\vv{U}}{\GG_1} \tmeet \mcx{\path}\GG_2}
         {\phi}}
 \end{mathpar}
 
@@ -1394,13 +1368,13 @@ We wish to prove admissible the following rules:
 %%   \\
 
 %%   \infer{\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash M : C}
-%%         {\xbar{i}{\h{x_i}{A_i}{s_i \tc \ti}} \vdash \textbf{box}\;M : \square C}
+%%         {\xbar{i}{\h{x_i}{A_i}{s_i \tc \iso}} \vdash \textbf{box}\;M : \square C}
 
 %%   \infer{\xbar{i}{\h{x_i}{A_i}{s_i}} \vdash M : \square B
 %%          \quad
 %%          \xbar{i}{\h{x_i}{A_i}{t_i}, \h{y}{B}{u}} \vdash N : C
 %%          \quad \iso \le u}
-%%         {\xbar{i}{\h{x_i}{A_i}{(s_i \tc \tb) \tmeet t_i}} \vdash
+%%         {\xbar{i}{\h{x_i}{A_i}{(s_i \tc \path) \tmeet t_i}} \vdash
 %%           \textbf{let box}~ x = M ~\textbf{in}~ N : C}
 %% \end{mathpar}
 
