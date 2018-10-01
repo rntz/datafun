@@ -10,10 +10,6 @@ open import TreeSet
 open import Iso
 
  ---------- Denotations of types & modes ----------
-Vars : Cx -> Set
-Vars X = ∃ (λ a -> a ∈ X)
-pattern Var {o} {a} p = (o , a) , p
-
 type : Type -> Proset
 type bool = bools
 type (set a p) = trees (iso (type a))
@@ -22,22 +18,21 @@ type (a ⊃ b) = type a ⇨ type b
 type (a * b) = type a ∧ type b
 type (a + b) = type a ∨ type b
 
--- Denotation of a singleton context.
-singleton : Fun hyps (cats {zero} {zero})
-singleton = TODO
--- ap singleton (T , a) = Tone.at (ap mode⇒tone T) (type a)
--- map singleton (T≤U , refl) = map mode⇒tone T≤U
+-- Denotation of a singleton context. This is basically the currying of the
+-- functor taking modes to endofunctors on prosets (plus the functor taking
+-- types (discrete) to prosets). It would be nice to express it that way.
+singleton : Fun hyps (op prosets)
+ap singleton (T , a) = Tone.at (ap mode⇒tone T) (type a)
+map singleton (U≤T , refl) = map mode⇒tone U≤T
 
--- ⟦_⟧₁ : Mode × Type -> Proset
-⟦_⟧₁ = ap singleton
--- ⟦ mono , a ⟧₁ = type a
--- ⟦ disc , a ⟧₁ = iso (type a)
+context : Fun cxs (op prosets)
+context = mapreduce singleton
+  where instance x : Products (op (op prosets))
+        x = Products: (top cat-products)
+            λ a b → a ∧ b / π₁ / π₂ / ⟨_,_⟩
 
--- Can I do this using tree-⋁ or something? Probably if I generalized it more.
 ⟦_⟧ : Cx -> Proset
-⟦ empty ⟧ = ⊤
-⟦ leaf h ⟧ = ⟦ h ⟧₁
-⟦ node X Y ⟧ = ⟦ X ⟧ ∧ ⟦ Y ⟧
+⟦_⟧ = ap context
 
 ⟦_⟧+ : Premise -> Proset
 ⟦ nil ⟧+    = ⊤

@@ -12,80 +12,69 @@ open import Iso
 
 
 ---------- Lemmas for denotational semantics of terms ----------
--- ⟦_⟧ is a functor, Cx^op -> Proset
-comap⟦_⟧ : ∀{X Y} -> X ≤ Y -> ⟦ Y ⟧ ⇒ ⟦ X ⟧
-comap⟦ empty≤ ⟧ = ≤⊤
--- uh-oh. I think I have failed to apply an "op" somewhere!
-comap⟦ leaf≤ h ⟧ = {!!}
-comap⟦ node≤ l r ⟧ = ⟨ comap⟦ l ⟧ , comap⟦ r ⟧ ⟩
-comap⟦ split₁ x ⟧ = π₁ ∙ comap⟦ x ⟧
-comap⟦ split₂ y ⟧ = π₂ ∙ comap⟦ y ⟧
+module _ {i j} (C : Cat i j) where
+  -- Obj-id≡ : Obj (Tone.at tone-id C) ≡ Obj C; Obj-id≡ = refl
+  -- rel-id≡ : Hom (Tone.at tone-id C) ≡ Hom C; rel-id≡ = refl
+  -- ident-id≡ : (λ {a} → ident (Tone.at tone-id C) {a}) ≡ ident C; ident-id≡ = refl
+  -- compo-id≡ : (λ {a}{b}{c} → compo (Tone.at tone-id C) {a}{b}{c}) ≡ compo C; compo-id≡ = refl
 
--- Managing environments.
-lookup : ∀{X x} -> x ∈ X -> ⟦ X ⟧ ⇒ ⟦ x ⟧₁
-lookup = comap⟦_⟧
+  -- How do I actually do this?
+  at-id≡ : Tone.at {i}{j} tone-id C ≡ C
+  at-id≡ = TODO
+  -- at-id≡ with Tone.at tone-id C | Obj-id≡ | rel-id≡ | ident-id≡ | compo-id≡
+  -- ... | D@(Cat: _ _ _ _) | refl | refl | refl | refl = ?
 
-cons : ∀{X Y} -> ⟦ X ⟧ ∧ ⟦ Y ⟧ ⇒ ⟦ Y ∨ X ⟧
-cons = swap
+-- Can I prove this using ⟦_⟧ being mapreduce? map context?
+-- no, this fundamentally relies on wipe distributing over ∧/⊤.
+wipe⇒iso : ∀ X → ⟦ wipe X ⟧ ⇒ iso ⟦ X ⟧
+wipe⇒iso empty = fun (λ _ → TT , TT)
+-- The leaf case is □A ≤ □(TA). This follows from □ ≤ □T, but only given □(TA) =
+-- (□T)A. It's easier to just prove it directly.
+wipe⇒iso (leaf (mono , a)) = fun id
+wipe⇒iso (leaf (disc , a)) = fun ⟨ id , swap ⟩
+wipe⇒iso (node X Y) = map∧ (wipe⇒iso X) (wipe⇒iso Y) ∙ ∧/iso
 
--- wipe-sym : ∀{X x y} -> Hom ⟦ wipe X ⟧ x y -> Hom ⟦ wipe X ⟧ y x
--- wipe-sym f (Var {mono} ())
--- -- Argh!
--- wipe-sym f (Var {disc} p) = swap {{sets}} (f (Var {disc} p))
+ ---------- Denotations of terms, premises, and term formers ----------
+eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ⇒ ⟦ P ⟧+
+eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ⇒ type a
 
--- wipe⇒iso : ∀{X} -> ⟦ wipe X ⟧ ⇒ iso ⟦ wipe X ⟧
--- wipe⇒iso = fun ⟨ id , wipe-sym ⟩
+eval tt = constant TT
+eval (M , N) = ⟨ eval M , eval N ⟩
+eval (bind M) = curry (swap ∙ eval M)
+eval (box {X} M) = wipe⇒iso X ∙ map Iso (eval M)
+eval (var mono p) = map context p ∙ fun id
+eval (var disc p) = map context p ∙ extract Iso
+eval (form ! M) = eval M ∙ eval⊩ form
 
--- lambda : ∀{x c} -> ⟦ hyp x ⟧ ⇨ c ⇒ ⟦ x ⟧₁ ⇨ c
--- lambda = precompose singleton
-
--- from-bool : ∀{a} (S : Sums a) -> bools ∧ a ⇒ a
--- from-bool S .ap (c , x) = if c then x else Sums.⊥ S
--- from-bool S .map (f≤* , x≤y) = Sums.⊥≤ S
--- from-bool S .map (t≤t , x≤y) = x≤y
-
---  ---------- Denotations of terms, premises, and term formers ----------
--- eval  : ∀{X P} -> X ⊢ P -> ⟦ X ⟧ ⇒ ⟦ P ⟧+
--- eval⊩ : ∀{P a} -> P ⊩ a -> ⟦ P ⟧+ ⇒ type a
-
--- eval tt = constant TT
--- eval (M , N) = ⟨ eval M , eval N ⟩
--- eval (bind M) = curry (cons ∙ eval M)
--- eval (box M) = comap⟦ extract Wipe ⟧ ∙ wipe⇒iso ∙ map Iso (eval M)
--- eval (var mono p) = lookup p
--- eval (var disc p) = lookup p ∙ extract Iso
--- eval (form ! M) = eval M ∙ eval⊩ form
-
--- eval⊩ lam = lambda
--- eval⊩ app = apply
--- eval⊩ box = id
--- eval⊩ letbox = map∧ id lambda ∙ swapply
--- eval⊩ pair = id
--- eval⊩ (proj true)  = π₁
--- eval⊩ (proj false) = π₂
--- eval⊩ (bool b) = Fun: (λ _ -> b) (λ _ → id)
--- eval⊩ if = uncurry (antisym⇒ antisym:bool≤ (λ x → if x then π₁ else π₂))
--- eval⊩ (inj true)  = in₁
--- eval⊩ (inj false) = in₂
--- -- TODO: make more use of Lambdas.
--- eval⊩ case = cases π₁ (map∧ (π₂ ∙ π₁) singleton ∙ apply)
---                       (map∧ (π₂ ∙ π₂) singleton ∙ apply)
---   where open import Lambdas
--- -- eval⊩ case = distrib-∧/∨
--- --            ∙ [ map∧ singleton π₁ ∙ swapply
--- --              , map∧ singleton π₂ ∙ swapply ]
--- eval⊩ splitsum .ap x = x
--- eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
--- eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)
--- eval⊩ (when (_ , sl)) = from-bool (is! sl)
--- eval⊩ (single _) .ap = leaf
--- eval⊩ (single _) .map = leaf≤
--- eval⊩ (for-in _ (_ , b-sl)) =
---   map∧ id (lambda ∙ Tree-map)
---   ∙ swapply
---   ∙ tree-⋁ _ (is! b-sl)
--- eval⊩ (empty sl) = constant (Sums.⊥ (is! sl))
--- eval⊩ (join sl) = functor∨ {{S = is! sl}}
--- -- TODO
--- eval⊩ (fix is-fix) = {!!}
--- eval⊩ (fix≤ is-fix≤) = {!!}
+eval⊩ (lam {a}) rewrite at-id≡ (type a) = id
+eval⊩ app = apply
+eval⊩ box = id
+eval⊩ letbox = swapply
+eval⊩ pair = id
+eval⊩ (proj true)  = π₁
+eval⊩ (proj false) = π₂
+eval⊩ (bool b) = Fun: (λ _ -> b) (λ _ → id)
+eval⊩ if = uncurry (antisym⇒ antisym:bool≤ (λ x → if x then π₁ else π₂))
+eval⊩ (inj true)  = in₁
+eval⊩ (inj false) = in₂
+-- TODO: make more use of Lambdas.
+eval⊩ case = cases π₁ (map∧ (π₂ ∙ π₁) (fun id) ∙ apply)
+                      (map∧ (π₂ ∙ π₂) (fun id) ∙ apply)
+  where open import Lambdas
+-- eval⊩ case = distrib-∧/∨
+--            ∙ [ map∧ (fun id) π₁ ∙ swapply
+--              , map∧ (fun id) π₂ ∙ swapply ]
+eval⊩ splitsum .ap x = x
+eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
+eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)
+eval⊩ (when {a} (_ , sl)) = When {{A = type a}} {{S = is! sl}} π₁ π₂
+eval⊩ (single _) .ap = leaf
+eval⊩ (single _) .map = leaf≤
+-- TODO: Can I use mapreduce here?
+eval⊩ (for-in _ (_ , b-sl)) =
+  map∧ id Tree-map ∙ swapply ∙ tree-⋁ _ (is! b-sl)
+eval⊩ (empty sl) = constant (Sums.⊥ (is! sl))
+eval⊩ (lub-of {a} sl) = functor∨ {{C = type a}} {{S = is! sl}}
+-- TODO
+eval⊩ (fix is-fix) = {!!}
+eval⊩ (fix≤ is-fix≤) = {!!}
