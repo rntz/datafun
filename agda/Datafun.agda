@@ -8,21 +8,21 @@ open import Monads
 data Mode : Set where mono disc : Mode
 
 data _≺_ : (o p : Mode) -> Set where
-  mode-refl : ∀{o} -> o ≺ o
-  mode-disc : ∀{o} -> disc ≺ o
+  refl≺ : ∀{o} -> o ≺ o
+  disc≺ : ∀{o} -> disc ≺ o
 
 instance
   modes : Proset
   Obj modes = Mode
   Hom modes = _≺_
-  ident modes = mode-refl
-  compo modes mode-refl b = b
-  compo modes mode-disc b = mode-disc
+  ident modes = refl≺
+  compo modes refl≺ b = b
+  compo modes disc≺ b = disc≺
 
 _≺?_ : ∀ o p -> Dec (o ≺ p)
-mono ≺? mono = yes mode-refl
+mono ≺? mono = yes refl≺
 mono ≺? disc = no (λ ())
-disc ≺? _ = yes mode-disc
+disc ≺? _ = yes disc≺
 
 data Class : Set where
   _,_ : BinOp Class
