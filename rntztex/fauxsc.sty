@@ -1,0 +1,22 @@
+%% This is adapted from
+%% https://tex.stackexchange.com/questions/55664/fake-small-caps-with-xetex-fontspec/225078#225078
+%%
+%% I might also need to use
+%% https://tex.stackexchange.com/questions/339887/small-caps-fauxsc-actually-with-output-from-jobname-today
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{fauxsc}[2018/06/15]
+\RequirePackage{graphicx} % scalebox
+
+\newcommand\fauxsc[1]{\fauxschelper#1 \relax\relax}
+\def\fauxschelper#1 #2\relax{%
+  \fauxschelphelp#1\relax\relax%
+  \if\relax#2\relax\else\ \fauxschelper#2\relax\fi%
+}
+\def\Hscale{.83}\def\Vscale{.72}\def\Cscale{1.00}
+\def\fauxschelphelp#1#2\relax{%
+  \ifnum`#1>``\ifnum`#1<`\{\scalebox{\Hscale}[\Vscale]{\uppercase{#1}}\else%
+    \scalebox{\Cscale}[1]{#1}\fi\else\scalebox{\Cscale}[1]{#1}\fi%
+  \ifx\relax#2\relax\else\fauxschelphelp#2\relax\fi}
+
+%% TODO: figure out how to change \scshape & \textsc to use \fauxsc for a
+%% specific typeface, e.g. serif only.

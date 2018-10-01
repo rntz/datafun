@@ -3,36 +3,33 @@
 %% augh, LaTeX and augh, fonts. Maybe LuaTeX or XeTeX could handle this better.
 
 %% https://tex.stackexchange.com/questions/205667/is-there-an-equivalent-to-fontspecs-scale-matchuppercase-for-pdflatex-or-how-t
-%%
 %% suggests I can get latex to print the heights of things for me! however, this
 %% won't necessarily result in things visually aligning.
 
 \documentclass[20pt]{rntz}
-%\usepackage[paperheight=50pt,paperwidth=150pt,margin=5pt]{geometry}
-\usepackage[paperheight=330pt,paperwidth=150pt,margin=5pt]{geometry}
+\usepackage[paperheight=330pt,paperwidth=340pt,margin=5pt]{geometry}
+\usepackage[T1]{fontenc}
 
+% serif: baskerville, charter, cochineal, fbb, libertine, palatino, pt
+% math: newmath, euler
 \usepackage{rntzfont}
 
 \setlength{\parindent}{0pt}
 \linespread{.8}
 \begin{document}\Huge
 
-%% x$x$ i$i$ a$a$ n$n$ h$h$ p$p$
-
-%% x{\ttfamily x} i{\ttfamily i} a{\ttfamily a} n{\ttfamily n} h{\ttfamily h} p{\ttfamily p}
-
-%% x{\sffamily x} i{\sffamily i} a{\sffamily a} n{\sffamily n} h{\sffamily h} p{\sffamily p}
-
-$x$x{\sffamily x}{\ttfamily x}
-
-$i$i{\sffamily i}{\ttfamily i}
-
-$a$a{\sffamily a}{\ttfamily a}
-
-$n$n{\sffamily n}{\ttfamily n}
-
-$h$h{\sffamily h}{\ttfamily h}
-
-$p$p{\sffamily p}{\ttfamily p}
+\begin{tabular}{ll}
+  \textit{x}$x$x\textsf{x}\texttt{x} & $X$X\textsf{X}\texttt{X}
+  \\
+  \textit{a}$a$a\textsf{a}\texttt{a} & $A$A\textsf{A}\texttt{A}
+  \\
+  \textit{i}$i$i\textsf{i}\texttt{i} & $I$I\textsf{I}\texttt{I}
+  \\
+  \textit{n}$n$n\textsf{n}\texttt{n} & $N$N\textsf{N}\texttt{N}
+  \\
+  \textit{f}$f$f\textsf{f}\texttt{f} & $F$F\textsf{F}\texttt{F}
+  \\
+  \textit{p}$p$p\textsf{p}\texttt{p} & $P$P\textsf{P}\texttt{P}
+\end{tabular}
 
 \end{document}

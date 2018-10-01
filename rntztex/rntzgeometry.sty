@@ -5,22 +5,15 @@
 %     b5: 176 x 250mm    6.9 x  9.8in
 %     a4: 210 x 297mm    8.3 x 11.7in
 % letter: 216 x 279mm    8.5 x 11in
+\DeclareOption{a5}{\def\rntz@geom{a5paper,text={120mm,175mm}}}
+\DeclareOption{b5}{\def\rntz@geom{b5paper,text={136mm,210mm}}}
+\DeclareOption{a4}{\def\rntz@geom{a4paper,text={160mm,247mm}}}
+\DeclareOption{letter}{\def\rntz@geom{letterpaper,text={175mm,230mm}}}
 
-% We use reasonable vertical margins, but very small horizontal margins. This is
-% because we're going to use the "narrow" package to reduce our horizontal
-% width, but want the full width available for wide figures if necessary.
-\DeclareOption{a5}{\def\rntz@geom{a5paper,text={128mm,170mm}}}
-\DeclareOption{b5}{\def\rntz@geom{b5paper,text={146mm,195mm}}}
-% 550pt ~= 193.3mm
-\DeclareOption{b5}{\def\rntz@geom{b5paper,textwidth=146mm,textheight=550pt}}
-\DeclareOption{a4}{\def\rntz@geom{a4paper,text={170mm,240mm}}}
-\DeclareOption{letter}{\def\rntz@geom{letterpaper,text={176mm,222mm}}}
+% Pass unrecognized options to `geometry'.
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{geometry}}
 
-% Pass unrecognized options to the "narrow" package.
-\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{narrow}}
-
-\ExecuteOptions{b5}
+\ExecuteOptions{a4}
 \ProcessOptions\relax
 
 \RequirePackage[\rntz@geom]{geometry}
-\RequirePackage{narrow}
