@@ -197,7 +197,10 @@ rename f tt         = tt
 rename f (M , N)    = rename f M , rename f N
 rename f (bind M)   = bind (rename (map∨₂ f) M)
 --rename f (box M)    = box (rename (map Wipe f) M)
-rename {X} {Y} {P} f (box M)    = TODO
+
+-- this look hard. argh.
+-- oh fuck, it's actually impossible! FUUUUUCK.
+rename {._} {Y} {P} f (box {X} M) = {!X!}
 rename f (form ! M) = form ! rename f M
 --rename f (var o p)  = var o (f (o , _) p)
 rename f (var o p)  = var o (p ∙ f)
