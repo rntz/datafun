@@ -80,7 +80,7 @@ record IsSL (A : Change) : Set where
 open IsSL public
 
 slSL : ∀ A S -> IsSL (change-SL A S)
-slSL A S = IsSL: (λ _ → a∨⊥≈a) (λ { (p , q) → juggle∨≈ ∙ ∨≈ p q })
+slSL A S = IsSL: (λ _ → idem∨ , in₁) (λ { (p , q) → juggle∨≈ ∙ ∨≈ p q })
   where private instance aa = A; ss = S; isoaa = iso A
 
 sl× : ∀ {A B} (P : IsSL A) (Q : IsSL B) -> IsSL (A ∧ B)
