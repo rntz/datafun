@@ -22,6 +22,7 @@ module Comonad {i j C} (□ : Fun {i}{j} C C) (Com : Monad (map Op □)) where
     renaming (join to dup; pure to extract; bind to extend)
 
 -- Autoconversion. The other direction is true definitionally.
+-- If I remove "no-eta-equality" from Cat, this becomes definitional too!
 instance
   auto:monad→comonad : ∀{i j} {{C}} {◇ : Fun {i}{j} C C} → Monad ◇ → Comonad (map Op ◇)
   auto:monad→comonad m = Monad: (Monad.join m) (Monad.pure m)
@@ -33,8 +34,10 @@ module _ {i j} {{C}} (◇ : Fun {i}{j} C C) {{Mon : Monad ◇}} where
   pure : ∀{a} -> a ≤ ap ◇ a;             pure = Monad.pure Mon
 
 module _ {i j} {{C}} (□ : Fun {i}{j} C C) {{Com : Comonad □}} where
-  dup : ∀{a} → ap □ a ≤ ap □ (ap □ a);  dup = Comonad.dup Com
-  extract : ∀{a} → ap □ a ≤ a;          extract = Comonad.extract Com
+  dup : ∀{a} → ap □ a ≤ ap □ (ap □ a)
+  dup = Comonad.dup {□ = □} Com
+  extract : ∀{a} → ap □ a ≤ a
+  extract = Comonad.extract {□ = □} Com
 
 
 module Tests where
