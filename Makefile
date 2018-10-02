@@ -25,6 +25,10 @@ watch: all
 %-book.pdf: %.pdf
 	pdfbook $<
 
+# Likewise, but makes a 2-up version.
+%-2up.pdf: %.pdf
+	pdfjam --suffix 2up --landscape --nup 2x1 -- $<
+
 clean:
 	$(LATEXRUN) --clean-all
 	rm -r latex.out
