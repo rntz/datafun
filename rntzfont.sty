@@ -30,12 +30,12 @@
 
 
 %% ---------- 2. Miscellany ----------
-%% Default linespread.
-\linespread{1.13}
-
 %% Utilities for scaling used inside this file.
 \newcommand{\@scaled}[1]{\fpeval{#1*\rntz@fontscale}}
 \edef\rntz@eulerscale{1}
+
+%% Default linespread.
+\linespread{\@scaled{1.13}}
 
 %% TO CONSIDER:
 %\PassOptionsToPackage{euler-digits}{eulervm}
