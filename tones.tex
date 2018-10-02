@@ -6,8 +6,8 @@
 %% \usepackage[scaled=0.95]{rntzfont}
 
 % Options: charter, palatino, cochineal, libertine.
-%\usepackage[b5]{rntzgeometry}\usepackage[width=365pt]{narrow}
-\usepackage[a5]{rntzgeometry}
+\usepackage[b5]{rntzgeometry}\usepackage[width=365pt,fullwidth=16cm]{narrow}
+%\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=13cm,width=115mm]{narrow}
 \usepackage[palatino]{rntzfont}
 %\linespread{1.1526}
 
@@ -365,11 +365,11 @@ $\text{a} \le \text{c} : \pathof{A}$, but $\text{a} \not\le \text{c}
 
     \begin{array}{r|cccc}
       T \tmeet U
-      & \id & \path & \op & \iso\\\hline
-      \id & \id & \id & \iso & \iso\\
-      \path & \id & \path & \op & \iso\\
-      \op & \iso & \op & \op & \iso\\
-      \iso & \iso & \iso & \iso & \iso
+            & \id  & \path & \op  & \iso\\\hline
+      \id   & \id  & \id   & \iso & \iso\\
+      \path & \id  & \path & \op  & \iso\\
+      \op   & \iso & \op   & \op  & \iso\\
+      \iso  & \iso & \iso  & \iso & \iso
     \end{array}
 
     \begin{array}{cr|cccc}
