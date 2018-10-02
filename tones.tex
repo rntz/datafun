@@ -85,6 +85,7 @@
 \newcommand{\sub}[1]{\{{#1}\}}
 \newcommand{\fix}{\textsf{fix}}
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
+\newcommand{\subtype}{\le}
 
 %% Category & preorder theory
 \newcommand{\cat}[1]{\textsc{#1}} %category name
@@ -269,7 +270,8 @@ Here are a few more useful properties of tones, which I invite you to verify:
 \end{theorem}
 
 \begin{theorem}[Tones distribute over $\x$ and $+$]\label{thm:tones-monoidal}
-  \(T(A + B) = TA + TB\) and \(T(A \x B) = TA \x TB\).
+  \(T(A \x B) = TA \x TB\) and \(T(A + B) = TA + TB\), where $A \x B$ and $A +
+  B$ are the product and coproduct preorders respectively.
 \end{theorem}
 
 
@@ -333,19 +335,18 @@ Here are a few more useful properties of tones, which I invite you to verify:
 \end{figure*}
 
 \Cref{fig:tone-example} illustrates how each tone transforms the graph of a
-simple preorder. $(\idof A)$ is identical to $A$. $(\opof A)$ inverts arrows'
-directions. \isof{A} keeps only the \emph{strongly connected components} of $A$.
-\pathof{A} makes \emph{weakly} connected components \emph{strong}. The arrows in
-$\isof A$ and $\pathof A$ are always bidirectional; their preorders are
-symmetric (and thus equivalence relations).
+simple preorder: $\idof A$ is identical to $A$; $\opof A$ inverts arrows'
+directions; \isof{A} isolates the strongly connected components of $A$; and
+\pathof{A} makes weakly connected components strong. Arrows in $\isof A$ and
+$\pathof A$ are always bidirectional, as their preorders are symmetric (and thus
+equivalence relations).
 
-The definition of $x \le y : \pathof A$ is more subtle than the other tones'.
+$\pathof{A}$ is a symmetric, transitive closure, the smallest preorder such that
+\(a \le b \vee b \le a : A\) implies \(a \le b : \pathof{A}\).
 %
-Formally, it is a symmetric, transitive closure: the smallest preorder such that
-\(a \le b \vee b \le a : A\) implies \(a \le b : \pathof{A}\). However, the
-converse does not always hold! In \cref{fig:tone-example}, for example,
-$\text{a} \le \text{c} : \pathof{A}$, but $\text{a} \not\le \text{c}
-\wedge \text{c} \not\le \text{a} : A$.
+Unlike every other tones' definition, this implication is not reversible. In
+\cref{fig:tone-example}, for example, $\text{a} \le \text{c} : \pathof{A}$, but
+$\text{a} \not\le \text{c} \wedge \text{c} \not\le \text{a} : A$.
 
 
 \subsection{Tone operators}
@@ -401,8 +402,8 @@ $\text{a} \le \text{c} : \pathof{A}$, but $\text{a} \not\le \text{c}
   for any preorder $A$.
 \end{enumerate}
 
-I sometimes write $UT$ as $U \tc T$ for clarity. Composition binds tighter than
-meet, so $TU \tmeet V = (TU) \tmeet V$.
+I sometimes write $TU$ as $T \tc U$ for clarity. Composition binds tighter than
+meet, so $TU \tmeet V = (T \circ U) \tmeet V$.
 %
 Together, $\tmeet$ and $\tc$ form a semiring whose properties are given in
 \cref{fig:tone-op-laws}. \todo{TODO: Reference all those other works which use
@@ -427,8 +428,8 @@ Together, $\tmeet$ and $\tc$ form a semiring whose properties are given in
       \vspace{2pt}\\
       \text{Associativity} & (TU)V &=& T(UV)\\
       \text{Identity} & \multicolumn{3}{c}{\id \tc T = T = T \tc \id}\\
-      \path~ \text{left-absorbs} & T\path &=& \path\\
-      \iso~ \text{left-absorbs} & T\iso &=& \iso\\
+      \path~ \text{right-absorbs} & T\path &=& \path\\
+      \iso~ \text{right-absorbs} & T\iso &=& \iso\\
       \op~ \text{involutive} & \op \tc \op &=& \id\\
     \end{array}
 
@@ -441,29 +442,36 @@ Together, $\tmeet$ and $\tc$ form a semiring whose properties are given in
   \label{fig:tone-op-laws}
 \end{figure*}
 
-\subsection{Monotonicity Types}
+
+%% TODO: maybe have a section talking about related work:
+%% 1. coeffects / graded comonads
+%% 2. context-constrained-computing
+%% 3. monotonicity types
+%%
+%% and then also mention all those works that use semiring annotations.
 
-\href{https://infoscience.epfl.ch/record/231867/files/monotonicity-types.pdf}{\emph{Monotonicity
-    Types}} by Clancy, Miller, and Meiklejohn has similar tables for their
-composition $\circ$ and ``contraction'' $+$ operators! However, instead of
-bivariance they have constancy, a stricter condition.
-%
-Constancy corresponds to respecting the \emph{indiscrete ordering} (which sets
-$a \le b$ for all $a,b$).\footnote{Indiscreteness and its dual, discreteness,
-  are also tones --- that is, functorial transformations on the ordering
-  component of a preorder --- but they complicate things, so I omit them.
+%% \subsection{Monotonicity Types}
 
-  Note also that discreteness and $\iso$ coincide on posets; many intuitions
-  transfer from one to the other.}
-%
-Interestingly, because constancy is so much stricter than bivariance, their
-composition operator is commutative.
+%% \href{https://infoscience.epfl.ch/record/231867/files/monotonicity-types.pdf}{\emph{Monotonicity
+%%     Types}} by Clancy, Miller, and Meiklejohn has similar tables for their
+%% composition $\circ$ and ``contraction'' $+$ operators! However, instead of
+%% bivariance they have constancy, a stricter condition.
+%% %
+%% Constancy corresponds to respecting the \emph{indiscrete ordering} (which sets
+%% $a \le b$ for all $a,b$).\footnote{Indiscreteness and its dual, discreteness,
+%%   are also tones --- that is, functorial transformations on the ordering
+%%   component of a preorder --- but they complicate things, so I omit them.
 
-They write $\uparrow$ for $\id$, $\downarrow$ for $\op$, $?$ for $\iso$, and
-$\sim$ for constancy. They also add $=$ for the ``tone'' that \emph{only the
-  identity function} has. This doesn't fit my framework; it cannot be phrased as
-a transformation on orderings. However, it seems related to subtyping.
+%%   Note also that discreteness and $\iso$ coincide on posets; many intuitions
+%%   transfer from one to the other.}
+%% %
+%% Interestingly, because constancy is so much stricter than bivariance, their
+%% composition operator is commutative.
 
+%% They write $\uparrow$ for $\id$, $\downarrow$ for $\op$, $?$ for $\iso$, and
+%% $\sim$ for constancy. They also add $=$ for the ``tone'' that \emph{only the
+%%   identity function} has. This doesn't fit my framework; it cannot be phrased as
+%% a transformation on orderings. However, it seems related to subtyping.
 
 
 \section{Tones, categorically}
@@ -516,6 +524,21 @@ Tone composition $TU$ corresponds to composition of tone functors:
 \begin{proof} Applying \cref{def:tone}, we have
   \( \elems{T(U-)} = \elems{U-} = \elemsfn \).
 \end{proof}
+
+
+%% \subsection{The tone lattice}
+
+%% Preorders have a natural ``subpreordering'' relationship, $A \subtype
+%% B$, which in turn induces an ordering on tones:
+
+%% \newcommand\defeq{\triangleq}
+
+%% \[\def\arraystretch{1.2}\begin{array}{rcl}
+%%   A \subtype B &\defeq&
+%%   A \subseteq B \mathrel{\text{and}}
+%%   (x \le y : A \implies x \le y : B)\\
+%%   T \le U &\defeq& (\forall A)~ TA \subtype UA
+%% \end{array}\]
 
 
 \subsection{The \Tone{} category}
@@ -708,7 +731,6 @@ simply typed $\lambda$-calculus.
 \newcommand{\tmcolor}{}%\color{ACMDarkBlue}}
 \newcommand{\cxcolor}{}%\color{ACMPurple}}
 
-\newcommand{\subtype}{\le}
 \newcommand{\strips}{\prec}
 
 \newcommand{\uh}[2]{#1 : #2}            % unmoded/toneless hypothesis
