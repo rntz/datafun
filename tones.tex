@@ -1,10 +1,15 @@
 \documentclass{rntz}
-\usepackage[a5]{rntzgeometry}
+
+%% \usepackage[laptop]{rntzgeometry}
+%% \usepackage[width=345pt,fullwidth=370pt]{narrow}
+%% \pagestyle{empty}
+%% \usepackage[scaled=0.95]{rntzfont}
 
 % Options: charter, palatino, cochineal, libertine.
-% pt is nice but lacks small caps.
-\usepackage[charter]{rntzfont}
-\linespread{1.15}
+%\usepackage[b5]{rntzgeometry}\usepackage[width=365pt]{narrow}
+\usepackage[a5]{rntzgeometry}
+\usepackage[palatino]{rntzfont}
+%\linespread{1.1526}
 
 %% \documentclass{article}
 %% \usepackage[b5paper]{geometry}
@@ -257,7 +262,7 @@ With this, we can state the theorem generalizing our observation:
 
 From this point on, when I write $f : A \to B$, I mean implicitly that $f$ is
 monotone; and therefore $f : TA \to B$ means that $f$ has tone $s$.
-
+%
 Here are a few more useful properties of tones, which I invite you to verify:
 
 \begin{theorem}[Functoriality of tones]\label{thm:tone-functoriality}
@@ -265,58 +270,115 @@ Here are a few more useful properties of tones, which I invite you to verify:
 \end{theorem}
 
 \begin{theorem}[Tones distribute over $\x$ and $+$]\label{thm:tones-monoidal}
-  \begin{eqnarray*}
-    T(A + B) = TA + TB\\
-    T(A \x B) = TA \x TB
-  \end{eqnarray*}
+  \(T(A + B) = TA + TB\) and \(T(A \x B) = TA \x TB\).
 \end{theorem}
 
-\subsection{Understanding \iso{} and \path{}}
+
+\subsection{Understanding tone transformations}
 
-\todo{An intuition about $\iso$ and $\path$: $\iso$ keeps only the \emph{strongly
-    connected components}, while $\path$ turns \emph{weakly} connected components
-  into \emph{strong} ones. I should use an example, with diagrams. I should also
-  mention that \iso{} and \path{} turn preorders into equivalence relations, and
-  the corresponding cate\-gory-and-functor diagram.}
+\begin{figure*}
+  \begin{mathpar}
+    \begin{tikzpicture}[baseline=(current bounding box.center)]
+      \node (a) at (0,   0) {a};
+      \node (b) at (.33, 1) {b};
+      \node (c) at (.67, 0) {c};
+      \node (d) at (1.33, 0) {e};
+      \node (e) at (1.33, 1) {d};
+      \draw [-Latex] (a) -- (b);
+      \draw [-Latex] (c) -- (b);
+      \draw [Latex-Latex] (d) -- (e);
+      \draw (-.4, -.4) -- (-.4, 1.4) -- (1.81, 1.4) -- (1.81, -.4) -- cycle;
+      \node [above] at (.705, 1.45) {$A = \idof A$};
+    \end{tikzpicture}
 
-\subsection{Defining \path{}} \label{sec:defining-path}
+    \begin{tikzpicture}[baseline=(current bounding box.center)]
+      \node (a) at (0,   0) {a};
+      \node (b) at (.33, 1) {b};
+      \node (c) at (.67, 0) {c};
+      \node (d) at (1.33, 0) {e};
+      \node (e) at (1.33, 1) {d};
+      \draw [-Latex] (b) -- (a);
+      \draw [-Latex] (b) -- (c);
+      \draw [Latex-Latex] (d) -- (e);
+      \draw (-.4, -.4) -- (-.4, 1.4) -- (1.81, 1.4) -- (1.81, -.4) -- cycle;
+      \node [above] at (.705, 1.45) {$\opof{A}$};
+    \end{tikzpicture}
 
-$\pathof{A}$ is the symmetric, transitive closure of $A$, the smallest preorder
-satisfying:
+    \begin{tikzpicture}[baseline=(current bounding box.center)]
+      \node (a) at (0,   0) {a};
+      \node (b) at (.33, 1) {b};
+      \node (c) at (.67, 0) {c};
+      \node (d) at (1.33, 0) {e};
+      \node (e) at (1.33, 1) {d};
+      \draw [Latex-Latex] (d) -- (e);
+      \draw (-.4, -.4) -- (-.4, 1.4) -- (1.81, 1.4) -- (1.81, -.4) -- cycle;
+      \node [above] at (.705, 1.45) {$\isof A$};
+    \end{tikzpicture}
 
-\[ a \le b \vee b \le a : A \implies a \le b : \pathof{A} \]
+    \begin{tikzpicture}[baseline=(current bounding box.center)]
+      \node (a) at (-.1,   0) {a};
+      \node (b) at (.35, 1) {b};
+      \node (c) at (.8, 0) {c};
+      \node (d) at (1.33, 0) {e};
+      \node (e) at (1.33, 1) {d};
+      \draw [Latex-Latex] (a) -- (b);
+      \draw [Latex-Latex] (b) -- (c);
+      \draw [Latex-Latex] (a) -- (c);
+      \draw [Latex-Latex] (d) -- (e);
+      \draw (-.48, -.4) -- (-.48, 1.4) -- (1.8, 1.4) -- (1.8, -.4) -- cycle;
+      \node [above] at (.66, 1.45) {$\pathof A$};
+    \end{tikzpicture}
+  \end{mathpar}
+  \caption{Tones applied to an example preorder}
+  \label{fig:tone-example}
+\end{figure*}
 
-The reverse direction, $a \le b : \pathof{A} \implies a \le b \vee b \le a : A$,
-does not always hold. A good counterexample is the \textsf{fencepost} preorder
-on $\N$, where $a < a+1$ for even $a$, and $a > a+1$ for odd $a$:
+\Cref{fig:tone-example} illustrates how each tone transforms the graph of a
+simple preorder. $(\idof A)$ is identical to $A$. $(\opof A)$ inverts arrows'
+directions. \isof{A} keeps only the \emph{strongly connected components} of $A$.
+\pathof{A} makes \emph{weakly} connected components \emph{strong}. The arrows in
+$\isof A$ and $\pathof A$ are always bidirectional; their preorders are
+symmetric (and thus equivalence relations).
 
-\begin{center}
-  \begin{tikzpicture}
-    \node (0)    at ( 0, 0) {0};
-    \node (1)    at ( 1, 1) {1};
-    \node (2)    at ( 2, 0) {2};
-    \node (3)    at ( 3, 1) {3};
-    \node (4)    at ( 4, 0) {4};
-    \node (5)    at ( 5, 1) {5};
-    \node (6)    at ( 6, 0) {6};
-    \node (dots) at ( 7, 1) {$\quad\cdots$};
-    \draw (0) -- (1) -- (2) -- (3) -- (4) -- (5) -- (6) -- (dots);
-  \end{tikzpicture}
-\end{center}
+The definition of $x \le y : \pathof A$ is more subtle than the other tones'.
+%
+Formally, it is a symmetric, transitive closure: the smallest preorder such that
+\(a \le b \vee b \le a : A\) implies \(a \le b : \pathof{A}\). However, the
+converse does not always hold! In \cref{fig:tone-example}, for example,
+$\text{a} \le \text{c} : \pathof{A}$, but $\text{a} \not\le \text{c}
+\wedge \text{c} \not\le \text{a} : A$.
 
-Note that $a \le b \vee b \le a : \textsf{fencepost} \iff |a-b| \le 1$, which
-isn't transitive! Instead, $\pathof{\textsf{fencepost}}$ is the \emph{transitive
-  closure} of $|a-b| \le 1$, which makes everything equivalent:
-\[ 0 \equiv 1 \equiv 2 \equiv 3 \equiv 4 \equiv \dots \]
+%% A good counterexample is the
+%% \textsf{fencepost} preorder on $\N$, where $a < a+1$ for even $a$, and $a > a+1$
+%% for odd $a$:
 
-This suggests a direct definition: let a \emph{path} from $a_0$ to $a_n$ be a
-``zig-zag\-ging'' list $a_0, \dots, a_n$ such that $a_i \le a_{i+1} \vee a_i \ge
-a_{i+1} : A$. Then $a \le b : \pathof{A}$ iff there is a path from $a$ to $b$.
+%% \begin{center}
+%%   \begin{tikzpicture}
+%%     \node (0)    at ( 0, 0) {0};
+%%     \node (1)    at ( 1, 1) {1};
+%%     \node (2)    at ( 2, 0) {2};
+%%     \node (3)    at ( 3, 1) {3};
+%%     \node (4)    at ( 4, 0) {4};
+%%     \node (5)    at ( 5, 1) {5};
+%%     \node (6)    at ( 6, 0) {6};
+%%     \node (dots) at ( 7, 1) {$\quad\cdots$};
+%%     \draw (0) -- (1) -- (2) -- (3) -- (4) -- (5) -- (6) -- (dots);
+%%   \end{tikzpicture}
+%% \end{center}
+
+%% Note that $a \le b \vee b \le a : \textsf{fencepost} \iff |a-b| \le 1$, which
+%% isn't transitive! Instead, $\pathof{\textsf{fencepost}}$ is the \emph{transitive
+%%   closure} of $|a-b| \le 1$, which makes everything equivalent:
+%% \[ 0 \equiv 1 \equiv 2 \equiv 3 \equiv 4 \equiv \dots \]
+
+%% This suggests a direct definition: let a \emph{path} from $a_0$ to $a_n$ be a
+%% ``zig-zag\-ging'' list $a_0, \dots, a_n$ such that $a_i \le a_{i+1} \vee a_i \ge
+%% a_{i+1} : A$. Then $a \le b : \pathof{A}$ iff there is a path from $a$ to $b$.
 
 
 \subsection{Tone operators}
 
-\begin{figure*}[t]
+\begin{figure*}
   \begin{mathpar}
     %% "baseline=(current bounding box.center)" incantation taken from
     %% https://tex.stackexchange.com/questions/220531/how-to-align-tikzpicture-and-text-in-a-table/220543#220543
@@ -367,7 +429,7 @@ a_{i+1} : A$. Then $a \le b : \pathof{A}$ iff there is a path from $a$ to $b$.
   for any preorder $A$.
 \end{enumerate}
 
-We sometimes write $UT$ as $U \tc T$ for clarity. Composition binds tighter than
+I sometimes write $UT$ as $U \tc T$ for clarity. Composition binds tighter than
 meet, so $TU \tmeet V = (TU) \tmeet V$.
 %
 Together, $\tmeet$ and $\tc$ form a semiring whose properties are given in
