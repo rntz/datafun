@@ -1,0 +1,27 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{fantasy}[2018/08/02]
+
+%% Laptop, 4:5 aspect.
+\DeclareOption{laptop}{
+  \def\rntz@geom{papersize={436pt,545pt},top=29pt,bottom=29pt}
+  \def\rntz@narrow{width=362pt,fullwidth=412pt}
+}
+
+%% Tablet, 3:4 aspect
+\DeclareOption{tablet}{
+  \def\rntz@geom{papersize={399pt,532pt},top=30pt,bottom=30pt}
+  \def\rntz@narrow{width=345pt,fullwidth=360pt}
+}
+
+%% Phone, 3:5 aspect, tiny margins.
+\DeclareOption{phone}{
+  \def\rntz@geom{papersize={342pt,570pt},top=15pt,bottom=15pt}
+  \def\rntz@narrow{width=312pt,fullwidth=340pt}
+}
+
+\ExecuteOptions{laptop}
+\ProcessOptions\relax
+
+\pagestyle{empty}
+\RequirePackage[\rntz@geom]{geometry}
+\RequirePackage[\rntz@narrow]{narrow}
