@@ -159,54 +159,6 @@ module Simplify(N: NORMAL): sig
 end = Simplify_(N)
 
 
-(* A derivative transform, as in the incremental lambda calculus. *)
-
-(* Maybe this should be weakly memoized? For now let's just leave it. If it
-   turns out to be a perf bottleneck we can handle that later. *)
-let rec delta: tp -> tp = function
-  | Bool -> Bool
-  | Prod tps -> Prod (List.map delta tps)
-  | Fn (a,b) -> Fn (a, Fn (delta a, delta b))
-
-(* How will this help me?
- * maybe T: TYPED should actually take a more interesting
- * interface, so that it can take advantage of derivatives
- * in computing fixed points. *)
-module Deriv(T: TYPED): TYPED
-       with type term = T.term * (sym cx -> T.term)
-= struct
-  type term = T.term * (sym cx -> T.term)
-
-  let dee x = gensym ("d" ^ x.name) ()
-
-  let var a x = T.var a x, fun cx -> T.var (delta a) (get cx x)
-
-  let lam (a: tp) (b: tp) (x: sym) ((body, dbody): term): term =
-    let da = delta a and db = delta b and dx = dee x in
-    T.lam a b x body,
-    fun cx -> T.lam a (Fn (da,db)) x (T.lam da db dx (dbody (set cx x dx)))
-
-  let app a b ((f,df): term) ((x,dx): term): term =
-    let da = delta a and db = delta b in
-    T.app a b f x,
-    fun cx -> T.app da db (T.app a (Fn(da,db)) (df cx) x) (dx cx)
-
-  let tuple terms =
-    T.tuple (List.map (fun (tp,tm) -> tp, fst tm) terms),
-    fun cx -> T.tuple (List.map (fun (tp,tm) -> delta tp, snd tm cx) terms)
-
-  let proj tps i (term, dterm) =
-    T.proj tps i term, fun cx -> T.proj tps i (dterm cx)
-
-  let letBind a b x (expr, dexpr) (body, dbody) =
-    let da = delta a and db = delta b and dx = dee x in
-    T.letBind a b x expr body,
-    fun cx -> T.letBind a db x expr
-                (T.letBind da db dx (dexpr cx)
-                   (dbody (set cx x dx)))
-end
-
-
 (* A bidirectional type checker implements a bidirectionally-typed language
  * given an explicitly-typed one. *)
 module Bidi(T: TYPED): BIDI
@@ -257,10 +209,9 @@ end
 
 (* TODO: Putting it all together *)
 module Lang = struct
-  (* Interp <- Simplify <- Deriv <- Check *)
+  (* Interp <- Simplify <- Check *)
   module Simple = Simplify(Interp)
-  module D = Deriv(Simple)
-  module Check = Bidi(D)
+  module Check = Bidi(Simple)
 
   type term = tp cx -> Interp.term
   type expr = term
