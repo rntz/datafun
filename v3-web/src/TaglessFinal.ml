@@ -1,3 +1,16 @@
+(* Feature list:
+ * - functions
+ * - tuples
+ * - TODO non-monotone functions OR modes?
+ * - TODO let-bindings
+ * - TODO finite sets
+ * - TODO booleans
+ * - TODO subtyping
+ * - TODO structural sum types
+ * - TODO semilattice types
+ * - TODO fixed points
+ *)
+
 module TaglessFinal = struct
 
 exception Todo let todo() = raise Todo
@@ -10,7 +23,7 @@ let typeError s = raise (TypeError s)
 type sym = {name: string; id: int}
 
 (* Types. *)
-type tp = Base | Prod of tp list | Fn of tp * tp
+type tp = Bool | Prod of tp list | Fn of tp * tp
 let subtype (a: tp) (b: tp) = a = b
 
 let next_id = ref 0
@@ -32,6 +45,7 @@ module type BIDI = sig
   val expr: expr -> term
   val lam: sym -> term -> term
   val tuple: term list -> term
+  val letBind: sym -> expr -> term -> term
 
   val asc: tp -> term -> expr
   val var: sym -> expr
@@ -47,6 +61,7 @@ module type TYPED = sig
   val app: tp -> tp -> term -> term -> term
   val tuple: (tp * term) list -> term
   val proj: tp list -> int -> term -> term
+  val letBind: tp -> tp -> sym -> term -> term -> term
 end
 
 (* Explicitly typed, in "normal" form. *)
@@ -64,10 +79,42 @@ module type NORMAL = sig
 end
 
 
-(* ===== Normalisation by evaluation (intensional) =====
+(* An evaluator for things in normal form. *)
+module Interp_ = struct
+  type value =
+    | Bool of bool
+    | Func of (value -> value)
+    | Tuple of value list
+
+  type env = value cx
+  type term = env -> value
+  type expr = env -> value
+
+  let expr _ (x: expr): term = x
+  let var _ x env = get env x
+
+  let lam _ _ x body env = Func (fun v -> body (set env x v))
+  let app _ _ fnc arg env = match fnc env, arg env with
+    | Func f, a -> f a
+    | _ -> raise Impossible
+
+  let tuple terms env = Tuple (List.map (fun (_,tm) -> tm env) terms)
+  let proj _ i e env = match e env with
+    | Tuple l -> List.nth l i
+    | _ -> raise Impossible
+end
+
+module Interp : sig
+  type value = Interp_.value
+  type env = Interp_.env
+  include NORMAL with type term = Interp_.term with type expr = Interp_.expr
+end = Interp_
+
+
+(* A simplification pass, based on intensional normalisation by evaluation.
  * Based on http://homepages.inf.ed.ac.uk/slindley/nbe/nbe-cambridge2016.pdf
  *)
-module Simplify(N: NORMAL) = struct
+module Simplify_(N: NORMAL) = struct
   type value = Neut of N.expr
              | Func of string * (value -> value)
              | Tuple of value list
@@ -85,7 +132,7 @@ module Simplify(N: NORMAL) = struct
   type term = env -> value
 
   let var a x env = try get env x with Not_found -> Neut (N.var a x)
-  let lam _ _ x m env = Func (x.name, (fun v -> m ((x,v)::env)))
+  let lam _ _ x m env = Func (x.name, (fun v -> m (set env x v)))
   let tuple terms env = Tuple (List.map (fun (_,t) -> t env) terms)
 
   let app a b m n env = match m env with
@@ -98,14 +145,71 @@ module Simplify(N: NORMAL) = struct
     | Tuple xs -> List.nth xs i
     | Func _ -> raise Impossible
 
+  let letBind _ _ x expr body env = body (set env x (expr env))
+
   let norm tp (t: term): N.term = reify tp (t [])
 end
-module Nbe_: NORMAL -> TYPED = Simplify
+
+module Simplify(N: NORMAL): sig
+  type value = Simplify_(N).value
+  type env = value cx
+  include TYPED with type term = env -> value
+  val reify: tp -> value -> N.term
+  val norm: tp -> term -> N.term
+end = Simplify_(N)
+
+
+(* A derivative transform, as in the incremental lambda calculus. *)
+
+(* Maybe this should be weakly memoized? For now let's just leave it. If it
+   turns out to be a perf bottleneck we can handle that later. *)
+let rec delta: tp -> tp = function
+  | Bool -> Bool
+  | Prod tps -> Prod (List.map delta tps)
+  | Fn (a,b) -> Fn (a, Fn (delta a, delta b))
+
+(* How will this help me?
+ * maybe T: TYPED should actually take a more interesting
+ * interface, so that it can take advantage of derivatives
+ * in computing fixed points. *)
+module Deriv(T: TYPED): TYPED
+       with type term = T.term * (sym cx -> T.term)
+= struct
+  type term = T.term * (sym cx -> T.term)
+
+  let dee x = gensym ("d" ^ x.name) ()
+
+  let var a x = T.var a x, fun cx -> T.var (delta a) (get cx x)
+
+  let lam (a: tp) (b: tp) (x: sym) ((body, dbody): term): term =
+    let da = delta a and db = delta b and dx = dee x in
+    T.lam a b x body,
+    fun cx -> T.lam a (Fn (da,db)) x (T.lam da db dx (dbody (set cx x dx)))
+
+  let app a b ((f,df): term) ((x,dx): term): term =
+    let da = delta a and db = delta b in
+    T.app a b f x,
+    fun cx -> T.app da db (T.app a (Fn(da,db)) (df cx) x) (dx cx)
+
+  let tuple terms =
+    T.tuple (List.map (fun (tp,tm) -> tp, fst tm) terms),
+    fun cx -> T.tuple (List.map (fun (tp,tm) -> delta tp, snd tm cx) terms)
+
+  let proj tps i (term, dterm) =
+    T.proj tps i term, fun cx -> T.proj tps i (dterm cx)
+
+  let letBind a b x (expr, dexpr) (body, dbody) =
+    let da = delta a and db = delta b and dx = dee x in
+    T.letBind a b x expr body,
+    fun cx -> T.letBind a db x expr
+                (T.letBind da db dx (dexpr cx)
+                   (dbody (set cx x dx)))
+end
 
 
 (* A bidirectional type checker implements a bidirectionally-typed language
  * given an explicitly-typed one. *)
-module Check(T: TYPED): BIDI
+module Bidi(T: TYPED): BIDI
         with type term = tp cx -> tp -> T.term
         with type expr = tp cx -> tp * T.term
 = struct
@@ -128,6 +232,9 @@ module Check(T: TYPED): BIDI
         with Invalid_argument _ -> typeError "wrong tuple length")
     | _ -> typeError "tuple must be a product"
 
+  let letBind (x: sym) (expr: expr) (body: term) (cx: tp cx) (b: tp): T.term =
+    let a, ex = expr cx in T.letBind a b x ex (body (set cx x a) b)
+
   (* ----- Synthesizing expressions ----- *)
   let asc a m cx = (a, m cx a)
 
@@ -146,5 +253,32 @@ module Check(T: TYPED): BIDI
                        with Failure _ -> typeError "bad projection index")
     | _ -> typeError "projection from non-tuple"
 end
+
+
+(* TODO: Putting it all together *)
+module Lang = struct
+  (* Interp <- Simplify <- Deriv <- Check *)
+  module Simple = Simplify(Interp)
+  module D = Deriv(Simple)
+  module Check = Bidi(D)
+
+  type term = tp cx -> Interp.term
+  type expr = term
+end
+
+(* module type BIDI_ = sig
+ *   type term
+ *   type expr
+ * 
+ *   val expr: expr -> term
+ *   val lam: sym -> term -> term
+ *   val tuple: term list -> term
+ *   val letBind: sym -> expr -> term -> term
+ * 
+ *   val asc: tp -> term -> expr
+ *   val var: sym -> expr
+ *   val app: expr -> term -> expr
+ *   val proj: int -> expr -> expr
+ * end *)
 
 end

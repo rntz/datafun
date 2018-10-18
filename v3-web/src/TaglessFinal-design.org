@@ -1,0 +1,30 @@
+* Passes
+
+** == 0. Parse ==> Datafun
+** == 1. Typecheck ==> Typed Datafun
+
+We ask whether the expression or definition's type is:
+
+A. First-order. We proceed with the rest of the pipeline.
+
+B. A function. If this is an expression, we do nothing. If this is a definition,
+we simplify it to an NBE "value" and store that in our environment for later use
+when evaluating other expressions or definitions.
+
+C. Mixed. We reject the program.
+
+** == 2. Simplify ==> First-order Datafun
+# Typed, first-order, normal-form-ish Datafun
+
+If evaluating a function definition, we stop here.
+
+If evaluating a first-order expression or definition, we pass the result on to
+the "derivative speedup" transformer.
+
+** == 3. Derivative speedup ==> Fast Datafun
+
+Typed, first-order (normal-form-ish?) Datafun with fast fixed points.
+
+Need to think about how this transformation will work.
+
+
