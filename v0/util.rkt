@@ -122,7 +122,7 @@
 (provide define-flat-contract define-flat-contracts)
 
 (define-syntax-rule (define-flat-contract name branches ...)
-  (define name (opt/c (flat-rec-contract name (or/c branches ...)))))
+  (define name (opt/c (flat-rec-contract name branches ...))))
 
 (define-syntax-rule (define-flat-contracts [name branches ...] ...)
   (define-values (name ...)
