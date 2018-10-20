@@ -50,8 +50,10 @@ module Set: sig
   val add: 'a -> 'a t -> 'a t
   val single: 'a -> 'a t
   val union: 'a t -> 'a t -> 'a t
+  val unions: 'a t list -> 'a t
   val flat_map: 'a t -> ('a -> 'b t) -> 'b t
   val is_empty: 'a t -> bool
+  val is_single: 'a t -> 'a option
   val to_list: 'a t -> 'a list
   val from_list: 'a list -> 'a t
 end = struct
@@ -65,8 +67,10 @@ end = struct
                           | LT -> x :: union xs b
                           | GT -> y :: union ys a
   let add x s = union [x] s
-  let rec flat_map s f = List.fold_left union empty (List.map f s)
+  let unions l = List.fold_left union empty l
+  let flat_map s f = unions (List.map f s)
   let is_empty = function [] -> true | _ -> false
+  let is_single = function [x] -> Some x | _ -> None
   let to_list x = x
   let from_list l = List.sort_uniq Pervasives.compare l
 end
@@ -85,8 +89,9 @@ module type BIDI = sig
   val letBind: sym -> expr -> term -> term
   (* sets *)
   val set: term list -> term
+  (* TODO: union: term list -> term *)
   val union: term -> term -> term
-  val forSet: sym -> expr -> term -> term
+  val forIn: sym -> expr -> term -> term
 
   val asc: tp -> term -> expr
   val var: sym -> expr
@@ -104,8 +109,12 @@ module type TYPED = sig
   val proj: tp list -> int -> term -> term
   val letBind: tp -> tp -> sym -> term -> term -> term
   val set: tp -> term list -> term
+  (* tp is tp of result expression, not element type. *)
   val union: tp -> term -> term -> term
-  val forSet: tp -> tp -> sym -> term -> term -> term
+  (* first type is type of elements of iterated-over set.
+   * second type is result type of whole computation.
+   * currently this is always of form (SetOf b). *)
+  val forIn: tp -> tp -> sym -> term -> term -> term
 end
 
 (* Explicitly typed, in "normal" form. *)
@@ -118,7 +127,7 @@ module type NORMAL = sig
   val tuple: (tp * term) list -> term
   val set: tp -> term list -> term
   val union: tp -> term -> term -> term
-  val forSet: tp -> tp -> sym -> expr -> term -> term
+  val forIn: tp -> tp -> sym -> expr -> term -> term
 
   val var: tp -> sym -> expr
   val app: tp -> tp -> expr -> term -> expr
@@ -154,7 +163,7 @@ module Interp_ = struct
 
   let set _ terms env = Set (Set.from_list (List.map (fun t -> t env) terms))
   let union _ m n env = Set (Set.union (asSet (m env)) (asSet (n env)))
-  let forSet _ _ x expr body env =
+  let forIn _ _ x expr body env =
     let f v = asSet (body (Cx.add x v env))
     in Set (Set.flat_map (expr env |> asSet) f)
 end
@@ -166,6 +175,40 @@ module Interp : sig
 end = Interp_
 
 
+(* A printer for things in normal form. *)
+module Display: NORMAL
+       with type term = int -> string
+        and type expr = int -> string
+= struct
+  type term = int -> string
+  type expr = term
+  let comma_sep (f: 'a -> string) : 'a list -> string = function
+    | [] -> ""
+    | [x] -> f x
+    | x::xs -> f x ^ List.fold_right (fun x rest -> ", " ^ f x ^ rest) xs ""
+
+  let pIf cond x = if cond then "(" ^ x ^ ")" else x
+
+  (* TODO: this code is almost certainly wrong about precedence *)
+  let expr _ e = e
+  let lam _ _ x e p = pIf (p > 0) ("fn " ^ x.name ^ " => " ^ e 0)
+  let tuple ms p = pIf (p >= 1) (comma_sep (fun m -> snd m 1) ms)
+  let set _ ms p = "{" ^ comma_sep (fun x -> x 1) ms ^ "}"
+  let union _ m n p = pIf (p > 1) (m 1 ^ " or " ^ n 1)
+  let forIn _ _ x expr body p =
+    pIf (p > 0) ("for " ^ x.name ^ " in " ^ expr 1 ^ " do " ^ body 0)
+  let var _ x _ = x.name
+  let app _ _ fnc arg p = pIf (p >= 2) (fnc 2 ^ " " ^ arg 1)
+  let proj _ i expr p = pIf (p >= 2) ("pi " ^ string_of_int i ^ " " ^ expr 1)
+end
+
+
+(* TODO: make a functor that takes a NORMAL lang to one with equality &
+   comparison on exprs. We can then use this in Simplify. The comparison should
+   be pretty shallow, just enough to de-duplicate obvious things, and bottom out
+   to physical equality for complex cases. *)
+
+
 (* A simplification pass, based on intensional normalisation by evaluation.
  * Based on http://homepages.inf.ed.ac.uk/slindley/nbe/nbe-cambridge2016.pdf
  *
@@ -173,7 +216,9 @@ end = Interp_
  * a) has only first-order free variables (inputs)
  * b) has a first-order type (output)
  *)
-module Simplify_(N: NORMAL) = struct
+module AbstractValues(N: NORMAL) = struct
+  (* TODO: Can I see value as another language, and tagless-final encode it?
+   * the purpose of values, more or less, is to be reified. *)
   type value = Expr of N.expr
              | Func of string * (value -> value)
              | Tuple of value list
@@ -182,70 +227,100 @@ module Simplify_(N: NORMAL) = struct
               * 2. uh-oh, how do we compare N.exprs? eh, if Pervasives.compare
               *    says they're equal, then we can probably treat them as equal.
               *
-              * `vals` are elements; `exprs` are expressions we need to union
-              * together. *)
-             | Set of { vals: value set
-                      ; exprs: N.expr set }
-             | ForSet of tp * sym * N.expr * value
+              *    except, shit. what if N.expr is functional. which it is.
+              *    balls.
+              *
+              * `vals` are elements; `sets` are expressions we need to union
+              * together. Invariant: `sets` contains no `Set` values. *)
+             | Set of { elts: value set; sets: value set }
+             | For of tp * string * N.expr * (value -> value)
 
   let rec reify (tp: tp) (v: value): N.term = match v,tp with
     | Expr e, _ -> N.expr tp e
-    | ForSet (a,x,e,body), b -> N.forSet a b x e (reify b body)
     | Tuple vs, Prod tps -> N.tuple (List.map2 (fun a v -> (a, reify a v)) tps vs)
     | Set v, SetOf a ->
-       let valset = N.set a (Set.to_list v.vals |> List.map (reify a)) in
-       if Set.is_empty v.exprs then valset
-       else Set.to_list v.exprs
-            |> List.map (N.expr (SetOf a))
-            |> List.fold_left (N.union a) valset
+       let elts = N.set a (Set.to_list v.elts |> List.map (reify a)) in
+       if Set.is_empty v.sets then elts
+       else Set.to_list v.sets |> List.map (reify tp)
+            |> List.fold_left (N.union a) elts
+    | For (a,name,e,body), _ ->
+       let x = Sym.gen name in
+       N.forIn a tp x e (reify tp (body (Expr (N.var a x))))
     | Func(name,f), Fn(a,b) ->
        let x = Sym.gen name in
        N.lam a b x (reify b (f (Expr (N.var a x))))
     | (Tuple _|Func _|Set _), _ -> raise Impossible
 
-  type env = value cx
-  type term = env -> value
-
-  let var a x env = try Cx.find x env with Not_found -> Expr (N.var a x)
-  let letBind _ _ x expr body env = body (Cx.add x (expr env) env)
-
-  (* FIXME: If forSet were allowed at any semilattice type, it could
+  (* FIXME: If forIn were allowed at any semilattice type, it could
    * generate functions and products, couldn't it? ARGH! *)
-  let lam _ _ x m env = Func (x.name, (fun v -> m (Cx.add x v env)))
-  let app a b m n env = match m env with
-    | Expr f -> Expr (N.app a b f (reify a (n env)))
-    | Func(_,f) -> f (n env)
+  let app (a: tp) (b: tp): value -> value -> value = function
+    | Expr e -> fun arg -> Expr (N.app a b e (reify a arg))
+    | Func (_,f) -> f
     | _ -> raise Impossible
 
-  let tuple terms env = Tuple (List.map (fun (_,t) -> t env) terms)
-  let proj tps i m env = match m env with
+  let proj (tps: tp list) (i: int): value -> value = function
     | Expr e -> Expr (N.proj tps i e)
     | Tuple xs -> List.nth xs i
     | _ -> raise Impossible
 
-  let set _ tms env = Set { vals = List.map (fun m -> m env) tms |> Set.from_list;
-                            exprs = Set.empty }
-  let union _ m n env = match m env, n env with
-    | Set x, Set y -> Set { vals = Set.union x.vals y.vals
-                          ; exprs = Set.union x.exprs y.exprs }
-    | Expr e, Set s | Set s, Expr e -> Set { s with exprs = Set.add e s.exprs }
-    | Expr x, Expr y -> Set { vals = Set.empty; exprs = Set.from_list [x;y] }
-    (* TODO: handle forSet! *)
-    | ForSet (a,x,e,body), huh -> (??)
-    | _ -> raise Impossible
-  let forSet (a: tp) (b: tp) (x: sym) (expr: term) (body: term) (env: env): value =
-    (* ah, shit. *)
-    match expr env with
-    | Expr e -> (??)
-    | Set s -> (??)
-    | ForSet _ -> (??)
+  (* Sets *)
+  let asSet: value -> value set * value set = function
+    | Set s -> s.elts, s.sets
+    | (Expr _|For _) as e -> Set.empty, Set.single e
     | _ -> raise Impossible
 
+  let mkSet (elts: value set) (sets: value set): value =
+    match Set.is_empty elts, Set.is_single sets with
+    | true, Some v -> v
+    | _ -> Set { elts; sets }
+
+  let set (_: tp) (xs: value list) = Set { elts = Set.from_list xs; sets = Set.empty }
+  let union (_: tp) (x: value) (y: value): value =
+    let xelts, xsets = asSet x and yelts, ysets = asSet y in
+    mkSet (Set.union xelts yelts) (Set.union xsets ysets)
+  let rec forIn (a: tp) (tp: tp) (x: string) (set: value) (body: value -> value): value =
+    let elts, sets = asSet set in
+    let runOnElt (v: value): value set * value set = asSet (body v) in
+    let runOnSet: value -> value = function
+      | Expr e -> For (a, x, e, fun v -> body v)
+      (* Commuting conversion:
+       * (for x in (for y in M do N) do O)
+       * --> (for y in M do for x in N do O) *)
+      | For (c, y, m, n) -> For (c, y, m, fun v -> forIn a tp x (n v) body)
+      | Set _ | _ -> raise Impossible in
+    let elt_elts, elt_sets = Set.to_list elts |> List.map runOnElt |> List.split in
+    let set_sets = Set.to_list sets |> List.map runOnSet |> Set.from_list in
+    mkSet (Set.unions elt_elts) (Set.unions (set_sets :: elt_sets))
+end
+
+module Simplify_(N: NORMAL) = struct
+  module V = AbstractValues(N)
+  open V
+
+  type value = V.value
+  type env = value cx
+  type term = env -> value
+
+  let reify = V.reify
   let norm tp (t: term): N.term = reify tp (t Cx.empty)
+
+  let var a x env = try Cx.find x env with Not_found -> Expr (N.var a x)
+  let letBind _ _ x expr body env = body (Cx.add x (expr env) env)
+
+  let lam _ _ x m env = Func (x.name, (fun v -> m (Cx.add x v env)))
+  let app a b m n env = V.app a b (m env) (n env)
+
+  let tuple terms env = Tuple (List.map (fun (_,t) -> t env) terms)
+  let proj tps i m env = V.proj tps i (m env)
+
+  let set a tms env = V.set a (List.map (fun m -> m env) tms)
+  let union a m n env = V.union a (m env) (n env)
+  let forIn a b x expr body env = V.forIn a b x.name (expr env)
+                                    (fun v -> body (Cx.add x v env))
 end
 
 module Simplify(N: NORMAL): sig
-  type value = Simplify_(N).value
+  type value
   type env = value cx
   include TYPED with type term = env -> value
   val reify: tp -> value -> N.term
@@ -268,6 +343,9 @@ module Bidi(T: TYPED): BIDI
     if subtype inferred expected then term
     else typeError "not a subtype"
 
+  let letBind (x: sym) (expr: expr) (body: term) (cx: tp cx) (b: tp): T.term =
+    let a, ex = expr cx in T.letBind a b x ex (body (Cx.add x a cx) b)
+
   let lam (x: sym) (m: term) (cx: tp cx): tp -> T.term = function
     | Fn(a,b) -> T.lam a b x (m (Cx.add x a cx) b)
     | _ -> typeError "lambda must be a function"
@@ -278,8 +356,19 @@ module Bidi(T: TYPED): BIDI
         with Invalid_argument _ -> typeError "wrong tuple length")
     | _ -> typeError "tuple must be a product"
 
-  let letBind (x: sym) (expr: expr) (body: term) (cx: tp cx) (b: tp): T.term =
-    let a, ex = expr cx in T.letBind a b x ex (body (Cx.add x a cx) b)
+  let set (tms: term list) (cx: tp cx): tp -> T.term = function
+    | SetOf a -> T.set a (List.map (fun m -> m cx a) tms)
+    | _ -> typeError "set literal must have set type"
+
+  let union (m: term) (n: term) (cx: tp cx): tp -> T.term = function
+    | SetOf _ as tp -> T.union tp (m cx tp) (n cx tp)
+    | _ -> typeError "union at non-set type"
+
+  let forIn (x: sym) (e: expr) (body: term) (cx: tp cx): tp -> T.term = function
+    | SetOf _ as tp ->
+       let a, expr = e cx in
+       T.forIn a tp x expr (body (Cx.add x a cx) tp)
+    | _ -> typeError "for-expression at non-set type"
 
   (* ----- Synthesizing expressions ----- *)
   let asc a m cx = (a, m cx a)
@@ -303,15 +392,16 @@ end
 
 (* Putting it all together *)
 module Lang = struct
-  (* Check -> Simplify -> Interp *)
-  module Simple = Simplify(Interp)
+  (* Check -> Simplify -> Display/Interp *)
+  module Simple = Simplify(Display)
   module Check = Bidi(Simple)
+  open Interp_                  (* for Interp.value constructors *)
   include Check
 
   type value = Interp.value
 
   let eval term cx tp env = Simple.norm tp (term cx tp) env
-  let evalExpr (expr: expr) (cx: tp cx) (env: value cx): tp * value =
+  let evalExpr expr cx env =
     let tp, simple = expr cx in
     tp, Simple.norm tp simple env
 
@@ -320,14 +410,35 @@ module Lang = struct
 
   (* \x. x *)
   let ex1 = (lam x (expr (var x)));;
-  let runex1 () = eval ex1 Cx.empty (Fn (Bool,Bool)) Cx.empty
+  let runex1 () = eval ex1 Cx.empty (Fn (Bool,Bool)) 0
+  (* let runex1 () = eval ex1 Cx.empty (Fn (Bool,Bool)) Cx.empty *)
 
   (* \x. (snd x, fst x) *)
   let swap = lam x (tuple [expr (proj 1 (var x)); expr (proj 0 (var x))])
-  let runswap (a, b) =
-    match eval swap Cx.empty (Fn (Prod [Bool;Bool], Prod [Bool;Bool])) Cx.empty with
-    | Func f -> f (Tuple [Bool a; Bool b])
-    | _ -> raise Impossible
+  let runswap () = eval swap Cx.empty (Fn (Prod [Bool;Bool], Prod [Bool;Bool])) 0
+  (* let runswap (a, b) =
+   *   match eval swap Cx.empty (Fn (Prod [Bool;Bool], Prod [Bool;Bool])) Cx.empty with
+   *   | Func f -> f (Tuple [Bool a; Bool b])
+   *   | _ -> raise Impossible *)
+
+  (* \x. {x,x} *)
+  let ex3 = lam x (set [expr (var x); expr (var x)])
+  let runex3 () = eval ex3 Cx.empty (Fn (Bool, SetOf Bool)) 0
+
+  (* \x. \y. {x,y} *)
+  (* Huh, this one is erroring with "compare: functional value".
+   * Can I get a backtrace? *)
+  let ex4 = lam x (lam y (set [expr (var x); expr (var y)]))
+  let runex4 () = eval ex4 Cx.empty (Fn (Bool, Fn (Bool, SetOf Bool))) 0
+
+  (* \x. x union x *)
+  let ex5 = (lam x (union (expr (var x)) (expr (var x))))
+  let runex5 () = eval ex5 Cx.empty (Fn (SetOf Bool, SetOf Bool)) 0
 end
+
+(* this bugs out *)
+(* shit, of _course_! terms in the language after Simplification are functions,
+ * because I'm in tagless-final style! *)
+let _ = Lang.(Simple.set Bool [Simple.var Bool x; Simple.var Bool x]) Cx.empty;;
 
 (* end *)
