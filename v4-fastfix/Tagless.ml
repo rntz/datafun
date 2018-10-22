@@ -14,14 +14,13 @@
 (* module TaglessFinal = struct *)
 
 exception Todo let todo() = raise Todo
-exception TypeError of string
 exception Impossible
+exception TypeError of string
+let typeError s = raise (TypeError s)
 
 type order = EQ | LT | GT
 let cmp x y = let i = Pervasives.compare x y in
               if i < 0 then LT else if i > 0 then GT else EQ
-
-let typeError s = raise (TypeError s)
 
 (* Symbols are strings annotated with unique identifiers. *)
 type sym = {name: string; id: int}
@@ -44,7 +43,7 @@ type 'a cx = 'a Cx.t
 
 (* Sets, represented as sorted lists. This makes them work polymorphically
  * for any type for which Pervasives.compare works. *)
-module Set: sig
+module ListSet: sig
   type 'a t
   val empty: 'a t
   val add: 'a -> 'a t -> 'a t
@@ -74,7 +73,7 @@ end = struct
   let to_list x = x
   let from_list l = List.sort_uniq Pervasives.compare l
 end
-type 'a set = 'a Set.t
+type 'a set = 'a ListSet.t
 
 
 (* ===== LANGUAGE ALGEBRAS as ML MODULES (a la tagless final style) ===== *)
@@ -161,11 +160,11 @@ module Interp_ = struct
   let tuple terms env = Tuple (List.map (fun (_,tm) -> tm env) terms)
   let proj _ i e env = List.nth (e env |> asTuple) i
 
-  let set _ terms env = Set (Set.from_list (List.map (fun t -> t env) terms))
-  let union _ m n env = Set (Set.union (asSet (m env)) (asSet (n env)))
+  let set _ terms env = Set (ListSet.from_list (List.map (fun t -> t env) terms))
+  let union _ m n env = Set (ListSet.union (asSet (m env)) (asSet (n env)))
   let forIn _ _ x expr body env =
     let f v = asSet (body (Cx.add x v env))
-    in Set (Set.flat_map (expr env |> asSet) f)
+    in Set (ListSet.flat_map (expr env |> asSet) f)
 end
 
 module Interp : sig
@@ -203,6 +202,14 @@ module Display: NORMAL
 end
 
 
+module Hashcons(N: NORMAL) = struct
+  type 'a wrap = {hash: int; ptr: 'a}
+  type term = N.term wrap
+  type expr = N.expr wrap
+  module T = struct type t = term let hash x = x.hash let equal = (==) end
+  module E = struct type t = expr let hash x = x.hash let equal = (==) end
+end
+
 (* TODO: make a functor that takes a NORMAL lang to one with equality &
    comparison on exprs. We can then use this in Simplify. The comparison should
    be pretty shallow, just enough to de-duplicate obvious things, and bottom out
@@ -216,101 +223,111 @@ end
  * a) has only first-order free variables (inputs)
  * b) has a first-order type (output)
  *)
-module AbstractValues(N: NORMAL) = struct
-  (* TODO: Can I see value as another language, and tagless-final encode it?
-   * the purpose of values, more or less, is to be reified. *)
-  type value = Expr of N.expr
-             | Func of string * (value -> value)
-             | Tuple of value list
-             (* 1. We never need to store a set of Funcs, b/c the type system
-              *    (should) disallow it.
-              * 2. uh-oh, how do we compare N.exprs? eh, if Pervasives.compare
-              *    says they're equal, then we can probably treat them as equal.
-              *
-              *    except, shit. what if N.expr is functional. which it is.
-              *    balls.
-              *
-              * `vals` are elements; `sets` are expressions we need to union
-              * together. Invariant: `sets` contains no `Set` values. *)
-             | Set of { elts: value set; sets: value set }
-             | For of tp * string * N.expr * (value -> value)
-
-  let rec reify (tp: tp) (v: value): N.term = match v,tp with
-    | Expr e, _ -> N.expr tp e
-    | Tuple vs, Prod tps -> N.tuple (List.map2 (fun a v -> (a, reify a v)) tps vs)
-    | Set v, SetOf a ->
-       let elts = N.set a (Set.to_list v.elts |> List.map (reify a)) in
-       if Set.is_empty v.sets then elts
-       else Set.to_list v.sets |> List.map (reify tp)
-            |> List.fold_left (N.union a) elts
-    | For (a,name,e,body), _ ->
-       let x = Sym.gen name in
-       N.forIn a tp x e (reify tp (body (Expr (N.var a x))))
-    | Func(name,f), Fn(a,b) ->
-       let x = Sym.gen name in
-       N.lam a b x (reify b (f (Expr (N.var a x))))
-    | (Tuple _|Func _|Set _), _ -> raise Impossible
-
-  (* FIXME: If forIn were allowed at any semilattice type, it could
-   * generate functions and products, couldn't it? ARGH! *)
-  let app (a: tp) (b: tp): value -> value -> value = function
-    | Expr e -> fun arg -> Expr (N.app a b e (reify a arg))
-    | Func (_,f) -> f
-    | _ -> raise Impossible
-
-  let proj (tps: tp list) (i: int): value -> value = function
-    | Expr e -> Expr (N.proj tps i e)
-    | Tuple xs -> List.nth xs i
-    | _ -> raise Impossible
-
-  (* Sets *)
-  let asSet: value -> value set * value set = function
-    | Set s -> s.elts, s.sets
-    | (Expr _|For _) as e -> Set.empty, Set.single e
-    | _ -> raise Impossible
-
-  let mkSet (elts: value set) (sets: value set): value =
-    match Set.is_empty elts, Set.is_single sets with
-    | true, Some v -> v
-    | _ -> Set { elts; sets }
-
-  let set (_: tp) (xs: value list) = Set { elts = Set.from_list xs; sets = Set.empty }
-  let union (_: tp) (x: value) (y: value): value =
-    let xelts, xsets = asSet x and yelts, ysets = asSet y in
-    mkSet (Set.union xelts yelts) (Set.union xsets ysets)
-  let rec forIn (a: tp) (tp: tp) (x: string) (set: value) (body: value -> value): value =
-    let elts, sets = asSet set in
-    let runOnElt (v: value): value set * value set = asSet (body v) in
-    let runOnSet: value -> value = function
-      | Expr e -> For (a, x, e, fun v -> body v)
-      (* Commuting conversion:
-       * (for x in (for y in M do N) do O)
-       * --> (for y in M do for x in N do O) *)
-      | For (c, y, m, n) -> For (c, y, m, fun v -> forIn a tp x (n v) body)
-      | Set _ | _ -> raise Impossible in
-    let elt_elts, elt_sets = Set.to_list elts |> List.map runOnElt |> List.split in
-    let set_sets = Set.to_list sets |> List.map runOnSet |> Set.from_list in
-    mkSet (Set.unions elt_elts) (Set.unions (set_sets :: elt_sets))
-end
 
 module Simplify_(N: NORMAL) = struct
-  module V = AbstractValues(N)
-  open V
+  module type VAL = sig
+    type t
+    val reify: tp -> t -> N.term
+    val expr: N.expr -> t
+    val func: string -> (t -> t) -> t
+    val tuple: t list -> t
+    val set: tp -> t list -> t
+    val app: tp -> tp -> t -> t -> t
+    val proj: tp list -> int -> t -> t
+    val union: tp -> t -> t -> t
+    val forIn: tp -> tp -> string -> t -> (t -> t) -> t
+  end
+  module rec V : VAL = struct
+    (* TODO: Can I see value as another language, and tagless-final encode it?
+     * the purpose of values, more or less, is to be reified. *)
+    type t = Expr of N.expr
+           | Func of string * (t -> t)
+           | Tuple of t list
+           (* `vals` are elements; `sets` are expressions we need to union
+            * together. Invariant: `sets` contains no `Set` values. *)
+           | Set of { elts: t set; sets: t set }
+           | For of tp * string * N.expr * (t -> t)
 
-  type value = V.value
+    (* shit, I need a total order. fuck. Okay, thne I probably want to go to a
+       hash-consed syntactic representation after simplification. *)
+    module S = ListSet
+
+    let expr x = Expr x
+    let func s f = Func (s,f)
+    let tuple xs = Tuple xs
+
+    let rec reify (tp: tp) (v: t): N.term = match v,tp with
+      | Expr e, _ -> N.expr tp e
+      | Tuple vs, Prod tps -> N.tuple (List.map2 (fun a v -> (a, reify a v)) tps vs)
+      | Set v, SetOf a ->
+         let elts = N.set a (S.to_list v.elts |> List.map (reify a)) in
+         if S.is_empty v.sets then elts
+         else S.to_list v.sets |> List.map (reify tp)
+              |> List.fold_left (N.union a) elts
+      | For (a,name,e,body), _ ->
+         let x = Sym.gen name in
+         N.forIn a tp x e (reify tp (body (Expr (N.var a x))))
+      | Func(name,f), Fn(a,b) ->
+         let x = Sym.gen name in
+         N.lam a b x (reify b (f (Expr (N.var a x))))
+      | (Tuple _|Func _|Set _), _ -> raise Impossible
+
+    (* FIXME: If forIn were allowed at any semilattice type, it could
+     * generate functions and products, couldn't it? ARGH! *)
+    let app (a: tp) (b: tp): t -> t -> t = function
+      | Expr e -> fun arg -> Expr (N.app a b e (reify a arg))
+      | Func (_,f) -> f
+      | _ -> raise Impossible
+
+    let proj (tps: tp list) (i: int): t -> t = function
+      | Expr e -> Expr (N.proj tps i e)
+      | Tuple xs -> List.nth xs i
+      | _ -> raise Impossible
+
+    (* Sets *)
+    let asSet: t -> t set * t set = function
+      | Set s -> s.elts, s.sets
+      | (Expr _|For _) as e -> S.empty, S.single e
+      | _ -> raise Impossible
+
+    let mkSet (elts: t set) (sets: t set): t =
+      match S.is_empty elts, S.is_single sets with
+      | true, Some v -> v
+      | _ -> Set { elts; sets }
+
+    let set (_: tp) (xs: t list) = Set { elts = S.from_list xs; sets = S.empty }
+    let union (_: tp) (x: t) (y: t): t =
+      let xelts, xsets = asSet x and yelts, ysets = asSet y in
+      mkSet (S.union xelts yelts) (S.union xsets ysets)
+    let rec forIn (a: tp) (tp: tp) (x: string) (set: t) (body: t -> t): t =
+      let elts, sets = asSet set in
+      let runOnElt (v: t): t set * t set = asSet (body v) in
+      let runOnSet: t -> t = function
+        | Expr e -> For (a, x, e, body)
+        (* Commuting conversion:
+         * (for x in (for y in M do N) do O)
+         * --> (for y in M do for x in N do O) *)
+        | For (c, y, m, n) -> For (c, y, m, fun v -> forIn a tp x (n v) body)
+        | Set _ | _ -> raise Impossible in
+      let elt_elts, elt_sets = S.to_list elts |> List.map runOnElt |> List.split in
+      let set_sets = S.to_list sets |> List.map runOnSet |> S.from_list in
+      mkSet (S.unions elt_elts) (S.unions (set_sets :: elt_sets))
+  end
+
+  type value = V.t
   type env = value cx
   type term = env -> value
 
   let reify = V.reify
   let norm tp (t: term): N.term = reify tp (t Cx.empty)
 
-  let var a x env = try Cx.find x env with Not_found -> Expr (N.var a x)
+  let var a x env = try Cx.find x env with Not_found -> V.expr (N.var a x)
   let letBind _ _ x expr body env = body (Cx.add x (expr env) env)
 
-  let lam _ _ x m env = Func (x.name, (fun v -> m (Cx.add x v env)))
+  let lam _ _ x m env = V.func x.name (fun v -> m (Cx.add x v env))
   let app a b m n env = V.app a b (m env) (n env)
 
-  let tuple terms env = Tuple (List.map (fun (_,t) -> t env) terms)
+  let tuple terms env = V.tuple (List.map (fun (_,t) -> t env) terms)
   let proj tps i m env = V.proj tps i (m env)
 
   let set a tms env = V.set a (List.map (fun m -> m env) tms)
