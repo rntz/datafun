@@ -32,7 +32,6 @@ type 'a cx = 'a Cx.t
 
 (* Types. *)
 type tp = Bool | Fn of tp * tp | Prod of tp list | Set of tp
-let subtype (a: tp) (b: tp) = a = b
 
 (* Just enough information to know how to perform semilattice operations at
  * runtime. *)
@@ -174,65 +173,13 @@ module IL = struct
 end
 
 
-(* ===== Surface language & translation to IL ===== *)
-module Lang = struct
-  open IL
-
-  (* Surface language *)
-  type ('t,'e) exprF
-    = [ `Var of sym | `The of tp * 't
-      | `App of 'e * 't | `Pi of int * 'e ]
-  type ('t,'e) termF
-    = [ ('t,'e) exprF
-      | `Let of sym * 'e * 't
-      | `Fn of sym * 't | `Tuple of 't list
-      | `Set of 't list | `Vee of 't list | `For of sym * 'e * 't ]
-
-  type term = (term,expr) termF
-  and  expr = (term,expr) exprF
-
-  let rec check (term: term) (expect: tp) (cx: tp cx): sem =
-    match term, expect with
-    | #expr as e, _ -> let got, sem = infer e cx in
-                       if subtype got expect then sem
-                       else typeError "subtype check failed"
-    | `Let(x,e,body), bodytp ->
-       let etp, ex = infer e cx in
-       letBind x ex (check body bodytp (Cx.add x etp cx))
-    | `Fn(x,body), Fn(a,b) -> fn x (check body b (Cx.add x a cx))
-    | `Tuple terms, Prod tps ->
-       tuple (try List.map2 (fun t a -> check t a cx) terms tps
-              with Invalid_argument _ -> typeError "wrong tuple length")
-    | `Set terms, Set a -> set (List.map (fun t -> check t a cx) terms)
-    | `Vee terms, tp -> vee (semilat tp) (List.map (fun t -> check t tp cx) terms)
-    | `For(x,e,body), tp ->
-       (match infer e cx with
-        | Set a, ex -> forIn (semilat tp) x ex (check body tp (Cx.add x a cx))
-        | _ -> typeError "comprehending over non-set")
-    | (`Fn _|`Tuple _|`Set _), _ -> typeError "type mismatch"
-
-  and infer (e: expr) (cx: tp cx): tp * sem = match e with
-    | `Var x -> (try Cx.find x cx, var x
-                 with Not_found -> typeError ("unbound variable: " ^ x.name))
-    | `The(tp,term) -> tp, check term tp cx
-    | `App(fnc,arg) ->
-       (match infer fnc cx with
-        | Fn(a,b), fncx -> b, app fncx (check arg a cx)
-        | _ -> typeError "applying non-function")
-    | `Pi(i,e) ->
-       (try match infer e cx with Prod tps, sem -> List.nth tps i, pi i sem
-                                | _ -> typeError "projection from non-tuple"
-        with Invalid_argument _ -> typeError "wrong tuple length")
-end
-
-
 (* ===== Pretty-printing ===== *)
 module Show = struct
   open IL
   open Format
 
   let paren (out: formatter) (cxPrec: int) (opPrec: int) f =
-    if cxPrec <= opPrec then f out else (printf "(@[%t@])" f)
+    if cxPrec <= opPrec then f out else (fprintf out "(@[%t@])" f)
 
   let sepBy (sep: string) (f: formatter -> 'a -> unit): formatter -> 'a list -> unit =
     pp_print_list ~pp_sep:(fun out _ -> fprintf out "%s@," sep) f
@@ -292,6 +239,62 @@ module Print = struct
   let tp ?(out = std_formatter) ?(prec = 0) = fprintf out "@[%a@]\n" (Show.tp prec)
   let term ?(out = std_formatter) ?(cx = Show.empty) ?(prec = 0) =
     fprintf out "@[%a@]\n" (Show.norm cx prec)
+end
+
+
+(* ===== Surface language & translation to IL ===== *)
+module Lang = struct
+  open IL
+
+  (* Surface language *)
+  type ('t,'e) exprF
+    = [ `Var of sym | `The of tp * 't
+      | `App of 'e * 't | `Pi of int * 'e ]
+  type ('t,'e) termF
+    = [ ('t,'e) exprF
+      | `Let of sym * 'e * 't
+      | `Fn of sym * 't | `Tuple of 't list
+      | `Set of 't list | `Vee of 't list | `For of sym * 'e * 't ]
+
+  type term = (term,expr) termF
+  and  expr = (term,expr) exprF
+
+  (* For now, subtyping is equality. *)
+  let subtp got expect =
+    if got = expect then ()
+    else typeError (Format.asprintf "cannot treat %a as %a"
+                      (Show.tp 10) got (Show.tp 10) expect)
+
+  let rec check (term: term) (expect: tp) (cx: tp cx): sem =
+    match term, expect with
+    | #expr as e, _ -> let got, sem = infer e cx in subtp got expect; sem
+    | `Let(x,e,body), bodytp ->
+       let etp, ex = infer e cx in
+       letBind x ex (check body bodytp (Cx.add x etp cx))
+    | `Fn(x,body), Fn(a,b) -> fn x (check body b (Cx.add x a cx))
+    | `Tuple terms, Prod tps ->
+       tuple (try List.map2 (fun t a -> check t a cx) terms tps
+              with Invalid_argument _ -> typeError "wrong tuple length")
+    | `Set terms, Set a -> set (List.map (fun t -> check t a cx) terms)
+    | `Vee terms, tp -> vee (semilat tp) (List.map (fun t -> check t tp cx) terms)
+    | `For(x,e,body), tp ->
+       (match infer e cx with
+        | Set a, ex -> forIn (semilat tp) x ex (check body tp (Cx.add x a cx))
+        | _ -> typeError "comprehending over non-set")
+    | (`Fn _|`Tuple _|`Set _), _ -> typeError "type mismatch"
+
+  and infer (e: expr) (cx: tp cx): tp * sem = match e with
+    | `Var x -> (try Cx.find x cx, var x
+                 with Not_found -> typeError ("unbound variable: " ^ x.name))
+    | `The(tp,term) -> tp, check term tp cx
+    | `App(fnc,arg) ->
+       (match infer fnc cx with
+        | Fn(a,b), fncx -> b, app fncx (check arg a cx)
+        | _ -> typeError "applying non-function")
+    | `Pi(i,e) ->
+       (try match infer e cx with Prod tps, sem -> List.nth tps i, pi i sem
+                                | _ -> typeError "projection from non-tuple"
+        with Invalid_argument _ -> typeError "wrong tuple length")
 end
 
 
