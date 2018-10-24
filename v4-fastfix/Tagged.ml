@@ -1,9 +1,9 @@
 (* Feature list:
  - functions, tuples, let-bindings, finite sets
- - TODO fixed points
+ - TODO if/then/else & when/then
  - TODO equality & inequality tests
+ - TODO fixed points
  - TODO strings, or some base type I can compute with
- - TODO if-then-else expressions
  - TODO subtyping
  - TODO structural sum types
  - TODO pattern-matching
@@ -11,7 +11,6 @@
  - TODO: monotonicity types!! (modes? modal subtyping? arrow annotations?)
  *)
 
-exception Todo let todo() = raise Todo
 exception TypeError of string
 exception Fail of string
 let typeError s = raise (TypeError s)
@@ -80,7 +79,7 @@ end
 type 'a set = 'a S.t
 
 
-(* Normalised intermediate language. *)
+(* ===== Normalised intermediate language ===== *)
 module IL = struct
   (* NB. should have type annotations where necessary. *)
   type ('t,'e) neutF = [ `Var of sym | `App of 'e * 't | `Pi of int * 'e ]
@@ -92,6 +91,7 @@ module IL = struct
 
   type norm = (norm,neut) normF
   and  neut = (norm,neut) neutF
+
   type value = Neut of neut
              | Fn of string * (value -> value) | Tuple of value list
              | Set of {elts: value set; sets: value set}
@@ -173,13 +173,13 @@ module IL = struct
 end
 
 
-(* Surface language & translation to IL. *)
+(* ===== Surface language & translation to IL ===== *)
 module Lang = struct
   open IL
 
   (* Surface language *)
   type ('t,'e) exprF
-    = [ `Var of sym | `Asc of tp * 't 
+    = [ `Var of sym | `The of tp * 't
       | `App of 'e * 't | `Pi of int * 'e ]
   type ('t,'e) termF
     = [ ('t,'e) exprF
@@ -212,8 +212,8 @@ module Lang = struct
 
   and infer (e: expr) (cx: tp cx): tp * sem = match e with
     | `Var x -> (try Cx.find x cx, var x
-                 with Not_found -> typeError "unbound variable")
-    | `Asc(tp,term) -> tp, check term tp cx
+                 with Not_found -> typeError ("unbound variable: " ^ x.name))
+    | `The(tp,term) -> tp, check term tp cx
     | `App(fnc,arg) ->
        (match infer fnc cx with
         | Fn(a,b), fncx -> b, app fncx (check arg a cx)
@@ -225,31 +225,145 @@ module Lang = struct
 end
 
 
+(* ===== Pretty-printing ===== *)
+module Show = struct
+  open IL
+  open Format
+
+  let paren (out: formatter) (cxPrec: int) (opPrec: int) f =
+    if cxPrec <= opPrec then f out else (printf "(@[%t@])" f)
+
+  let sepBy (sep: string) (f: formatter -> 'a -> unit): formatter -> 'a list -> unit =
+    pp_print_list ~pp_sep:(fun out _ -> fprintf out "%s@," sep) f
+
+  let rec tp (prec: int) (out: formatter): tp -> unit = function
+    | Bool -> fprintf out "bool"
+    | Set a -> fprintf out "{@[%a@]}" (tp 0) a
+    | Prod ts -> paren out prec 1 (fun f -> sepBy ", " (tp 2) f ts)
+    | Fn (a,b) -> paren out prec 0 (fun f -> fprintf f "%a -> %a" (tp 1) a (tp 0) b)
+
+  (* Dealing with variables is annoying. *)
+  module SS = Set.Make(struct type t = string let compare = Pervasives.compare end)
+  type cx = {used: SS.t; vars: string Cx.t}
+  let empty: cx = {used = SS.empty; vars = Cx.empty}
+
+  (* Generates a fresh variable name, returning it & updated context. *)
+  let bind x cx =
+    let return n = n, {used = SS.add n cx.used; vars = Cx.add x n cx.vars} in
+    let rec propose i name = if SS.mem name cx.used then loop i else return name
+    and loop (i:int) = propose (i+1) (sprintf "%s%x" x.name i) in
+    propose 0 x.name
+
+  (* Precedence (higher binds tighter):
+   * 0 Fn, For
+   * 1 Vee, Tuple
+   * 9 App, Pi *)
+  let rec neut cx prec out (e: neut) = norm cx prec out (e :> norm)
+  and norm (cx: cx) (prec: int) (out: formatter) (term: norm): unit =
+    let printf: 'a. ('a,formatter,unit) format -> 'a = fun x -> fprintf out x in
+    let sepBy sep prec = sepBy sep (norm cx prec) in
+    let par = paren out prec in
+    match term with
+    | `Var x -> (try printf "%s" (Cx.find x cx.vars)
+                 with Not_found -> printf "%s.%d" x.name x.id)
+    | `App(fnc,arg) ->
+       par 9 (fun _ -> printf "%a@ %a" (neut cx 9) fnc (norm cx 10) arg)
+    | `Fn(x,e) ->
+       let name, ecx = bind x cx in
+       par 0 (fun _ -> printf "λ%s. @[%a@]" name (norm ecx 0) e)
+    | `Pi(i,e) ->
+       let pi = match i with 0 -> "fst" | 1 -> "snd" | i -> sprintf "pi_%i" i in
+       par 9 (fun _ -> printf "%s@ %a" pi (neut cx 10) e)
+    | `Tuple ts -> par 1 (fun _ -> sepBy "," 2 out ts)
+    | `Set ts -> printf "{@[%a@]}" (sepBy "," 2) ts
+    | `Vee(_,[]) -> printf "empty"
+    | `Vee(_,ts) -> par 1 (fun _ -> printf "@[%a@]" (sepBy "or" 2) ts)
+    | `For(_,x,e,t) ->
+       let name, tcx = bind x cx in
+       match t with
+       | `Set[t] -> printf "{@[%a@]@ | %s in @[%a@]}" (norm tcx 2) t name (neut cx 2) e
+       | t -> par 0 (fun _ -> printf "for %s in @[%a@] do@ %a"
+                                name (neut cx 1) e (norm tcx 0) t)
+end
+
+module Print = struct
+  open Format
+  let tp ?(out = std_formatter) ?(prec = 0) = fprintf out "@[%a@]\n" (Show.tp prec)
+  let term ?(out = std_formatter) ?(cx = Show.empty) ?(prec = 0) =
+    fprintf out "@[%a@]\n" (Show.norm cx prec)
+end
+
+
 (* Tests. TODO: MOAR tests. *)
 module Test = struct
   open Lang
 
   let x = Sym.gen "x" let y = Sym.gen "y" let z = Sym.gen "z"
-  let vx = `Var x     let vy = `Var y     let vy = `Var z
+  let vx = `Var x     let vy = `Var y     let vz = `Var z
 
   let b2b = Fn(Bool,Bool)
   let s2s = Fn(Set Bool, Set Bool)
+  let s2b = Fn(Set Bool, Bool)
+  let b2s = Fn(Bool, Set Bool)
+  let ss2ss = Fn(Set (Set Bool), Set (Set Bool))
 
   (* ===== Identity functions =====
-   * All of these should normalize to (λx.x).
-   * (λx.x)         THE VANILLA*)
-  let idterm: term = `Fn(x, vx)
-  let idnorm = IL.norm (check idterm b2b Cx.empty)
+   * All of these could in principle normalise to (λx.x). *)
+  (* THE VANILLA        λx.x *)
+  let idT: term = `Fn(x, vx)
+  let idN = IL.norm (check idT b2b Cx.empty)
 
-  (* λx.(λy.y)x     THE INDIRECTOR *)
-  let id2term: term = `Fn(x, `App(`Asc(b2b,`Fn(y, vy)), vx))
-  let id2norm = IL.norm (check idterm b2b Cx.empty)
+  (* THE INDIRECTOR     λx.(λy.y)x *)
+  let idkT: term = `Fn(x, `App(`The(b2b,`Fn(y, vy)), vx))
+  let idkN = IL.norm (check idT b2b Cx.empty)
 
-  (* (\x. x ∪ x)    THE UNIONIST *)
-  let idsetTerm: term = `Fn(x, `Vee [vx; vx])
-  let idsetNorm = IL.norm (check idsetTerm s2s Cx.empty)
+  (* THE UNIONIST       λx. x ∪ x *)
+  let idsetT: term = `Fn(x, `Vee [vx; vx])
+  let idsetN = IL.norm (check idsetT s2s Cx.empty)
 
-  (* λx.π₁(x,x)     THE TWINS *)
-  let idprojTerm: term = `Fn(x, `Pi(0, `Asc (Prod [Bool; Bool], `Tuple [vx; vx])))
-  let idprojNorm = IL.norm (check idprojTerm b2b Cx.empty)
+  (* THE EXTENSION      λx.λy.xy
+   * We don't η-shorten, so this normalizes to itself. *)
+  let idetaT: term = `Fn(x, `Fn(y, `App(vx,vy)))
+  let idetaN = IL.norm (check idetaT (Fn(b2b,b2b)) Cx.empty)
+
+  (* THE THESAURUS      λx. let y = x in y *)
+  let idletT: term = `Fn(x, `Let(y, vx, vy))
+  let idletN = IL.norm (check idletT b2b Cx.empty)
+
+  (* THE CHROMOSOMES    λx.fst(x,x) *)
+  let idupT: term = `Fn(x, `Pi(0, `The (Prod [Bool; Bool], `Tuple [vx; vx])))
+  let idupN = IL.norm (check idupT b2b Cx.empty)
+
+  (* THE ITERATOR       λx. {y | y ∈ x}
+   * unfortunately, we do not yet normalise this to (λx.x).
+   * I should look into this if it comes up in real programs. *)
+  let idforT: term = `Fn(x, `For (y, vx, `Set [vy]))
+  let idforN = IL.norm (check idforT s2s Cx.empty)
+
+  (* THE RUSSIAN DOLL    λx. {y | y ∈ {z | z ∈ x}}
+   * this normalizes to λ.x {z | z ∈ x}, which is great, but I don't understand
+   * why, even though I wrote the damn code. *)
+  let idnestT: term =
+    `Fn(x, `For(y, `The(Set Bool, `For(z, vx, `Set [vz])), `Set [vy]))
+  let idnestN = IL.norm (check idnestT s2s Cx.empty)
+
+  (* THE SOVIET DOLL   λx. {{z | z ∈ y} | y ∈ x} *)
+  let idnest2T: term = `Fn(x, `For(y, vx, `For(z, vy, `Set [`Set [vz]])))
+  let idnest2N = IL.norm (check idnest2T ss2ss Cx.empty)
+
+  (* THE SHAGGY DOG     λx. for y in x ∪ x do snd(y, {y, (λz.z) y})
+   * Presently normalizes to λx. {y | y in x}. *)
+  let idigressT: term =
+    `Fn(x, `For(y, `The(Set Bool, `Vee [vx;vx]),
+                `Pi(1, `The(Prod [Bool; Set Bool],
+                            `Tuple [vy; `Set [vy; `App(`The(b2b, `Fn (z, vz)), vy)]]))))
+  let idigressN = IL.norm (check idigressT s2s Cx.empty)
+
+  (* ===== Non-identity funcs ===== *)
+  let singleT: term = `Fn(x, `Set [vx])
+  let singleN = IL.norm (check singleT b2s Cx.empty)
+
+  (* λxy. (x,y) *)
+  let pairT: term = `Fn(x, `Fn(y, `Tuple [vx;vy]))
+  let pairN = IL.norm (check pairT (Fn(Bool, Fn(Bool, Prod[Bool;Bool]))) Cx.empty)
 end
