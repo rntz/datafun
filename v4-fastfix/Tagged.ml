@@ -81,7 +81,8 @@ type 'a set = 'a S.t
 
 (* ===== Normalised intermediate language ===== *)
 module IL = struct
-  (* NB. should have type annotations where necessary. *)
+  (* NB. should have type annotations where necessary.
+   * Might need them on variable bindings for derivative transform. *)
   type ('t,'e) neutF = [ `Var of sym | `App of 'e * 't | `Pi of int * 'e ]
   type ('t,'e) normF =
     [ ('t,'e) neutF | `Fn of sym * 't | `Tuple of 't list
@@ -294,7 +295,8 @@ module Print = struct
 end
 
 
-(* Tests. TODO: MOAR tests. *)
+(* ===== Tests ===== *)
+(* TODO: MOAR tests. *)
 module Test = struct
   open Lang
 
