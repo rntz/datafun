@@ -106,9 +106,10 @@ module IL = struct
     | For (sl,name,expr,body) ->
        let x = Sym.gen name in `For (sl, x, expr, reify (body (Neut (`Var x))))
     | Set v ->
-       let elts = `Set (S.toList v.elts |> List.map reify) in
-       if S.isEmpty v.sets then elts
-       else `Vee (LSet, elts :: List.map reify (S.toList v.sets))
+       match List.map reify (S.toList v.elts), List.map reify (S.toList v.sets) with
+       | elts, [] -> `Set elts
+       | [], sets -> `Vee (LSet, sets)
+       | elts, sets -> `Vee (LSet, `Set elts :: sets)
 
   let norm (x: sem): norm = reify (x Cx.empty)
 
@@ -181,13 +182,13 @@ module Show = struct
   let paren (out: formatter) (cxPrec: int) (opPrec: int) f =
     if cxPrec <= opPrec then f out else (fprintf out "(@[%t@])" f)
 
-  let sepBy (sep: string) (f: formatter -> 'a -> unit): formatter -> 'a list -> unit =
-    pp_print_list ~pp_sep:(fun out _ -> fprintf out "%s@," sep) f
+  let sepBy sep (f: formatter -> 'a -> unit): formatter -> 'a list -> unit =
+    pp_print_list ~pp_sep:(fun out _ -> fprintf out sep) f
 
   let rec tp (prec: int) (out: formatter): tp -> unit = function
     | Bool -> fprintf out "bool"
     | Set a -> fprintf out "{@[%a@]}" (tp 0) a
-    | Prod ts -> paren out prec 1 (fun f -> sepBy ", " (tp 2) f ts)
+    | Prod ts -> paren out prec 1 (fun f -> sepBy ",@ " (tp 2) f ts)
     | Fn (a,b) -> paren out prec 0 (fun f -> fprintf f "%a -> %a" (tp 1) a (tp 0) b)
 
   (* Dealing with variables is annoying. *)
@@ -222,10 +223,11 @@ module Show = struct
     | `Pi(i,e) ->
        let pi = match i with 0 -> "fst" | 1 -> "snd" | i -> sprintf "pi_%i" i in
        par 9 (fun _ -> printf "%s@ %a" pi (neut cx 10) e)
-    | `Tuple ts -> par 1 (fun _ -> sepBy "," 2 out ts)
-    | `Set ts -> printf "{@[%a@]}" (sepBy "," 2) ts
+    | `Tuple ts -> par 1 (fun _ -> sepBy ",@," 2 out ts)
+    | `Set ts -> printf "{@[%a@]}" (sepBy ",@," 2) ts
     | `Vee(_,[]) -> printf "empty"
-    | `Vee(_,ts) -> par 1 (fun _ -> printf "@[%a@]" (sepBy "or" 2) ts)
+    | `Vee(_,[t]) -> par 1 (fun _ -> printf "@[or %a@]" (norm cx 2) t)
+    | `Vee(_,ts) -> par 1 (fun _ -> printf "@[%a@]" (sepBy "@ or " 2) ts)
     | `For(_,x,e,t) ->
        let name, tcx = bind x cx in
        match t with
@@ -237,7 +239,7 @@ end
 module Print = struct
   open Format
   let tp ?(out = std_formatter) ?(prec = 0) = fprintf out "@[%a@]\n" (Show.tp prec)
-  let term ?(out = std_formatter) ?(cx = Show.empty) ?(prec = 0) =
+  let norm ?(out = std_formatter) ?(cx = Show.empty) ?(prec = 0) =
     fprintf out "@[%a@]\n" (Show.norm cx prec)
 end
 
@@ -371,4 +373,8 @@ module Test = struct
   (* λxy. (x,y) *)
   let pairT: term = `Fn(x, `Fn(y, `Tuple [vx;vy]))
   let pairN = IL.norm (check pairT (Fn(Bool, Fn(Bool, Prod[Bool;Bool]))) Cx.empty)
+
+  (* λxy. empty or x or (y or (or x)) *)
+  let unionT: term = `Fn(x, `Fn(y, `Vee [`Vee []; vx; `Vee [vy; `Vee [vx]]]))
+  let unionN = IL.norm (check unionT (Fn(Set Bool, Fn(Set Bool, Set Bool))) Cx.empty)
 end
