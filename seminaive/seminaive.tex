@@ -1,8 +1,9 @@
 %% rntz.cls doesn't support subsubsections.
 \documentclass{rntz}
 \usepackage[a4,width=14cm]{rntzgeometry}
-\usepackage{rntzfont}
-%\usepackage{anyfontsize}
+\usepackage[charter,newmath]{rntzfont}
+%\usepackage[sc]{mathpazo}\linespread{1.13}
+\usepackage{anyfontsize}
 \usepackage[spacing=true,stretch=10]{microtype}
 \frenchspacing
 \usepackage{seminaive}
@@ -745,31 +746,76 @@ which we prove here:
 \section{Finding fixed points faster}
 %% \section{Finding fixed points faster with $\delta$}
 
+\newcommand\naive{na\"ive}
+
+Consider some function $f : \fixtype{A} \to \fixtype{A}$. The \naive{} strategy
+for finding its fixed point is to iterate $f$ to stability:
+
+\begin{align*}
+  x_0 &= \bot & x_{i+1} &= f(x_i)
+\end{align*}
+
+\noindent
+However, if we have access to the derivative $\delta f : \Disc{\fixtype{A}} \to
+\Ch\fixtype{A} \to \Ch\fixtype{A}$, we can do better. The \emph{semi\naive}
+strategy saves time by computing only the \emph{changes} between each iteration
+of the \naive{} strategy:
+
+\begin{align*}
+  x_0 &= \bot &
+  dx_0 &= f(\bot) \ominus \bot\\
+  x_{i+1} &= x_i \oplus dx_{i+1} &
+  dx_{i+1} &= \delta f(x_i)(dx_i)
+\end{align*}
+
+\noindent This yields the same sequence $x_i = f^i(\bot)$ as the
+\naive{} strategy:
+\begin{theorem} If $\delta f$ is a derivative for $f$, then \(x_i = f^i(\bot)\).
+\end{theorem}
+\begin{proof}
+  We show by induction on $i$ that $x_{i+1} = f(x_i)$. The case $i = 0$ is true
+  by construction. Otherwise, we inductively assume this for $i$ and prove it
+  for $i+1$:
+  \begin{align*}
+    x_{i+2}
+    &= x_{i+1} \oplus dx_{i+1}
+    & \text{definition of $x_{i+2}$}\\
+    &= x_{i+1} \oplus \delta f(x_i)(dx_i) & \text{definition of $dx_{i+1}$}\\
+    &= f(x_i) \oplus \delta f(x_i)(dx_i)
+    & \text{inductively, $x_{i+1} = f(x_i)$}\\
+    &= f(x_i \oplus dx_i) & \text{$\delta f$ is a derivative of $f$}\\
+    &= f(x_{i+1}) & \text{definition of $x_{i+1}$}
+  \end{align*}
+\end{proof}
+
+\noindent
+Here is \textsf{fast-fix}, a recursive function implementing this semi\naive{}
+strategy:
+
 \[\begin{array}{l}
   \textsf{fast-fix} ~:~
   (\Disc{\fixtype{A}} \to \Ch\fixtype{A} \to \Ch\fixtype{A})
   \to \fixtype{A} \to \Ch\fixtype{A} \to \fixtype{A}\\
-  \textsf{fast-fix}\; \mi{df}\; \mi{current}\; \mi{change} =\\
-  \quad \textbf{let}~ {\mi{next} = \mi{current} \oplus \mi{change}}
+  \textsf{fast-fix}\; \mi{df}\; x\; dx =\\
+  \quad \textbf{let}~ {x' = x \oplus dx}
   ~\textbf{in}\\
-  \quad \textbf{if}~ \mi{next} \le \mi{current}
-  ~\textbf{then}~ \mi{current}\\
-  \quad \textbf{else}~ \textsf{fast-fix}\; \mi{df}\; \mi{next}
-  \;(\mi{df}\; \mi{current}\; \mi{change})\\
-  \\
-  \textsf{fast-fix}
-  \in ((x : \Disc{L}) \to \Delta(L, x) \to \Delta(L, x)) \to L
-  \\
-  \textsf{fast-fix} \; df =\\
-  \quad\textbf{let}~ \textsf{loop} \in (x : L) \to \Delta(L, x) \to L\\
-  \quad\phantom{\textbf{let}~} \textsf{loop} \;x \;dx =\\
-  \quad\phantom{\textbf{let}~}\quad
-  \textbf{let}~ x' = x \oplus dx ~\textbf{in}\\
-  \quad\phantom{\textbf{let}~}\quad
-  \textbf{if}~ x' \le x ~\textbf{then}~ x\\
-  \quad\phantom{\textbf{let}~}\quad
-  \textbf{else}~\textsf{loop} \;x' \;(df \; x \; dx)\\
-  \quad\textbf{in}~ \textsf{loop} \; \unit \; (f \; \unit \ominus \unit)
+  \quad \textbf{if}~ x' \le x
+  ~\textbf{then}~ x ~\textbf{else}~ \textsf{fast-fix}\; \mi{df}\; x'
+  \;(\mi{df}\; x\; dx)
+  %% \\ \\
+  %% \textsf{fast-fix}
+  %% \in ((x : \Disc{L}) \to \Delta(L, x) \to \Delta(L, x)) \to L
+  %% \\
+  %% \textsf{fast-fix} \; df =\\
+  %% \quad\textbf{let}~ \textsf{loop} \in (x : L) \to \Delta(L, x) \to L\\
+  %% \quad\phantom{\textbf{let}~} \textsf{loop} \;x \;dx =\\
+  %% \quad\phantom{\textbf{let}~}\quad
+  %% \textbf{let}~ x' = x \oplus dx ~\textbf{in}\\
+  %% \quad\phantom{\textbf{let}~}\quad
+  %% \textbf{if}~ x' \le x ~\textbf{then}~ x\\
+  %% \quad\phantom{\textbf{let}~}\quad
+  %% \textbf{else}~\textsf{loop} \;x' \;(df \; x \; dx)\\
+  %% \quad\textbf{in}~ \textsf{loop} \; \unit \; (f \; \unit \ominus \unit)
 \end{array}\]
 
 

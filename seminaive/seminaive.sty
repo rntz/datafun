@@ -8,6 +8,7 @@
 \usepackage{graphicx}           % \scalebox, \rotatebox
 \usepackage[dvipsnames]{xcolor} % must be loaded before tikz
 \usepackage{tikz,tikz-cd}       % diagrams.
+\usepackage{nccmath}            % fix spacing.
 
 
 %% My commands
@@ -63,7 +64,7 @@
 \newcommand{\under}[2]{\underaccent{\mi{#1}}{#2}}
 
 %% typeclasses
-\newcommand{\eq}[1]{\under{dec}{#1}}
+\renewcommand{\eq}[1]{\under{dec}{#1}}
 \newcommand{\fin}[1]{\under{fin}{#1}}
 \newcommand{\lat}[1]{\under{lat}{#1}}
 \newcommand{\acc}[1]{\under{acc}{#1}}
