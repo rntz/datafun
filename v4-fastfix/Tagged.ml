@@ -77,6 +77,35 @@ end = struct
 end
 type 'a set = 'a S.t
 
+(* Finite maps, represented as sorted lists. *)
+module M: sig
+  type ('k,'v) t
+  val empty: ('k,'v) t
+  val single: 'k -> 'v -> ('k,'v) t
+  val add: 'k -> 'v -> ('k,'v) t -> ('k,'v) t
+  val map: ('v1 -> 'v2 option) -> ('k,'v1) t -> ('k,'v2) t
+  val union: ('v -> 'v -> 'v) -> ('k,'v) t -> ('k,'v) t -> ('k,'v) t
+  val unions: ('v list -> 'v) -> ('k,'v) t list -> ('k,'v) t
+  val find: 'k -> ('k,'v) t -> 'v
+  val isEmpty: ('k,'v) t -> bool
+  val toList: ('k,'v) t -> ('k * 'v) list
+  (* TODO: figure out semantics in case of duplicate keys. *)
+  val fromList: ('k * 'v) list -> ('k,'v) t
+end = struct
+  type ('k,'v) t = ('k * 'v) list
+  let empty = []
+  let single k v = [(k,v)]
+  let map f = fail "TODO: M.map"
+  let union f x y = fail "TODO: M.union"
+  let unions f sets = fail "TODO: M.unions"
+  let add k v xs = union (fun _ v1 v2 -> Some v1) [(k,v)] xs
+  let find = List.assoc
+  let isEmpty = function [] -> true | _ -> false
+  let toList x = x
+  let fromList x = fail "TODO: fromList"
+end
+type ('a,'b) map = ('a,'b) M.t
+
 
 (* ===== Syntax ===== *)
 module Lang = struct
@@ -95,19 +124,54 @@ module Lang = struct
   and  expr = (term,expr) exprF
 
   (* Normalised intermediate language *)
-  (* NB. should have type annotations where necessary.
-   * Might need them on variable bindings for derivative transform. *)
-  type ('t,'e) neutF = [ `Var of sym | `App of 'e * 't | `Pi of int * 'e ]
-  type ('t,'e) normF =
-    [ ('t,'e) neutF | `Bool of bool | `Tuple of 't list | `Fn of sym * 't
-    | `Set of 't list
-    (* when, vee, and for are parameterized by semilattices *)
-    | `When of semilat * 'e * 't
-    | `Vee of semilat * 't list
-    | `For of semilat * sym * 'e * 't ]
+  type neut = Var of sym | App of neut * norm | Pi of int * neut
+  and loop = For of sym * neut | When of neut
+  and 'a dnf = {imm: 'a; kids: (loop, 'a dnf) map}
+  and norm =
+    | Neut of neut
+    | Fn of sym * norm
+    | Tuple of norm list
+    (* I think I really want an abstract data structure parameterized by
+     * a notion of _subsumption_, or perhaps _static difference_. *)
+    | Bool of (neut set option) dnf
+    (* `Set(elts, subsets) *)
+    | Set of (norm set * neut set) dnf
 
-  type norm = (norm,neut) normF
-  and  neut = (norm,neut) neutF
+end
+
+module type SL = sig
+  type t
+  val isEmpty: t -> bool
+  val empty: t
+  val union: t -> t -> t
+  val unions: t list -> t
+end
+
+module Dnf(X: SL) = struct
+  open Lang
+  type t = X.t dnf
+
+  let isEmpty (x: t) = X.isEmpty x.imm && M.isEmpty x.kids
+  let maybe (x: t): t option = if isEmpty x then None else Some x
+
+  let empty = {imm = X.empty; kids = M.empty}
+  let single (x: X.t): t = {imm = x; kids = M.empty}
+
+  let rec map (f: 'a -> X.t) (x: 'a dnf): t =
+    { imm = f x.imm; kids = M.map (mapMaybe f) x.kids }
+  and mapMaybe f x = maybe (map f x)
+
+  let rec union (x: t) (y: t): t =
+    { imm = X.union x.imm y.imm; kids = M.union union x.kids y.kids }
+
+  let rec unions (xs: t list): t =
+    List.map (fun x -> x.imm, x.kids) xs |> List.split
+    |> fun (imms, kids) -> {imm = X.unions imms; kids = M.unions unions kids}
+
+  let rec bind (x: 'a dnf) (f: 'a -> t): t =
+    let visit (x: 'a dnf): t option = maybe (bind x f) in
+    let {imm; kids} = f x.imm in
+    {imm; kids = M.union union kids (M.map visit x.kids)}
 end
 
 
@@ -144,109 +208,137 @@ module Show = struct
    * 0 Fn, For, When
    * 1 Vee, Tuple
    * 9 App, Pi *)
-  let rec neut cx prec out (e: neut) = norm cx prec out (e :> norm)
-  and norm (cx: cx) (prec: int) (out: formatter) (term: norm): unit =
-    let printf: 'a. ('a,formatter,unit) format -> 'a = fun x -> fprintf out x in
-    let sepBy sep prec = sepBy sep (norm cx prec) in
-    let par = paren out prec in
-    match term with
-    | `Var x -> (try printf "%s" (Cx.find x cx.vars)
-                 with Not_found -> printf "%s.%d" x.name x.id)
-    | `Bool b -> printf (if b then "yes" else "no")
-    | `App(fnc,arg) ->
-       par 9 (fun _ -> printf "%a@ %a" (neut cx 9) fnc (norm cx 10) arg)
-    | `Fn(x,e) ->
-       let name, ecx = bind x cx in
-       par 0 (fun _ -> printf "λ%s. @[%a@]" name (norm ecx 0) e)
-    | `Pi(i,e) ->
-       let pi = match i with 0 -> "fst" | 1 -> "snd" | i -> sprintf "pi_%i" i in
-       par 9 (fun _ -> printf "%s@ %a" pi (neut cx 10) e)
-    | `Tuple ts -> par 1 (fun _ -> sepBy ",@," 2 out ts)
-    | `Set ts -> printf "{@[%a@]}" (sepBy ",@," 2) ts
-    | `When(_,cnd,body) ->
-       par 0 (fun _ -> printf "when @[%a@] do@ %a" (neut cx 1) cnd (norm cx 0) body)
-    | `Vee(_,[]) -> printf "empty"
-    | `Vee(_,[t]) -> par 1 (fun _ -> printf "@[or %a@]" (norm cx 2) t)
-    | `Vee(_,ts) -> par 1 (fun _ -> printf "@[%a@]" (sepBy "@ or " 2) ts)
-    | `For(_,x,e,t) ->
-       let name, tcx = bind x cx in
-       match t with
-       | `Set[t] -> printf "{@[%a@]@ | %s in @[%a@]}" (norm tcx 2) t name (neut cx 2) e
-       | t -> par 0 (fun _ -> printf "for %s in @[%a@] do@ %a"
-                                name (neut cx 1) e (norm tcx 0) t)
+  (* let rec neut cx prec out (e: neut) = norm cx prec out (e :> norm)
+   * and norm (cx: cx) (prec: int) (out: formatter) (term: norm): unit =
+   *   let printf: 'a. ('a,formatter,unit) format -> 'a = fun x -> fprintf out x in
+   *   let sepBy sep prec = sepBy sep (norm cx prec) in
+   *   let par = paren out prec in
+   *   match term with
+   *   | `Var x -> (try printf "%s" (Cx.find x cx.vars)
+   *                with Not_found -> printf "%s.%d" x.name x.id)
+   *   | `Bool b -> printf (if b then "yes" else "no")
+   *   | `App(fnc,arg) ->
+   *      par 9 (fun _ -> printf "%a@ %a" (neut cx 9) fnc (norm cx 10) arg)
+   *   | `Fn(x,e) ->
+   *      let name, ecx = bind x cx in
+   *      par 0 (fun _ -> printf "λ%s. @[%a@]" name (norm ecx 0) e)
+   *   | `Pi(i,e) ->
+   *      let pi = match i with 0 -> "fst" | 1 -> "snd" | i -> sprintf "pi_%i" i in
+   *      par 9 (fun _ -> printf "%s@ %a" pi (neut cx 10) e)
+   *   | `Tuple ts -> par 1 (fun _ -> sepBy ",@," 2 out ts)
+   *   | `Set ts -> printf "{@[%a@]}" (sepBy ",@," 2) ts
+   *   | `When(_,cnd,body) ->
+   *      par 0 (fun _ -> printf "when @[%a@] do@ %a" (neut cx 1) cnd (norm cx 0) body)
+   *   | `Vee(_,[]) -> printf "empty"
+   *   | `Vee(_,[t]) -> par 1 (fun _ -> printf "@[or %a@]" (norm cx 2) t)
+   *   | `Vee(_,ts) -> par 1 (fun _ -> printf "@[%a@]" (sepBy "@ or " 2) ts)
+   *   | `For(_,x,e,t) ->
+   *      let name, tcx = bind x cx in
+   *      match t with
+   *      | `Set[t] -> printf "{@[%a@]@ | %s in @[%a@]}" (norm tcx 2) t name (neut cx 2) e
+   *      | t -> par 0 (fun _ -> printf "for %s in @[%a@] do@ %a"
+   *                               name (neut cx 1) e (norm tcx 0) t) *)
 end
 
 module Print = struct
   open Format
   let tp ?(out = std_formatter) ?(prec = 0) = fprintf out "@[%a@]\n" (Show.tp prec)
-  let norm ?(out = std_formatter) ?(cx = Show.empty) ?(prec = 0) =
-    fprintf out "@[%a@]\n" (Show.norm cx prec)
+  (* let norm ?(out = std_formatter) ?(cx = Show.empty) ?(prec = 0) =
+   *   fprintf out "@[%a@]\n" (Show.norm cx prec) *)
 end
 
 
-(* ===== Normalisation by evaluation ===== *)
-module NBE = struct
+(* ===== Semantic "values" used for NBE ===== *)
+module type VALUE = sig
+  type t
+  val reify: t -> Lang.norm
+  val var: sym -> t
+  val bool: bool -> t
+  val fn: string -> (t -> t) -> t
+  val tuple: t list -> t
+  val app: t -> t -> t
+  val pi: int -> t -> t
+  val set: t list -> t
+  val vee: semilat -> t list -> t
+  val whenDo: semilat -> t -> t -> t
+  val forIn: semilat -> string -> t -> (t -> t) -> t
+end
+
+module Value = struct
   open Lang
   (* Instead of defining values positively, what if I defined them negatively,
      by what I can do to them? This is probably best investigated in either a
      dependently-typed or untyped host language. *)
-  type value = Neut of neut
-             | Bool of bool | Tuple of value list
-             | Fn of string * (value -> value)
-             | Set of {elts: value set; sets: value set}
-             | When of semilat * neut * value
-             | For of semilat * string * neut * (value -> value)
-  type env = value cx
-  type sem = env -> value
+  type t = Neut of neut
+         | Fn of string * (t -> t)
+         | Tuple of t list
+         (* I'm not convinced here. *)
+         | Bool of neut set option dnf
+         (* (t set) or (norm set)? *)
+         | Set of (t set * neut set) dnf
+  type value = t
 
-  let rec reify: value -> norm = function
-    | Neut e -> (e :> norm)
-    | Bool b -> `Bool b
-    | Fn(name,f) -> let x = Sym.gen name in `Fn (x, reify (f (Neut (`Var x))))
-    | Tuple xs -> `Tuple (List.map reify xs)
-    | When (sl,cond,body) -> `When (sl, cond, reify body)
-    | For (sl,name,expr,body) ->
-       let x = Sym.gen name in `For (sl, x, expr, reify (body (Neut (`Var x))))
-    | Set v ->
-       match List.map reify (S.toList v.elts), List.map reify (S.toList v.sets) with
-       | elts, [] -> `Set elts
-       | [], sets -> `Vee (LSet, sets)
-       | elts, sets -> `Vee (LSet, `Set elts :: sets)
+  module BoolSL = struct
+    type t = neut set option
+    let isEmpty = function Some s -> S.isEmpty s | _ -> false
+    let empty = Some S.empty
+    let union x y = match x,y with
+      | None, _ | _, None -> None
+      | Some x, Some y -> Some (S.union x y)
+    let unions = List.fold_left union empty
+  end
+  module SetSL(X: sig type t end) = struct
+    type t = X.t set * neut set
+    let isEmpty (x,y) = S.isEmpty x && S.isEmpty y
+    let empty = S.empty, S.empty
+    let union (xn,xe) (yn,ye) = S.union xn yn, S.union xe ye
+    let unions l = List.split l |> fun (ns,es) -> S.unions ns, S.unions es
+  end
+  module BoolDnf = Dnf(BoolSL)
+  module SetDnf = Dnf(SetSL(struct type t = value end))
+  module NormSetDnf = Dnf(SetSL(struct type t = norm end))
 
-  let norm (x: sem): norm = reify (x Cx.empty)
+  let var x = Neut (Var x)
+  let bool b = Bool {imm = if b then None else Some S.empty; kids = M.empty}
+  let fn s f = Fn(s,f)
+  let tuple ts = Tuple ts
 
-  module V = struct
-    (* TODO: once funcs are semilattice types, we could apply a For or Vee! *)
-    let app: value -> value -> value = function
-      | Neut e -> fun x -> Neut (`App (e, reify x))
-      | Fn(x,f) -> f
-      | _ -> fail "app"
+  let rec reify: t -> norm = function
+    | Neut x -> Neut x
+    | Bool b -> Bool b
+    | Fn(name,f) -> let x = Sym.gen name in Fn (x, reify (f (var x)))
+    | Tuple xs -> Tuple (List.map reify xs)
+    | Set s -> Set (NormSetDnf.map (fun (x,es) -> (??), es) s)
+    (* | Set (elts, disj) ->
+     *    Set (S.toList elts |> List.map reify |> S.fromList, disj) *)
 
-    (* TODO: once tuples are semilattice types, could pi a For or Vee! *)
-    let pi (i: int): value -> value = function
-      | Neut e -> Neut (`Pi (i,e))
-      | Tuple xs -> List.nth xs i
-      | _ -> fail "pi"
+  (* TODO: once funcs are semilattice types, we could apply a For or Vee! *)
+  let app: t -> t -> t = function
+    | Neut e -> fun x -> Neut (App (e, reify x))
+    | Fn(x,f) -> f
+    | _ -> fail "app"
 
-    (* Set normalisation. The hard bit. *)
-    let asSet: value -> value set * value set = function
-      | Set s -> s.elts, s.sets
-      | (Neut _|For _) as e -> S.empty, S.single e
-      | _ -> fail "asSet"
+  (* TODO: once tuples are semilattice types, could pi a For or Vee! *)
+  let pi (i: int): t -> t = function
+    | Neut e -> Neut (Pi (i,e))
+    | Tuple xs -> List.nth xs i
+    | _ -> fail "pi"
 
-    let toSet (elts: value set) (sets: value set): value =
-      match S.isEmpty elts, S.isSingle sets with
-      | true, Some v -> v
-      | _ -> Set {elts; sets}
+  (* Set normalisation. The hard bit. *)
+  (* let asSet: t -> t set * disj = function
+   *   | Set(xs,d) ->  xs, d
+   *   | Neut x -> S.empty, S.single ([], x)
+   *   | _ -> fail "asSet"
+   * 
+   * let set xs = Set (S.fromList xs, S.empty)
+   * 
+   * let vee (how: semilat) (xs: t list): t = match how with
+   *   | LSet -> let elts, sets = List.map asSet xs |> List.split in
+   *             Set (S.unions elts, S.unions sets)
+   *   | LBool -> fail "todo: vee for booleans"
+   *   | LProd _ -> fail "todo: vee for products" *)
 
-    let set xs = Set {elts = S.fromList xs; sets = S.empty}
-
-    let vee (how: semilat) (xs: value list): value = match how with
-      | LSet -> let elts, sets = List.map asSet xs |> List.split in
-                toSet (S.unions elts) (S.unions sets)
-      | _ -> fail "todo: vee"
-
-    (* TODO: need to handle if/then/else, vee, when, and for at boolean type:
+  (* TODO: need to handle if/then/else, vee, when, and for at boolean type:
 
        when (when M do N) do P         -->  when M do when N do P
        when (for x in M do N) do P     -->  for x in M do when N do P
@@ -255,41 +347,56 @@ module NBE = struct
        TODO: should I rewrite
            when M do (N or P)  -->  (when M do N) or (when N do P)
        or vice-versa?
-     *)
-    let whenDo (how: semilat) (cond: value) (body: value): value = match cond with
-      | Neut e -> When (how, e, body)
-      | Bool b -> if b then body else vee how []
-      | When _ | For _ -> fail "todo: whenDo"
-      | _ -> fail "whenDo"
+   *)
+  (* let whenDo (how: semilat) (cond: t) (body: t): t = match cond, body with
+   *   | Bool None, body -> body
+   *   | Bool (Some conds), body -> (??)
+   *   | Neut e, Set (elts, disj) -> (??)
+   *   | Neut _, Bool _ -> fail "todo: whenDo for boolean body"
+   *   | _ -> fail "whenDo" *)
 
-    let rec forIn (how: semilat) (x: string) (set: value) (body: value -> value): value =
-      let elts, sets = asSet set in
-      let onElt (v: value): value set * value set = asSet (body v) in
-      let onSet: value -> value = function
-        | Neut e -> For (how, x, e, body)
-        (* Commuting conversion:
-           for x in (for y in M do N) do O  -->  for y in M do for x in N do O
-         *)
-        | For (LSet, y, inner_set, inner_body) ->
-           For (how, y, inner_set, fun v -> forIn how x (inner_body v) body)
-        | Set _ | _ -> fail "forIn/onSet" in
-      let elt_elts, elt_sets = S.toList elts |> List.map onElt |> List.split in
-      let set_sets = S.toList sets |> List.map onSet |> S.fromList in
-      toSet (S.unions elt_elts) (S.unions (set_sets :: elt_sets))
-  end
+  (* let rec forIn (how: semilat) (x: string) (set: t) (body: t -> t): t =
+   *   (??)
+   *   (\* let elts, sets = asSet set in
+   *    * let onElt (v: t): t set * t set = asSet (body v) in
+   *    * let onSet: t -> t = function
+   *    *   | Neut e -> For (how, x, e, body)
+   *    *   (\\* Commuting conversion:
+   *    *        for x in (for y in M do N) do O  -->  for y in M do for x in N do O
+   *    *    *\\)
+   *    *   | For (LSet, y, inner_set, inner_body) ->
+   *    *      For (how, y, inner_set, fun v -> forIn how x (inner_body v) body)
+   *    *   | Set _ | _ -> fail "forIn/onSet" in
+   *    * let elt_elts, elt_sets = S.toList elts |> List.map onElt |> List.split in
+   *    * let set_sets = S.toList sets |> List.map onSet |> S.fromList in
+   *    * toSet (S.unions elt_elts) (S.unions (set_sets :: elt_sets)) *\) *)
 
-  let var: sym -> env -> value = Cx.find
-  let bool (b: bool) (e: env): value = Bool b
-  let tuple (xs: sem list) (e: env): value = Tuple (List.map ((|>) e) xs)
-  let pi (i: int) (x: sem) (e: env) = V.pi i (x e)
-  let fn (x: sym) (body: sem) (e: env): value = Fn (x.name, fun v -> body (Cx.add x v e))
-  let app (f: sem) (a: sem) (e: env) = V.app (f e) (a e) (* S combinator! *)
+end
+
+
+(* NBE, using our abstract values. *)
+module NBE = struct
+  open Lang
+  module A = Value
+  type value = Value.t
+  type env = value cx
+  type sem = env -> value
+  type t = sem
+
+  let norm (x: sem): norm = A.reify (x Cx.empty)
+
+  let var (x: sym) (e: env): value = try Cx.find x e with Not_found -> A.var x
+  let bool (b: bool) (e: env): value = A.bool b
+  let tuple (xs: sem list) (e: env): value = A.tuple (List.map ((|>) e) xs)
+  let pi (i: int) (x: sem) (e: env) = A.pi i (x e)
+  let fn (x: sym) (body: sem) (e: env): value = A.fn x.name (fun v -> body (Cx.add x v e))
+  let app (f: sem) (a: sem) (e: env) = A.app (f e) (a e) (* S combinator! *)
   let letBind (x: sym) (e: sem) (body: sem) (env: env): value = body (Cx.add x (e env) env)
-  let set (xs: sem list) (e: env): value = V.set (List.map ((|>) e) xs)
-  let whenDo how cond body env = V.whenDo how (cond env) (body env)
-  let vee (how: semilat) (xs: sem list) (e: env): value = V.vee how (List.map ((|>) e) xs)
+  let set (xs: sem list) (e: env): value = A.set (List.map ((|>) e) xs)
+  let whenDo how cond body env = A.whenDo how (cond env) (body env)
+  let vee (how: semilat) (xs: sem list) (e: env): value = A.vee how (List.map ((|>) e) xs)
   let forIn (how: semilat) (x: sym) (expr: sem) (body: sem) (env: env): value =
-    V.forIn how x.name (expr env) (fun v -> body (Cx.add x v env))
+    A.forIn how x.name (expr env) (fun v -> body (Cx.add x v env))
 end
 
 
