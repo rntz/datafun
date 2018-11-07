@@ -1,4 +1,4 @@
-\documentclass[nomarginums]{rntz}
+\documentclass{rntz}
 \usepackage[b5]{rntzgeometry}
 %\usepackage[phone]{fantasy}
 \usepackage[baskerville,newmath]{rntzfont}
@@ -22,8 +22,8 @@
 \newcommand\strong\textbf
 \newcommand\CP{\cat{ChangePoset}}
 \newcommand\Poset{\cat{Poset}}
-\newcommand\initObj{\ensuremath{\mathbold{0}}}
-\newcommand\termObj{\ensuremath{\mathbold{1}}}
+\newcommand\initO{\ensuremath{\mathbold{0}}}
+\newcommand\termO{\ensuremath{\mathbold{1}}}
 
 \newcommand\G\Gamma
 \newcommand\D\Delta
@@ -170,8 +170,8 @@ constructions when they can be derived from this fact.
   the corresponding structure in \Poset{}:
 
   \begin{align*}
-    \vals \initObj = \chgs \initObj &= \initObj \in \Poset &
-    \vals \termObj = \chgs \termObj &= \termObj \in \Poset \\
+    \vals \initO = \chgs \initO &= \initO \in \Poset &
+    \vals \termO = \chgs \termO &= \termO \in \Poset \\
     \vals{(A \x B)} &= \vals A \x \vals B &
     \vals{(A + B)} &= \vals A + \vals B \\
     \chgs{(A \x B)} &= \chgs A \x \chgs B &
@@ -182,15 +182,15 @@ constructions when they can be derived from this fact.
 
   \[\setlength\arraycolsep{.25em}\def\arraystretch{1.45}
   \begin{array}{rcl}
-    \multicolumn{3}{c}{\triv \valid{\triv} \triv : \termObj} \\
+    \multicolumn{3}{c}{\triv \valid{\triv} \triv : \termO} \\
     a \valid{da} a' \wedge b \valid{db} b'
     &\implies& \tuple{a,b} \longvalid{\tuple{da,db}} \tuple{a',b'} \\
     x \valid{dx} y &\implies&
     \inj{i} x \longvalid{\inj{i} dx} \inj{i} y
   \end{array}\]
 
-  \noindent Here, $\triv$ is the single inhabitant of $\termObj \in \Poset$. We
-  give no cases for $\initObj$ because it is empty.
+  \noindent Here, $\triv$ is the single inhabitant of $\termO \in \Poset$. We
+  give no cases for $\initO$ because it is empty.
 
   The ``value components'' of the morphisms $!$, \textexclamdown, $\pi_i$,
   $\injc_i$, $\fork{f, g}$, and $[f,g]$ are inherited from \Poset{} along
@@ -270,22 +270,41 @@ axiom of choice in the context of Datafun.
 
 \subsection{Exponential objects}
 
-\newcommand\expObj[2]{{#1} \shortrightarrow {#2}}
-%% fucking kerning.
-\newcommand\df{d\kern-0.1em f\kern-.1em}
+\newcommand\expO[2]{#1 \Rightarrow #2}
+\newcommand\df{d\kern-0.1em f\kern-.1em} % fucking kerning.
 
-The change poset of the exponential object $\expObj{A}{B} \in \CP$ consists of
-monotone maps $\df, dg \in \expObj{\isof{\vals A}}{\expObj{\chgs A}{\chgs B}}$,
+The change poset of the exponential object $\expO A B \in \CP$ consists of
+monotone maps $\df, dg \in \expO{\isof{\vals A}}{\expO{\chgs A}{\chgs B}}$,
 partially ordered pointwise by their effect on valid changes and quotiented to
 satisfy antisymmetry:
 
-\[ \df \le dg \iff \fa{x \valid{dx} y} \df \;x \;dx \le dg \;x \;dx \]
+\begin{equation*}
+  \df \le dg : \chgs{(\expO A B)}
+  \iff \fa{x \valid{dx} y} \df \;x \;dx \le dg \;x \;dx 
+\end{equation*}
 
 \noindent
 The validity relation is:
 
-\[ f \valid{\df} g \iff \fa{x \valid{dx} y} f\;x \longvalid{df \;x \;dx} g\;y
-\]
+\begin{equation*}
+  f \valid{\df} g : \expO A B
+  \iff \fa{x \valid{dx} y} f\;x \longvalid{df \;x \;dx} g\;y
+\end{equation*}
+
+\noindent
+This is sound \& complete for increases: \todo{TODO}
+\begin{align*}
+  f \le g : \vals{(\expO A B)}
+  &\iff f \le g : \expO{\vals A}{\vals B}\\
+  &\iff \fa{x \le y} f\;x \le g\;y\\
+  &\iff \fa{x,y} (\ex{dx} x \valid{dx} y)
+  \implies \ex{dx} f\;x \valid{dx} g\;y\\
+  &\iff \todo{???}\\
+  &\iff \ex{\df} f \valid{\df} g
+\end{align*}
+
+\newcommand\fn\lambda
+\todo{TODO: define \fname{eval}, compute $\fn$ from its universal property}
 
 
 \subsection{The lifted \iso{} comonad}
