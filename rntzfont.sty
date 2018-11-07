@@ -147,6 +147,7 @@
 \ifdefstring{\rntz@mathfont}{euler}{
   \RequirePackage{eulervm}
   \edef\zeu@Scale{\@scaled{\rntz@eulerscale}} % scale eulervm font.
+  \PassOptionsToPackage{scaled=\zeu@Scale}{mathalfa}
 }
 
 %% Adjust calendar alphabet.
