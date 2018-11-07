@@ -1,8 +1,7 @@
-\documentclass[nomarginums]{rntz}
+\documentclass[]{rntz}
 %\usepackage[b5]{rntzgeometry}
-\usepackage[phone]{fantasy}
-%\usepackage[baskerville,newmath]{rntzfont}
-\usepackage[pt]{rntzfont}
+\usepackage[laptop]{fantasy}
+\usepackage[scaled=1.02]{rntzfont}
 \usepackage{anyfontsize}
 \usepackage[spacing=true,stretch=10]{microtype}
 \frenchspacing
@@ -14,8 +13,10 @@
 \usepackage{stmaryrd}               % \shortrightarrow, \llbracket, etc.
 \usepackage[b]{esvect}              % \vv for wide vector arrows
 \usepackage{nccmath}                % fix align* (etc.) spacing
+\usepackage{latexsym}
 
-%% Commands
+
+%% ===== Commands =====
 \newcommand\todo[1]{{\color{Rhodamine}#1}}
 
 \newcommand\naive{na\"ive}
@@ -46,23 +47,16 @@
 \newcommand\dummy{\fname{dummy}}
 
 %% TODO: look at other latex arrows
-\newcommand\validarrow{{\to}}
-\newcommand\longvalidarrow{{\longrightarrow}}
-\newcommand\valid[1]{\mathrel{\overset{#1}{\validarrow}}}
-\newcommand\longvalid[1]{\mathrel{\overset{#1}{\longvalidarrow}}}
 \newcommand\vals[1]{#1^v} % other options: _v, _o, _\iota
-\newcommand\valfn{\vals{-}}
+\newcommand\valfn{\ensuremath{\vals{-}}}
 \newcommand\chgs[1]{\D{#1}}
 
 \newcommand\fork[1]{\langle{#1}\rangle}
 \newcommand\krof[1]{[{#1}]}
 \newcommand\Fork[1]{\left\langle{#1}\right\rangle}
 \newcommand\Krof[1]{\left[{#1}\right]}
-\renewcommand\fork\Fork
-\renewcommand\krof\Krof
-
-\renewcommand\vals{\mathcal{V}}
-\renewcommand\valfn\vals
+%% \renewcommand\fork\Fork
+%% \renewcommand\krof\Krof
 
 \newcommand\funct[1]{\vals{#1}}
 \newcommand\deriv[1]{#1'}
@@ -72,6 +66,52 @@
 \newcommand\ex[1]{\exists #1.\bindsp}
 %% \renewcommand\ex[1]{(\exists #1)\bindsp}
 %% \renewcommand\fa[1]{(\forall #1)\bindsp}
+
+
+%% Option A
+% \leadsto, \rightsquigarrow, \Rightarrow
+\newcommand\validarrow\to
+\newcommand\vld[3]{{#2 \mathrel{\overset{#1}{\validarrow}} #3}}
+\newcommand\longvld[3]{{#2 \xrightarrow{#1} #3}}
+
+
+%% %% Option B
+%% \renewcommand\validarrow\leadsto
+%% \newcommand\longvalidarrow\validarrow
+%% \renewcommand\longvld[3]{{#2 \mathrel{\overset{#1}{\longvalidarrow}} #3}}
+
+
+%% %% Option C
+%% \renewcommand\vld[3]{{#2 \xrsquigarrow{#1} #3}}
+%% \renewcommand\longvld[3]{{#2 \xrsquigarrow{#1} #3}}
+
+%% %% Adapted from https://tex.stackexchange.com/questions/233676/leadsto-with-text
+%% \usepackage{tikz}
+%% \usetikzlibrary{decorations.pathmorphing,shapes}
+
+%% \usepackage{tikz-cd}
+%% \usetikzlibrary{decorations.pathmorphing}
+%% \newcommand\xrsquigarrow[1]{%
+%%     \mathrel{%
+%%         \begin{tikzpicture}[%
+%%             baseline={(current bounding box.south)}
+%%             ]
+%%         \node[%
+%%             ,inner sep=.44ex
+%%             ,align=center
+%%             ] (tmp) {$\scriptstyle #1$};
+%%         \path[%
+%%             ,draw,<-
+%%             ,decorate,decoration={%
+%%                 ,zigzag
+%%                 ,amplitude=0.7pt
+%%                 ,segment length=1.2mm,pre length=3.5pt
+%%                 }
+%%             ] 
+%%         (tmp.south east) -- (tmp.south west);
+%%         \end{tikzpicture}
+%%         }
+%%     }
 
 
 \title{Change Semantics for Semi\naive{} Datafun}
@@ -89,15 +129,15 @@
   \CP.
 \end{abstract}
 
-\todo{TODO: should I be using posets or preorders?}
-
 
 \section{Notation and conventions}
 
-$\initE_A : \initO \to A$ is the unique map out of an initial object; $\termI_A
-: A \to \initO$ is the unique map into a terminal object.
-
-\todo{TODO: Explain $\iso : \Poset \to \Poset$.}
+\begin{enumerate}
+\item I write $f~x$ for a function $f$ applied to an argument $x$.
+\item $\initE_A : \initO \to A$ is the unique map out of an initial object;\\
+  $\termI_A : A \to \initO$ is the unique map into a terminal object.
+\item \todo{TODO: Explain $\iso : \Poset \to \Poset$.}
+\end{enumerate}
 
 
 \section{The category \CP}
@@ -109,25 +149,25 @@ Objects $A$ of \CP{} are tuples $(\vals A, \chgs A, \upd_A)$, where
 \begin{enumerate}
 \item $\vals A \in \Poset$ is the poset of values.
 \item $\chgs A \in \Poset$ is the poset of changes.
-\item $(\upd) : \vals A \x \chgs A \pto \vals A$ is a \strong{partial} map
+\item $(\upd) : \vals A \x \chgs A \pto \vals A$ is a partial map
   taking a value and a change to an updated value. If $x \upd dx$ is defined, we
   say $dx$ is a \emph{valid} change to $x$.
 
-  $x \valid{dx} y$ denotes that $x \upd dx$ is defined and equal to $y$.
-  Otherwise, propositions involving $\upd$ should be understood to hold only
-  when it is defined.
+  $\vld{dx} x y$ means $x \upd dx$ is defined and equal to $y$. Otherwise,
+  propositions involving $\upd$ should be understood to hold only when it is
+  defined.
 \end{enumerate}
 
 \noindent
-These must satisfy the following conditions:\footnote{There are other
-  conditions one might sensibly impose here, most notably, that $x \upd dx$ is
-  monotone in $dx$. I have omitted this because I have not needed it, but the
-  lack of an obvious ``correct'' set of conditions bothers me.}
+These must satisfy the following conditions:\footnote{There are other conditions
+  one might sensibly impose here, most notably, that $x \upd dx$ is monotone in
+  $dx$. I have not needed this, but the lack of an obvious ``correct'' set of
+  conditions bothers me.}
 
 \begin{align*}
-  x \le y &~\implies \ex{dx} x \valid{dx} y
+  x \le y &~\implies \ex{dx} \vld{dx} x y
   & \text{complete for increases}\\
-  x \le y &\impliedby~ \ex{dx} x \valid{dx} y
+  x \le y &\impliedby~ \ex{dx} \vld{dx} x y
   & \text{sound for increases}
 \end{align*}
 
@@ -136,17 +176,17 @@ A morphism $f \in \CP(A, B)$ is a value map $\funct f \in \Poset(\vals A, \vals
 B)$ eq\-uip\-ped with a derivative $\deriv f \in \Poset(\isof{\vals A} \x \chgs
 A, \chgs B)$ such that:
 
-\[ x \valid{dx} y \implies \funct f\,x \longvalid{\deriv f(x,dx)} \funct f\,y\]
+\[ \vld{dx} x y \implies \longvld{\deriv f(x,dx)}{\funct f\,x}{\funct f\,y}\]
 
 \noindent Or, equivalently:
 \[ \funct f(x \upd dx) = \funct f\,x \upd \deriv f(x, dx) \]
 
 \noindent
 Two morphisms are equal iff they have equal value maps and their derivatives'
-behavior coincides on \emph{valid} changes. In other words, we \strong{quotient}
-equality of derivatives as follows:
+behavior coincides on \emph{valid} changes. In other words, we quotient equality
+of derivatives as follows:
 
-\[ (\fa{x \valid{dx} y} \deriv f(x,dx) = \deriv g(x,dx))
+\[ (\fa{\vld{dx} x y} \deriv f(x,dx) = \deriv g(x,dx))
 \implies \deriv f = \deriv g \]
 
 \noindent
@@ -157,16 +197,16 @@ Composition of derivatives follows the chain rule:
   %% \funct{(f \circ g)}\, x &= \funct f (\funct g\,x)\\
   \funct\id &= \id & \funct{(f \circ g)} &= \funct f \circ \funct g\\
   \deriv\id(x,dx) &= dx
-  & \deriv{(f \circ g)} (x,dx) &= \deriv f (g \;x,\, \deriv g(x,dx))
+  & \deriv{(f \circ g)} (x,dx) &= \deriv f (g ~x,\, \deriv g(x,dx))
 \end{align*}
 
 \noindent The only interesting case of associativity is the one involving the
 chain rule:
 \begin{align*}
   \deriv{(f \circ (g \circ h))} (x,dx)
-  &= \deriv f((g \circ h) \;x,\ \deriv{(g \circ h)}(x,dx))\\
-  &= \deriv f (g(h \;x),\ \deriv g(h \;x,\ \deriv h(x,dx)))\\
-  &= \deriv{(f \circ g)} (h \;x,\ \deriv h(x,dx))\\
+  &= \deriv f((g \circ h) ~x,\ \deriv{(g \circ h)}(x,dx))\\
+  &= \deriv f (g(h ~x),\ \deriv g(h ~x,\ \deriv h(x,dx)))\\
+  &= \deriv{(f \circ g)} (h ~x,\ \deriv h(x,dx))\\
   &= \deriv{((f \circ g) \circ h)} (x,dx)
 \end{align*}
 
@@ -175,49 +215,40 @@ chain rule:
 
 Applying the axiom of choice to soundness \& completeness for increases, we can
 recover zero-change and composition operators $\zero$, $(\cdot)$ such that $x
-\upd \zero_x = x$ and $x \upd (dx \cdot dy) = (x \upd dx) \upd dy$. These
-do not necessarily satisfy the identity and associativity laws of a category,
-but can be useful nonetheless. \todo{TODO: talk about non-constructivity and why
-  it won't be a problem. maybe should go in ``strategy'' section at the top?}
+\upd \zero_x = x$ and $x \upd (dx \cdot dy) = (x \upd dx) \upd dy$. These do not
+necessarily satisfy the identity and associativity laws of a category, but will
+be useful nonetheless. \todo{TODO: talk about non-constructivity and why it
+  won't be a problem. maybe should go in ``strategy'' section at the top?}
 
 
 \subsection{\CP{} refines \Poset{}}
 \label{sec:refines}
 
-There is a straightforward forgetful functor $\valfn : \CP \to \Poset$ taking
-objects $A$ to $\vals{A}$ and morphisms $f$ to $\funct f$. The structures we
-will build in \CP{} all \emph{refine} the corresponding structures in \Poset{},
-meaning they commute with $\valfn$. For example, for cartesian products,
-$\vals{(A \x B)} = \vals{A} \x \vals{B}$ and $\funct{\fork{f,g}} = \fork{\funct
-  f, \funct g}$. For brevity's sake, we omit the ``value components'' of our
-constructions when they can be derived from this fact.
+The forgetful functor $\valfn : \CP \to \Poset$ takes objects $A$ to $\vals{A}$
+and morphisms $f$ to $\funct f$. The structures we will build in \CP{}
+\emph{refine} the corresponding structures in \Poset{}, in the sense of
+commuting with $\valfn$. For example, for cartesian products, $\vals{(A \x B)} =
+\vals{A} \x \vals{B}$ and $\funct{\fork{f,g}} = \fork{\funct f, \funct g}$. For
+brevity, we omit the ``value components'' of our constructions when they can be
+derived from this fact.
 
 
-\subsection{Cartesian structure}
+\section{Cartesian structure}
 
 \begin{theorem}
   \CP{} has all finite products and sums.
 \end{theorem}
 
 \begin{proof}
-  The value- and change-poset structure is inherited from \Poset{}, as are the
-  value components of the universal, projection, and injection maps (see
-  \S\ref{sec:refines}), while the projection and injection's derivatives operate
-  pointwise on changes:
+  I omit the value-level structure, as it is inherited from \Poset{} along
+  \valfn{}. The change-poset structure is also inherited from \Poset{}, while
+  the projection and injection's derivatives operate pointwise on changes:
 
   \begin{align*}
-    \vals{\left(\prod_{i \in I} A_i\right)} &= \prod_{i \in I} \vals A_i &
-    \vals{\left(\sum_{i \in I} A_i\right)} &= \sum_{i \in I} \vals A_i
-    \\[1em]
     \chgs{\prod_{i \in I} A_i} &= \prod_{i \in I} \chgs A_i &
     \chgs{\sum_{i \in I} A_i} &= \sum_{i \in I} \chgs A_i
-    \\[.5em]
-    \funct{\Fork{\vv f}} &= \Fork{\vv{\funct f}} &
-    \funct{\Krof{\vv{f}}} &= \Krof{\vv{\funct f}}
     \\
-    \funct\pi_i &= \pi_i & \funct \injc_i &= \injc_i
-    \\
-    \deriv\pi_i(x,dx) &= \pi_i\;dx & \deriv\injc_i(x,dx) &= \inj i dx
+    \deriv\pi_i(x,dx) &= \pi_i~dx & \deriv\injc_i(x,dx) &= \inj i dx
   \end{align*}
 
   \noindent Updates are pointwise, noting that $(\inj i x \upd \inj j dx)$ is
@@ -227,6 +258,10 @@ constructions when they can be derived from this fact.
     (x_i)_i \upd (dx_i)_i &= (x_i \upd dx_i)_i &
     \inj i x \upd \inj i dx &= \inj i (x \upd dx)
   \end{align*}
+
+  \noindent
+  Soundness \& completeness for increases follow directly from the pointwise
+  orderings of products \& coproducts in \Poset{}.
 
   We calculate $\deriv{\fork{\vv f}}$ from its universal property. Imagine $g$
   such that $\deriv f_i = (\pi_i \circ g)'$ for $i \in I$. Then:
@@ -250,142 +285,35 @@ constructions when they can be derived from this fact.
     &= \deriv g(\inj i x,\, \inj i dx)
   \end{align*}
 
-  This defines $g'(\inj i x,\, \inj j dx)$ when $i = j$. What about $i \ne j$?
-  Here we appeal to our quotient: derivatives are equal iff they agree on
-  \emph{valid} changes. By construction, all valid changes to $\inj i x$ are of
-  the form $\inj i dx$. So it \strong{does not matter} what $\deriv{\krof{\vv
-      f}}(\inj i x, \inj j dx)$ does for $i \ne j$, so long as it is defined.
-  One satisfactory definition is:
+  This defines $\deriv{\krof{\vv f}}(\inj i x,\, \inj j dx)$ when $i = j$. What
+  about $i \ne j$? Here we appeal to our quotient: derivatives are equal iff
+  they agree on \emph{valid} changes. By construction, all valid changes to
+  $\inj i x$ are of the form $\inj i dx$. So the $i \ne j$ case \strong{does not
+    matter}, so long as it is defined. One satisfactory definition is:
 
   \begin{equation*}
     \deriv{\Krof{\vv f}}(\inj i x,\, \inj j dx) = 
     \begin{cases}
       \deriv f_i(x,dx) & \text{if}~ i=j\\
-      \fname{magic}(x) & \text{otherwise}
+      \zero_x & \text{otherwise}
     \end{cases}
   \end{equation*}
 
-  \noindent\todo{TODO}
-
-  \pagebreak
-  We show this by constructing initial and terminal objects and binary sums and
-  products. In each case, both the underlying and the change posets come from
-  the corresponding structure in \Poset{}:
-
-  %% \begin{align*}
-  %%   \vals \termO = \chgs \termO &= \termO \in \Poset &
-  %%   \vals \initO = \chgs \initO &= \initO \in \Poset\\
-  %%   \triv \upd \triv &= \triv
-  %%   \\
-  %%   \vals{(A \x B)} &= \vals A \x \vals B &
-  %%   \vals{(A + B)} &= \vals A + \vals B
-  %%   \\
-  %%   \chgs{(A \x B)} &= \chgs A \x \chgs B &
-  %%   \chgs{(A + B)} &= \chgs A + \chgs B \\
-  %%   (a,b) \upd (da,db) &= (a \upd da, b \upd db) &
-  %%   \inj i x \upd \inj i dx &= \inj i (x \upd dx)
-  %% \end{align*}
-
-  \begin{align*}
-    \vals \initO = \chgs \initO &= \initO \in \Poset &
-    \vals \termO = \chgs \termO &= \termO \in \Poset \\
-    \vals{(A \x B)} &= \vals A \x \vals B &
-    \vals{(A + B)} &= \vals A + \vals B \\
-    \chgs{(A \x B)} &= \chgs A \x \chgs B &
-    \chgs{(A + B)} &= \chgs A + \chgs B
-  \end{align*}
-
-  \noindent The update maps are given by:
-
-  \begin{align*}
-    \triv \upd \triv &= \triv\\
-    (a,b) \upd (da,db) &= (a \upd da, b \upd db)\\
-    \inj i x \upd \inj i dx &= \inj i (x \upd dx)
-  \end{align*}
-
-  \noindent Here, $\triv$ is the single inhabitant of $\termO \in \Poset$. We
-  give no cases for $\initO$ because it is empty. Note that $(\inj i x \upd \inj
-  j dx)$ is undefined for $i \ne j$.
-
-  The ``value components'' of the morphisms $!$, \textexclamdown, $\pi_i$,
-  $\injc_i$, $\fork{f, g}$, and $[f,g]$ are inherited from \Poset{} along
-  $(\vals{-})$ (see \S\ref{sec:refines}). The derivatives of $!$, \textexclamdown,
-  $\pi_i$, and $\injc_i$ simply operate pointwise on their second argument:
-
-  \begin{align*}
-    {\deriv{!}}(x,dx) &= {\funct{!}}\,dx &
-    \deriv{\text{\textexclamdown}}(x,dx) &= \funct{\text{\textexclamdown}}\,dx\\
-    \deriv\pi_i(x,dx) &= \funct{\pi_i}\,dx &
-    \deriv\injc_i(x,dx) &= \funct{\injc_i}\,dx
-  \end{align*}
-
-  \noindent
-  Note that $!$ and {\textexclamdown} inherit their universal properties from
-  \Poset{}.
-
-  We can calculate $\deriv{\fork{f_1,f_2}}$ from its universal property.
-  Consider some $g$ such that $\deriv f_i = \deriv{(\pi_i \circ g)}$ for $i \in
-  \{1,2\}$. Then:
-
-  \begin{align*}
-    \deriv f_i(x,dx)
-    &= \deriv{(\pi_i \circ g)}(x,dx)\\
-    &= \deriv\pi_i (\funct g\,x,\, \deriv g(x,dx))\\
-    &= \funct\pi_i(\deriv g(x,dx))
-  \end{align*}
-
-  \noindent
-  So by the universal property of products in \Poset{}, we have $g' =
-  \fork{\deriv f_1, \deriv f_2}$. Thus $\deriv{\fork{f_1,f_2}} = \fork{\deriv
-    f_1, \deriv f_2}$.
-
-  Finally, let's attempt to calculate $\deriv{[f_1,f_2]}$ from its universal
-  property. Consider some $g$ such that $\deriv f_i = \deriv{(g \circ
-    \injc_i)}$. Then:
-
-  \begin{align*}
-    \deriv f_i(x,dx)
-    &= \deriv{(g \circ \injc_i)}(x,dx)\\
-    &= \deriv g (\funct\injc_i \,x,\, \deriv\injc_i \,(x,dx))\\
-    &= \deriv g (\inj i x,\, \inj i dx)
-  \end{align*}
-
-  \noindent
-  This defines $g'(\inj i x,\, \inj j dx)$ when $i = j$. What about $i \ne j$?
-  Here we appeal to our quotient: derivatives are equal iff they agree on
-  \emph{valid} changes. By construction of the validity relation for sums, all
-  valid changes to $\inj i x$ are of the form $\inj i dx$. So it \strong{does
-    not matter} what $\deriv{[f_1,f_2]}(\inj i x, \inj j dx)$ does for $i \ne
-  j$, so long as it is defined. One satisfactory definition is:
-
-  \begin{equation*}
-    \deriv{\Krof{f_1,f_2}} (\inj{i} x,\, \inj{j} dx)
-    = \begin{cases}
-      \deriv f_i(x,dx) & \text{if}~ i=j\\
-      \fname{magic}(x) & \text{otherwise}
-    \end{cases}
-  \end{equation*}
-
-  \noindent
-  Here $\fname{magic} : \vals A \to \chgs A$ is given by the axiom of choice as
-  follows. Fix $x : \vals A$. By reflexivity $x \le x$, so by soundness,
-  $\exists dx : \chgs A$ (indeed, one such that $x \valid{dx} x$, but this is
-  irrelevant here). Let \fname{magic} be a choice function that picks such a
-  $dx$.
-
-  I omit the proofs that the derivatives are monotone in their second argument.
+  I omit the proofs that the derivatives above are monotone in their second
+  argument.
 \end{proof}
 
 \noindent
-NB. \fname{magic} is effectively dead code: necessary to define $\deriv{[f,g]}$,
-but irrelevant to its behavior. We will exploit this later to avoid needing the
-axiom of choice in the context of Datafun.
+The use of $\zero_x$ in $\deriv{\krof{\vv f}}$ is effectively dead code:
+necessary to define $\deriv{\krof{\vv f}}$, but irrelevant to its behavior. We
+will exploit this later to avoid needing the axiom of choice (used to define
+$\zero_x$) in the context of Datafun.
 
 
-\subsection{Exponential objects}
+\section{Exponential objects}
 
 \newcommand\expO[2]{#1 \Rightarrow #2}
-\newcommand\df{d\kern-0.1em f\kern-.1em} % fucking kerning.
+\newcommand\df{d\kern-.1em f\kern-.1em} % fucking kerning.
 
 The change poset of the exponential object $\expO A B \in \CP$ consists of
 monotone maps $\df, dg \in \expO{\isof{\vals A}}{\expO{\chgs A}{\chgs B}}$,
@@ -394,37 +322,73 @@ satisfy antisymmetry:
 
 \begin{equation*}
   \df \le dg : \chgs{(\expO A B)}
-  \iff \fa{x \valid{dx} y} \df \;x \;dx \le dg \;x \;dx 
+  \iff \fa{\vld{dx} x y} \df ~x ~dx \le dg ~x ~dx 
 \end{equation*}
 
 \noindent
-The validity relation is:
+The update relation is:
 
-\begin{equation*}
-  f \valid{\df} g : \expO A B
-  \iff \fa{x \valid{dx} y} f\;x \longvalid{df \;x \;dx} g\;y
-\end{equation*}
+\begin{equation}\label{eqn:function-update}
+  \vld{\df} f g : \expO A B
+  \iff \fa{\vld{dx} x y} \longvld{\df~x~dx}{f~x}{g~y}
+\end{equation}
+
+\noindent Informally, this says a function change $\df$ is valid so long as it
+takes valid input changes to valid output changes: if $dx$ is a change to $x$,
+then $\df~x~dx$ must be a change to $f~x$.
+
+To show this defines a unique partial function $\upd$, suppose $\vld\df f g$ and
+$\vld\df f h$ and consider any $x : A$. \Cref{eqn:function-update} applied to
+$\vld{\zero_x} x x$ gives us $\longvld{\df~x~\zero_x}{f~x}{g~x}$ and
+$\longvld{\df~x~\zero_x}{f~x}{h~x}$. By functionality of $\validarrow$ at $B$ we
+have $g~x = h~x = f~x \upd \df~x~\zero_x$.
+
+Thus, whenever $f \upd \df$ is defined, we have
+%
+\[ (f \upd \df)~x = f~x \upd \df~x~\zero_x \]
+%
+and more generally, setting aside definedness, \cref{eqn:function-update} can be
+rewritten:
+%
+\[ f~x \upd \df~x~dx = (f \upd \df)~(x \upd dx) \]
 
 \noindent
-This is sound \& complete for increases: \todo{TODO}
-\begin{align*}
-  f \le g : \vals{(\expO A B)}
-  &\iff f \le g : \expO{\vals A}{\vals B}\\
-  &\iff \fa{x \le y} f\;x \le g\;y\\
-  &\iff \fa{x,y} (\ex{dx} x \valid{dx} y)
-  \implies \ex{dx} f\;x \valid{dx} g\;y\\
-  &\iff \todo{???}\\
-  &\iff \ex{\df} f \valid{\df} g
-\end{align*}
+Soundness \& completeness for increases at $\expO A B$ follows from soundness \&
+completeness at $A$ and $B$ and the axiom of choice. \todo{TODO: elaborate}
+
+% WTS: f ≤ g ⇔ ∃df. f -df-> g
+
+% Suppose f ≤ g.
+% WTS: ∃df. f --df--> g.
+% Let's calculate! df has to be such that
+% ∀(x -dx-> y) f x --df x dx--> g y
+% Suppose (x -dx-> y)
+% 
+% Suppose f -df-> g.
+% Consider x : A. WTS: f x <= g y. Know x --0x--> x.
+% Thus f x --df x 0x--> g x. So by soundness f x <= g x.
+
+%% \begin{align*}
+%%   f \le g : \vals{(\expO A B)}
+%%   &\iff f \le g : \expO{\vals A}{\vals B}\\
+%%   &\iff \fa{x \le y} f~x \le g~y\\
+%%   &\iff \fa{x,y} (\ex{dx} \vld{dx} x y)
+%%   \implies \ex{dx} \vld{dx}{f~x}{g~y}\\
+%%   &\iff \todo{???}\\
+%%   &\iff \ex{\df} \vld{\df} f g
+%% \end{align*}
 
 \newcommand\fn\lambda
 \todo{TODO: define \fname{eval}, compute $\fn$ from its universal property}
 
 
-\subsection{The lifted \iso{} comonad}
+\section{The lifted \iso{} comonad}
 
-\subsection{Semilattice objects}
+\section{Semilattice objects}
 
-\subsection{Fixed points}
+\section{Fixed points}
+
+
+\section{``Reading off'' the change semantics of Datafun}
 
 \end{document}
