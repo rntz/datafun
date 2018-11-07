@@ -1,8 +1,9 @@
-\documentclass{rntz}
+\documentclass[nomarginums]{rntz}
 
 %% Laptop-oriented 4:5 fantasy paper. Other options: tablet, phone.
-\usepackage{fantasy}
+\usepackage[phone]{fantasy}
 \usepackage{rntzfont}
+%\linespread{1.15}
 
 %% % Options: charter, palatino, cochineal, libertine.
 %% %\usepackage[b5]{rntzgeometry}\usepackage[width=365pt,fullwidth=16cm]{narrow}
@@ -57,7 +58,7 @@
 
 % typographic improvements
 % TODO: put these in rntzfont.sty or rntz.cls?
-\usepackage[spacing=true,stretch=15,tracking=true,letterspace=15]{microtype}
+\usepackage[spacing=true,stretch=15,tracking=true,letterspace=30]{microtype}
 \frenchspacing
 
 
@@ -66,8 +67,8 @@
 
 \newcommand{\fapremise}[1]{(\forall #1)~\,}
 
-%\newcommand{\bnfeq}{\dblcolon=}
-\newcommand{\bnfeq}{\ni}
+\newcommand{\bnfeq}{\dblcolon=}
+%\newcommand{\bnfeq}{\ni}
 \newcommand{\bnfcont}{}
 \newcommand{\pipe}{~\,|\,~}
 
@@ -75,7 +76,7 @@
 \newcommand{\mi}[1]{\ensuremath{\mathit{#1}}}
 \newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}
 
-\newcommand{\GG}{\Gamma}
+\newcommand{\G}{\Gamma}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\x}{\times}
 \newcommand{\fn}{\lambda}
@@ -86,6 +87,7 @@
 \newcommand{\fix}{\textsf{fix}}
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
 \newcommand{\subtype}{\le}
+\newcommand\defeq{\triangleq}
 
 %% Category & preorder theory
 \newcommand{\cat}[1]{\textsc{#1}} %category name
@@ -238,8 +240,7 @@ the preorder $A$ transformed by the tone $T$, defined:
     \\
     \iso
     & \text{induced equivalence}
-    & $a \le b \wedge b \le a : A$ &$\iff$& $a \le b : \isof A$
-    \\
+    & $a \le b \wedge b \le a : A$ &$\iff$& $a \le b : \isof A$\\
     \path{}
     & \text{equivalence closure}
     & $a \le b \vee b \le a : A$ &$\ \implies$& $a \le b : \pathof A$
@@ -394,9 +395,7 @@ $\text{a} \not\le \text{c} \wedge \text{c} \not\le \text{a} : A$.
   : (T \tmeet U)A \to B \times C$ of two functions $f : TA \to B$ and $g : UA
   \to C$.
 
-  %% TODO FIXME: ordering of tone composition is wrong! need to fix this goddamn
-  %% everywhere, and I may have already messed up a few places, so double-check
-  %% while I'm at it.
+  %% TODO: Double-check the ordering of tone composition I use everywhere.
 \item Composition $UT$ gives the tone of a composed function $g \circ f : UTA
   \to C$ when $f : TA \to B$ and $g : UB \to C$. Equivalently, $(UT)A = U(TA)$
   for any preorder $A$.
@@ -406,10 +405,11 @@ I sometimes write $TU$ as $T \tc U$ for clarity. Composition binds tighter than
 meet, so $TU \tmeet V = (T \circ U) \tmeet V$.
 %
 Together, $\tmeet$ and $\tc$ form a semiring whose properties are given in
-\cref{fig:tone-op-laws}. \todo{TODO: Reference all those other works which use
-  annotations forming a semiring.}
+\cref{fig:tone-op-laws}.
 
-\todo{TODO: check the distribution laws hold!}
+%% TODO: check the distribution laws hold.
+%% TODO: Reference all those other works with semiring annotations.
+
 
 \begin{figure*}
   \begin{mathpar}
@@ -474,7 +474,7 @@ Together, $\tmeet$ and $\tc$ form a semiring whose properties are given in
 %% a transformation on orderings. However, it seems related to subtyping.
 
 
-\section{Tones, categorically}
+\section{Semantics of tones}
 
 \newcommand{\elems}[1]{\ensuremath{|{#1}|}}
 \newcommand{\elemsfn}[0]{\elems{-}}
@@ -482,13 +482,10 @@ Together, $\tmeet$ and $\tc$ form a semiring whose properties are given in
 %% \renewcommand{\elemsfn}{\mathbold{E}}
 %% \renewcommand{\elems}[1]{\elemsfn(#1)}
 
-This section gives a categorical semantics of tones. You may safely skip it.
-
 Let's change perspective. \Cref{sec:tones} defines tones as function
 pro\-per\-ties, then gives corresponding pre\-order trans\-form\-ations. Now,
 let's define tones as preorder transformations, and derive corresponding
 function properties.
-
 \begin{definition}
   $\elemsfn : \Pre \to \Set$ is the functor taking a preorder to its set of
   elements.
@@ -500,9 +497,9 @@ function properties.
     isomorphism \(\iota : \elems{T-} \isoto \elemsfn\). I'm not yet comfortable
     generalizing that far.} That is, for any preorder $A$ and monotone map $f$,
   \begin{enumerate}
-  \item $\elems{TA} = \elems{A}$: tone functors alter a preorder's
+  \item $\elems{TA} = \elems{A}$: tones alter a preorder's
     \emph{ordering}, not its elements.
-  \item $\elems{Tf} = \elems{f}$: tone functors do not alter functions'
+  \item $\elems{Tf} = \elems{f}$: tones do not alter functions'
     behavior.
   \end{enumerate}
 \end{definition}
@@ -513,47 +510,113 @@ function properties.
 %% It's also unclear how to generalize this definition to tones of functors on
 %% \Cat{}.
 
-\subsection{Tone composition}
-
-Tone composition $TU$ corresponds to composition of tone functors:
+
+%% \subsection{Tone composition}
 
 \begin{theorem}
-  The composition $TU$ of two tones is itself a tone.
+  Tones are closed under functor composition.
 \end{theorem}
 
 \begin{proof} Applying \cref{def:tone}, we have
-  \( \elems{T(U-)} = \elems{U-} = \elemsfn \).
+  \( \elems{U(T-)} = \elems{T-} = \elemsfn \).
 \end{proof}
 
 
-%% \subsection{The tone lattice}
+\subsection{The tone lattice}
 
-%% Preorders have a natural ``subpreordering'' relationship, $A \subtype
-%% B$, which in turn induces an ordering on tones:
+Preorders have a natural \emph{subpreorder} relationship, $A \subtype B$, given
+by:
+\begin{align*}
+  A \subtype B
+  &\iff {\le_A} \subseteq {\le_B}
+  \\ &\iff \fnof{x} x : A \to B
+  \\ &\iff A \subseteq B \wedge \forall(x,y)~ x \le y : A \implies x \le y : B
+\end{align*}
 
-%% \newcommand\defeq{\triangleq}
+\noindent This lifts pointwise to a partial order on tones:
 
-%% \[\def\arraystretch{1.2}\begin{array}{rcl}
-%%   A \subtype B &\defeq&
-%%   A \subseteq B \mathrel{\text{and}}
-%%   (x \le y : A \implies x \le y : B)\\
-%%   T \le U &\defeq& (\forall A)~ TA \subtype UA
-%% \end{array}\]
+\[ T \le U \iff (\forall A)~ TA \subtype UA \]
+
+\newcommand{\setfor}[2]{\{#1 ~|~ #2\}}
+
+\begin{theorem}\label{thm:subpreorder-lattice}
+  Preorders over a set $A$ form a lattice.
+\end{theorem}
+
+\begin{proof}
+  Let $P,Q,R \subseteq A \x A$ stand for preorder relations on $A$. Let $S^*$ be
+  the transitive closure of $S$. Then our preorder lattice is given by:
+  \begin{align*}
+    P \wedge Q &= P \cap Q  & \bot &= \setfor{(x,x)}{x \in A} \\
+    P \vee Q &= (P \cup Q)^* & \top &= A \x A
+  \end{align*}
+
+  By construction, $\bot$ is the least preorder; $\top$ the greatest; $P \wedge
+  Q$ the greatest lower bound of $P, Q$; and $P \vee Q$ their least upper bound
+  (as the least transitive relation such that $P \cup Q \subseteq P \vee
+  Q$).\footnote{Interestingly, this lattice is not distributive. Let $A =
+    \{1,2,3,4\}$ and consider the preorders $P = \{1 < 2 < 4\}$, $Q = \{1 <
+    3\}$, and $R = \{3 < 4\}$. Then $P \wedge (Q \vee R) = \{1 < 4\}$ but $(P
+    \wedge Q) \vee (P \wedge R)$ is discrete. \todo{TODO: is there a
+      counterexample for the other distributive law?}}
+\end{proof}
+
+\begin{theorem}
+  Tones form a lattice.\footnote{Since the preorder lattice is not distributive,
+    I expect that the tone lattice isn't either, but have yet to find a
+    counterexample.}
+\end{theorem}
+
+\begin{proof}
+  Since tones are ordered pointwise, they inherit the lattice on preorders from
+  \cref{thm:subpreorder-lattice}, so long as the lattice operations
+  are functorial. Restating their definitions in logical notation, given tones
+  $T,U$, the tone functors $\bot$, $\top$, $T \wedge U$, and $T \vee U$
+  construct the smallest preorders satisfying:
+
+  \begin{align*}
+    x \le y : \bot A &\iff x = y\\
+    x \le y : \top A &\iff \top\\
+    x \le y : (T \wedge U)A &\iff x \le y : TA \wedge x \le y : UA\\
+    x \le y : (T \vee U)A &\impliedby\hspace{2.5pt} x \le y : TA \vee x \le y : UA
+  \end{align*}
+
+  $\bot$ and $\top$ are functorial because \emph{all} maps $\bot A \to \bot B$
+  or $\top A \to \top B$ are monotone. $T \wedge U$ is functorial \todo{by
+    functoriality of $T$, $U$, and $\wedge$}.
+  %
+  $T \vee U$ is functorial as follows:
+  %
+  Suppose $f : A \to B$. We wish to show $f : (T \vee U)A \to (T \vee U)B$.
+  Suppose $x \le y : (T \vee U)A$. Since $(T \vee U)A$ is a transitive closure,
+  there exists a path $x_0, ..., x_n$ such that $x_0 = x$, $x_n = y$, and $x_i
+  \le x_{i+1} : TA \vee x_i \le x_{i+1} : UA$. Fix $i$. Without loss of
+  generality, let $x_i \le x_{i+1} : TA$. Then $f(x_i) \le f(x_{i+1}) : TA$ by
+  functoriality of $T$. Thus $f(x_i) \le f(x_{i+1}) : (T \vee U)A$. By
+  transitivity $f(x) \le f(y) : (T \vee U)A$.
+\end{proof}
+
+\begin{conjecture}
+  The syntactic definitions of $\tmeet$ and $\tc$ in \cref{fig:tone-ops} agree
+  with their semantic counterparts when applied to $\id$, $\op$, $\path$, and
+  $\iso$.
+\end{conjecture}
 
 
 \subsection{The \Tone{} category}
 
-Preorders have a natural partial order, letting $A \le B$ iff $A$ is a
-\emph{subpreorder} of $B$ --- that is, if $\fnof{x} x : A \to B$.\footnote{In
-  other words, if $A \subseteq B$ and $x \le y : A \implies x \le y : B$.}
-%
-This lifts pointwise to a partial order on tones: let $T \le U$ iff
-$TA \le UA$ for all $A$.
-%
-As functors, tones also form a category, \Tone{}, with natural transformations
-as morphisms. However, \Tone{} is but a fa\c{c}ade over this partial order:
+%% Preorders have a natural partial order, letting $A \le B$ iff $A$ is a
+%% \emph{subpreorder} of $B$ --- that is, if $\fnof{x} x : A \to B$.\footnote{In
+%%   other words, if $A \subseteq B$ and $x \le y : A \implies x \le y : B$.}
+%% %
+%% This lifts pointwise to a partial order on tones: let $T \le U$ iff
+%% $TA \le UA$ for all $A$.
+%% %
 
-\begin{theorem} \label{thm:tone-poset}
+Let \Tone{} be the category whose objects are tones and whose morphisms are
+natural transformations. \Tone{} is isomorphic to the tone lattice:
+
+\begin{theorem} \label{thm:tone-poset} The following are equivalent:
   \[T \le U \iff \exists \eta : \Tone(T, U) \iff \exists! \eta : \Tone(T,U)\]
 \end{theorem}
 
@@ -595,56 +658,18 @@ a singleton, $\eta_{\mb{1}} = \idfn$, thus:
 \end{proof}
 
 
-\subsection{The \Tone{} lattice}
-
-\begin{conjecture}
-  \Tone{} is a distributive lattice.
-\end{conjecture}
-\begin{proof}
-  \todo{TODO}
-\end{proof}
-
-\todo{Isn't $\tmeet$ greatest lower bound / product? Don't we have
-  $\vee$ / least upper bound / coproducts? Old stuff:}
-
-Tone meet and composition also have semantic versions. $T \tmeet U$ corresponds
-to intersection of relations (noting that the intersection of two reflexive,
-transitive relations is itself reflexive and transitive), and $TU$ corresponds
-to functor composition.
-%
-\begin{eqnarray*}
-  a \le b : (T \tmeet U)A %% \iff a \le b : A^s \cap A^t
-  &\iff& a \le b : TA \wedge a \le b : UA\\
-  a \le b : (TU)A &\iff& a \le b : T(UA)
-\end{eqnarray*}
-
-\begin{conjecture}
-  The intersection of two tones is a tone.
-\end{conjecture}
-\begin{proof}
-  \todo{TODO}
-\end{proof}
-
-\begin{conjecture}
-  The definitions of meet and compose in \cref{fig:tone-ops} coincide with their
-  semantic definitions, applied to the semantic interpretation of $\id$, $\op$,
-  $\path$, and $\iso$.
-\end{conjecture}
-
-
 \section{An aside on overline notation}
 
-\newcommand{\xbar}[2]{\overline{#2}^{\hspace{.5pt}#1}}
+%% TODO: determine whether to use overbar or (E(i))_i notation.
+
+\newcommand{\xbar}[2]{{\overline{#2}^{\hspace{.5pt}#1}}}
 %\renewcommand{\xbar}[2]{\prescript{#1}{}{\vv{#2}}}
-%\renewcommand{\xbar}[2]{{\color{red}{\left(#2\right)}_{#1}}}
+%\renewcommand{\xbar}[2]{{\color{blue}{\left(#2\right)}_{#1}}}
 
 \newcommand{\Expr}{\Phi}
 \newcommand{\Ix}[1]{#1}
 \newcommand{\Ex}{{x}}
 \newcommand{\Ay}{{A}}
-
-\todo{TODO: Consider instead $\left(\Expr\right)_i$ notation, which I think is
-  also a pre-existing convention.}
 
 An overlined and superscripted meta-expression $\xbar{i}{\Expr(i)}$ represents a
 sequence (of unspecified length) indexed by $i$. The index $i$ clarifies which
@@ -663,21 +688,12 @@ bits are repeated \emph{with variation}, and which \emph{without}. For example:
 \end{center}
 
 This resembles the usual notation for sums of sequences, but with the bounds
-left implicit. For example, $\sum_{i} x_iy_i$ can be written
-$\sum\left(\xbar{i}{x_iy_i}\right)$ if we take $\sum$ to be a function from
-sequences of numbers to numbers.%
+left implicit. For example, $\sum_{i} x_i y^i$ can be written
+$\sum\xbar{i}{x_iy^i}$ if we take $\sum$ to be a function from sequences of
+numbers to numbers.%
 %
-\footnote{This convention is also influenced by Guy Steele's talk on Computer
-  Science Metanotation. In his talk, Guy analyses ``overline notation'' --- the
-  use of $\overline{\Expr(i)}$ to stand for a sequence $\Expr(1), \Expr(2), ...,
-  \Expr(n)$. Inspired by quasiquotation in Lisp, he proposes using underlines to
-  indicate parts which are repeated \emph{without variation}. Thus $\overline{x
-    : A}$ stands for $x_1 : A_1, ..., x_n : A_n$, while $\overline{x :
-    \underline{A}}$ stands for $x_1 : A, ..., x_n : A$. In my Lisp experience,
-  admittedly more limited than Guy's, quasiquotation is wonderful until you need
-  to nest it. Indexes, however, nest nicely.
-
-  There are videos of the talk at
+\footnote{This convention is inspired by Guy Steele's talk on Computer Science
+  Metanotation. There are videos of the talk at
   \href{https://www.youtube.com/watch?v=dCuZkaaou0Q}{Clojure/conj 2017},
   \href{https://www.youtube.com/watch?v=7HKbjYqqPPQ}{PPoPP 2017}, and
   \href{https://www.youtube.com/watch?v=8fCfkGFF7X8&feature=youtu.be&t=37m46s}{Harvard
@@ -692,30 +708,30 @@ sequences of numbers to numbers.%
 
 %% "moded" things: hypothesis, types, contexts. mode/tone comes first.
 \newcommand{\mtp}[2]{\left[#1\right] #2}
-\newcommand{\mcx}[2]{\left[#1\right] #2}
+\newcommand{\mcx}[2]{#1 #2}
 %\renewcommand{\mcx}[2]{#1 #2} % Would need to re-parenthesize some use-sites.
 \newcommand{\extend}[2]{{#1},\, {#2}}
 
 \begin{mathpar}
   \mcx{T}{\xbar{i}{\mtp{U_i}{A_i}}} = \xbar{i}{\mtp{TU_i}{A_i}}\\
 
-  \infer[Hypothesis]{T \le \id}{\extend{\GG}{\mtp{T}{A}} \vdash A}
+  \infer[Hypothesis]{T \le \id}{\extend{\G}{\mtp{T}{A}} \vdash A}
 
-  \infer[$T$-Right]{\GG \vdash A}{\mcx{T}{\GG} \vdash \T{T} A}
+  \infer[$T$-Right]{\G \vdash A}{\mcx{T}{\G} \vdash \T{T} A}
 
   \infer[$T$-Left]
-        {\extend{\GG}{\mtp{TU}{A}} \vdash C}
-        {\extend{\GG}{\mtp{T}{\T{U}A}} \vdash C}
+        {\extend{\G}{\mtp{TU}{A}} \vdash C}
+        {\extend{\G}{\mtp{T}{\T{U}A}} \vdash C}
 
-  \infer[Weakening]{\extend{\GG}{\mtp{T}{A}} \vdash C \\ U \le T}
-        {\extend{\GG}{\mtp{U}{A}} \vdash C}
+  \infer[Weakening]{U \le T \\ \extend{\G}{\mtp{T}{A}} \vdash C}
+        {\extend{\G}{\mtp{U}{A}} \vdash C}
 
   \infer[Contraction]
-        {\extend{\GG}{\mtp{T}{A},\, \mtp{U}{A}} \vdash C}
-        {\extend{\GG}{\mtp{T \tmeet U}{A}} \vdash C}
+        {\extend{\G}{\mtp{T}{A},\, \mtp{U}{A}} \vdash C}
+        {\extend{\G}{\mtp{T \tmeet U}{A}} \vdash C}
 
-  \infer[Cut]{\GG \vdash A \\ \extend{\Delta}{\mtp{T}{A}} \vdash C}
-        {\extend{\mcx{T}{\GG}}{\Delta} \vdash C}
+  \infer[Cut]{\G \vdash A \\ \extend{\Delta}{\mtp{T}{A}} \vdash C}
+        {\extend{\mcx{T}{\G}}{\Delta} \vdash C}
 \end{mathpar}
 
 Jason Reed sent me these rules for a sequent calculus, where $\T{T} A$ is the
@@ -777,11 +793,11 @@ simply typed $\lambda$-calculus.
     &&\bnfcont& \ecase{e} \xbar{i}{\ein{i}{x} \cto m_i}
     \vspace{0.5em}\\
 
-    \text{contexts} & \GG
-    &\bnfeq& \emptycx \pipe \extend{\GG}{\h{x}{T}{A}}\vspace{1pt}\\
+    \text{contexts} & \G
+    &\bnfeq& \emptycx \pipe \extend{\G}{\h{x}{T}{A}}\vspace{1pt}\\
     \text{judgments} & J
-    &\bnfeq& \checks{m}{\GG}{A} & \text{type checking}\\
-    &&\bnfcont& \infers{e}{\GG}{A} & \text{type inference}\\
+    &\bnfeq& \checks{m}{\G}{A} & \text{type checking}\\
+    &&\bnfcont& \infers{e}{\G}{A} & \text{type inference}\\
     &&\bnfcont& \adjoint{T}{U} \pipe T \le U & \text{tone relations}
     \\
     &&\bnfcont& \mtp{T}{A} \subtype B
@@ -790,8 +806,8 @@ simply typed $\lambda$-calculus.
   \end{array}
 \end{mathpar}
 
-\todo{TODO: explain my various abuses of notation, e.g. $\mcx{T}{\GG}$ and
-  $\GG_1 \tmeet \GG_2$}
+\todo{TODO: explain my various abuses of notation, e.g. $\mcx{T}{\G}$ and
+  $\G_1 \tmeet \G_2$}
 
 
 \subsection{Typing rules}
@@ -801,20 +817,20 @@ simply typed $\lambda$-calculus.
 \begin{mathpar}
   %% ---- inferring forms ----
   %% checking -> inferring by annotation
-  \infer{\checks{m}{\GG}{A}}{\infers{m : A}{\GG}{A}}
+  \infer{\checks{m}{\G}{A}}{\infers{m : A}{\G}{A}}
 
   %% variables
   \infer{ }{\infers{x}{\h{x}{\id}{A}}{A}}
 
   %% projection
-  \infer{\infers{e}{\GG}{A} \\ \mtp{T}{A} \strips B_1 \x B_2}
-        {\infers{\pi_i\;e}{\mcx{T}{\GG}}{B_i}}
+  \infer{\infers{e}{\G}{A} \\ \mtp{T}{A} \strips B_1 \x B_2}
+        {\infers{\pi_i\;e}{\mcx{T}{\G}}{B_i}}
 
   %% application
-  \infer{\infers{e}{\GG_1}{A}
+  \infer{\infers{e}{\G_1}{A}
          \\ \mtp{T}{A} \strips B \to C
-         \\ \checks{m}{\GG_2}{B}}
-        {\infers{e\; m}{\mcx{T}{\GG_1} \tmeet \GG_2}{C}}
+         \\ \checks{m}{\G_2}{B}}
+        {\infers{e\; m}{\mcx{T}{\G_1} \tmeet \G_2}{C}}
 \end{mathpar}
 
 \subsubsection{Checking forms}
@@ -822,36 +838,36 @@ simply typed $\lambda$-calculus.
 \begin{mathpar}
   %% ---- checking forms ----
   %% inferring -> checking by subtyping
-  \infer{\infers{e}{\GG}{A} \\ \mtp{T}{A} \subtype B}
-        {\checks{e}{\mcx{T}{\GG}}{B}}
+  \infer{\infers{e}{\G}{A} \\ \mtp{T}{A} \subtype B}
+        {\checks{e}{\mcx{T}{\G}}{B}}
 
   %% mode introduction
-  \infer{\checks{m}{\GG}{A} \\ T \in \{\iso,\op\}}
-        {\checks{m}{\mcx{T}{\GG}}{\T{T} A}}
+  \infer{\checks{m}{\G}{A} \\ T \in \{\iso,\op\}}
+        {\checks{m}{\mcx{T}{\G}}{\T{T} A}}
 
   %% let-binding
-  \infer{\infers{e}{\GG_1}{A} \\ \checks{m}{\extend{\GG_2}{\h{x}{T}{A}}}{C}}
-        {\checks{\mb{let}~x = e~\mb{in}~m}{\mcx{T}{\GG_1} \tmeet \GG_2}{C}}
+  \infer{\infers{e}{\G_1}{A} \\ \checks{m}{\extend{\G_2}{\h{x}{T}{A}}}{C}}
+        {\checks{\mb{let}~x = e~\mb{in}~m}{\mcx{T}{\G_1} \tmeet \G_2}{C}}
 
   %% lambdas
-  \infer{\checks{m}{\extend{\GG}{\h{x}{T}{A}}}{B} \\ \id \le T}
-        {\checks{\fnof{x} m}{\GG}{A \to B}}
+  \infer{\checks{m}{\extend{\G}{\h{x}{T}{A}}}{B} \\ \id \le T}
+        {\checks{\fnof{x} m}{\G}{A \to B}}
 
   %% pairs
-  \infer{\checks{m}{\GG_1}{A_1} \\ \checks{n}{\GG_2}{A_2}}
-        {\checks{(m,n)}{\GG_1 \tmeet \GG_2}{A_1 \x A_2}}
+  \infer{\checks{m}{\G_1}{A_1} \\ \checks{n}{\G_2}{A_2}}
+        {\checks{(m,n)}{\G_1 \tmeet \G_2}{A_1 \x A_2}}
 
   %% injection
-  \infer{\checks{m}{\GG}{A_i}}
-        {\checks{\ein{i}{m}}{\GG}{A_1 + A_2}}
+  \infer{\checks{m}{\G}{A_i}}
+        {\checks{\ein{i}{m}}{\G}{A_1 + A_2}}
 
   %% case analysis
-  \infer{\infers{e}{\GG}{A} \\
+  \infer{\infers{e}{\G}{A} \\
          \mtp{T}{A} \strips B_1 + B_2 \\
          \fapremise{i}
-         \checks{m_i}{\extend{\GG_i}{\h{x}{U_i}{B_i}}}{C}}
+         \checks{m_i}{\extend{\G_i}{\h{x}{U_i}{B_i}}}{C}}
         {\checks{\ecase{e} \xbar{i}{\ein{i}{x} \cto m_i}}
-          {\textstyle\bigmeet_i\left( \mcx{U_iT}{\GG} \tmeet \GG_i \right)}
+          {\textstyle\bigmeet_i\left( \mcx{U_iT}{\G} \tmeet \G_i \right)}
           {C}}
 \end{mathpar}
 
@@ -910,7 +926,7 @@ is output. In each rule I've marked the connective being analysed in
           \subtype A_2 \mathop{\focus\mbinop} B_2}
 \end{mathpar}
 
-The semantic justification for \textsc{adjoint} is as follows.
+The semantic justification for \textsc{t-left} is as follows.
 %
 Note that $\fnof{x} x : VA \to VA$. Applying $U \dashv V$ we have $\fnof{x} x :
 UVA \to A$, thus $UVA \le A$, and so finally $TUVA \le TA \le B$. \todo{Clean up
@@ -941,9 +957,34 @@ The premise $\path T = \path$ of the third rule holds for $T \ne \iso$ in our sy
 however, $\path T = \path$ captures more exactly \emph{why} the rule is valid.
 \todo{TODO: Give proofs each of these rules are valid.}
 
+%% This forms a Kleene algebra, with T* = id ∧ T. Laws:
+%%
+%% 1. T* = id ∧ TT*                 holds!
+%% 2. T∧T = T                       holds!
+%% 3. UT∧T=T implies U*T∧T = T      holds!
+%% 4. TU∧T=T implies TU*∧T = T      holds!
+%%
+%% T* = □ is also a *-semiring, but not a Kleene algebra.
+%%
+%% Does (∨,∘) form a semiring? A Kleene algebra?
+%%
+%% DISTRIBUTIVITY LAWS
+%% 1. T(U∧V) = TU ∧ TV. Proof by cases on T.
+%%
+%%    id(U∧V) = U∧V = id.U ∧ id.V
+%%    x≤y : op(U∧V)A ⇔ y≤x : (U∧V)A ⇔ y≤x:UA ∧ y≤x:VA ⇔ x≤y:op(UA∧VA)
+%%    x≤y : □(U∧V)A ⇔ x≡y : (U∧V)A ⇔ x≡y:UA ∧ x≡y:VA ↔ x≤y : □(UA∧VA)
+%%
+%% 2. (T∧U)V = TV ∧ UV
+
 \todo{Are there also more precise/suggestive versions of the other premises? Can
   the $U \le T$ constraints be turned into ``composing with $V$ is $\ge \id$'',
-  for some choice of $V$ depending on $U$?}
+  for some choice of $V$ depending on $U$? Or, a hypothetical generalization of
+  three of those rules:}
+\[
+\infer{U \dashv T \\ U \le V \\ \mtp{V}{A_2} \subtype A_1 \\ \mtp{T}{B_1} \subtype B_2}
+      {\mtp{T}{A_1 \to B_1} \subtype A_2 \to B_2}
+\]
 
 Subtyping at base types will depend on the base types you choose. Frequently,
 some base types' preorders will be symmetric (or even discrete, $x \le y \iff x
@@ -978,14 +1019,14 @@ Here are two more general variations on the $\fn$ rule I've considered:
 %
 \begin{mathpar}
   \infer[Fn-1]
-        {\checks{m}{\extend{\GG}{\h{x}{T}{A}}}{B} \\ A \le \mtp{T}{A}}
-        {\checks{\fnof{x}{m}}{\GG}{A \to B}}
+        {\checks{m}{\extend{\G}{\h{x}{T}{A}}}{B} \\ A \le \mtp{T}{A}}
+        {\checks{\fnof{x}{m}}{\G}{A \to B}}
 
   \infer[Fn-2]
-        {\checks{m}{\extend{\GG}{\h{x}{U}{A}}}{B}
+        {\checks{m}{\extend{\G}{\h{x}{U}{A}}}{B}
          \\ \mtp{T}{A} \subtype A
          \\ \id \le T U}
-        {\checks{\fnof{x} m}{\GG}{A \to B}}
+        {\checks{\fnof{x} m}{\G}{A \to B}}
 \end{mathpar}
 \textsc{Fn-1} requires a new judgment, $A \le \mtp{T}{B}$, where $A,B,T$ are all
 inputs; this doesn't seem difficult to define, but it's Yet Another Subtyping
@@ -995,15 +1036,15 @@ However, it's not clear to me I need to generalize the $\fn$ rule. The reason I
 thought I did was to justify something like the following:
 \begin{mathpar}
   \infer*{\infer*{\vdots}
-           {{\extend{\GG}{\h{x}{\iso}{A}}} \vdash {m} : {B}}}
-         {{\GG} \vdash {\fnof{x}{m}} : {\T{\iso} A \to B}}
+           {{\extend{\G}{\h{x}{\iso}{A}}} \vdash {m} : {B}}}
+         {{\G} \vdash {\fnof{x}{m}} : {\T{\iso} A \to B}}
 \end{mathpar}
 
 But this \emph{could} check as follows:
 \begin{mathpar}
-  \infer*{\infer*{\vdots}{\checks{m}{\extend{\GG}{\h{x}{T}{(\T{\iso} A)}}}{B}}
+  \infer*{\infer*{\vdots}{\checks{m}{\extend{\G}{\h{x}{T}{(\T{\iso} A)}}}{B}}
           \\ \id \le T}
-         {\checks{\fnof{x}{m}}{\GG}{\T{\iso} A \to B}}
+         {\checks{\fnof{x}{m}}{\G}{\T{\iso} A \to B}}
 \end{mathpar}
 
 So the crucial question is: can we always substitute $\h{x}{\id}{\T{\iso} A}$
@@ -1035,7 +1076,7 @@ $\lambda$ rule?
   \text{judgments} & J
   &\bnfeq& \mdist{A}{B \mbinop C}\\
   &&\bnfcont& \pcheck{p}{A}{\phi}\\
-  &&\bnfcont& \armcheck{p}{m}{T}{A}{\GG}{C}
+  &&\bnfcont& \armcheck{p}{m}{T}{A}{\G}{C}
 \end{array}\]
 
 \vspace{.5em} The types in toneless contexts $\phi$ aren't annotated with tones.
@@ -1086,7 +1127,7 @@ produces values for $\phi$'s variables.
 \end{mathpar}
 
 %% To handle non-linear patterns, or patterns with gu\-ard expressions, the
-%% morphism would also need an input context $\GG$. I consider this in
+%% morphism would also need an input context $\G$. I consider this in
 %% \cref{sec:patterns-with-guards}.
 
 
@@ -1096,33 +1137,33 @@ Typing \mb{case} as a single rule is complicated:
 %
 \[
 \infer{
-  \infers{e}{\GG}{A} \\
+  \infers{e}{\G}{A} \\
   \fapremise{i} \pcheck{p_i}{A}{\phi_i} \\
   \fapremise{i}
-  \checks{m_i}{\GG_i, \mprecx{\vvsub{T}{i}}{\phi_i}}{C}
+  \checks{m_i}{\G_i, \mprecx{\vvsub{T}{i}}{\phi_i}}{C}
 }{
   \checks
       {\ecase{e} \xbar{i}{p_i \cto m_i}}
-      {\bigmeet_i\left(\GG_i \tmeet \mcx{\bigmeet\!\vvsub{T}{i}}{\GG}\right)}
+      {\bigmeet_i\left(\G_i \tmeet \mcx{\bigmeet\!\vvsub{T}{i}}{\G}\right)}
       {A}}
 \]
 
-We can split this up using a helper judgment, $\armcheck{p}{m}{T}{A}{\GG}{C}$,
-corresponding to a morphism $TA \x \GG \to 1 + C$. This says that the arm $p
+We can split this up using a helper judgment, $\armcheck{p}{m}{T}{A}{\G}{C}$,
+corresponding to a morphism $TA \x \G \to 1 + C$. This says that the arm $p
 \cto m$ matches a scrutinee of type $A$ that it uses at tone $T$, along with
-variables in $\GG$, to produce (if it matches) a result of type $C$. Then we
+variables in $\G$, to produce (if it matches) a result of type $C$. Then we
 have:
 %
 \begin{mathpar}
   \infer{\pcheck{p}{A}{\phi} \\
-         \checks{m}{\GG, \mprecx{\vv{T}}{\phi}}{C}
-  }     {\armcheck{p}{m}{\textstyle\bigmeet\!\vv{T}}{A}{\GG}{C}}
+         \checks{m}{\G, \mprecx{\vv{T}}{\phi}}{C}
+  }     {\armcheck{p}{m}{\textstyle\bigmeet\!\vv{T}}{A}{\G}{C}}
 
-  \infer{\infers{e}{\GG}{A} \\
-         \fapremise{i} {\armcheck{p_i}{m_i}{T_i}{A}{\GG_i}{C}}
+  \infer{\infers{e}{\G}{A} \\
+         \fapremise{i} {\armcheck{p_i}{m_i}{T_i}{A}{\G_i}{C}}
   }{\checks
     {\ecase{e} \xbar{i}{p_i \cto m_i}}
-    {\bigmeet_i \left( \mcx{T_i}{\GG} \tmeet \GG_i \right)}
+    {\bigmeet_i \left( \mcx{T_i}{\G} \tmeet \G_i \right)}
     {C}}
 \end{mathpar}
 
@@ -1132,8 +1173,8 @@ have:
 Can we also use modal distribution instead of modal stripping in our typing
 rules for expressions? Not quite. We can rewrite the tuple-projection rule:
 \begin{mathpar}
-  \infer{\infers{e}{\GG}{A} \\ \mdist{A}{A_1 \x A_2}}
-        {\infers{\pi_i\;e}{\GG}{A_i}}
+  \infer{\infers{e}{\G}{A} \\ \mdist{A}{A_1 \x A_2}}
+        {\infers{\pi_i\;e}{\G}{A_i}}
 \end{mathpar}
 
 However, we cannot rewrite function application (shown below) this way; in
@@ -1141,10 +1182,10 @@ general, $\T{T}(A \to B) \not\equiv \T{T} A \to \T{T} B$. (In particular for $T
 \in \{\iso,\path\}$.) So it seems there is no choice but to use subtyping.
 
 \begin{mathpar}
-  \infer{\infers{e}{\GG_1}{A}
+  \infer{\infers{e}{\G_1}{A}
          \\ {\color{ACMRed} \mtp{T}{A} \strips B \to C}
-         \\ \checks{m}{\GG_2}{B}}
-        {\infers{e\; m}{\mcx{T}{\GG_1} \tmeet \GG_2}{C}}
+         \\ \checks{m}{\G_2}{B}}
+        {\infers{e\; m}{\mcx{T}{\G_1} \tmeet \G_2}{C}}
 \end{mathpar}
 
 \todo{TODO: explain why using modal stripping for pattern matching doesn't work,
@@ -1170,25 +1211,25 @@ general, $\T{T}(A \to B) \not\equiv \T{T} A \to \T{T} B$. (In particular for $T
   \text{checking expressions} & m
   &\bnfeq& \ecase{e} \xbar{i}{\armif{p_i}{m_i}{n_i}}
   \vspace{.5em}\\
-  \text{judgments}& J &\bnfeq& \armifcheck{p}{m}{n}{T}{A}{\GG}{C}
+  \text{judgments}& J &\bnfeq& \armifcheck{p}{m}{n}{T}{A}{\G}{C}
 \end{array}\]
 
 \begin{mathpar}
   \infer{
     \pcheck{p}{A}{\phi} \\
-    \checks{m}{\GG_1, \mprecx{\vv{T}}{\phi}}{\isof{2}} \\
-    \checks{n}{\GG_2, \mprecx{\vv{U}}{\phi}}{C}
+    \checks{m}{\G_1, \mprecx{\vv{T}}{\phi}}{\isof{2}} \\
+    \checks{n}{\G_2, \mprecx{\vv{U}}{\phi}}{C}
   }{\textstyle
     \armifcheck{p}{m}{n}
                {\bigmeet\!\vv{T} \tmeet \bigmeet\!\vv{U}}
-               {A}{\GG}{C}}
+               {A}{\G}{C}}
 
   \infer{
-    \infers{e}{\GG}{A} \\
-    \fapremise{i} \armifcheck{p_i}{m_i}{n_i}{T_i}{A}{\GG_i}{C}
+    \infers{e}{\G}{A} \\
+    \fapremise{i} \armifcheck{p_i}{m_i}{n_i}{T_i}{A}{\G_i}{C}
   }{\checks
     {\ecase{e} \xbar{i}{\armif{p_i}{m_i}{n_i}}}
-    {\textstyle\bigmeet_i\left( \mcx{T_i}{\GG} \tmeet \GG_i \right)}
+    {\textstyle\bigmeet_i\left( \mcx{T_i}{\G} \tmeet \G_i \right)}
     {C}}
 \end{mathpar}
 
@@ -1203,14 +1244,14 @@ general, $\T{T}(A \to B) \not\equiv \T{T} A \to \T{T} B$. (In particular for $T
   \text{patterns} & p,q
   &\bnfeq& \pif{p}{m}
   \vspace{0.5em}\\
-  \text{judgments} & J &\bnfeq& \pcheckio{p}{T}{A}{\GG}{\phi}
+  \text{judgments} & J &\bnfeq& \pcheckio{p}{T}{A}{\G}{\phi}
 \end{array}\]
 
 \vspace{\parsep}
 
 Now that patterns can contain expressions, our pattern typing judgment takes an
-input context $\GG$, becoming $\pcheckio{p}{T}{A}{\GG}{\phi}$. This corresponds
-to a morphism $\GG \x TA \to 1 + \phi$. \todo{However, at this point our rules
+input context $\G$, becoming $\pcheckio{p}{T}{A}{\G}{\phi}$. This corresponds
+to a morphism $\G \x TA \to 1 + \phi$. \todo{However, at this point our rules
   get so complicated I don't trust them without a proof:}
 
 \begin{mathpar}
@@ -1218,61 +1259,61 @@ to a morphism $\GG \x TA \to 1 + \phi$. \todo{However, at this point our rules
     \pcheckio{x}{\id}{A}{\mprecx{\vv{\path}}{\phi}}{x : A}}
 
   \infer{\mdist{A}{A_1 + A_2} \\
-         \pcheckio{p}{T}{A_i}{\GG}{\phi}}
-        {\pcheckio{\ein{i}{p}}{T}{A}{\GG}{\phi}}
+         \pcheckio{p}{T}{A_i}{\G}{\phi}}
+        {\pcheckio{\ein{i}{p}}{T}{A}{\G}{\phi}}
 
   \infer{\mdist{A}{B \x C} \\
-         \pcheckio{p}{T}{B}{\GG_1}{\phi} \\
-         \pcheckio{q}{U}{C}{\GG_2, \mprecx{\vv{V}}{\phi}}{\psi}
+         \pcheckio{p}{T}{B}{\G_1}{\phi} \\
+         \pcheckio{q}{U}{C}{\G_2, \mprecx{\vv{V}}{\phi}}{\psi}
   }{\textstyle
     \pcheckio{(p,q)}
              {\left(\id \tmeet \bigmeet\!\vv{V}\right) T \tmeet U}
              {A}
-             {\mcx{\id \tmeet \bigmeet\!\vv{V}}{\GG_1} \tmeet \GG_2}
+             {\mcx{\id \tmeet \bigmeet\!\vv{V}}{\G_1} \tmeet \G_2}
              {\phi, \psi}}
 
-  \infer{\pcheckio{p}{T}{A}{\GG_1}{\phi} \\
-         \checks{m}{\GG_2, \mprecx{\vv{U}}{\phi}}{\isof{2}}
+  \infer{\pcheckio{p}{T}{A}{\G_1}{\phi} \\
+         \checks{m}{\G_2, \mprecx{\vv{U}}{\phi}}{\isof{2}}
   }{\textstyle
     \pcheckio
         {\pif{p}{m}}
         %{\left(\id \tmeet \path{\bigmeet\!\vv{U}} \right) T}
         {T \tmeet \path\bigmeet\!\vv{U}T}
         {A}
-        {\mcx{\id \tmeet \path\bigmeet\!\vv{U}}{\GG_1} \tmeet \mcx{\path}\GG_2}
+        {\mcx{\id \tmeet \path\bigmeet\!\vv{U}}{\G_1} \tmeet \mcx{\path}\G_2}
         {\phi}}
 \end{mathpar}
 
-Now we update the rules for $\armcheck{p}{m}{T}{A}{\GG}{C}$ to pass through $\GG$ to the pattern:
+Now we update the rules for $\armcheck{p}{m}{T}{A}{\G}{C}$ to pass through $\G$ to the pattern:
 %
 \begin{mathpar}
-  \infer{\pcheckio{p}{T}{A}{\GG_1}{\phi} \\
-         \checks{m}{\GG_2, \mprecx{\vv{U}}{\phi}}{C}}
-        {\armcheck{p}{m}{T}{A}{\mcx{\bigmeet\!\vv{U}}{\GG_1} \tmeet \GG_2}{C}}
+  \infer{\pcheckio{p}{T}{A}{\G_1}{\phi} \\
+         \checks{m}{\G_2, \mprecx{\vv{U}}{\phi}}{C}}
+        {\armcheck{p}{m}{T}{A}{\mcx{\bigmeet\!\vv{U}}{\G_1} \tmeet \G_2}{C}}
 \end{mathpar}
 
 %% \subsection{Old work}
 
 %% \newcommand{\pinfer}[5]{#1 : #2 \vdash #3^{#4} \dashv #5}
 
-%% Judgment: $\pinfer{p}{\GG}{A}{s}{\Delta}$. \todo{TODO: what's an input, what's
-%%   an output? I think $s$ and the tones on $\GG$ are outputs? so the only inputs
-%%   are $A$ and the types in $\GG$.}
+%% Judgment: $\pinfer{p}{\G}{A}{s}{\Delta}$. \todo{TODO: what's an input, what's
+%%   an output? I think $s$ and the tones on $\G$ are outputs? so the only inputs
+%%   are $A$ and the types in $\G$.}
 
 %% \begin{mathpar}
 %%   %% this is wrong
-%%   \infer{x \not\in \GG}
-%%         {\pinfer{x}{\GG}{A}{s}{x : A^s}}
+%%   \infer{x \not\in \G}
+%%         {\pinfer{x}{\G}{A}{s}{x : A^s}}
 
-%%   \infer{\h{x}{t}{A} \in \GG
+%%   \infer{\h{x}{t}{A} \in \G
 %%          \\ \text{\todo{TODO}}
 %%          \\ A~\text{decidable} }
-%%         {\pinfer{x}{\GG}{A}{s}{\emptycx}}
+%%         {\pinfer{x}{\G}{A}{s}{\emptycx}}
 
 %%   \infer{A^{t} \strips B_1 \x B_2
-%%          \\ \pinfer{p}{\GG}{B_1}{?}{\Delta_1}
-%%          \\ \pinfer{q}{\GG,\Delta_1}{B_2}{?}{\Delta_2} }
-%%         {\pinfer{(p,q)}{\GG}{A}{s}{\Delta_1, \Delta_2}}
+%%          \\ \pinfer{p}{\G}{B_1}{?}{\Delta_1}
+%%          \\ \pinfer{q}{\G,\Delta_1}{B_2}{?}{\Delta_2} }
+%%         {\pinfer{(p,q)}{\G}{A}{s}{\Delta_1, \Delta_2}}
 %% \end{mathpar}
 
 
@@ -1346,22 +1387,22 @@ We wish to prove admissible the following rules:
 %
 \begin{mathpar}
   \infer[tone weakening]
-        {\checks{m}{\GG}{A}}
-        {\checks{m}{\GG \tmeet \GG'}{A}}
+        {\checks{m}{\G}{A}}
+        {\checks{m}{\G \tmeet \G'}{A}}
 
   \infer[subtyping left]
-        {\checks{m}{\GG, \h{x}{T}{A}}{C} \\ TA \le UB}
-        {\checks{m}{\GG, \h{x}{U}{B}}{C}}
+        {\checks{m}{\G, \h{x}{T}{A}}{C} \\ TA \le UB}
+        {\checks{m}{\G, \h{x}{U}{B}}{C}}
 
   \infer[subtyping right]
-        {\checks{m}{\GG}{A} \\ TA \le B}
-        {\checks{m}{\mcx{T}{\GG}}{B}}
+        {\checks{m}{\G}{A} \\ TA \le B}
+        {\checks{m}{\mcx{T}{\G}}{B}}
 
   \infer[substitution]
-        {\infers{e}{\GG_1}{A}
+        {\infers{e}{\G_1}{A}
          \\ TA \le UB
-         \\ \checks{m}{\GG_2, \h{x}{U}{B}}{C}}
-        {\checks{m[e/x]}{\mcx{T}{\GG_1} \tmeet \GG_2}{C}}
+         \\ \checks{m}{\G_2, \h{x}{U}{B}}{C}}
+        {\checks{m[e/x]}{\mcx{T}{\G_1} \tmeet \G_2}{C}}
 \end{mathpar}
 
 \todo{TODO: Doesn't \textsc{tone weakening} follow from \textsc{subtyping
@@ -1378,11 +1419,11 @@ We wish to prove admissible the following rules:
 %% substitution principle, is:
 %% \begin{mathpar}
 %%   \infer{
-%%     \GG \vdash \h{M}{B}{s}
+%%     \G \vdash \h{M}{B}{s}
 %%     \quad
-%%     \GG, \h{x}{B}{s} \vdash \h{N}{C}{t}
+%%     \G, \h{x}{B}{s} \vdash \h{N}{C}{t}
 %%   }{
-%%     \GG \vdash \textbf{let}~ x = M ~\textbf{in}~ \h{N}{C}{t}
+%%     \G \vdash \textbf{let}~ x = M ~\textbf{in}~ \h{N}{C}{t}
 %%   }
 %% \end{mathpar}
 
