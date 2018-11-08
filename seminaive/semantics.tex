@@ -1,9 +1,9 @@
-\documentclass[]{rntz}
-%\usepackage[b5]{rntzgeometry}
-\usepackage[laptop]{fantasy}
+\documentclass{rntz}
+%\usepackage[a5]{rntzgeometry}
+\usepackage{fantasy}
 \usepackage[scaled=1.02]{rntzfont}
 \usepackage{anyfontsize}
-\usepackage[spacing=true,stretch=10]{microtype}
+\usepackage[spacing=true]{microtype}
 \frenchspacing
 
 \usepackage{amssymb,amsmath,amsthm} % \square etc.
@@ -14,6 +14,8 @@
 \usepackage[b]{esvect}              % \vv for wide vector arrows
 \usepackage{nccmath}                % fix align* (etc.) spacing
 \usepackage{latexsym}
+
+\hyphenation{eq-uip-ped}
 
 
 %% ===== Commands =====
@@ -50,6 +52,8 @@
 \newcommand\vals[1]{#1^v} % other options: _v, _o, _\iota
 \newcommand\valfn{\ensuremath{\vals{-}}}
 \newcommand\chgs[1]{\D{#1}}
+\newcommand\funct[1]{\vals{#1}}
+\newcommand\deriv[1]{#1'}
 
 \newcommand\fork[1]{\langle{#1}\rangle}
 \newcommand\krof[1]{[{#1}]}
@@ -57,9 +61,6 @@
 \newcommand\Krof[1]{\left[{#1}\right]}
 %% \renewcommand\fork\Fork
 %% \renewcommand\krof\Krof
-
-\newcommand\funct[1]{\vals{#1}}
-\newcommand\deriv[1]{#1'}
 
 \newcommand\bindsp{~\,}
 \newcommand\fa[1]{\forall #1.\bindsp}
@@ -147,7 +148,13 @@
 
 Objects $A$ of \CP{} are tuples $(\vals A, \chgs A, \upd_A)$, where
 \begin{enumerate}
-\item $\vals A \in \Poset$ is the poset of values.
+\item $\vals A \in \Poset$ is the poset of values. \todo{TODO: hold on, why does
+  this need to be a poset? Why not just a set, and then \emph{recover} the
+  partial order (edit: fuck, preorder) from the update map? well, because I want
+  the forgetful functor down to \Poset{} to preserve all relevant structure so
+  my correctness proof works. But this is no big deal, I'll just have to prove
+  \emph{that} as I go along rather than proving soundness \& completeness. But
+  hold on, how do I define morphisms then?}
 \item $\chgs A \in \Poset$ is the poset of changes.
 \item $(\upd) : \vals A \x \chgs A \pto \vals A$ is a partial map
   taking a value and a change to an updated value. If $x \upd dx$ is defined, we
@@ -172,9 +179,9 @@ These must satisfy the following conditions:\footnote{There are other conditions
 \end{align*}
 
 \noindent
-A morphism $f \in \CP(A, B)$ is a value map $\funct f \in \Poset(\vals A, \vals
-B)$ eq\-uip\-ped with a derivative $\deriv f \in \Poset(\isof{\vals A} \x \chgs
-A, \chgs B)$ such that:
+A morphism $f \in \CP(A, B)$ is a value map $f \in \Poset(\vals A, \vals B)$
+equipped with a derivative $\deriv f \in \Poset(\isof{\vals A} \x \chgs A, \chgs
+B)$ such that:
 
 \[ \vld{dx} x y \implies \longvld{\deriv f(x,dx)}{\funct f\,x}{\funct f\,y}\]
 
