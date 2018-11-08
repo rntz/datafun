@@ -1,0 +1,122 @@
+for (A + B)
+need inᵢ : Aᵢ → (A₁ + A₂)
+and [f,g] : (A + B) → C when f : A → C and g : B → C
+where [f,g] *unique* such that fᵢ = ([f₁,f₂] ∘ inᵢ)
+
+At the value level, all this comes straight from Poset. What about the
+derivatives level?
+
+    inᵢ'(x,dx) = inᵢ dx
+
+Want:
+
+    fᵢ' = ([f₁,f₂] ∘ inᵢ)'
+
+What is the RHS?
+
+    ([f₁,f₂] ∘ inᵢ)' (x,dx)
+  = [f₁,f₂]' (inᵢ x, inᵢ'(x,dx))
+  = [f₁,f₂]' (inᵢ x, inᵢ dx)
+
+Which defines [f₁,f₂]'(inᵢ x, inⱼ dx) when i=j, but what about otherwise? We chose:
+
+    [f₁,f₂]' (inᵢ x, inᵢ dx) = fᵢ'(x,dx)
+    [f₁,f₂]' (inᵢ x, inⱼ dx) = dummy x    <- anything could go here
+
+SOLUTION: quotient equality of morphisms
+
+When is f' = g'?
+When ∀(dx changes x to y : A) f'(x,dx) = g'(x,dx)
+
+-----------------------
+
+For exponentials (A => B)
+
+Δ(A => B) = □A → ΔA → ΔB
+
+ordered like so:
+
+  df ≤ dg iff (∀(dx changes x to y) df x dx ≤ dg y dy)
+
+What goes wrong if we _don't_ do this: no quotient, and just order pointwise according to ΔB? <--- TRY THIS FIRST
+
+If that doesn't work, then: ???
+
+---------- TRYING WITHOUT QUOTIENTS
+eval[A,B] : (A ⇒ B) × A → B
+eval'     : □((A ⇒ B) × A) → (□A → ΔA → ΔB) × ΔA → ΔB
+eval (f,x) = f(x)
+eval'(f,x) (df,dx) = df x dx         (??)
+
+then what is λ? λ must be unique such that
+
+   Given f : Γ × A → B
+   Need λf : Γ → (A ⇒ B)
+
+   st. eval[A,B] ∘ (λf × id) == f : (Γ × A → B)
+
+We need:
+
+   (eval[A,B] ∘ (λf × id))' == f'
+
+  (eval[A,B] ∘ (λf × id))' ((γ,a),(dγ,da))
+= eval[A,B]'((λf × id)(γ,a), (λf × id)'((γ,a),(dγ,da)))
+= eval[A,B]'((λf(γ), a), (λf'(γ,dγ), id'(a,da)))
+= eval[A,B]'((λf(γ), a), (λf'(γ,dγ), da))
+= λf'(γ,dγ) a da
+which we want
+= f'((γ,a), (dγ,da))
+
+SO DEFINE:
+
+  λf'(γ,dγ) a da = f'((γ,a), (dγ,da))
+
+Want that:
+1. this is monotone in all the appropriate ways
+2. this is a valid derivative
+3. uniqueness of λ!
+
+So maybe it just works?! TODO: work through proof in detail.
+
+-----
+Assume h such that (eval[A,B] ∘ (h × id))' == f'.
+WTS: h' == λf' at quotiented equality for derivatives
+λf : Γ → A ⇒ B
+λf',h' : □Γ × ΔΓ → (□A → ΔA → ΔB)
+which means:
+
+    ∀(γ changes dγ to _)
+    (λf'(γ,dγ) == h'(γ,dγ) : □A → ΔA → ΔB)
+
+Assume γ changes dγ to _.
+Consider any a:□A, da:ΔA.
+WTS: (λf'(γ,dγ) a da == h'(γ,dγ) a da)
+i.e. f'((γ,a), (dγ,da)) == h'(γ,dγ) a da
+
+We have assumed f' == (eval[A,B] ∘ (h × id))' : quotiented.
+so we're screwed, we don't know da valid for a.
+
+-----
+what is (f × g)'((a,b), (da,db))?
+A: (f'(a,da), g'(b,db))
+
+x = (y,z)
+dx = (dy,dz)
+
+  (f × g)' (x,dx)
+= ⟨f ∘ π₁, g ∘ π₂⟩' (x,dx)
+= ⟨(f ∘ π₁)', (g ∘ π₂)'⟩ (x,dx)
+= ((f ∘ π₁)' (x,dx), (g ∘ π₂)' (x,dx))
+= (f'(π₁ x, π₁'(x,dx)), ...)
+= (f'(π₁ x, π₁ dx), ...)
+= (f'(y, dy), g'(z, dz))
+
+----------
+
+Ultimately, I'm trying to prove:
+
+    e {x + dx/x}  ==  e + δe
+
+This is the defining property of derivatives of morphisms:
+
+    f(x + dx) = f(x) + f'(x,dx)
