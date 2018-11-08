@@ -10,7 +10,7 @@
 \RequirePackage{xkeyval}        % key-value options
 
 %% ---------- 1. Package options ----------
-\DeclareOptionX{scaled}[1.0]{\edef\rntz@fontscale{#1}}
+\DeclareOptionX{scaled}[1]{\edef\rntz@fontscale{#1}}
 
 %% serif font options
 \DeclareOptionX{baskerville}{\def\rntz@font{baskerville}}
@@ -24,6 +24,7 @@
 %% math font options
 \DeclareOptionX{newmath}{\def\rntz@mathfont{newmath}}
 \DeclareOptionX{euler}{\def\rntz@mathfont{euler}}
+\DeclareOptionX{pazo}{\def\rntz@mathfont{pazo}}
 
 \ExecuteOptionsX{scaled,charter,euler} % default options
 \ProcessOptionsX\relax                 % is \relax necessary here?
@@ -56,8 +57,17 @@
 \PassOptionsToPackage{vvarbb,smallerops}{newtxmath}
 \PassOptionsToPackage{vvarbb,smallerops}{newpxmath}
 
+%% Load pazo as math font if selected. We load it first so its text font will
+%% get replaced by the user's choice.
+\ifdefstring{\rntz@mathfont}{pazo}{
+  \RequirePackage{mathpazo}
+  \ifdefstring{\rntz@fontscale}{1}{}{
+    \PackageWarning{rntzfont}{Cannot scale Pazo font.}
+  }
+}
+
 
-%% ---------- 3. Text font choices ----------
+%% ---------- 3. Font choices ----------
 % Baskervaldx is too heavy, baskervillef is way too light. I like
 % librebaskerville, but it doesn't have small caps :(.
 \ifdefstring{\rntz@font}{baskerville}{
