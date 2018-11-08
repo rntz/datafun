@@ -1,7 +1,7 @@
 \documentclass{rntz}
-%\usepackage[a5]{rntzgeometry}
+%\usepackage[b5]{rntzgeometry}
 \usepackage{fantasy}
-\usepackage[scaled=1.02]{rntzfont}
+\usepackage{rntzfont}
 \usepackage{anyfontsize}
 \usepackage[spacing=true]{microtype}
 \frenchspacing
@@ -148,13 +148,15 @@
 
 Objects $A$ of \CP{} are tuples $(\vals A, \chgs A, \upd_A)$, where
 \begin{enumerate}
-\item $\vals A \in \Poset$ is the poset of values. \todo{TODO: hold on, why does
-  this need to be a poset? Why not just a set, and then \emph{recover} the
-  partial order (edit: fuck, preorder) from the update map? well, because I want
-  the forgetful functor down to \Poset{} to preserve all relevant structure so
-  my correctness proof works. But this is no big deal, I'll just have to prove
-  \emph{that} as I go along rather than proving soundness \& completeness. But
-  hold on, how do I define morphisms then?}
+\item $\vals A \in \Poset$ is the poset of values.
+  %% \todo{TODO: hold on, why does
+  %% this need to be a poset? Why not just a set, and then \emph{recover} the
+  %% partial order (argh, actually a \strong{preorder}) from the update map? well,
+  %% because I want the forgetful functor down to \Poset{} to preserve all relevant
+  %% structure so my correctness proof works. But this is no big deal, I'll just
+  %% have to prove \emph{that} as I go along rather than proving soundness \&
+  %% completeness. But hold on, how do I define morphisms then?}
+
 \item $\chgs A \in \Poset$ is the poset of changes.
 \item $(\upd) : \vals A \x \chgs A \pto \vals A$ is a partial map
   taking a value and a change to an updated value. If $x \upd dx$ is defined, we
