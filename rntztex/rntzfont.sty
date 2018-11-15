@@ -20,6 +20,7 @@
 \DeclareOptionX{libertine}{\def\rntz@font{libertine}}
 \DeclareOptionX{palatino}{\def\rntz@font{palatino}}
 \DeclareOptionX{pt}{\def\rntz@font{pt}}
+\DeclareOptionX{source}{\def\rntz@font{source}}
 
 %% math font options
 \DeclareOptionX{newmath}{\def\rntz@mathfont{newmath}}
@@ -151,6 +152,19 @@
   \edef\rntz@eulerscale{1.07}
   \ifdefstring{\rntz@mathfont}{newmath}{
     \RequirePackage[utopia,scaled=\@scaled{1.1313}]{newtxmath}
+  }{}
+}{}
+
+\ifdefstring{\rntz@font}{source}{
+  %% I'd like to pass "osf" here, but it ends up using old-style figures in math
+  %% mode, too (in both Euler & newmath). Argh.
+  \RequirePackage[proportional]{sourceserifpro}
+  \RequirePackage[proportional,semibold]{sourcesanspro}
+  %% TODO: double-check this scaling.
+  \RequirePackage[scaled=\@scaled{1.06}]{inconsolata}
+  \edef\rntz@eulerscale{1.045}
+  \ifdefstring{\rntz@mathfont}{newmath}{
+    \RequirePackage[libertine,scaled=\@scaled{1.11}]{newtxmath}
   }{}
 }{}
 
