@@ -7,7 +7,7 @@ projects. It contains:
 
 1. A Makefile for LaTeX projects that's short and fairly generic. It uses Austin
    Clements' wonderful [latexrun][] tool, which is included; no installation
-   necessary.
+   necessary. You will need Python 3 installed, however.
 
 2. `rntz.cls`, a document class based on `extarticle` with some formatting
    changes. Most notably, it puts section numbers into the left-margin.
@@ -36,8 +36,8 @@ complicated and beyond the scope of this README. Good luck!
 
 # Licensing
 
-This repo is currently MIT-licensed; see LICENSE.txt. If you want to reuse my
-code but you're worried about licensing issues, send me an email or a pull
+This repo is currently MIT-licensed; see the LICENSE file. If you want to reuse
+my code but you're worried about licensing issues, send me an email or a pull
 request; I want this to be useful to as many people as possible.
 
 # Files
@@ -58,7 +58,10 @@ Useful targets:
 - `make foo-book.pdf`: Makes a zine-style "booklet" from a regular PDF. For
   example, if `foo.pdf` is formatted for A5 paper, `foo-book.pdf` will be A4,
   with two pages per side. You can print it out, cut or fold down the middle,
-  and staple the pages together.
+  and staple the pages together. Needs the `pdfbook` tool.
+
+- `make foo-2up.pdf`: Like `make foo-book.pdf` but makes a 2-up version. Needs
+  the `pdfjam` tool.
 
 - `make clean`: Runs `latexrun --clean-all` and also removes `latex.out` (where
   `latexrun` stores intermediate files).
@@ -85,18 +88,22 @@ ACM{Blue,Yellow,Orange,Red,LightBlue,DarkBlue,Green,Purple}.
 
 ## rntzgeometry.sty
 
-Sets the page geometry to have "reasonable" margins. It uses `narrow.sty` to
-produce a single column of text; the `figure*` and `fullwidth` environments
-expand to a larger width.
+Sets the page geometry to have "reasonable" margins. Options indicate paper
+size: `a5`, `b5`, `a4`, `letter`. Default is `a4`.
+
+## narrow.sty
+
+This sets your body text in a single narrow column, but defines a `fullwidth`
+environment that expands to "full width". It redefines `figure*` to use full
+width as well.
 
 **Options**:
 
-- `a5`, `b5`, `a4`, `letter`: Paper size. Default is b5.
+- `width=LEN`: The width of the main text column. Default 345pt.
 
-- `width=LEN`: Width of the main text column. Default is 345pt.
-
-- `fullwidth=LEN`: Width for `figure*` and `fullwidth` environments. Default
-  varies by paper size.
+- `fullwidth=LEN`: The width for `figure*` and `fullwidth` environments. Default
+  is `\textwidth`, i.e. the width the text *would have been* before you loaded
+  `narrow.sty`.
 
 ## rntzfont.sty
 
@@ -109,32 +116,39 @@ monospace. The text fonts are:
   and has "faked" bold italics, but is otherwise very pleasant and quite
   legible.
 
-- `charter` for [Bitstream Charter][charter] with [Source Sans Pro][ssp].
+- `charter` for [Bitstream Charter][charter] with [Source Sans Pro][ssans].
   Charter is very legible, even at low DPI.
 
-- `cochineal` for [Cochineal][]. Cochineal is an old-style font, very pleasant
-   in print and tolerable on screen.
+- `cochineal` for [Cochineal][]. Cochineal is an old-style font, pleasant in
+   print and tolerable on screen.
 
 - `fbb` for the Bembo-inspired [fbb][] package. Elegant, but not very readable
   on screen.
 
-- `libertine` for [Linux Libertine][Libertine]. Libertine is somewhat similar to
+- `libertine` for [Linux Libertine][Libertine]. Libertine has similar metrics to
   Times New Roman.
 
 - `palatino` for [Palatino][], an elegant font that still displays well on
   screen. Palatino and Euler are both designed by Hermann Zapf, and match
   nicely.
 
-- `pt` for [PT Serif and Sans][pt] with [newtxmath][]. PT Serif is quite
-  readable on screen. However, its LaTeX package is missing some features, such
-  as small caps and straight quotes.
+- `pt` for [PT Serif and Sans][pt]. PT Serif is very readable on screen and at
+  low DPI. However, its LaTeX package is missing some features, such as small
+  caps and straight quotes.
 
-You can also choose between two families of math fonts:
+- `source` for [Source Serif][sserif] and [Sans][ssans] Pro. Similar to Charter,
+  better-looking to my eyes, but lacking italics in TeX Live 2018 and prior
+  versions.
+
+You can also choose between three families of math fonts:
 
 - `euler` for [Euler][], a somewhat calligraphic upright math font.
 
 - `newmath` for [newtxmath][] (or its relative [newpxmath][]), using whichever
   variant most nicely matches the text font choice.
+
+- `pazo`, a Palatino-based math font similar to [newpxmath][] but IMO slightly
+  nicer-looking. Unfortunately, it is not scalable.
 
 The defaults are `charter` with `euler`.
 
@@ -151,22 +165,9 @@ the newtx, newpx, XCharter, cochineal, and fbb packages.
 [pt]: https://ctan.org/pkg/paratype
 [newtxmath]: https://ctan.org/pkg/newtx
 [newpxmath]: https://ctan.org/pkg/newpx
-[ssp]: https://ctan.org/pkg/sourcesanspro
+[ssans]: https://ctan.org/pkg/sourcesanspro
+[sserif]: https://ctan.org/pkg/sourceserifpro
 [fbb]: https://ctan.org/pkg/fbb
-
-## narrow.sty
-
-This sets your body text in a single narrow column, but defines a `fullwidth`
-environment that expands to "full width". It redefines `figure*` to use full
-width as well.
-
-**Options**:
-
-- `width=LEN`: The width of the main text column. Default 345pt.
-
-- `fullwidth=LEN`: The width for `figure*` and `fullwidth` environments. Default
-  is `\textwidth`, i.e. the width the text *would have been* before you loaded
-  `narrow.sty`.
 
 ## example.tex
 
