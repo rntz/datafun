@@ -119,7 +119,7 @@
 
 %% Title formatting.
 \newcommand{\headernum}{\lnfigures\tbfigures}
-\newcommand{\header}{\rmfamily\bfseries}
+\newcommand{\header}{\bfseries}
 %% \renewcommand{\header}{\rmfamily\itshape}  % or, italics
 %% \renewcommand{\header}{\sffamily\bfseries} % or, sans-serif
 
