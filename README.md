@@ -113,8 +113,7 @@ load [Biolinum][Libertine] for sans-serif, and all load [Inconsolata][] for
 monospace. The text fonts are:
 
 - `baskerville` for [Libre Baskerville][librebaskerville]. It lacks small caps
-  and has "faked" bold italics, but is otherwise very pleasant and quite
-  legible.
+  and has "faked" bold italics, but is otherwise pleasant and legible.
 
 - `charter` for [Bitstream Charter][charter] with [Source Sans Pro][ssans].
   Charter is very legible, even at low DPI.
@@ -126,7 +125,7 @@ monospace. The text fonts are:
   on screen.
 
 - `libertine` for [Linux Libertine][Libertine]. Libertine has similar metrics to
-  Times New Roman.
+  Times New Roman. It works well with [newtxmath][].
 
 - `palatino` for [Palatino][], an elegant font that still displays well on
   screen. Palatino and Euler are both designed by Hermann Zapf, and match
@@ -137,8 +136,7 @@ monospace. The text fonts are:
   caps and straight quotes.
 
 - `source` for [Source Serif][sserif] and [Sans][ssans] Pro. Similar to Charter,
-  better-looking to my eyes, but lacking italics in TeX Live 2018 and prior
-  versions.
+  but lacking italics in TeX Live 2018 and prior versions.
 
 You can also choose between three families of math fonts:
 
@@ -147,8 +145,8 @@ You can also choose between three families of math fonts:
 - `newmath` for [newtxmath][] (or its relative [newpxmath][]), using whichever
   variant most nicely matches the text font choice.
 
-- `pazo`, a Palatino-based math font similar to [newpxmath][] but IMO slightly
-  nicer-looking. Unfortunately, it is not scalable.
+- `pazo`, a Palatino-based math font similar to [newpxmath][] but in my opinion
+  slightly nicer-looking. Unfortunately, it is not scalable.
 
 The defaults are `charter` with `euler`.
 
