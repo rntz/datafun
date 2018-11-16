@@ -1,0 +1,21 @@
+%% ---- Document titling ----
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{rntztitle}[2018/11/16]
+\RequirePackage{placeins}       % for \FloatBarrier
+
+%% ---- Document title formatting and sizing ----
+\newcommand{\titlesize}{\Large}
+\newcommand{\authorsize}{\normalsize}
+\newcommand{\secsize}{\large}
+\newcommand{\subsecsize}{\normalsize}
+\newcommand{\subsubsecsize}{\normalsize}
+
+%% TODO: omit {title,author,date} if not provided
+%% TODO: support \subtitle.
+\renewcommand*{\maketitle}{
+  \begingroup%
+  \setlength{\parindent}{0pt}%
+  {\titlesize\@title\vspace{0.5ex}\\}%
+  {\authorsize\@author\vspace{0.5ex}\\}%
+  {\authorsize\@date}%
+  \endgroup\FloatBarrier\par}

@@ -1,0 +1,15 @@
+%% ---- Theorem styling ----
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{rntzthm}[2018/11/16]
+\RequirePackage{amsthm}
+
+%% Everything is numbered sequentially with a single counter.
+\theoremstyle{definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem*{corollary}{Corollary}
+\theoremstyle{plain}            %back to default

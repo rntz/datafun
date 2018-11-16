@@ -1,0 +1,23 @@
+%% ---- Links and references ----
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{rntzref}[2018/11/16]
+
+\RequirePackage{xcolor}
+\definecolor[named]{ACMBlue}{cmyk}{1,0.1,0,0.1}
+\definecolor[named]{ACMYellow}{cmyk}{0,0.16,1,0}
+\definecolor[named]{ACMOrange}{cmyk}{0,0.42,1,0.01}
+\definecolor[named]{ACMRed}{cmyk}{0,0.90,0.86,0}
+\definecolor[named]{ACMLightBlue}{cmyk}{0.49,0.01,0,0}
+\definecolor[named]{ACMGreen}{cmyk}{0.20,0,1,0.19}
+\definecolor[named]{ACMPurple}{cmyk}{0.55,1,0,0.15}
+\definecolor[named]{ACMDarkBlue}{cmyk}{1,0.58,0,0.21}
+
+\RequirePackage{hyperref,url}
+\hypersetup{colorlinks, linkcolor=ACMBlue, citecolor=ACMBlue, urlcolor=ACMBlue, filecolor=ACMBlue}
+
+%% cleveref must be loaded AFTER hyperref & amsmath, or it errors; and AFTER
+%% amsthm and BEFORE we define theorem styles, otherwise (eg) it calls lemmas
+%% "Theorem"s.
+\RequirePackage{amsmath,amsthm}
+% options: capitalise
+\RequirePackage[nameinlink,noabbrev]{cleveref}
