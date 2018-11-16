@@ -1,1 +1,10 @@
-- use nccmath to fix spacing issues?
+- make new rntz.cls that combines all appropriate features.
+  - rntzfont
+  - rntzgeometry
+  - nccmath to fix align* spacing issues
+  - microtype
+
+- define \mathvar for multi-letter variables in rntzfont.sty. For Euler,
+  \ensuremath. For newtxmath when text font and math font match exactly,
+  \mathit. Problem: what about when using newmath with a font other than the one
+  used? How does \mathit work, anyway?
