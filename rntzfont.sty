@@ -11,6 +11,7 @@
 
 %% ---------- 1. Package options ----------
 \DeclareOptionX{scaled}[1]{\edef\rntz@fontscale{#1}}
+\DeclareOptionX{linespread}[1.08]{\edef\rntz@linespread{#1}}
 
 %% serif font options
 \DeclareOptionX{baskerville}{\def\rntz@font{baskerville}}
@@ -27,7 +28,7 @@
 \DeclareOptionX{euler}{\def\rntz@mathfont{euler}}
 \DeclareOptionX{pazo}{\def\rntz@mathfont{pazo}}
 
-\ExecuteOptionsX{scaled,charter,euler} % default options
+\ExecuteOptionsX{scaled,linespread,charter,euler} % default options
 \ProcessOptionsX\relax                 % is \relax necessary here?
 
 
@@ -37,7 +38,7 @@
 \edef\rntz@eulerscale{1}
 
 %% Default linespread.
-\linespread{\@scaled{1.13}}
+\linespread{\@scaled{\rntz@linespread}}
 
 %% TO CONSIDER:
 %\PassOptionsToPackage{euler-digits}{eulervm}
