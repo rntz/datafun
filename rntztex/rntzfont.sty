@@ -24,8 +24,9 @@
 \DeclareOptionX{source}{\def\rntz@font{source}}
 
 %% math font options
-\DeclareOptionX{newmath}{\def\rntz@mathfont{newmath}}
 \DeclareOptionX{euler}{\def\rntz@mathfont{euler}}
+\DeclareOptionX{newmath}{\def\rntz@mathfont{newmath}}
+\DeclareOptionX{nomath}{\def\rntz@mathfont{none}}
 \DeclareOptionX{pazo}{\def\rntz@mathfont{pazo}}
 
 \ExecuteOptionsX{scaled,linespread,charter,euler} % default options
@@ -157,6 +158,11 @@
 }{}
 
 \ifdefstring{\rntz@font}{source}{
+  \ifdefstring{\rntz@mathfont}{newmath}{
+    \PackageWarning{rntzfont}{%
+Source Serif and newtxmath don't mix well. Consider euler or mathastext.}
+    \RequirePackage[libertine,scaled=\@scaled{1.11}]{newtxmath}
+  }{}
   %% I'd like to pass "osf" here, but it ends up using old-style figures in math
   %% mode, too (in both Euler & newmath). Argh.
   \RequirePackage[proportional,scaled=\@scaled{1}]{sourceserifpro}
@@ -164,9 +170,6 @@
   %% TODO: double-check this scaling.
   \RequirePackage[scaled=\@scaled{1.06}]{inconsolata}
   \edef\rntz@eulerscale{1.045}
-  \ifdefstring{\rntz@mathfont}{newmath}{
-    \RequirePackage[libertine,scaled=\@scaled{1.11}]{newtxmath}
-  }{}
 }{}
 
 
