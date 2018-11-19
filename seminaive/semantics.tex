@@ -1,21 +1,42 @@
-\documentclass{rntz}
-%\usepackage[b5]{rntzgeometry}
-\usepackage{fantasy}
-\usepackage{rntzfont}
-\usepackage{anyfontsize}
-\usepackage[spacing=true]{microtype}
-\frenchspacing
+\documentclass[ribbons,9pt]{rntz}\usepackage[a5]{rntzgeometry}%\usepackage[fullwidth=13cm,width=315pt]{narrow}
+%\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
+%\usepackage{anyfontsize}
+%\usepackage{latexsym}               % \rightsquigarrow
+%\usepackage{stmaryrd}               % \shortrightarrow, \llbracket, etc.
 \usepackage{amssymb,amsmath,amsthm} % \square etc.
 %\usepackage{array}                  % >{blah}, <{blah} in array formats.
 %\usepackage{booktabs}               % \midrule
 \usepackage{mathpartir}             % \begin{mathpar}, \infer, etc.
-\usepackage{stmaryrd}               % \shortrightarrow, \llbracket, etc.
-\usepackage[b]{esvect}              % \vv for wide vector arrows
+\usepackage[f]{esvect}              % \vv for wide vector arrows
 \usepackage{nccmath}                % fix align* (etc.) spacing
-\usepackage{latexsym}
+\usepackage{enumitem}\setlist{labelindent=1em,labelsep=.75em,leftmargin=*}
+%\setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
 
 \hyphenation{eq-uip-ped}
+
+\usepackage[source,linespread=1.15]{rntzfont}
+%\usepackage[italic,basic,defaultmathsizes]{mathastext}
+%\usepackage[charter]{mathdesign}\linespread{1.08}
+%\DeclareSymbolFontAlphabet{\mathbb}{AMSb}
+\ifdefined\mathbold\else\newcommand\mathbold{\boldsymbol}\fi
+\usepackage[spacing=true]{microtype}\frenchspacing
+
+% For euler. TODO: put \mathvar in rntzfont.sty.
+\newcommand\mathvar[1]{\ensuremath{#1}}
+% Space for function application. Between \; and \:.
+\newcommand\<{\mskip 4mu plus 4mu minus 1mu}
+%\renewcommand\<\;
+\newcommand\da{\mathvar{da}}
+\newcommand\db{\mathvar{db}}
+\newcommand\dx{\mathvar{dx}}
+\newcommand\dy{\mathvar{dy}}
+\newcommand\df{\mathvar{df}}
+\newcommand\dg{\mathvar{dg}}
+
+% For newmath, pazo, mathdesign, etc.
+%\renewcommand\mathvar[1]{\ensuremath{\mathit{#1}}}
+%\renewcommand\df{d\kern-.1em f\kern-.1em} % fucking kerning.
 
 
 %% ===== Commands =====
@@ -25,35 +46,40 @@
 \newcommand\Naive{Na\"ive}
 \newcommand\cat\textbf
 \newcommand\strong\textbf
-\newcommand\CP{\cat{ChangePoset}}
+\newcommand\CP{\cat{\texorpdfstring{$\Delta$Poset}{DeltaPoset}}}
 \newcommand\Poset{\cat{Poset}}
 \newcommand\initO{\ensuremath{\mathbold{0}}}
 \newcommand\termO{\ensuremath{\mathbold{1}}}
+\newcommand\expO[2]{#1 \Rightarrow #2}
 \newcommand\initE{\mathop{\text{\textexclamdown}}}
 \newcommand\termI{\mathop{!}}
 
 \newcommand\G\Gamma
 \newcommand\D\Delta
 \newcommand\x\times
+\newcommand\pto\rightharpoonup
+\newcommand\fn\lambda
 \newcommand\dee\delta
 \newcommand\tuple[1]{\left({#1}\right)}
 \newcommand\triv{\star}
-\newcommand\injc{\mathrm{in}}
+\newcommand\injc{\textrm{in}}
 \newcommand\inj[1]{\injc_{#1}\,}
 \newcommand\zero{\ensuremath{\mathbold{0}}}
 
 \newcommand\iso{\texorpdfstring{\ensuremath{\square}}{iso}}
-\newcommand\isof[1]{\iso {#1}}
+\newcommand\isof{\iso}
 \newcommand\fname[1]{\textit{#1}}
 \newcommand\id{\fname{id}}
 \newcommand\dummy{\fname{dummy}}
 
 %% TODO: look at other latex arrows
-\newcommand\vals[1]{#1^v} % other options: _v, _o, _\iota
-\newcommand\valfn{\ensuremath{\vals{-}}}
+\newcommand\valfn{\ensuremath{\mathbb{U}}}
+%\renewcommand\valfn{\ensuremath{\mathcal{U}}}
+\newcommand\vals{\valfn}
 \newcommand\chgs[1]{\D{#1}}
-\newcommand\funct[1]{\vals{#1}}
-\newcommand\deriv[1]{#1'}
+\newcommand\deriv[1]{\ensuremath{#1'}}
+\newcommand\upd{\mathbin{\oplus}}
+\newcommand\updfn{\ensuremath{{\upd}}}
 
 \newcommand\fork[1]{\langle{#1}\rangle}
 \newcommand\krof[1]{[{#1}]}
@@ -65,15 +91,15 @@
 \newcommand\bindsp{~\,}
 \newcommand\fa[1]{\forall #1.\bindsp}
 \newcommand\ex[1]{\exists #1.\bindsp}
-%% \renewcommand\ex[1]{(\exists #1)\bindsp}
-%% \renewcommand\fa[1]{(\forall #1)\bindsp}
 
 
 %% Option A
 % \leadsto, \rightsquigarrow, \Rightarrow
 \newcommand\validarrow\to
-\newcommand\vld[3]{{#2 \mathrel{\overset{#1}{\validarrow}} #3}}
-\newcommand\longvld[3]{{#2 \xrightarrow{#1} #3}}
+\newcommand\valid[1]{\mathrel{\overset{#1}{\validarrow}}}
+\newcommand\longvalid[1]{\mathrel{\xrightarrow{#1}}}
+\newcommand\vld[3]{{#2 \valid{#1} #3}}
+\newcommand\longvld[3]{{#2 \longvalid{#1} #3}}
 
 
 %% %% Option B
@@ -122,7 +148,6 @@
 \begin{document}
 
 \maketitle
-
 \begin{abstract}
   We define the category \CP{} of posets equipped with \emph{increasing
     changes}, whose morphisms are monotone maps equipped with \emph{derivatives}
@@ -134,112 +159,104 @@
 \section{Notation and conventions}
 
 \begin{enumerate}
-\item I write $f~x$ for a function $f$ applied to an argument $x$.
+\item I write $f\<x$ for a function $f$ applied to an argument $x$.
+
 \item $\initE_A : \initO \to A$ is the unique map out of an initial object;\\
   $\termI_A : A \to \initO$ is the unique map into a terminal object.
-\item \todo{TODO: Explain $\iso : \Poset \to \Poset$.}
+
+\item Given a family of morphisms $f_i : A \to B_i$ in a category with finite
+  products, their ``fork'' $\fork{\vv{f_i}} : A \to \prod_{i} B_i$ uniquely
+  satisfies $\pi_i \circ \fork{\vv{f_i}} = f_i$. Dually, given $f_i : A_i \to B$
+  in a category with finite sums, their ``split'' $\krof{\vv{f_i}} : \sum_i A_i
+  \to B$ uniquely satisfies $\krof{\vv{f_i}} \circ \injc_i = f_i$. So in
+  particular, $\fork{} = \termI$ and $\krof{} = \initE$.
+
+\item $\iso : \Poset \to \Poset$ takes a poset to the \emph{discrete} poset on
+  the same elements, defined:
+  \[\setlength\arraycolsep{.25em}\begin{array}{rcl}
+    x \in \isof A &\iff& x \in A\\
+    x \le y : \isof A &\iff& x = y\\
+    \isof(f : A \to B) &=& f : \isof A \to \isof B
+  \end{array}\]
 \end{enumerate}
 
 
 \section{The category \CP}
 
-\newcommand\pto\rightharpoonup
-\newcommand\upd\oplus
-
 Objects $A$ of \CP{} are tuples $(\vals A, \chgs A, \upd_A)$, where
+%
 \begin{enumerate}
 \item $\vals A \in \Poset$ is the poset of values.
-  %% \todo{TODO: hold on, why does
-  %% this need to be a poset? Why not just a set, and then \emph{recover} the
-  %% partial order (argh, actually a \strong{preorder}) from the update map? well,
-  %% because I want the forgetful functor down to \Poset{} to preserve all relevant
-  %% structure so my correctness proof works. But this is no big deal, I'll just
-  %% have to prove \emph{that} as I go along rather than proving soundness \&
-  %% completeness. But hold on, how do I define morphisms then?}
 
 \item $\chgs A \in \Poset$ is the poset of changes.
-\item $(\upd) : \vals A \x \chgs A \pto \vals A$ is a partial map
-  taking a value and a change to an updated value. If $x \upd dx$ is defined, we
-  say $dx$ is a \emph{valid} change to $x$.
 
-  $\vld{dx} x y$ means $x \upd dx$ is defined and equal to $y$. Otherwise,
-  propositions involving $\upd$ should be understood to hold only when it is
+\item $\updfn : \vals A \x \chgs A \pto \vals A$ is a partial map taking a value
+  and a change to an updated value. If $x \upd \dx$ is defined, we say $\dx$ is a
+  \emph{valid} change to $x$.
+
+  $\vld{\dx} x y$ means $x \upd \dx$ is defined and equal to $y$. Otherwise,
+  equations involving \updfn{} should be understood to hold only when it is
   defined.
 \end{enumerate}
 
 \noindent
 These must satisfy the following conditions:\footnote{There are other conditions
-  one might sensibly impose here, most notably, that $x \upd dx$ is monotone in
-  $dx$. I have not needed this, but the lack of an obvious ``correct'' set of
+  one might sensibly impose here, most notably, that $x \upd \dx$ is monotone in
+  $\dx$. I have not needed this, but the lack of an obvious ``correct'' set of
   conditions bothers me.}
 
 \begin{align*}
-  x \le y &~\implies \ex{dx} \vld{dx} x y
+  x \le y &\implies \ex{\dx} \vld{\dx} x y
   & \text{complete for increases}\\
-  x \le y &\impliedby~ \ex{dx} \vld{dx} x y
+  x \le y &\impliedby \ex{\dx} \vld{\dx} x y
   & \text{sound for increases}
 \end{align*}
 
 \noindent
-A morphism $f \in \CP(A, B)$ is a value map $f \in \Poset(\vals A, \vals B)$
-equipped with a derivative $\deriv f \in \Poset(\isof{\vals A} \x \chgs A, \chgs
-B)$ such that:
+Morphisms $f : \CP(A,B)$ are differentiable maps $f \in \Poset(\vals A, \vals
+B)$. A map is differentiable iff it has a derivative $\deriv f : \vals A
+\to \Poset(\chgs A, \chgs B)$ such that:
 
-\[ \vld{dx} x y \implies \longvld{\deriv f(x,dx)}{\funct f\,x}{\funct f\,y}\]
+\[ \vld{\dx} x y \implies \longvld{\deriv f\<x\<\dx}{f\<x}{f\<y}\]
 
 \noindent Or, equivalently:
-\[ \funct f(x \upd dx) = \funct f\,x \upd \deriv f(x, dx) \]
+\[ f\<(x \upd \dx) = f\<x \upd \deriv f\<x\<\dx \]
 
 \noindent
-Two morphisms are equal iff they have equal value maps and their derivatives'
-behavior coincides on \emph{valid} changes. In other words, we quotient equality
-of derivatives as follows:
+The same morphism may have many different derivatives; all that matters is that
+one exist. We will later exhibit an algorithm to find a derivative of a Datafun
+term.
 
-\[ (\fa{\vld{dx} x y} \deriv f(x,dx) = \deriv g(x,dx))
-\implies \deriv f = \deriv g \]
-
-\noindent
 Composition of derivatives follows the chain rule:
 
 \begin{align*}
-  %% \funct\id\, x &= x &
-  %% \funct{(f \circ g)}\, x &= \funct f (\funct g\,x)\\
-  \funct\id &= \id & \funct{(f \circ g)} &= \funct f \circ \funct g\\
-  \deriv\id(x,dx) &= dx
-  & \deriv{(f \circ g)} (x,dx) &= \deriv f (g ~x,\, \deriv g(x,dx))
-\end{align*}
-
-\noindent The only interesting case of associativity is the one involving the
-chain rule:
-\begin{align*}
-  \deriv{(f \circ (g \circ h))} (x,dx)
-  &= \deriv f((g \circ h) ~x,\ \deriv{(g \circ h)}(x,dx))\\
-  &= \deriv f (g(h ~x),\ \deriv g(h ~x,\ \deriv h(x,dx)))\\
-  &= \deriv{(f \circ g)} (h ~x,\ \deriv h(x,dx))\\
-  &= \deriv{((f \circ g) \circ h)} (x,dx)
+  \deriv\id \<x\<\dx &= \dx
+  & \deriv{(f \circ g)} \<x\<\dx &= \deriv f \<(g\<x) \<(\deriv g\<x\<\dx)
 \end{align*}
 
 
 \subsection{Zero changes and change composition}
 
 Applying the axiom of choice to soundness \& completeness for increases, we can
-recover zero-change and composition operators $\zero$, $(\cdot)$ such that $x
-\upd \zero_x = x$ and $x \upd (dx \cdot dy) = (x \upd dx) \upd dy$. These do not
-necessarily satisfy the identity and associativity laws of a category, but will
-be useful nonetheless. \todo{TODO: talk about non-constructivity and why it
-  won't be a problem. maybe should go in ``strategy'' section at the top?}
+recover operators $\zero$, $(\cdot)$ such that $x \upd \zero_x = x$ and $x \upd
+(\dx \cdot \dy) = (x \upd \dx) \upd \dy$. These do not necessarily satisfy the
+identity and associativity laws of a category, but will be useful nonetheless.
+\todo{TODO: talk about non-constructivity and why it won't be a problem. maybe
+  should go in ``strategy'' section at the top?}
 
 
 \subsection{\CP{} refines \Poset{}}
 \label{sec:refines}
 
 The forgetful functor $\valfn : \CP \to \Poset$ takes objects $A$ to $\vals{A}$
-and morphisms $f$ to $\funct f$. The structures we will build in \CP{}
-\emph{refine} the corresponding structures in \Poset{}, in the sense of
-commuting with $\valfn$. For example, for cartesian products, $\vals{(A \x B)} =
-\vals{A} \x \vals{B}$ and $\funct{\fork{f,g}} = \fork{\funct f, \funct g}$. For
-brevity, we omit the ``value components'' of our constructions when they can be
-derived from this fact.
+and morphisms $f$ to themselves. The structures we will build in \CP{}
+\emph{refine} those in \Poset{}, in the sense of commuting with $\valfn$. For
+example, for cartesian products, $\vals{(A \x B)} = \vals{A} \x \vals{B}$ and
+$\vals{\fork{f,g}} = \fork{\vals f, \vals g}$.
+%
+For brevity, we omit the ``value components'' of our constructions when they can
+be derived from this fact, only defining $\chgs{A}$ and $\oplus$ and showing the
+existence of derivatives.
 
 
 \section{Cartesian structure}
@@ -249,121 +266,133 @@ derived from this fact.
 \end{theorem}
 
 \begin{proof}
-  I omit the value-level structure, as it is inherited from \Poset{} along
-  \valfn{}. The change-poset structure is also inherited from \Poset{}, while
-  the projection and injection's derivatives operate pointwise on changes:
+  The value-level structure is inherited from \Poset{} along \valfn{}. The
+  change-poset structure is also inherited from \Poset{}, while the projection
+  and injection's derivatives operate pointwise on changes:
 
   \begin{align*}
     \chgs{\prod_{i \in I} A_i} &= \prod_{i \in I} \chgs A_i &
     \chgs{\sum_{i \in I} A_i} &= \sum_{i \in I} \chgs A_i
     \\
-    \deriv\pi_i(x,dx) &= \pi_i~dx & \deriv\injc_i(x,dx) &= \inj i dx
+    \deriv\pi_i\<x\<\dx &= \pi_i\<\dx & \deriv\injc_i\<x\<\dx &= \inj i \dx
   \end{align*}
 
-  \noindent Updates are pointwise, noting that $(\inj i x \upd \inj j dx)$ is
+  \noindent Updates are pointwise, noting that $(\inj i x \upd \inj j \dx)$ is
   undefined for $i \ne j$:
 
   \begin{align*}
-    (x_i)_i \upd (dx_i)_i &= (x_i \upd dx_i)_i &
-    \inj i x \upd \inj i dx &= \inj i (x \upd dx)
+    (x_i)_i \upd (\dx_i)_i &= (x_i \upd \dx_i)_i &
+    \inj i x \upd \inj i \dx &= \inj i (x \upd \dx)
   \end{align*}
 
   \noindent
   Soundness \& completeness for increases follow directly from the pointwise
   orderings of products \& coproducts in \Poset{}.
 
-  We calculate $\deriv{\fork{\vv f}}$ from its universal property. Imagine $g$
-  such that $\deriv f_i = (\pi_i \circ g)'$ for $i \in I$. Then:
+  Fork's derivative $\deriv{\fork{\vv{f_i}}}$ is $\fork{\vv{\deriv f_i}}$: %% It
+  %% suffices to show:
 
-  \begin{align*}
-    \deriv f_i(x,dx) &= \deriv{(\pi_i \circ g)} (x,dx)\\
-    &= \deriv\pi_i(\funct g\,x,\, \deriv g(x,dx))\\
-    &= \pi_i (\deriv g(x,dx))
-  \end{align*}
+  %% \[x \valid{\dx} y
+  %% \implies (f_i\<x)_i \longvalid{\left(\deriv f_i \<x \<\dx\right)_i} (f_i\<y)_i \]
+
+  \begin{gather*}
+    \fork{\vv{f_i}}(x \upd \dx)
+    = (f_i(x \upd \dx))_i
+    = (f_i\<x \upd \deriv f_i \<x \<\dx)_i
+    = \fork{\vv{f_i}}\<x \upd \fork{\vv{\deriv f_i}} \<x \<\dx
+  \end{gather*}
+
+  %% \noindent Which follows directly from our definition of \updfn{} for product
+  %% types.
 
   \noindent
-  So by the universal property of products in \Poset{}, we have $\deriv g =
-  \fork{\vv{\deriv f}}$. Thus $\deriv{\fork{\vv f}} = \fork{\vv{\deriv f}}$.
+  A derivative for split must obey \[ \krof{\vv{f_i}}(\inj i x \upd \inj i \dx)
+  = f_i\<x \upd \deriv{\krof{\vv{f_i}}} \<(\inj i x) \<(\inj i \dx) \] so one
+  valid choice is
 
-  Now let's try calculating $\deriv{\krof{\vv f}}$ from its universal property.
-  Imagine $g$ such that $\deriv f_i = \deriv{(g \circ \injc_i)}$. Then:
+  \[\deriv{\Krof{\vv{f_i}}} (\inj i x) \<(\inj j \dx)
+  = 
+  \begin{cases}
+    \deriv f_i \<x \<\dx & \text{if}~i = j\\
+    \deriv f_i \<x \<\zero_x & \text{otherwise}
+  \end{cases}
+  \]
 
-  \begin{align*}
-    \deriv f_i(x,dx) &= \deriv{(g \circ \injc_i)}(x,dx)\\
-    &= \deriv g(\funct\injc_i(x),\, \deriv\injc_i(x,dx))\\
-    &= \deriv g(\inj i x,\, \inj i dx)
-  \end{align*}
-
-  This defines $\deriv{\krof{\vv f}}(\inj i x,\, \inj j dx)$ when $i = j$. What
-  about $i \ne j$? Here we appeal to our quotient: derivatives are equal iff
-  they agree on \emph{valid} changes. By construction, all valid changes to
-  $\inj i x$ are of the form $\inj i dx$. So the $i \ne j$ case \strong{does not
-    matter}, so long as it is defined. One satisfactory definition is:
-
-  \begin{equation*}
-    \deriv{\Krof{\vv f}}(\inj i x,\, \inj j dx) = 
-    \begin{cases}
-      \deriv f_i(x,dx) & \text{if}~ i=j\\
-      \zero_x & \text{otherwise}
-    \end{cases}
-  \end{equation*}
-
-  I omit the proofs that the derivatives above are monotone in their second
-  argument.
+  \noindent
+  The second case is dead code; any value of the right type would do. We will
+  exploit this later to avoid needing the axiom of choice (used to define
+  $\zero_x$) in the context of Datafun.
 \end{proof}
-
-\noindent
-The use of $\zero_x$ in $\deriv{\krof{\vv f}}$ is effectively dead code:
-necessary to define $\deriv{\krof{\vv f}}$, but irrelevant to its behavior. We
-will exploit this later to avoid needing the axiom of choice (used to define
-$\zero_x$) in the context of Datafun.
 
 
 \section{Exponential objects}
 
-\newcommand\expO[2]{#1 \Rightarrow #2}
-\newcommand\df{d\kern-.1em f\kern-.1em} % fucking kerning.
-
-The change poset of the exponential object $\expO A B \in \CP$ consists of
-monotone maps $\df, dg \in \expO{\isof{\vals A}}{\expO{\chgs A}{\chgs B}}$,
-partially ordered pointwise by their effect on valid changes and quotiented to
-satisfy antisymmetry:
-
-\begin{equation*}
-  \df \le dg : \chgs{(\expO A B)}
-  \iff \fa{\vld{dx} x y} \df ~x ~dx \le dg ~x ~dx 
-\end{equation*}
-
-\noindent
-The update relation is:
+The change poset of the exponential object $\expO A B \in \CP$ consists of maps
+$\vals A \to \Poset(\chgs A, \chgs B)$, ordered pointwise. The update relation
+is:
 
 \begin{equation}\label{eqn:function-update}
-  \vld{\df} f g : \expO A B
-  \iff \fa{\vld{dx} x y} \longvld{\df~x~dx}{f~x}{g~y}
+  f \valid\df g : \expO A B
+  \iff \fa{x \valid\dx y} f\<x \longvalid{\df\<x\<\dx} g\<y
 \end{equation}
 
 \noindent Informally, this says a function change $\df$ is valid so long as it
-takes valid input changes to valid output changes: if $dx$ is a change to $x$,
-then $\df~x~dx$ must be a change to $f~x$.
+takes valid input changes to valid output changes: if $\dx$ is a change to $x$,
+then $\df\<x\<\dx$ must be a change to $f\<x$.
 
-To show this defines a unique partial function $\upd$, suppose $\vld\df f g$ and
+To show this defines a unique partial function \updfn, suppose $\vld\df f g$ and
 $\vld\df f h$ and consider any $x : A$. \Cref{eqn:function-update} applied to
-$\vld{\zero_x} x x$ gives us $\longvld{\df~x~\zero_x}{f~x}{g~x}$ and
-$\longvld{\df~x~\zero_x}{f~x}{h~x}$. By functionality of $\validarrow$ at $B$ we
-have $g~x = h~x = f~x \upd \df~x~\zero_x$.
-
-Thus, whenever $f \upd \df$ is defined, we have
+$\vld{\zero_x} x x$ gives us $\longvld{\df\<x\<\zero_x}{f\<x}{g\<x}$ and
+$\longvld{\df\<x\<\zero_x}{f\<x}{h\<x}$. Then we know \(f\<x \upd
+\df\<x\<\zero_x = g\<x = h\<x \), proving $g = h$. And so, whenever $f \upd \df$
+is defined, we have
 %
-\[ (f \upd \df)~x = f~x \upd \df~x~\zero_x \]
+\[ (f \upd \df)\<x = f\<x \upd \df\<x\<\zero_x \]
 %
-and more generally, setting aside definedness, \cref{eqn:function-update} can be
-rewritten:
+and more generally, \cref{eqn:function-update} can be rewritten:
 %
-\[ f~x \upd \df~x~dx = (f \upd \df)~(x \upd dx) \]
+\begin{equation*}
+  f\<x \upd \df\<x\<\dx = (f \upd \df)\<(x \upd \dx) 
+\end{equation*}
 
 \noindent
 Soundness \& completeness for increases at $\expO A B$ follows from soundness \&
-completeness at $A$ and $B$ and the axiom of choice. \todo{TODO: elaborate}
+completeness at $A$ and $B$ and the axiom of choice. % TODO?: Elaborate?
+
+The derivative of the evaluation map is given by
+
+\[\begin{array}{l}
+  \deriv{\fname{eval}} \,:\,
+  %(\expO{\vals A}{\vals B})
+  \Poset(\vals A, \vals B)
+  \x \vals A \to
+  \Poset({\chgs{(\expO A B)} \x \chgs A},{\chgs B})
+  \\
+  \deriv{\fname{eval}} \<(f,a) \<(\df,\da) = \df\<a\<\da
+\end{array}\]
+
+\noindent
+And for $f : \CP(\G \x A, B)$, the derivative of the curried $\fn f : \CP(\G,
+\expO A B)$ is given by currying the derivative:
+
+\[
+\begin{array}{l}
+  \deriv{(\fn f)} \,:\, \vals\G \to \expO{\chgs \G}{\chgs{(\expO A B)}}\\
+  \deriv{(\fn f)} \<\gamma \<\mathvar{d\gamma} \<a \<\da
+  = \deriv f \<(\gamma,a) \<(\mathvar{d\gamma}, \da)
+\end{array}
+\]
+
+\noindent
+Correctness of $\deriv{\fname{eval}}$ follows from the validity of \df\ and \da;
+correctness of $\deriv{(\fn f)}$ follows from correctness of \deriv{f}.
+
+%% Exponential is:
+%% eval : (A => B) x A -> B
+%%
+%% Given f : Γ x A -> B
+%% Exists λf : Γ -> (A => B)
+%% such that f = (λf × id); eval
 
 % WTS: f ≤ g ⇔ ∃df. f -df-> g
 
@@ -380,21 +409,55 @@ completeness at $A$ and $B$ and the axiom of choice. \todo{TODO: elaborate}
 %% \begin{align*}
 %%   f \le g : \vals{(\expO A B)}
 %%   &\iff f \le g : \expO{\vals A}{\vals B}\\
-%%   &\iff \fa{x \le y} f~x \le g~y\\
-%%   &\iff \fa{x,y} (\ex{dx} \vld{dx} x y)
-%%   \implies \ex{dx} \vld{dx}{f~x}{g~y}\\
+%%   &\iff \fa{x \le y} f\<x \le g\<y\\
+%%   &\iff \fa{x,y} (\ex{\dx} \vld{\dx} x y)
+%%   \implies \ex{\dx} \vld{\dx}{f\<x}{g\<y}\\
 %%   &\iff \todo{???}\\
 %%   &\iff \ex{\df} \vld{\df} f g
 %% \end{align*}
 
-\newcommand\fn\lambda
-\todo{TODO: define \fname{eval}, compute $\fn$ from its universal property}
-
 
 \section{The lifted \iso{} comonad}
 
+\newcommand\setfor[2]{\ensuremath{\{#1 \mathrel{|} #2\}}}
+
+Now we construct a comonad $\iso$ on \CP\ such that $\valfn\iso_\CP =
+\iso_\Poset\valfn$. This requirement defines the value-level structure, leaving
+only the change poset and update map:
+
+\begin{align*}
+  \chgs{\isof A} &= \isof{\chgs A}
+  &
+  x \oplus_{\isof A} dx = y &\iff x = y \wedge x \oplus_A dx = y
+\end{align*}
+
+\noindent
+So changes are ordered discretely, and \emph{only zero-changes are valid}. This
+maintains soundness \& completeness for increases, since $x \le y : \isof A \iff
+x = y$.
+
+Functoriality is straightforward to verify:
+
+\begin{align*}
+  \iso_\CP(f) = \iso_\Poset(f) = f
+  && \deriv{\iso_\CP(f)} = \deriv{\iso_\Poset(f)} = \deriv f
+\end{align*}
+
+\noindent
+To show $\iso$ is a comonad, it's easy to see that ${\iso} = {\iso\iso}$, so the
+duplication natural transformation $\delta : {\iso} \to {\iso\iso}$ is the
+identity; the extraction natural transformation $\varepsilon : {\iso} \to
+\mathbold{1}$ is given by the subposet inclusion from $\isof A$ to $A$, with
+$\deriv{\varepsilon_A} \<x \<\dx = \dx$.
+
+Finally, we'd like to show that $\iso_\CP$, like $\iso_\Poset$, distributes over
+products \& sums.
+\todo{TODO: show distributes over products \& sums.}
+
+
 \section{Semilattice objects}
 
+
 \section{Fixed points}
 
 
