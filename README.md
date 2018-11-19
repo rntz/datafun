@@ -135,8 +135,8 @@ monospace. The text fonts are:
   low DPI. However, its LaTeX package is missing some features, such as small
   caps and straight quotes.
 
-- `source` for [Source Serif][sserif] and [Sans][ssans] Pro. Similar to Charter,
-  but lacking italics in TeX Live 2018 and prior versions.
+- `source` for [Source Serif Pro][sserif]. Similar to Charter, with more fine
+  details in print, but lacking italics in TeX Live 2018 and prior versions.
 
 You can also choose between three families of math fonts:
 
