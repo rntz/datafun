@@ -112,8 +112,8 @@ spacings. The text font options are named by the serif font they choose. Most
 load [Biolinum][Libertine] for sans-serif, and all load [Inconsolata][] for
 monospace. The text fonts are:
 
-- `baskerville` for [Libre Baskerville][librebaskerville]. It lacks small caps
-  and has "faked" bold italics, but is otherwise pleasant and legible.
+- `baskervald` for [Baskervald][baskervald], a Baskerville variant. Nice in
+  print, acceptable on screen.
 
 - `charter` for [Bitstream Charter][charter] with [Source Sans Pro][ssans].
   Charter is very legible, even at low DPI.
@@ -121,11 +121,12 @@ monospace. The text fonts are:
 - `cochineal` for [Cochineal][]. Cochineal is an old-style font, pleasant in
    print and tolerable on screen.
 
-- `fbb` for the Bembo-inspired [fbb][] package. Elegant, but not very readable
-  on screen.
-
 - `libertine` for [Linux Libertine][Libertine]. Libertine has similar metrics to
   Times New Roman. It works well with [newtxmath][].
+
+- `librebaskerville` for [Libre Baskerville][librebaskerville], a Baskerville
+  revival designed for screen use. It lacks small caps and has "faked" bold
+  italics.
 
 - `palatino` for [Palatino][], an elegant font that still displays well on
   screen. Palatino and Euler are both designed by Hermann Zapf, and match
@@ -135,8 +136,10 @@ monospace. The text fonts are:
   low DPI. However, its LaTeX package is missing some features, such as small
   caps and straight quotes.
 
-- `source` for [Source Serif Pro][sserif]. Similar to Charter, with more fine
-  details in print, but lacking italics in TeX Live 2018 and prior versions.
+- `source` for [Source Serif Pro][sserif] with [Source Sans Pro][ssans]. Source
+  Serif is a very legible font, similar to Charter, with more fine details in
+  print. However, the version distributed with TeX Live 2018 (and prior) lacks
+  italics.
 
 You can also choose between three families of math fonts:
 
@@ -148,11 +151,14 @@ You can also choose between three families of math fonts:
 - `pazo`, a Palatino-based math font similar to [newpxmath][] but in my opinion
   slightly nicer-looking. Unfortunately, it is not scalable.
 
+- `nomath` leaves the math font unchanged.
+
 The defaults are `charter` with `euler`.
 
-A big thanks to [Michael Sharpe](http://math.ucsd.edu/~msharpe/), who maintains
-the newtx, newpx, XCharter, cochineal, and fbb packages.
+Many thanks to [Michael Sharpe](http://math.ucsd.edu/~msharpe/), who maintains
+the Baskervaldx, newtx, newpx, XCharter, and cochineal packages.
 
+[baskervaldx]: https://ctan.org/pkg/baskervaldx
 [librebaskerville]: https://ctan.org/pkg/librebaskerville
 [Cochineal]: https://ctan.org/pkg/cochineal
 [Euler]: https://ctan.org/pkg/eulervm
@@ -165,7 +171,6 @@ the newtx, newpx, XCharter, cochineal, and fbb packages.
 [newpxmath]: https://ctan.org/pkg/newpx
 [ssans]: https://ctan.org/pkg/sourcesanspro
 [sserif]: https://ctan.org/pkg/sourceserifpro
-[fbb]: https://ctan.org/pkg/fbb
 
 ## example.tex
 

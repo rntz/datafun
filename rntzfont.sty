@@ -14,11 +14,11 @@
 \DeclareOptionX{linespread}[1.1]{\edef\rntz@linespread{#1}}
 
 %% serif font options
-\DeclareOptionX{baskerville}{\def\rntz@font{baskerville}}
+\DeclareOptionX{baskervald}{\def\rntz@font{baskervald}}
 \DeclareOptionX{charter}{\def\rntz@font{charter}}
 \DeclareOptionX{cochineal}{\def\rntz@font{cochineal}}
-\DeclareOptionX{fbb}{\def\rntz@font{fbb}}
 \DeclareOptionX{libertine}{\def\rntz@font{libertine}}
+\DeclareOptionX{librebaskerville}{\def\rntz@font{librebaskerville}}
 \DeclareOptionX{palatino}{\def\rntz@font{palatino}}
 \DeclareOptionX{pt}{\def\rntz@font{pt}}
 \DeclareOptionX{source}{\def\rntz@font{source}}
@@ -55,6 +55,8 @@
 %% vvarbb - A more readable variant blackboard bold.
 %% smallerops - Vertically smaller \prod & \sum.
 %%
+%% To consider: bigdelims (enlarges "delimiters" - what are those? parens?)
+%%
 %% Font-family options to newtxmath:
 %% baskerv{aldx,ille}, libertine, cochineal, utopia.
 \PassOptionsToPackage{vvarbb,smallerops}{newtxmath}
@@ -71,17 +73,12 @@
 
 
 %% ---------- 3. Font choices ----------
-% Baskervaldx is too heavy, baskervillef is way too light. I like
-% librebaskerville, but it doesn't have small caps :(.
-\ifdefstring{\rntz@font}{baskerville}{
-  %\RequirePackage[p,osf,scaled=1.0526]{Baskervaldx}
-  \RequirePackage[scaled=\@scaled{0.8717815}]{librebaskerville}
+\ifdefstring{\rntz@font}{baskervald}{
+  \RequirePackage[proportional,osf,scaled=\@scaled{1.0526}]{Baskervaldx}
   \RequirePackage[p,osf,scaled=\@scaled{1.063126}]{biolinum}
   \RequirePackage[scaled=\@scaled{1.005}]{inconsolata}
   \ifdefstring{\rntz@mathfont}{newmath}{
-    \RequirePackage[libertine,scaled=\@scaled{1.063126}]{newtxmath}
-    %\RequirePackage[baskerville,scaled=1.0711]{newtxmath}
-    %\RequirePackage[baskervaldx,scaled=1.0526]{newtxmath}
+    \RequirePackage[baskervaldx,scaled=\@scaled{1.0526}]{newtxmath}
   }{}
 }{}
 
@@ -108,16 +105,6 @@
   }{}
 }{}
 
-\ifdefstring{\rntz@font}{fbb}{
-  \RequirePackage[p,osf,scaled=\@scaled{1.06}]{fbb}
-  \RequirePackage[p,osf,scaled=\@scaled{1.0812}]{biolinum}
-  \RequirePackage[scaled=\@scaled{1.023}]{inconsolata}
-  \edef\rntz@eulerscale{1.007}
-  \ifdefstring{\rntz@mathfont}{newmath}{
-    \RequirePackage[cochineal,scaled=\@scaled{1.0918}]{newtxmath}
-  }{}
-}{}
-
 \ifdefstring{\rntz@font}{libertine}{
   % libertine[osf] makes newtxmath use old-style figures in math mode :(
   % Other options: semibold.
@@ -130,14 +117,23 @@
   }{}
 }{}
 
+\ifdefstring{\rntz@font}{librebaskerville}{
+  \RequirePackage[scaled=\@scaled{0.8717815}]{librebaskerville}
+  \RequirePackage[p,osf,scaled=\@scaled{1.063126}]{biolinum}
+  \RequirePackage[scaled=\@scaled{1.005}]{inconsolata}
+  \ifdefstring{\rntz@mathfont}{newmath}{
+    \RequirePackage[libertine,scaled=\@scaled{1.063126}]{newtxmath}
+  }{}
+}{}
+
 \ifdefstring{\rntz@font}{palatino}{
   \RequirePackage[scaled=\@scaled{1}]{newpxtext}
   \RequirePackage[scaled=\@scaled{1.067}]{biolinum}
   \RequirePackage[scaled=\@scaled{1.012}]{inconsolata}
   \ifdefstring{\rntz@mathfont}{newmath}{
     \RequirePackage[scaled=\@scaled{1}]{newpxmath}
+    \PassOptionsToPackage{bb=ams,bbscaled=\@scaled{1}}{mathalfa}
   }{}
-
   %% HACK: newpxtext doesn't respect fontaxes' \tbfigures! :( but it _does_
   %% define, eg., \tlfstyle! hm...
   \RequirePackage{fontaxes}
