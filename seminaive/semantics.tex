@@ -1,4 +1,4 @@
-\documentclass[ribbons,9pt]{rntz}\usepackage[a5]{rntzgeometry}%\usepackage[fullwidth=13cm,width=315pt]{narrow}
+\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=13cm,width=315pt]{narrow}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
 %\usepackage{anyfontsize}
@@ -8,22 +8,42 @@
 %\usepackage{array}                  % >{blah}, <{blah} in array formats.
 %\usepackage{booktabs}               % \midrule
 \usepackage{mathpartir}             % \begin{mathpar}, \infer, etc.
+%% FIXME: get rid of esvect
 \usepackage[f]{esvect}              % \vv for wide vector arrows
 \usepackage{nccmath}                % fix align* (etc.) spacing
 \usepackage{enumitem}\setlist{labelindent=1em,labelsep=.75em,leftmargin=*}
-%\setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
+%\setlist{labelindent=.5em,labelsep=.75em,leftmargin=*}
 
 \hyphenation{eq-uip-ped}
 
-\usepackage[source,linespread=1.15]{rntzfont}
+%% Ooh, check out the typeface package:
+%% https://ctan.org/pkg/typeface?lang=en
+%% https://mirror.hmc.edu/ctan/macros/latex/contrib/typeface/typeface.pdf
+%%
+%% Hm, it doesn't handle:
+%% - scaling the main text font (!)
+%% - all newtxmath's options
+%% - newpxtext or newpxmath
+
+\linespread{1.08}
+%\usepackage[textosf,mathlf]{MinionPro}
+%\usepackage[source,scaled=.92,linespread=1.12]{rntzfont} %.94 to match libertine at 1.
+%\PassOptionsToPackage{bb=ams,bbscaled=.943}{mathalfa}\usepackage[baskervald,newmath,scaled=.9215,linespread=1.1]{rntzfont}
+%\linespread{1.04}\usepackage[scaled=.99]{libertine}\usepackage[scaled=.99,libertine,smallerops]{newtxmath}\usepackage[bb=ams,bbscaled=0.94,bbscaled=.9306]{mathalfa}
+%\usepackage[palatino,newmath,scaled=.92]{rntzfont}\linespread{1.08}
+%\usepackage[source,scaled=.94,linespread=1.13]{rntzfont} % 10pt
+\usepackage[charter,scaled=.94,linespread=1.13]{rntzfont} % 10pt
+
 %\usepackage[italic,basic,defaultmathsizes]{mathastext}
 %\usepackage[charter]{mathdesign}\linespread{1.08}
 %\DeclareSymbolFontAlphabet{\mathbb}{AMSb}
 \ifdefined\mathbold\else\newcommand\mathbold{\boldsymbol}\fi
 \usepackage[spacing=true]{microtype}\frenchspacing
 
-% For euler. TODO: put \mathvar in rntzfont.sty.
-\newcommand\mathvar[1]{\ensuremath{#1}}
+\newcommand\mathvar[1]{\ensuremath{#1}} % For upright math font.
+%\renewcommand\mathvar[1]{\ensuremath{\mathit{#1}}} % For italic math font.
+%\renewcommand\df{d\kern-.1em f\kern-.1em} % fucking kerning.
+
 % Space for function application. Between \; and \:.
 \newcommand\<{\mskip 4mu plus 4mu minus 1mu}
 %\renewcommand\<\;
@@ -33,10 +53,6 @@
 \newcommand\dy{\mathvar{dy}}
 \newcommand\df{\mathvar{df}}
 \newcommand\dg{\mathvar{dg}}
-
-% For newmath, pazo, mathdesign, etc.
-%\renewcommand\mathvar[1]{\ensuremath{\mathit{#1}}}
-%\renewcommand\df{d\kern-.1em f\kern-.1em} % fucking kerning.
 
 
 %% ===== Commands =====
@@ -81,12 +97,13 @@
 \newcommand\upd{\mathbin{\oplus}}
 \newcommand\updfn{\ensuremath{{\upd}}}
 
+%% \renewcommand\vals[1]{{#1}^v}
+%% \renewcommand\valfn{\ensuremath{\vals{-}}}
+
 \newcommand\fork[1]{\langle{#1}\rangle}
 \newcommand\krof[1]{[{#1}]}
-\newcommand\Fork[1]{\left\langle{#1}\right\rangle}
-\newcommand\Krof[1]{\left[{#1}\right]}
-%% \renewcommand\fork\Fork
-%% \renewcommand\krof\Krof
+%\newcommand\Fork[1]{\left\langle{#1}\right\rangle}
+%\newcommand\Krof[1]{\left[{#1}\right]}
 
 \newcommand\bindsp{~\,}
 \newcommand\fa[1]{\forall #1.\bindsp}
@@ -159,21 +176,32 @@
 \section{Notation and conventions}
 
 \begin{enumerate}
-\item I write $f\<x$ for a function $f$ applied to an argument $x$.
+\item Adjacency $f\<x$ denotes the function $f$ applied to an argument $x$.
+
+  \newcommand\iexpr{\phi}
+\item I write $(\iexpr(i))_i$ for the tuple or sequence $(\iexpr(0), \iexpr(1),
+  ..., \iexpr(n))$, leaving $n$ unspecified. For example,
+  \[ (2^ix + y_i)_i \quad\text{means}\quad
+  (2^0x + y_0,~ 2^1x + y_1,~ ...,~ 2^nx + y_n) \]
+
+  \noindent
+  I also use this notation with other braces, eg. $\fork{\iexpr(i)}_i =
+  \fork{\iexpr(0), ..., \iexpr(n)}$.
 
 \item $\initE_A : \initO \to A$ is the unique map out of an initial object;\\
   $\termI_A : A \to \initO$ is the unique map into a terminal object.
 
 \item Given a family of morphisms $f_i : A \to B_i$ in a category with finite
-  products, their ``fork'' $\fork{\vv{f_i}} : A \to \prod_{i} B_i$ uniquely
-  satisfies $\pi_i \circ \fork{\vv{f_i}} = f_i$. Dually, given $f_i : A_i \to B$
-  in a category with finite sums, their ``split'' $\krof{\vv{f_i}} : \sum_i A_i
-  \to B$ uniquely satisfies $\krof{\vv{f_i}} \circ \injc_i = f_i$. So in
-  particular, $\fork{} = \termI$ and $\krof{} = \initE$.
+  products, their ``fork'' $\fork{f_i}_i : A \to \textstyle\prod_{i} B_i$
+  uniquely satisfies $\pi_i \circ \fork{f_i}_i = f_i$. Dually, given $f_i :
+  A_i \to B$ in a category with finite sums, their ``split'' $\krof{f_i}_i :
+  \sum_i A_i \to B$ uniquely satisfies $\krof{f_i}_i \circ \injc_i = f_i$. So
+  in particular, $\fork{} = \termI$ and $\krof{} = \initE$.
 
 \item $\iso : \Poset \to \Poset$ takes a poset to the \emph{discrete} poset on
   the same elements, defined:
-  \[\setlength\arraycolsep{.25em}\begin{array}{rcl}
+  \[\setlength\arraycolsep{.33em}
+  \begin{array}{rcl}
     x \in \isof A &\iff& x \in A\\
     x \le y : \isof A &\iff& x = y\\
     \isof(f : A \to B) &=& f : \isof A \to \isof B
@@ -183,7 +211,7 @@
 
 \section{The category \CP}
 
-Objects $A$ of \CP{} are tuples $(\vals A, \chgs A, \upd_A)$, where
+Objects $A$ of \CP{} are tuples $(\vals A, \chgs A, \updfn_A)$, where
 %
 \begin{enumerate}
 \item $\vals A \in \Poset$ is the poset of values.
@@ -240,9 +268,9 @@ Composition of derivatives follows the chain rule:
 Applying the axiom of choice to soundness \& completeness for increases, we can
 recover operators $\zero$, $(\cdot)$ such that $x \upd \zero_x = x$ and $x \upd
 (\dx \cdot \dy) = (x \upd \dx) \upd \dy$. These do not necessarily satisfy the
-identity and associativity laws of a category, but will be useful nonetheless.
-\todo{TODO: talk about non-constructivity and why it won't be a problem. maybe
-  should go in ``strategy'' section at the top?}
+identity and associativity laws of a category, but $\zero$ will be useful
+nonetheless. We will see how to duck this non-constructive use of the axiom of
+choice in \cref{sec:derivative-transform}.
 
 
 \subsection{\CP{} refines \Poset{}}
@@ -289,28 +317,21 @@ existence of derivatives.
   Soundness \& completeness for increases follow directly from the pointwise
   orderings of products \& coproducts in \Poset{}.
 
-  Fork's derivative $\deriv{\fork{\vv{f_i}}}$ is $\fork{\vv{\deriv f_i}}$: %% It
-  %% suffices to show:
-
-  %% \[x \valid{\dx} y
-  %% \implies (f_i\<x)_i \longvalid{\left(\deriv f_i \<x \<\dx\right)_i} (f_i\<y)_i \]
+  Fork's derivative $\deriv{\fork{f_i}_i}$ is $\fork{\deriv f_i}_i$:
 
   \begin{gather*}
-    \fork{\vv{f_i}}(x \upd \dx)
+    \fork{f_i}_i \<(x \upd \dx)
     = (f_i(x \upd \dx))_i
     = (f_i\<x \upd \deriv f_i \<x \<\dx)_i
-    = \fork{\vv{f_i}}\<x \upd \fork{\vv{\deriv f_i}} \<x \<\dx
+    = \fork{f_i}_i \<x \upd \fork{\deriv f_i}_i \<x \<\dx
   \end{gather*}
 
-  %% \noindent Which follows directly from our definition of \updfn{} for product
-  %% types.
-
   \noindent
-  A derivative for split must obey \[ \krof{\vv{f_i}}(\inj i x \upd \inj i \dx)
-  = f_i\<x \upd \deriv{\krof{\vv{f_i}}} \<(\inj i x) \<(\inj i \dx) \] so one
+  A derivative for split must obey \[ \krof{f_i}_i\<(\inj i x \upd \inj i \dx)
+  = f_i\<x \upd \deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj i \dx) \] so one
   valid choice is
 
-  \[\deriv{\Krof{\vv{f_i}}} (\inj i x) \<(\inj j \dx)
+  \[\deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj j \dx)
   = 
   \begin{cases}
     \deriv f_i \<x \<\dx & \text{if}~i = j\\
@@ -428,7 +449,7 @@ only the change poset and update map:
 \begin{align*}
   \chgs{\isof A} &= \isof{\chgs A}
   &
-  x \oplus_{\isof A} dx = y &\iff x = y \wedge x \oplus_A dx = y
+  x \oplus_{\isof A} \dx = y &\iff x = y \wedge x \oplus_A \dx = y
 \end{align*}
 
 \noindent
@@ -450,17 +471,30 @@ identity; the extraction natural transformation $\varepsilon : {\iso} \to
 \mathbold{1}$ is given by the subposet inclusion from $\isof A$ to $A$, with
 $\deriv{\varepsilon_A} \<x \<\dx = \dx$.
 
-Finally, we'd like to show that $\iso_\CP$, like $\iso_\Poset$, distributes over
-products \& sums.
-\todo{TODO: show distributes over products \& sums.}
+Finally, $\iso_\CP$, like $\iso_\Poset$, distributes over products \& sums. This
+follows from the definitions of $\chgs{\iso A}$ and $\updfn_{\iso A}$ and of
+products and sums in $\CP$.
 
 
 \section{Semilattice objects}
+
+\todo{What do we need from semilattice objects? We need
+  \begin{enumerate}
+  \item That $\vals A$ is a semilattice, to interpret $\bot$ and $M \vee N$.
+  \item That $\chgs A$ is a semilattice, and that $\delta\bot = \bot$ and
+    $\delta(M \vee N) = \delta M \vee \delta N$ and ditto for $\delta(\bigvee(x
+    \in M)~N)$.
+  \end{enumerate}
+}
 
 
 \section{Fixed points}
 
 
-\section{``Reading off'' the change semantics of Datafun}
+\section{``Reading off'' the derivative transformation}
+\label{sec:derivative-transform}
+
+\todo{TODO: explain how we avoid non-constructive use of $\zero$ via
+  $\fname{dummy} : A \to \chgs A$.}
 
 \end{document}
