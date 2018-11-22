@@ -156,7 +156,7 @@ You can also choose between three families of math fonts:
 The defaults are `charter` with `euler`.
 
 Many thanks to [Michael Sharpe](http://math.ucsd.edu/~msharpe/), who maintains
-the Baskervaldx, newtx, newpx, XCharter, and cochineal packages.
+the Baskervaldx, cochineal, inconsolata, newtx, newpx, and XCharter packages.
 
 [baskervaldx]: https://ctan.org/pkg/baskervaldx
 [librebaskerville]: https://ctan.org/pkg/librebaskerville
