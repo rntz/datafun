@@ -1,38 +1,33 @@
-\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=13cm,width=315pt]{narrow}
+\documentclass[ribbons]{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=13cm,width=315pt]{narrow}
+%\documentclass[ribbons]{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=16cm]{narrow}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
-%\usepackage{anyfontsize}
 %\usepackage{latexsym}               % \rightsquigarrow
-%\usepackage{stmaryrd}               % \shortrightarrow, \llbracket, etc.
+\usepackage{stmaryrd}               % \shortrightarrow, \llbracket, etc.
 \usepackage{amssymb,amsmath,amsthm} % \square etc.
+\usepackage{mathtools}              %\dblcolon
 %\usepackage{array}                  % >{blah}, <{blah} in array formats.
 %\usepackage{booktabs}               % \midrule
 \usepackage{mathpartir}             % \begin{mathpar}, \infer, etc.
 %% FIXME: get rid of esvect
-\usepackage[f]{esvect}              % \vv for wide vector arrows
+%\usepackage[f]{esvect}              % \vv for wide vector arrows
 \usepackage{nccmath}                % fix align* (etc.) spacing
+\usepackage{anyfontsize}
+
 \usepackage{enumitem}\setlist{labelindent=1em,labelsep=.75em,leftmargin=*}
-%\setlist{labelindent=.5em,labelsep=.75em,leftmargin=*}
+\setlist{labelindent=.5em,labelsep=.75em,leftmargin=*}
+\setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
 
 \hyphenation{eq-uip-ped}
 
-%% Ooh, check out the typeface package:
-%% https://ctan.org/pkg/typeface?lang=en
-%% https://mirror.hmc.edu/ctan/macros/latex/contrib/typeface/typeface.pdf
-%%
-%% Hm, it doesn't handle:
-%% - scaling the main text font (!)
-%% - all newtxmath's options
-%% - newpxtext or newpxmath
-
-\linespread{1.08}
-%\usepackage[textosf,mathlf]{MinionPro}
-%\usepackage[source,scaled=.92,linespread=1.12]{rntzfont} %.94 to match libertine at 1.
+%\linespread{1.05}\usepackage[textosf,mathlf]{MinionPro}
+% scaled=.9091 to match minion, scaled=.92 to match libertine at default scale.
+\usepackage[charter,scaled=.92,linespread=1.125]{rntzfont}
 %\PassOptionsToPackage{bb=ams,bbscaled=.943}{mathalfa}\usepackage[baskervald,newmath,scaled=.9215,linespread=1.1]{rntzfont}
-%\linespread{1.04}\usepackage[scaled=.99]{libertine}\usepackage[scaled=.99,libertine,smallerops]{newtxmath}\usepackage[bb=ams,bbscaled=0.94,bbscaled=.9306]{mathalfa}
-%\usepackage[palatino,newmath,scaled=.92]{rntzfont}\linespread{1.08}
-%\usepackage[source,scaled=.94,linespread=1.13]{rntzfont} % 10pt
-\usepackage[charter,scaled=.94,linespread=1.13]{rntzfont} % 10pt
+%\linespread{1.04}\usepackage{libertine}\usepackage[libertine,smallerops]{newtxmath}\usepackage[bb=ams,bbscaled=0.94]{mathalfa}
+
+%\usepackage[charter,scaled=.98]{rntzfont} % for phone
+%\usepackage[librebaskerville]{rntzfont} % for b5
 
 %\usepackage[italic,basic,defaultmathsizes]{mathastext}
 %\usepackage[charter]{mathdesign}\linespread{1.08}
@@ -44,15 +39,27 @@
 %\renewcommand\mathvar[1]{\ensuremath{\mathit{#1}}} % For italic math font.
 %\renewcommand\df{d\kern-.1em f\kern-.1em} % fucking kerning.
 
+%% Ooh, check out the typeface package:
+%% https://ctan.org/pkg/typeface?lang=en
+%% https://mirror.hmc.edu/ctan/macros/latex/contrib/typeface/typeface.pdf
+%%
+%% Hm, it doesn't handle:
+%% - scaling the main text font (!)
+%% - all newtxmath's options
+%% - newpxtext or newpxmath
+
 
 %% ===== Commands =====
-\newcommand\todo[1]{{\color{Rhodamine}#1}}
+\newcommand\todo[1]{{\color{ACMRed}#1}}
+\newcommand\isocolor{\color{ACMBlue}}
+\newcommand\commentcolor{\color{ACMPurple}}
+%\renewcommand\isocolor{}
 
 \newcommand\naive{na\"ive}
 \newcommand\Naive{Na\"ive}
 \newcommand\cat\textbf
 \newcommand\strong\textbf
-\newcommand\CP{\cat{\texorpdfstring{$\Delta$Poset}{DeltaPoset}}}
+\newcommand\CP{\cat{\texorpdfstring{$\boldsymbol\Delta$Poset}{DeltaPoset}}}
 \newcommand\Poset{\cat{Poset}}
 \newcommand\initO{\ensuremath{\mathbold{0}}}
 \newcommand\termO{\ensuremath{\mathbold{1}}}
@@ -71,6 +78,8 @@
 \newcommand\injc{\textrm{in}}
 \newcommand\inj[1]{\injc_{#1}\,}
 \newcommand\zero{\ensuremath{\mathbold{0}}}
+\newcommand\bnfor{~~|~~}
+\newcommand\bnfeq\Coloneqq
 
 % Space for function application. Between \; and \:.
 \newcommand\<{\mskip 4mu plus 4mu minus 1mu}
@@ -82,11 +91,12 @@
 \newcommand\df{\mathvar{df}}
 \newcommand\dg{\mathvar{dg}}
 
-\newcommand\iso{\texorpdfstring{\ensuremath{\square}}{iso}}
+\newcommand\iso{{\texorpdfstring{\ensuremath{\square}}{iso}}}
 \newcommand\isof{\iso}
-\newcommand\fname[1]{\textit{#1}}
+\newcommand\fname\textrm
 \newcommand\id{\fname{id}}
 \newcommand\dummy{\fname{dummy}}
+\newcommand\extract{{\color{Red}\fname{extract}}}
 
 %% TODO: look at other latex arrows
 \newcommand\valfn{\ensuremath{\mathbb{U}}}
@@ -105,9 +115,38 @@
 %\newcommand\Fork[1]{\left\langle{#1}\right\rangle}
 %\newcommand\Krof[1]{\left[{#1}\right]}
 
-\newcommand\bindsp{~\,}
-\newcommand\fa[1]{\forall #1.\bindsp}
-\newcommand\ex[1]{\exists #1.\bindsp}
+\newcommand\quantifierspace{~\,}
+\newcommand\fa[1]{\forall #1.\quantifierspace}
+\newcommand\ex[1]{\exists #1.\quantifierspace}
+\newcommand\fnspace{\;}
+\newcommand\fnof[1]{\fn{#1}.\fnspace}
+
+\newcommand\kwname\textbf
+\newcommand\tset[1]{\{{#1}\}}
+\newcommand\tbool{{\boldsymbol 2}}
+\newcommand\efor[1]{\kwname{for}\:({#1})\fnspace}
+%\renewcommand\efor[1]{\bigvee(#1)\;}
+\newcommand\ewhen[1]{\kwname{when}\:({#1})\fnspace}
+\newcommand\ecase[1]{\kwname{case} \;{#1}\; \kwname{of}\;}
+\newcommand\caseto\shortrightarrow
+\newcommand\eset[1]{\{{#1}\}}
+\newcommand\etrue{\mathrm{true}}
+\newcommand\efalse{\mathrm{false}}
+\newcommand\eif[2]{\kwname{if}\;{#1}\;\kwname{then}\;{#2}\;\kwname{else}\;}
+\newcommand\ebox[1]{[{#1}]}
+\newcommand\elet[1]{\kwname{let}\;#1\;\kwname{in}\;}
+\newcommand\efix{\kwname{fix}\<}
+\newcommand\eboxd[1]{\ebox{\isocolor #1}}
+\newcommand\esetd[1]{\eset{\isocolor #1}}
+\newcommand\eford[2]{\efor{{\isocolor #1} \in #2}}
+\newcommand\eifd[2]{\eif{\isocolor #1}{#2}}
+\newcommand\pwild{\underline{\phantom{a}}}
+\newcommand\etuple[1]{\langle#1\rangle}
+\newcommand\splitsum{\kwname{split}\<}
+
+\newcommand\subst[2]{{#1}\,\{{#2}\}}
+\newcommand\substd[2]{\subst{#1}{\isocolor #2}}
+\newcommand\substo\coloneqq
 
 
 %% Option A
@@ -151,7 +190,7 @@
 %%                 ,amplitude=0.7pt
 %%                 ,segment length=1.2mm,pre length=3.5pt
 %%                 }
-%%             ] 
+%%             ]
 %%         (tmp.south east) -- (tmp.south west);
 %%         \end{tikzpicture}
 %%         }
@@ -198,8 +237,8 @@
   \sum_i A_i \to B$ uniquely satisfies $\krof{f_i}_i \circ \injc_i = f_i$. So
   in particular, $\fork{} = \termI$ and $\krof{} = \initE$.
 
-\item $\iso : \Poset \to \Poset$ takes a poset to the \emph{discrete} poset on
-  the same elements, defined:
+\item The comonad $\iso : \Poset \to \Poset$ takes a poset to the
+  \emph{discrete} poset on the same elements, defined:
   \[\setlength\arraycolsep{.33em}
   \begin{array}{rcl}
     x \in \isof A &\iff& x \in A\\
@@ -241,9 +280,9 @@ These must satisfy the following conditions:\footnote{There are other conditions
 \end{align*}
 
 \noindent
-Morphisms $f : \CP(A,B)$ are differentiable maps $f \in \Poset(\vals A, \vals
-B)$. A map is differentiable iff it has a derivative $\deriv f : \vals A
-\to \Poset(\chgs A, \chgs B)$ such that:
+Morphisms $f \in \CP(A,B)$ are differentiable maps $f \in \Poset(\vals A, \vals
+B)$. A map is differentiable iff it has a derivative $\deriv f : \vals A \to
+\Poset(\chgs A, \chgs B)$ such that:
 
 \[ \vld{\dx} x y \implies \longvld{\deriv f\<x\<\dx}{f\<x}{f\<y}\]
 
@@ -332,7 +371,7 @@ existence of derivatives.
   valid choice is
 
   \[\deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj j \dx)
-  = 
+  =
   \begin{cases}
     \deriv f_i \<x \<\dx & \text{if}~i = j\\
     \deriv f_i \<x \<\zero_x & \text{otherwise}
@@ -373,7 +412,7 @@ is defined, we have
 and more generally, \cref{eqn:function-update} can be rewritten:
 %
 \begin{equation*}
-  f\<x \upd \df\<x\<\dx = (f \upd \df)\<(x \upd \dx) 
+  f\<x \upd \df\<x\<\dx = (f \upd \df)\<(x \upd \dx)
 \end{equation*}
 
 \noindent
@@ -422,7 +461,7 @@ correctness of $\deriv{(\fn f)}$ follows from correctness of \deriv{f}.
 % Let's calculate! df has to be such that
 % ∀(x -dx-> y) f x --df x dx--> g y
 % Suppose (x -dx-> y)
-% 
+%
 % Suppose f -df-> g.
 % Consider x : A. WTS: f x <= g y. Know x --0x--> x.
 % Thus f x --df x 0x--> g x. So by soundness f x <= g x.
@@ -490,11 +529,222 @@ products and sums in $\CP$.
 
 \section{Fixed points}
 
+\todo{What do we need from fixed point types? We need
+  \begin{enumerate}
+  \item $\vals A$ has a least element and satisfies ACC.
+  \item Our proof for $\delta(\mathop{\text{fix}} f)$ requires that $\chgs A =
+    \vals A$ and $\updfn = {\vee}$ and $x \valid{\bot} x$.
+  \end{enumerate}
+}
+
 
 \section{``Reading off'' the derivative transformation}
 \label{sec:derivative-transform}
 
 \todo{TODO: explain how we avoid non-constructive use of $\zero$ via
   $\fname{dummy} : A \to \chgs A$.}
+
+%% TODO: variadic tuples & sums?
+\begin{figure*}
+  \[\setlength\arraycolsep{.33em}\begin{array}{l@{\hskip 1em}lcl}
+    \text{types} & A,B &\bnfeq& \tbool \bnfor \tset{A} \bnfor
+    \iso A
+    \bnfor A \to B \bnfor A \x B \bnfor A + B
+    \\[.5em]
+    \text{terms} & e,f,g &\bnfeq& x \bnfor \fnof{x} e \bnfor e\<f
+    \bnfor \etuple{e,f} \bnfor \pi_i\<e\\
+    &&&\inj i e \bnfor \ecase{e} (\inj i x \caseto f_i)_{i\in\{1,2\}}\\
+    &&&\etrue \bnfor \efalse \bnfor \eifd e f g\\
+    &&&\bot \bnfor e \vee f \bnfor \esetd{e_i}_i \bnfor \eford{x}{e} f
+    \bnfor \ewhen e f\\
+    &&& \eboxd e \bnfor \elet{\eboxd x = e} f \bnfor \splitsum e
+  \end{array}\]
+  \vspace{-1.5em}
+  \caption{Syntax of Datafun}
+  \label{fig:syntax}
+\end{figure*}
+
+\renewcommand\extract{\error{don't use extract}}
+\begin{figure*}
+  \begin{mathpar}
+    \setlength\arraycolsep{.3em}\begin{array}{lcl}
+      \dummy &:& A \to \D A\\
+      \dummy \<(\pwild : \tbool) &=& \efalse\\
+      \dummy \<(\pwild : \tset{A}) &=& \eset{}\\
+      \dummy \<\eboxd{x} &=& \eboxd{\dummy\<x}\\
+      \dummy \<(f : A \to B) &=& \fnof{x} \dummy\<(f\<x)\\
+      \dummy \<\etuple{x,y} &=& \etuple{\dummy\<x, \dummy\<y}\\
+      %% \dummy \<\etuple{x_i}_i &=& \etuple{\dummy\<x_i}_i\\
+      \dummy \<(\inj i x) &=& \inj i (\dummy\<x)
+    \end{array}
+    %%
+    %% \begin{array}{l}
+    %%   \extract_i ~:~ A_i \to \D A_1 + \D A_2 \to \D A_i\\
+    %%   \extract_i\<x\<\dx = \ecase{\dx} \inj i \dx \caseto \dx;\;%\\
+    %%   %\phantom{\extract_i\<x\<\dx = \ecase{\dx}}
+    %%   \pwild \caseto \dummy\<x
+    %%   %\quad\ {\color{ACMPurple} \longleftarrow \textit{Dead code.}}
+    %% \end{array}
+  \end{mathpar}
+  \caption{The \dummy\ function}
+  \label{fig:dummy}
+\end{figure*}
+
+\begin{figure*}
+  \begin{align*}
+    \delta x &= \dx\\
+    \delta (\fnof{x} e) &= \fnof{\eboxd x}\fnof\dx \delta e &
+    \delta (e\<f) &= \delta e \<\eboxd f \<\delta f\\
+    \delta \etuple{e,f} &= \etuple{\delta e, \delta f} &
+    \delta (\pi_i\<e) &= \pi_i\< \delta e\\
+    \delta (\inj i e) &= \inj i {\delta e}\\
+    \delta \bot &= \bot &
+    \delta (e \vee f) &= \delta e \vee \delta f\\
+    \delta \etrue = \delta \efalse &= \efalse
+    & \delta\esetd{e_i}_i &= \eset{}\\
+    \delta \eboxd{e} &= \eboxd{\delta e}
+    & \delta(\splitsum e) &= \splitsum \delta e
+  \end{align*}
+
+  %% FIXME: use of \extract is wrong
+  \begin{align*}
+    \delta(\elet{\eboxd x = e} f)
+    &= \elet{\eboxd x = e \mathrel{\kwname{and}} \eboxd\dx = \delta e} \delta f
+    \\
+    \delta (\efix e) &= \efix (\delta e \<\eboxd{\efix e}) \\
+    \delta (\eifd e f g) &= \eifd{e}{\delta f}{\delta g}\\
+    \delta (\ewhen e f) &= \eifd e {\delta f} \ewhen{\delta e} f \vee \delta f\\
+    \delta (\eford x e f)
+    &= (\eford x {\delta e} f)\\
+    &\vee (\eford x{e \vee \delta e} \substd{\delta f}{\dx \substo \zero\< x})\\
+    \delta (\ecase e (\inj i x \caseto f_i)_i)
+    %% &= \ecase{\splitsum{\eboxd e}}\\
+    %% &\qquad(\inj i \eboxd{x} \caseto \subst{\delta f_i}{\dx \substo \extract_i\<x\<\delta e})_i
+    &= \ecase{\splitsum{\eboxd e},\, \delta e}\\
+    &\qquad ({\inj i \eboxd x,\, \inj i \dx} \caseto \delta f_i)_i\\
+    &\qquad \textit{\commentcolor --- The following cases are unreachable.}\\
+    &\qquad ({\inj i \eboxd x,\, \pwild} \caseto
+    %\elet{\dx = \dummy\<x}
+    \subst{\delta f_i}{\dx \coloneqq \dummy\<x})_i
+  \end{align*}
+  \caption{The derivative translation}
+  \label{fig:derivatives}
+\end{figure*}
+
+
+\section{Semi\naive{} evaluation}
+
+\todo{TODO: Explain the use of weakening in semi\naive{} $\delta(e\<f)$,
+  hilighted in {\color{Rhodamine}pink}.}
+
+\begin{figure*}
+  \begin{align*}
+    \Phi \tbool &= \tbool & \D\tbool &= \tbool\\
+    \Phi \tset{A} &= \tset{\Phi A} & \D\tset{A} &= \tset{\Phi A}\\
+    \Phi \isof A &= \isof{(\Phi A \x \D A)}
+    & \D\isof A &= \isof \D A\\
+    \Phi(A \to B) &= \Phi A \to \Phi B
+    & \D(A \to B) &= \isof \Phi A \to \D A \to \D B\\
+    \Phi(A \x B) &= \Phi A \x \Phi B & \D(A \x B) &= \D A \x \D B\\
+    \Phi(A + B) &= \Phi A + \Phi B & \D(A + B) &= \D A + \D B
+  \end{align*}
+  \caption{Semi\naive{} type translation}
+\end{figure*}
+
+\begin{figure*}
+  \begin{align*}
+    \phi x &= x & \delta x &= \dx\\
+    \phi(\fnof x e) &= \fnof x \phi e
+    & \delta(\fnof{x} e) &= \fnof{\eboxd x} \fnof\dx \delta e\\
+    \phi(e\<f) &= \phi e\<\phi f
+    & \delta(e\<f) &= \delta e \<\eboxd{\color{Rhodamine}\phi e} \<\delta f\\
+    \phi\etuple{e,f} &= \etuple{\phi e, \phi f}
+    & \delta\etuple{e,f} &= \etuple{\delta e, \delta f}\\
+    \phi(\pi_i\<e) &= \pi_i\<\phi e
+    & \delta(\pi_i\<e) &= \pi_i\<\delta e\\
+    \phi(\inj i e) &= \inj i \phi e
+    & \delta(\inj i e) &= \inj i \delta e\\
+    \phi\etrue &= \etrue & \delta\etrue &= \efalse\\
+    \phi\efalse &= \efalse & \delta\efalse &= \efalse\\
+    \phi\bot &= \bot & \delta\bot &= \bot\\
+    \phi(e \vee f) &= \phi e \vee \phi f
+    & \delta(e \vee f) &= \delta e \vee \delta f\\
+    \phi\esetd{e_i}_i &= \esetd{\phi e_i}_i & \delta\esetd{e_i}_i &= \esetd{}\\
+    \phi\eboxd{e} &= \eboxd{\etuple{\phi e, \delta e}}
+    & \delta\eboxd{e} &= \eboxd{\delta e}
+  \end{align*}
+
+  %% TODO FIXME: determine exactly how much syntax sugar I want to allow in the
+  %% target of this translation. for example, the case-split I use in
+  %% \phi(\splitsum e) is only valid *because* \splitsum exists.
+  %%
+  %% Would be nice to give the syntax sugar explicitly, but maybe more effor
+  %% than its worth? Might be clearer to mostly avoid syntax sugar? Not sure.
+
+  \begin{align*}
+    \phi(\ecase e (\inj i x \caseto f_i)_i)
+    &= \ecase{\phi e} (\inj i x \caseto \phi f_i)_i
+    \\
+    \delta(\ecase e (\inj i x \caseto f_i)_i)
+    &= \ecase{\splitsum{\eboxd{\phi e}},\, \delta e}\\
+    &\qquad ({\inj i {\eboxd x},\, \inj i \dx} \caseto \delta f_i)_i\\
+    &\qquad ({\inj i {\eboxd x},\, \pwild}
+      \caseto \subst{\delta f_i}{\dx \substo \dummy\<x})_i
+    %% &= \ecase{\splitsum{\eboxd{\phi e}}}\\
+    %% &\qquad (\inj i \eboxd x
+    %% \caseto \subst{\delta f_i}{\dx \substo \extract_i\<x\<\delta e})_i\\
+    %% \phi(\eif e f g) &= \eif{\phi e}{\phi f}{\phi g}\\
+    %% \delta(\eif e f g) &= \eif{\phi e}{\delta f}{\delta g}
+    \\
+    \phi(\eford x e f)
+    &= \eford{x}{\phi e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
+    \substd{\phi f}{\dx \substo \zero\<x}
+    \\
+    \delta(\eford x e f)
+    &= (\eford x{\delta e} \substd{\phi f}{\dx \substo \zero\<x}) \\
+    &\vee (\eford x{e \vee \delta e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
+    \substd{\delta f}{\dx \substo \zero\<x})
+    \\
+    \phi(\ewhen e f) &= \ewhen{\phi e} \phi f
+    \\
+    \delta(\ewhen e f)
+    &= \eifd{\phi e}{\delta f} \ewhen{\delta e} \phi f \vee \delta f
+    \\
+    \phi(\elet{\eboxd x = e} f) &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \phi f
+    \\
+    \delta(\elet{\eboxd x = e} f)
+    &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \delta f
+    \\
+    \phi(\splitsum e) &=
+    %% \elet{\eboxd{\etuple{y,\dy}} = \phi e}\\
+    %% &\phantom{{}={}} \ecase{\splitsum{\eboxd y}}\\
+    %% &\qquad (\inj i \eboxd x \caseto
+    %% \substd{\phi f_i}{\dx \substo \extract_i\<y\<\dy})_i
+    %%
+    %% \elet{\eboxd{\etuple{x,\dx}} = \phi e}\\
+    %% &\phantom{{}={}}\ecase{\splitsum {\eboxd x}, \splitsum {\eboxd\dx}}\\
+    %% &\qquad (\inj i \eboxd x, \inj i \eboxd\dx
+    %% \caseto \inj i \eboxd{\etuple{x,\dx}})_i\\
+    %% &\qquad (\inj i \eboxd x, \pwild
+    %% \caseto \inj i \eboxd{\etuple{x,\dummy\<x}})_i
+    %%
+    \elet{\eboxd{x} = \phi e}\\
+    &\phantom{{}={}} \splitsum [\isocolor \ecase x\\
+    &\phantom{= \splitsum}\quad\isocolor
+      (\etuple{\inj i y, \inj i \dy} \caseto \inj i \etuple{y,\dy})_i\\
+    &\phantom{= \splitsum}\quad
+      {\isocolor(\etuple{\inj i y, \pwild}
+        \caseto \inj i \etuple{y, \dummy\<y})_i}]
+    %%
+    %% \ecase{\phi e}\\
+    %% &\qquad (\eboxd{\etuple{\inj i x, \inj i \dx}}
+    %% \caseto \inj i \eboxd{x,\dx})_i\\
+    %% &\qquad (\eboxd{\etuple{\inj i x, \pwild}}
+    %% \caseto \inj i \eboxd{x, \dummy\<x})_{i}
+    \\
+    \delta(\splitsum e) &= \splitsum \delta e
+  \end{align*}
+  \caption{Semi\naive{} term translation}
+\end{figure*}
 
 \end{document}
