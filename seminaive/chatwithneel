@@ -120,3 +120,33 @@ Ultimately, I'm trying to prove:
 This is the defining property of derivatives of morphisms:
 
     f(x + dx) = f(x) + f'(x,dx)
+
+
+---------- 2018-11-22 ----------
+
+Neel suggests: □A ---> (□A × ZA) ???
+
+ZA = □ΔA
+
+φ takes M to faster M
+δX(M) for a set of variables X
+finds the deriv of M wrt X
+ζ = δ{}
+
+Φ(A → B) = □A → ZA → A          ???
+Δ(A → B) = □A → ZA → ΔA → ΔB    ???
+
+δX(x) = dx      if x ∈ X
+δX(x) = zx      if x ∉ X
+
+φ(πᵢ M) = πᵢ φ(M)
+φ(M N) = φ(M) 
+φ(λx. M) = λx x dx. φ(M)
+φ(fix f) = faster-fix ζf ⊥ φ(f ⊥)
+
+fix : □(A → A) → A
+faster-fix : □?(A → ΔA → ΔA) → A → ΔA → A
+
+faster-fix df x dx =
+  if x + dx = x then x else
+  faster-fix df (x + dx) (df x dx)
