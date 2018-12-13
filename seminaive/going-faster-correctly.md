@@ -44,6 +44,36 @@ However, this suffers from a duplicates problem: Can we have {x},{y,z} ∈ R{A} 
 
 And this is a genuine problem if, say, we have a primitive function (size : {A} → ℕ)! So, our logical relation for sets needs to be a bit more careful. Hence the bijection.
 
+## TO SHOW: Adequacy
+If Ψ;Γ ⊢ e : A
+(implying ΦΨ,ΔΨ;ΦΓ ⊢ φe : ΦA
+ and      ΦΨ,ΔΨ,ΦΓ;ΔΓ ⊢ δe : ΔA)
+then e,φe ∈ R(Ψ;Γ ⊢ A)
+
+(e,φe) ∈ R(Ψ;Γ ⊢ A) iff:
+  ∀(ψ : Ψ, φψ : ΦΨ, δψ : ΔΨ) [ψ],[φψ,δψ] ∈ R□Ψ →
+  ∀(γ : Γ, φγ : ΨΓ) γ,φδ ∈ RΓ →
+  e{ψ;γ}, φe{φψ,δψ;φγ} ∈ RA
+
+Strategy: induction over Ψ;Γ ⊢ e : A?
+
+Most cases should be easy, because φ just distributes.
+
+### Case φ[e] = [φe,δe]
+WTS: [e]{ψ;γ}, [φe,δe]{φψ,δψ;φγ} ∈ R□A
+ie: [e{ψ;}], [φe{φψ,δψ;},δe{φψ,δψ;}] ∈ R□A
+ie: e{ψ;}, φe{φψ,δψ;} ∈ RA                  (1)
+and φe{φψ,δψ;} ↝[δe{φψ,δψ;}] φe{φψ,δψ;}     (2)
+
+First by IH, second by lemma for δ.
+
+## Adequacy for δ (mutually inductive w/ Adequacy)
+If   ψ ↝[δψ] ψ and γ₁ ↝[δγ] γ₂
+then φe{ψ,δψ;γ₁} ↝[δe{ψ,δψ,γ₁;δγ}] φe{ψ,δψ;γ₂}
+
+The cases for this will actually be interesting. Can we reuse the semantic proof involving ΔPoset?
+
+
 # elab/forget approach
 
 _⊝_ : A → A → ΔA
