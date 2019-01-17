@@ -89,7 +89,9 @@
   \RequirePackage[sups,scaled=\@scaled{1.02}]{XCharter}
   \RequirePackage[proportional,semibold,scaled=\@scaled{1.0074}]{sourcesanspro}
   \RequirePackage[scaled=\@scaled{1.075}]{inconsolata}
-  \edef\rntz@eulerscale{1.054782}
+  %\edef\rntz@eulerscale{1.054782} % eyeballed
+  %\edef\rntz@eulercasle{1.0618175} % multiplicative mean of the other two
+  \edef\rntz@eulerscale{1.0689}   % calculated from fontdimen values
   \ifdefstring{\rntz@mathfont}{newmath}{
     \RequirePackage[xcharter,scaled=\@scaled{1.1075}]{newtxmath}
   }{}

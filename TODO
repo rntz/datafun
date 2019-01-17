@@ -1,3 +1,6 @@
+- recalculate x-heights using font dimension info (now included in xheight.tex).
+  Already did this for Charter.
+
 - Find remaining places I use em rather than \baselineskip for vertical space
   measures. Use \baselineskip; em behaves unpredictably when scaling fonts.
 
