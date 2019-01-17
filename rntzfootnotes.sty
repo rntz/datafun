@@ -4,14 +4,17 @@
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{footmisc}}
 \ProcessOptions\relax
 
-\RequirePackage[marginal]{footmisc}
+\RequirePackage[marginal,norule]{footmisc}
 \AtBeginDocument{
-  \setlength{\skip\footins}{1em plus .25em minus .2em}
+  %% Comment out if norule is set. Also it uses ems, which is a bad idea if the
+  %% font is scaled a lot. TODO: fix this.
+  %\setlength{\skip\footins}{1em plus .25em minus .2em}
+
   %% NB. In vanilla TeX, \footnotesep isn't actually a length, I think? At
   %% least, if I do \setlength\footnotesep{1em plus .25em minus .2em}, I end up
   %% with ``plus .25em minus .2em'' at the front of my document. UNLESS I
   %% \usepackage{mathtools}. I don't know why that fixes it. In any case, I
   %% don't want to have use mathtools, so instead I define \footnotesep in terms
   %% of \skip\footins, which seems to work.
-  \setlength{\footnotesep}{\skip\footins}
+  \setlength\footnotesep{\skip\footins}
 }
