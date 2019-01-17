@@ -8,6 +8,7 @@
 
 \newtoggle{ribbons}             % colored section number ribbons?
 \newtoggle{marginums}           % header numbers in left margin?
+\newtoggle{boldhead}            % bold or italic headings?
 
 % I don't understand option processing.
 %% ---- Options ----
@@ -15,8 +16,10 @@
 \DeclareOption{noribbons}{\togglefalse{ribbons}}
 \DeclareOption{marginums}{\toggletrue{marginums}}
 \DeclareOption{nomarginums}{\togglefalse{marginums}}
+\DeclareOption{boldhead}{\toggletrue{boldhead}}
+\DeclareOption{italichead}{\togglefalse{boldhead}}
 % Defaults
-\ExecuteOptions{marginums,noribbons}
+\ExecuteOptions{boldhead,marginums,noribbons}
 \ProcessOptions\relax
 
 %% titlesec < 2.10.2 has a bug that prevents showing section numbers. This fixes
@@ -44,9 +47,7 @@
 
 %% Title formatting.
 \newcommand{\headernum}{\lnfigures\tbfigures}
-\newcommand{\header}{\bfseries}
-%% \renewcommand{\header}{\rmfamily\itshape}  % or, italics
-%% \renewcommand{\header}{\sffamily\bfseries} % or, sans-serif
+\iftoggle{boldhead}{\newcommand\header\bfseries}{\newcommand\header\itshape}
 
 \newcommand{\hnopost}{\hspace*{0mm}}
 \newcommand{\hnopre}{\hspace*{2.5mm}}
