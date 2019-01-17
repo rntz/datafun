@@ -13,19 +13,28 @@
 
 \setlength{\parindent}{0pt}
 \linespread{.8}
-\begin{document}\Huge
-
+\begin{document}
+\Huge
 \begin{tabular}{ll}
-  \emph{x}$x$x\textsf{x}\texttt{x} & \emph{y}$y$y\textsf{y}\texttt{y}
+  x$x$\emph{x}\textsf{x}\texttt{x} & y$y$\emph{y}\textsf{y}\texttt{y}
   \\
-  \emph{u}$u$u\textsf{u}\texttt{u} & \emph{v}$v$v\textsf{v}\texttt{v}
+  u$u$\emph{u}\textsf{u}\texttt{u} & v$v$\emph{v}\textsf{v}\texttt{v}
   \\
-  \emph{n}$n$n\textsf{n}\texttt{n} & \emph{q}$q$q\textsf{q}\texttt{q}
+  n$n$\emph{n}\textsf{n}\texttt{n} & q$q$\emph{q}\textsf{q}\texttt{q}
   \\
-  \emph{f}$f$f\textsf{f}\texttt{f} &
-  \emph{h}$h$h\textsf{h}\texttt{h}
+  f$f$\emph{f}\textsf{f}\texttt{f} & h$h$\emph{h}\textsf{h}\texttt{h}
   \\
-  $X$X\textsf{X}\texttt{X} & $N$N\textsf{N}\texttt{N}
+  X$X$\textsf{X}\texttt{X} & N$N$\textsf{N}\texttt{N}
 \end{tabular}
+
+\clearpage\linespread{1}\normalsize
+% empty math environment to force reloading math font for new size.
+ex: \the\fontdimen5\font\(\)\\
+em: \the\fontdimen6\font\\
+math ex: \the\fontdimen5\textfont1\\
+math em: \the\fontdimen6\textfont1\\
+baselineskip: \the\baselineskip\\
+interword space: \the\fontdimen2\font\\
+
 
 \end{document}
