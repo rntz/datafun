@@ -5,6 +5,8 @@
 \DeclareOption{nomarginums}{\PassOptionsToPackage{\CurrentOption}{rntzsection}}
 \DeclareOption{ribbons}{\PassOptionsToPackage{\CurrentOption}{rntzsection}}
 \DeclareOption{noribbons}{\PassOptionsToPackage{\CurrentOption}{rntzsection}}
+\DeclareOption{boldhead}{\PassOptionsToPackage{\CurrentOption}{rntzsection}}
+\DeclareOption{italichead}{\PassOptionsToPackage{\CurrentOption}{rntzsection}}
 \DeclareOption{twocolumn}{\ClassWarning{rntz}{Two-column mode is not supported.}}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{extarticle}}
 
