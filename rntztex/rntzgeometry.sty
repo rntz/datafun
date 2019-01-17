@@ -1,11 +1,14 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{rntzgeometry}[2018/05/10]
 
+%     b6: 125 x 176mm    4.9 x  6.9in
 %     a5: 148 x 210mm    5.8 x  8.3in
 %     b5: 176 x 250mm    6.9 x  9.8in
 %     a4: 210 x 297mm    8.3 x 11.7in
 % letter: 216 x 279mm    8.5 x 11in
-\DeclareOption{a5}{\def\rntz@geom{a5paper,text={115mm,170mm}}}
+%\DeclareOption{b6}{\def\rntz@geom{b6paper,text={300pt,149mm}}}
+\DeclareOption{b6}{\def\rntz@geom{b6paper,textwidth=300pt,top=26pt,bottom=4pc}}
+\DeclareOption{a5}{\def\rntz@geom{a5paper,text={115mm,175mm}}}
 \DeclareOption{b5}{\def\rntz@geom{b5paper,text={136mm,205mm}}}
 \DeclareOption{a4}{\def\rntz@geom{a4paper,text={160mm,247mm}}}
 \DeclareOption{letter}{\def\rntz@geom{letterpaper,text={175mm,230mm}}}
