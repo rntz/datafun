@@ -1,15 +1,17 @@
 \documentclass[nomarginums]{rntz}
 
-%% Laptop-oriented 4:5 fantasy paper. Other options: tablet, phone.
-\usepackage[phone]{fantasy}
-\usepackage{rntzfont}
-%\linespread{1.15}
-
-%% % Options: charter, palatino, cochineal, libertine.
-%% %\usepackage[b5]{rntzgeometry}\usepackage[width=365pt,fullwidth=16cm]{narrow}
-%% \usepackage[a5]{rntzgeometry}\usepackage[fullwidth=13cm,width=115mm]{narrow}
+%% %% Laptop-oriented 4:5 fantasy paper. Other options: tablet, phone.
+%% \usepackage[phone]{fantasy}
 %% \usepackage{rntzfont}
-%% %\linespread{1.1526}
+%% %\linespread{1.15}
+
+\usepackage[b5]{rntzgeometry}
+\usepackage[width=365pt,fullwidth=16cm,width=13cm,fullwidth=150mm]{narrow}
+\usepackage[linespread=1.16667]{rntzfont}
+
+%% \usepackage[a5]{rntzgeometry}
+%% \usepackage[fullwidth=13cm,width=115mm]{narrow}
+%% \usepackage[linespread=1.12,scaled=.9804]{rntzfont}
 
 %% \documentclass{article}
 %% \usepackage[b5paper]{geometry}
@@ -51,14 +53,17 @@
 %% vectors with subscripts. \vv* doesn't look quite right.
 \newcommand{\vvsub}[2]{\vv*{#1}{\!#2}}
 
+\usepackage[skip=.5\baselineskip,labelfont=sc,labelsep=period,format=hang]{caption}
+
 % List styling: No extra separation between items (aside from \parsep). Indent
 % lists to match paragraph indentation.
 \usepackage{enumitem}
 \setlist{itemsep=0pt,labelindent=\parindent,leftmargin=*}
+%\setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
 
 % typographic improvements
 % TODO: put these in rntzfont.sty or rntz.cls?
-\usepackage[spacing=true,stretch=15,tracking=true,letterspace=30]{microtype}
+\usepackage[spacing=true,stretch=15,tracking=true,letterspace=15]{microtype}
 \frenchspacing
 
 
@@ -76,6 +81,8 @@
 \newcommand{\mi}[1]{\ensuremath{\mathit{#1}}}
 \newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}
 
+\newcommand\defeq{\triangleq}
+\newcommand{\emptycx}{\varepsilon}
 \newcommand{\G}{\Gamma}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\x}{\times}
@@ -87,7 +94,10 @@
 \newcommand{\fix}{\textsf{fix}}
 \newcommand{\den}[1]{\llbracket{#1}\rrbracket}
 \newcommand{\subtype}{\le}
-\newcommand\defeq{\triangleq}
+
+\newcommand{\ein}[2]{\textsf{in}_{#1}\:{#2}}
+\newcommand{\cto}{\shortrightarrow}
+\newcommand{\ecase}[1]{\mb{case}~{#1}~\mb{of}~\,}
 
 %% Category & preorder theory
 \newcommand{\cat}[1]{\textsc{#1}} %category name
@@ -119,10 +129,40 @@
 \newcommand\tmeet{\wedge}                  % tone meet
 \newcommand\bigmeet{\bigwedge}             % tone meet
 
+%% TODO: get rid of \T.
+\newcommand{\T}[1]{#1}
+%% "moded" things: hypothesis, types, contexts. mode/tone comes first.
+\newcommand{\mtp}[2]{\left[#1\right] #2}
+\newcommand{\mcx}[2]{#1 #2}
+
+\newcommand{\extend}[2]{{#1},\, {#2}}
+\newcommand{\tpcolor}{}%\color{Green}}
+\newcommand{\tmcolor}{}%\color{ACMDarkBlue}}
+\newcommand{\cxcolor}{}%\color{ACMPurple}}
+
+\newcommand{\strips}{\prec}
+
+\newcommand{\uh}[2]{#1 : #2}            % unmoded/toneless hypothesis
+\newcommand{\h}[3]{\uh{#1}{\mtp{#2}{#3}}}
+\newcommand{\infers}[3]{{\tmcolor#1} \Rightarrow {\cxcolor#2} \vdash {\tpcolor#3}}
+\newcommand{\checks}[3]{{\tmcolor#1} \Leftarrow {\cxcolor#2} \vdash {\tpcolor#3}}
+
+\newcommand{\mdist}[2]{#1 \equiv #2}
+\newcommand{\mbinop}{\oast}
+\newcommand{\adjoint}[2]{#1 \dashv #2}
+
+%% \renewcommand{\infers}[3]{#2 \vdash #1 \Rightarrow #3}
+%% \renewcommand{\checks}[3]{#2 \vdash #1 \Leftarrow #3}
+
+%% \renewcommand{\infers}[3]{#1 \Rightarrow {#3} \dashv {#2}}
+%% \renewcommand{\checks}[3]{#1 \Leftarrow {#3} \dashv {#2}}
+%% \renewcommand{\extend}[2]{{#2},\, {#1}}
+%% \renewcommand{\uh}[2]{#2\,#1}
+
 
 %% ---- Front matter ----
 \title{Tones and Types}
-\author{Michael Arntzenius, %
+\author{{\scshape Michael Arntzenius}, %
   \href{mailto:daekharel@gmail.com}{daekharel@gmail.com}}
 % Date format: "25 March 2018"
 \usepackage[en-GB]{datetime2}
@@ -131,6 +171,13 @@
 
 
 \begin{document}
+
+%% \makeatletter \noindent
+%% before section: \rntz@secbefore\\
+%% after section: \rntz@secafter\\
+%% baseline skip: \the\baselineskip\\
+%% em: \the\fontdimen6\font\\
+%% \makeatother
 
 \maketitle
 
@@ -702,77 +749,36 @@ numbers to numbers.%
     from Code Mesh 2017}.}
 
 
-\section{A tonal sequent calculus}
-
-\newcommand{\T}[1]{#1}
-
-%% "moded" things: hypothesis, types, contexts. mode/tone comes first.
-\newcommand{\mtp}[2]{\left[#1\right] #2}
-\newcommand{\mcx}[2]{#1 #2}
-%\renewcommand{\mcx}[2]{#1 #2} % Would need to re-parenthesize some use-sites.
-\newcommand{\extend}[2]{{#1},\, {#2}}
-
-\begin{mathpar}
-  \mcx{T}{\xbar{i}{\mtp{U_i}{A_i}}} = \xbar{i}{\mtp{TU_i}{A_i}}\\
-
-  \infer[Hypothesis]{T \le \id}{\extend{\G}{\mtp{T}{A}} \vdash A}
-
-  \infer[$T$-Right]{\G \vdash A}{\mcx{T}{\G} \vdash \T{T} A}
-
-  \infer[$T$-Left]
-        {\extend{\G}{\mtp{TU}{A}} \vdash C}
-        {\extend{\G}{\mtp{T}{\T{U}A}} \vdash C}
-
-  \infer[Weakening]{U \le T \\ \extend{\G}{\mtp{T}{A}} \vdash C}
-        {\extend{\G}{\mtp{U}{A}} \vdash C}
-
-  \infer[Contraction]
-        {\extend{\G}{\mtp{T}{A},\, \mtp{U}{A}} \vdash C}
-        {\extend{\G}{\mtp{T \tmeet U}{A}} \vdash C}
-
-  \infer[Cut]{\G \vdash A \\ \extend{\Delta}{\mtp{T}{A}} \vdash C}
-        {\extend{\mcx{T}{\G}}{\Delta} \vdash C}
-\end{mathpar}
-
-Jason Reed sent me these rules for a sequent calculus, where $\T{T} A$ is the
-type internalizing the tone functor $T$ applied to the type $A$. \todo{TODO:
-  this notation is convenient but slightly confusing. elucidate it.} I aim to
-adapt this into a natural-deduction-style system with proof terms, i.e.\ a
-simply typed $\lambda$-calculus.
-
-
 \section{A bidirectional \texorpdfstring{$\lambda$}{lambda}-calculus with tone inference}
 
-\newcommand{\tpcolor}{}%\color{Green}}
-\newcommand{\tmcolor}{}%\color{ACMDarkBlue}}
-\newcommand{\cxcolor}{}%\color{ACMPurple}}
+\begin{figure}
+  \begin{mathpar}
+    \mcx{T}{\xbar{i}{\mtp{U_i}{A_i}}} = \xbar{i}{\mtp{TU_i}{A_i}}\\
 
-\newcommand{\strips}{\prec}
+    \infer[Hypothesis]{T \le \id}{\extend{\G}{\mtp{T}{A}} \vdash A}
 
-\newcommand{\uh}[2]{#1 : #2}            % unmoded/toneless hypothesis
-\newcommand{\h}[3]{\uh{#1}{\mtp{#2}{#3}}}
-\newcommand{\infers}[3]{{\tmcolor#1} \Rightarrow {\cxcolor#2} \vdash {\tpcolor#3}}
-\newcommand{\checks}[3]{{\tmcolor#1} \Leftarrow {\cxcolor#2} \vdash {\tpcolor#3}}
+    \infer[$T$-Right]{\G \vdash A}{\mcx{T}{\G} \vdash \T{T} A}
 
-\newcommand{\ein}[2]{\textsf{in}_{#1}\:{#2}}
-\newcommand{\cto}{\shortrightarrow}
-\newcommand{\ecase}[1]{\mb{case}~{#1}~\mb{of}~\,}
-\newcommand{\emptycx}{\varepsilon}
+    \infer[$T$-Left]
+          {\extend{\G}{\mtp{TU}{A}} \vdash C}
+          {\extend{\G}{\mtp{T}{\T{U}A}} \vdash C}
 
-\newcommand{\mdist}[2]{#1 \equiv #2}
-\newcommand{\mbinop}{\oast}
-\newcommand{\adjoint}[2]{#1 \dashv #2}
+    \infer[Weakening]{U \le T \\ \extend{\G}{\mtp{T}{A}} \vdash C}
+          {\extend{\G}{\mtp{U}{A}} \vdash C}
 
-%% \renewcommand{\infers}[3]{#2 \vdash #1 \Rightarrow #3}
-%% \renewcommand{\checks}[3]{#2 \vdash #1 \Leftarrow #3}
+    \infer[Contraction]
+          {\extend{\G}{\mtp{T}{A},\, \mtp{U}{A}} \vdash C}
+          {\extend{\G}{\mtp{T \tmeet U}{A}} \vdash C}
 
-%% \renewcommand{\infers}[3]{#1 \Rightarrow {#3} \dashv {#2}}
-%% \renewcommand{\checks}[3]{#1 \Leftarrow {#3} \dashv {#2}}
-%% \renewcommand{\extend}[2]{{#2},\, {#1}}
-%% \renewcommand{\uh}[2]{#2\,#1}
+    \infer[Cut]{\G \vdash A \\ \extend{\Delta}{\mtp{T}{A}} \vdash C}
+          {\extend{\mcx{T}{\G}}{\Delta} \vdash C}
+  \end{mathpar}
+  \caption{Tonal sequent calculus}
+  \label{fig:tonal-sequent-calculus}
+\end{figure}
 
-\begin{mathpar}
-  \begin{array}{rcclr}
+\begin{figure*}
+  \[\begin{array}{rcclr}
     \text{variables} & x\vspace{1pt}\\
     \text{base types} & P
     \vspace{0.5em}\\
@@ -794,21 +800,47 @@ simply typed $\lambda$-calculus.
     \vspace{0.5em}\\
 
     \text{contexts} & \G
-    &\bnfeq& \emptycx \pipe \extend{\G}{\h{x}{T}{A}}\vspace{1pt}\\
-    \text{judgments} & J
-    &\bnfeq& \checks{m}{\G}{A} & \text{type checking}\\
-    &&\bnfcont& \infers{e}{\G}{A} & \text{type inference}\\
-    &&\bnfcont& \adjoint{T}{U} \pipe T \le U & \text{tone relations}
-    \\
-    &&\bnfcont& \mtp{T}{A} \subtype B
-    \pipe \mtp{T}{A} \strips B
-    & \text{subtyping}
-  \end{array}
-\end{mathpar}
+    &\bnfeq& \emptycx \pipe \extend{\G}{\h{x}{T}{A}}
+    %% \vspace{1pt}\\
+    %% \text{judgments} & J
+    %% &\bnfeq& \checks{m}{\G}{A} & \text{type checking}\\
+    %% &&\bnfcont& \infers{e}{\G}{A} & \text{type inference}\\
+    %% &&\bnfcont& \adjoint{T}{U} \pipe T \le U & \text{tone relations}
+    %% \\
+    %% &&\bnfcont& \mtp{T}{A} \subtype B
+    %% \pipe \mtp{T}{A} \strips B
+    %% & \text{subtyping}
+  \end{array}\]
+  
+  \caption{Syntax for the bidirectional tonal $\lambda$-calculus}
+  \label{fig:tonal-lambda-calculus}
+\end{figure*}
 
-\todo{TODO: explain my various abuses of notation, e.g. $\mcx{T}{\G}$ and
-  $\G_1 \tmeet \G_2$}
+\begin{figure}
+  \begin{mathpar}
+  \infer[Type Checking]{\checks{m}{\G}{A}}{}
 
+  \infer[Type Inference]{\infers m \G A}{}
+
+  \infer[Tone Adjunction]{\adjoint T U}{}
+
+  \infer[Subtoning]{T \le U}{}
+
+  \infer[Subtyping]{\mtp{T}{A} \subtype B}{}
+
+  \infer[Mode Stripping]{\mtp{T}{A} \strips B}{}
+  \end{mathpar}
+  \caption{Typing judgments for the tonal $\fn$-calculus}
+  \label{fig:judgments}
+\end{figure}
+
+\Cref{fig:tonal-sequent-calculus} gives rules\footnote{Sent to me by Jason
+  Reed.} for a tonal sequent calculus with a type $\T{T} A$ representing the
+tone functor $T$ applied to the type $A$. I adapt this into a tonal
+$\lambda$-calculus with bidirectional type inference. I give its syntax in
+\cref{fig:tonal-lambda-calculus} and its typing judgment forms in
+\cref{fig:judgments}. \todo{TODO: explain my various abuses of notation, e.g.
+  $\mcx{T}{\G}$ and $\G_1 \tmeet \G_2$.}
 
 \subsection{Typing rules}
 
