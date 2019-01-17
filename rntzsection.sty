@@ -28,22 +28,21 @@
 \patchcmd{\ttlh@hang}{\parindent\z@}{\parindent\z@\leavevmode}{}{}
 \patchcmd{\ttlh@hang}{\noindent}{}{}{}
 
-% Lotsa whitespace. 2:1 before:after ratio.
-\def\rntz@secbefore{1.6em plus .4em minus .32em}
-\def\rntz@secafter{.8em plus .2em minus .16em}
-%\def\rntz@secbefore{1.5em plus .375em minus .3em}
-%\def\rntz@secafter{ .75em plus .1875em minus .15em}
 \titlespacing*{\section}{0pt}{\rntz@secbefore}{\rntz@secafter}
 \titlespacing*{\subsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
 \titlespacing*{\subsubsection}{0pt}{\rntz@secbefore}{\rntz@secafter}
 %\titlespacing*{\paragraph}{0pt}{1.28em plus .512em minus .256em}{1em}
+% \titlespacing*{\paragraph}{0pt}
+%               {1\baselineskip plus .25\baselineskip minus .2\baselineskip}
+%               {1em}
 
-%% %% Tighter spacing: 1.5\baselineskip at 2:1 before:after.
-%% \def\rntz@secbefore{1\baselineskip plus .25\baselineskip minus .2\baselineskip}
-%% \def\rntz@secafter{.5\baselineskip plus .125\baselineskip minus .1\baselineskip}
-%% \titlespacing*{\paragraph}{0pt}
-%%               {1\baselineskip plus .25\baselineskip minus .2\baselineskip}
-%%               {1em}
+%% Tighter spacing: 1.5\baselineskip at 2:1 before:after.
+\def\rntz@secbefore{1\baselineskip plus .25\baselineskip minus .2\baselineskip}
+\def\rntz@secafter{.5\baselineskip plus .125\baselineskip minus .1\baselineskip}
+
+%% %% Looser spacing: 1.8\baselineskip at 2:1 before:after.
+%% \def\rntz@secbefore{1.2\baselineskip plus .3\baselineskip minus .24\baselineskip}
+%% \def\rntz@secafter{.6\baselineskip plus .15\baselineskip minus .12\baselineskip}
 
 %% Title formatting.
 \newcommand{\headernum}{\lnfigures\tbfigures}

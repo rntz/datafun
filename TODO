@@ -1,3 +1,6 @@
+- Find remaining places I use em rather than \baselineskip for vertical space
+  measures. Use \baselineskip; em behaves unpredictably when scaling fonts.
+
 - make new rntz.cls that combines all appropriate features.
   - rntzfont
   - rntzgeometry
