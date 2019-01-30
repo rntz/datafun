@@ -28,7 +28,7 @@ All tagless-final. Compiler flowchart:
       |
       | eval/compile
       V
-    Output
+    Generate Haskell or OCaml code (?)
 
 GRIPES
 ======
@@ -111,29 +111,6 @@ let deltaLat: modtp semilat -> rawtp semilat = Obj.magic delta
  *       | ⊥ | M ∨ N | {M} | for (x in M) N
  *       | box M | let box x = M in N
  *)
-module type BIDIR = sig
-  type tp
-  type term
-  type expr
-
-  (* checking terms *)
-  val expr: expr -> term
-  val letIn: sym -> expr -> term -> term
-  val lam: sym -> term -> term
-  val tuple: term list -> term
-  val set: term list -> term
-  val union: term list -> term
-  val forIn: sym -> expr -> term -> term
-  val box: term -> term
-  val letBox: sym -> expr -> term -> term
-  val fix: sym -> term -> term
-
-  (* inferring exprs *)
-  val var: sym -> expr
-  val app: expr -> term -> expr
-  val proj: int -> expr -> expr
-  val asc: tp -> term -> expr
-end
 
 (* For now, no typing contexts or variable usage/freeness information. *)
 module type BASE = sig
@@ -163,6 +140,129 @@ end
 module type SIMPLE = sig
   include BASE with type tp = rawtp
   val fastfix: tp semilat -> term -> term
+end
+
+module type BIDIR = sig
+  type tp = modtp
+  type term
+  type expr
+
+  (* inferring exprs *)
+  val asc: tp -> term -> expr
+  val var: sym -> expr
+  val app: expr -> term -> expr
+  val proj: int -> expr -> expr
+
+  (* checking terms *)
+  val expr: expr -> term
+  val letIn: sym -> expr -> term -> term
+  val lam: sym -> term -> term
+  val tuple: term list -> term
+  val set: term list -> term
+  val union: term list -> term
+  val forIn: sym -> expr -> term -> term
+  val box: term -> term
+  val letBox: sym -> expr -> term -> term
+  val fix: sym -> term -> term
+end
+
+
+(* Bidirectional type checking/inference *)
+type mode = Id | Box | Hidden
+type modalcx = (mode * modtp) Cx.t
+
+module Bidir(Imp: MODAL): BIDIR
+     with type term = modalcx -> modtp -> Imp.term
+     with type expr = modalcx -> modtp * Imp.term
+= struct
+  type tp = modtp
+  type cx = modalcx
+  type term = cx -> tp -> Imp.term
+  type expr = cx -> tp * Imp.term
+
+  exception TypeError of string
+  let typeError msg = raise (TypeError msg)
+  let subtype (a: tp) (b: tp) = a = b
+
+  let rec asLat: tp -> tp semilat = function
+    | `Bool -> `Bool
+    | `Set a -> `Set a
+    | `Fn (a,b) -> `Fn (a, asLat b)
+    | `Tuple tps -> `Tuple (List.map asLat tps)
+    | `Box _ -> typeError "not a semilattice type"
+
+  (* inferring exprs *)
+  let asc (tp: tp) (term: term) (cx: cx): tp * Imp.term = tp, term cx tp
+
+  let var (x: sym) (cx: cx): tp * Imp.term =
+    match Cx.find x cx with
+    | (Box | Id), tp -> tp, Imp.var tp x
+    | Hidden, _ -> typeError "that variable is hidden"
+
+  let app (fnc: expr) (arg: term) (cx: cx): tp * Imp.term =
+    match fnc cx with
+    | `Fn(a,b), fncX -> b, Imp.app a b fncX (arg cx a)
+    | _ -> typeError "applying non-function"
+
+  let proj (i: int) (expr: expr) (cx: cx): tp * Imp.term =
+    match expr cx with
+    | `Tuple tps, exprX -> List.nth tps i, Imp.proj tps i exprX
+    | _ -> typeError "projection from non-tuple"
+
+  (* checking terms *)
+  let expr (expr: expr) (cx: cx) (tp: tp): Imp.term =
+    let exprType, exprX = expr cx in
+    if subtype exprType tp then exprX
+    else typeError "inferred type does not match annotation"
+
+  let letIn (x: sym) (expr: expr) (body: term) (cx: cx) (tp: tp): Imp.term =
+    let exprType, exprX = expr cx in
+    Imp.letIn exprType tp x exprX (body (Cx.add x (Id,exprType) cx) tp)
+
+  let lam (x: sym) (body: term) (cx: cx): tp -> Imp.term = function
+    | `Fn(a,b) -> Imp.lam a b x (body (Cx.add x (Id,a) cx) b)
+    | _ -> typeError "lambda must have function type"
+
+  let tuple (terms: term list) (cx: cx): tp -> Imp.term = function
+    | `Tuple tps ->
+       if List.(length terms <> length tps)
+       then typeError "tuple has wrong length"
+       else Imp.tuple (List.map2 (fun tp term -> tp, term cx tp) tps terms)
+    | _ -> typeError "tuples must have tuple type"
+
+  let set (terms: term list) (cx: cx): tp -> Imp.term = function
+    | `Set eltp -> terms
+                   |> List.map (fun term -> term cx eltp)
+                   |> Imp.set eltp
+    | _ -> typeError "set must have set type"
+
+  let union (terms: term list) (cx: cx) (tp: tp): Imp.term =
+    terms
+    |> List.map (fun term -> term cx tp)
+    |> Imp.union (asLat tp)
+
+  let forIn (x: sym) (set: expr) (body: term) (cx: cx) (tp: tp): Imp.term =
+    match set cx with
+    | `Set eltype, setX -> Imp.forIn eltype (asLat tp) x setX (body cx tp)
+    | _ -> typeError "cannot comprehend over non-set"
+
+  let box (term: term) (cx: cx): tp -> Imp.term = function
+    | `Box a -> Imp.box a (term cx a)
+    | _ -> typeError "box must have box type"
+
+  let letBox (x: sym) (expr: expr) (body: term) (cx: cx) (tp: tp): Imp.term =
+    match expr cx with
+    | `Box a, exprX -> Imp.letBox a tp x exprX (body (Cx.add x (Box,a) cx) tp)
+    | _ -> typeError "cannot unbox non-box type"
+
+  let fix (x: sym) (body: term) (cx: cx) (tp: tp): Imp.term =
+    (* Needs to be a semilattice type and also first order.
+     * We're not doing termination checking for now. *)
+    if not (firstOrder tp)
+    then typeError "fixed point at higher-order type"
+    else body (Cx.add x (Id,tp) cx) tp
+         |> Imp.lam tp tp x 
+         |> Imp.fix (asLat tp)
 end
 
 
@@ -196,6 +296,16 @@ module Seminaive(Raw: SIMPLE): MODAL
 
   (* φ(let box x = M in N) = let x,dx = φM in φN
    * δ(let box x = M in N) = let x,dx = φM in δN *)
+
+  (* TODO: this is a potential optimization point. we can examine the type `b`
+   * and if it's first-order and contains no sums - for example, if it's a set type -
+   * we know statically what the zero value will be and we can substitute it in
+   * instead of unboxing it.
+   *
+   * so instead of:     φ(let [x] = M in N) = let [x,dx] = φM in φN
+   * it becomes:        φ(let [x] = M in N) = let [x,_] = φM in let dx = 0_A in φN
+   * (and 0 x can be statically determined)
+   *)
   let letBox (a: tp) (b: tp) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term): term =
     let fa,da = phiDelta a and fb,db = phiDelta b and dx = Sym.d x in
     let y = Sym.gen x.name and ytps = [fa;da] in
