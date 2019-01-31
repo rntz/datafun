@@ -37,9 +37,9 @@ This design involves passing types explicitly everywhere, which would be fine if
 we weren't also computing with those types. But we are computing with them;
 we're applying phi and delta to them. And this means we'll end up doing a
 superlinear amount of work because we'll recompute the adjusted phi/delta types
-at each level. If we instead worked bidirectionally the whole way through, I
-believe we could avoid this. But, this would require more involved plumbing
-boilerpate.
+at each node in the syntax tree. If we instead worked bidirectionally the whole
+way through, I believe we could avoid this. But, this would require more
+involved plumbing boilerpate.
 
 However, I suspect the total amount of type computation will be negligible
 anyway, and compilation speed isn't the point here anyway; this is just a proof
@@ -71,6 +71,12 @@ module Sym = struct
   let nextId () = let x = !next_id in next_id := x + 1; x
   let gen name = {name = name; id = nextId(); degree = 0}
   let d x = {name = x.name; id = x.id; degree = 1+x.degree}
+  let to_string x =
+    let name = x.name ^ string_of_int x.id in
+    match x.degree with
+    | 0 -> name
+    | 1 -> "d" ^ name
+    | d -> "d" ^ string_of_int d ^ name
 end
 
 (* Contexts mapping variables to stuff. *)
@@ -171,7 +177,7 @@ end
 type mode = Id | Box | Hidden
 type modalcx = (mode * modtp) Cx.t
 
-module Bidir(Imp: MODAL): BIDIR
+module Typecheck(Imp: MODAL): BIDIR
      with type term = modalcx -> modtp -> Imp.term
      with type expr = modalcx -> modtp * Imp.term
 = struct
@@ -304,7 +310,6 @@ module Seminaive(Raw: SIMPLE): MODAL
    *
    * so instead of:     φ(let [x] = M in N) = let [x,dx] = φM in φN
    * it becomes:        φ(let [x] = M in N) = let [x,_] = φM in let dx = 0_A in φN
-   * (and 0 x can be statically determined)
    *)
   let letBox (a: tp) (b: tp) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term): term =
     let fa,da = phiDelta a and fb,db = phiDelta b and dx = Sym.d x in
@@ -384,3 +389,49 @@ module Seminaive(Raw: SIMPLE): MODAL
     let fa,da = phiDeltaLat a in
     Raw.fastfix fa fFunc, Raw.union da [] 
 end
+
+
+(* A simple and stupid debug printer.
+ * Has precedence all wrong. *)
+module ToString: SIMPLE with type term = string = struct
+  type tp = rawtp
+  type term = string
+
+  let sym = Sym.to_string
+  let commas = String.concat ", "
+
+  let var tp x = sym x
+  let letIn a b x expr body = "let " ^ sym x ^ " = " ^ expr ^ " in " ^ body
+  let lam a b x body = "fn " ^ sym x ^ " => " ^ body
+  let app a b fnc arg = "(" ^ fnc ^ " " ^ arg ^ ")"
+  let tuple = function
+    | [_,term] -> "(" ^ term ^ ",)"
+    | tpterms -> "(" ^ commas (List.map snd tpterms) ^ ")"
+  let proj tps i term = "π" ^ string_of_int i ^ " " ^ term
+  let set a terms = "{" ^ commas terms ^ "}"
+  let union tp = function
+    | [] -> "empty"
+    | [term] -> "(or " ^ term ^ ")"
+    | terms -> "(" ^ String.concat " or " terms ^ ")"
+  let forIn a b x set body =
+    "for (" ^ sym x ^ " in " ^ set ^ ") " ^ body
+  let fix tp term = "fix " ^ term
+  let fastfix tp term = "fastfix " ^ term
+end
+
+
+(* Putting it all together. *)
+module Examples(Modal: MODAL) = struct
+  module Lang = Typecheck(Modal)
+  open Lang
+
+  let x = Sym.gen "x"
+  let test (tp, ex) = ex Cx.empty tp
+
+  let t1 = test (`Fn(`Bool,`Bool), lam x (expr (var x)))
+
+  (* TODO: more tests. *)
+end
+
+module Debug = Examples(Seminaive(ToString))
+let f1, d1 = Debug.t1
