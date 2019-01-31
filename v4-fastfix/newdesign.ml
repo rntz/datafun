@@ -80,7 +80,11 @@ module Sym = struct
 end
 
 (* Contexts mapping variables to stuff. *)
-module Cx = Map.Make(Sym)
+module Cx = struct
+  include Map.Make(Sym)
+  (* Prefers later bindings to earlier ones. *)
+  let from_list l = List.fold_left (fun cx (k,v) -> add k v cx) empty l
+end
 type 'a cx = 'a Cx.t
 
 (* Frontend, modal types. *)
@@ -190,6 +194,10 @@ module Typecheck(Imp: MODAL): BIDIR
   let typeError msg = raise (TypeError msg)
   let subtype (a: tp) (b: tp) = a = b
 
+  let scrub: cx -> cx =
+    Cx.map (function Box, tp -> Box, tp
+                   | (Id|Hidden), tp -> Hidden, tp)
+
   let rec asLat: tp -> tp semilat = function
     | `Bool -> `Bool
     | `Set a -> `Set a
@@ -248,12 +256,14 @@ module Typecheck(Imp: MODAL): BIDIR
     |> Imp.union (asLat tp)
 
   let forIn (x: sym) (set: expr) (body: term) (cx: cx) (tp: tp): Imp.term =
-    match set cx with
-    | `Set eltype, setX -> Imp.forIn eltype (asLat tp) x setX (body cx tp)
-    | _ -> typeError "cannot comprehend over non-set"
+    let eltype, setX = match set cx with
+      | `Set eltype, setX -> eltype, setX
+      | _ -> typeError "cannot comprehend over non-set" in
+    Imp.forIn eltype (asLat tp) x setX
+      (body (Cx.add x (Box,eltype) cx) tp)
 
   let box (term: term) (cx: cx): tp -> Imp.term = function
-    | `Box a -> Imp.box a (term cx a)
+    | `Box a -> Imp.box a (term (scrub cx) a)
     | _ -> typeError "box must have box type"
 
   let letBox (x: sym) (expr: expr) (body: term) (cx: cx) (tp: tp): Imp.term =
@@ -265,10 +275,12 @@ module Typecheck(Imp: MODAL): BIDIR
     (* Needs to be a semilattice type and also first order.
      * We're not doing termination checking for now. *)
     if not (firstOrder tp)
-    then typeError "fixed point at higher-order type"
-    else body (Cx.add x (Id,tp) cx) tp
-         |> Imp.lam tp tp x 
-         |> Imp.fix (asLat tp)
+    then typeError "fixed point at higher-order type" else
+      (* We scrub the context then add a monotone variable; de facto,
+       * fix: □(A → A) → A *)
+      body (scrub cx |> Cx.add x (Id,tp)) tp
+      |> Imp.lam tp tp x 
+      |> Imp.fix (asLat tp)
 end
 
 
@@ -426,12 +438,16 @@ module Examples(Modal: MODAL) = struct
   open Lang
 
   let x = Sym.gen "x"
-  let test (tp, ex) = ex Cx.empty tp
+  let testIn cx (tp: tp) (ex: term) =
+    ex (cx |> List.map (fun (a,b,c) -> a,(b,c)) |> Cx.from_list) tp
+  let test (tp: tp) (ex: term) = ex Cx.empty tp
 
-  let t1 = test (`Fn(`Bool,`Bool), lam x (expr (var x)))
+  let t0 = testIn [x,Id,`Bool] `Bool (expr (var x))
+  let t1 = test (`Fn(`Bool,`Bool)) (lam x (expr (var x)))
 
   (* TODO: more tests. *)
 end
 
 module Debug = Examples(Seminaive(ToString))
+let f0, d0 = Debug.t0
 let f1, d1 = Debug.t1
