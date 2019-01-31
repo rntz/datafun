@@ -120,10 +120,10 @@
 \newcommand\iso{\texorpdfstring{\ensuremath{{\isocolor\Box}}}{iso}}
 \renewcommand\path{\texorpdfstring{\ensuremath{{\pathcolor\lozenge}}}{path}}
 
-\newcommand\idof{\id\,}
-\newcommand\opof{\op\,}
-\newcommand\isof{\iso}
-\newcommand\pathof{\path}
+\newcommand\idof[1]{\ensuremath{\id\,#1}}
+\newcommand\opof[1]{\ensuremath{\op\,#1}}
+\newcommand\isof[1]{\ensuremath{\iso #1}}
+\newcommand\pathof[1]{\ensuremath{\path #1}}
 
 \newcommand\tc{\circ}                      % tone composition
 \newcommand\tmeet{\wedge}                  % tone meet
@@ -309,7 +309,7 @@ With this, we can state the theorem generalizing our observation:
 \end{theorem}
 
 From this point on, when I write $f : A \to B$, I mean implicitly that $f$ is
-monotone; and therefore $f : TA \to B$ means that $f$ has tone $s$.
+monotone; and therefore $f : TA \to B$ means that $f$ has tone $T$.
 %
 Here are a few more useful properties of tones, which I invite you to verify:
 
@@ -384,8 +384,8 @@ Here are a few more useful properties of tones, which I invite you to verify:
 
 \Cref{fig:tone-example} illustrates how each tone transforms the graph of a
 simple preorder: $\idof A$ is identical to $A$; $\opof A$ inverts arrows'
-directions; \isof{A} isolates the strongly connected components of $A$; and
-\pathof{A} makes weakly connected components strong. Arrows in $\isof A$ and
+directions; $\isof A$ isolates the strongly connected components of $A$; and
+$\pathof A$ makes weakly connected components strong. Arrows in $\isof A$ and
 $\pathof A$ are always bidirectional, as their preorders are symmetric (and thus
 equivalence relations).
 
@@ -906,7 +906,7 @@ $\lambda$-calculus with bidirectional type inference. I give its syntax in
 
 \subsection{Tone judgments}
 
-\todo{TODO: Explain judgment $s \le t$, for tone ordering, and $\adjoint{s}{t}$,
+\todo{TODO: Explain judgment $T \le U$, for tone ordering, and $\adjoint{T}{U}$,
   for tone adjunction.}
 %
 \begin{mathpar}
@@ -962,9 +962,9 @@ The semantic justification for \textsc{t-left} is as follows.
 %
 Note that $\fnof{x} x : VA \to VA$. Applying $U \dashv V$ we have $\fnof{x} x :
 UVA \to A$, thus $UVA \le A$, and so finally $TUVA \le TA \le B$. \todo{Clean up
-  this explanation. Explain that we use adjunction rather than $st \le \id$
-  directly because adjunction gives us the \emph{most informative} result; $st
-  \le \id$ is declarative, $\adjoint{t}{s}$ is algorithmic. Give explanations
+  this explanation. Explain that we use adjunction rather than $TU \le \id$
+  directly because adjunction gives us the \emph{most informative} result; $TU
+  \le \id$ is declarative, $\adjoint{T}{U}$ is algorithmic. Give explanations
   for each other rule as well.}
 
 Function subtyping, $\mtp{T}{A_1 \mathrel{\focus{\to}} B_1} \subtype A_2
