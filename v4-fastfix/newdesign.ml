@@ -1,7 +1,11 @@
 (* TODO:
  * - equality tests
- * - some base type to compute with; naturals?
- * - boolean intro/elim forms
+ * - boolean intro/elim forms (true, false, if, when)
+ * - some base type to compute with; naturals or strings.
+ * - ToHaskell compilation step
+ *
+ * POST DEADLINE:
+ * - a parser
  * - sum types
  *)
 
@@ -126,20 +130,20 @@ end
 type 'a cx = 'a Cx.t
 
 (* Frontend, modal types. *)
-type modtp = [ `Bool | `Set of modtp | `Box of modtp
-             | `Tuple of modtp list | `Fn of modtp * modtp ]
+type modaltp = [ `Bool | `Set of modaltp | `Box of modaltp
+               | `Tuple of modaltp list | `Fn of modaltp * modaltp ]
 (* Backend, non-modal types. *)
 type rawtp = [ `Bool | `Set of rawtp | `Tuple of rawtp list | `Fn of rawtp * rawtp ]
 (* Semilattices, parameterized by underlying types *)
 type 'a semilat = [ `Bool | `Set of 'a | `Tuple of 'a semilat list | `Fn of 'a * 'a semilat ]
 
-let rec firstOrder: modtp -> bool = function
+let rec firstOrder: modaltp -> bool = function
   | `Fn _ -> false
   | `Bool | `Set _ -> true
   | `Box a -> firstOrder a
   | `Tuple tps -> List.for_all firstOrder tps
 
-let rec phiDelta: modtp -> rawtp * rawtp = function
+let rec phiDelta: modaltp -> rawtp * rawtp = function
   | `Bool -> `Bool, `Bool
   | `Set a -> let fa = phi a in `Set fa, `Set fa
   | `Box a -> let fa, da = phiDelta a in `Tuple [fa;da], da
@@ -150,9 +154,11 @@ let rec phiDelta: modtp -> rawtp * rawtp = function
 and phi a = fst (phiDelta a)
 and delta a = snd (phiDelta a)
 
-let phiDeltaLat: modtp semilat -> rawtp semilat * rawtp semilat = Obj.magic phiDelta
-let phiLat: modtp semilat -> rawtp semilat = Obj.magic phi
-let deltaLat: modtp semilat -> rawtp semilat = Obj.magic delta
+(* phiDelta of a semilattice type produces a semilattice type; Obj.magic convinces
+ * OCaml that this is so. *)
+let phiDeltaLat: modaltp semilat -> rawtp semilat * rawtp semilat = Obj.magic phiDelta
+let phiLat: modaltp semilat -> rawtp semilat = Obj.magic phi
+let deltaLat: modaltp semilat -> rawtp semilat = Obj.magic delta
 
 
 (* M,N ::= x | λx.M | M N | (M0,M1,...,Mn) | πᵢ M
@@ -180,7 +186,7 @@ module type BASE = sig
 end
 
 module type MODAL = sig
-  include BASE with type tp = modtp
+  include BASE with type tp = modaltp
   val box: tp -> term -> term
   val letBox: tp -> tp -> sym -> term -> term -> term
 end
@@ -191,7 +197,7 @@ module type SIMPLE = sig
 end
 
 module type BIDIR = sig
-  type tp = modtp
+  type tp = modaltp
   type term
   type expr
 
@@ -217,13 +223,13 @@ end
 
 (* Bidirectional type checking/inference *)
 type mode = Id | Box | Hidden
-type modalcx = (mode * modtp) Cx.t
+type modalcx = (mode * modaltp) Cx.t
 
 module Typecheck(Imp: MODAL): BIDIR
-     with type term = modalcx -> modtp -> Imp.term
-     with type expr = modalcx -> modtp * Imp.term
+     with type term = modalcx -> modaltp -> Imp.term
+     with type expr = modalcx -> modaltp * Imp.term
 = struct
-  type tp = modtp
+  type tp = modaltp
   type cx = modalcx
   type term = cx -> tp -> Imp.term
   type expr = cx -> tp * Imp.term
@@ -315,7 +321,8 @@ module Typecheck(Imp: MODAL): BIDIR
       (* We scrub the context then add a monotone variable; de facto,
        * fix: □(A → A) → A *)
       body (scrub cx |> Cx.add x (Id,tp)) tp
-      |> Imp.lam tp tp x 
+      |> Imp.lam tp tp x
+      |> Imp.box (`Fn (tp, tp))
       |> Imp.fix (asLat tp)
 end
 
@@ -324,7 +331,7 @@ end
 module Seminaive(Raw: SIMPLE): MODAL
        with type term = Raw.term * Raw.term
 = struct
-  type tp = modtp
+  type tp = modaltp
   type term = Raw.term * Raw.term (* φM, δM *)
 
   (* This should only ever be used at base types. It almost ignores its
@@ -420,7 +427,7 @@ module Seminaive(Raw: SIMPLE): MODAL
      * functional types. In that case the correct strategy is to eta-expand.
      * However, I don't expect to be using forIn at functional types in any real
      * programs, so I just fail if the type isn't first-order. *)
-    if not (firstOrder (b :> modtp))
+    if not (firstOrder (b :> modaltp))
     then todo "forIn only implemented for first-order data"
     else if not (fb = db) then impossible "this shouldn't happen"
     else
@@ -435,7 +442,8 @@ module Seminaive(Raw: SIMPLE): MODAL
    * δ(fix M) = zero ⊥ = ⊥ *)
   let fix (a: tp semilat) (fFunc, dFunc: term) =
     let fa,da = phiDeltaLat a in
-    Raw.fastfix fa fFunc, Raw.union da [] 
+    Raw.fastfix fa fFunc,
+    Raw.union da [] 
 end
 
 
@@ -468,23 +476,24 @@ module ToString: SIMPLE with type term = string = struct
 end
 
 
-(* Compiling to Haskell. *)
-module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
-  type tp = rawtp
-  type term = StringBuilder.t
-  let sym x = StringBuilder.string (Sym.to_uid x)
-  let var tp x = sym x
-  let letIn = (??)
-  let lam = (??)
-  let app = (??)
-  let tuple = (??)
-  let proj = (??)
-  let set = (??)
-  let union = (??)
-  let forIn = (??)
-  let fix = (??)
-  let fastfix = (??)
-end
+(* (\* Compiling to Haskell. *\)
+ * module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
+ *   open StringBuilder
+ *   type tp = rawtp
+ *   type term = StringBuilder.t
+ *   let sym x = string (Sym.to_uid x)
+ *   let var tp x = sym x
+ *   let letIn a b x expr body = (??)
+ *   let lam a b x body = (??)
+ *   let app a b fnc arg = (??)
+ *   let tuple terms = (??)
+ *   let proj tps i term = (??)
+ *   let set a terms = (??)
+ *   let union tp terms = (??)
+ *   let forIn = (??)
+ *   let fix = (??)
+ *   let fastfix = (??)
+ * end *)
 
 
 (* Putting it all together. *)
@@ -493,6 +502,8 @@ module Examples(Modal: MODAL) = struct
   open Lang
 
   let x = Sym.gen "x"
+  let y = Sym.gen "y"
+
   let testIn cx (tp: tp) (ex: term) =
     ex (cx |> List.map (fun (a,b,c) -> a,(b,c)) |> Cx.from_list) tp
   let test (tp: tp) (ex: term) = ex Cx.empty tp
@@ -503,7 +514,23 @@ module Examples(Modal: MODAL) = struct
   (* TODO: more tests. *)
   let t0 = testIn [x,Id,`Bool] `Bool (expr (var x))
   let t1 = testIn [x,Box,`Bool] `Bool (expr (var x))
+  (* t2 = λx.x *)
   let t2 = test (`Fn(`Bool,`Bool)) (lam x (expr (var x)))
+  let t3 = testIn
+             [x,Id,`Fn(`Bool,`Bool); y,Id,`Bool]
+             `Bool
+             (expr (app (var x) (expr (var y))))
+
+  let t4 = test (`Box (`Fn(`Bool, `Bool)))
+             (box (lam x (expr (var x))))
+
+  let term5 = letBox x
+                (asc (`Box (`Fn(`Bool, `Bool)))
+                   (box (lam x (expr (var x)))))
+                (expr (app (var x) (expr (var y))))
+  let t5 = testIn [y,Id,`Bool] `Bool term5
+
+  let t6 = test (`Tuple []) (fix x (expr (var x)))
 
   let _ = shouldFail (fun _ -> testIn [x,Hidden,`Bool] `Bool (expr (var x)))
 end
@@ -512,3 +539,7 @@ module Debug = Examples(Seminaive(ToString))
 let f0, d0 = Debug.t0
 let f1, d1 = Debug.t1
 let f2, d2 = Debug.t2
+let f3, d3 = Debug.t3
+let f4, d4 = Debug.t4
+let f5, d5 = Debug.t5
+let f6, d6 = Debug.t6
