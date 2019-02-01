@@ -49,10 +49,38 @@ of concept.
 
 exception TODO of string
 exception Impossible of string
+exception TypeError of string
 
 let todo msg = raise (TODO msg)
 let impossible msg = raise (Impossible msg)
+let typeError msg = raise (TypeError msg)
 
+
+(* A module for building large strings efficiently.
+ * I could probably use Buffer, but it has an imperative interface. *)
+module type STRING_BUILDER = sig
+  type t
+  val finish: t -> string
+  val string: string -> t
+  val int: int -> t
+  val (^): t -> t -> t
+  val concat: t -> t list -> t
+end
+
+module StringBuilder: STRING_BUILDER = struct
+  type t = string list -> string list
+  let finish t = String.concat "" (t [])
+  let string s rest = s :: rest
+  let int i = string (string_of_int i)
+  let (^) x y rest = x (y rest)
+  let concat sep: t list -> t = function
+    | [] -> fun s -> s
+    | [t] -> t
+    | t::ts -> fun rest ->
+               t (List.fold_right (fun t rest -> sep (t rest)) ts rest)
+end
+
+
 (* Strings with a unique identifier and a derivative degree. The "derivative
    degree" makes it easy, given a variable, to make up a variable standing for
    its derivative. This is kind of a hack, but the alternatives are:
@@ -190,8 +218,6 @@ module Typecheck(Imp: MODAL): BIDIR
   type term = cx -> tp -> Imp.term
   type expr = cx -> tp * Imp.term
 
-  exception TypeError of string
-  let typeError msg = raise (TypeError msg)
   let subtype (a: tp) (b: tp) = a = b
 
   let scrub: cx -> cx =
@@ -442,12 +468,18 @@ module Examples(Modal: MODAL) = struct
     ex (cx |> List.map (fun (a,b,c) -> a,(b,c)) |> Cx.from_list) tp
   let test (tp: tp) (ex: term) = ex Cx.empty tp
 
-  let t0 = testIn [x,Id,`Bool] `Bool (expr (var x))
-  let t1 = test (`Fn(`Bool,`Bool)) (lam x (expr (var x)))
+  let shouldFail f = try ignore (f ()); impossible "shouldn't typecheck"
+                     with TypeError _ -> ()
 
   (* TODO: more tests. *)
+  let t0 = testIn [x,Id,`Bool] `Bool (expr (var x))
+  let t1 = testIn [x,Box,`Bool] `Bool (expr (var x))
+  let t2 = test (`Fn(`Bool,`Bool)) (lam x (expr (var x)))
+
+  let _ = shouldFail (fun _ -> testIn [x,Hidden,`Bool] `Bool (expr (var x)))
 end
 
 module Debug = Examples(Seminaive(ToString))
 let f0, d0 = Debug.t0
 let f1, d1 = Debug.t1
+let f2, d2 = Debug.t2
