@@ -559,9 +559,11 @@ module Examples(Modal: MODAL) = struct
   let t6 = test (`Tuple []) (fix x (expr (var x)))
 
   let _ = shouldFail (fun _ -> testIn [x,Hidden,`Bool] `Bool (expr (var x)))
+
+  let tests = [t0;t1;t2;t3;t4;t5;t6]
 end
 
-module Debug = Examples(Seminaive(ToString))
+module Debug = Examples(Seminaive(ToHaskell))
 let f0, d0 = Debug.t0
 let f1, d1 = Debug.t1
 let f2, d2 = Debug.t2
@@ -569,3 +571,9 @@ let f3, d3 = Debug.t3
 let f4, d4 = Debug.t4
 let f5, d5 = Debug.t5
 let f6, d6 = Debug.t6
+
+let runTest i (x,y) =
+  Printf.printf "%d: %s\n%d: %s\n"
+    i (StringBuilder.finish x)
+    i (StringBuilder.finish y)
+let runTests () = List.iteri runTest Debug.tests
