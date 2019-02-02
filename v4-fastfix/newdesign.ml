@@ -476,24 +476,50 @@ module ToString: SIMPLE with type term = string = struct
 end
 
 
-(* (\* Compiling to Haskell. *\)
- * module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
- *   open StringBuilder
- *   type tp = rawtp
- *   type term = StringBuilder.t
- *   let sym x = string (Sym.to_uid x)
- *   let var tp x = sym x
- *   let letIn a b x expr body = (??)
- *   let lam a b x body = (??)
- *   let app a b fnc arg = (??)
- *   let tuple terms = (??)
- *   let proj tps i term = (??)
- *   let set a terms = (??)
- *   let union tp terms = (??)
- *   let forIn = (??)
- *   let fix = (??)
- *   let fastfix = (??)
- * end *)
+(* Compiling to Haskell. *)
+module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
+  open StringBuilder
+  type tp = rawtp
+  type term = StringBuilder.t
+
+  let sym x = string (Sym.to_uid x)
+  let paren t = string "(" ^ t ^ string ")"
+  let spaces = concat (string " ")
+  let commas = concat (string ", ")
+  let listOf terms = string "[" ^ commas terms ^ string "]"
+  let call name args = paren (spaces (string name :: args))
+  let lambda x body = paren (string "\\" ^ sym x ^ string " -> " ^ body)
+
+  let var tp x = sym x
+  let letIn a b x expr body =
+    paren (spaces [string "let"; sym x; string "="; expr; string "in"; body])
+  let lam a b x body = lambda x body
+  let app a b fnc arg = paren (spaces [fnc; arg])
+
+  let tuple = function
+    | [] -> string "()"
+    (* singleton tuples turn into the contained type *)
+    | [_,term] -> term
+    | [_,tm1;_,tm2] -> paren (commas [tm1;tm2])
+    | _ -> todo "ternary or larger tuples unimplemented"
+  let proj tps i term = match List.length tps, i with
+    | x, y when y >= x -> impossible "out of bounds projection"
+    | 1, 0 -> term
+    | 2, 0 -> call "fst" [term]
+    | 2, 1 -> call "snd" [term]
+    | _, _ -> todo "ternary or larger tuples unimplemented"
+
+  let set a terms = call "set" [listOf terms]
+  let union tp = function
+    | [] -> string "empty"
+    | [tm] -> tm
+    | [tm1; tm2] -> call "union" [tm1; tm2]
+    | terms -> call "unions" [listOf terms]
+
+  let forIn a b x set body = call "forIn" [set; lambda x body]
+  let fix tp term = call "fix" [term]
+  let fastfix tp term = call "fastfix" [term]
+end
 
 
 (* Putting it all together. *)
