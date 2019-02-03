@@ -1,18 +1,16 @@
-(* TODO:
- * - equality tests
- * - boolean intro/elim forms (true, false, if, when)
- * - some base type to compute with; naturals or strings.
- * - ToHaskell compilation step
- *
- * POST DEADLINE:
- * - a parser
- * - sum types
- *)
-
 (*
+===== TODO =====
 
-NEW DESIGN as of January 2019
-=============================
+- equality tests
+- boolean intro/elim forms (true, false, if, when)
+- some base type to compute with; naturals or strings.
+- moar tests
+
+POST DEADLINE:
+- a parser
+- sum types
+
+===== NEW DESIGN as of January 2019 =====
 
 All tagless-final. Compiler flowchart:
 
@@ -30,12 +28,16 @@ All tagless-final. Compiler flowchart:
       V
     NORMAL: Normal non-monotone λ-calculus with fix & fast-fix
       |
-      | eval/compile
+      | compile to Haskell
       V
-    Generate Haskell or OCaml code (?)
+    Haskell code
 
-GRIPES
-======
+===== KNOWN BUGS/DESIGN FLAWS =====
+
+We inherit variable shadowing behavior from our target language (currently
+Haskell).
+
+===== GRIPES =====
 
 This design involves passing types explicitly everywhere, which would be fine if
 we weren't also computing with those types. But we are computing with them;
@@ -126,6 +128,7 @@ module Cx = struct
   include Map.Make(Sym)
   (* Prefers later bindings to earlier ones. *)
   let from_list l = List.fold_left (fun cx (k,v) -> add k v cx) empty l
+  let add_list l cx = union (fun k x y -> Some x) (from_list l) cx
 end
 type 'a cx = 'a Cx.t
 
@@ -161,7 +164,8 @@ let phiLat: modaltp semilat -> rawtp semilat = Obj.magic phi
 let deltaLat: modaltp semilat -> rawtp semilat = Obj.magic delta
 
 
-(* M,N ::= x | λx.M | M N | (M0,M1,...,Mn) | πᵢ M
+(* M,N ::= x | λx.M | M N
+ *       | (M0,M1,...,Mn) | πᵢ M | let (x0,...,xn) = M in N
  *       | ⊥ | M ∨ N | {M} | for (x in M) N
  *       | box M | let box x = M in N
  *)
@@ -176,6 +180,7 @@ module type BASE = sig
   val app: tp -> tp -> term -> term -> term
   val tuple: (tp * term) list -> term
   val proj: tp list -> int -> term -> term
+  val letTuple: (tp * sym) list -> tp -> term -> term -> term
   (* set A [M0;...;Mn] = {M0,...,Mn} : {A} *)
   val set: tp -> term list -> term
   (* union A [M0;...;Mn] = M0 ∨ ... ∨ Mn : A *)
@@ -212,6 +217,7 @@ module type BIDIR = sig
   val letIn: sym -> expr -> term -> term
   val lam: sym -> term -> term
   val tuple: term list -> term
+  val letTuple: sym list -> expr -> term -> term
   val set: term list -> term
   val union: term list -> term
   val forIn: sym -> expr -> term -> term
@@ -286,6 +292,17 @@ module Typecheck(Imp: MODAL): BIDIR
        else Imp.tuple (List.map2 (fun tp term -> tp, term cx tp) tps terms)
     | _ -> typeError "tuples must have tuple type"
 
+  let letTuple (xs: sym list) (expr: expr) (body: term) (cx: cx) (tp: tp): Imp.term =
+    match expr cx with
+    | `Tuple tps, exprX ->
+       if List.(length tps <> length xs)
+       then typeError "tuple has wrong length"
+       else
+         let tpxs = List.combine tps xs in
+         let bindings = List.map (fun (tp,x) -> x,(Id,tp)) tpxs in
+         Imp.letTuple tpxs tp exprX (body (Cx.add_list bindings cx) tp)
+    | _ -> typeError "destructuring non-tuple"
+
   let set (terms: term list) (cx: cx): tp -> Imp.term = function
     | `Set eltp -> terms
                    |> List.map (fun term -> term cx eltp)
@@ -355,9 +372,6 @@ module Seminaive(Raw: SIMPLE): MODAL
     let fa, da = phiDelta a in
     Raw.tuple [fa, fTerm; da, dTerm], dTerm
 
-  (* φ(let box x = M in N) = let x,dx = φM in φN
-   * δ(let box x = M in N) = let x,dx = φM in δN *)
-
   (* TODO: this is a potential optimization point. we can examine the type `b`
    * and if it's first-order and contains no sums - for example, if it's a set type -
    * we know statically what the zero value will be and we can substitute it in
@@ -366,22 +380,20 @@ module Seminaive(Raw: SIMPLE): MODAL
    * so instead of:     φ(let [x] = M in N) = let [x,dx] = φM in φN
    * it becomes:        φ(let [x] = M in N) = let [x,_] = φM in let dx = 0_A in φN
    *)
+  (* φ(let box x = M in N) = let x,dx = φM in φN
+   * δ(let box x = M in N) = let x,dx = φM in δN *)
   let letBox (a: tp) (b: tp) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term): term =
     let fa,da = phiDelta a and fb,db = phiDelta b and dx = Sym.d x in
-    let y = Sym.gen x.name and ytps = [fa;da] in
-    let ytp = `Tuple ytps in
-    let yproj i = Raw.proj ytps i (Raw.var ytp y) in
-    let binder body =
-      (* let y = φM in let x = fst y in let dx = snd y in ... *)
-      Raw.letIn ytp fb y fExpr
-        (Raw.letIn fa fb x (yproj 0) (Raw.letIn da fb dx (yproj 1) body))
-    in binder fBody, binder dBody
+    (* let (x,dx) = φM in ... *)
+    let binder bodyTp body = Raw.letTuple [fa,x;da,dx] bodyTp fExpr body in
+    binder fb fBody, binder db dBody
 
   (* φ(let x = M in N) = let x = φM in φN
-   * δ(let x = M in N) = let x = φM in δN *)
+   * δ(let x = M in N) = let x = φM and dx = δM in δN *)
   let letIn (a: tp) (b: tp) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term): term =
-    let fA = phi a and fB, dB = phiDelta b in
-    Raw.letIn fA fB x fExpr fBody, Raw.letIn fA dB x fExpr dBody
+    let fA,dA = phiDelta a and fB, dB = phiDelta b and dx = Sym.d x in
+    Raw.letIn fA fB x fExpr fBody,
+    Raw.letIn fA dB x fExpr (Raw.letIn dA dB dx dExpr dBody)
 
   (* φ(λx.M) = λx.φM        δ(λx.M) = λx dx. δM *)
   let lam (a: tp) (b: tp) (x: sym) (fBody, dBody: term): term =
@@ -399,6 +411,12 @@ module Seminaive(Raw: SIMPLE): MODAL
   let tuple (elts: (tp * term) list) =
     Raw.tuple (List.map (fun (a, (fE,_)) -> phi a, fE) elts),
     Raw.tuple (List.map (fun (a, (_,dE)) -> delta a, dE) elts)
+
+  (* φ(let (x,y) = M in N) = let (x,y) = φM in φN
+   * δ(let (x,y) = M in N) = let (x,y) = φM and (dx,dy) = δM in δN *)
+  let letTuple (tpxs: (tp * sym) list) (bodyTp: tp)
+               (fTuple, dTuple: term) (fBody, dBody: term): term =
+    (??)
 
   (* φ(πᵢ M) = πᵢ φM        δ(πᵢ M) = πᵢ δM *)
   let proj (tps: tp list) (i: int) (fTerm, dTerm: term) =
@@ -463,6 +481,7 @@ module ToString: SIMPLE with type term = string = struct
   let tuple = function
     | [_,term] -> "(" ^ term ^ ",)"
     | tpterms -> "(" ^ commas (List.map snd tpterms) ^ ")"
+  let letTuple = (??)
   let proj tps i term = "π" ^ string_of_int i ^ " " ^ term
   let set a terms = "{" ^ commas terms ^ "}"
   let union tp = function
@@ -508,6 +527,7 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
     | 2, 0 -> call "fst" [term]
     | 2, 1 -> call "snd" [term]
     | _, _ -> todo "ternary or larger tuples unimplemented"
+  let letTuple = (??)
 
   let set a terms = call "set" [listOf terms]
   let union tp = function
