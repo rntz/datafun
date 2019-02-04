@@ -33,6 +33,10 @@ instance (Semilat a, Semilat b) => Semilat (a,b) where
 set :: Ord a => [a] -> Set a
 set = Set.fromList
 
+guard :: Semilat a => Bool -> a -> a
+guard True x = x
+guard False x = empty
+
 forIn :: Semilat b => Set a -> (a -> b) -> b
 forIn set f = unions [f x | x <- Set.toList set]
 

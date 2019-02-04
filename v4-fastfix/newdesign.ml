@@ -2,7 +2,6 @@
 ===== TODO =====
 
 - equality tests
-- boolean intro/elim forms (true, false, if, when)
 - some base type to compute with; naturals or strings.
 - moar tests
 
@@ -580,8 +579,7 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
   let bool b = string (if b then "True" else "False")
   let ifThenElse tp cond thn els =
     parenSpaces [string "if"; cond; string "then"; thn; string "else"; els]
-  let guard tp cond body =
-    parenSpaces [string "if"; cond; string "then"; body; string "else empty"]
+  let guard tp cond body = call "guard" [cond; body]
 
   let tuple = function
     | [] -> string "()"
