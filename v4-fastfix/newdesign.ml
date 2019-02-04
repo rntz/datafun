@@ -172,8 +172,10 @@ let deltaLat: modaltp semilat -> rawtp semilat = Obj.magic delta
 
 (* M,N ::= x | λx.M | M N
  *       | (M0,M1,...,Mn) | πᵢ M | let (x0,...,xn) = M in N
+ *       | true | false | if M then N else O | when (M) N
  *       | ⊥ | M ∨ N | {M} | for (x in M) N
  *       | box M | let box x = M in N
+ *       | M = N
  *)
 
 (* For now, no typing contexts or variable usage/freeness information. *)
@@ -197,6 +199,7 @@ module type BASE = sig
   (* forIn A B x M N = for (x : A in M) do N : B *)
   val forIn: tp -> tp semilat -> sym -> term -> term -> term
   val fix: tp semilat -> term -> term
+  val equals: tp -> term -> term -> term
 end
 
 module type MODAL = sig
@@ -220,6 +223,7 @@ module type BIDIR = sig
   val var: sym -> expr
   val app: expr -> term -> expr
   val proj: int -> expr -> expr
+  val equals: expr -> expr -> expr
 
   (* checking terms *)
   val expr: expr -> term
@@ -264,24 +268,6 @@ module Typecheck(Imp: MODAL): BIDIR
     | `Fn (a,b) -> `Fn (a, asLat b)
     | `Tuple tps -> `Tuple (List.map asLat tps)
     | `Box _ -> typeError "not a semilattice type"
-
-  (* inferring exprs *)
-  let asc (tp: tp) (term: term) (cx: cx): tp * Imp.term = tp, term cx tp
-
-  let var (x: sym) (cx: cx): tp * Imp.term =
-    match Cx.find x cx with
-    | (Box | Id), tp -> tp, Imp.var tp x
-    | Hidden, _ -> typeError "that variable is hidden"
-
-  let app (fnc: expr) (arg: term) (cx: cx): tp * Imp.term =
-    match fnc cx with
-    | `Fn(a,b), fncX -> b, Imp.app a b fncX (arg cx a)
-    | _ -> typeError "applying non-function"
-
-  let proj (i: int) (expr: expr) (cx: cx): tp * Imp.term =
-    match expr cx with
-    | `Tuple tps, exprX -> List.nth tps i, Imp.proj tps i exprX
-    | _ -> typeError "projection from non-tuple"
 
   (* checking terms *)
   let expr (expr: expr) (cx: cx) (tp: tp): Imp.term =
@@ -364,6 +350,28 @@ module Typecheck(Imp: MODAL): BIDIR
       |> Imp.lam tp tp x
       |> Imp.box (`Fn (tp, tp))
       |> Imp.fix (asLat tp)
+
+  (* inferring exprs *)
+  let asc (tp: tp) (term: term) (cx: cx): tp * Imp.term = tp, term cx tp
+
+  let var (x: sym) (cx: cx): tp * Imp.term =
+    match Cx.find x cx with
+    | (Box | Id), tp -> tp, Imp.var tp x
+    | Hidden, _ -> typeError "that variable is hidden"
+
+  let app (fnc: expr) (arg: term) (cx: cx): tp * Imp.term =
+    match fnc cx with
+    | `Fn(a,b), fncX -> b, Imp.app a b fncX (arg cx a)
+    | _ -> typeError "applying non-function"
+
+  let proj (i: int) (expr: expr) (cx: cx): tp * Imp.term =
+    match expr cx with
+    | `Tuple tps, exprX -> List.nth tps i, Imp.proj tps i exprX
+    | _ -> typeError "projection from non-tuple"
+
+  let equals (m: expr) (n: expr) (cx: cx): tp * Imp.term =
+    let tp, mX = m (scrub cx) in
+    `Bool, Imp.equals tp mX (expr n (scrub cx) tp)
 end
 
 
@@ -522,6 +530,10 @@ module Seminaive(Imp: SIMPLE): MODAL
     let fa,da = phiDeltaLatCheck a in
     Imp.fastfix fa fFunc,
     Imp.union da []
+
+  (* φ(M == N) = φM == φN       δ(M == N) = false *)
+  let equals (a: tp) (fM, dM: term) (fN, dN: term): term =
+    Imp.equals (phi a) fM fN, Imp.bool false
 end
 
 
@@ -573,6 +585,7 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
 
   let var tp x = sym x
   let letIn a b x expr body = letBind (sym x) expr body
+  let equals a m n = parenSpaces [m; string "=="; n]
   let lam a b x body = lambda x body
   let app a b fnc arg = parenSpaces [fnc; arg]
 
