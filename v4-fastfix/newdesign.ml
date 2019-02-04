@@ -37,6 +37,13 @@ All tagless-final. Compiler flowchart:
 We inherit variable shadowing behavior from our target language (currently
 Haskell).
 
+It's not clear how best to deal with n-tuples. We currently compile them to
+Haskell tuples of the same length. This makes tuple & letTuple easy. However, it
+makes proj hard, because Haskell has no "get the nth field" syntax. Also Haskell
+has no way to generically derive Preord or Semilat for tuples of all sizes. An
+alternative would be encoding n-tuples for n > 2 into nested pairs. This
+complicates tuple & letTuple.
+
 ===== GRIPES =====
 
 This design involves passing types explicitly everywhere, which would be fine if
@@ -110,13 +117,13 @@ module Sym = struct
 
   (* to_uid is injective over syms generated through the Sym interface, although
    * not over all possible syms. In particular, it relies on the invariant that
-   * x.id == y.id implies x.name == y.name, (although not x.degree == y.degree).
+   * x.id = y.id implies x.name = y.name, (although not x.degree = y.degree).
    *
    * In principle I could use the module system to enforce this interface,
    * but for ease of debugging I do not. *)
   let to_uid x =
     let d = match x.degree with
-      | 0 -> "" | 1 -> "d" | d -> "d" ^ string_of_int d 
+      | 0 -> "" | 1 -> "d" | d -> "d" ^ string_of_int d
     in Printf.sprintf "%s%s_%i" d x.name x.id
 
   (* Yields a hopefully human-friendly name. For now just use to_uid. *)
@@ -181,6 +188,9 @@ module type BASE = sig
   val tuple: (tp * term) list -> term
   val proj: tp list -> int -> term -> term
   val letTuple: (tp * sym) list -> tp -> term -> term -> term
+  val bool: bool -> term
+  val ifThenElse: tp -> term -> term -> term -> term
+  val guard: tp semilat -> term -> term -> term
   (* set A [M0;...;Mn] = {M0,...,Mn} : {A} *)
   val set: tp -> term list -> term
   (* union A [M0;...;Mn] = M0 ∨ ... ∨ Mn : A *)
@@ -215,6 +225,9 @@ module type BIDIR = sig
   (* checking terms *)
   val expr: expr -> term
   val letIn: sym -> expr -> term -> term
+  val bool: bool -> term
+  val ifThenElse: term -> term -> term -> term
+  val guard: term -> term -> term
   val lam: sym -> term -> term
   val tuple: term list -> term
   val letTuple: sym list -> expr -> term -> term
@@ -281,6 +294,17 @@ module Typecheck(Imp: MODAL): BIDIR
     let exprType, exprX = expr cx in
     Imp.letIn exprType tp x exprX (body (Cx.add x (Id,exprType) cx) tp)
 
+  let bool (b: bool) (cx: cx) = function
+    | `Bool -> Imp.bool b
+    | _ -> typeError "booleans must have boolean type"
+
+  let ifThenElse (cond: term) (thn: term) (els: term) (cx: cx) (tp: tp) =
+    (* NB. We scrub cond's context b/c we are discrete wrt it. *)
+    Imp.ifThenElse tp (cond (scrub cx) `Bool) (thn cx tp) (els cx tp)
+
+  let guard (cond: term) (body: term) (cx: cx) (tp: tp) =
+    Imp.guard (asLat tp) (cond cx `Bool) (body cx tp)
+
   let lam (x: sym) (body: term) (cx: cx): tp -> Imp.term = function
     | `Fn(a,b) -> Imp.lam a b x (body (Cx.add x (Id,a) cx) b)
     | _ -> typeError "lambda must have function type"
@@ -345,32 +369,49 @@ end
 
 
 (* Implementation of the go-faster transformation. *)
-module Seminaive(Raw: SIMPLE): MODAL
-       with type term = Raw.term * Raw.term
+module Seminaive(Imp: SIMPLE): MODAL
+       with type term = Imp.term * Imp.term
 = struct
   type tp = modaltp
-  type term = Raw.term * Raw.term (* φM, δM *)
+  type term = Imp.term * Imp.term (* φM, δM *)
 
   (* This should only ever be used at base types. It almost ignores its
    * argument; however, at sum types, it does depend on the tag. *)
-  let rec zero (tp: tp) (term: Raw.term): Raw.term = match tp with
+  let rec zero (tp: tp) (term: Imp.term): Imp.term = match tp with
     | `Box a -> zero a term
     | `Bool -> todo "no boolean literals yet"
-    | `Set a -> Raw.set (phi a) []
+    | `Set a -> Imp.set (phi a) []
     | `Tuple tps ->
        let dtps = List.map delta tps in
-       List.mapi (fun i a -> delta a, zero a (Raw.proj dtps i term)) tps
-       |> Raw.tuple
+       List.mapi (fun i a -> delta a, zero a (Imp.proj dtps i term)) tps
+       |> Imp.tuple
     (* This case _should_ be dead code. *)
     | `Fn (a,b) -> impossible "cannot compute zero change at function type"
 
+  (* Most semilattice operations (except fix) are implementable at higher-order
+   * types. However, their φ/δ translations are different. For first-order
+   * semilattice types A, φA = ΔA and ⊕ = ∨. At higher-order types, this is not
+   * true, and the correct approach is to eta-expand until it is true. However,
+   * I don't expect to be using semilattice operations at functional types in
+   * any example programs, so to simplify the implementation I error on higher-
+   * order semilattice types.
+   * 
+   * For more info, See seminaive/seminaive.pdf and seminaive/semantics.pdf.
+   *)
+  let phiDeltaLatCheck (a: tp semilat) =
+    let fA, dA = phiDeltaLat a in
+    if not (firstOrder (a :> modaltp))
+    then todo "semilattice operations only implemented for first-order data"
+    else if not (fA = dA) then impossible "this shouldn't happen"
+    else fA,dA
+
   (* φx = x                 δx = dx *)
-  let var (a: tp) (x: sym) = Raw.var (phi a) x, Raw.var (delta a) (Sym.d x)
+  let var (a: tp) (x: sym) = Imp.var (phi a) x, Imp.var (delta a) (Sym.d x)
 
   (* φ(box M) = φM, δM      δ(box M) = δM *)
   let box (a: tp) (fTerm, dTerm: term): term =
     let fa, da = phiDelta a in
-    Raw.tuple [fa, fTerm; da, dTerm], dTerm
+    Imp.tuple [fa, fTerm; da, dTerm], dTerm
 
   (* TODO: this is a potential optimization point. we can examine the type `b`
    * and if it's first-order and contains no sums - for example, if it's a set type -
@@ -385,114 +426,134 @@ module Seminaive(Raw: SIMPLE): MODAL
   let letBox (a: tp) (b: tp) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term): term =
     let fa,da = phiDelta a and fb,db = phiDelta b and dx = Sym.d x in
     (* let (x,dx) = φM in ... *)
-    let binder bodyTp body = Raw.letTuple [fa,x;da,dx] bodyTp fExpr body in
+    let binder bodyTp body = Imp.letTuple [fa,x;da,dx] bodyTp fExpr body in
     binder fb fBody, binder db dBody
 
   (* φ(let x = M in N) = let x = φM in φN
    * δ(let x = M in N) = let x = φM and dx = δM in δN *)
   let letIn (a: tp) (b: tp) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term): term =
     let fA,dA = phiDelta a and fB, dB = phiDelta b and dx = Sym.d x in
-    Raw.letIn fA fB x fExpr fBody,
-    Raw.letIn fA dB x fExpr (Raw.letIn dA dB dx dExpr dBody)
+    Imp.letIn fA fB x fExpr fBody,
+    Imp.letIn fA dB x fExpr (Imp.letIn dA dB dx dExpr dBody)
 
   (* φ(λx.M) = λx.φM        δ(λx.M) = λx dx. δM *)
   let lam (a: tp) (b: tp) (x: sym) (fBody, dBody: term): term =
     let fA,dA = phiDelta a and fB,dB = phiDelta b in
-    Raw.lam fA fB x fBody,
-    Raw.lam fA (`Fn (dA, dB)) x (Raw.lam dA dB (Sym.d x) dBody)
+    Imp.lam fA fB x fBody,
+    Imp.lam fA (`Fn (dA, dB)) x (Imp.lam dA dB (Sym.d x) dBody)
 
   (* φ(M N) = φM φN         δ(M N) = δM φN δN *)
   let app (a: tp) (b: tp) (fFnc, dFnc: term) (fArg, dArg: term): term =
     let fA,dA = phiDelta a and fB,dB = phiDelta b in
-    Raw.app fA fB fFnc fArg,
-    Raw.app dA dB (Raw.app fA (`Fn (dA, dB)) dFnc fArg) dArg
+    Imp.app fA fB fFnc fArg,
+    Imp.app dA dB (Imp.app fA (`Fn (dA, dB)) dFnc fArg) dArg
 
   (* φ(M,N) = φM,φN         δ(M,N) = δM,δN *)
   let tuple (elts: (tp * term) list) =
-    Raw.tuple (List.map (fun (a, (fE,_)) -> phi a, fE) elts),
-    Raw.tuple (List.map (fun (a, (_,dE)) -> delta a, dE) elts)
+    Imp.tuple (List.map (fun (a, (fE,_)) -> phi a, fE) elts),
+    Imp.tuple (List.map (fun (a, (_,dE)) -> delta a, dE) elts)
+
+  (* φ(πᵢ M) = πᵢ φM        δ(πᵢ M) = πᵢ δM *)
+  let proj (tps: tp list) (i: int) (fTerm, dTerm: term) =
+    let ftps, dtps = List.(map phiDelta tps |> split) in
+    Imp.proj ftps i fTerm, Imp.proj dtps i dTerm
 
   (* φ(let (x,y) = M in N) = let (x,y) = φM in φN
    * δ(let (x,y) = M in N) = let (x,y) = φM and (dx,dy) = δM in δN *)
   let letTuple (tpxs: (tp * sym) list) (bodyTp: tp)
                (fTuple, dTuple: term) (fBody, dBody: term): term =
-    (??)
+    let fBodyTp, dBodyTp = phiDelta bodyTp in
+    let f (a,x) = let (fa,da) = phiDelta a in (fa,x),(da,x) in
+    let ftpxs, dtpxs = List.(map f tpxs |> split) in
+    Imp.letTuple ftpxs fBodyTp fTuple fBody,
+    Imp.letTuple ftpxs dBodyTp fTuple (Imp.letTuple dtpxs dBodyTp dTuple dBody)
 
-  (* φ(πᵢ M) = πᵢ φM        δ(πᵢ M) = πᵢ δM *)
-  let proj (tps: tp list) (i: int) (fTerm, dTerm: term) =
-    let ftps, dtps = List.(map phiDelta tps |> split) in
-    Raw.proj ftps i fTerm, Raw.proj dtps i dTerm
+  (* φ(b : bool) = b        δ(b : bool) = false *)
+  let bool (b: bool): term = Imp.bool b, Imp.bool false
+
+  (* φ(if M then N else O) = if φM then φN else φO
+   * δ(if M then N else O) = if φM then δN else δO  -- condition can't change! *)
+  let ifThenElse (a: tp) (fCond,dCond: term) (fThn,dThn: term) (fEls,dEls: term): term =
+    let fA,dA = phiDelta a in
+    Imp.ifThenElse fA fCond fThn fEls, Imp.ifThenElse dA fCond dThn dEls
+
+  (* φ(when (M) N) = when (φM) φN
+   * δ(when (M) N) = if φM then δN else when (δM) φN ∨ δN
+   *
+   * The latter assumes φA = ΔA and ⊕ = ∨. (See phiDeltaLatCheck.) *)
+  let guard (a: tp semilat) (fCond,dCond: term) (fBody,dBody: term): term =
+    let fA,dA = phiDeltaLatCheck a in
+    Imp.guard fA fCond fBody,
+    Imp.ifThenElse dA fCond dBody
+      (Imp.guard dA dCond (Imp.union dA [fBody; dBody]))
 
   (* φ({M}) = {φM}          δ({M}) = ∅ *)
   let set (a: tp) (elts: term list) =
-    Raw.set (phi a) (List.map fst elts), Raw.set (phi a) []
+    Imp.set (phi a) (List.map fst elts), Imp.set (phi a) []
 
   (* φ(M ∨ N) = φM ∨ φN     δ(M ∨ N) = δM ∨ δN *)
   let union (a: tp semilat) (terms: term list) =
-    Raw.union (phiLat a) (List.map fst terms),
-    Raw.union (deltaLat a) (List.map snd terms)
+    Imp.union (phiLat a) (List.map fst terms),
+    Imp.union (deltaLat a) (List.map snd terms)
 
   let forIn (a: tp) (b: tp semilat) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term) =
-    let fa,da = phiDelta a and fb,db = phiDeltaLat b in
+    let fa,da = phiDelta a and fb,db = phiDeltaLatCheck b in
     (* φ(for (x in M) N) = for (x in φM) let dx = 0 x in φN *)
-    Raw.forIn fa fb x fExpr
-      (Raw.letIn da fb (Sym.d x) (zero a (Raw.var fa x)) fBody),
-    (* δ(for (x in φM) φN)
-     * =  (for (x in δM) let dx = 0 x in φN)
-     *   ∨ for (x in φM ∪ δM) let dx = 0 x in δN
+    Imp.forIn fa fb x fExpr
+      (Imp.letIn da fb (Sym.d x) (zero a (Imp.var fa x)) fBody),
+    (* Assuming φB = ΔB and ⊕ = ∨ (see phiDeltaLatCheck),
      *
-     * However, this assumes ΦB = ΔB and that ⊕ = ∨. This is false for
-     * functional types. In that case the correct strategy is to eta-expand.
-     * However, I don't expect to be using forIn at functional types in any real
-     * programs, so I just fail if the type isn't first-order. *)
+     * δ(for (x in φM) φN)
+     * =  (for (x in δM) let dx = 0 x in φN)
+     *   ∨ for (x in φM ∪ δM) let dx = 0 x in δN *)
     if not (firstOrder (b :> modaltp))
     then todo "forIn only implemented for first-order data"
     else if not (fb = db) then impossible "this shouldn't happen"
     else
-      let loopBody body = Raw.letIn da fb (Sym.d x) (zero a (Raw.var fa x)) body in
-      Raw.union fb
+      let loopBody body = Imp.letIn da fb (Sym.d x) (zero a (Imp.var fa x)) body in
+      Imp.union fb
         (* for (x in δM) let dx = 0 x in φN *)
-        [ Raw.forIn fa fb x dExpr (loopBody fBody)
+        [ Imp.forIn fa fb x dExpr (loopBody fBody)
         (* for (x in M ∪ δM) let dx = 0 x in δN *)
-        ; Raw.forIn fa fb x (Raw.union (`Set fa) [fExpr;dExpr]) (loopBody dBody) ]
+        ; Imp.forIn fa fb x (Imp.union (`Set fa) [fExpr;dExpr]) (loopBody dBody) ]
 
   (* φ(fix M) = fastfix φM
    * δ(fix M) = zero ⊥ = ⊥ *)
   let fix (a: tp semilat) (fFunc, dFunc: term) =
-    let fa,da = phiDeltaLat a in
-    Raw.fastfix fa fFunc,
-    Raw.union da [] 
+    let fa,da = phiDeltaLatCheck a in
+    Imp.fastfix fa fFunc,
+    Imp.union da []
 end
 
 
-(* A simple and stupid debug printer.
- * Has precedence all wrong. *)
-module ToString: SIMPLE with type term = string = struct
-  type tp = rawtp
-  type term = string
-
-  let sym = Sym.to_string
-  let commas = String.concat ", "
-
-  let var tp x = sym x
-  let letIn a b x expr body = "let " ^ sym x ^ " = " ^ expr ^ " in " ^ body
-  let lam a b x body = "fn " ^ sym x ^ " => " ^ body
-  let app a b fnc arg = "(" ^ fnc ^ " " ^ arg ^ ")"
-  let tuple = function
-    | [_,term] -> "(" ^ term ^ ",)"
-    | tpterms -> "(" ^ commas (List.map snd tpterms) ^ ")"
-  let letTuple = (??)
-  let proj tps i term = "π" ^ string_of_int i ^ " " ^ term
-  let set a terms = "{" ^ commas terms ^ "}"
-  let union tp = function
-    | [] -> "empty"
-    | [term] -> "(or " ^ term ^ ")"
-    | terms -> "(" ^ String.concat " or " terms ^ ")"
-  let forIn a b x set body =
-    "for (" ^ sym x ^ " in " ^ set ^ ") " ^ body
-  let fix tp term = "fix " ^ term
-  let fastfix tp term = "fastfix " ^ term
-end
+(* (\* A simple and stupid debug printer.
+ *  * Has precedence all wrong. *\)
+ * module ToString: SIMPLE with type term = string = struct
+ *   type tp = rawtp
+ *   type term = string
+ *
+ *   let sym = Sym.to_string
+ *   let commas = String.concat ", "
+ *
+ *   let var tp x = sym x
+ *   let letIn a b x expr body = "let " ^ sym x ^ " = " ^ expr ^ " in " ^ body
+ *   let lam a b x body = "fn " ^ sym x ^ " => " ^ body
+ *   let app a b fnc arg = "(" ^ fnc ^ " " ^ arg ^ ")"
+ *   let tuple = function
+ *     | [_,term] -> "(" ^ term ^ ",)"
+ *     | tpterms -> "(" ^ commas (List.map snd tpterms) ^ ")"
+ *   let letTuple _ = todo "ToString.letTuple"
+ *   let proj tps i term = "π" ^ string_of_int i ^ " " ^ term
+ *   let set a terms = "{" ^ commas terms ^ "}"
+ *   let union tp = function
+ *     | [] -> "empty"
+ *     | [term] -> "(or " ^ term ^ ")"
+ *     | terms -> "(" ^ String.concat " or " terms ^ ")"
+ *   let forIn a b x set body =
+ *     "for (" ^ sym x ^ " in " ^ set ^ ") " ^ body
+ *   let fix tp term = "fix " ^ term
+ *   let fastfix tp term = "fastfix " ^ term
+ * end *)
 
 
 (* Compiling to Haskell. *)
@@ -503,17 +564,24 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
 
   let sym x = string (Sym.to_uid x)
   let paren t = string "(" ^ t ^ string ")"
-  let spaces = concat (string " ")
+  let parenSpaces xs = paren (concat (string " ") xs)
   let commas = concat (string ", ")
   let listOf terms = string "[" ^ commas terms ^ string "]"
-  let call name args = paren (spaces (string name :: args))
+  let call name args = parenSpaces (string name :: args)
   let lambda x body = paren (string "\\" ^ sym x ^ string " -> " ^ body)
+  let letBind pat expr body =
+    parenSpaces [string "let"; pat; string "="; expr; string "in"; body]
 
   let var tp x = sym x
-  let letIn a b x expr body =
-    paren (spaces [string "let"; sym x; string "="; expr; string "in"; body])
+  let letIn a b x expr body = letBind (sym x) expr body
   let lam a b x body = lambda x body
-  let app a b fnc arg = paren (spaces [fnc; arg])
+  let app a b fnc arg = parenSpaces [fnc; arg]
+
+  let bool b = string (if b then "True" else "False")
+  let ifThenElse tp cond thn els =
+    parenSpaces [string "if"; cond; string "then"; thn; string "else"; els]
+  let guard tp cond body =
+    parenSpaces [string "if"; cond; string "then"; body; string "else empty"]
 
   let tuple = function
     | [] -> string "()"
@@ -527,7 +595,8 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
     | 2, 0 -> call "fst" [term]
     | 2, 1 -> call "snd" [term]
     | _, _ -> todo "ternary or larger tuples unimplemented"
-  let letTuple = (??)
+  let letTuple tpxs bodyTp tuple body =
+    letBind (List.map (fun (tp,x) -> sym x) tpxs |> commas |> paren) tuple body
 
   let set a terms = call "set" [listOf terms]
   let union tp = function
