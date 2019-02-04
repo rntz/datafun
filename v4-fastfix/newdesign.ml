@@ -33,6 +33,10 @@ All tagless-final. Compiler flowchart:
 
 ===== KNOWN BUGS/DESIGN FLAWS =====
 
+FIXME: Currently we don't ban putting functions inside sets; however, the
+Haskell type-checker will probably catch this because it won't be able to derive
+Ord.
+
 We inherit variable shadowing behavior from our target language (currently
 Haskell).
 
@@ -139,21 +143,23 @@ end
 type 'a cx = 'a Cx.t
 
 (* Frontend, modal types. *)
-type modaltp = [ `Bool | `Set of modaltp | `Box of modaltp
+type modaltp = [ `Bool | `String | `Set of modaltp | `Box of modaltp
                | `Tuple of modaltp list | `Fn of modaltp * modaltp ]
 (* Backend, non-modal types. *)
-type rawtp = [ `Bool | `Set of rawtp | `Tuple of rawtp list | `Fn of rawtp * rawtp ]
+type rawtp = [ `Bool | `String | `Set of rawtp
+             | `Tuple of rawtp list | `Fn of rawtp * rawtp ]
 (* Semilattices, parameterized by underlying types *)
 type 'a semilat = [ `Bool | `Set of 'a | `Tuple of 'a semilat list | `Fn of 'a * 'a semilat ]
 
 let rec firstOrder: modaltp -> bool = function
   | `Fn _ -> false
-  | `Bool | `Set _ -> true
-  | `Box a -> firstOrder a
+  | `Bool | `String -> true
+  | `Box a | `Set a -> firstOrder a
   | `Tuple tps -> List.for_all firstOrder tps
 
 let rec phiDelta: modaltp -> rawtp * rawtp = function
   | `Bool -> `Bool, `Bool
+  | `String -> `String, `Tuple [] (* strings don't change *)
   | `Set a -> let fa = phi a in `Set fa, `Set fa
   | `Box a -> let fa, da = phiDelta a in `Tuple [fa;da], da
   | `Tuple tps -> let ftps, dtps = List.(map phiDelta tps |> split) in
@@ -189,6 +195,7 @@ module type BASE = sig
   val tuple: (tp * term) list -> term
   val proj: tp list -> int -> term -> term
   val letTuple: (tp * sym) list -> tp -> term -> term -> term
+  val string: string -> term
   val bool: bool -> term
   val ifThenElse: tp -> term -> term -> term -> term
   val guard: tp semilat -> term -> term -> term
@@ -228,6 +235,7 @@ module type BIDIR = sig
   (* checking terms *)
   val expr: expr -> term
   val letIn: sym -> expr -> term -> term
+  val string: string -> term
   val bool: bool -> term
   val ifThenElse: term -> term -> term -> term
   val guard: term -> term -> term
@@ -267,7 +275,7 @@ module Typecheck(Imp: MODAL): BIDIR
     | `Set a -> `Set a
     | `Fn (a,b) -> `Fn (a, asLat b)
     | `Tuple tps -> `Tuple (List.map asLat tps)
-    | `Box _ -> typeError "not a semilattice type"
+    | `String | `Box _ -> typeError "not a semilattice type"
 
   (* checking terms *)
   let expr (expr: expr) (cx: cx) (tp: tp): Imp.term =
@@ -278,6 +286,10 @@ module Typecheck(Imp: MODAL): BIDIR
   let letIn (x: sym) (expr: expr) (body: term) (cx: cx) (tp: tp): Imp.term =
     let exprType, exprX = expr cx in
     Imp.letIn exprType tp x exprX (body (Cx.add x (Id,exprType) cx) tp)
+
+  let string (s: string) (cx: cx) = function
+    | `String -> Imp.string s
+    | _ -> typeError "strings must have string type"
 
   let bool (b: bool) (cx: cx) = function
     | `Bool -> Imp.bool b
@@ -386,7 +398,8 @@ module Seminaive(Imp: SIMPLE): MODAL
    * argument; however, at sum types, it does depend on the tag. *)
   let rec zero (tp: tp) (term: Imp.term): Imp.term = match tp with
     | `Box a -> zero a term
-    | `Bool -> todo "no boolean literals yet"
+    | `Bool -> Imp.bool false
+    | `String -> Imp.tuple []
     | `Set a -> Imp.set (phi a) []
     | `Tuple tps ->
        let dtps = List.map delta tps in
@@ -405,12 +418,12 @@ module Seminaive(Imp: SIMPLE): MODAL
    * 
    * For more info, See seminaive/seminaive.pdf and seminaive/semantics.pdf.
    *)
-  let phiDeltaLatCheck (a: tp semilat) =
+  let phiFirstOrderLat (a: tp semilat) =
     let fA, dA = phiDeltaLat a in
     if not (firstOrder (a :> modaltp))
     then todo "semilattice operations only implemented for first-order data"
     else if not (fA = dA) then impossible "this shouldn't happen"
-    else fA,dA
+    else fA
 
   (* φx = x                 δx = dx *)
   let var (a: tp) (x: sym) = Imp.var (phi a) x, Imp.var (delta a) (Sym.d x)
@@ -475,7 +488,10 @@ module Seminaive(Imp: SIMPLE): MODAL
     Imp.letTuple ftpxs fBodyTp fTuple fBody,
     Imp.letTuple ftpxs dBodyTp fTuple (Imp.letTuple dtpxs dBodyTp dTuple dBody)
 
-  (* φ(b : bool) = b        δ(b : bool) = false *)
+  (* φ(s: string) = s   δ(s: string) = () *)
+  let string (s: string): term = Imp.string s, Imp.tuple []
+
+  (* φ(b: bool) = b     δ(b: bool) = false *)
   let bool (b: bool): term = Imp.bool b, Imp.bool false
 
   (* φ(if M then N else O) = if φM then φN else φO
@@ -487,12 +503,12 @@ module Seminaive(Imp: SIMPLE): MODAL
   (* φ(when (M) N) = when (φM) φN
    * δ(when (M) N) = if φM then δN else when (δM) φN ∨ δN
    *
-   * The latter assumes φA = ΔA and ⊕ = ∨. (See phiDeltaLatCheck.) *)
+   * The latter assumes φA = ΔA and ⊕ = ∨. (See phiFirstOrderLat.) *)
   let guard (a: tp semilat) (fCond,dCond: term) (fBody,dBody: term): term =
-    let fA,dA = phiDeltaLatCheck a in
+    let fA = phiFirstOrderLat a in
     Imp.guard fA fCond fBody,
-    Imp.ifThenElse dA fCond dBody
-      (Imp.guard dA dCond (Imp.union dA [fBody; dBody]))
+    Imp.ifThenElse (fA :> rawtp) fCond dBody
+      (Imp.guard fA dCond (Imp.union fA [fBody; dBody]))
 
   (* φ({M}) = {φM}          δ({M}) = ∅ *)
   let set (a: tp) (elts: term list) =
@@ -504,32 +520,28 @@ module Seminaive(Imp: SIMPLE): MODAL
     Imp.union (deltaLat a) (List.map snd terms)
 
   let forIn (a: tp) (b: tp semilat) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term) =
-    let fa,da = phiDelta a and fb,db = phiDeltaLatCheck b in
+    let fa,da = phiDelta a and fb = phiFirstOrderLat b in
     (* φ(for (x in M) N) = for (x in φM) let dx = 0 x in φN *)
     Imp.forIn fa fb x fExpr
-      (Imp.letIn da fb (Sym.d x) (zero a (Imp.var fa x)) fBody),
-    (* Assuming φB = ΔB and ⊕ = ∨ (see phiDeltaLatCheck),
+      (Imp.letIn da (fb :> rawtp) (Sym.d x) (zero a (Imp.var fa x)) fBody),
+    (* Assuming φB = ΔB and ⊕ = ∨ (see phiFirstOrderLat),
      *
      * δ(for (x in φM) φN)
      * =  (for (x in δM) let dx = 0 x in φN)
      *   ∨ for (x in φM ∪ δM) let dx = 0 x in δN *)
-    if not (firstOrder (b :> modaltp))
-    then todo "forIn only implemented for first-order data"
-    else if not (fb = db) then impossible "this shouldn't happen"
-    else
-      let loopBody body = Imp.letIn da fb (Sym.d x) (zero a (Imp.var fa x)) body in
-      Imp.union fb
-        (* for (x in δM) let dx = 0 x in φN *)
-        [ Imp.forIn fa fb x dExpr (loopBody fBody)
-        (* for (x in M ∪ δM) let dx = 0 x in δN *)
-        ; Imp.forIn fa fb x (Imp.union (`Set fa) [fExpr;dExpr]) (loopBody dBody) ]
+    let loopBody body =
+      Imp.letIn da (fb :> rawtp) (Sym.d x) (zero a (Imp.var fa x)) body in
+    Imp.union fb
+      (* for (x in δM) let dx = 0 x in φN *)
+      [ Imp.forIn fa fb x dExpr (loopBody fBody)
+      (* for (x in M ∪ δM) let dx = 0 x in δN *)
+      ; Imp.forIn fa fb x (Imp.union (`Set fa) [fExpr;dExpr]) (loopBody dBody) ]
 
   (* φ(fix M) = fastfix φM
    * δ(fix M) = zero ⊥ = ⊥ *)
   let fix (a: tp semilat) (fFunc, dFunc: term) =
-    let fa,da = phiDeltaLatCheck a in
-    Imp.fastfix fa fFunc,
-    Imp.union da []
+    let fa = phiFirstOrderLat a in
+    Imp.fastfix fa fFunc, Imp.union fa []
 
   (* φ(M == N) = φM == φN       δ(M == N) = false *)
   let equals (a: tp) (fM, dM: term) (fN, dN: term): term =
@@ -588,6 +600,9 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
   let equals a m n = parenSpaces [m; string "=="; n]
   let lam a b x body = lambda x body
   let app a b fnc arg = parenSpaces [fnc; arg]
+
+  (* TODO: argh, string escaping! *)
+  let string s = (??)
 
   let bool b = string (if b then "True" else "False")
   let ifThenElse tp cond thn els =
