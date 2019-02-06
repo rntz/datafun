@@ -601,8 +601,7 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
   let lam a b x body = lambda x body
   let app a b fnc arg = parenSpaces [fnc; arg]
 
-  (* TODO: argh, string escaping! *)
-  let string s = (??)
+  let string s = StringBuilder.string (Printf.sprintf "%S" s)
 
   let bool b = string (if b then "True" else "False")
   let ifThenElse tp cond thn els =
