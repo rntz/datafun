@@ -369,7 +369,7 @@ module Typecheck(Imp: MODAL): BIDIR
   let var (x: sym) (cx: cx): tp * Imp.term =
     match Cx.find x cx with
     | (Box | Id), tp -> tp, Imp.var tp x
-    | Hidden, _ -> typeError "that variable is hidden"
+    | Hidden, _ -> typeError (Printf.sprintf "variable %s is hidden" (Sym.to_string x))
 
   let app (fnc: expr) (arg: term) (cx: cx): tp * Imp.term =
     match fnc cx with
@@ -601,8 +601,6 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
   let lam a b x body = lambda x body
   let app a b fnc arg = parenSpaces [fnc; arg]
 
-  let string s = StringBuilder.string (Printf.sprintf "%S" s)
-
   let bool b = string (if b then "True" else "False")
   let ifThenElse tp cond thn els =
     parenSpaces [string "if"; cond; string "then"; thn; string "else"; els]
@@ -633,6 +631,10 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
   let forIn a b x set body = call "forIn" [set; lambda x body]
   let fix tp term = call "fix" [term]
   let fastfix tp term = call "fastfix" [term]
+
+  (* This has to come at the end because we use string to mean
+     StringBuilder.string earlier. *)
+  let string s = StringBuilder.string (Printf.sprintf "%S" s)
 end
 
 
@@ -641,8 +643,10 @@ module Examples(Modal: MODAL) = struct
   module Lang = Typecheck(Modal)
   open Lang
 
-  let x = Sym.gen "x"
-  let y = Sym.gen "y"
+  let x = Sym.gen "x" let y = Sym.gen "y"
+  let a = Sym.gen "a" let b = Sym.gen "b"
+  let x1 = Sym.gen "x1" let x2 = Sym.gen "x2"
+  let y1 = Sym.gen "y1" let y2 = Sym.gen "y2"
 
   let testIn cx (tp: tp) (ex: term) =
     ex (cx |> List.map (fun (a,b,c) -> a,(b,c)) |> Cx.from_list) tp
@@ -672,9 +676,18 @@ module Examples(Modal: MODAL) = struct
 
   let t6 = test (`Tuple []) (fix x (expr (var x)))
 
+  (* Relation composition *)
+  let strel: tp = `Set (`Tuple [`String; `String])
+  let t7 = testIn [a,Box,strel;b,Box,strel] strel
+         (forIn x (var a)
+            (forIn y (var b)
+               (guard (expr (equals (proj 1 (var x)) (proj 0 (var y))))
+                  (set [tuple [expr (proj 0 (var x));
+                               expr (proj 1 (var y))]]))))
+
   let _ = shouldFail (fun _ -> testIn [x,Hidden,`Bool] `Bool (expr (var x)))
 
-  let tests = [t0;t1;t2;t3;t4;t5;t6]
+  let tests = [t0;t1;t2;t3;t4;t5;t6;t7]
 end
 
 module Debug = Examples(Seminaive(ToHaskell))
@@ -691,3 +704,33 @@ let runTest i (x,y) =
     i (StringBuilder.finish x)
     i (StringBuilder.finish y)
 let runTests () = List.iteri runTest Debug.tests
+
+(* Results of t7, tidied up:
+
+7: (forIn a_2 (\x_0 ->
+     let dx_0 = ((), ()) in
+     forIn b_3 (\y_1 ->
+      let dy_1 = ((), ()) in
+      guard (snd x_0 == fst y_1)
+        (set [((fst x_0), (snd y_1))]))))
+7: union
+    (forIn da_2 (\x_0 ->
+      let dx_0 = ((), ()) in
+      forIn b_3 (\y_1 ->
+        let dy_1 = ((), ()) in
+        guard (snd x_0 == fst y_1)
+          (set [(fst x_0, snd y_1)]))))
+    (forIn (union a_2 da_2) (\x_0 ->
+      let dx_0 = ((), ()) in
+      union
+        (forIn db_3 (\y_1 ->
+          let dy_1 = ((), ()) in
+          guard (snd x_0 == fst y_1)
+            (set [((fst x_0), (snd y_1))])))
+        (forIn (union b_3 db_3) (\y_1 ->
+          let dy_1 = ((), ()) in
+          if (snd x_0 == fst y_1)
+          then (set [])
+          else (guard False (union (set [(fst x_0, snd y_1)]) (set [])))))))
+
+*)
