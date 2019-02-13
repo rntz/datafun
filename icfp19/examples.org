@@ -1,3 +1,17 @@
+# NOTE TO FUTURE SELF
+
+!(A, ΔA, ⊕ : A × ΔA → A) where last is partial
+= (!A, !ΔA, !⊕)
+
+!A = {(a,da) ∈ A × ΔA | a ⊕ da = a}
+!ΔA = ΔA?
+
+(a,da) ⊕ da' = (a,da) iff a ⊕ da' = a
+
+possibly we want to quotient to only compare first components?
+wait, but if we quotient that way then (!A = A) and so ! = □.
+Neel claims this can make our proof slick. TODO.
+
 # Potential examples
 
 1. path(X,Y) ← edge(X,Y)
