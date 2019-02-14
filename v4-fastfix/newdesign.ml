@@ -645,7 +645,10 @@ module Both(A: SIMPLE)(B: SIMPLE): SIMPLE with type term = A.term * B.term
   let equals a (mA,mB) (nA,nB) = A.equals a mA nA, B.equals a mB nB
 end
 
-module Simplify(Imp: SIMPLE) = struct
+module Simplify(Imp: SIMPLE): sig
+  include SIMPLE
+  val finish: term -> Imp.term
+end = struct
   include Both(Imp)(IsEmpty)
   let finish (term, isEmpty: term) = match isEmpty Cx.empty with
     | None -> term
@@ -752,7 +755,8 @@ module Examples(Modal: MODAL) = struct
   let x1 = Sym.gen "x1" let x2 = Sym.gen "x2"
   let y1 = Sym.gen "y1" let y2 = Sym.gen "y2"
 
-  let testIn cx (tp: tp) (ex: term) =
+  type test = Modal.term
+  let testIn cx (tp: tp) (ex: term): Modal.term =
     ex (cx |> List.map (fun (a,b,c) -> a,(b,c)) |> Cx.from_list) tp
   let test (tp: tp) (ex: term) = ex Cx.empty tp
 
@@ -794,7 +798,9 @@ module Examples(Modal: MODAL) = struct
   let tests = [t0;t1;t2;t3;t4;t5;t6;t7]
 end
 
-module Debug = Examples(Seminaive(ToHaskell))
+module Simplified = Simplify(ToHaskell)
+module Seminaived = Seminaive(Simplified)
+module Debug = Examples(Seminaived)
 let f0, d0 = Debug.t0
 let f1, d1 = Debug.t1
 let f2, d2 = Debug.t2
@@ -803,13 +809,13 @@ let f4, d4 = Debug.t4
 let f5, d5 = Debug.t5
 let f6, d6 = Debug.t6
 
-let runTest i (x,y) =
+let runTest (i: int) (x,y: Debug.test) =
   Printf.printf "%d: %s\n%d: %s\n"
-    i (StringBuilder.finish x)
-    i (StringBuilder.finish y)
+    i (StringBuilder.finish (Simplified.finish x))
+    i (StringBuilder.finish (Simplified.finish y))
 let runTests () = List.iteri runTest Debug.tests
 
-(* Results of t7, tidied up:
+(* Results of t7, tidied up, without Simplify:
 
 7: (forIn a_2 (\x_0 ->
      let dx_0 = ((), ()) in
@@ -836,5 +842,36 @@ let runTests () = List.iteri runTest Debug.tests
           if (snd x_0 == fst y_1)
           then (set [])
           else (guard False (union (set [(fst x_0, snd y_1)]) (set [])))))))
+
+Results of t7, tidied up, with Simplify:
+
+7: (forIn a_2 (\x_0 ->
+     let dx_0 = ((), ()) in
+     forIn b_3 (\y_1 ->
+       let dy_1 = ((), ()) in
+       guard ((snd x_0) == (fst y_1))
+         (set [((fst x_0), (snd y_1))]))))
+7: union
+    (forIn da_2 (\x_0 ->
+      let dx_0 = ((), ()) in
+      forIn b_3 (\y_1 ->
+        let dy_1 = ((), ()) in
+        guard ((snd x_0) == (fst y_1))
+          (set [((fst x_0), (snd y_1))]))))
+    (forIn (union a_2 da_2) (\x_0 ->
+      let dx_0 = ((), ()) in
+      union
+        (forIn db_3 (\y_1 ->
+          let dy_1 = ((), ()) in
+          guard ((snd x_0) == (fst y_1)) (set [((fst x_0), (snd y_1))])))
+        (forIn (union b_3 db_3) (\y_1 ->
+          let dy_1 = ((), ()) in
+          if ((snd x_0) == (fst y_1))
+          then set []
+          else (guard False (union (set [((fst x_0), (snd y_1))]) (set [])))))))
+
+ARGH! These look the same! :(
+
+ARGH, it's because it's not applying the simplification deeply!
 
 *)
