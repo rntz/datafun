@@ -98,6 +98,7 @@ module Option = struct
       | None::_ -> None
       | [] -> Some (List.rev acc)
     in loop [] l
+  let is_some = function Some _ -> true | None -> false
 end
 
 (* A module for building large strings efficiently.
@@ -576,7 +577,10 @@ module Seminaive(Imp: SIMPLE): MODAL
 end
 
 
-(* Optimization/simplification *)
+(* Optimization/simplification.
+ * Isn't this basically a product of the identity translation
+ * and a simpler (isEmpty option) interpretation?
+ *)
 module Simplify(Imp: SIMPLE): sig
   include SIMPLE
   val finish: term -> Imp.term
@@ -584,6 +588,8 @@ end = struct
   type tp = rawtp
   type isEmpty = tp semilat
   type term = isEmpty cx -> Imp.term * isEmpty option
+
+  let empty a = Imp.union a [], Some a
 
   let finish (term: term): Imp.term = match term Cx.empty with
     | _, Some tp -> Imp.union tp []
@@ -613,26 +619,87 @@ end = struct
     Imp.proj tps i termX,
     match termE with Some `Tuple lats -> Some (List.nth lats i) | _ -> None
 
-  let letTuple tpxs bodyTp expr body = (??)
+  let letTuple tpxs bodyTp expr body cx =
+    let exprX, exprE = expr cx in
+    let knowns = match exprE with
+      | Some `Tuple lats -> List.map2 (fun (_,x) lat -> x,lat) tpxs lats
+      | _ -> [] in
+    let bodyX, bodyE = body (Cx.add_list knowns cx) in
+    Imp.letTuple tpxs bodyTp exprX bodyX, bodyE
+
   let string s cx = Imp.string s, None
   let bool x cx = Imp.bool x, if x then None else Some `Bool
 
-  let ifThenElse a cnd thn els = (??)
-  let guard a cnd body = (??)
-  let set a terms cx = match List.map (fun tm -> fst (tm cx)) terms with
-    | [] -> Imp.set a [], Some (`Set a)
-    | terms -> Imp.set a terms, None
+  let ifThenElse a cnd thn els cx =
+    match cnd cx, thn cx, els cx with
+    (* If condition is false, give back els. *)
+    | (_, Some _), _, els -> els
+    (* If both branches are always empty, return empty. *)
+    | _, (_, Some lat), (_, Some _) -> empty lat
+    (* Otherwise, default. *)
+    | (cndX, _), (thnX,_), (elsX,_) -> Imp.ifThenElse a cndX thnX elsX, None
 
+  let guard a cnd body cx =
+    match cnd cx, body cx with
+    | (_, Some _), _ -> empty a
+    | (cndX,_), (bodyX, bodyE) -> Imp.guard a cndX bodyX, bodyE
+
+  let set a terms cx = match List.map (fun tm -> fst (tm cx)) terms with
+    | [] -> empty (`Set a)
+    | terms -> Imp.set a terms, None
   let union a terms cx =
     let f tm = match tm cx with tmX, Some _ -> [] | tmX, None -> [tmX] in
     match List.(concat (map f terms)) with
-    | [] -> Imp.union a [], Some a
-    | elems -> Imp.union a elems, None
-
-  let forIn a b x set body = (??)
-  let fix a fnc = (??)
-  let fastfix a fncderiv = (??)
+    | [] -> empty a | elems -> Imp.union a elems, None
+  let forIn a b x set body cx =
+    match set cx, body cx with
+    | (setX, None), (bodyX, None) -> Imp.forIn a b x setX bodyX, None
+    | _ -> empty b
+  let fix a fnc cx = match fnc cx with
+    | _, Some _ -> empty a | fncX, None -> Imp.fix a fncX, None
+  let fastfix a fncderiv cx = match fncderiv cx with
+    | _, Some _ -> empty a | fdX, None -> Imp.fastfix a fdX, None
   let equals a tm1 tm2 cx = Imp.equals a (fst (tm1 cx)) (fst (tm2 cx)), None
+end
+
+module IsEmpty: SIMPLE with type term = rawtp semilat cx -> rawtp semilat option
+= struct
+  type tp = rawtp
+  type isEmpty = rawtp semilat
+  type term = isEmpty cx -> isEmpty option
+  let var a = Cx.find_opt
+  let letIn a b x expr body cx = body (Cx.add_opt x (expr cx) cx)
+  let lam a b x body cx = Option.map (fun b -> `Fn(a,b)) (body cx)
+  let app a b fnc arg cx = match fnc cx with Some `Fn(_,y) -> Some y | _ -> None
+  let tuple (tpterms: (tp * term) list) cx =
+    let empties = List.(map (fun (a,m) -> m cx) tpterms) in
+    Option.(all empties |> map (fun x -> `Tuple x))
+  let proj tps i term cx =
+    match term cx with Some `Tuple lats -> Some (List.nth lats i) | _ -> None
+  let letTuple tpxs bodyTp (expr: term) (body: term) cx =
+    let knowns = match expr cx with
+      | Some `Tuple lats -> List.map2 (fun (_,x) lat -> x,lat) tpxs lats
+      | _ -> [] in
+    body (Cx.add_list knowns cx)
+  let string s cx = None
+  let bool x cx = if x then None else Some `Bool
+  let ifThenElse a (cnd: term) (thn: term) (els: term) cx =
+    match cnd cx, thn cx, els cx with
+    | Some _, _, els -> els           (* cnd is false -> return els *)
+    | _, Some lat, Some _ -> Some lat (* both branches empty *)
+    | _ -> None
+  let guard a cnd body cx = match cnd cx, body cx with
+    | Some _, _ -> Some a | _, bodyE -> bodyE
+  let set a terms cx = match List.map (fun tm -> tm cx) terms with
+    | [] -> Some (`Set a) | terms -> None
+  let union a (terms: term list) cx =
+    if List.for_all (fun tm -> Option.is_some (tm cx)) terms
+    then Some a else None
+  let forIn a b x set body cx = match set cx, body cx with
+    | None, None -> None | _ -> Some b
+  let fix a fnc cx = Option.map (fun _ -> a) (fnc cx)
+  let fastfix a (fncderiv: term) cx = Option.map (fun _ -> a) (fncderiv cx)
+  let equals a tm1 tm2 cx = None
 end
 
 
