@@ -92,12 +92,12 @@ let typeError msg = raise (TypeError msg)
 module Option = struct
   type 'a t = 'a option
   let map f = function None -> None | Some x -> Some (f x)
-  let all (l: 'a option list): 'a list option =
+  let all_map (f: 'a -> 'b option): 'a list -> 'b list option =
     let rec loop acc = function
-      | Some x::xs -> loop (x::acc) xs
-      | None::_ -> None
       | [] -> Some (List.rev acc)
-    in loop [] l
+      | x::xs -> match f x with None -> None | Some y -> loop (y::acc) xs
+    in loop []
+  let all (l: 'a option list): 'a list option = all_map (fun x -> x) l
   let is_some = function Some _ -> true | None -> false
 end
 
@@ -665,15 +665,16 @@ end
 module IsEmpty: SIMPLE with type term = rawtp semilat cx -> rawtp semilat option
 = struct
   type tp = rawtp
-  type isEmpty = rawtp semilat
+  type isEmpty = rawtp semilat  (* the type at which something is bottom. *)
+  (* A term takes a context of bottom-valued variables & yields (Some a) if the
+   * term is bottom & of type a. *)
   type term = isEmpty cx -> isEmpty option
   let var a = Cx.find_opt
   let letIn a b x expr body cx = body (Cx.add_opt x (expr cx) cx)
   let lam a b x body cx = Option.map (fun b -> `Fn(a,b)) (body cx)
   let app a b fnc arg cx = match fnc cx with Some `Fn(_,y) -> Some y | _ -> None
   let tuple (tpterms: (tp * term) list) cx =
-    let empties = List.(map (fun (a,m) -> m cx) tpterms) in
-    Option.(all empties |> map (fun x -> `Tuple x))
+    Option.(tpterms |> all_map (fun (_,m) -> m cx) |> map (fun x -> `Tuple x))
   let proj tps i term cx =
     match term cx with Some `Tuple lats -> Some (List.nth lats i) | _ -> None
   let letTuple tpxs bodyTp (expr: term) (body: term) cx =
@@ -700,6 +701,39 @@ module IsEmpty: SIMPLE with type term = rawtp semilat cx -> rawtp semilat option
   let fix a fnc cx = Option.map (fun _ -> a) (fnc cx)
   let fastfix a (fncderiv: term) cx = Option.map (fun _ -> a) (fncderiv cx)
   let equals a tm1 tm2 cx = None
+end
+
+module Both(A: SIMPLE)(B: SIMPLE): SIMPLE with type term = A.term * B.term
+= struct
+  type tp = rawtp
+  type term = A.term * B.term
+  let var a x = A.var a x, B.var a x
+  let letIn a b x (mA,mB) (nA,nB) = A.letIn a b x mA nA, B.letIn a b x mB nB
+  let lam a b x (mA,mB) = A.lam a b x mA, B.lam a b x mB
+  let app a b (mA,mB) (nA,nB) = A.app a b mA nA, B.app a b mB nB
+  let tuple tpterms =
+    let xs,ys = List.(tpterms |> map (fun (tp,(a,b)) -> (tp,a),(tp,b)) |> split)
+    in A.tuple xs, B.tuple ys
+  let proj tps i (mA,mB) = A.proj tps i mA, B.proj tps i mB
+  let letTuple l t (mA,mB) (nA,nB) = A.letTuple l t mA nA, B.letTuple l t mB nB
+  let string s = A.string s, B.string s
+  let bool x = A.bool x, B.bool x
+  let ifThenElse a (cA,cB) (tA,tB) (eA,eB) =
+    A.ifThenElse a cA tA eA, B.ifThenElse a cB tB eB
+  let guard a (mA,mB) (nA,nB) = A.guard a mA nA, B.guard a mB nB
+  let set a tms = let atms,btms = List.split tms in A.set a atms, B.set a btms
+  let union a tms = let mA, mB = List.split tms in A.union a mA, B.union a mB
+  let forIn a b x (mA,mB) (nA,nB) = A.forIn a b x mA nA, B.forIn a b x mB nB
+  let fix a (mA,mB) = A.fix a mA, B.fix a mB
+  let fastfix a (mA,mB) = A.fastfix a mA, B.fastfix a mB
+  let equals a (mA,mB) (nA,nB) = A.equals a mA nA, B.equals a mB nB
+end
+
+module Simplify2(Imp: SIMPLE) = struct
+  include Both(Imp)(IsEmpty)
+  let finish (term, isEmpty: term) = match isEmpty Cx.empty with
+    | None -> term
+    | Some a -> Imp.union a []
 end
 
 
