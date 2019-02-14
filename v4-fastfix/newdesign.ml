@@ -685,36 +685,6 @@ module Simplify(Imp: SIMPLE) = struct
 end
 
 
-(* (\* A simple and stupid debug printer.
- *  * Has precedence all wrong. *\)
- * module ToString: SIMPLE with type term = string = struct
- *   type tp = rawtp
- *   type term = string
- *
- *   let sym = Sym.to_string
- *   let commas = String.concat ", "
- *
- *   let var tp x = sym x
- *   let letIn a b x expr body = "let " ^ sym x ^ " = " ^ expr ^ " in " ^ body
- *   let lam a b x body = "fn " ^ sym x ^ " => " ^ body
- *   let app a b fnc arg = "(" ^ fnc ^ " " ^ arg ^ ")"
- *   let tuple = function
- *     | [_,term] -> "(" ^ term ^ ",)"
- *     | tpterms -> "(" ^ commas (List.map snd tpterms) ^ ")"
- *   let letTuple _ = todo "ToString.letTuple"
- *   let proj tps i term = "π" ^ string_of_int i ^ " " ^ term
- *   let set a terms = "{" ^ commas terms ^ "}"
- *   let union tp = function
- *     | [] -> "empty"
- *     | [term] -> "(or " ^ term ^ ")"
- *     | terms -> "(" ^ String.concat " or " terms ^ ")"
- *   let forIn a b x set body =
- *     "for (" ^ sym x ^ " in " ^ set ^ ") " ^ body
- *   let fix tp term = "fix " ^ term
- *   let fastfix tp term = "fastfix " ^ term
- * end *)
-
-
 (* Compiling to Haskell. *)
 module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
   open StringBuilder
