@@ -1,31 +1,31 @@
 (*
 ===== TODO =====
 
-- Moar tests.
-- A simplification/optimizer pass.
+- More tests!
+- A pass-through transform from MODAL to SIMPLE, to compare against Seminaive.
+- Asymptotic speedup benchmarks?
 
 POST DEADLINE:
-- a parser
-- sum types
+- A parser.
+- Sum types.
+- Produce cleaner, more human-readable Haskell
+  OR
+- A pretty-printer.
 
 ===== OPTIMIZATION =====
 
-What optimizations will I need? I will need at least:
+The simplifier performs the following optimizations:
 
-- Eliminating/propagating bottoms (esp. empty sets and false).
+- Eliminating/propagating bottoms (eg. empty sets and false).
+- Eliminating "if"s & "when"s whose conditions are constantly false.
 
-It's probably easy and useful to also:
-
-- Eliminating "if"s & "when"s whose conditions are constant, or at least,
-  constantly false.
-
-Is that all? Consider optimizing the derivatives of the following:
+Is that all I need? TODO: Consider the derivatives of the following:
 
 - relation intersection
 - relation composition (see icfp19/examples.org)
 - transitive closure
 
-===== NEW DESIGN as of January 2019 =====
+===== NEW DESIGN as of February 2019 =====
 
 All tagless-final. Compiler flowchart:
 
@@ -33,6 +33,28 @@ All tagless-final. Compiler flowchart:
       |
       | typecheck
       V
+    MODAL: Explicit modal Datafun
+      |
+      | φ/δ seminaive magic
+      V
+    SIMPLE: Non-monotone λ-calculus with fix & fast-fix
+      |
+      | simplify
+      V
+    SIMPLE: Non-monotone λ-calculus with fix & fast-fix, with
+      |     some simplifications/optimizations applied.
+      |
+      | compile to Haskell
+      V
+    Haskell code
+
+===== PREVIOUS DESIGN as of January 2019 =====
+
+It would be handy to have a pass-through transformation to compare the seminaive
+φ/δ transform to. Also, originally I was hoping to implement full normalization
+rather than just simplification --- this would make it easier to target first-order
+languages (... WebAssembly?).
+
     MODAL: Explicit modal Datafun
       |              |
       | φ/δ          | forget □
@@ -43,9 +65,9 @@ All tagless-final. Compiler flowchart:
       V
     NORMAL: Normal non-monotone λ-calculus with fix & fast-fix
       |
-      | compile to Haskell
+      | compile
       V
-    Haskell code
+    First-order target language
 
 ===== KNOWN BUGS/DESIGN FLAWS =====
 
