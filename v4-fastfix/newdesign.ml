@@ -114,13 +114,12 @@ let typeError msg = raise (TypeError msg)
 module Option = struct
   type 'a t = 'a option
   let map f = function None -> None | Some x -> Some (f x)
-  let all_map (f: 'a -> 'b option): 'a list -> 'b list option =
+  let all (l: 'a option list): 'a list option =
     let rec loop acc = function
       | [] -> Some (List.rev acc)
-      | x::xs -> match f x with None -> None | Some y -> loop (y::acc) xs
-    in loop []
-  let all (l: 'a option list): 'a list option = all_map (fun x -> x) l
-  let is_some = function Some _ -> true | None -> false
+      | None :: xs -> None
+      | Some x :: xs -> loop (x::acc) xs
+    in loop [] l
 end
 
 (* A module for building large strings efficiently.
