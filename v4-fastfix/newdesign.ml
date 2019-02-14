@@ -443,7 +443,7 @@ module Seminaive(Imp: SIMPLE): MODAL
    * I don't expect to be using semilattice operations at functional types in
    * any example programs, so to simplify the implementation I error on higher-
    * order semilattice types.
-   * 
+   *
    * For more info, See seminaive/seminaive.pdf and seminaive/semantics.pdf.
    *)
   let phiFirstOrderLat (a: tp semilat) =
@@ -577,47 +577,45 @@ module Seminaive(Imp: SIMPLE): MODAL
 end
 
 
-(* Optimization/simplification.
- * Isn't this basically a product of the identity translation
- * and a simpler (isEmpty option) interpretation?
- *)
-module Simplify(Imp: SIMPLE): sig
-  include SIMPLE
-  val finish: term -> Imp.term
-end = struct
+(* Optimization/simplification. This is ugly and hackish, but works. *)
+module Simplify(Imp: SIMPLE) = struct
   type tp = rawtp
   type isEmpty = tp semilat
-  type term = isEmpty cx -> Imp.term * isEmpty option
+  (* Invariant: in any value of the form (x, Some a), x = Imp.union a []. *)
+  type value = Imp.term * isEmpty option
+  type term = isEmpty cx -> value
 
-  let empty a = Imp.union a [], Some a
+  let finish (term: term): Imp.term = fst (term Cx.empty)
 
-  let finish (term: term): Imp.term = match term Cx.empty with
-    | _, Some tp -> Imp.union tp []
-    | term, None -> term
+  let empty (a: tp semilat): value = Imp.union a [], Some a
+  let full (term: Imp.term): value = term, None
+  let wat (term: Imp.term): isEmpty option -> value =
+    function None -> full term | Some a -> empty a
 
-  let var a x cx = Imp.var a x, Cx.find_opt x cx
-  let letIn a b x expr body cx =
-    let eTerm, eEmpty = expr cx in
-    let bTerm, bEmpty = body (Cx.add_opt x eEmpty cx) in
-    Imp.letIn a b x eTerm bTerm, bEmpty
+  let var a x cx = wat (Imp.var a x) (Cx.find_opt x cx)
 
-  let lam a b x body cx =
-    let bTerm, bEmpty = body cx in
-    Imp.lam a b x bTerm, Option.map (fun b -> `Fn(a,b)) bEmpty
+  let letIn a b x (expr:term) (body:term) (cx: isEmpty cx): value =
+    let exprX, exprE = expr cx in
+    let bodyX, bodyE = body (Cx.add_opt x exprE cx) in
+    wat (Imp.letIn a b x exprX bodyX) bodyE
 
-  let app a b (fnc: term) arg cx =
-    let fncX, fncE = fnc cx and argX, argE = arg cx in
-    Imp.app a b fncX argX, match fncE with Some `Fn(_,y) -> Some y | _ -> None
+  let lam a b x body cx = match body cx with
+    | _, Some b -> empty (`Fn(a,b))
+    | bodyX, _ -> full (Imp.lam a b x bodyX)
+
+  let app a b fnc arg cx = match fnc cx with
+    | _, Some `Fn(_,y) -> empty y
+    | fncX, _ -> full (Imp.app a b fncX (fst (arg cx)))
 
   let tuple tpterms cx =
     let f (a,m) = let mX,mE = m cx in (a,mX), mE in
     let tptms, empties = List.(map f tpterms |> split) in
-    Imp.tuple tptms, Option.(all empties |> map (fun x -> `Tuple x))
+    wat (Imp.tuple tptms) Option.(all empties |> map (fun x -> `Tuple x))
 
   let proj tps i term cx =
     let termX, termE = term cx in
-    Imp.proj tps i termX,
-    match termE with Some `Tuple lats -> Some (List.nth lats i) | _ -> None
+    wat (Imp.proj tps i termX)
+      (match termE with Some `Tuple lats -> Some (List.nth lats i) | _ -> None)
 
   let letTuple tpxs bodyTp expr body cx =
     let exprX, exprE = expr cx in
@@ -625,7 +623,7 @@ end = struct
       | Some `Tuple lats -> List.map2 (fun (_,x) lat -> x,lat) tpxs lats
       | _ -> [] in
     let bodyX, bodyE = body (Cx.add_list knowns cx) in
-    Imp.letTuple tpxs bodyTp exprX bodyX, bodyE
+    wat (Imp.letTuple tpxs bodyTp exprX bodyX) bodyE
 
   let string s cx = Imp.string s, None
   let bool x cx = Imp.bool x, if x then None else Some `Bool
@@ -637,106 +635,31 @@ end = struct
     (* If both branches are always empty, return empty. *)
     | _, (_, Some lat), (_, Some _) -> empty lat
     (* Otherwise, default. *)
-    | (cndX, _), (thnX,_), (elsX,_) -> Imp.ifThenElse a cndX thnX elsX, None
+    | (cndX, _), (thnX,_), (elsX,_) -> full (Imp.ifThenElse a cndX thnX elsX)
 
   let guard a cnd body cx =
     match cnd cx, body cx with
-    | (_, Some _), _ -> empty a
-    | (cndX,_), (bodyX, bodyE) -> Imp.guard a cndX bodyX, bodyE
+    | (_, Some _), _ | _, (_, Some _)-> empty a
+    | (cndX,_), (bodyX, None) -> full (Imp.guard a cndX bodyX)
 
   let set a terms cx = match List.map (fun tm -> fst (tm cx)) terms with
     | [] -> empty (`Set a)
-    | terms -> Imp.set a terms, None
+    | terms -> full (Imp.set a terms)
+
   let union a terms cx =
     let f tm = match tm cx with tmX, Some _ -> [] | tmX, None -> [tmX] in
     match List.(concat (map f terms)) with
-    | [] -> empty a | elems -> Imp.union a elems, None
+    | [] -> empty a | elems -> full (Imp.union a elems)
+
   let forIn a b x set body cx =
     match set cx, body cx with
-    | (setX, None), (bodyX, None) -> Imp.forIn a b x setX bodyX, None
+    | (setX, None), (bodyX, None) -> full (Imp.forIn a b x setX bodyX)
     | _ -> empty b
   let fix a fnc cx = match fnc cx with
-    | _, Some _ -> empty a | fncX, None -> Imp.fix a fncX, None
+    | _, Some _ -> empty a | fncX, None -> full (Imp.fix a fncX)
   let fastfix a fncderiv cx = match fncderiv cx with
-    | _, Some _ -> empty a | fdX, None -> Imp.fastfix a fdX, None
-  let equals a tm1 tm2 cx = Imp.equals a (fst (tm1 cx)) (fst (tm2 cx)), None
-end
-
-module IsEmpty: SIMPLE with type term = rawtp semilat cx -> rawtp semilat option
-= struct
-  type tp = rawtp
-  type isEmpty = rawtp semilat  (* the type at which something is bottom. *)
-  (* A term takes a context of bottom-valued variables & yields (Some a) if the
-   * term is bottom & of type a. *)
-  type term = isEmpty cx -> isEmpty option
-  let var a = Cx.find_opt
-  let letIn a b x expr body cx = body (Cx.add_opt x (expr cx) cx)
-  let lam a b x body cx = Option.map (fun b -> `Fn(a,b)) (body cx)
-  let app a b fnc arg cx = match fnc cx with Some `Fn(_,y) -> Some y | _ -> None
-  let tuple (tpterms: (tp * term) list) cx =
-    Option.(tpterms |> all_map (fun (_,m) -> m cx) |> map (fun x -> `Tuple x))
-  let proj tps i term cx =
-    match term cx with Some `Tuple lats -> Some (List.nth lats i) | _ -> None
-  let letTuple tpxs bodyTp (expr: term) (body: term) cx =
-    let knowns = match expr cx with
-      | Some `Tuple lats -> List.map2 (fun (_,x) lat -> x,lat) tpxs lats
-      | _ -> [] in
-    body (Cx.add_list knowns cx)
-  let string s cx = None
-  let bool x cx = if x then None else Some `Bool
-  let ifThenElse a (cnd: term) (thn: term) (els: term) cx =
-    match cnd cx, thn cx, els cx with
-    | Some _, _, els -> els           (* cnd is false -> return els *)
-    | _, Some lat, Some _ -> Some lat (* both branches empty *)
-    | _ -> None
-  let guard a cnd body cx = match cnd cx, body cx with
-    | Some _, _ -> Some a | _, bodyE -> bodyE
-  let set a terms cx = match List.map (fun tm -> tm cx) terms with
-    | [] -> Some (`Set a) | terms -> None
-  let union a (terms: term list) cx =
-    if List.for_all (fun tm -> Option.is_some (tm cx)) terms
-    then Some a else None
-  let forIn a b x set body cx = match set cx, body cx with
-    | None, None -> None | _ -> Some b
-  let fix a fnc cx = Option.map (fun _ -> a) (fnc cx)
-  let fastfix a (fncderiv: term) cx = Option.map (fun _ -> a) (fncderiv cx)
-  let equals a tm1 tm2 cx = None
-end
-
-module Both(A: SIMPLE)(B: SIMPLE): SIMPLE with type term = A.term * B.term
-= struct
-  type tp = rawtp
-  type term = A.term * B.term
-  let var a x = A.var a x, B.var a x
-  let letIn a b x (mA,mB) (nA,nB) = A.letIn a b x mA nA, B.letIn a b x mB nB
-  let lam a b x (mA,mB) = A.lam a b x mA, B.lam a b x mB
-  let app a b (mA,mB) (nA,nB) = A.app a b mA nA, B.app a b mB nB
-  let tuple tpterms =
-    let xs,ys = List.(tpterms |> map (fun (tp,(a,b)) -> (tp,a),(tp,b)) |> split)
-    in A.tuple xs, B.tuple ys
-  let proj tps i (mA,mB) = A.proj tps i mA, B.proj tps i mB
-  let letTuple l t (mA,mB) (nA,nB) = A.letTuple l t mA nA, B.letTuple l t mB nB
-  let string s = A.string s, B.string s
-  let bool x = A.bool x, B.bool x
-  let ifThenElse a (cA,cB) (tA,tB) (eA,eB) =
-    A.ifThenElse a cA tA eA, B.ifThenElse a cB tB eB
-  let guard a (mA,mB) (nA,nB) = A.guard a mA nA, B.guard a mB nB
-  let set a tms = let atms,btms = List.split tms in A.set a atms, B.set a btms
-  let union a tms = let mA, mB = List.split tms in A.union a mA, B.union a mB
-  let forIn a b x (mA,mB) (nA,nB) = A.forIn a b x mA nA, B.forIn a b x mB nB
-  let fix a (mA,mB) = A.fix a mA, B.fix a mB
-  let fastfix a (mA,mB) = A.fastfix a mA, B.fastfix a mB
-  let equals a (mA,mB) (nA,nB) = A.equals a mA nA, B.equals a mB nB
-end
-
-module Simplify(Imp: SIMPLE): sig
-  include SIMPLE
-  val finish: term -> Imp.term
-end = struct
-  include Both(Imp)(IsEmpty)
-  let finish (term, isEmpty: term) = match isEmpty Cx.empty with
-    | None -> term
-    | Some a -> Imp.union a []
+    | _, Some _ -> empty a | fdX, None -> full (Imp.fastfix a fdX)
+  let equals a tm1 tm2 cx = full (Imp.equals a (fst (tm1 cx)) (fst (tm2 cx)))
 end
 
 
@@ -868,6 +791,8 @@ module Examples(Modal: MODAL) = struct
 
   let t6 = test (`Tuple []) (fix x (expr (var x)))
 
+  (* TODO: intersection *)
+
   (* Relation composition *)
   let strel: tp = `Set (`Tuple [`String; `String])
   let t7 = testIn [a,Box,strel;b,Box,strel] strel
@@ -878,6 +803,8 @@ module Examples(Modal: MODAL) = struct
                                expr (proj 1 (var y))]]))))
 
   let _ = shouldFail (fun _ -> testIn [x,Hidden,`Bool] `Bool (expr (var x)))
+
+  (* TODO: transitive closure *)
 
   let tests = [t0;t1;t2;t3;t4;t5;t6;t7]
 end
@@ -929,33 +856,24 @@ let runTests () = List.iteri runTest Debug.tests
 
 Results of t7, tidied up, with Simplify:
 
-7: (forIn a_2 (\x_0 ->
-     let dx_0 = ((), ()) in
+7: forIn a_2 (\x_0 ->
+     let dx_0 = empty in
      forIn b_3 (\y_1 ->
-       let dy_1 = ((), ()) in
+       let dy_1 = empty in
        guard ((snd x_0) == (fst y_1))
-         (set [((fst x_0), (snd y_1))]))))
+         (set [((fst x_0), (snd y_1))])))
 7: union
-    (forIn da_2 (\x_0 ->
-      let dx_0 = ((), ()) in
-      forIn b_3 (\y_1 ->
-        let dy_1 = ((), ()) in
-        guard ((snd x_0) == (fst y_1))
-          (set [((fst x_0), (snd y_1))]))))
-    (forIn (union a_2 da_2) (\x_0 ->
-      let dx_0 = ((), ()) in
-      union
-        (forIn db_3 (\y_1 ->
-          let dy_1 = ((), ()) in
-          guard ((snd x_0) == (fst y_1)) (set [((fst x_0), (snd y_1))])))
-        (forIn (union b_3 db_3) (\y_1 ->
-          let dy_1 = ((), ()) in
-          if ((snd x_0) == (fst y_1))
-          then set []
-          else (guard False (union (set [((fst x_0), (snd y_1))]) (set [])))))))
-
-ARGH! These look the same! :(
-
-ARGH, it's because it's not applying the simplification deeply!
+     (forIn da_2 (\x_0 ->
+       let dx_0 = empty in
+       forIn b_3 (\y_1 ->
+         let dy_1 = empty in
+         guard (snd x_0 == fst y_1)
+           (set [((fst x_0), (snd y_1))]))))
+     (forIn (union a_2 da_2) (\x_0 ->
+       let dx_0 = empty in
+       forIn db_3 (\y_1 ->
+         let dy_1 = empty in
+         guard ((snd x_0) == (fst y_1))
+           (set [((fst x_0), (snd y_1))]))))
 
 *)
