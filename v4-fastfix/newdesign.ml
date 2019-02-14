@@ -92,6 +92,12 @@ let typeError msg = raise (TypeError msg)
 module Option = struct
   type 'a t = 'a option
   let map f = function None -> None | Some x -> Some (f x)
+  let all (l: 'a option list): 'a list option =
+    let rec loop acc = function
+      | Some x::xs -> loop (x::acc) xs
+      | None::_ -> None
+      | [] -> Some (List.rev acc)
+    in loop [] l
 end
 
 (* A module for building large strings efficiently.
@@ -577,34 +583,56 @@ module Simplify(Imp: SIMPLE): sig
 end = struct
   type tp = rawtp
   type isEmpty = tp semilat
-  type term = isEmpty cx -> isEmpty option * Imp.term
+  type term = isEmpty cx -> Imp.term * isEmpty option
 
   let finish (term: term): Imp.term = match term Cx.empty with
-    | Some tp, _ -> Imp.union tp []
-    | None, term -> term
+    | _, Some tp -> Imp.union tp []
+    | term, None -> term
 
-  let var a x cx = Cx.find_opt x cx, Imp.var a x
+  let var a x cx = Imp.var a x, Cx.find_opt x cx
   let letIn a b x expr body cx =
-    let eEmpty, eTerm = expr cx in
-    let bEmpty, bTerm = body (Cx.add_opt x eEmpty cx) in
-    bEmpty, Imp.letIn a b x eTerm bTerm
+    let eTerm, eEmpty = expr cx in
+    let bTerm, bEmpty = body (Cx.add_opt x eEmpty cx) in
+    Imp.letIn a b x eTerm bTerm, bEmpty
+
   let lam a b x body cx =
-    let bEmpty, bTerm = body cx in
-    Option.map (fun b -> `Fn(a,b)) bEmpty, Imp.lam a b x bTerm
-  let app a b fnc arg cx = (??)
-  let tuple tpterms = (??)
-  let proj tps i term = (??)
+    let bTerm, bEmpty = body cx in
+    Imp.lam a b x bTerm, Option.map (fun b -> `Fn(a,b)) bEmpty
+
+  let app a b (fnc: term) arg cx =
+    let fncX, fncE = fnc cx and argX, argE = arg cx in
+    Imp.app a b fncX argX, match fncE with Some `Fn(_,y) -> Some y | _ -> None
+
+  let tuple tpterms cx =
+    let f (a,m) = let mX,mE = m cx in (a,mX), mE in
+    let tptms, empties = List.(map f tpterms |> split) in
+    Imp.tuple tptms, Option.(all empties |> map (fun x -> `Tuple x))
+
+  let proj tps i term cx =
+    let termX, termE = term cx in
+    Imp.proj tps i termX,
+    match termE with Some `Tuple lats -> Some (List.nth lats i) | _ -> None
+
   let letTuple tpxs bodyTp expr body = (??)
-  let string s = (??)
-  let bool x = (??)
+  let string s cx = Imp.string s, None
+  let bool x cx = Imp.bool x, if x then None else Some `Bool
+
   let ifThenElse a cnd thn els = (??)
   let guard a cnd body = (??)
-  let set a terms = (??)
-  let union a terms = (??)
+  let set a terms cx = match List.map (fun tm -> fst (tm cx)) terms with
+    | [] -> Imp.set a [], Some (`Set a)
+    | terms -> Imp.set a terms, None
+
+  let union a terms cx =
+    let f tm = match tm cx with tmX, Some _ -> [] | tmX, None -> [tmX] in
+    match List.(concat (map f terms)) with
+    | [] -> Imp.union a [], Some a
+    | elems -> Imp.union a elems, None
+
   let forIn a b x set body = (??)
   let fix a fnc = (??)
   let fastfix a fncderiv = (??)
-  let equals a tm1 tm2 = (??)
+  let equals a tm1 tm2 cx = Imp.equals a (fst (tm1 cx)) (fst (tm2 cx)), None
 end
 
 
