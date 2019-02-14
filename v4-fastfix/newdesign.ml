@@ -1,13 +1,29 @@
 (*
 ===== TODO =====
 
-- equality tests
-- some base type to compute with; naturals or strings.
-- moar tests
+- Moar tests.
+- A simplification/optimizer pass.
 
 POST DEADLINE:
 - a parser
 - sum types
+
+===== OPTIMIZATION =====
+
+What optimizations will I need? I will need at least:
+
+- Eliminating/propagating bottoms (esp. empty sets and false).
+
+It's probably easy and useful to also:
+
+- Eliminating "if"s & "when"s whose conditions are constant, or at least,
+  constantly false.
+
+Is that all? Consider optimizing the derivatives of the following:
+
+- relation intersection
+- relation composition (see icfp19/examples.org)
+- transitive closure
 
 ===== NEW DESIGN as of January 2019 =====
 
@@ -72,18 +88,22 @@ let impossible msg = raise (Impossible msg)
 let typeError msg = raise (TypeError msg)
 
 
+(* Utility modules *)
+module Option = struct
+  type 'a t = 'a option
+  let map f = function None -> None | Some x -> Some (f x)
+end
+
 (* A module for building large strings efficiently.
  * I could probably use Buffer, but it has an imperative interface. *)
-module type STRING_BUILDER = sig
+module StringBuilder: sig
   type t
   val finish: t -> string
   val string: string -> t
   val int: int -> t
   val (^): t -> t -> t
   val concat: t -> t list -> t
-end
-
-module StringBuilder: STRING_BUILDER = struct
+end = struct
   type t = string list -> string list
   (* this assumes String.concat is efficient; if not, rewrite using Buffer. *)
   let finish t = String.concat "" (t [])
@@ -139,6 +159,7 @@ module Cx = struct
   (* Prefers later bindings to earlier ones. *)
   let from_list l = List.fold_left (fun cx (k,v) -> add k v cx) empty l
   let add_list l cx = union (fun k x y -> Some x) (from_list l) cx
+  let add_opt k vopt cx = match vopt with None -> cx | Some v -> add k v cx
 end
 type 'a cx = 'a Cx.t
 
@@ -546,6 +567,44 @@ module Seminaive(Imp: SIMPLE): MODAL
   (* φ(M == N) = φM == φN       δ(M == N) = false *)
   let equals (a: tp) (fM, dM: term) (fN, dN: term): term =
     Imp.equals (phi a) fM fN, Imp.bool false
+end
+
+
+(* Optimization/simplification *)
+module Simplify(Imp: SIMPLE): sig
+  include SIMPLE
+  val finish: term -> Imp.term
+end = struct
+  type tp = rawtp
+  type isEmpty = tp semilat
+  type term = isEmpty cx -> isEmpty option * Imp.term
+
+  let finish (term: term): Imp.term = match term Cx.empty with
+    | Some tp, _ -> Imp.union tp []
+    | None, term -> term
+
+  let var a x cx = Cx.find_opt x cx, Imp.var a x
+  let letIn a b x expr body cx =
+    let eEmpty, eTerm = expr cx in
+    let bEmpty, bTerm = body (Cx.add_opt x eEmpty cx) in
+    bEmpty, Imp.letIn a b x eTerm bTerm
+  let lam a b x body cx =
+    let bEmpty, bTerm = body cx in
+    Option.map (fun b -> `Fn(a,b)) bEmpty, Imp.lam a b x bTerm
+  let app a b fnc arg cx = (??)
+  let tuple tpterms = (??)
+  let proj tps i term = (??)
+  let letTuple tpxs bodyTp expr body = (??)
+  let string s = (??)
+  let bool x = (??)
+  let ifThenElse a cnd thn els = (??)
+  let guard a cnd body = (??)
+  let set a terms = (??)
+  let union a terms = (??)
+  let forIn a b x set body = (??)
+  let fix a fnc = (??)
+  let fastfix a fncderiv = (??)
+  let equals a tm1 tm2 = (??)
 end
 
 
