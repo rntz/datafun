@@ -733,10 +733,18 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
   let letTuple tpxs bodyTp tuple body =
     letBind (List.map (fun (tp,x) -> sym x) tpxs |> commas |> paren) tuple body
 
+  (* NB. You'd think we could just generate "empty" here and let Haskell's
+   * typeclasses do the work for us, but if Haskell can't infer the type of
+   * such an expression it gets mad. So we make it explicit. *)
+  let rec empty: tp semilat -> term = function
+    | `Bool -> string "False"
+    | `Set _ -> string "Set.empty"
+    | `Tuple tps -> tuple (List.map (fun tp -> tp, empty tp) tps)
+    | `Fn(a,b) -> lam a b (Sym.gen "_") (empty b)
+
   let set a terms = call "set" [listOf terms]
   let union tp = function
-    (* FIXME TODO: in the empty case, Haskell can't always infer the type! *)
-    | [] -> string "empty"
+    | [] -> empty tp
     | [tm] -> tm
     | [tm1; tm2] -> call "union" [tm1; tm2]
     | terms -> call "unions" [listOf terms]
