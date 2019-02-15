@@ -444,7 +444,11 @@ module Seminaive(Imp: SIMPLE): MODAL
   type term = Imp.term * Imp.term (* φM, δM *)
 
   (* This should only ever be used at base types. It almost ignores its
-   * argument; however, at sum types, it does depend on the tag. *)
+   * argument; however, at sum types, it does depend on the tag. `zero` is
+   * carefully defined such that if sum types are not involved, it produces
+   * a constant expression. In particular, at first-order semilattice types,
+   * it produces a bottom expression, which the simplifier will recognize.
+   * This aids optimization. *)
   let rec zero (tp: tp) (term: Imp.term): Imp.term = match tp with
     | `Box a -> zero a term
     | `Bool -> Imp.bool false
@@ -475,6 +479,9 @@ module Seminaive(Imp: SIMPLE): MODAL
     else fA
 
   (* φx = x                 δx = dx *)
+  (* TODO: optimization opportunity! if variable is discrete, we know
+   * its derivative is a zero change; if it's first-order, we can inline
+   * zero applied to it. *)
   let var (a: tp) (x: sym) = Imp.var (phi a) x, Imp.var (delta a) (Sym.d x)
 
   (* φ(box M) = φM, δM      δ(box M) = δM *)
@@ -728,6 +735,7 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
 
   let set a terms = call "set" [listOf terms]
   let union tp = function
+    (* FIXME TODO: in the empty case, Haskell can't always infer the type! *)
     | [] -> string "empty"
     | [tm] -> tm
     | [tm1; tm2] -> call "union" [tm1; tm2]
@@ -760,6 +768,7 @@ module Examples(Modal: MODAL) = struct
 
   let shouldFail f = try ignore (f ()); impossible "shouldn't typecheck"
                      with TypeError _ -> ()
+  let _ = shouldFail (fun _ -> testIn [x,Hidden,`Bool] `Bool (expr (var x)))
 
   (* TODO: more tests. *)
   let t0 = testIn [x,Id,`Bool] `Bool (expr (var x))
@@ -782,34 +791,31 @@ module Examples(Modal: MODAL) = struct
 
   let t6 = test (`Tuple []) (fix x (expr (var x)))
 
-  (* TODO: intersection *)
-
   (* Relation composition *)
   let strel: tp = `Set (`Tuple [`String; `String])
-  let t7 = testIn [a,Box,strel;b,Box,strel] strel
-         (forIn x (var a)
-            (forIn y (var b)
-               (guard (expr (equals (proj 1 (var x)) (proj 0 (var y))))
-                  (set [tuple [expr (proj 0 (var x));
-                               expr (proj 1 (var y))]]))))
+  let t7 = testIn [a,Id,strel;b,Id,strel] strel
+             (forIn x (var a)
+                (forIn y (var b)
+                   (guard (expr (equals (proj 1 (var x)) (proj 0 (var y))))
+                      (set [tuple [expr (proj 0 (var x));
+                                   expr (proj 1 (var y))]]))))
 
-  let _ = shouldFail (fun _ -> testIn [x,Hidden,`Bool] `Bool (expr (var x)))
+  (* Intersection *)
+  let strset: tp = `Set `String
+  let t8 = testIn [a,Id,strset; b,Id,strset] strset
+             (forIn x (var a)
+                (forIn y (var b)
+                   (guard (expr (equals (var x) (var y)))
+                      (set [expr (var x)]))))
 
   (* TODO: transitive closure *)
 
-  let tests = [t0;t1;t2;t3;t4;t5;t6;t7]
+  let tests = [t0;t1;t2;t3;t4;t5;t6;t7;t8]
 end
 
 module Simplified = Simplify(ToHaskell)
 module Seminaived = Seminaive(Simplified)
 module Debug = Examples(Seminaived)
-let f0, d0 = Debug.t0
-let f1, d1 = Debug.t1
-let f2, d2 = Debug.t2
-let f3, d3 = Debug.t3
-let f4, d4 = Debug.t4
-let f5, d5 = Debug.t5
-let f6, d6 = Debug.t6
 
 let runTest (i: int) (x,y: Debug.test) =
   Printf.printf "%d: %s\n%d: %s\n"
