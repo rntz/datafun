@@ -612,7 +612,7 @@ end
 (* Optimization/simplification. This is ugly and hackish, but works. *)
 module Simplify(Imp: SIMPLE): sig
   include SIMPLE
-       with type term = rawtp semilat cx -> Imp.term * rawtp semilat option
+          with type term = rawtp semilat cx -> Imp.term * rawtp semilat option
   val finish: term -> Imp.term
 end = struct
   type tp = rawtp
@@ -710,14 +710,13 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
   let commas = concat (string ", ")
   let listOf terms = string "[" ^ commas terms ^ string "]"
   let call name args = parenSpaces (string name :: args)
-  let lambda x body = paren (string "\\" ^ sym x ^ string " -> " ^ body)
   let letBind pat expr body =
     parenSpaces [string "let"; pat; string "="; expr; string "in"; body]
 
   let var tp x = sym x
   let letIn a b x expr body = letBind (sym x) expr body
   let equals a m n = parenSpaces [m; string "=="; n]
-  let lam a b x body = lambda x body
+  let lam a b x body = paren (string "\\" ^ sym x ^ string " -> " ^ body)
   let app a b fnc arg = parenSpaces [fnc; arg]
 
   let bool b = string (if b then "True" else "False")
@@ -727,18 +726,16 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
 
   let tuple = function
     | [] -> string "()"
-    (* singleton tuples turn into the contained type *)
-    | [_,term] -> term
-    | [_,tm1;_,tm2] -> paren (commas [tm1;tm2])
-    | _ -> todo "ternary or larger tuples unimplemented"
-  let proj tps i term = match List.length tps, i with
-    | x, y when y >= x -> impossible "out of bounds projection"
-    | 1, 0 -> term
-    | 2, 0 -> call "fst" [term]
-    | 2, 1 -> call "snd" [term]
-    | _, _ -> todo "ternary or larger tuples unimplemented"
+    | [_,term] -> term (* singleton tuples turn into the contained type *)
+    | terms -> paren (commas List.(map snd terms))
   let letTuple tpxs bodyTp tuple body =
     letBind (List.map (fun (tp,x) -> sym x) tpxs |> commas |> paren) tuple body
+  let proj tps i term = match List.length tps, i with
+    | x, y when y >= x -> impossible "out of bounds projection"
+    | 1, 0 -> term     (* singleton tuples turn into the contained type *)
+    | 2, 0 -> call "fst" [term]
+    | 2, 1 -> call "snd" [term]
+    | _, _ -> todo "projection from ternary or larger tuples unimplemented"
 
   (* NB. You'd think we could just generate "empty" here and let Haskell's
    * typeclasses do the work for us, but if Haskell can't infer the type of
@@ -756,7 +753,7 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
     | [tm1; tm2] -> call "union" [tm1; tm2]
     | terms -> call "unions" [listOf terms]
 
-  let forIn a b x set body = call "forIn" [set; lambda x body]
+  let forIn a b x set body = call "forIn" [set; lam a b x body]
   let fix tp term = call "fix" [term]
   let fastfix tp term = call "fastfix" [term]
 
