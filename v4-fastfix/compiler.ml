@@ -481,7 +481,8 @@ module Seminaive(Imp: SIMPLE): MODAL
   (* φx = x                 δx = dx *)
   (* TODO: optimization opportunity! if variable is discrete, we know
    * its derivative is a zero change; if it's first-order, we can inline
-   * zero applied to it. *)
+   * zero applied to it. Unfortunately, we can't tell whether the variable
+   * is discrete or not here. Argh! *)
   let var (a: tp) (x: sym) = Imp.var (phi a) x, Imp.var (delta a) (Sym.d x)
 
   (* φ(box M) = φM, δM      δ(box M) = δM *)
@@ -489,20 +490,23 @@ module Seminaive(Imp: SIMPLE): MODAL
     let fa, da = phiDelta a in
     Imp.tuple [fa, fTerm; da, dTerm], dTerm
 
-  (* TODO: this is a potential optimization point. we can examine the type `b`
-   * and if it's first-order and contains no sums - for example, if it's a set type -
-   * we know statically what the zero value will be and we can substitute it in
-   * instead of unboxing it.
-   *
-   * so instead of:     φ(let [x] = M in N) = let [x,dx] = φM in φN
-   * it becomes:        φ(let [x] = M in N) = let [x,_] = φM in let dx = 0_A in φN
-   *)
   (* φ(let box x = M in N) = let x,dx = φM in φN
    * δ(let box x = M in N) = let x,dx = φM in δN *)
   let letBox (a: tp) (b: tp) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term): term =
     let fa,da = phiDelta a and fb,db = phiDelta b and dx = Sym.d x in
     (* let (x,dx) = φM in ... *)
-    let binder bodyTp body = Imp.letTuple [fa,x;da,dx] bodyTp fExpr body in
+    let binder bodyTp body =
+      Imp.letTuple [fa,x;da,dx] bodyTp fExpr
+        (* dx just needs to be a zero-change to x. If A is first-order, we can
+         * calculate a zero-change to x using x. Except for sum types, we can
+         * even do so statically! And if we bind dx to an explicit zero-change,
+         * the optimizer can do more magic. Schematically,
+         *
+         * instead of:  φ(let [x] = M in N) = let [x,dx] = φM in φN
+         * we produce:  φ(let [x] = M in N) = let [x,_] = φM in let dx = 0 x in φN
+         *)
+        (if not (firstOrder a) then body
+         else Imp.letIn da bodyTp dx (zero a (Imp.var fa x)) body) in
     binder fb fBody, binder db dBody
 
   (* φ(let x = M in N) = let x = φM in φN
@@ -606,7 +610,11 @@ end
 
 
 (* Optimization/simplification. This is ugly and hackish, but works. *)
-module Simplify(Imp: SIMPLE) = struct
+module Simplify(Imp: SIMPLE): sig
+  include SIMPLE
+       with type term = rawtp semilat cx -> Imp.term * rawtp semilat option
+  val finish: term -> Imp.term
+end = struct
   type tp = rawtp
   type isEmpty = tp semilat
   (* Invariant: in any value of the form (x, Some a), x = Imp.union a []. *)
@@ -635,15 +643,14 @@ module Simplify(Imp: SIMPLE) = struct
     | _, Some `Fn(_,y) -> empty y
     | fncX, _ -> full (Imp.app a b fncX (fst (arg cx)))
 
-  let tuple tpterms cx =
+  let tuple (tpterms: (tp * term) list) cx: value =
     let f (a,m) = let mX,mE = m cx in (a,mX), mE in
     let tptms, empties = List.(map f tpterms |> split) in
     wat (Imp.tuple tptms) Option.(all empties |> map (fun x -> `Tuple x))
 
-  let proj tps i term cx =
-    let termX, termE = term cx in
-    wat (Imp.proj tps i termX)
-      (match termE with Some `Tuple lats -> Some (List.nth lats i) | _ -> None)
+  let proj tps i (term: term) cx: value = match term cx with
+    | termX, Some `Tuple lats -> empty (List.nth lats i)
+    | termX, _ -> full (Imp.proj tps i termX)
 
   let letTuple tpxs bodyTp expr body cx =
     let exprX, exprE = expr cx in
@@ -770,22 +777,21 @@ module Examples(Modal: MODAL) = struct
   let y1 = Sym.gen "y1" let y2 = Sym.gen "y2"
 
   type test = Modal.term
-  let testIn cx (tp: tp) (ex: term): Modal.term =
+  let testIn (tp: tp) cx (ex: term): Modal.term =
     ex (cx |> List.map (fun (a,b,c) -> a,(b,c)) |> Cx.from_list) tp
   let test (tp: tp) (ex: term) = ex Cx.empty tp
 
   let shouldFail f = try ignore (f ()); impossible "shouldn't typecheck"
                      with TypeError _ -> ()
-  let _ = shouldFail (fun _ -> testIn [x,Hidden,`Bool] `Bool (expr (var x)))
+  let _ = shouldFail (fun _ -> testIn `Bool [x,Hidden,`Bool] (expr (var x)))
 
   (* TODO: more tests. *)
-  let t0 = testIn [x,Id,`Bool] `Bool (expr (var x))
-  let t1 = testIn [x,Box,`Bool] `Bool (expr (var x))
+  let t0 = testIn `Bool [x,Id,`Bool] (expr (var x))
+  let t1 = testIn `Bool [x,Box,`Bool] (expr (var x))
   (* t2 = λx.x *)
   let t2 = test (`Fn(`Bool,`Bool)) (lam x (expr (var x)))
-  let t3 = testIn
+  let t3 = testIn `Bool
              [x,Id,`Fn(`Bool,`Bool); y,Id,`Bool]
-             `Bool
              (expr (app (var x) (expr (var y))))
 
   let t4 = test (`Box (`Fn(`Bool, `Bool)))
@@ -795,13 +801,13 @@ module Examples(Modal: MODAL) = struct
                 (asc (`Box (`Fn(`Bool, `Bool)))
                    (box (lam x (expr (var x)))))
                 (expr (app (var x) (expr (var y))))
-  let t5 = testIn [y,Id,`Bool] `Bool term5
+  let t5 = testIn `Bool [y,Id,`Bool] term5
 
   let t6 = test (`Tuple []) (fix x (expr (var x)))
 
   (* Relation composition *)
   let strel: tp = `Set (`Tuple [`String; `String])
-  let t7 = testIn [a,Id,strel;b,Id,strel] strel
+  let t7 = testIn strel [a,Id,strel;b,Id,strel]
              (forIn x (var a)
                 (forIn y (var b)
                    (guard (expr (equals (proj 1 (var x)) (proj 0 (var y))))
@@ -810,7 +816,7 @@ module Examples(Modal: MODAL) = struct
 
   (* Intersection *)
   let strset: tp = `Set `String
-  let t8 = testIn [a,Id,strset; b,Id,strset] strset
+  let t8 = testIn strset [a,Id,strset; b,Id,strset]
              (forIn x (var a)
                 (forIn y (var b)
                    (guard (expr (equals (var x) (var y)))
@@ -818,7 +824,12 @@ module Examples(Modal: MODAL) = struct
 
   (* TODO: transitive closure *)
 
-  let tests = [t0;t1;t2;t3;t4;t5;t6;t7;t8]
+  (* Test for letBox at first-order type.
+   * Should optimize derivative to False. *)
+  let t9 = testIn `Bool [x,Id,`Box `Bool]
+             (letBox y (var x) (expr (var y)))
+
+  let tests = [t0;t1;t2;t3;t4;t5;t6;t7;t8;t9]
 end
 
 module Simplified = Simplify(ToHaskell)
