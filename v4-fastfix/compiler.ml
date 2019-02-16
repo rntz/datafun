@@ -225,11 +225,13 @@ let phiLat: modaltp semilat -> rawtp semilat = Obj.magic phi
 let deltaLat: modaltp semilat -> rawtp semilat = Obj.magic delta
 
 
-(* M,N ::= x | λx.M | M N
- *       | (M0,M1,...,Mn) | πᵢ M | let (x0,...,xn) = M in N
- *       | true | false | if M then N else O | when (M) N
- *       | ⊥ | M ∨ N | {M} | for (x in M) N
- *       | box M | let box x = M in N
+(* ===== THE LANGUAGE, more or less =====
+ *
+ * M,N ::= x | λx.M | M N
+ *       | (M0,...,Mn) | πᵢ M | let (x0,...,xn) = M in N
+ *       | true | false | if M then N else O
+ *       | ⊥ | M ∨ N | {M} | for (x in M) N | when (M) N
+ *       | [M] | let [x] = M in N
  *       | M = N
  *)
 
@@ -433,6 +435,39 @@ module Typecheck(Imp: MODAL): BIDIR
   let equals (m: expr) (n: expr) (cx: cx): tp * Imp.term =
     let tp, mX = m (scrub cx) in
     `Bool, Imp.equals tp mX (expr n (scrub cx) tp)
+end
+
+
+(* Dummy transform to compare against Seminaive. *)
+module DropBoxes(Imp: SIMPLE): MODAL with type term = Imp.term
+= struct
+  type tp = modaltp
+  type term = Imp.term
+  let rec debox: modaltp -> rawtp = function
+    | `Box a -> debox a
+    | (`Bool|`String) as a -> a
+    | `Set a -> `Set (debox a)
+    | `Fn (a,b) -> `Fn(debox a, debox b)
+    | `Tuple tps -> `Tuple List.(map debox tps)
+  let deboxLat: modaltp semilat -> rawtp semilat = Obj.magic debox
+  let var a = Imp.var (debox a)
+  let letIn a b = Imp.letIn (debox a) (debox b)
+  let lam a b = Imp.lam (debox a) (debox b)
+  let app a b = Imp.app (debox a) (debox b)
+  let tuple tpterms = Imp.tuple List.(map (fun (a,m) -> debox a, m) tpterms)
+  let proj tps = Imp.proj (List.map debox tps)
+  let letTuple axs b = Imp.letTuple List.(map (fun (a,x) -> debox a,x) axs) (debox b)
+  let string = Imp.string
+  let bool = Imp.bool
+  let ifThenElse a = Imp.ifThenElse (debox a)
+  let guard a = Imp.guard (deboxLat a)
+  let set a = Imp.set (debox a)
+  let union a = Imp.union (deboxLat a)
+  let forIn a b = Imp.forIn (debox a) (deboxLat b)
+  let fix a = Imp.fix (deboxLat a)
+  let equals a = Imp.equals (debox a)
+  let box a m = m
+  let letBox a b = Imp.letIn (debox a) (debox b)
 end
 
 
