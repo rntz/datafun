@@ -1,8 +1,9 @@
-\documentclass[ribbons]{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=13cm,width=315pt]{narrow}
-%\documentclass[ribbons]{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=16cm]{narrow}
+\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=13cm,width=320pt,width=115mm]{narrow}
+%\documentclass{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=15cm,width=13cm]{narrow}
+%\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=19cm,width=37.94em]{narrow}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
-%\usepackage{latexsym}               % \rightsquigarrow
+\usepackage{latexsym}               % \rightsquigarrow
 \usepackage{stmaryrd}               % \shortrightarrow, \llbracket, etc.
 \usepackage{amssymb,amsmath,amsthm} % \square etc.
 \usepackage{mathtools}              %\dblcolon
@@ -14,30 +15,37 @@
 \usepackage{nccmath}                % fix align* (etc.) spacing
 \usepackage{anyfontsize}
 
+% hang is only relevant for long captions, which I don't have
+%\usepackage[labelfont=it,textfont=it,format=hang]{caption}
+\usepackage[skip=.5\baselineskip,labelfont=sc,labelsep=period,format=hang]{caption}
+
 \usepackage{enumitem}\setlist{labelindent=1em,labelsep=.75em,leftmargin=*}
 \setlist{labelindent=.5em,labelsep=.75em,leftmargin=*}
 \setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
 
-\hyphenation{eq-uip-ped}
+%% \usepackage[textosf,mathlf,onlytext]{MinionPro}
+%% \makeatletter\edef\zeu@Scale{.965}\makeatletter\usepackage{eulervm}
 
-%\linespread{1.05}\usepackage[textosf,mathlf]{MinionPro}
 % scaled=.9091 to match minion, scaled=.92 to match libertine at default scale.
-\usepackage[charter,scaled=.92,linespread=1.125]{rntzfont}
-%\PassOptionsToPackage{bb=ams,bbscaled=.943}{mathalfa}\usepackage[baskervald,newmath,scaled=.9215,linespread=1.1]{rntzfont}
-%\linespread{1.04}\usepackage{libertine}\usepackage[libertine,smallerops]{newtxmath}\usepackage[bb=ams,bbscaled=0.94]{mathalfa}
+%\usepackage[charter,scaled=.92,linespread=1.13]{rntzfont}
+%\PassOptionsToPackage{bb=ams,bbscaled=.943}{mathalfa}\usepackage[baskervald,newmath,scaled=.9215,linespread=1]{rntzfont}
+%\usepackage{libertine}\usepackage[libertine,smallerops]{newtxmath}\usepackage[bb=ams,bbscaled=0.94]{mathalfa}
 
 %\usepackage[charter,scaled=.98]{rntzfont} % for phone
-%\usepackage[librebaskerville]{rntzfont} % for b5
+%\usepackage[scaled=1.04,linespread=1.12,]{rntzfont} % for b5/a4
+%\usepackage[scaled=.96]{rntzfont} % a5
+\usepackage[scaled=.92,linespread=1.14,]{rntzfont} % a5
 
-%\usepackage[italic,basic,defaultmathsizes]{mathastext}
-%\usepackage[charter]{mathdesign}\linespread{1.08}
-%\DeclareSymbolFontAlphabet{\mathbb}{AMSb}
+%% \usepackage[default,scale=.93,scale=.98]{lato}
+%% \usepackage{eulervm}\makeatletter\edef\zeu@Scale{1.022}\edef\zeu@Scale{1.077}\makeatother
+%% \usepackage[italic,basic,defaultmathsizes]{mathastext}
+%% \linespread{1.054}
+
 \ifdefined\mathbold\else\newcommand\mathbold{\boldsymbol}\fi
 \usepackage[spacing=true]{microtype}\frenchspacing
 
 \newcommand\mathvar[1]{\ensuremath{#1}} % For upright math font.
 %\renewcommand\mathvar[1]{\ensuremath{\mathit{#1}}} % For italic math font.
-%\renewcommand\df{d\kern-.1em f\kern-.1em} % fucking kerning.
 
 %% Ooh, check out the typeface package:
 %% https://ctan.org/pkg/typeface?lang=en
@@ -47,6 +55,9 @@
 %% - scaling the main text font (!)
 %% - all newtxmath's options
 %% - newpxtext or newpxmath
+
+\hyphenation{eq-uip-ped}
+\hyphenation{inv-olv-ing}
 
 
 %% ===== Commands =====
@@ -58,7 +69,7 @@
 \newcommand\naive{na\"ive}
 \newcommand\Naive{Na\"ive}
 \newcommand\cat\textbf
-\newcommand\strong\textbf
+\ifdefined\strong\else\newcommand\strong\textbf\fi
 \newcommand\CP{\cat{\texorpdfstring{$\boldsymbol\Delta$Poset}{DeltaPoset}}}
 \newcommand\Poset{\cat{Poset}}
 \newcommand\initO{\ensuremath{\mathbold{0}}}
@@ -67,7 +78,7 @@
 \newcommand\initE{\mathop{\text{\textexclamdown}}}
 \newcommand\termI{\mathop{!}}
 
-\newcommand\G\Gamma
+\ifdefined\G\renewcommand\G\Gamma\else\newcommand\G\Gamma\fi
 \newcommand\D\Delta
 \newcommand\x\times
 \newcommand\pto\rightharpoonup
@@ -75,7 +86,7 @@
 \newcommand\dee\delta
 \newcommand\tuple[1]{\left({#1}\right)}
 \newcommand\triv{\star}
-\newcommand\injc{\textrm{in}}
+\newcommand\injc{\text{in}}
 \newcommand\inj[1]{\injc_{#1}\,}
 \newcommand\zero{\ensuremath{\mathbold{0}}}
 \newcommand\bnfor{~~|~~}
@@ -89,11 +100,12 @@
 \newcommand\dx{\mathvar{dx}}
 \newcommand\dy{\mathvar{dy}}
 \newcommand\df{\mathvar{df}}
+%\renewcommand\df{d\kern-.1em f\kern-.1em} % fucking kerning.
 \newcommand\dg{\mathvar{dg}}
 
 \newcommand\iso{{\texorpdfstring{\ensuremath{\square}}{iso}}}
 \newcommand\isof{\iso}
-\newcommand\fname\textrm
+\newcommand\fname\text
 \newcommand\id{\fname{id}}
 \newcommand\dummy{\fname{dummy}}
 \newcommand\extract{{\color{Red}\fname{extract}}}
@@ -198,18 +210,29 @@
 
 
 \title{Change Semantics for Semi\naive{} Datafun}
-\author{Michael Arntzenius}
+\author{\scshape Michael Arntzenius}
 \date{5 November 2018}
 
 \begin{document}
 
 \maketitle
 \begin{abstract}
-  We define the category \CP{} of posets equipped with \emph{increasing
-    changes}, whose morphisms are monotone maps equipped with \emph{derivatives}
-  taking input changes to output changes. We give a semantics for Datafun in
-  \CP.
+  We give two transformations on Datafun programs: \emph{incrementalization} and
+  \emph{semi\naive{} evaluation}, generalizing the classic Datalog optimization.
+
+  Our approach is to define a category \CP{} of posets equipped with increasing
+  changes, whose morphisms are monotone maps equipped with \emph{derivatives}
+  taking input changes to output changes. We give a general categorical
+  semantics for Datafun, and construct two instances of it in \CP: an
+  \emph{incremental} semantics (extending Datafun's existing semantics in
+  \Poset) and a \emph{semi\naive} semantics. From each semantics we read off a
+  program transformation. To prove these correct, we construct a type-indexed
+  family of natural isomorphisms connecting these semantics.
 \end{abstract}
+
+\todo{TODO: rewrite to match above abstract}
+
+%% X-height test: x$x$\emph{x} y$y$\emph{y} v$v$\emph{v} w$w$\emph{w} X$X$\emph{X}
 
 
 \section{Notation and conventions}
@@ -231,11 +254,11 @@
   $\termI_A : A \to \initO$ is the unique map into a terminal object.
 
 \item Given a family of morphisms $f_i : A \to B_i$ in a category with finite
-  products, their ``fork'' $\fork{f_i}_i : A \to \textstyle\prod_{i} B_i$
-  uniquely satisfies $\pi_i \circ \fork{f_i}_i = f_i$. Dually, given $f_i :
-  A_i \to B$ in a category with finite sums, their ``split'' $\krof{f_i}_i :
-  \sum_i A_i \to B$ uniquely satisfies $\krof{f_i}_i \circ \injc_i = f_i$. So
-  in particular, $\fork{} = \termI$ and $\krof{} = \initE$.
+  products, their \emph{``fork''} $\fork{f_i}_i : A \to \textstyle\prod_{i} B_i$
+  uniquely satisfies $\pi_i \circ \fork{f_i}_i = f_i$. Dually, given $f_i : A_i
+  \to B$ in a category with finite sums, their \emph{``split''} $\krof{f_i}_i :
+  \sum_i A_i \to B$ uniquely satisfies $\krof{f_i}_i \circ \injc_i = f_i$. So in
+  particular, $\fork{} = \termI$ and $\krof{} = \initE$.
 
 \item The comonad $\iso : \Poset \to \Poset$ takes a poset to the
   \emph{discrete} poset on the same elements, defined:
@@ -262,7 +285,7 @@ Objects $A$ of \CP{} are tuples $(\vals A, \chgs A, \updfn_A)$, where
   \emph{valid} change to $x$.
 
   $\vld{\dx} x y$ means $x \upd \dx$ is defined and equal to $y$. Otherwise,
-  equations involving \updfn{} should be understood to hold only when it is
+  equations inv\-olv\-ing \updfn{} should be understood to hold only when it is
   defined.
 \end{enumerate}
 
@@ -304,7 +327,7 @@ Composition of derivatives follows the chain rule:
 
 \subsection{Zero changes and change composition}
 
-Applying the axiom of choice to soundness \& completeness for increases, we can
+Applying the axiom of choice to soundness \& completeness for increases, we
 recover operators $\zero$, $(\cdot)$ such that $x \upd \zero_x = x$ and $x \upd
 (\dx \cdot \dy) = (x \upd \dx) \upd \dy$. These do not necessarily satisfy the
 identity and associativity laws of a category, but $\zero$ will be useful
@@ -559,9 +582,39 @@ products and sums in $\CP$.
     \bnfor \ewhen e f\\
     &&& \eboxd e \bnfor \elet{\eboxd x = e} f \bnfor \splitsum e
   \end{array}\]
-  \vspace{-1.5em}
   \caption{Syntax of Datafun}
   \label{fig:syntax}
+\end{figure*}
+
+\newcommand\expandsto{\rightsquigarrow}
+\begin{figure*}
+  %% TODO: pattern-matching on box types.
+  \[\setlength\arraycolsep{.15em}\begin{array}{rcl}
+    \ecase{e,\vec f} (p_i, \vec q_{i,j} \caseto g_{i,j})_{i,j}
+    &\expandsto& \ecase{e} (p_i \caseto \ecase{\vec f} (\vec q_{i,j} \caseto g_{i,j})_j)_i
+    \\[.33em]
+    \ecase{e} x \caseto f;\ (p_i \caseto g_i)_i
+    &\expandsto& \elet{x = e} f
+    \\[.33em]
+    \ecase{e} \eboxd x \caseto f;\ (p_i \caseto g_i)_i
+    &\expandsto& \elet{\eboxd x = e} f
+    \\[.33em]
+    \ecase{e} (\etuple{p_i,q_i} \caseto f_i)_i
+    &\expandsto& \elet{x = e}\\
+    && \ecase{\pi_1\< x,\, \pi_2\< x} (p_i,q_i \caseto f_i)_i
+    \\[.33em]
+    \ecase{e} (\eboxd{\etuple{p_i,q_i}} \caseto f_i)_i
+    &\expandsto& \elet{\eboxd x = e}\\
+    && \ecase{\eboxd{\pi_1\<x}, \eboxd{\pi_2\<x}}
+    (\eboxd{p_i}, \eboxd{q_i} \caseto f_i)
+    \\[.33em]
+    \ecase{e} (\inj i p_{i,j} \caseto f_{i,j})_{i,j}
+    &\expandsto& \ecase{e} (\inj i x \caseto \ecase{x} (p_{i,j} \caseto f_{i,j})_j)_i
+    \\[.33em]
+    \ecase{e} (\eboxd{\inj i p_i} \caseto f_i)_i
+    &\expandsto& \ecase{\splitsum e} (\inj i \eboxd{p_i} \caseto f_i)_i
+  \end{array}\]
+  \caption{Some pattern-matching elaboration rules}
 \end{figure*}
 
 \renewcommand\extract{\error{don't use extract}}
@@ -606,7 +659,6 @@ products and sums in $\CP$.
     & \delta(\splitsum e) &= \splitsum \delta e
   \end{align*}
 
-  %% FIXME: use of \extract is wrong
   \begin{align*}
     \delta(\elet{\eboxd x = e} f)
     &= \elet{\eboxd x = e \mathrel{\kwname{and}} \eboxd\dx = \delta e} \delta f
@@ -674,12 +726,15 @@ products and sums in $\CP$.
     & \delta\eboxd{e} &= \eboxd{\delta e}
   \end{align*}
 
-  %% TODO FIXME: determine exactly how much syntax sugar I want to allow in the
-  %% target of this translation. for example, the case-split I use in
-  %% \phi(\splitsum e) is only valid *because* \splitsum exists.
+  %% TODO: determine exactly how much syntax sugar I want to allow in the target
+  %% of this translation. for example, the case-split I use in \phi(\splitsum e)
+  %% is only valid *because* \splitsum exists.
   %%
   %% Would be nice to give the syntax sugar explicitly, but maybe more effor
   %% than its worth? Might be clearer to mostly avoid syntax sugar? Not sure.
+
+  %% TODO FIXME: \phi(\fix e), \delta(\fix e)!
+  %% TODO FIXME: \phi(if then else), \delta(if then else)!
 
   \begin{align*}
     \phi(\ecase e (\inj i x \caseto f_i)_i)
