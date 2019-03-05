@@ -4,11 +4,12 @@
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{footmisc}}
 \ProcessOptions\relax
 
-\RequirePackage[marginal,norule]{footmisc}
+\RequirePackage[marginal]{footmisc}
 \AtBeginDocument{
   %% Comment out if norule is set. Also it uses ems, which is a bad idea if the
-  %% font is scaled a lot. TODO: fix this.
-  %\setlength{\skip\footins}{1em plus .25em minus .2em}
+  %% font is scaled a lot. TODO: fix this. could I use \f@size & \dimexpr? Maybe
+  %% should use exes, since it's a vertical measure.
+  \setlength{\skip\footins}{1em plus .25em minus .2em}
 
   %% NB. In vanilla TeX, \footnotesep isn't actually a length, I think? At
   %% least, if I do \setlength\footnotesep{1em plus .25em minus .2em}, I end up

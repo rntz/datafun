@@ -11,7 +11,7 @@
 
 %% ---------- 1. Package options ----------
 \DeclareOptionX{scaled}[1]{\edef\rntz@fontscale{#1}}
-\DeclareOptionX{linespread}[1.1]{\edef\rntz@linespread{#1}}
+\DeclareOptionX{linespread}[1]{\edef\rntz@linespread{#1}}
 
 %% serif font options
 \DeclareOptionX{baskervald}{\def\rntz@font{baskervald}}
@@ -27,7 +27,6 @@
 \DeclareOptionX{euler}{\def\rntz@mathfont{euler}}
 \DeclareOptionX{newmath}{\def\rntz@mathfont{newmath}}
 \DeclareOptionX{nomath}{\def\rntz@mathfont{none}}
-\DeclareOptionX{pazo}{\def\rntz@mathfont{pazo}}
 
 \ExecuteOptionsX{scaled,linespread,charter,euler} % default options
 \ProcessOptionsX\relax                 % is \relax necessary here?
@@ -35,11 +34,9 @@
 
 %% ---------- 2. Miscellany ----------
 %% Utilities for scaling used inside this file.
-\newcommand{\@scaled}[1]{\fpeval{#1*\rntz@fontscale}}
+\newcommand\@scaled[1]{\fpeval{#1*\rntz@fontscale}}
 \edef\rntz@eulerscale{1}
-
-%% Default linespread.
-\linespread{\@scaled{\rntz@linespread}}
+\edef\rntz@leadingfactor{1}
 
 %% TO CONSIDER:
 %\PassOptionsToPackage{euler-digits}{eulervm}
@@ -62,80 +59,81 @@
 \PassOptionsToPackage{vvarbb,smallerops}{newtxmath}
 \PassOptionsToPackage{vvarbb,smallerops}{newpxmath}
 
-%% Load pazo as math font if selected. We load it first so its text font will
-%% get replaced by the user's choice.
-\ifdefstring{\rntz@mathfont}{pazo}{
-  \RequirePackage{mathpazo}
-  \ifdefstring{\rntz@fontscale}{1}{}{
-    \PackageWarning{rntzfont}{Cannot scale Pazo font.}
-  }
-}
-
 
 %% ---------- 3. Font choices ----------
 \ifdefstring{\rntz@font}{baskervald}{
-  \RequirePackage[proportional,osf,scaled=\@scaled{1.0526}]{Baskervaldx}
-  \RequirePackage[p,osf,scaled=\@scaled{1.063126}]{biolinum}
-  \RequirePackage[scaled=\@scaled{1.005}]{inconsolata}
+  \RequirePackage[proportional,osf,scaled=\@scaled{1}]{Baskervaldx}
+  \RequirePackage[p,osf,scaled=\@scaled{0.997687494646978}]{biolinum}
+  \RequirePackage[scaled=\@scaled{0.94310928470303}]{inconsolata}
+  \edef\rntz@eulerscale{0.938997821350762} % matches font dimensions.
+  \edef\rntz@eulerscale{.9484} % add a little oomph.
   \ifdefstring{\rntz@mathfont}{newmath}{
-    \RequirePackage[baskervaldx,scaled=\@scaled{1.0526}]{newtxmath}
+    \RequirePackage[baskervaldx,scaled=\@scaled{1}]{newtxmath}
   }{}
+  \edef\rntz@leadingfactor{1.001045174776449}
 }{}
 
 \ifdefstring{\rntz@font}{charter}{
-  %% XCharter can be scaled. It has an option [osf] for old-style proportional
-  %% figures, but lacks proportional lining figures, and so doesn't respect
-  %% fontaxes' \tbfigures or \lnfigures.
-  \RequirePackage[sups,scaled=\@scaled{1.02}]{XCharter}
-  \RequirePackage[proportional,semibold,scaled=\@scaled{1.0074}]{sourcesanspro}
-  \RequirePackage[scaled=\@scaled{1.075}]{inconsolata}
-  %\edef\rntz@eulerscale{1.054782} % eyeballed
-  %\edef\rntz@eulercasle{1.0618175} % multiplicative mean of the other two
-  \edef\rntz@eulerscale{1.0689}   % calculated from fontdimen values
+  \RequirePackage[sups,scaled=\@scaled{.96}]{XCharter}
+  \RequirePackage[scaled=\@scaled{0.950123456790123},proportional,semibold]
+                 {sourcesanspro}
+  \RequirePackage[scaled=\@scaled{1.010417965903645}]{inconsolata}
+  \edef\rntz@eulerscale{1.006013071895425}
   \ifdefstring{\rntz@mathfont}{newmath}{
-    \RequirePackage[xcharter,scaled=\@scaled{1.1075}]{newtxmath}
+    % Charter x-height & newtxmath[charter] x-height don't match w/o scaling.
+    \RequirePackage[xcharter,scaled=\@scaled{1.044705882352941}]{newtxmath}
   }{}
+  \edef\rntz@leadingfactor{1.072488677273255} % calculated
+  %% \edef\rntz@leadingfactor{1.045}  % manually adjusted
+  %% \edef\rntz@leadingfactor{1.06}   % manually adjusted
 }{}
 
 \ifdefstring{\rntz@font}{cochineal}{
-  \RequirePackage[p,osf,sups,scale=\@scaled{1.13}]{cochineal}
-  \RequirePackage[p,osf,scaled=\@scaled{1.12}]{biolinum}
-  \RequirePackage[scaled=\@scaled{1.0622}]{inconsolata}
-  \edef\rntz@eulerscale{1.05}
+  \RequirePackage[p,osf,sups,scaled=\@scaled{1.06}]{cochineal}
+  \RequirePackage[p,osf,scaled=\@scaled{1.045280197407864}]{biolinum}
+  \RequirePackage[scaled=\@scaled{0.988098442228539}]{inconsolata}
+  \edef\rntz@eulerscale{0.983790849673203}
   \ifdefstring{\rntz@mathfont}{newmath} {
-    \RequirePackage[cochineal,scaled=\@scaled{1.13}]{newtxmath}
+    \RequirePackage[cochineal,scaled=\@scaled{1.06}]{newtxmath}
   }{}
+  \edef\rntz@leadingfactor{1.048798049007084}
 }{}
 
 \ifdefstring{\rntz@font}{libertine}{
   % libertine[osf] makes newtxmath use old-style figures in math mode :(
   % Other options: semibold.
-  \RequirePackage[p,mono=false,llscale=\@scaled{1.0842},scale=\@scaled{1.0842}]
-                 {libertine}
-  \RequirePackage[scaled=\@scaled{1.02485}]{inconsolata}
-  \edef\rntz@eulerscale{1.03}
+  \RequirePackage[llscale=\@scaled{1.0424583},scale=\@scaled{1.0424583},
+    p,mono=false]{libertine}
+  \RequirePackage[scaled=\@scaled{0.978589910918842}]{inconsolata}
+  \edef\rntz@eulerscale{0.974323770588235}
   \ifdefstring{\rntz@mathfont}{newmath}{
-    \RequirePackage[libertine,scaled=\@scaled{1.0842}]{newtxmath}
+    \RequirePackage[libertine,scaled=\@scaled{1.0424583}]{newtxmath}
   }{}
+  \edef\rntz@leadingfactor{1.038705401695506}
 }{}
 
 \ifdefstring{\rntz@font}{librebaskerville}{
-  \RequirePackage[scaled=\@scaled{0.8717815}]{librebaskerville}
-  \RequirePackage[p,osf,scaled=\@scaled{1.063126}]{biolinum}
-  \RequirePackage[scaled=\@scaled{1.005}]{inconsolata}
+  \RequirePackage[scaled=\@scaled{0.83905}]{librebaskerville}
+  \RequirePackage[p,osf,scaled=\@scaled{1.036586622261072}]{biolinum}
+  \RequirePackage[scaled=\@scaled{0.973077973803006}]{inconsolata}
+  \edef\rntz@eulerscale{0.968835862636166}
   \ifdefstring{\rntz@mathfont}{newmath}{
-    \RequirePackage[libertine,scaled=\@scaled{1.063126}]{newtxmath}
+    \RequirePackage[libertine,scaled=\@scaled{1.036586622261072}]{newtxmath}
   }{}
+  \edef\rntz@leadingfactor{1.03285486226919}
 }{}
 
 \ifdefstring{\rntz@font}{palatino}{
-  \RequirePackage[scaled=\@scaled{1}]{newpxtext}
-  \RequirePackage[scaled=\@scaled{1.067}]{biolinum}
-  \RequirePackage[scaled=\@scaled{1.012}]{inconsolata}
+  \RequirePackage[scaled=\@scaled{.96}]{newpxtext}
+  %\RequirePackage[p,scaled=\@scaled{1.020002361116577}]{biolinum}
+  \RequirePackage[scaled=\@scaled{1.0176}]{biolinum} % manually adjusted
+  \RequirePackage[scaled=\@scaled{0.964203422764601}]{inconsolata}
+  \edef\rntz@eulerscale{.96}
   \ifdefstring{\rntz@mathfont}{newmath}{
-    \RequirePackage[scaled=\@scaled{1}]{newpxmath}
-    \PassOptionsToPackage{bb=ams,bbscaled=\@scaled{1}}{mathalfa}
+    \RequirePackage[scaled=\@scaled{.96}]{newpxmath}
+    \PassOptionsToPackage{bb=ams,bbscaled=\@scaled{.96}}{mathalfa}
   }{}
+  \edef\rntz@leadingfactor{1.023435141098595}
   %% HACK: newpxtext doesn't respect fontaxes' \tbfigures! :( but it _does_
   %% define, eg., \tlfstyle! hm...
   \RequirePackage{fontaxes}
@@ -144,45 +142,49 @@
 }{}
 
 \ifdefstring{\rntz@font}{pt}{
-  \RequirePackage[scaled=\@scaled{0.995}]{PTSerif}
-  \RequirePackage[scaled=\@scaled{0.995}]{PTSans}
+  \RequirePackage[scaled=\@scaled{0.922365}]{PTSerif}
+  \RequirePackage[scaled=\@scaled{0.922365}]{PTSans}
   %% PTSans doesn't have small caps; could use biolinum or sourcesanspro instead.
-  %\RequirePackage[scaled=1.135]{biolinum}
-  \RequirePackage[scaled=\@scaled{1.1128}]{inconsolata}
-  \edef\rntz@eulerscale{1.07}
+  \RequirePackage[scaled=\@scaled{1.009154286989687}]{inconsolata}
+  \edef\rntz@eulerscale{1.004754901960784}
   \ifdefstring{\rntz@mathfont}{newmath}{
-    \RequirePackage[utopia,scaled=\@scaled{1.1313}]{newtxmath}
+    \RequirePackage[utopia,scaled=\@scaled{1.043399321266968}]{newtxmath}
   }{}
+  \edef\rntz@leadingfactor{1.071147369643479}
+  \edef\rntz@leadingfactor{1.061415} % manually adjusted
 }{}
 
 \ifdefstring{\rntz@font}{source}{
   \ifdefstring{\rntz@mathfont}{newmath}{
     \PackageWarning{rntzfont}{%
-Source Serif and newtxmath don't mix well. Consider euler or mathastext.}
-    \RequirePackage[libertine,scaled=\@scaled{1.11}]{newtxmath}
+Source Serif and newtxmath don't mix well. Consider eulervm or mathastext.}
+    \RequirePackage[charter,scaled=\@scaled{1.020927601809955}]{newtxmath}
   }{}
   %% I'd like to pass "osf" here, but it ends up using old-style figures in math
   %% mode, too (in both Euler & newmath). Argh.
-  \RequirePackage[semibold,proportional,scaled=\@scaled{1}]{sourceserifpro}
-  \RequirePackage[proportional,semibold,scaled=\@scaled{1}]{sourcesanspro}
-  %% TODO: double-check this scaling.
-  \RequirePackage[scaled=\@scaled{1.06}]{inconsolata}
-  \edef\rntz@eulerscale{1.045}
+  \RequirePackage[semibold,proportional,scaled=\@scaled{.95}]{sourceserifpro}
+  \RequirePackage[proportional,semibold,scaled=\@scaled{.95}]{sourcesanspro}
+  %\RequirePackage[scaled=\@scaled{0.987420103763903}]{inconsolata}
+  \RequirePackage[scaled=\@scaled{0.99275}]{inconsolata} % manually adjusted
+  \edef\rntz@eulerscale{0.983115468409586}
+  \edef\rntz@leadingfactor{1.048078039716641}
 }{}
 
 
 %% ---------- 4. Final tweaks & cleanup ----------
+\linespread{\@scaled{\rntz@linespread * \rntz@leadingfactor}}
+
 %% Load euler as math alphabet if requested
 \ifdefstring{\rntz@mathfont}{euler}{
   \RequirePackage{eulervm}
   \edef\zeu@Scale{\@scaled{\rntz@eulerscale}} % scale eulervm font.
-  \PassOptionsToPackage{scaled=\zeu@Scale}{mathalfa}
+  \PassOptionsToPackage{scaled=\zeu@Scale,bbscaled=\zeu@Scale,scrscaled=\zeu@Scale}{mathalfa}
 }
 
 %% Adjust calligraphic alphabet.
 %% TODO: check scaling of \mathcal in example.tex!
-%% Other options: cal={cm,stix,pxtx,boondoxo}.
-\RequirePackage[cal=pxtx]{mathalfa}
+%% Other options: cal={cm,stix,pxtx,boondoxo}. scr=dutchcal.
+\RequirePackage[cal=cm]{mathalfa}
 
 %% Make sure \mathbold is defined.
 \ifdefined\mathbold\else\newcommand\mathbold{\boldsymbol}\fi

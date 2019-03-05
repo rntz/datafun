@@ -61,9 +61,17 @@
 %
 % Text font options are baskervald, charter, cochineal, libertine,
 % librebaskerville, palatino, pt, and source. Math font options are euler,
-% newmath, pazo, and nomath (which doesn't change the math font). Default is
-% charter with euler.
-\usepackage{rntzfont}
+% newmath, and nomath (which doesn't change the math font). Default is charter
+% with euler.
+
+%\usepackage[baskervald]{rntzfont}
+\usepackage[charter]{rntzfont}
+%\usepackage[cochineal]{rntzfont}
+%\usepackage[libertine,newmath]{rntzfont}
+%\usepackage[librebaskerville]{rntzfont}
+%\usepackage[palatino]{rntzfont}
+%\usepackage[pt]{rntzfont}
+%\usepackage[source]{rntzfont}
 
 % Some small typographic improvements.
 \usepackage[T1]{fontenc}
@@ -72,13 +80,12 @@
 
 \usepackage{lipsum} % for example text.
 
-\title{An example document}
+\title{Towards Better Typography in \LaTeX{}}
 \author{Lore M. Ipsum}
 \date{\today}
 
 
 \begin{document}
-
 \maketitle
 
 \begin{abstract}
@@ -121,7 +128,9 @@ tincidunt tristique, libero.\footnote{Latin latin latin, latin latin latin.
 \end{theorem}
 
 \begin{corollary} Adipiscing $n=4$, elit
-  \( (x+y)^4 = x^4 + 4x^3y + 6x^2y^2 + 4xy^3 + y^4 \).
+  \( (x+y)^4 = x^4 + 4x^3y + 6x^2y^2 + 4xy^3 + y^4 \). Moreover, if $f(x) =
+  x^2$, then it follows that $f = \mathit{id} \cdot \mathit{id}$, et cetera, et
+  cetera.
 \end{corollary}
 
 Vivamus viverra fermentum felis. Donec nonummy pellentesque ante. Pha\-sellus

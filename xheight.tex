@@ -1,40 +1,66 @@
-%% This is a test document that I use to check my x-heights are aligned across
-%% different typefaces (rm, math, sf, tt). Ideally I'd automate this process but
-%% augh, LaTeX and augh, fonts. Maybe LuaTeX or XeTeX could handle this better.
+%% This is a test document that I use to display info about fonts, in
+%% particular, their x-heights, and to check visually that their x-heights are
+%% aligned.
 
+%% TODO: read
 %% https://tex.stackexchange.com/questions/205667/is-there-an-equivalent-to-fontspecs-scale-matchuppercase-for-pdflatex-or-how-t
-%% suggests I can get latex to print the heights of things for me! however, this
-%% won't necessarily result in things visually aligning.
 
-\documentclass[20pt]{rntz}
-\usepackage[paperheight=280pt,paperwidth=340pt,margin=5pt]{geometry}
+\documentclass{article}
+\usepackage[paperheight=13em,paperwidth=23.5em,margin=1pt]{geometry}
 \usepackage[T1]{fontenc}
+\setlength\parindent{0pt}
+\setlength\parskip{5pt}
+\usepackage{lipsum}
+\frenchspacing
+
+%% Load fonts here.
 \usepackage{rntzfont}
 
-\setlength{\parindent}{0pt}
-\linespread{.8}
+% The calculated ones are consistently too small! Maybe palatino's x-height
+% needs adjusting? Since zeu@Scale=1 is good, what if I use euler's x-height?
+
 \begin{document}
-\Huge
+
+
+%% Visual test page.
+\clearpage\linespread{.8}\Huge
 \begin{tabular}{ll}
-  x$x$\emph{x}\textsf{x}\texttt{x} & y$y$\emph{y}\textsf{y}\texttt{y}
+  x$x$\emph{x} x\textsf{x}\texttt{x}x & y$y$\emph{y} y\textsf{y}\texttt{y}y
   \\
-  u$u$\emph{u}\textsf{u}\texttt{u} & v$v$\emph{v}\textsf{v}\texttt{v}
+  v$v$\emph{v} v\textsf{v}\texttt{v}v & o$o$\emph{o} o\textsf{o}\texttt{o}o
   \\
-  n$n$\emph{n}\textsf{n}\texttt{n} & q$q$\emph{q}\textsf{q}\texttt{q}
+  a$a$\emph{a} a\textsf{a}\texttt{a}a & e$e$\emph{e} e\textsf{e}\texttt{e}e
   \\
-  f$f$\emph{f}\textsf{f}\texttt{f} & h$h$\emph{h}\textsf{h}\texttt{h}
+  t$t$\emph{t} t\textsf{t}\texttt{t}t & n$n$\emph{n} n\textsf{n}\texttt{n}n
   \\
-  X$X$\textsf{X}\texttt{X} & N$N$\textsf{N}\texttt{N}
+  %% i$i$\emph{i} i\textsf{i}\texttt{i}i
+  f$f$\emph{f} f\textsf{f}\texttt{f}f
+  & T$T$\emph{T} T\textsf{T}\texttt{T}T
 \end{tabular}
 
+
+%% Font dimension info page.
 \clearpage\linespread{1}\normalsize
 % empty math environment to force reloading math font for new size.
-ex: \the\fontdimen5\font\(\)\\
-em: \the\fontdimen6\font\\
-math ex: \the\fontdimen5\textfont1\\
-math em: \the\fontdimen6\textfont1\\
-baselineskip: \the\baselineskip\\
-interword space: \the\fontdimen2\font\\
+\begin{tabular}{rl}
+ex/em& \the\fontdimen5\font{} / \the\fontdimen6\font\\
+\sffamily sf& \sffamily \the\fontdimen5\font{} / \the\fontdimen6\font\\
+\ttfamily tt& \ttfamily \the\fontdimen5\font{} / \the\fontdimen6\font\\
+\rmfamily
+% empty math environment forces loading math font.
+math & \(\)\the\fontdimen5\textfont1{} / \the\fontdimen6\textfont1
+\end{tabular}
 
+Serif. {\sffamily Sans-serif.} {\ttfamily Monospace.} $\sqrt{x^2 + y^2}$
+
+an\textsf{nap}olis m\textsf{o}o\textsf{n} de\textsf{liber}ate A \textsf{long} goodbye.
+
+an\texttt{nap}olis m\texttt{o}o\texttt{n} de\texttt{liber}ate. A \texttt{long} goodbye.
+
+One \texttt{lucky} \textsf{shot}. \texttt{Then} \textsf{hell} \textrm{broke} $\mathit{loose}$.
+
+%% 
+%% %% Lorem ipsum.
+%% \clearpage\linespread{1.02}\normalsize\lipsum[1]
 
 \end{document}

@@ -148,9 +148,6 @@ You can also choose between three families of math fonts:
 - `newmath` for [newtxmath][] (or its relative [newpxmath][]), using whichever
   variant most nicely matches the text font choice.
 
-- `pazo`, a Palatino-based math font similar to [newpxmath][] but in my opinion
-  slightly nicer-looking. Unfortunately, it is not scalable.
-
 - `nomath` leaves the math font unchanged.
 
 The defaults are `charter` with `euler`.
