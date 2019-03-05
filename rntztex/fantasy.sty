@@ -3,20 +3,35 @@
 
 %% Laptop, 4:5 aspect.
 \DeclareOption{laptop}{
-  \def\rntz@geom{papersize={436pt,545pt},top=29pt,bottom=29pt}
-  \def\rntz@narrow{width=362pt,fullwidth=412pt}
+  \def\rntz@geom{papersize={425.6pt,532pt},top=30pt,bottom=30pt}
+  \def\rntz@narrow{fullwidth=402pt,width=345pt}
+
+  \def\rntz@geom{papersize={416pt,520pt},top=28pt,bottom=28pt}
+  \def\rntz@narrow{fullwidth=396pt,width=345pt}
 }
 
 %% Tablet, 3:4 aspect
 \DeclareOption{tablet}{
   \def\rntz@geom{papersize={399pt,532pt},top=30pt,bottom=30pt}
-  \def\rntz@narrow{width=345pt,fullwidth=360pt}
+  \def\rntz@narrow{fullwidth=360pt,width=345pt}
+
+  \def\rntz@geom{papersize={390pt,520pt},top=28pt,bottom=28pt}
+  \def\rntz@narrow{fullwidth=360pt,width=345pt}
 }
 
 %% Phone, 3:5 aspect, tiny margins.
 \DeclareOption{phone}{
   \def\rntz@geom{papersize={342pt,570pt},top=15pt,bottom=15pt}
   \def\rntz@narrow{width=312pt,fullwidth=340pt}
+
+  %% \def\rntz@geom{papersize={324pt,540pt},top=14pt,bottom=14pt}
+  %% \def\rntz@narrow{width=296pt,fullwidth=322pt}
+
+  %% \def\rntz@geom{papersize={319.2pt,532pt},top=14pt,bottom=14pt}
+  %% \def\rntz@narrow{width=291.2pt,fullwidth=317.3333pt}
+
+  %% \def\rntz@geom{papersize={312pt,520pt},top=14pt,bottom=14pt}
+  %% \def\rntz@narrow{width=284pt,fullwidth=310pt}
 }
 
 \ExecuteOptions{laptop}

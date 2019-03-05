@@ -36,23 +36,39 @@
 %               {1\baselineskip plus .25\baselineskip minus .2\baselineskip}
 %               {1em}
 
-%% Tighter spacing: 1.5\baselineskip at 2:1 before:after.
+%% %% Loosest spacing: 1.8\baselineskip at 2:1 before:after.
+%% \def\rntz@secbefore{1.2\baselineskip plus .3\baselineskip minus .24\baselineskip}
+%% \def\rntz@secafter{.6\baselineskip plus .15\baselineskip minus .12\baselineskip}
+
+%% Loose spacing: 1.5\baselineskip at 2:1 before:after.
 \def\rntz@secbefore{1\baselineskip plus .25\baselineskip minus .2\baselineskip}
 \def\rntz@secafter{.5\baselineskip plus .125\baselineskip minus .1\baselineskip}
 
-%% %% Looser spacing: 1.8\baselineskip at 2:1 before:after.
-%% \def\rntz@secbefore{1.2\baselineskip plus .3\baselineskip minus .24\baselineskip}
-%% \def\rntz@secafter{.6\baselineskip plus .15\baselineskip minus .12\baselineskip}
+% Medium spacing: Roughly 1.36\baselineskip at 3:2 before:after.
+\def\rntz@secbefore{2.25ex plus .45ex minus .3ex}
+\def\rntz@secafter{1.5ex plus .3ex minus .2ex}
+
+%% %% Tight spacing. 1.25\baselineskip at 3:2 before:after.
+%% \def\rntz@secbefore{.75\baselineskip plus .25\baselineskip}
+%% \def\rntz@secafter{.5\baselineskip plus .1667\baselineskip}
+
+%% %% Tightest spacing. Roughly 1.21\baselineskip at 3:2 before:after.
+%% \def\rntz@secbefore{2ex plus .5ex minus .4ex}
+%% \def\rntz@secafter{1.3333ex plus .3333ex minus .2667ex}
 
 %% Title formatting.
 \newcommand{\headernum}{\lnfigures\tbfigures}
 \iftoggle{boldhead}{\newcommand\header\bfseries}{\newcommand\header\itshape}
 
-\newcommand{\hnopost}{\hspace*{0mm}}
-\newcommand{\hnopre}{\hspace*{2.5mm}}
+%% Set \headeroffset relative to the nominal body text size.
+%% TODO: .711317? really? maybe 1 or .75?
+\newlength\headeroffset
+\setlength\headeroffset{.711317\dimexpr\f@size pt\relax}
+
 \iftoggle{marginums}{
   \newcommand{\makehno}[3]{%
-    \llap{\colorbox{#1}{\parbox[t]{100in}{\hfill{\color{#2}\headernum#3\hnopost}}}\hnopre}}
+    \llap{\colorbox{#1}{\parbox[t]{100in}{\hfill{\color{#2}\headernum#3}}}%
+\hspace*{\headeroffset}}}%
 }{
   \newcommand{\makehno}[3]{\headernum#3\hspace{1em}}
 }
