@@ -1,0 +1,13 @@
+* Syntax sugar / conveniences
+
+sets          → downsets + discreteness
+{e₁...eₙ}     → {[e₁]} ∨ ... ∨ {[eₙ]}
+discrete case → splitsum
+if-then-else  → case & isEmpty
+true,false    → {[()]}, ⊥
+when          → for & sets of units
+(fix x.e)     → fix (box (λx.e))
+e₁ = e₂       → box e₁ = box e₂
+
+explain why booleans-as-sets-of-units is helpful
+(ie. use "when")
