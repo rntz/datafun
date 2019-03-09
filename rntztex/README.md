@@ -18,8 +18,7 @@ projects. It contains:
    sizes.
 
 5. `narrow.sty`, which sets up a one-column layout with extra width for
-   `figure*` and `fullwidth` environments. `rntzgeometry.sty` uses `narrow.sty`
-   automatically, but you can also use `narrow.sty` on its own.
+   `figure*` and `fullwidth` environments.
 
 # Using rntztex
 

@@ -1,8 +1,4 @@
-- recalculate x-heights using font dimension info (now included in xheight.tex).
-  Already did this for Charter.
-
-- Find remaining places I use em rather than \baselineskip for vertical space
-  measures. Use \baselineskip; em behaves unpredictably when scaling fonts.
+- document fantasy.sty in README.md
 
 - make new rntz.cls that combines all appropriate features.
   - rntzfont
@@ -13,8 +9,6 @@
 - style lists like so:
   \usepackage{enumitem}
   \setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
-
-- make rntzfont not fiddle with \linespread?
 
 - define \mathvar for multi-letter variables in rntzfont.sty. For Euler,
   \ensuremath. For newtxmath when text font and math font match exactly,
