@@ -5,6 +5,9 @@ tt = lambda **kwargs: font(family="tt", **kwargs)
 math = lambda **kwargs: font(family="math", **kwargs)
 
 FONT_INFO = {
+    # TODO: newmath option for Alegreya
+    "Alegreya": rm(ex=4.52, osf="osf", newmath="charter"),
+    "AlegreyaSans": rm(ex=4.58, osf="osf"),
     "Baskervaldx": rm(ex=4.31, opts=["proportional"], osf="osf",
                       newmath="baskervaldx"),
     "charter": rm(ex=4.81, package="XCharter", opts=["sups"], osf="osf"),

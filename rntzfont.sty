@@ -14,6 +14,7 @@
 \DeclareOptionX{linespread}[1]{\edef\rntz@linespread{#1}}
 
 %% serif font options
+\DeclareOptionX{alegreya}{\def\rntz@font{alegreya}}
 \DeclareOptionX{baskervald}{\def\rntz@font{baskervald}}
 \DeclareOptionX{charter}{\def\rntz@font{charter}}
 \DeclareOptionX{cochineal}{\def\rntz@font{cochineal}}
@@ -52,15 +53,24 @@
 %% vvarbb - A more readable variant blackboard bold.
 %% smallerops - Vertically smaller \prod & \sum.
 %%
-%% To consider: bigdelims (enlarges "delimiters" - what are those? parens?)
-%%
 %% Font-family options to newtxmath:
-%% baskerv{aldx,ille}, libertine, cochineal, utopia.
+%% baskerv{aldx,ille}, charter, libertine, cochineal, utopia.
 \PassOptionsToPackage{vvarbb,smallerops}{newtxmath}
 \PassOptionsToPackage{vvarbb,smallerops}{newpxmath}
 
 
 %% ---------- 3. Font choices ----------
+\ifdefstring{\rntz@font}{alegreya}{
+  \RequirePackage[osf,scaled=\@scaled{1.02}]{Alegreya}
+  \RequirePackage[osf,scaled=\@scaled{1.02}]{AlegreyaSans}
+  \RequirePackage[scaled=\@scaled{1.008842470114814}]{inconsolata}
+  \edef\rntz@eulerscale{1.004444444444444}
+  \ifdefstring{\rntz@mathfont}{newmath}{
+    \RequirePackage[charter,scaled=\@scaled{1.043076923076923}]{newtxmath}
+  }{}
+  \edef\rntz@leadingfactor{1.070816397630937}
+}{}
+
 \ifdefstring{\rntz@font}{baskervald}{
   \RequirePackage[proportional,osf,scaled=\@scaled{1}]{Baskervaldx}
   \RequirePackage[p,osf,scaled=\@scaled{0.997687494646978}]{biolinum}

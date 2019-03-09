@@ -112,6 +112,9 @@ spacings. The text font options are named by the serif font they choose. Most
 load [Biolinum][Libertine] for sans-serif, and all load [Inconsolata][] for
 monospace. The text fonts are:
 
+- `alegreya` for [Alegreya Serif and Sans][alegreya], a strongly-flavored,
+  rather angular font.
+
 - `baskervald` for [Baskervald][baskervald], a Baskerville variant. Nice in
   print, acceptable on screen.
 
@@ -153,8 +156,11 @@ You can also choose between three families of math fonts:
 The defaults are `charter` with `euler`.
 
 Many thanks to [Michael Sharpe](http://math.ucsd.edu/~msharpe/), who maintains
-the Baskervaldx, cochineal, inconsolata, newtx, newpx, and XCharter packages.
+the Baskervaldx, cochineal, inconsolata, newtx, newpx, and xcharter packages;
+and to Bob Tennent, who maintains the alegreya, librebaskerville, and libertine
+packages.
 
+[alegreya]: https://ctan.org/pkg/alegreya
 [baskervaldx]: https://ctan.org/pkg/baskervaldx
 [librebaskerville]: https://ctan.org/pkg/librebaskerville
 [Cochineal]: https://ctan.org/pkg/cochineal
