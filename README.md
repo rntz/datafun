@@ -114,7 +114,7 @@ monospace. The text fonts are:
 - `alegreya` for [Alegreya Serif and Sans][alegreya], a strongly-flavored,
   rather angular font.
 
-- `baskervald` for [Baskervald][baskervald], a Baskerville variant. Nice in
+- `baskervald` for [Baskervald][baskervaldx], a Baskerville variant. Nice in
   print, acceptable on screen.
 
 - `charter` for [Bitstream Charter][charter] with [Source Sans Pro][ssans].
