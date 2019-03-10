@@ -1,10 +1,10 @@
-%\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=19cm,width=36.65625em,width=38em,]{narrow}
-%\documentclass{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=158mm,width=373pt,]{narrow}
-\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
+%\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=19cm,width=38em,width=36.65625em,]{narrow}
+%\documentclass{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=158mm,width=373pt,width=360pt,]{narrow}
+%\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
 %\documentclass[nomarginums]{rntz}\usepackage[b6]{rntzgeometry}\usepackage[width=\textwidth,fullwidth=115mm,]{narrow}\geometry{bottom=36pt}\pagestyle{empty}
 
 %\documentclass{rntz}\usepackage{fantasy}\geometry{textwidth=330pt,}
-%\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}\geometry{textwidth=330pt}
+\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}\geometry{textwidth=330pt}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
 \usepackage{latexsym}               % \rightsquigarrow
@@ -15,8 +15,6 @@
 %\usepackage{booktabs}               % \midrule
 \usepackage{mathpartir}             % \begin{mathpar}, \infer, etc.
 \usepackage{accents}                %\underaccent
-%% FIXME: get rid of esvect
-%\usepackage[f]{esvect}              % \vv for wide vector arrows
 \usepackage{nccmath}                % fix align* (etc.) spacing
 \usepackage{anyfontsize}
 
@@ -24,7 +22,7 @@
 \makeatletter\crefname{section}{\S\@gobble}{\S\@gobble}\makeatother
 
 % hang is only relevant for long captions, which I don't have
-%\usepackage[skip=.5\baselineskip,labelsep=period,labelfont=it,textfont=it,format=hang]{caption}
+\usepackage[skip=.5\baselineskip,labelsep=period,labelfont=it,textfont=it,format=hang]{caption}
 %\usepackage[skip=.5\baselineskip,labelfont=sc,textfont=it,labelsep=period,format=hang]{caption}
 
 \usepackage{enumitem}\setlist{labelindent=1em,labelsep=.75em,leftmargin=*}
@@ -32,13 +30,15 @@
 \setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
 
 %\PassOptionsToPackage{scaled=1.1}{rntzfont} % a4/b5, width=38em/373pt
-%\PassOptionsToPackage{scaled=1.0625}{rntzfont} % b5/a4 width=36.66em
+%\PassOptionsToPackage{scaled=1.0625}{rntzfont} % b5/a4 width=36.66em/360pt
+\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
 %\PassOptionsToPackage{scaled=.99}{rntzfont} %b6
-%\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy
 
 %% Note to self: don't use newmath, Neel's PC can't handle it.
 \usepackage[charter,]{rntzfont}
 %\usepackage[source,linespread=1.0233,]{rntzfont}
+%\usepackage[librebaskerville,linespread=1.015,]{rntzfont}
+%\usepackage[alegreya,scaled=1.01,]{rntzfont}
 
 %% \usepackage[default,scale=.96]{lato}
 %% \usepackage[sfdefault,scaled=0.9]{noto}
@@ -64,178 +64,7 @@
 \hyphenation{eq-uip-ped}
 \hyphenation{inv-olv-ing}
 
-
-%% ===== Commands =====
-\newcommand\todo[1]{{\color{ACMRed}#1}}
-\newcommand\XXX{\todo{\text{XXX}}}
-
-\newcommand\isocolor{\color{ForestGreen}} % ACMBlue is used in links
-\newcommand\commentcolor{\color{ACMPurple}}
-%\renewcommand\isocolor{}
-
-\newcommand\naive{na\"ive}
-\newcommand\Naive{Na\"ive}
-\newcommand\cat\textbf
-\ifdefined\strong\else\newcommand\strong\textbf\fi
-\newcommand\CP{\cat{\texorpdfstring{$\boldsymbol\Delta$Poset}{DeltaPoset}}}
-\newcommand\Poset{\cat{Poset}}
-\newcommand\initO{0}
-\newcommand\termO{1}
-%% \newcommand\initO{\ensuremath{\mathbold{0}}}
-%% \newcommand\termO{\ensuremath{\mathbold{1}}}
-\newcommand\expO[2]{#1 \Rightarrow #2}
-\newcommand\initE{\mathord{\text{\textexclamdown}}}
-\newcommand\termI{\mathord{!}}
-
-\ifdefined\G\renewcommand\G\Gamma\else\newcommand\G\Gamma\fi
-\newcommand\D\Delta
-\newcommand\x\times
-\newcommand\pto\rightharpoonup
-\newcommand\fn\lambda
-\newcommand\dee\delta
-\newcommand\injc{\text{in}}
-\newcommand\inj[1]{\injc_{#1}\,}
-\newcommand\zero{\ensuremath{\mathbold{0}}}
-\newcommand\bnfor{~~|~~}
-\newcommand\bnfeq\Coloneqq
-\newcommand\N{\mathbb{N}}
-\newcommand\tuple[1]{\langle{#1}\rangle}
-
-% Space for function application. Between \; and \:.
-\newcommand\<{\mskip 4mu plus 4mu minus 1mu}
-%\renewcommand\<\;
-\newcommand\da{\mathvar{da}}
-\newcommand\db{\mathvar{db}}
-\newcommand\dx{\mathvar{dx}}
-\newcommand\dy{\mathvar{dy}}
-\newcommand\df{\mathvar{df}}
-%\renewcommand\df{d\kern-.1em f\kern-.1em} % fucking kerning.
-\newcommand\dg{\mathvar{dg}}
-
-\newcommand\iso{{\texorpdfstring{\ensuremath{\square}}{iso}}}
-\newcommand\isof{\iso}
-\newcommand\blackiso{{\texorpdfstring{\ensuremath{\blacksquare}}{black-box}}}
-\newcommand\blackisof{\blackiso}
-\newcommand\fname\text
-\newcommand\id{\fname{id}}
-\newcommand\dummy{\fname{dummy}}
-\newcommand\extract{{\color{Red}\fname{extract}}}
-
-\newcommand\valfn{\ensuremath{\mathbb{U}}}
-%\renewcommand\valfn{\ensuremath{\mathcal{U}}}
-\newcommand\vals{\valfn}
-\newcommand\chgs[1]{\D{#1}}
-\newcommand\deriv[1]{\ensuremath{#1'}}
-\newcommand\upd{\mathbin{\oplus}}
-\newcommand\updfn{\ensuremath{{\upd}}}
-
-%% \renewcommand\vals[1]{{#1}^v}
-%% \renewcommand\valfn{\ensuremath{\vals{-}}}
-
-\newcommand\fork[1]{\langle{#1}\rangle}
-\newcommand\krof[1]{[{#1}]}
-\newcommand\bigkrof[1]{\bigl[{#1}\bigr]}
-%\newcommand\Fork[1]{\left\langle{#1}\right\rangle}
-%\newcommand\Krof[1]{\left[{#1}\right]}
-
-\newcommand\quantifierspace{~\,}
-\newcommand\fa[1]{\forall #1.\quantifierspace}
-\newcommand\ex[1]{\exists #1.\quantifierspace}
-\newcommand\fnspace{\;}
-\newcommand\fnof[1]{\fn{#1}.\fnspace}
-
-\newcommand\kwname\textbf
-\newcommand\tset[1]{\{{#1}\}}
-\newcommand\tbool{{\boldsymbol 2}}
-\newcommand\efor[1]{\kwname{for}\:({#1})\fnspace}
-%\renewcommand\efor[1]{\bigvee(#1)\;}
-\newcommand\ewhen[1]{\kwname{when}\:({#1})\fnspace}
-\newcommand\ecase[1]{\kwname{case} \;{#1}\; \kwname{of}\;}
-\newcommand\caseto\shortrightarrow
-\newcommand\eset[1]{\{{#1}\}}
-\newcommand\etrue{\mathrm{true}}
-\newcommand\efalse{\mathrm{false}}
-\newcommand\eif[2]{\kwname{if}\;{#1}\;\kwname{then}\;{#2}\;\kwname{else}\;}
-\newcommand\ebox[1]{[{#1}]}
-\newcommand\elet[1]{\kwname{let}\;#1\;\kwname{in}\;}
-\newcommand\efix{\kwname{fix}\<}
-\newcommand\eboxd[1]{\ebox{\isocolor #1}}
-\newcommand\esetd[1]{\eset{\isocolor #1}}
-\newcommand\eford[2]{\efor{{\isocolor #1} \in #2}}
-\newcommand\eifd[2]{\eif{\isocolor #1}{#2}}
-\newcommand\pwild{\underline{\phantom{a}}}
-\newcommand\etuple[1]{\langle{#1}\rangle}
-\newcommand\splitsum{\kwname{split}\<}
-
-\newcommand\subst[2]{{#1}\,\{{#2}\}}
-\newcommand\substd[2]{\subst{#1}{\isocolor #2}}
-\newcommand\substo\coloneqq
-
-\newcommand\den[1]{\ensuremath{\left\llbracket{#1}\right\rrbracket}}
-\newcommand\bigden[1]{\ensuremath{\bigl\llbracket{#1}\bigr\rrbracket}}
-\newcommand\homto\Rightarrow
-\newcommand\then{\mathbin{;}}
-%\renewcommand\then{\,{;}\,}
-\renewcommand\then\cdot
-\newcommand\catC{\ensuremath{\mathcal{C}}}
-\newcommand\down{\ensuremath{F}}
-\newcommand\disco{\ensuremath{W}}
-\newcommand\downof[1]{\down #1}
-\newcommand\discof[1]{\ensuremath{\disco #1}}
-\newcommand\morph\mathit
-\newcommand\idmorph{\morph{id}}
-\newcommand\idfunctor{\morph{Id}}
-
-%% \renewcommand\idmorph{1}
-%% \renewcommand\idfunctor\idmorph
-
-
-%% Option A
-% \leadsto, \rightsquigarrow, \Rightarrow
-\newcommand\validarrow\to
-\newcommand\valid[1]{\mathrel{\overset{#1}{\validarrow}}}
-\newcommand\longvalid[1]{\mathrel{\xrightarrow{#1}}}
-\newcommand\vld[3]{{#2 \valid{#1} #3}}
-\newcommand\longvld[3]{{#2 \longvalid{#1} #3}}
-
-
-%% %% Option B
-%% \renewcommand\validarrow\leadsto
-%% \newcommand\longvalidarrow\validarrow
-%% \renewcommand\longvld[3]{{#2 \mathrel{\overset{#1}{\longvalidarrow}} #3}}
-
-
-%% %% Option C
-%% \renewcommand\vld[3]{{#2 \xrsquigarrow{#1} #3}}
-%% \renewcommand\longvld[3]{{#2 \xrsquigarrow{#1} #3}}
-
-%% %% Adapted from https://tex.stackexchange.com/questions/233676/leadsto-with-text
-%% \usepackage{tikz}
-%% \usetikzlibrary{decorations.pathmorphing,shapes}
-
-%% \usepackage{tikz-cd}
-%% \usetikzlibrary{decorations.pathmorphing}
-%% \newcommand\xrsquigarrow[1]{%
-%%     \mathrel{%
-%%         \begin{tikzpicture}[%
-%%             baseline={(current bounding box.south)}
-%%             ]
-%%         \node[%
-%%             ,inner sep=.44ex
-%%             ,align=center
-%%             ] (tmp) {$\scriptstyle #1$};
-%%         \path[%
-%%             ,draw,<-
-%%             ,decorate,decoration={%
-%%                 ,zigzag
-%%                 ,amplitude=0.7pt
-%%                 ,segment length=1.2mm,pre length=3.5pt
-%%                 }
-%%             ]
-%%         (tmp.south east) -- (tmp.south west);
-%%         \end{tikzpicture}
-%%         }
-%%     }
+\usepackage{notation}
 
 
 \title{Change Semantics for Semi\naive{} Datafun}
@@ -246,9 +75,20 @@
 
 \begin{document}
 
+%% \noindent
+%% % use a math environment to force loading math font.
+%% ex/em: \the\fontdimen5\font{} / \the\fontdimen6\font \(\)\\
+%% math ex: \the\fontdimen5\textfont1{} / \the\fontdimen6\textfont1\\
+%% word space: \the\fontdimen2\font\\
+%% baselineskip: \the\baselineskip\\
+%% %% \par\begingroup\Large\noindent
+%% %% x$x$\emph{x} y$y$\emph{y} v$v$\emph{v} $f$f $t$t $o$o $T$T\emph{T} lIx\\
+%% %% fb ff fh fi fj fk fl ft \emph{fb ff fh fi fj fk fl ft} Th \emph{Th}\\
+%% %% ffb ffh ffi ffj ffk ffl fft \emph{ffb ffh ffi ffj ffk ffl fft}
+%% %% \endgroup\\
+
 \maketitle
 
-%\noindent abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz
 \begin{abstract}
   We define \emph{incrementalization} and \emph{semi\naive{} evaluation}
   transformations for Datafun programs, generalizing the classic Datalog
@@ -271,6 +111,153 @@ type-indexed family of natural isomorphisms relating the incremental and
 semi\naive{} semantics.
 
 %% TODO: rewrite to match above strategy and add section links
+
+
+%% ---- Syntax & typing rules ----
+\begin{figure*}
+  \[\setlength\arraycolsep{.33em}\begin{array}{r@{\hskip 1em}ccl}
+    \text{types} & A,B &\bnfeq& \tunit \bnfor A \x B \bnfor A + B \bnfor A \to B
+    \bnfor \isof A \bnfor \tdown{\eqt A}
+    \\
+    \text{semilattices} & L,M &\bnfeq& \tunit \bnfor L \x M \bnfor A \to L \bnfor \tdown{\eqt A}
+    \\
+    \text{eqtypes} & \eqt A, \eqt B &\bnfeq&
+    \tunit \bnfor \eqt A \x \eqt B \bnfor \eqt A + \eqt B
+    \bnfor \isof{\eqt A} \bnfor \tdown{\eqt A}
+    \\[.5em]
+    \text{terms} & e,f,g &\bnfeq& x \bnfor \dvar x \bnfor \fnof{x} e \bnfor e\<f
+    \bnfor \etuple{} \bnfor \etuple{e,f} \bnfor \pi_i\<e\\
+    &&&\inj i e \bnfor \ecase{e} (\inj i x \caseto f_i)_{i\in\{1,2\}}\\
+    &&&\bot \bnfor e \vee f \bnfor \edown{e} \bnfor \ebigvee x e f\\
+    &&& \eboxd e \bnfor \elet{\eboxd x = e} f\\
+    &&& \prim{isEmpty}\<e \bnfor \esplit e \bnfor \prim{eq}\<e \bnfor \efix e
+    \\[.5em]
+    \text{contexts} & \G &\bnfeq& (H_i)_i\\
+    \text{hypotheses} & H &\bnfeq& \h x A \bnfor \hd x A
+  \end{array}\]
+
+  \vspace{-1ex}
+  \begin{mathpar}
+    \infer{\h x A \in \G}{\J x \G A}
+
+    \infer{\hd x A \in \G}{\J {\dvar x} \G A}
+
+    \infer{\J e {\G,\h x A} B}{\J {\fnof x e} \G {A \to B}}
+
+    \infer{\J e \G {A \to B} \\ \J f \G A}{\J {e\<f} \G B}
+
+    \infer{\quad}{\J {\etuple{}} \G \tunit}
+
+    \infer{(\J{e_i}\G{A_i})_i}{\J{\etuple{e_1,e_2}} \G {A_1 \x A_2}}
+
+    \infer{\J e \G {A_1 \x A_2}}{\J{\pi_i\<e}\G{A_i}}
+
+    \infer{\J e \G A_i}{\J{\inj i e}\G{A_1 + A_2}}
+
+    \infer{\J e \G {A_1 + A_2} \\
+      (\J {f_i} {\G,\h {x_i} {A_i}} {B})_i
+    }{
+      \J {\ecase{e} (\inj i {x_i} \caseto f_i)_i} \G B
+    }
+
+    \infer{\quad}{\J\bot\G L}
+
+    \infer{(\J{e_i}\G L)_i}{\J{e_1 \vee e_2}\G L}
+
+    \infer{\J e \G {\eqt A}}{\J {\edown e} \G {\tdown {\eqt A}}}
+
+    \infer{\J e \G {\tdown {\eqt A}} \\
+      \J f {\G,\h x {\eqt A}} L
+    }{\J {\ebigvee x e f} \G L}
+
+    \infer{\J {\isocolor e} {\stripcx\G} A}{\J{\eboxd e} \G {\isof A}}
+
+    \infer{\J e \G {\isof A} \\ \J f {\G,\hd x A} B}{
+      \J {\elet{\eboxd x = e} f} \G B}
+
+    \infer{\J e \G {\tdown \tunit}}{\J {\prim{isEmpty}\<e} \G {\tunit + \tunit}}
+
+    \infer{\J e \G {\isof{(A + B)}}}{\J{\esplit e} \G {\isof A + \isof B}}
+
+    \infer{\J e \G {\isof{(\eqt A \x \eqt A)}}}{\J{\prim{eq}\<e} \G {\tdown\tunit}}
+
+    \infer{\J e \G {\isof{(\eqt L \to \eqt L)}}}{\J{\prim{fix}\< e} \G {\eqt L}}
+  \end{mathpar}
+
+  \caption{Datafun core syntax and typing rules}
+  \label{fig:core-datafun}
+\end{figure*}
+
+\begin{figure*}
+  \[\setlength\arraycolsep{.33em}\begin{array}{r@{\hskip 1em}ccl}
+    \text{types} & A,B &\bnfeq& ... \bnfor \tbool \bnfor \tset{\eqt A}
+    \\
+    \text{terms} & e,f,g &\bnfeq&
+    ... \bnfor \esetd{e_i}_i \bnfor \eeqd{e}{f} \bnfor \eford{x}{e} f\\
+    &&& \efalse \bnfor \etrue \bnfor \eif e f g \bnfor \ewhen e f\\
+    &&& \edcase{e} (\inj i {\dvar{x_i}} \caseto f_i)_{i\in\{1,2\}} \bnfor \efixisd x e
+  \end{array}\]
+
+  \begin{mathpar}
+    \infer{(\J {\isocolor e_i} {\stripcx\G} A)_i}{
+      \J {\esetd{e_i}_i} \G {\tset{A}}}
+
+    \infer{(\J {\isocolor e_i} {\stripcx\G} {\eqt A})_i}
+          {\J {\eeqd{e_1}{e_2}} \G \tbool}
+
+    \infer{
+      \J e \G {\tset A} \\
+      \J f {\G,\hd x A} L
+    }{\J {\eford x e f} \G L}
+
+    \infer{\quad}{\J \etrue \G \tbool}
+
+    \infer{\quad}{\J \efalse \G \tbool}
+
+    \infer{\J {\isocolor e} {\stripcx\G} \tbool \\ (\J{f_i}\G B)_i}
+          {\J {\eifd e{f_1}{f_2}} \G {B}}
+
+    \infer{\J e \G \tbool \\ \J f \G L}{\J {\ewhen e f} \G L}
+
+    \infer{\J {\isocolor e} {\stripcx{\G}, \h x {\eqt L}} {\eqt L}}
+          {\J {\efixisd x e} \G {\eqt L}}
+  \end{mathpar}
+
+  \caption{Surface syntax and typing rules}
+  \label{fig:surface-syntax}
+\end{figure*}
+
+\begin{figure*}
+  \begin{align*}
+    \tbool &\desugars \tdown{\tunit} &
+    \tset{\eqt A} &\desugars \tdown{\isof {\eqt A}}
+    \\[.5em]
+    \efalse &\desugars \bot &
+    \etrue &\desugars \edown{\etuple{}}
+    \\
+    \eeqd e f &\desugars \prim{eq}\< \eboxd{\etuple{e, f}} &
+    \ewhen e f &\desugars \ebigvee {\freshvar\pwild} e f
+  \end{align*}
+
+  \begin{align*}
+    \esetd{e_i}_i &\desugars \edown\eboxd{e_0} \vee ... \vee \edown\eboxd{e_n}
+    \quad \text{(or $\bot$ if $n=0$)}\\
+    \eford x e f &\desugars \ebigvee {\freshvar y} e {\elet{\eboxd x = \freshvar y} f}\\
+    \eif e {f_1}{f_2} &\desugars
+    \ecase{\prim{isEmpty}\<e} (\inj i {\freshvar\pwild} \caseto f_i)_i\\
+    \edcase e (\inj i {\dvar{x_i}} \caseto f_i)_i
+    &\desugars \ecase{\esplit \eboxd e}
+    (\inj i {\freshvar y} \caseto \elet{\eboxd{x_i} = \freshvar y} f_i)_i\\
+    \efixisd x e &\desugars \efix \eboxd{\fnof {\color{black} x} e}
+  \end{align*}
+
+  \vspace{-.5ex}
+  {\small Fresh variables ($\freshvar y$, $\freshvar\pwild$) are marked in \freshvar{pink}.}
+
+  \vspace{.5ex}
+  \caption{Desugaring of surface syntax}
+  \label{fig:desugaring}
+\end{figure*}
 
 
 \section{Notation and conventions}
@@ -346,185 +333,11 @@ any bicartesian closed category \catC{} equipped with the following structures:
 
 \end{enumerate}
 
-You may notice that we not imposed any \emph{laws}; lacking laws, there is no
-useful general equational theory of Datafun models. Instead, our approach is to
-relate the models we construct to the standard \Poset{} model and use \emph{its}
-equational theory. \Cref{fig:general-semantics} shows how to interpret Datafun
-into any Datafun model.
-
-
-%% ---- Syntax & semantics figures ----
-\newcommand\cxs[2]{{\isocolor #1}\mathop{;}#2}
-\newcommand\emptycx{}
-
-\newcommand\eqt[1]{\underaccent{\mathrm{eq}}{#1}}
-\newcommand\eeq[2]{#1 = #2}
-
-%% TODO: variadic tuples & sums?
-\begin{figure*}
-  \[\setlength\arraycolsep{.33em}\begin{array}{r@{\hskip 1em}ccl}
-    \text{types} & A,B &\bnfeq& \tbool \bnfor \tset{A} \bnfor
-    \iso A \bnfor A \to B \bnfor A \x B \bnfor A + B
-    \\
-    \text{semilattices} & L,M &\bnfeq& \tbool \bnfor \tset{A} \bnfor
-    A \to L \bnfor L \x M
-    \\
-    \text{eqtypes} & \eqt A, \eqt B &\bnfeq& \tbool \bnfor \tset{\eqt A} \bnfor
-    \isof{\eqt A} \bnfor \eqt A \x \eqt B \bnfor \eqt A + \eqt B
-    \\[.2em]
-    \text{terms} & e,f,g &\bnfeq& x \bnfor {\isocolor x} \bnfor \fnof{x} e \bnfor e\<f
-    \bnfor \etuple{e,f} \bnfor \pi_i\<e\\
-    &&&\inj i e \bnfor \ecase{e} (\inj i x \caseto f_i)_{i\in\{1,2\}}\\
-    &&&\etrue \bnfor \efalse \bnfor \eif e f g\\
-    &&&\bot \bnfor e \vee f \bnfor \esetd{e_i}_i \bnfor \eford{x}{e} f
-    \bnfor \ewhen e f\\
-    &&& \eboxd e \bnfor \elet{\eboxd x = e} f \bnfor \splitsum e \bnfor \eeq{e}{f}
-    \bnfor \efix e
-    \\[2ex]
-    \text{contexts} & \Omega &\bnfeq& \cxs\Psi\G
-    \\
-    \text{semicontexts} & \Psi,\G &\bnfeq& (x_i : A_i)_i
-  \end{array}\]
-  \caption{Syntax of Datafun}
-  \label{fig:syntax}
-\end{figure*}
-
-%\newcommand\J[3]{{#1} \mathrel{\,:\,} {#2} \vdash {#3}}
-\newcommand\J[3]{{#2} \vdash {#1} \mathrel{:} {#3}}
-\newcommand\h[2]{{#1} : {#2}}
-
-\begin{figure*}
-  \begin{mathpar}
-    \infer{\isocolor \h x A \in \Psi}{\J {\isocolor x} {\cxs\Psi\G} A}
-
-    \infer{\h x A \in \G}{\J x {\cxs\Psi\G} A}
-
-    \infer{\J e {\cxs\Psi{\G,\h x A}} B}{\J{\fnof x e}{\cxs\Psi\G}{A \to B}}
-
-    \infer{\J e \Omega {A \to B} \\ \J f \Omega A}{\J {e\<f} \Omega B}
-
-    \infer{(\J{e_i}\Omega{A_i})_i}{\J{\etuple{e_1,e_2}} \Omega {A_1 \x A_2}}
-
-    \infer{\J e \Omega {A_1 \x A_2}}{\J{\pi_i\<e}\Omega{A_i}}
-
-    \infer{\J e \Omega A_i}{\J{\inj i e}\Omega{A_1 + A_2}}
-
-    \infer{\J e {\cxs\Psi\G} {A_1 + A_2} \\
-      (\J {f_i} {\cxs\Psi{\G,\h {x_i} {A_i}}} {B})_i
-    }{
-      \J{\ecase{e} (\inj i {x_i} \caseto f_i)_i}{\cxs\Psi\G}{B}
-    }
-
-    \infer{\quad}{\J \etrue \Omega \tbool}
-
-    \infer{\quad}{\J \efalse \Omega \tbool}
-
-    \infer{\J e \Omega {\isof\tbool} \\ (\J{f_i}\Omega B)_i}{
-      \J {\eif e{f_1}{f_2}} \Omega {B}
-    }
-
-    \infer{\J e \Omega \tbool \\ \J f \Omega L}{\J {\ewhen e f} \Omega L}
-
-    \infer{\quad}{\J\bot\Omega L}
-
-    \infer{(\J{e_i}\Omega L)_i}{\J{e_1 \vee e_2}\Omega L}
-
-    \infer{(\J{e_i}{\cxs\Psi\emptycx}{A})_i}{
-      \J{\esetd{e_i}_i}{\cxs\Psi\G}{\tset{A}}}
-
-    \infer{
-      \J e {\cxs\Psi\G} {\tset A} \\
-      \J f {\cxs{\Psi,\h x A}\G} L
-    }{\J{\eford x e f}{\cxs\Psi\G}{L}}
-
-    \infer{\J e {\cxs\Psi\emptycx} A}{\J{\eboxd e}{\cxs\Psi\G}{\isof A}}
-
-    \infer{\J e {\cxs\Psi\G} {\isof A}\\
-      \J f {\cxs{\Psi,\h x A}\G} B
-    }{\J {\elet{\eboxd x = e} f} {\cxs\Psi\G} B}
-
-    \infer{\J e \Omega {\isof{(A + B)}}}{\J{\splitsum e} \Omega {\isof A + \isof B}}
-
-    \infer{(\J {e_i} \Omega {\isof{\eqt A}})_i}{\J {\eeq{e_1}{e_2}} \Omega \tbool}
-
-    \infer{\J e \Omega {\isof{(\eqt L \to \eqt L)}}
-    }{\J{\efix e} \Omega {\eqt L}}
-  \end{mathpar}
-
-  \caption{Typing rules of Datafun}
-  \label{fig:typing-rules}
-\end{figure*}
-
-\begin{figure*}[p]
-  \begin{mathpar}
-    \den{A} : \catC
-
-    \den{\J e \Omega A} : \den{\Omega} \to \den{A} : \catC
-
-    \morph{dist}^\x_+ : A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)
-  \end{mathpar}
-
-  \begin{align*}
-    \den{\tbool} &= \downof{\termO} & \den{A \to B} &= \den{A} \homto \den{B}
-    \\
-    \den{\tset{A}} &= \downof{\den{A}} & \den{A \x B} &= \den{A} \x \den{B}
-    \\
-    \den{\isof A} &= \discof{\den{A}} & \den{A + B} &= \den{A} + \den{B}
-  \end{align*}
-
-  \begin{align*}
-    \den{{\isocolor x}} &= \XXX \quad \text{(for discrete $\isocolor x$)}
-    & \den{x} &= \XXX \quad \text{(for monotone $x$)}
-    \\
-    \den{\fnof x e} &= \XXX
-    & \den{e\<f} &= \fork{\den{e}, \den{f}} \then \morph{eval}
-    \\
-    \den{\etuple{e,f}} &= \fork{\den{e},\den{f}}
-    & \den{\pi_i\<e} &= \den{e} \then \pi_i
-    \\
-    \den{\inj i e} &= \den{e} \then \injc_i
-    \\
-    \den{\efalse} &= \bot
-    & \den{\etrue} &= \termI{} \then \morph{singleton}
-    \\
-    \den{\bot} &= \bot
-    & \den{e \vee f} &= \fork{\den{e}, \den{f}} \then \morph{join}
-    \\
-    %% FIXME: wrong denotation
-    \den{\esetd{e_i}_i} &=
-    \color{red} \fork{\den{e_i} \then \morph{singleton}}_i \then \morph{join}
-    \\
-    \bigden{\eboxd e} &= \XXX \then \discof{(\XXX \then \den e)}
-    & \bigden{\elet{\eboxd x = e} f} &=
-    \fork{\idmorph, \den{e}} \then \XXX \then \den{f}
-    \\
-    \den{\splitsum e} &= \den{e}\then W_+ &
-    \den{\eeq{e}{f}} &= \fork{\den{e},\den{f}} \then \morph{eq}
-  \end{align*}
-
-  \begin{align*}
-    \den{\ecase{e} (\inj i{x_i} \caseto f_i)_i} &=
-    \fork{\idmorph, \den{e}} \then \morph{dist}^\x_+
-    \then \bigkrof{\XXX \then \den{f_i}}_i
-    \\
-    \den{\eif e {f_1}{f_2}}
-    &= \fork{\idmorph, \den e \then \morph{isEmpty}}
-    \then \morph{dist}^\x_+ \then \bigkrof{\pi_1 \then \den{f_i}}_i
-    \\
-    \den{\ewhen e f} &= \fork{\idmorph, \den{e}} \then \morph{strong}
-    \then \downof{(\pi_1 \then \den{f})} \then \morph{collect}
-    \\
-    \den{\eford x e f} &= \fork{\idmorph,\den{e}} \then \morph{strong}
-    \then \downof{(\XXX \then \den{f})} \then \morph{collect}
-  \end{align*}
-
-  \todo{FIXME: denotation set literals is wrong, doesn't account for context stripping!}
-
-  \todo{TODO: $\den{\efix e}$}
-
-  \caption{Datafun semantics in a Datafun model $\tuple{\catC, \disco, \down}$}
-  \label{fig:general-semantics}
-\end{figure*}
+Observe that we have not imposed any laws, so there is no useful general
+equational theory of Datafun models. Instead, our approach is to relate the
+models we construct to the standard \Poset{} model and use \emph{its} equational
+theory. \Cref{fig:general-semantics} shows how to interpret Datafun into any
+Datafun model.
 
 
 \subsection{Object families}
@@ -546,6 +359,80 @@ To be a Datafun model, semilattice types must be interpreted into
 \item A fixed point object when equipped with a morphism $\morph{fix} : \discof{(A
   \homto A)} \to A$.
 \end{itemize}
+
+
+%% ---- Semantics in a Datafun Model ----
+\begin{figure*}
+  \emph{Types and contexts}%\vspace{-.5ex}
+
+  \begin{align*}
+    \den{\tunit} &= \termO & \den{A \to B} &= \den{A} \homto \den{B}
+    \\
+    \den{\tdown A} &= \downof{\den{A}} & \den{A \x B} &= \den{A} \x \den{B}
+    \\
+    \den{\isof A} &= \discof{\den{A}} & \den{A + B} &= \den{A} + \den{B}
+  \end{align*}
+
+  \begin{align*}
+    \den{\G} &= \prod_{H \in \G} \den{H} &
+    \den{\h x A} &= \den{A} & \den{\hd x A} &= \discof{\den{A}}
+  \end{align*}
+
+  \vspace{.5ex}\emph{Terms}%\vspace{-.5ex}
+
+  \begin{align*}
+    \den{\dvar x} &= \pi_x \then \varepsilon \quad \text{($\dvar x$ discrete)}
+    & \den{x} &= \pi_x \quad \text{($x$ monotone)}
+    \\
+    \den{\fnof x e} &= \lambda\den{e}
+    & \den{e\<f} &= \fork{\den{e}, \den{f}} \then \morph{eval}
+    \\
+    \den{\etuple{e_i}_i} &= \fork{\den{e_i}}_i
+    & \den{\pi_i\<e} &= \den{e} \then \pi_i
+    \\
+    \den{\inj i e} &= \den{e} \then \injc_i
+    &
+    \den{\bot} &= \termI \then \morph{join}_0
+    \\
+    \den{e \vee f} &= \fork{\den{e}, \den{f}} \then \morph{join}_2
+    &
+    \den{\edown e} &= \den{e} \then \morph{singleton}
+    \\
+    \bigden{\eboxd e} &= \morph{strip} \then \discof{\den e}
+    & \bigden{\elet{\eboxd x = e} f} &=
+    \fork{\idmorph, \den{e}} \then \den{f}
+    \\
+    \den{\prim{isEmpty}\<e} &= \den{e} \then \morph{isEmpty}
+    & \den{\esplit e} &= \den{e}\then \disco_+
+    \\
+    \den{\prim{eq}\<e} &= \den{e} \then \morph{eq}
+    & \den{\efix e} &= \den{e} \then \morph{fix}
+  \end{align*}
+
+  \begin{align*}
+    \den{\ecase{e} (\inj i{x_i} \caseto f_i)_i} &=
+    \fork{\idmorph, \den{e}} \then \morph{dist}^\x_+
+    \then \bigkrof{\den{f_i}}_i
+    \\
+    \den{\ebigvee x e f} &= \fork{\idmorph,\den{e}} \then \morph{strong}
+    \then \downof{\den{f}} \then \morph{collect}
+  \end{align*}
+
+  \vspace{.5ex}\emph{Lemmas}%\vspace{-.5ex}
+
+  \begin{align*}
+    \morph{dist}^\x_+ &: A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)\\
+    % this could be simpler if it distributed in the opposite direction.
+    \morph{dist}^\x_+ &= \fork{\pi_2 \then \krof{\lambda (\fork{\pi_2,\pi_1} \then \injc_i)}_i, \pi_1}
+    \then \morph{eval}
+    \\[1ex]
+    \morph{strip} &: \den\G \to \discof{\den{\stripcx\G}}\\
+    \morph{strip} &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \disco_\x
+  \end{align*}
+
+  \caption{Datafun semantics in a Datafun model $\tuple{\catC, \disco, \down}$}
+  \label{fig:general-semantics}
+\end{figure*}
 
 
 \section{The category \CP}
@@ -855,12 +742,14 @@ products and sums in $\CP$.
     &\expandsto& \ecase{e} (\inj i x \caseto \ecase{x} (p_{i,j} \caseto f_{i,j})_j)_i
     \\[.33em]
     \ecase{e} (\eboxd{\inj i p_i} \caseto f_i)_i
-    &\expandsto& \ecase{\splitsum e} (\inj i \eboxd{p_i} \caseto f_i)_i
+    &\expandsto& \ecase{\esplit e} (\inj i \eboxd{p_i} \caseto f_i)_i
   \end{array}\]
   \caption{Some pattern-matching elaboration rules}
 \end{figure*}
 
-\renewcommand\extract{\error{don't use extract}}
+%% \newcommand\extract{{\color{Red}\fname{extract}}}
+%% \renewcommand\extract{\error{don't use extract}}
+
 \begin{figure*}
   \begin{mathpar}
     \setlength\arraycolsep{.3em}\begin{array}{lcl}
@@ -899,7 +788,7 @@ products and sums in $\CP$.
     \delta \etrue = \delta \efalse &= \efalse
     & \delta\esetd{e_i}_i &= \eset{}\\
     \delta \eboxd{e} &= \eboxd{\delta e}
-    & \delta(\splitsum e) &= \splitsum \delta e
+    & \delta(\esplit e) &= \esplit \delta e
   \end{align*}
 
   \begin{align*}
@@ -913,9 +802,9 @@ products and sums in $\CP$.
     &= (\eford x {\delta e} f)\\
     &\vee (\eford x{e \vee \delta e} \substd{\delta f}{\dx \substo \zero\< x})\\
     \delta (\ecase e (\inj i x \caseto f_i)_i)
-    %% &= \ecase{\splitsum{\eboxd e}}\\
+    %% &= \ecase{\esplit{\eboxd e}}\\
     %% &\qquad(\inj i \eboxd{x} \caseto \subst{\delta f_i}{\dx \substo \extract_i\<x\<\delta e})_i
-    &= \ecase{\splitsum{\eboxd e},\, \delta e}\\
+    &= \ecase{\esplit{\eboxd e},\, \delta e}\\
     &\qquad ({\inj i \eboxd x,\, \inj i \dx} \caseto \delta f_i)_i\\
     &\qquad \textit{\commentcolor --- The following cases are unreachable.}\\
     &\qquad ({\inj i \eboxd x,\, \pwild} \caseto
@@ -977,8 +866,8 @@ products and sums in $\CP$.
   \end{align*}
 
   %% TODO: determine exactly how much syntax sugar I want to allow in the target
-  %% of this translation. for example, the case-split I use in \phi(\splitsum e)
-  %% is only valid *because* \splitsum exists.
+  %% of this translation. for example, the case-split I use in \phi(\esplit e)
+  %% is only valid *because* \esplit exists.
   %%
   %% Would be nice to give the syntax sugar explicitly, but maybe more effor
   %% than its worth? Might be clearer to mostly avoid syntax sugar? Not sure.
@@ -991,11 +880,11 @@ products and sums in $\CP$.
     &= \ecase{\phi e} (\inj i x \caseto \phi f_i)_i
     \\
     \delta(\ecase e (\inj i x \caseto f_i)_i)
-    &= \ecase{\splitsum{\eboxd{\phi e}},\, \delta e}\\
+    &= \ecase{\esplit{\eboxd{\phi e}},\, \delta e}\\
     &\qquad ({\inj i {\eboxd x},\, \inj i \dx} \caseto \delta f_i)_i\\
     &\qquad ({\inj i {\eboxd x},\, \pwild}
       \caseto \subst{\delta f_i}{\dx \substo \dummy\<x})_i
-    %% &= \ecase{\splitsum{\eboxd{\phi e}}}\\
+    %% &= \ecase{\esplit{\eboxd{\phi e}}}\\
     %% &\qquad (\inj i \eboxd x
     %% \caseto \subst{\delta f_i}{\dx \substo \extract_i\<x\<\delta e})_i\\
     %% \phi(\eif e f g) &= \eif{\phi e}{\phi f}{\phi g}\\
@@ -1020,24 +909,24 @@ products and sums in $\CP$.
     \delta(\elet{\eboxd x = e} f)
     &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \delta f
     \\
-    \phi(\splitsum e) &=
+    \phi(\esplit e) &=
     %% \elet{\eboxd{\etuple{y,\dy}} = \phi e}\\
-    %% &\phantom{{}={}} \ecase{\splitsum{\eboxd y}}\\
+    %% &\phantom{{}={}} \ecase{\esplit{\eboxd y}}\\
     %% &\qquad (\inj i \eboxd x \caseto
     %% \substd{\phi f_i}{\dx \substo \extract_i\<y\<\dy})_i
     %%
     %% \elet{\eboxd{\etuple{x,\dx}} = \phi e}\\
-    %% &\phantom{{}={}}\ecase{\splitsum {\eboxd x}, \splitsum {\eboxd\dx}}\\
+    %% &\phantom{{}={}}\ecase{\esplit {\eboxd x}, \esplit {\eboxd\dx}}\\
     %% &\qquad (\inj i \eboxd x, \inj i \eboxd\dx
     %% \caseto \inj i \eboxd{\etuple{x,\dx}})_i\\
     %% &\qquad (\inj i \eboxd x, \pwild
     %% \caseto \inj i \eboxd{\etuple{x,\dummy\<x}})_i
     %%
     \elet{\eboxd{x} = \phi e}\\
-    &\phantom{{}={}} \splitsum [\isocolor \ecase x\\
-    &\phantom{= \splitsum}\quad\isocolor
+    &\phantom{{}={}} \esplit [\isocolor \ecase x\\
+    &\phantom{= \esplit}\quad\isocolor
       (\etuple{\inj i y, \inj i \dy} \caseto \inj i \etuple{y,\dy})_i\\
-    &\phantom{= \splitsum}\quad
+    &\phantom{= \esplit}\quad
       {\isocolor(\etuple{\inj i y, \pwild}
         \caseto \inj i \etuple{y, \dummy\<y})_i}]
     %%
@@ -1047,8 +936,11 @@ products and sums in $\CP$.
     %% &\qquad (\eboxd{\etuple{\inj i x, \pwild}}
     %% \caseto \inj i \eboxd{x, \dummy\<x})_{i}
     \\
-    \delta(\splitsum e) &= \splitsum \delta e
+    \delta(\esplit e) &= \esplit \delta e
   \end{align*}
+
+  \todo{TODO: split cases for non-core syntax into separate figure.}
+
   \caption{Semi\naive{} term translation}
 \end{figure*}
 
