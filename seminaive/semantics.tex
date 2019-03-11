@@ -1,10 +1,10 @@
 %\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=18cm,width=38em,width=36.65625em,]{narrow}
 %\documentclass{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=152mm,width=373pt,width=360pt,]{narrow}
-%\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
+\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
 %\documentclass[nomarginums]{rntz}\usepackage[b6]{rntzgeometry}\usepackage[width=\textwidth,fullwidth=115mm,]{narrow}\geometry{bottom=36pt}\pagestyle{empty}
 
-\documentclass{rntz}\usepackage{fantasy}\geometry{textwidth=330pt,}
-%\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}\geometry{textwidth=330pt}
+%\documentclass{rntz}\usepackage{fantasy}\geometry{textwidth=330pt,}
+%\documentclass{rntz}\usepackage[tablet]{fantasy}\geometry{textwidth=330pt}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
 \usepackage{latexsym}               % \rightsquigarrow
@@ -43,7 +43,7 @@
 %% %% Nice for fantasy[phone].
 %% \usepackage[sfdefault,scaled=.89060]{noto}
 %% \usepackage{eulervm}\makeatletter\edef\zeu@Scale{1.04}\makeatother
-%% \usepackage[cal=cm]{mathalfa}
+%% \usepackage[cal=cm,bb=esstix,scaled=.93,bbscaled=.93]{mathalfa}
 %% \renewcommand\mathit\textit\renewcommand\mathrm\text % argh
 %% \usepackage[basic,defaultmathsizes]{mathastext}
 %% \linespread{1.08}
@@ -139,7 +139,7 @@ semi\naive{} semantics.
       \text{hypotheses} & H &\bnfeq& \h x A \bnfor \hd x A
     \end{array}
     \\
-    \stripcx\G = (\hd x A)_{\hd x A \in \G}
+    \stripcxd\G = (\hd x A)_{\hd x A \in \G}
     \\
     \infer{\h x A \in \G}{\J x \G A}
 
@@ -258,8 +258,41 @@ semi\naive{} semantics.
   {\small Fresh variables ($\freshvar y$, $\freshvar\pwild$) are marked in \freshvar{pink}.}
 
   \vspace{.5ex}
+  %% TODO: consider the pattern-matching desugaring in "Some pattern-matching
+  %% elaboration rules". if we have that, we probably don't also need \edcase.
+  %% Only include one in final paper.
   \caption{Desugaring of surface syntax}
   \label{fig:desugaring}
+\end{figure*}
+
+%% TODO: do we need all of these?
+\begin{figure*}
+  \[\setlength\arraycolsep{.15em}\begin{array}{rcl}
+    \ecase{e,\vec f} (p_i, \vec q_{i,j} \caseto g_{i,j})_{i,j}
+    &\desugars& \ecase{e} (p_i \caseto \ecase{\vec f} (\vec q_{i,j} \caseto g_{i,j})_j)_i
+    \\[.33em]
+    \ecase{e} x \caseto f;\ (p_i \caseto g_i)_i
+    &\desugars& \elet{x = e} f
+    \\[.33em]
+    \ecase{e} \eboxd x \caseto f;\ (p_i \caseto g_i)_i
+    &\desugars& \elet{\eboxd x = e} f
+    \\[.33em]
+    \ecase{e} (\etuple{p_i,q_i} \caseto f_i)_i
+    &\desugars& \elet{x = e}\\
+    && \ecase{\pi_1\< x,\, \pi_2\< x} (p_i,q_i \caseto f_i)_i
+    \\[.33em]
+    \ecase{e} (\eboxd{\etuple{p_i,q_i}} \caseto f_i)_i
+    &\desugars& \elet{\eboxd x = e}\\
+    && \ecase{\eboxd{\pi_1\<x}, \eboxd{\pi_2\<x}}
+    (\eboxd{p_i}, \eboxd{q_i} \caseto f_i)
+    \\[.33em]
+    \ecase{e} (\inj i p_{i,j} \caseto f_{i,j})_{i,j}
+    &\desugars& \ecase{e} (\inj i x \caseto \ecase{x} (p_{i,j} \caseto f_{i,j})_j)_i
+    \\[.33em]
+    \ecase{e} (\eboxd{\inj i p_i} \caseto f_i)_i
+    &\desugars& \ecase{\esplit e} (\inj i \eboxd{p_i} \caseto f_i)_i
+  \end{array}\]
+  \caption{Some pattern-matching elaboration rules}
 \end{figure*}
 
 
@@ -282,18 +315,16 @@ semi\naive{} semantics.
   I also use this notation with other braces, eg. $\fork{\iexpr_i}_i =
   \fork{\iexpr_0, ..., \iexpr_n}$.
 
-\item $\initE_A : \initO \to A$ is the unique map out of an initial object;\\
-  $\termI_A : A \to \termO$ is the unique map into a terminal object.
-
-\item $A \homto B$ denotes the exponential $B^A$ in a category with
-  exponentials.
+\item $\expO A B$ denotes the exponential $B^A$ in a cartesian closed category.
 
 \item Given a family of morphisms $f_i : A \to B_i$ in a category with finite
   products, their \emph{``fork''} $\fork{f_i}_i : A \to \textstyle\prod_{i} B_i$
   uniquely satisfies $\fork{f_i}_i \then \pi_i = f_i$. Dually, given $f_i : A_i
   \to B$ in a category with finite sums, their \emph{``split''} $\krof{f_i}_i :
-  \sum_i A_i \to B$ uniquely satisfies $\injc_i \then \krof{f_i}_i = f_i$. So in
-  particular, $\fork{} = \termI$ and $\krof{} = \initE$.
+  \sum_i A_i \to B$ uniquely satisfies $\injc_i \then \krof{f_i}_i = f_i$.
+  %
+  So in particular, $\termI : A \to \termO$ is the unique map into the terminal
+  object and $\initE : \initO \to B$ the unique map out of the initial object.
 
 \item The comonad $\iso : \Poset \to \Poset$ takes a poset to the
   \emph{discrete} poset on the same elements, defined:
@@ -310,59 +341,72 @@ semi\naive{} semantics.
 \label{sec:datafun-models}
 
 The \emph{``standard''} model of Datafun interprets types as posets and terms as
-monotone maps. However, with a little care, we can interpret Datafun terms into
-any bicartesian closed category \catC{} equipped with the following structures:
+monotone maps. Generalizing this, we can interpret Datafun terms into any
+bicartesian closed category \catC{} equipped with the following structures:
 
 \begin{enumerate}
-\item A \emph{``discreteness''} comonad $\tuple{\disco{}, \varepsilon, \delta}$.
-
-\item A \emph{``downset''} functor \(\down : \catC \to \catC\) equipped with
-  maps
+\item A \emph{``discreteness''} comonad $\tuple{\disco{}, \varepsilon, \delta}$
+  equipped with distributive maps
   \begin{align*}
-    \morph{strong}_{A,B} &: A \x \downof{B} \to \downof{(A \x B)}\\
-    \morph{singleton}_A &: A \to \downof{A}\\
-    \morph{isEmpty} &: \discof{\downof{\termO}} \to \termO + \termO
-  \end{align*}
-
-\item For any finite family of objects $(A_i)_i$, distributive maps
-  \begin{align*}
-    \disco^\x &: \prod_i \discof{A_i} \to \disco \prod_i A_i
+    \discox &: \prod_i \discof{A_i} \to \disco \prod_i A_i
     &
-    \disco^+ &: \disco \sum_i A_i \to \sum_i \discof{A_i}
+    \discosum &: \disco \sum_i A_i \to \sum_i \discof{A_i}
   \end{align*}
 
-\item \emph{Semilattice objects}, \emph{fixed point objects}, and \emph{equality
-  objects} (see \cref{sec:object-families}).
+\item A \emph{``free semilattice''} functor \(\down : \catC \to \catC\) equipped
+  with maps
+  \begin{align*}
+    \morph{singleton}_A &: A \to \downof{A}\\
+    \morph{isEmpty} &: \discof{\downof{\termO}} \to \termO + \termO\\
+    \morph{strong}_{A,B} &: A \x \downof{B} \to \downof{(A \x B)}
+  \end{align*}
+
+\item \emph{Equality}, \emph{semilattice}, and \emph{fixed point
+  objects}, which must interpret equality, semilattice, and fixed point types
+  respectively. An object $A$ is:
+  %
+  \begin{itemize}
+  \item An equality object if equipped with a morphism $\morph{eq} : \discof A
+    \x \discof A \to \downof \termO$.
+
+  \item A semilattice object if equipped with an \down-algebra $\morph{collect} :
+    \downof{A} \to A$ and a family of morphisms $\morph{join}_n : A^n \to A$.
+
+  \item A fixed point object if equipped with a morphism $\morph{fix} :
+    \discof{(\expO A A)} \to A$.
+  \end{itemize}
 
 \end{enumerate}
 
 \noindent
-Observe that we have not imposed any laws, so there is no useful general
-equational theory of Datafun models. Instead, our approach is to relate the
-models we construct to the standard \Poset{} model and use \emph{its} equational
-theory. \Cref{fig:general-semantics} shows how to interpret Datafun into any
-Datafun model.
+\Cref{fig:general-semantics} shows how to interpret Datafun into any Datafun
+model. The standard semantics is an instance of this, letting \catC{} be
+\Poset{}, \iso{} be \iso{}, and \down{} be the free semilattice monad (i.e.
+finitely-generated downward-closed sets).
+
+Since we have not imposed any laws, there is no useful general equational theory
+of Datafun models. Instead, our approach is to relate the models we construct to
+the standard model and use \emph{its} equational theory.
 
 
-\subsection{Object families}
-\label{sec:object-families}
+%% \subsection{Object families}
+%% \label{sec:object-families}
 
-To be a Datafun model, semilattice types must be interpreted into
-\emph{semilattice objects}; equality types must be interpreted into
-\emph{equality objects}; and fixed point types must be interpreted into
-\emph{fixed point objects}. A given object $A$ is:
+%% To be a Datafun model, semilattice types must be interpreted into
+%% \emph{semilattice objects}; equality types must be interpreted into
+%% \emph{equality objects}; and fixed point types must be interpreted into
+%% \emph{fixed point objects}. A given object $A$ is:
 
+%% \begin{itemize}
+%% \item A semilattice object when equipped with an \down-algebra $\morph{collect} :
+%%   \downof{A} \to A$ and a family of morphisms $\morph{join}_n : A^n \to A$.
 
-\begin{itemize}
-\item A semilattice object when equipped with an \down-algebra $\morph{collect} :
-  \downof{A} \to A$ and a family of morphisms $\morph{join}_n : A^n \to A$.
+%% \item An equality object when equipped with a morphism $\morph{eq} : \discof A \x
+%% \discof A \to \downof \termO$.
 
-\item An equality object when equipped with a morphism $\morph{eq} : \discof A \x
-\discof A \to \downof \termO$.
-
-\item A fixed point object when equipped with a morphism $\morph{fix} : \discof{(A
-  \homto A)} \to A$.
-\end{itemize}
+%% \item A fixed point object when equipped with a morphism $\morph{fix} :
+%% \discof{(\expO A A)} \to A$.
+%% \end{itemize}
 
 
 %% ---- Semantics in a Datafun Model ----
@@ -370,7 +414,7 @@ To be a Datafun model, semilattice types must be interpreted into
   \emph{Types and contexts}\vspace{-.5ex}
 
   \begin{align*}
-    \den{\tunit} &= \termO & \den{A \to B} &= \den{A} \homto \den{B}
+    \den{\tunit} &= \termO & \den{A \to B} &= \expO{\den{A}}{\den{B}}
     \\
     \den{\tdown A} &= \downof{\den{A}} & \den{A \x B} &= \den{A} \x \den{B}
     \\
@@ -385,7 +429,7 @@ To be a Datafun model, semilattice types must be interpreted into
   \vspace{1ex}\emph{Terms}\vspace{-.5ex}
 
   \begin{align*}
-    \den{\dvar x} &= \pi_x \then \varepsilon \quad \text{($\dvar x$ discrete)}
+    \den{\dvar x} &= \pi_{\dvar x} \then \varepsilon \quad \text{($\dvar x$ discrete)}
     & \den{x} &= \pi_x \quad \text{($x$ monotone)}
     \\
     \den{\fnof x e} &= \lambda\den{e}
@@ -407,7 +451,7 @@ To be a Datafun model, semilattice types must be interpreted into
     \fork{\id, \den{e}} \then \den{f}
     \\
     \den{\prim{isEmpty}\<e} &= \den{e} \then \morph{isEmpty}
-    & \den{\esplit e} &= \den{e}\then \disco^+
+    & \den{\esplit e} &= \den{e}\then \discosum
     \\
     \den{\prim{eq}\<e} &= \den{e} \then \morph{eq}
     & \den{\efix e} &= \den{e} \then \morph{fix}
@@ -415,11 +459,12 @@ To be a Datafun model, semilattice types must be interpreted into
 
   \begin{align*}
     \den{\ecase{e} (\inj i{x_i} \caseto f_i)_i} &=
-    \fork{\id, \den{e}} \then \morph{dist}^\x_+
-    \then \bigkrof{\den{f_i}}_i
+    \fork{\id, \den{e}} \then \morph{dist}^\x_+ \then \bigkrof{\den{f_i}}_i
+    %\bigkrof{\den{f_i}}_i \circ \morph{dist}^\x_+ \circ \fork{\id, \den{e}}
     \\
-    \den{\ebigvee x e f} &= \fork{\id,\den{e}} \then \morph{strong}
-    \then \downof{\den{f}} \then \morph{collect}
+    \den{\ebigvee x e f} &=
+    \fork{\id,\den{e}} \then \morph{strong} \then \downof{\den{f}} \then \morph{collect}
+    %\morph{collect} \circ \downof{\den{f}} \circ \morph{strong} \circ \fork{\id,\den{e}}
   \end{align*}
 
   \vspace{1ex}\emph{Lemmas}\vspace{-.5ex}
@@ -431,7 +476,7 @@ To be a Datafun model, semilattice types must be interpreted into
     \then \morph{eval}
     \\[1ex]
     \morph{strip} &: \den\G \to \discof{\den{\stripcxd\G}}\\
-    \morph{strip} &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \disco^\x
+    \morph{strip} &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \discox
   \end{align*}
 
   \caption{Datafun semantics in a Datafun model $\tuple{\catC, \disco, \down}$}
@@ -478,10 +523,15 @@ Morphisms $f \in \CP(A,B)$ are differentiable maps $f \in \Poset(\vals A, \vals
 B)$. A map is differentiable iff it has a derivative $\deriv f : \vals A \to
 \Poset(\chgs A, \chgs B)$ such that:
 
-\[ \vld{\dx} x y \implies \longvld{\deriv f\<x\<\dx}{f\<x}{f\<y}\]
+%% \[ \vld{\dx} x y \implies \longvld{\deriv f\<x\<\dx}{f\<x}{f\<y}\]
 
-\noindent Or, equivalently:
-\[ f\<(x \upd \dx) = f\<x \upd \deriv f\<x\<\dx \]
+%% \noindent Or, equivalently:
+%% \[ f\<(x \upd \dx) = f\<x \upd \deriv f\<x\<\dx \]
+
+\nopagebreak
+\[ \vld{\dx} x y \implies \longvld{\deriv f\<x\<\dx}{f\<x}{f\<y}
+\qquad\text{or equivalently}\qquad
+f\<(x \upd \dx) = f\<x \upd \deriv f\<x\<\dx \]
 
 \noindent
 The same morphism may have many different derivatives; all that matters is that
@@ -492,7 +542,7 @@ Composition of derivatives follows the chain rule:
 
 \begin{align*}
   \deriv\id \<x\<\dx &= \dx
-  & \deriv{(g \then f)} \<x\<\dx &= \deriv f \<(g\<x) \<(\deriv g\<x\<\dx)
+  & \deriv{(f \circ g)} \<x\<\dx &= \deriv f \<(g\<x) \<(\deriv g\<x\<\dx)
 \end{align*}
 
 
@@ -672,12 +722,13 @@ correctness of $\deriv{(\fn f)}$ follows from correctness of \deriv{f}.
 
 
 \subsection{The lifted \iso{} comonad}
+%% TODO: maybe call this \iso_{\boldsymbol\Delta} instead?
 
 \newcommand\setfor[2]{\ensuremath{\{#1 \mathrel{|} #2\}}}
 
 Now we construct a comonad $\iso$ on \CP\ such that $\valfn\iso_\CP =
-\iso_\Poset\valfn$. This requirement defines the value-level structure, leaving
-only the change poset and update map:
+\iso\valfn_\Poset$. This requirement defines the value-level structure, leaving only
+the change poset and update map:
 
 \begin{align*}
   \chgs{\isof A} &= \isof{\chgs A}
@@ -693,8 +744,7 @@ x = y$.
 Functoriality is straightforward to verify:
 
 \begin{align*}
-  \iso_\CP(f) = \iso_\Poset(f) = f
-  && \deriv{\iso_\CP(f)} = \deriv{\iso_\Poset(f)} = \deriv f
+  \iso_\CP(f) = \iso_\Poset(f) = f && \deriv{\iso_\CP(f)} = \deriv{\iso_\Poset(f)} = \deriv f
 \end{align*}
 
 \noindent
@@ -721,130 +771,75 @@ products and sums in $\CP$. \todo{TODO: this should be clearer}
 \section{Incrementalization}
 \label{sec:incremental}
 
-The \emph{incremental semantics} for Datafun is given by the Datafun model in
-\CP{} constructed in \cref{sec:changeposets}, letting $\disco = \iso_\CP$ and
-$\down = \down_\CP$. As we took care to show while constructing it, this model
-\emph{refines} the standard \Poset{} model along the forgetful functor $\valfn$.
-In other words, $\vals \den{-}_\CP = \den{-}_\Poset$. For example,
+The \emph{incremental semantics} for Datafun, notated $\incden{-}$, is given by
+the Datafun model in \CP{} constructed in \cref{sec:changeposets}, letting
+$\disco = \iso_\CP$ and $\down = \down_\CP$. As we took care to show while
+constructing it, this \emph{refines} the standard model along the forgetful
+functor $\valfn$, that is:
 
-%% TODO: check this proof works out!
+\begin{theorem}
+  \(\vals \incden{-} = \den{-}_\Poset\).
+\end{theorem}
+\begin{proof}
+  By induction on types and typing derivations. For example,
+
+%% TODO: check this proof!
 \begin{align*}
-  \vals\den{e_1 \vee e_2}_\CP
-  &= \vals{(\fork{\den{e_i}_\CP}_i \then \morph{join}_2)}\\
-  &= \vals{\fork{\den{e_i}_\CP}_i} \then \vals{\morph{join}_2}\\
-  &= \fork{\vals{\den{e_i}_\CP}}_i \then \morph{join}_2\\
-  &= \fork{\den{e_i}_\Poset}_i \then \morph{join}_2\\
+  \vals\incden{e_1 \vee e_2}
+  &= \vals{(\fork{\incden{e_i}}_i \then \morph{join}_2)}
+  && \text{by definition}\\
+  &= \vals{\fork{\incden{e_i}}_i} \then \vals{\morph{join}_2}
+  && \text{functoriality of }\valfn\\
+  &= \fork{\vals{\incden{e_i}}}_i \then \morph{join}_2
+  && \text{refinement along \valfn{} (\cref{sec:refines})}\\
+  &= \fork{\den{e_i}_\Poset}_i \then \morph{join}_2
+  && \text{inductive hypothesis}\\
   &= \den{e_1 \vee e_2}_\Poset
+  && \text{by definition}
 \end{align*}
+\end{proof}
 
-\noindent What is less clear is how this justifies a
-program transformation.
+
+%% ---- More figures ----
+%% \begin{figure*}
+%%   \begin{align*}
+%%     \delta x &= \dx\\
+%%     \delta (\fnof{x} e) &= \fnof{\eboxd x}\fnof\dx \delta e &
+%%     \delta (e\<f) &= \delta e \<\eboxd f \<\delta f\\
+%%     \delta \etuple{e,f} &= \etuple{\delta e, \delta f} &
+%%     \delta (\pi_i\<e) &= \pi_i\< \delta e\\
+%%     \delta (\inj i e) &= \inj i {\delta e}\\
+%%     \delta \bot &= \bot &
+%%     \delta (e \vee f) &= \delta e \vee \delta f\\
+%%     \delta \etrue = \delta \efalse &= \efalse
+%%     & \delta\esetd{e_i}_i &= \eset{}\\
+%%     \delta \eboxd{e} &= \eboxd{\delta e}
+%%     & \delta(\esplit e) &= \esplit \delta e
+%%   \end{align*}
 
-\todo{TODO: Read off the incrementalization transform from the \emph{other}
-  projection down to \Poset{}. Wait, but this involves monotonicity! Argh! To do
-  this we need to fix our non-constructive use of $\zero$, which we do via
-  $\fname{dummy} : A \to \chgs A$.}
-
-%% TODO: unify with \desugars
-\newcommand\expandsto{\rightsquigarrow}
-\renewcommand\expandsto\desugars
-%% TODO: do we need all of these?
-\begin{figure*}
-  \[\setlength\arraycolsep{.15em}\begin{array}{rcl}
-    \ecase{e,\vec f} (p_i, \vec q_{i,j} \caseto g_{i,j})_{i,j}
-    &\expandsto& \ecase{e} (p_i \caseto \ecase{\vec f} (\vec q_{i,j} \caseto g_{i,j})_j)_i
-    \\[.33em]
-    \ecase{e} x \caseto f;\ (p_i \caseto g_i)_i
-    &\expandsto& \elet{x = e} f
-    \\[.33em]
-    \ecase{e} \eboxd x \caseto f;\ (p_i \caseto g_i)_i
-    &\expandsto& \elet{\eboxd x = e} f
-    \\[.33em]
-    \ecase{e} (\etuple{p_i,q_i} \caseto f_i)_i
-    &\expandsto& \elet{x = e}\\
-    && \ecase{\pi_1\< x,\, \pi_2\< x} (p_i,q_i \caseto f_i)_i
-    \\[.33em]
-    \ecase{e} (\eboxd{\etuple{p_i,q_i}} \caseto f_i)_i
-    &\expandsto& \elet{\eboxd x = e}\\
-    && \ecase{\eboxd{\pi_1\<x}, \eboxd{\pi_2\<x}}
-    (\eboxd{p_i}, \eboxd{q_i} \caseto f_i)
-    \\[.33em]
-    \ecase{e} (\inj i p_{i,j} \caseto f_{i,j})_{i,j}
-    &\expandsto& \ecase{e} (\inj i x \caseto \ecase{x} (p_{i,j} \caseto f_{i,j})_j)_i
-    \\[.33em]
-    \ecase{e} (\eboxd{\inj i p_i} \caseto f_i)_i
-    &\expandsto& \ecase{\esplit e} (\inj i \eboxd{p_i} \caseto f_i)_i
-  \end{array}\]
-  \caption{Some pattern-matching elaboration rules}
-\end{figure*}
-
-%% \newcommand\extract{{\color{Red}\fname{extract}}}
-%% \renewcommand\extract{\error{don't use extract}}
-
-\begin{figure*}
-  \begin{mathpar}
-    \setlength\arraycolsep{.3em}\begin{array}{lcl}
-      \dummy &:& A \to \D A\\
-      \dummy \<(\pwild : \tbool) &=& \efalse\\
-      \dummy \<(\pwild : \tset{A}) &=& \eset{}\\
-      \dummy \<\eboxd{x} &=& \eboxd{\dummy\<x}\\
-      \dummy \<(f : A \to B) &=& \fnof{x} \dummy\<(f\<x)\\
-      \dummy \<\etuple{x,y} &=& \etuple{\dummy\<x, \dummy\<y}\\
-      %% \dummy \<\etuple{x_i}_i &=& \etuple{\dummy\<x_i}_i\\
-      \dummy \<(\inj i x) &=& \inj i (\dummy\<x)
-    \end{array}
-    %%
-    %% \begin{array}{l}
-    %%   \extract_i ~:~ A_i \to \D A_1 + \D A_2 \to \D A_i\\
-    %%   \extract_i\<x\<\dx = \ecase{\dx} \inj i \dx \caseto \dx;\;%\\
-    %%   %\phantom{\extract_i\<x\<\dx = \ecase{\dx}}
-    %%   \pwild \caseto \dummy\<x
-    %%   %\quad\ {\color{ACMPurple} \longleftarrow \textit{Dead code.}}
-    %% \end{array}
-  \end{mathpar}
-  \caption{The \dummy\ function}
-  \label{fig:dummy}
-\end{figure*}
-
-\begin{figure*}
-  \begin{align*}
-    \delta x &= \dx\\
-    \delta (\fnof{x} e) &= \fnof{\eboxd x}\fnof\dx \delta e &
-    \delta (e\<f) &= \delta e \<\eboxd f \<\delta f\\
-    \delta \etuple{e,f} &= \etuple{\delta e, \delta f} &
-    \delta (\pi_i\<e) &= \pi_i\< \delta e\\
-    \delta (\inj i e) &= \inj i {\delta e}\\
-    \delta \bot &= \bot &
-    \delta (e \vee f) &= \delta e \vee \delta f\\
-    \delta \etrue = \delta \efalse &= \efalse
-    & \delta\esetd{e_i}_i &= \eset{}\\
-    \delta \eboxd{e} &= \eboxd{\delta e}
-    & \delta(\esplit e) &= \esplit \delta e
-  \end{align*}
-
-  \begin{align*}
-    \delta(\elet{\eboxd x = e} f)
-    &= \elet{\eboxd x = e \mathrel{\kwname{and}} \eboxd\dx = \delta e} \delta f
-    \\
-    \delta (\efix e) &= \efix (\delta e \<\eboxd{\efix e}) \\
-    \delta (\eifd e f g) &= \eifd{e}{\delta f}{\delta g}\\
-    \delta (\ewhen e f) &= \eifd e {\delta f} \ewhen{\delta e} f \vee \delta f\\
-    \delta (\eford x e f)
-    &= (\eford x {\delta e} f)\\
-    &\vee (\eford x{e \vee \delta e} \substd{\delta f}{\dx \substo \zero\< x})\\
-    \delta (\ecase e (\inj i x \caseto f_i)_i)
-    %% &= \ecase{\esplit{\eboxd e}}\\
-    %% &\qquad(\inj i \eboxd{x} \caseto \subst{\delta f_i}{\dx \substo \extract_i\<x\<\delta e})_i
-    &= \ecase{\esplit{\eboxd e},\, \delta e}\\
-    &\qquad ({\inj i \eboxd x,\, \inj i \dx} \caseto \delta f_i)_i\\
-    &\qquad \textit{\commentcolor --- The following cases are unreachable.}\\
-    &\qquad ({\inj i \eboxd x,\, \pwild} \caseto
-    %\elet{\dx = \dummy\<x}
-    \subst{\delta f_i}{\dx \coloneqq \dummy\<x})_i
-  \end{align*}
-  \caption{The derivative translation}
-  \label{fig:derivatives}
-\end{figure*}
+%%   \begin{align*}
+%%     \delta(\elet{\eboxd x = e} f)
+%%     &= \elet{\eboxd x = e \mathrel{\kwname{and}} \eboxd\dx = \delta e} \delta f
+%%     \\
+%%     \delta (\efix e) &= \efix (\delta e \<\eboxd{\efix e}) \\
+%%     \delta (\eifd e f g) &= \eifd{e}{\delta f}{\delta g}\\
+%%     \delta (\ewhen e f) &= \eifd e {\delta f} \ewhen{\delta e} f \vee \delta f\\
+%%     \delta (\eford x e f)
+%%     &= (\eford x {\delta e} f)\\
+%%     &\vee (\eford x{e \vee \delta e} \substd{\delta f}{\dx \substo \zero\< x})\\
+%%     \delta (\ecase e (\inj i x \caseto f_i)_i)
+%%     %% &= \ecase{\esplit{\eboxd e}}\\
+%%     %% &\qquad(\inj i \eboxd{x} \caseto \subst{\delta f_i}{\dx \substo \extract_i\<x\<\delta e})_i
+%%     &= \ecase{\esplit{\eboxd e},\, \delta e}\\
+%%     &\qquad ({\inj i \eboxd x,\, \inj i \dx} \caseto \delta f_i)_i\\
+%%     &\qquad \textit{\commentcolor --- The following cases are unreachable.}\\
+%%     &\qquad ({\inj i \eboxd x,\, \pwild} \caseto
+%%     %\elet{\dx = \dummy\<x}
+%%     \subst{\delta f_i}{\dx \coloneqq \dummy\<x})_i
+%%   \end{align*}
+%%   \caption{The derivative translation}
+%%   \label{fig:derivatives}
+%% \end{figure*}
 
 
 \section{Semi\naive{} evaluation}
@@ -871,6 +866,21 @@ program transformation.
     \Phi(A + B) &= \Phi A + \Phi B & \D(A + B) &= \D A + \D B
   \end{align*}
   \caption{Semi\naive{} type translation}
+\end{figure*}
+
+\begin{figure*}
+  \[\setlength\arraycolsep{.3em}\begin{array}{lcl}
+    \dummy &:& A \to \D A\\
+    \dummy \<(\pwild : \tbool) &=& \efalse\\
+    \dummy \<(\pwild : \tset{A}) &=& \eset{}\\
+    \dummy \<\eboxd{x} &=& \eboxd{\dummy\<x}\\
+    \dummy \<(f : A \to B) &=& \fnof{x} \dummy\<(f\<x)\\
+    \dummy \<\etuple{x,y} &=& \etuple{\dummy\<x, \dummy\<y}\\
+    %% \dummy \<\etuple{x_i}_i &=& \etuple{\dummy\<x_i}_i\\
+    \dummy \<(\inj i x) &=& \inj i (\dummy\<x)
+  \end{array}\]
+  \caption{The \dummy\ function}
+  \label{fig:dummy}
 \end{figure*}
 
 \begin{figure*}

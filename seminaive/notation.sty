@@ -35,16 +35,12 @@
 \newcommand\cat\textbf
 \ifdefined\textsb\renewcommand\cat\textsb\else\fi
 \ifdefined\strong\else\newcommand\strong\textbf\fi
-\newcommand\CP{\cat{\texorpdfstring{$\boldsymbol\Delta$Poset}{DeltaPoset}}}
+\newcommand\BD{{\texorpdfstring{\ensuremath{\boldsymbol\Delta}}{Delta}}}
+\newcommand\CP{\cat{\BD{}Poset}}
 \newcommand\Poset{\cat{Poset}}
 \newcommand\initO{0}
 \newcommand\termO{1}
-%% \newcommand\initO{\ensuremath{\mathbold{0}}}
-%% \newcommand\termO{\ensuremath{\mathbold{1}}}
 \newcommand\expO[2]{#1 \Rightarrow #2}
-\newcommand\initE{\mathord{\text{\textexclamdown}}}
-\newcommand\termI{\mathord{!}}
-\newcommand\homto\Rightarrow
 \newcommand\then\cdot
 %\renewcommand\then{\mathbin{;}}
 %\renewcommand\then{\,{;}\,}
@@ -58,6 +54,8 @@
 \newcommand\bigkrof[1]{\bigl[{#1}\bigr]}
 %\newcommand\Fork[1]{\left\langle{#1}\right\rangle}
 %\newcommand\Krof[1]{\left[{#1}\right]}
+\newcommand\initE{\krof{\kern .08em}}
+\newcommand\termI{\fork{}}
 
 
 %% ===== Datafun model notation =====
@@ -66,6 +64,8 @@
 \newcommand\disco{\iso}
 \newcommand\downof[1]{\down #1}
 \newcommand\discof[1]{\ensuremath{\disco #1}}
+\newcommand\discox{\ensuremath{\morph{dist}^\x_\disco}}
+\newcommand\discosum{\ensuremath{\morph{dist}^\disco_+}}
 
 
 %% ===== Datafun syntax =====
@@ -129,6 +129,9 @@
 
 
 %% ===== Poset, ChangePoset, derivative & seminaive notation =====
+\newcommand\incden[1]{\den{#1}_\BD}
+\newcommand\semiden[1]{\den{#1}_\phi}
+
 %% TODO: replace \fname with \morph or vice-versa?
 \newcommand\fname\morph
 \newcommand\dummy{\fname{dummy}}
