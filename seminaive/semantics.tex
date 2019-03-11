@@ -1,10 +1,10 @@
-%\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=19cm,width=38em,width=36.65625em,]{narrow}
-%\documentclass{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=158mm,width=373pt,width=360pt,]{narrow}
+%\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=18cm,width=38em,width=36.65625em,]{narrow}
+%\documentclass{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=152mm,width=373pt,width=360pt,]{narrow}
 %\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
 %\documentclass[nomarginums]{rntz}\usepackage[b6]{rntzgeometry}\usepackage[width=\textwidth,fullwidth=115mm,]{narrow}\geometry{bottom=36pt}\pagestyle{empty}
 
-%\documentclass{rntz}\usepackage{fantasy}\geometry{textwidth=330pt,}
-\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}\geometry{textwidth=330pt}
+\documentclass{rntz}\usepackage{fantasy}\geometry{textwidth=330pt,}
+%\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}\geometry{textwidth=330pt}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
 \usepackage{latexsym}               % \rightsquigarrow
@@ -31,7 +31,7 @@
 
 %\PassOptionsToPackage{scaled=1.1}{rntzfont} % a4/b5, width=38em/373pt
 %\PassOptionsToPackage{scaled=1.0625}{rntzfont} % b5/a4 width=36.66em/360pt
-\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
+%\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
 %\PassOptionsToPackage{scaled=.99}{rntzfont} %b6
 
 %% Note to self: don't use newmath, Neel's PC can't handle it.
@@ -40,11 +40,13 @@
 %\usepackage[librebaskerville,linespread=1.015,]{rntzfont}
 %\usepackage[alegreya,scaled=1.01,]{rntzfont}
 
-%% \usepackage[default,scale=.96]{lato}
-%% \usepackage[sfdefault,scaled=0.9]{noto}
-%% \usepackage{eulervm}\makeatletter\edef\zeu@Scale{1.022}\edef\zeu@Scale{1.077}\makeatother
-%% %\usepackage[italic,basic,defaultmathsizes]{mathastext}
-%% \linespread{1.054}%\linespread{1.0735}
+%% %% Nice for fantasy[phone].
+%% \usepackage[sfdefault,scaled=.89060]{noto}
+%% \usepackage{eulervm}\makeatletter\edef\zeu@Scale{1.04}\makeatother
+%% \usepackage[cal=cm]{mathalfa}
+%% \renewcommand\mathit\textit\renewcommand\mathrm\text % argh
+%% \usepackage[basic,defaultmathsizes]{mathastext}
+%% \linespread{1.08}
 
 \ifdefined\mathbold\else\newcommand\mathbold{\boldsymbol}\fi
 \usepackage[spacing=true]{microtype}\frenchspacing
@@ -115,29 +117,30 @@ semi\naive{} semantics.
 
 %% ---- Syntax & typing rules ----
 \begin{figure*}
-  \[\setlength\arraycolsep{.33em}\begin{array}{r@{\hskip 1em}ccl}
-    \text{types} & A,B &\bnfeq& \tunit \bnfor A \x B \bnfor A + B \bnfor A \to B
-    \bnfor \isof A \bnfor \tdown{\eqt A}
-    \\
-    \text{semilattices} & L,M &\bnfeq& \tunit \bnfor L \x M \bnfor A \to L \bnfor \tdown{\eqt A}
-    \\
-    \text{eqtypes} & \eqt A, \eqt B &\bnfeq&
-    \tunit \bnfor \eqt A \x \eqt B \bnfor \eqt A + \eqt B
-    \bnfor \isof{\eqt A} \bnfor \tdown{\eqt A}
-    \\[.5em]
-    \text{terms} & e,f,g &\bnfeq& x \bnfor \dvar x \bnfor \fnof{x} e \bnfor e\<f
-    \bnfor \etuple{} \bnfor \etuple{e,f} \bnfor \pi_i\<e\\
-    &&&\inj i e \bnfor \ecase{e} (\inj i x \caseto f_i)_{i\in\{1,2\}}\\
-    &&&\bot \bnfor e \vee f \bnfor \edown{e} \bnfor \ebigvee x e f\\
-    &&& \eboxd e \bnfor \elet{\eboxd x = e} f\\
-    &&& \prim{isEmpty}\<e \bnfor \esplit e \bnfor \prim{eq}\<e \bnfor \efix e
-    \\[.5em]
-    \text{contexts} & \G &\bnfeq& (H_i)_i\\
-    \text{hypotheses} & H &\bnfeq& \h x A \bnfor \hd x A
-  \end{array}\]
-
-  \vspace{-1ex}
   \begin{mathpar}
+    \setlength\arraycolsep{.33em}\begin{array}{r@{\hskip 1em}ccl}
+      \text{types} & A,B &\bnfeq& \tunit \bnfor A \x B \bnfor A + B
+      \bnfor A \to B \bnfor \isof A \bnfor \tdown{\eqt A}
+      \\
+      \text{semilattices} & L,M &\bnfeq&
+      \tunit \bnfor L \x M \bnfor A \to L \bnfor \tdown{\eqt A}
+      \\
+      \text{eqtypes} & \eqt A, \eqt B &\bnfeq& \tunit \bnfor \eqt A \x \eqt B
+      \bnfor \eqt A + \eqt B \bnfor \isof{\eqt A} \bnfor \tdown{\eqt A}
+      \\[.5em]
+      \text{terms} & e,f,g &\bnfeq& x \bnfor \dvar x \bnfor \fnof{x} e
+      \bnfor e\<f \bnfor \etuple{} \bnfor \etuple{e,f} \bnfor \pi_i\<e\\
+      &&&\inj i e \bnfor \ecase{e} (\inj i x \caseto f_i)_{i\in\{1,2\}}\\
+      &&&\bot \bnfor e \vee f \bnfor \edown{e} \bnfor \ebigvee x e f\\
+      &&& \eboxd e \bnfor \elet{\eboxd x = e} f\\
+      &&& \prim{isEmpty}\<e \bnfor \esplit e \bnfor \prim{eq}\<e \bnfor \efix e
+      \\[.5em]
+      \text{contexts} & \G &\bnfeq& (H_i)_i\\
+      \text{hypotheses} & H &\bnfeq& \h x A \bnfor \hd x A
+    \end{array}
+    \\
+    \stripcx\G = (\hd x A)_{\hd x A \in \G}
+    \\
     \infer{\h x A \in \G}{\J x \G A}
 
     \infer{\hd x A \in \G}{\J {\dvar x} \G A}
@@ -170,7 +173,7 @@ semi\naive{} semantics.
       \J f {\G,\h x {\eqt A}} L
     }{\J {\ebigvee x e f} \G L}
 
-    \infer{\J {\isocolor e} {\stripcx\G} A}{\J{\eboxd e} \G {\isof A}}
+    \infer{\J {\isocolor e} {\stripcxd\G} A}{\J{\eboxd e} \G {\isof A}}
 
     \infer{\J e \G {\isof A} \\ \J f {\G,\hd x A} B}{
       \J {\elet{\eboxd x = e} f} \G B}
@@ -199,10 +202,10 @@ semi\naive{} semantics.
   \end{array}\]
 
   \begin{mathpar}
-    \infer{(\J {\isocolor e_i} {\stripcx\G} A)_i}{
+    \infer{(\J {\isocolor e_i} {\stripcxd\G} A)_i}{
       \J {\esetd{e_i}_i} \G {\tset{A}}}
 
-    \infer{(\J {\isocolor e_i} {\stripcx\G} {\eqt A})_i}
+    \infer{(\J {\isocolor e_i} {\stripcxd\G} {\eqt A})_i}
           {\J {\eeqd{e_1}{e_2}} \G \tbool}
 
     \infer{
@@ -214,12 +217,12 @@ semi\naive{} semantics.
 
     \infer{\quad}{\J \efalse \G \tbool}
 
-    \infer{\J {\isocolor e} {\stripcx\G} \tbool \\ (\J{f_i}\G B)_i}
+    \infer{\J {\isocolor e} {\stripcxd\G} \tbool \\ (\J{f_i}\G B)_i}
           {\J {\eifd e{f_1}{f_2}} \G {B}}
 
     \infer{\J e \G \tbool \\ \J f \G L}{\J {\ewhen e f} \G L}
 
-    \infer{\J {\isocolor e} {\stripcx{\G}, \h x {\eqt L}} {\eqt L}}
+    \infer{\J {\isocolor e} {\stripcxd{\G}, \h x {\eqt L}} {\eqt L}}
           {\J {\efixisd x e} \G {\eqt L}}
   \end{mathpar}
 
@@ -323,9 +326,9 @@ any bicartesian closed category \catC{} equipped with the following structures:
 
 \item For any finite family of objects $(A_i)_i$, distributive maps
   \begin{align*}
-    \disco_\x &: \prod_i \discof{A_i} \to \disco \prod_i A_i
+    \disco^\x &: \prod_i \discof{A_i} \to \disco \prod_i A_i
     &
-    \disco_+ &: \disco \sum_i A_i \to \sum_i \discof{A_i}
+    \disco^+ &: \disco \sum_i A_i \to \sum_i \discof{A_i}
   \end{align*}
 
 \item \emph{Semilattice objects}, \emph{fixed point objects}, and \emph{equality
@@ -333,6 +336,7 @@ any bicartesian closed category \catC{} equipped with the following structures:
 
 \end{enumerate}
 
+\noindent
 Observe that we have not imposed any laws, so there is no useful general
 equational theory of Datafun models. Instead, our approach is to relate the
 models we construct to the standard \Poset{} model and use \emph{its} equational
@@ -363,7 +367,7 @@ To be a Datafun model, semilattice types must be interpreted into
 
 %% ---- Semantics in a Datafun Model ----
 \begin{figure*}
-  \emph{Types and contexts}%\vspace{-.5ex}
+  \emph{Types and contexts}\vspace{-.5ex}
 
   \begin{align*}
     \den{\tunit} &= \termO & \den{A \to B} &= \den{A} \homto \den{B}
@@ -378,7 +382,7 @@ To be a Datafun model, semilattice types must be interpreted into
     \den{\h x A} &= \den{A} & \den{\hd x A} &= \discof{\den{A}}
   \end{align*}
 
-  \vspace{.5ex}\emph{Terms}%\vspace{-.5ex}
+  \vspace{1ex}\emph{Terms}\vspace{-.5ex}
 
   \begin{align*}
     \den{\dvar x} &= \pi_x \then \varepsilon \quad \text{($\dvar x$ discrete)}
@@ -400,10 +404,10 @@ To be a Datafun model, semilattice types must be interpreted into
     \\
     \bigden{\eboxd e} &= \morph{strip} \then \discof{\den e}
     & \bigden{\elet{\eboxd x = e} f} &=
-    \fork{\idmorph, \den{e}} \then \den{f}
+    \fork{\id, \den{e}} \then \den{f}
     \\
     \den{\prim{isEmpty}\<e} &= \den{e} \then \morph{isEmpty}
-    & \den{\esplit e} &= \den{e}\then \disco_+
+    & \den{\esplit e} &= \den{e}\then \disco^+
     \\
     \den{\prim{eq}\<e} &= \den{e} \then \morph{eq}
     & \den{\efix e} &= \den{e} \then \morph{fix}
@@ -411,14 +415,14 @@ To be a Datafun model, semilattice types must be interpreted into
 
   \begin{align*}
     \den{\ecase{e} (\inj i{x_i} \caseto f_i)_i} &=
-    \fork{\idmorph, \den{e}} \then \morph{dist}^\x_+
+    \fork{\id, \den{e}} \then \morph{dist}^\x_+
     \then \bigkrof{\den{f_i}}_i
     \\
-    \den{\ebigvee x e f} &= \fork{\idmorph,\den{e}} \then \morph{strong}
+    \den{\ebigvee x e f} &= \fork{\id,\den{e}} \then \morph{strong}
     \then \downof{\den{f}} \then \morph{collect}
   \end{align*}
 
-  \vspace{.5ex}\emph{Lemmas}%\vspace{-.5ex}
+  \vspace{1ex}\emph{Lemmas}\vspace{-.5ex}
 
   \begin{align*}
     \morph{dist}^\x_+ &: A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)\\
@@ -426,8 +430,8 @@ To be a Datafun model, semilattice types must be interpreted into
     \morph{dist}^\x_+ &= \fork{\pi_2 \then \krof{\lambda (\fork{\pi_2,\pi_1} \then \injc_i)}_i, \pi_1}
     \then \morph{eval}
     \\[1ex]
-    \morph{strip} &: \den\G \to \discof{\den{\stripcx\G}}\\
-    \morph{strip} &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \disco_\x
+    \morph{strip} &: \den\G \to \discof{\den{\stripcxd\G}}\\
+    \morph{strip} &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \disco^\x
   \end{align*}
 
   \caption{Datafun semantics in a Datafun model $\tuple{\catC, \disco, \down}$}
@@ -467,7 +471,9 @@ These must satisfy the following conditions:\footnote{There are other conditions
   & \text{sound for increases}
 \end{align*}
 
-\noindent
+\noindent In particular, for every $x$ there is a (not necessarily unique)
+\emph{zero change}, $\zero_x$, such that $x \upd \zero_x = x$.
+
 Morphisms $f \in \CP(A,B)$ are differentiable maps $f \in \Poset(\vals A, \vals
 B)$. A map is differentiable iff it has a derivative $\deriv f : \vals A \to
 \Poset(\chgs A, \chgs B)$ such that:
@@ -486,18 +492,18 @@ Composition of derivatives follows the chain rule:
 
 \begin{align*}
   \deriv\id \<x\<\dx &= \dx
-  & \deriv{(f \circ g)} \<x\<\dx &= \deriv f \<(g\<x) \<(\deriv g\<x\<\dx)
+  & \deriv{(g \then f)} \<x\<\dx &= \deriv f \<(g\<x) \<(\deriv g\<x\<\dx)
 \end{align*}
 
 
-\subsection{Zero changes and change composition}
+%\subsection{Zero changes and change composition}
 
-Applying the axiom of choice to soundness \& completeness for increases, we
-recover operators $\zero$, $(\cdot)$ such that $x \upd \zero_x = x$ and $x \upd
-(\dx \cdot \dy) = (x \upd \dx) \upd \dy$. These do not necessarily satisfy the
-identity and associativity laws of a category, but $\zero$ will be useful
-nonetheless. We will see how to duck this non-constructive use of the axiom of
-choice in \cref{sec:incremental}.
+%% Applying the axiom of choice to soundness \& completeness for increases, we
+%% recover operators $\zero$, $(\cdot)$ such that $x \upd \zero_x = x$ and $x \upd
+%% (\dx \cdot \dy) = (x \upd \dx) \upd \dy$. These do not necessarily satisfy the
+%% identity and associativity laws of a category, but $\zero$ will be useful
+%% nonetheless. We will see how to duck this non-constructive use of the axiom of
+%% choice in \cref{sec:incremental}.
 
 
 \subsection{\CP{} refines \Poset{}}
@@ -568,8 +574,8 @@ existence of derivatives.
 
   \noindent
   The second case is dead code; any value of the right type would do. We will
-  exploit this later to avoid needing the axiom of choice (used to define
-  $\zero_x$) in the context of Datafun.
+  exploit this in \cref{sec:incremental} to avoid needing the axiom of choice
+  (used to define $\zero_x$) in the context of Datafun.
 \end{proof}
 
 
@@ -694,31 +700,56 @@ Functoriality is straightforward to verify:
 \noindent
 To show $\iso$ is a comonad, it's easy to see that ${\iso} = {\iso\iso}$, so the
 duplication natural transformation $\delta : {\iso} \to {\iso\iso}$ is the
-identity; the extraction natural transformation $\varepsilon : {\iso} \to
-\mathbold{1}$ is given by the subposet inclusion from $\isof A$ to $A$, with
-$\deriv{\varepsilon_A} \<x \<\dx = \dx$.
+identity. The extraction natural transformation $\varepsilon : {\iso} \to
+\idfunctor$ is given by the subposet inclusion from $\isof A$ to $A$, with
+$\deriv{\varepsilon_A} \<x \<\dx = \dx$, which clearly makes the natural square
+commute.
 
 Finally, $\iso_\CP$, like $\iso_\Poset$, distributes over products \& sums. This
 follows from the definitions of $\chgs{\iso A}$ and $\updfn_{\iso A}$ and of
-products and sums in $\CP$.
+products and sums in $\CP$. \todo{TODO: this should be clearer}
 
 
-\subsection{Semilattice and fixed-point structure}
+\subsection{The lifted $\down$ monad}
+\XXX
 
-\todo{TODO}
+
+\subsection{Semilattice, equality, and fixed-point structure}
+\XXX
 
 
 \section{Incrementalization}
 \label{sec:incremental}
 
-\todo{TODO: explain incremental semantics --- it's the ``obvious'' categorical
-  semantics in \CP{}. Read off the incrementalization transform. To do this we
-  need to fix our non-constructive use of $\zero$, which we do via
+The \emph{incremental semantics} for Datafun is given by the Datafun model in
+\CP{} constructed in \cref{sec:changeposets}, letting $\disco = \iso_\CP$ and
+$\down = \down_\CP$. As we took care to show while constructing it, this model
+\emph{refines} the standard \Poset{} model along the forgetful functor $\valfn$.
+In other words, $\vals \den{-}_\CP = \den{-}_\Poset$. For example,
+
+%% TODO: check this proof works out!
+\begin{align*}
+  \vals\den{e_1 \vee e_2}_\CP
+  &= \vals{(\fork{\den{e_i}_\CP}_i \then \morph{join}_2)}\\
+  &= \vals{\fork{\den{e_i}_\CP}_i} \then \vals{\morph{join}_2}\\
+  &= \fork{\vals{\den{e_i}_\CP}}_i \then \morph{join}_2\\
+  &= \fork{\den{e_i}_\Poset}_i \then \morph{join}_2\\
+  &= \den{e_1 \vee e_2}_\Poset
+\end{align*}
+
+\noindent What is less clear is how this justifies a
+program transformation.
+
+\todo{TODO: Read off the incrementalization transform from the \emph{other}
+  projection down to \Poset{}. Wait, but this involves monotonicity! Argh! To do
+  this we need to fix our non-constructive use of $\zero$, which we do via
   $\fname{dummy} : A \to \chgs A$.}
 
+%% TODO: unify with \desugars
 \newcommand\expandsto{\rightsquigarrow}
+\renewcommand\expandsto\desugars
+%% TODO: do we need all of these?
 \begin{figure*}
-  %% TODO: pattern-matching on box types.
   \[\setlength\arraycolsep{.15em}\begin{array}{rcl}
     \ecase{e,\vec f} (p_i, \vec q_{i,j} \caseto g_{i,j})_{i,j}
     &\expandsto& \ecase{e} (p_i \caseto \ecase{\vec f} (\vec q_{i,j} \caseto g_{i,j})_j)_i
@@ -946,6 +977,6 @@ products and sums in $\CP$.
 
 \subsection{The \blackiso{} comonad}
 
-\todo{TODO: explain $\blackiso$}
+\todo{TODO: explain $\blackiso$. show it's naturally isomorphic to $\iso$.}
 
 \end{document}
