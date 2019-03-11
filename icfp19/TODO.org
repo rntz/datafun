@@ -1,3 +1,15 @@
+* Sketch of paper
+1. Lead with faster-fix and how it eg. speeds up transitive closure
+   from O(n^2) to O(n).
+
+* Theorems to put in paper
+1. U⟦-⟧_deriv = ⟦-⟧_Poset.
+2. □ ≅ ■
+3 (types) & 4 (terms). ⟦-⟧_deriv ≅ ⟦-⟧_φ
+5. Reading off ⟦-⟧_φ gives φ/δ translation, namely:
+5a. ⟦φe⟧_Poset = U⟦e⟧_φ (= ⟦e⟧_Poset by Thm1).
+5b. ⟦δe⟧_Poset is a derivative for (5a).
+
 * Syntax sugar / conveniences
 
 sets          → downsets + discreteness
