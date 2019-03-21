@@ -1,9 +1,9 @@
 %\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=18cm,width=38em,width=36.65625em,]{narrow}
 %\documentclass{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=152mm,width=373pt,width=360pt,]{narrow}
-\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
+%\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
 %\documentclass[nomarginums]{rntz}\usepackage[b6]{rntzgeometry}\usepackage[width=\textwidth,fullwidth=115mm,]{narrow}\geometry{bottom=36pt}\pagestyle{empty}
 
-%\documentclass{rntz}\usepackage{fantasy}\geometry{textwidth=330pt,}
+\documentclass{rntz}\usepackage{fantasy}%\geometry{textwidth=330pt,}
 %\documentclass{rntz}\usepackage[tablet]{fantasy}\geometry{textwidth=330pt}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
@@ -37,8 +37,8 @@
 %% Note to self: don't use newmath, Neel's PC can't handle it.
 \usepackage[charter,]{rntzfont}
 %\usepackage[source,linespread=1.0233,]{rntzfont}
-%\usepackage[librebaskerville,linespread=1.015,]{rntzfont}
-%\usepackage[alegreya,scaled=1.01,]{rntzfont}
+%\usepackage[source,scaled=1.01,linespread=1.0132,linespread=1.015,]{rntzfont}
+%\usepackage[librebaskerville,scaled=1.012,]{rntzfont} % zeu@Scale ≈ .98
 
 %% %% Nice for fantasy[phone].
 %% \usepackage[sfdefault,scaled=.89060]{noto}
@@ -178,7 +178,7 @@ semi\naive{} semantics.
     \infer{\J e \G {\isof A} \\ \J f {\G,\hd x A} B}{
       \J {\elet{\eboxd x = e} f} \G B}
 
-    \infer{\J e \G {\tdown \tunit}}{\J {\prim{isEmpty}\<e} \G {\tunit + \tunit}}
+    \infer{\J e \G {\isof{\tdown\tunit}}}{\J {\prim{isEmpty}\<e} \G {\tunit + \tunit}}
 
     \infer{\J e \G {\isof{(A + B)}}}{\J{\esplit e} \G {\isof A + \isof B}}
 
@@ -517,21 +517,24 @@ These must satisfy the following conditions:\footnote{There are other conditions
 \end{align*}
 
 \noindent In particular, for every $x$ there is a (not necessarily unique)
-\emph{zero change}, $\zero_x$, such that $x \upd \zero_x = x$.
+\emph{zero change}, $\zero_x$, such that $x \upd \zero_x = x$.\footnote{Use of
+  the $\zero_x$ operator amounts to invoking the axiom of choice.}
 
 Morphisms $f \in \CP(A,B)$ are differentiable maps $f \in \Poset(\vals A, \vals
 B)$. A map is differentiable iff it has a derivative $\deriv f : \vals A \to
 \Poset(\chgs A, \chgs B)$ such that:
 
-%% \[ \vld{\dx} x y \implies \longvld{\deriv f\<x\<\dx}{f\<x}{f\<y}\]
-
-%% \noindent Or, equivalently:
-%% \[ f\<(x \upd \dx) = f\<x \upd \deriv f\<x\<\dx \]
-
 \nopagebreak
-\[ \vld{\dx} x y \implies \longvld{\deriv f\<x\<\dx}{f\<x}{f\<y}
-\qquad\text{or equivalently}\qquad
-f\<(x \upd \dx) = f\<x \upd \deriv f\<x\<\dx \]
+\[ \vld{\dx} x y \implies \longvld{\deriv f\<x\<\dx}{f\<x}{f\<y}\]
+
+\noindent Or, equivalently:
+\[ f\<(x \upd \dx) = f\<x \upd \deriv f\<x\<\dx \]
+
+%% % Doesn't work on narrow paper, eg. a5.
+%% \nopagebreak
+%% \[ \vld{\dx} x y \implies \longvld{\deriv f\<x\<\dx}{f\<x}{f\<y}
+%% \quad\text{or equivalently}\quad
+%% f\<(x \upd \dx) = f\<x \upd \deriv f\<x\<\dx \]
 
 \noindent
 The same morphism may have many different derivatives; all that matters is that
@@ -581,12 +584,13 @@ existence of derivatives.
   change-poset structure is also inherited from \Poset{}, while the projection
   and injection's derivatives operate pointwise on changes:
 
-  \begin{align*}
+  \begin{align}
     \chgs{\prod_{i \in I} A_i} &= \prod_{i \in I} \chgs A_i &
     \chgs{\sum_{i \in I} A_i} &= \sum_{i \in I} \chgs A_i
+    \label{eqn:delta-distributes-over-sums-and-products}
     \\
     \deriv\pi_i\<x\<\dx &= \pi_i\<\dx & \deriv\injc_i\<x\<\dx &= \inj i \dx
-  \end{align*}
+  \end{align}
 
   \noindent Updates are pointwise, noting that $(\inj i x \upd \inj j \dx)$ is
   undefined for $i \ne j$:
@@ -721,43 +725,81 @@ correctness of $\deriv{(\fn f)}$ follows from correctness of \deriv{f}.
 %% \end{align*}
 
 
-\subsection{The lifted \iso{} comonad}
+\subsection{The lifted \iso{} comonad and its relatives}
 %% TODO: maybe call this \iso_{\boldsymbol\Delta} instead?
 
 \newcommand\setfor[2]{\ensuremath{\{#1 \mathrel{|} #2\}}}
 
 Now we construct a comonad $\iso$ on \CP\ such that $\valfn\iso_\CP =
-\iso\valfn_\Poset$. This requirement defines the value-level structure, leaving only
-the change poset and update map:
+\iso_\Poset\valfn$. This requirement defines the value-level structure, leaving
+only the change poset and update map. Since $\isof A$ is ordered discretely,
+values \emph{cannot} increase. So the simplest definition, and the one we will
+use, is:
 
 \begin{align*}
-  \chgs{\isof A} &= \isof{\chgs A}
+  \chgs{\isof A} &= \termO
   &
-  x \oplus_{\isof A} \dx = y &\iff x = y \wedge x \oplus_A \dx = y
+  x \oplus_{\isof A} \tuple{} = x
 \end{align*}
 
 \noindent
-So changes are ordered discretely, and \emph{only zero-changes are valid}. This
-maintains soundness \& completeness for increases, since $x \le y : \isof A \iff
-x = y$.
+Functoriality, extraction, duplication, and product- and sum-distribution all
+refine the corresponding properties of $\iso_\Poset$, and their derivatives are
+fairly straightforward:
+%
+\begin{mathpar}
+  \deriv{\iso(f)} \<x \<\tuple{} = \tuple{}
 
-Functoriality is straightforward to verify:
+  \deriv\delta_A \<x \<\tuple{} = \tuple{}
+
+  \deriv\varepsilon_A \<x \<\tuple{} = \zero_x
+  \\
+  \deriv{{\discox}} \<x \<\dx = \tuple{}
+
+  \deriv{{\discosum}} \<(\inj i x) \<\tuple{} = \inj i {\tuple{}}
+\end{mathpar}
+
+\noindent
+\todo{TODO: since distribution over products \& sums isn't equality, what does
+  this mean for our actual \emph{implementation}? seems like $\delta(\esplit e)$
+  might have to actually do some work!}
+
+\newcommand\altiso{\iso_{\textrm{alt}}}
+
+\subsubsection{The alternative $\altiso$}
+
+There is another refinement of $\iso$ in \CP{}, which I'll call $\altiso$ for
+clarity, defined like so:
 
 \begin{align*}
-  \iso_\CP(f) = \iso_\Poset(f) = f && \deriv{\iso_\CP(f)} = \deriv{\iso_\Poset(f)} = \deriv f
+  \chgs{\altiso A} &= \altiso \chgs A
+  &
+  x \oplus_{\altiso A} \dx = y &\iff x = y \wedge x \oplus_A \dx = y
 \end{align*}
 
 \noindent
-To show $\iso$ is a comonad, it's easy to see that ${\iso} = {\iso\iso}$, so the
-duplication natural transformation $\delta : {\iso} \to {\iso\iso}$ is the
-identity. The extraction natural transformation $\varepsilon : {\iso} \to
-\idfunctor$ is given by the subposet inclusion from $\isof A$ to $A$, with
-$\deriv{\varepsilon_A} \<x \<\dx = \dx$, which clearly makes the natural square
-commute.
+So $\altiso A$ inherits all of $A$'s changes, but ordered discretely and with
+\emph{only zero-changes still valid}. The derivatives of functoriality,
+duplication, and extraction are different:
+%
+\begin{mathpar}
+  \deriv{\altiso(f)} = \deriv f
 
-Finally, $\iso_\CP$, like $\iso_\Poset$, distributes over products \& sums. This
-follows from the definitions of $\chgs{\iso A}$ and $\updfn_{\iso A}$ and of
-products and sums in $\CP$. \todo{TODO: this should be clearer}
+  \deriv\delta_A \<x\<\dx = \dx
+
+  \deriv\varepsilon_A \<x\<\dx = \dx
+\end{mathpar}
+
+\noindent
+Product- and sum-distribution are actually identity maps, because (although it
+takes a little checking to establish) $\prod_i \altiso A_i = \altiso \prod_i A$
+and $\sum_i \altiso A_i = \altiso \sum_i A_i$.
+
+$\altiso$ avoids the need to use the non-constructive (and not obviously
+computable) $\zero_x$ to define the comonad extraction $\varepsilon$. However,
+for us this will turn out not to be an issue. \todo{TODO: explain why $\chgs
+  \isof A = \termO$ turns out to be handy - it allows us to split up $\Phi$ and
+  $\Delta$ on types.}
 
 
 \subsection{The lifted $\down$ monad}
@@ -778,14 +820,14 @@ constructing it, this \emph{refines} the standard model along the forgetful
 functor $\valfn$, that is:
 
 \begin{theorem}
-  \(\vals \incden{-} = \den{-}_\Poset\).
+  \(\vals{\incden{-}} = \den{-}_\Poset\).
 \end{theorem}
 \begin{proof}
   By induction on types and typing derivations. For example,
 
 %% TODO: check this proof!
 \begin{align*}
-  \vals\incden{e_1 \vee e_2}
+  \vals{\incden{e_1 \vee e_2}}
   &= \vals{(\fork{\incden{e_i}}_i \then \morph{join}_2)}
   && \text{by definition}\\
   &= \vals{\fork{\incden{e_i}}_i} \then \vals{\morph{join}_2}
@@ -856,14 +898,18 @@ functor $\valfn$, that is:
 
 \begin{figure*}
   \begin{align*}
-    \Phi \tbool &= \tbool & \D\tbool &= \tbool\\
-    \Phi \tset{A} &= \tset{\Phi A} & \D\tset{A} &= \tset{\Phi A}\\
+    \Phi \tunit &= \tunit & \D\tunit &= \tunit\\
+    \Phi \tdown{\eqt A} &= \tdown{\Phi \eqt A} & \D\tdown{\eqt A} &= \tdown{\Phi \eqt A}\\
     \Phi \isof A &= \isof{(\Phi A \x \D A)}
     & \D\isof A &= \isof \D A\\
     \Phi(A \to B) &= \Phi A \to \Phi B
     & \D(A \to B) &= \isof \Phi A \to \D A \to \D B\\
     \Phi(A \x B) &= \Phi A \x \Phi B & \D(A \x B) &= \D A \x \D B\\
     \Phi(A + B) &= \Phi A + \Phi B & \D(A + B) &= \D A + \D B
+    %% % Syntax sugar cases.
+    %% \\
+    %% \Phi \tbool &= \tbool & \D\tbool &= \tbool\\
+    %% \Phi \tset{A} &= \tset{\Phi A} & \D\tset{A} &= \tset{\Phi A}
   \end{align*}
   \caption{Semi\naive{} type translation}
 \end{figure*}
@@ -883,45 +929,50 @@ functor $\valfn$, that is:
   \label{fig:dummy}
 \end{figure*}
 
+
+%% ---- Seminaive ("go faster") term translation ----
 \begin{figure*}
+
+  %% TODO: think about this translation and syntax sugar. for example, the
+  %% case-split I use in \phi(\esplit e) is only valid *because* \esplit exists.
+  %%
+  %% Would be nice to give the syntax sugar explicitly, but maybe more effor
+  %% than its worth? Might be clearer to mostly avoid syntax sugar? Not sure.
+
   \begin{align*}
+    %% Ugh, I should really mark that some of these variables are monotone and
+    %% others discrete in some non-color way.
     \phi x &= x & \delta x &= \dx\\
+    \phi \dvar x &= \dvar x & \delta \dvar x &= \dvar\dx\\
     \phi(\fnof x e) &= \fnof x \phi e
     & \delta(\fnof{x} e) &= \fnof{\eboxd x} \fnof\dx \delta e\\
     \phi(e\<f) &= \phi e\<\phi f
     & \delta(e\<f) &= \delta e \<\eboxd{\color{Rhodamine}\phi e} \<\delta f\\
-    \phi\etuple{e,f} &= \etuple{\phi e, \phi f}
+    \phi\etuple{e_i}_i &= \etuple{\phi e_i}_i
     & \delta\etuple{e,f} &= \etuple{\delta e, \delta f}\\
     \phi(\pi_i\<e) &= \pi_i\<\phi e
     & \delta(\pi_i\<e) &= \pi_i\<\delta e\\
     \phi(\inj i e) &= \inj i \phi e
     & \delta(\inj i e) &= \inj i \delta e\\
-    \phi\etrue &= \etrue & \delta\etrue &= \efalse\\
-    \phi\efalse &= \efalse & \delta\efalse &= \efalse\\
     \phi\bot &= \bot & \delta\bot &= \bot\\
     \phi(e \vee f) &= \phi e \vee \phi f
     & \delta(e \vee f) &= \delta e \vee \delta f\\
-    \phi\esetd{e_i}_i &= \esetd{\phi e_i}_i & \delta\esetd{e_i}_i &= \esetd{}\\
+    \phi(\edown e) &= \edown \phi e & \delta(\edown e) &= \bot\\
     \phi\eboxd{e} &= \eboxd{\etuple{\phi e, \delta e}}
-    & \delta\eboxd{e} &= \eboxd{\delta e}
+    & \delta\eboxd{e} &= \eboxd{\delta e}\\
+    %% ugh
+    \phi(\prim{eq}\<e) &= \elet{\eboxd{x,\pwild} = \phi e} \prim{eq}\<\dvar x
+    & \delta(\prim{eq}\<e) &= \bot\\
+    \phi(\prim{fix}\<e) &= \prim{fast-fix}\<\phi e
+    & \delta(\prim{fix}\<e) &= \bot
   \end{align*}
-
-  %% TODO: determine exactly how much syntax sugar I want to allow in the target
-  %% of this translation. for example, the case-split I use in \phi(\esplit e)
-  %% is only valid *because* \esplit exists.
-  %%
-  %% Would be nice to give the syntax sugar explicitly, but maybe more effor
-  %% than its worth? Might be clearer to mostly avoid syntax sugar? Not sure.
-
-  %% TODO FIXME: \phi(\fix e), \delta(\fix e)!
-  %% TODO FIXME: \phi(if then else), \delta(if then else)!
 
   \begin{align*}
     \phi(\ecase e (\inj i x \caseto f_i)_i)
     &= \ecase{\phi e} (\inj i x \caseto \phi f_i)_i
     \\
     \delta(\ecase e (\inj i x \caseto f_i)_i)
-    &= \ecase{\esplit{\eboxd{\phi e}},\, \delta e}\\
+    &= \ecase{\esplit{\eboxd{\color{Rhodamine} \phi e}},\, \delta e}\\
     &\qquad ({\inj i {\eboxd x},\, \inj i \dx} \caseto \delta f_i)_i\\
     &\qquad ({\inj i {\eboxd x},\, \pwild}
       \caseto \subst{\delta f_i}{\dx \substo \dummy\<x})_i
@@ -931,60 +982,147 @@ functor $\valfn$, that is:
     %% \phi(\eif e f g) &= \eif{\phi e}{\phi f}{\phi g}\\
     %% \delta(\eif e f g) &= \eif{\phi e}{\delta f}{\delta g}
     \\
-    \phi(\eford x e f)
-    &= \eford{x}{\phi e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
-    \substd{\phi f}{\dx \substo \zero\<x}
+    \phi\bigl(\ebigvee x e f\bigr)
+    &= \ebigvee x {\phi e} {\phi f}
     \\
-    \delta(\eford x e f)
-    &= (\eford x{\delta e} \substd{\phi f}{\dx \substo \zero\<x}) \\
-    &\vee (\eford x{e \vee \delta e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
-    \substd{\delta f}{\dx \substo \zero\<x})
-    \\
-    \phi(\ewhen e f) &= \ewhen{\phi e} \phi f
-    \\
-    \delta(\ewhen e f)
-    &= \eifd{\phi e}{\delta f} \ewhen{\delta e} \phi f \vee \delta f
+    %% wait, is weakening being used here?
+    \delta\bigl(\ebigvee x e f\bigr)
+    &= \bigl(\ebigvee x {\delta e} {\color{Rhodamine}\phi f}\bigr) \vee
+    \bigl(\ebigvee x {{\color{Rhodamine}\phi e} \vee \delta e} {\delta f}\bigr)
+%%     \delta(\eford x e f)
+%%     &= (\eford x{\delta e} \substd{\phi f}{\dx \substo \zero\<x}) \\
+%%     &\vee (\eford x{e \vee \delta e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
+%%     \substd{\delta f}{\dx \substo \zero\<x})
     \\
     \phi(\elet{\eboxd x = e} f) &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \phi f
     \\
     \delta(\elet{\eboxd x = e} f)
-    &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \delta f
+    &= \elet{\eboxd{\etuple{x,\dx}} = \color{Rhodamine}\phi e} \delta f
     \\
-    \phi(\esplit e) &=
-    %% \elet{\eboxd{\etuple{y,\dy}} = \phi e}\\
-    %% &\phantom{{}={}} \ecase{\esplit{\eboxd y}}\\
-    %% &\qquad (\inj i \eboxd x \caseto
-    %% \substd{\phi f_i}{\dx \substo \extract_i\<y\<\dy})_i
-    %%
-    %% \elet{\eboxd{\etuple{x,\dx}} = \phi e}\\
-    %% &\phantom{{}={}}\ecase{\esplit {\eboxd x}, \esplit {\eboxd\dx}}\\
-    %% &\qquad (\inj i \eboxd x, \inj i \eboxd\dx
-    %% \caseto \inj i \eboxd{\etuple{x,\dx}})_i\\
-    %% &\qquad (\inj i \eboxd x, \pwild
-    %% \caseto \inj i \eboxd{\etuple{x,\dummy\<x}})_i
-    %%
-    \elet{\eboxd{x} = \phi e}\\
+    \phi(\prim{isEmpty}\<e) &=
+    %% ugh.
+    \elet{\eboxd{\etuple{x,\pwild}} = \phi e} \prim{isEmpty}\<\dvar x\\
+    %% TODO: check this lines up with \delta(if then else), because that's where
+    %% it comes up.
+    \delta(\prim{isEmpty}\<e) &= \XXX\\
+    \phi(\esplit e) &= \elet{\eboxd{x} = \phi e}\\
     &\phantom{{}={}} \esplit [\isocolor \ecase x\\
     &\phantom{= \esplit}\quad\isocolor
       (\etuple{\inj i y, \inj i \dy} \caseto \inj i \etuple{y,\dy})_i\\
     &\phantom{= \esplit}\quad
       {\isocolor(\etuple{\inj i y, \pwild}
         \caseto \inj i \etuple{y, \dummy\<y})_i}]
-    %%
-    %% \ecase{\phi e}\\
-    %% &\qquad (\eboxd{\etuple{\inj i x, \inj i \dx}}
-    %% \caseto \inj i \eboxd{x,\dx})_i\\
-    %% &\qquad (\eboxd{\etuple{\inj i x, \pwild}}
-    %% \caseto \inj i \eboxd{x, \dummy\<x})_{i}
     \\
     \delta(\esplit e) &= \esplit \delta e
   \end{align*}
 
-  \todo{TODO: split cases for non-core syntax into separate figure.}
-
   \caption{Semi\naive{} term translation}
 \end{figure*}
 
+%% ---- old seminaive term translation ----
+%% \begin{figure*}
+%%   \begin{align*}
+%%     \phi x &= x & \delta x &= \dx\\
+%%     \phi(\fnof x e) &= \fnof x \phi e
+%%     & \delta(\fnof{x} e) &= \fnof{\eboxd x} \fnof\dx \delta e\\
+%%     \phi(e\<f) &= \phi e\<\phi f
+%%     & \delta(e\<f) &= \delta e \<\eboxd{\color{Rhodamine}\phi e} \<\delta f\\
+%%     \phi\etuple{e,f} &= \etuple{\phi e, \phi f}
+%%     & \delta\etuple{e,f} &= \etuple{\delta e, \delta f}\\
+%%     \phi(\pi_i\<e) &= \pi_i\<\phi e
+%%     & \delta(\pi_i\<e) &= \pi_i\<\delta e\\
+%%     \phi(\inj i e) &= \inj i \phi e
+%%     & \delta(\inj i e) &= \inj i \delta e\\
+%%     \phi\etrue &= \etrue & \delta\etrue &= \efalse\\
+%%     \phi\efalse &= \efalse & \delta\efalse &= \efalse\\
+%%     \phi\bot &= \bot & \delta\bot &= \bot\\
+%%     \phi(e \vee f) &= \phi e \vee \phi f
+%%     & \delta(e \vee f) &= \delta e \vee \delta f\\
+%%     \phi\esetd{e_i}_i &= \esetd{\phi e_i}_i & \delta\esetd{e_i}_i &= \esetd{}\\
+%%     \phi\eboxd{e} &= \eboxd{\etuple{\phi e, \delta e}}
+%%     & \delta\eboxd{e} &= \eboxd{\delta e}
+%%   \end{align*}
+
+%%   %% TODO: determine exactly how much syntax sugar I want to allow in the target
+%%   %% of this translation. for example, the case-split I use in \phi(\esplit e)
+%%   %% is only valid *because* \esplit exists.
+%%   %%
+%%   %% Would be nice to give the syntax sugar explicitly, but maybe more effor
+%%   %% than its worth? Might be clearer to mostly avoid syntax sugar? Not sure.
+
+%%   %% TODO FIXME: \phi(\fix e), \delta(\fix e)!
+%%   %% TODO FIXME: \phi(if then else), \delta(if then else)!
+
+%%   \begin{align*}
+%%     \phi(\ecase e (\inj i x \caseto f_i)_i)
+%%     &= \ecase{\phi e} (\inj i x \caseto \phi f_i)_i
+%%     \\
+%%     \delta(\ecase e (\inj i x \caseto f_i)_i)
+%%     &= \ecase{\esplit{\eboxd{\phi e}},\, \delta e}\\
+%%     &\qquad ({\inj i {\eboxd x},\, \inj i \dx} \caseto \delta f_i)_i\\
+%%     &\qquad ({\inj i {\eboxd x},\, \pwild}
+%%       \caseto \subst{\delta f_i}{\dx \substo \dummy\<x})_i
+%%     %% &= \ecase{\esplit{\eboxd{\phi e}}}\\
+%%     %% &\qquad (\inj i \eboxd x
+%%     %% \caseto \subst{\delta f_i}{\dx \substo \extract_i\<x\<\delta e})_i\\
+%%     %% \phi(\eif e f g) &= \eif{\phi e}{\phi f}{\phi g}\\
+%%     %% \delta(\eif e f g) &= \eif{\phi e}{\delta f}{\delta g}
+%%     \\
+%%     \phi(\eford x e f)
+%%     &= \eford{x}{\phi e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
+%%     \substd{\phi f}{\dx \substo \zero\<x}
+%%     \\
+%%     \delta(\eford x e f)
+%%     &= (\eford x{\delta e} \substd{\phi f}{\dx \substo \zero\<x}) \\
+%%     &\vee (\eford x{e \vee \delta e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
+%%     \substd{\delta f}{\dx \substo \zero\<x})
+%%     \\
+%%     \phi(\ewhen e f) &= \ewhen{\phi e} \phi f
+%%     \\
+%%     \delta(\ewhen e f)
+%%     &= \eifd{\phi e}{\delta f} \ewhen{\delta e} \phi f \vee \delta f
+%%     \\
+%%     \phi(\elet{\eboxd x = e} f) &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \phi f
+%%     \\
+%%     \delta(\elet{\eboxd x = e} f)
+%%     &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \delta f
+%%     \\
+%%     \phi(\esplit e) &=
+%%     %% \elet{\eboxd{\etuple{y,\dy}} = \phi e}\\
+%%     %% &\phantom{{}={}} \ecase{\esplit{\eboxd y}}\\
+%%     %% &\qquad (\inj i \eboxd x \caseto
+%%     %% \substd{\phi f_i}{\dx \substo \extract_i\<y\<\dy})_i
+%%     %%
+%%     %% \elet{\eboxd{\etuple{x,\dx}} = \phi e}\\
+%%     %% &\phantom{{}={}}\ecase{\esplit {\eboxd x}, \esplit {\eboxd\dx}}\\
+%%     %% &\qquad (\inj i \eboxd x, \inj i \eboxd\dx
+%%     %% \caseto \inj i \eboxd{\etuple{x,\dx}})_i\\
+%%     %% &\qquad (\inj i \eboxd x, \pwild
+%%     %% \caseto \inj i \eboxd{\etuple{x,\dummy\<x}})_i
+%%     %%
+%%     \elet{\eboxd{x} = \phi e}\\
+%%     &\phantom{{}={}} \esplit [\isocolor \ecase x\\
+%%     &\phantom{= \esplit}\quad\isocolor
+%%       (\etuple{\inj i y, \inj i \dy} \caseto \inj i \etuple{y,\dy})_i\\
+%%     &\phantom{= \esplit}\quad
+%%       {\isocolor(\etuple{\inj i y, \pwild}
+%%         \caseto \inj i \etuple{y, \dummy\<y})_i}]
+%%     %%
+%%     %% \ecase{\phi e}\\
+%%     %% &\qquad (\eboxd{\etuple{\inj i x, \inj i \dx}}
+%%     %% \caseto \inj i \eboxd{x,\dx})_i\\
+%%     %% &\qquad (\eboxd{\etuple{\inj i x, \pwild}}
+%%     %% \caseto \inj i \eboxd{x, \dummy\<x})_{i}
+%%     \\
+%%     \delta(\esplit e) &= \esplit \delta e
+%%   \end{align*}
+
+%%   \todo{TODO: split cases for non-core syntax into separate figure.}
+
+%%   \caption{Semi\naive{} term translation}
+%% \end{figure*}
+
+
 \subsection{The \blackiso{} comonad}
 
 \todo{TODO: explain $\blackiso$. show it's naturally isomorphic to $\iso$.}

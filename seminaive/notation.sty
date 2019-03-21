@@ -45,7 +45,7 @@
 %\renewcommand\then{\mathbin{;}}
 %\renewcommand\then{\,{;}\,}
 \newcommand\catC{\ensuremath{\mathcal{C}}}
-\newcommand\morph[1]{\ensuremath{\mathit{#1}}}
+\newcommand\morph\textit
 \newcommand\id{\morph{id}}
 \newcommand\idfunctor{\morph{Id}} % not used yet
 
@@ -70,7 +70,7 @@
 
 %% ===== Datafun syntax =====
 \newcommand\kwname\textbf
-\newcommand\prim\mathrm
+\newcommand\prim\text
 \newcommand\caseto\shortrightarrow
 \newcommand\pwild{\underline{\phantom{a}}}
 \newcommand\desugars{~\leadsto~}
@@ -82,7 +82,7 @@
 \newcommand\tbool{\mathbold 2}
 \newcommand\tunit{\mathbold 1}
 \newcommand\tdown\downof
-\newcommand\eqt[1]{\underaccent{\mathrm{eq}}{#1}}
+\newcommand\eqt[1]{\underaccent{\text{eq}}{#1}}
 
 \newcommand\ebox[1]{[{#1}]}
 \newcommand\elet[1]{\kwname{let}\;{#1}\;\kwname{in}\;}
@@ -93,7 +93,7 @@
 \newcommand\ewhen[1]{\kwname{when}\:({#1})\fnspace}
 \newcommand\edcase[1]{\kwname{case}^\iso \;{\isocolor #1}\; \kwname{of}\;}
 \newcommand\eset[1]{\{{#1}\}}
-\newcommand\etrue{\mathrm{true}}\newcommand\efalse{\mathrm{false}}
+\newcommand\etrue{\textrm{true}}\newcommand\efalse{\textrm{false}}
 \newcommand\eif[2]{\kwname{if}\;{#1}\;\kwname{then}\;{#2}\;\kwname{else}\;}
 \newcommand\eeq[2]{{#1} = {#2}}
 \newcommand\efixis[1]{\kwname{fix}\;#1\;\kwname{is}\;}
@@ -122,7 +122,7 @@
 \newcommand\freshvar[1]{{\color{Rhodamine}#1}}
 \newcommand\hd[2]{\dvar{#1} \dblcolon {#2}}
 %% TODO: better notation
-\newcommand\stripcx[1]{\mathit{strip}({#1})}
+\newcommand\stripcx[1]{\textit{strip}({#1})}
 \renewcommand\stripcx[1]{\lceil{#1}\rceil}
 %% FIXME: should the context get iso-colored? really?
 \newcommand\stripcxd[1]{{\isocolor\stripcx{\isocolor #1}}}
@@ -143,7 +143,7 @@
 
 \newcommand\zero{\ensuremath{\mathbold{0}}}
 \newcommand\valfn{\ensuremath{\mathbb{U}}}
-%\renewcommand\valfn{\ensuremath{\mathcal{U}}}
+%\renewcommand\valfn{\ensuremath{\mathbb{V}}}
 \newcommand\vals{\valfn}
 \newcommand\chgs[1]{\D{#1}}
 \newcommand\deriv[1]{\ensuremath{#1'}}
