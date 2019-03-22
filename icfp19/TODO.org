@@ -2,13 +2,57 @@
 1. Lead with faster-fix and how it eg. speeds up transitive closure
    from O(n^2) to O(n).
 
+
 * Theorems to put in paper
-1. U⟦-⟧_deriv = ⟦-⟧_Poset.
+⟦-⟧ : Datafun → Poset is the standard semantics.
+⦃-⦄ : Datafun → ΔPoset is the change semantics.
+𝓤 : ΔPoset → Poset is the forgetful functor.
+For A : ΔPoset, 𝓤A : Poset is the value poset
+and ΔA : Poset is the change poset.
+
+1. 𝓤⦃-⦄ = ⟦-⟧
+2. Δ⦃A⦄ = ⟦ΔA⟧
+3. The logical relations proof.
+
+
+** OLD, broken version
+TODO: fix up this theorem todo list
+1. U⟦-⟧_Deriv = ⟦-⟧_Poset
 2. □ ≅ ■
-3 (types) & 4 (terms). ⟦-⟧_deriv ≅ ⟦-⟧_φ
+3. iso : ⟦A⟧_deriv ≅ ⟦A⟧_φ
+4. Naturality, ⟦e⟧_deriv; iso = iso; ⟦e⟧_φ
 5. Reading off ⟦-⟧_φ gives φ/δ translation, namely:
 5a. ⟦φe⟧_Poset = U⟦e⟧_φ (= ⟦e⟧_Poset by Thm1).
 5b. ⟦δe⟧_Poset is a derivative for (5a).
+
+uh-oh, I think those last two don't even type-check!
+
+
+* Roads not taken
+There were a lot of choices we made that could have been made differently. I'd
+like to have a section in the paper on them if there's room. In particular, we
+could have, in no particular order:
+
+1. Normalized first, then do seminaive transform only on first-order Datafun.
+
+2. Used "change monoids" a la unpublished(?) Picallo & Michael PJ &c paper.
+
+3. Tried to handle nested fixed points. This would involve 2nd and higher
+   derivatives; could lazily compute them? Apply Paolo Giarrusso's thesis work?
+   We didn't do this because it seems hard and Datalog can't do it.
+
+4. Decided to include the derivative transform, not just the seminaive
+   transform.
+
+5. Augmented our target language with dependent types (to specify "zero change
+   for a value") and quotients to try to make Φ□A more closely model the
+   semantics.
+
+6. Used two _separate_ comonads, one for discreteness, one for preventing nested
+   fixed points. But then we'd have to think about how they interact!
+
+7. Only stored zero-changes for _functions_, not for everything inside a boxed
+   type. This seems related to letting Φ(A_eq) = A_eq.
 
 * Syntax sugar / conveniences
 
