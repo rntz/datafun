@@ -3,8 +3,8 @@
 %\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
 %\documentclass[nomarginums]{rntz}\usepackage[b6]{rntzgeometry}\usepackage[width=\textwidth,fullwidth=115mm,]{narrow}\geometry{bottom=36pt}\pagestyle{empty}
 
-\documentclass{rntz}\usepackage{fantasy}%\geometry{textwidth=330pt,}
-%\documentclass{rntz}\usepackage[tablet]{fantasy}\geometry{textwidth=330pt}
+%\documentclass{rntz}\usepackage{fantasy}\geometry{textwidth=330pt,}
+\documentclass{rntz}\usepackage[tablet]{fantasy}\geometry{textwidth=330pt}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
 \usepackage{latexsym}               % \rightsquigarrow
@@ -17,6 +17,9 @@
 \usepackage{accents}                %\underaccent
 \usepackage{nccmath}                % fix align* (etc.) spacing
 \usepackage{anyfontsize}
+
+% Allow re-statable theorems. Consider integrating into rntzthm.
+\usepackage{thmtools,thm-restate}
 
 % Make section name references use \S.
 \makeatletter\crefname{section}{\S\@gobble}{\S\@gobble}\makeatother
@@ -31,14 +34,14 @@
 
 %\PassOptionsToPackage{scaled=1.1}{rntzfont} % a4/b5, width=38em/373pt
 %\PassOptionsToPackage{scaled=1.0625}{rntzfont} % b5/a4 width=36.66em/360pt
-%\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
+\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
 %\PassOptionsToPackage{scaled=.99}{rntzfont} %b6
 
 %% Note to self: don't use newmath, Neel's PC can't handle it.
-\usepackage[charter,]{rntzfont}
-%\usepackage[source,linespread=1.0233,]{rntzfont}
+%\usepackage[charter,]{rntzfont}
+\usepackage[source,linespread=1.0233,]{rntzfont}
 %\usepackage[source,scaled=1.01,linespread=1.0132,linespread=1.015,]{rntzfont}
-%\usepackage[librebaskerville,scaled=1.012,]{rntzfont} % zeu@Scale ≈ .98
+%\usepackage[librebaskerville,linespread=1.012,]{rntzfont} % zeu@Scale ≈ .98
 
 %% %% Nice for fantasy[phone].
 %% \usepackage[sfdefault,scaled=.89060]{noto}
@@ -46,7 +49,7 @@
 %% \usepackage[cal=cm,bb=esstix,scaled=.93,bbscaled=.93]{mathalfa}
 %% \renewcommand\mathit\textit\renewcommand\mathrm\text % argh
 %% \usepackage[basic,defaultmathsizes]{mathastext}
-%% \linespread{1.08}
+%% \linespread{1.05}%\linespread{1.08}
 
 \ifdefined\mathbold\else\newcommand\mathbold{\boldsymbol}\fi
 \usepackage[spacing=true]{microtype}\frenchspacing
@@ -575,62 +578,57 @@ existence of derivatives.
 
 \subsection{Cartesian structure}
 
-\begin{theorem}
-  \CP{} has all finite products and sums.
-\end{theorem}
+\CP{} has all finite products and sums. The value-level structure is inherited
+from \Poset{} along \valfn{}. The change-poset structure is also inherited from
+\Poset{}, while the projection and injection's derivatives operate pointwise on
+changes:
 
-\begin{proof}
-  The value-level structure is inherited from \Poset{} along \valfn{}. The
-  change-poset structure is also inherited from \Poset{}, while the projection
-  and injection's derivatives operate pointwise on changes:
+\begin{align*}
+  \chgs{\prod_{i \in I} A_i} &= \prod_{i \in I} \chgs A_i &
+  \chgs{\sum_{i \in I} A_i} &= \sum_{i \in I} \chgs A_i
+  %\label{eqn:delta-distributes-over-sums-and-products}
+  \\
+  \deriv\pi_i\<x\<\dx &= \pi_i\<\dx & \deriv\injc_i\<x\<\dx &= \inj i \dx
+\end{align*}
 
-  \begin{align}
-    \chgs{\prod_{i \in I} A_i} &= \prod_{i \in I} \chgs A_i &
-    \chgs{\sum_{i \in I} A_i} &= \sum_{i \in I} \chgs A_i
-    \label{eqn:delta-distributes-over-sums-and-products}
-    \\
-    \deriv\pi_i\<x\<\dx &= \pi_i\<\dx & \deriv\injc_i\<x\<\dx &= \inj i \dx
-  \end{align}
+\noindent Updates are pointwise, noting that $(\inj i x \upd \inj j \dx)$ is
+undefined for $i \ne j$:
 
-  \noindent Updates are pointwise, noting that $(\inj i x \upd \inj j \dx)$ is
-  undefined for $i \ne j$:
+\begin{align*}
+  (x_i)_i \upd (\dx_i)_i &= (x_i \upd \dx_i)_i &
+  \inj i x \upd \inj i \dx &= \inj i (x \upd \dx)
+\end{align*}
 
-  \begin{align*}
-    (x_i)_i \upd (\dx_i)_i &= (x_i \upd \dx_i)_i &
-    \inj i x \upd \inj i \dx &= \inj i (x \upd \dx)
-  \end{align*}
+\noindent
+Soundness \& completeness for increases follow directly from the pointwise
+orderings of products \& coproducts in \Poset{}.
 
-  \noindent
-  Soundness \& completeness for increases follow directly from the pointwise
-  orderings of products \& coproducts in \Poset{}.
+Fork's derivative $\deriv{\fork{f_i}_i}$ is $\fork{\deriv f_i}_i$:
 
-  Fork's derivative $\deriv{\fork{f_i}_i}$ is $\fork{\deriv f_i}_i$:
+\begin{gather*}
+  \fork{f_i}_i \<(x \upd \dx)
+  = (f_i(x \upd \dx))_i
+  = (f_i\<x \upd \deriv f_i \<x \<\dx)_i
+  = \fork{f_i}_i \<x \upd \fork{\deriv f_i}_i \<x \<\dx
+\end{gather*}
 
-  \begin{gather*}
-    \fork{f_i}_i \<(x \upd \dx)
-    = (f_i(x \upd \dx))_i
-    = (f_i\<x \upd \deriv f_i \<x \<\dx)_i
-    = \fork{f_i}_i \<x \upd \fork{\deriv f_i}_i \<x \<\dx
-  \end{gather*}
+\noindent
+A derivative for split must obey \[ \krof{f_i}_i\<(\inj i x \upd \inj i \dx)
+= f_i\<x \upd \deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj i \dx) \] so one
+valid choice is
 
-  \noindent
-  A derivative for split must obey \[ \krof{f_i}_i\<(\inj i x \upd \inj i \dx)
-  = f_i\<x \upd \deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj i \dx) \] so one
-  valid choice is
+\[\deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj j \dx)
+=
+\begin{cases}
+  \deriv f_i \<x \<\dx & \text{if}~i = j\\
+  \deriv f_i \<x \<\zero_x & \text{otherwise}
+\end{cases}
+\]
 
-  \[\deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj j \dx)
-  =
-  \begin{cases}
-    \deriv f_i \<x \<\dx & \text{if}~i = j\\
-    \deriv f_i \<x \<\zero_x & \text{otherwise}
-  \end{cases}
-  \]
-
-  \noindent
-  The second case is dead code; any value of the right type would do. We will
-  exploit this in \cref{sec:incremental} to avoid needing the axiom of choice
-  (used to define $\zero_x$) in the context of Datafun.
-\end{proof}
+\noindent
+The second case is dead code; any value of the right type would do. We will
+exploit this in \cref{sec:incremental} to avoid needing the axiom of choice
+(used to define $\zero_x$) in the context of Datafun.
 
 
 \subsection{Exponentials}
@@ -733,8 +731,8 @@ correctness of $\deriv{(\fn f)}$ follows from correctness of \deriv{f}.
 Now we construct a comonad $\iso$ on \CP\ such that $\valfn\iso_\CP =
 \iso_\Poset\valfn$. This requirement defines the value-level structure, leaving
 only the change poset and update map. Since $\isof A$ is ordered discretely,
-values \emph{cannot} increase. So the simplest definition, and the one we will
-use, is:
+values \emph{cannot} increase. So the simplest definition that is sound and
+complete for increases is:
 
 \begin{align*}
   \chgs{\isof A} &= \termO
@@ -781,25 +779,22 @@ clarity, defined like so:
 So $\altiso A$ inherits all of $A$'s changes, but ordered discretely and with
 \emph{only zero-changes still valid}. The derivatives of functoriality,
 duplication, and extraction are different:
-%
-\begin{mathpar}
-  \deriv{\altiso(f)} = \deriv f
 
-  \deriv\delta_A \<x\<\dx = \dx
-
-  \deriv\varepsilon_A \<x\<\dx = \dx
-\end{mathpar}
+\begin{align*}
+  \deriv{\altiso(f)} &= \deriv f
+  & \deriv\delta_A \<x\<\dx &= \dx
+  & \deriv\varepsilon_A \<x\<\dx &= \dx
+\end{align*}
 
 \noindent
-Product- and sum-distribution are actually identity maps, because (although it
-takes a little checking to establish) $\prod_i \altiso A_i = \altiso \prod_i A$
-and $\sum_i \altiso A_i = \altiso \sum_i A_i$.
+Product- and sum-distribution are actually identity maps, because $\prod_i
+\altiso A_i = \altiso \prod_i A$ and $\sum_i \altiso A_i = \altiso \sum_i
+A_i$.\footnote{Checking this is left as an exercise for the reader.}
 
-$\altiso$ avoids the need to use the non-constructive (and not obviously
-computable) $\zero_x$ to define the comonad extraction $\varepsilon$. However,
-for us this will turn out not to be an issue. \todo{TODO: explain why $\chgs
-  \isof A = \termO$ turns out to be handy - it allows us to split up $\Phi$ and
-  $\Delta$ on types.}
+$\altiso$ avoids the need to use the non-constructive $\zero_x$ to define the
+comonad extraction $\varepsilon$. However, for us this will turn out not to be
+an issue. \todo{TODO: explain why $\chgs \isof A = \termO$ turns out to be handy
+  - it allows us to split up $\Phi$ and $\Delta$ on types.}
 
 
 \subsection{The lifted $\down$ monad}
@@ -813,32 +808,61 @@ for us this will turn out not to be an issue. \todo{TODO: explain why $\chgs
 \section{Incrementalization}
 \label{sec:incremental}
 
-The \emph{incremental semantics} for Datafun, notated $\incden{-}$, is given by
-the Datafun model in \CP{} constructed in \cref{sec:changeposets}, letting
+The \emph{incremental semantics} for Datafun, notated $\incden{-}$, is given
+by the Datafun model in \CP{} constructed in \cref{sec:changeposets}, letting
 $\disco = \iso_\CP$ and $\down = \down_\CP$. As we took care to show while
 constructing it, this \emph{refines} the standard model along the forgetful
 functor $\valfn$, that is:
 
+\begin{restatable}{theorem}{forgetInc}
+  \label{thm:forget-incremental}
+  \(\vals{\incden{-}} = \den{-}\).
+\end{restatable}
+
+\begin{proof}
+  By induction on types and typing derivations. 
+  For example,
+
+  \begin{align*}
+    \vals{\incden{e_1 \vee e_2}}
+    &= \vals{(\fork{\incdens{e_i}}_i \then \morph{join}_2)}
+    && \text{by definition}\\
+    &= \vals{\fork{\incdens{e_i}}_i} \then \vals{\morph{join}_2}
+    && \text{functoriality of }\valfn\\
+    &= \fork{\vals{\incdens{e_i}}}_i \then \morph{join}_2
+    && \text{refinement along \valfn{} (\cref{sec:refines})}\\
+    &= \fork{\den{e_i}}_i \then \morph{join}_2
+    && \text{inductive hypothesis}\\
+    &= \den{e_1 \vee e_2}
+    && \text{by definition}
+  \end{align*}
+
+  \noindent See \cpageref{proof:forget-incremental} for full proof.
+\end{proof}
+
+
+\subsection{The change type translation}
+
+Given any Datafun type $A$, its change poset $\D\incdens A$ is internally
+definable via the following translation (also named $\D$, at the risk of
+possible semantic overload):
+
+\begin{align*}
+  \D\tunit &= \tunit
+  & \D(A \x B) &= \D A \x \D B
+  \\
+  \D \isof A &= \tunit
+  & \D(A + B) &= \D A + \D B
+  \\
+  \D\tdown{\eqt A} &= \tdown{\eqt A}
+  & \D(A \to B) &= \isof A \to \D A \to \D B
+\end{align*}
+
 \begin{theorem}
-  \(\vals{\incden{-}} = \den{-}_\Poset\).
+  \(\D\incdens A = \den{\D A}\).
 \end{theorem}
 \begin{proof}
-  By induction on types and typing derivations. For example,
-
-%% TODO: check this proof!
-\begin{align*}
-  \vals{\incden{e_1 \vee e_2}}
-  &= \vals{(\fork{\incden{e_i}}_i \then \morph{join}_2)}
-  && \text{by definition}\\
-  &= \vals{\fork{\incden{e_i}}_i} \then \vals{\morph{join}_2}
-  && \text{functoriality of }\valfn\\
-  &= \fork{\vals{\incden{e_i}}}_i \then \morph{join}_2
-  && \text{refinement along \valfn{} (\cref{sec:refines})}\\
-  &= \fork{\den{e_i}_\Poset}_i \then \morph{join}_2
-  && \text{inductive hypothesis}\\
-  &= \den{e_1 \vee e_2}_\Poset
-  && \text{by definition}
-\end{align*}
+  Induct on types.
 \end{proof}
 
 
@@ -911,6 +935,7 @@ functor $\valfn$, that is:
     %% \Phi \tbool &= \tbool & \D\tbool &= \tbool\\
     %% \Phi \tset{A} &= \tset{\Phi A} & \D\tset{A} &= \tset{\Phi A}
   \end{align*}
+  \todo{TODO: delete this}
   \caption{Semi\naive{} type translation}
 \end{figure*}
 
@@ -1126,5 +1151,20 @@ functor $\valfn$, that is:
 \subsection{The \blackiso{} comonad}
 
 \todo{TODO: explain $\blackiso$. show it's naturally isomorphic to $\iso$.}
+
+
+\clearpage
+\begin{center}
+  \Large \itshape Appendix: Proofs
+\end{center}
+
+\forgetInc*
+\begin{proof}\label{proof:forget-incremental}
+  Induct on types and typing derivations. We omit the proof for types; it
+  follows directly from the construction in \cref{sec:changeposets}. For typing
+  derivations:
+
+  \todo{TODO} \XXX
+\end{proof}
 
 \end{document}

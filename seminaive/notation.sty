@@ -93,7 +93,7 @@
 \newcommand\ewhen[1]{\kwname{when}\:({#1})\fnspace}
 \newcommand\edcase[1]{\kwname{case}^\iso \;{\isocolor #1}\; \kwname{of}\;}
 \newcommand\eset[1]{\{{#1}\}}
-\newcommand\etrue{\textrm{true}}\newcommand\efalse{\textrm{false}}
+\newcommand\etrue{\text{true}}\newcommand\efalse{\text{false}}
 \newcommand\eif[2]{\kwname{if}\;{#1}\;\kwname{then}\;{#2}\;\kwname{else}\;}
 \newcommand\eeq[2]{{#1} = {#2}}
 \newcommand\efixis[1]{\kwname{fix}\;#1\;\kwname{is}\;}
@@ -129,7 +129,7 @@
 
 
 %% ===== Poset, ChangePoset, derivative & seminaive notation =====
-\newcommand\incden[1]{\den{#1}_\BD}
+\newcommand\incden[1]{\den{#1}_\D}
 \newcommand\semiden[1]{\den{#1}_\phi}
 
 %% TODO: replace \fname with \morph or vice-versa?
@@ -149,6 +149,17 @@
 \newcommand\deriv[1]{\ensuremath{#1'}}
 \newcommand\upd{\mathbin{\oplus}}
 \newcommand\updfn{\ensuremath{{\upd}}}
+
+% See
+% https://tex.stackexchange.com/questions/419860/how-to-declare-a-bracket-style-math-operator
+% https://tex.stackexchange.com/questions/252648/left-right-double-curly-brace-blackboard-bold-symbol
+%\renewcommand\incden[1]{\langle\kern -.26em\langle{#1}\rangle\kern -.26em\rangle}
+%\renewcommand\incden[1]{\{\kern-.18em\{{#1}\}\kern -.18em\}}
+
+\renewcommand\valfn{\ensuremath{V}}
+\newcommand\incdenfn{\mathcal{D}}
+\newcommand\incdens{\incdenfn} % s for "short"
+\renewcommand\incden[1]{\incdenfn({#1})}
 
 %% \renewcommand\vals[1]{{#1}^v}
 %% \renewcommand\valfn{\ensuremath{\vals{-}}}
