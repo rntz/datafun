@@ -13,7 +13,7 @@
 \newcommand\x\times
 \newcommand\pto\rightharpoonup
 \newcommand\fn\lambda
-\newcommand\injc{\text{in}}
+\newcommand\injc{\mathrm{in}}
 \newcommand\inj[1]{\injc_{#1}\,}
 \newcommand\bnfor{~~|~~}
 \newcommand\bnfeq\Coloneqq
@@ -70,7 +70,7 @@
 
 %% ===== Datafun syntax =====
 \newcommand\kwname\textbf
-\newcommand\prim\text
+\newcommand\prim\textmd
 \newcommand\caseto\shortrightarrow
 \newcommand\pwild{\underline{\phantom{a}}}
 \newcommand\desugars{~\leadsto~}
@@ -79,30 +79,34 @@
 %\renewcommand\desugars{\,\xrsquigarrow{\text{expand}}\,}
 
 \newcommand\tset[1]{\{{#1}\}}
-\newcommand\tbool{\mathbold 2}
-\newcommand\tunit{\mathbold 1}
-\newcommand\tdown\downof
-\newcommand\eqt[1]{\underaccent{\text{eq}}{#1}}
+\newcommand\tbool{2}
+\newcommand\tunit{1}
+%% FIXME: remove \tdown
+\newcommand\tdown[1]{\color{red}\downof{#1}}
+\newcommand\eqt[1]{\underaccent{\textmd{eq}}{#1}}
+\newcommand\tseteq[1]{\tset{\eqt{#1}}}
 
 \newcommand\ebox[1]{[{#1}]}
 \newcommand\elet[1]{\kwname{let}\;{#1}\;\kwname{in}\;}
 \newcommand\etuple[1]{\langle{#1}\rangle}
 \newcommand\ecase[1]{\kwname{case} \;{#1}\; \kwname{of}\;}
-%% surface syntax
+\newcommand\eset[1]{\{{#1}\}}
 \newcommand\efor[1]{\kwname{for}\:({#1})\fnspace}
+\newcommand\eeq[2]{{#1} = {#2}}
+%% surface syntax
 \newcommand\ewhen[1]{\kwname{when}\:({#1})\fnspace}
 \newcommand\edcase[1]{\kwname{case}^\iso \;{\isocolor #1}\; \kwname{of}\;}
-\newcommand\eset[1]{\{{#1}\}}
-\newcommand\etrue{\text{true}}\newcommand\efalse{\text{false}}
+\newcommand\etrue{\prim{true}}\newcommand\efalse{\prim{false}}
 \newcommand\eif[2]{\kwname{if}\;{#1}\;\kwname{then}\;{#2}\;\kwname{else}\;}
-\newcommand\eeq[2]{{#1} = {#2}}
 \newcommand\efixis[1]{\kwname{fix}\;#1\;\kwname{is}\;}
 %% desugared syntax
-\newcommand\edown{\mathop{\downarrow}}
-\newcommand\ebigvee[2]{\mathop{\textstyle\bigvee}({#1} \in {#2})\fnspace}
-%% TODO: maybe remove \efix, \esplit?
 \newcommand\efix{\prim{fix}\<}
 \newcommand\esplit{\prim{split}\<}
+%\newcommand\esplitd[1]{\esplit{\isocolor #1}}
+\newcommand\eisEmpty[1]{\prim{isEmpty}\<{\isocolor #1}}
+%% TODO: remove \edown, \ebigvee
+\newcommand\edown{\color{red}\mathop{\downarrow}}
+\newcommand\ebigvee[2]{\color{red}\mathop{\textstyle\bigvee}({#1} \in {#2})\fnspace}
 
 \newcommand\esetd[1]{\eset{\isocolor #1}}
 \newcommand\eboxd[1]{\ebox{\isocolor #1}}
@@ -129,7 +133,6 @@
 
 
 %% ===== Poset, ChangePoset, derivative & seminaive notation =====
-\newcommand\incden[1]{\den{#1}_\D}
 \newcommand\semiden[1]{\den{#1}_\phi}
 
 %% TODO: replace \fname with \morph or vice-versa?
@@ -143,23 +146,26 @@
 
 \newcommand\zero{\ensuremath{\mathbold{0}}}
 \newcommand\valfn{\ensuremath{\mathbb{U}}}
-%\renewcommand\valfn{\ensuremath{\mathbb{V}}}
 \newcommand\vals{\valfn}
 \newcommand\chgs[1]{\D{#1}}
 \newcommand\deriv[1]{\ensuremath{#1'}}
 \newcommand\upd{\mathbin{\oplus}}
 \newcommand\updfn{\ensuremath{{\upd}}}
 
-% See
-% https://tex.stackexchange.com/questions/419860/how-to-declare-a-bracket-style-math-operator
-% https://tex.stackexchange.com/questions/252648/left-right-double-curly-brace-blackboard-bold-symbol
-%\renewcommand\incden[1]{\langle\kern -.26em\langle{#1}\rangle\kern -.26em\rangle}
-%\renewcommand\incden[1]{\{\kern-.18em\{{#1}\}\kern -.18em\}}
-
-\renewcommand\valfn{\ensuremath{V}}
 \newcommand\incdenfn{\mathcal{D}}
 \newcommand\incdens{\incdenfn} % s for "short"
-\renewcommand\incden[1]{\incdenfn({#1})}
+\newcommand\incden[1]{\incdenfn({#1})}
+
+%\renewcommand\valfn{\ensuremath{V}}
+\renewcommand\valfn{\ensuremath{\mathbb{V}}}
+
+%% % See
+%% % https://tex.stackexchange.com/questions/419860/how-to-declare-a-bracket-style-math-operator
+%% % https://tex.stackexchange.com/questions/252648/left-right-double-curly-brace-blackboard-bold-symbol
+%% \renewcommand\incden[1]{\langle\kern -.26em\langle{#1}\rangle\kern -.26em\rangle}
+%% %\renewcommand\incden[1]{\{\kern-.18em\{{#1}\}\kern -.18em\}}
+%% \renewcommand\incdens\incden
+%% \renewcommand\incdenfn{\ensuremath{\incden{-}}}
 
 %% \renewcommand\vals[1]{{#1}^v}
 %% \renewcommand\valfn{\ensuremath{\vals{-}}}

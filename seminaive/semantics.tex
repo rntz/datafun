@@ -1,10 +1,10 @@
-%\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=18cm,width=38em,width=36.65625em,]{narrow}
-%\documentclass{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=152mm,width=373pt,width=360pt,]{narrow}
+%\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=18cm,width=420pt,width=38em,]{narrow}
+%\documentclass{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=152mm,width=351pt,width=373pt,]{narrow}
 %\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
-%\documentclass[nomarginums]{rntz}\usepackage[b6]{rntzgeometry}\usepackage[width=\textwidth,fullwidth=115mm,]{narrow}\geometry{bottom=36pt}\pagestyle{empty}
+%\documentclass[nomarginums]{rntz}\usepackage[b6]{rntzgeometry}\usepackage[width=\textwidth,fullwidth=115mm,]{narrow}\pagestyle{empty}
 
-%\documentclass{rntz}\usepackage{fantasy}\geometry{textwidth=330pt,}
-\documentclass{rntz}\usepackage[tablet]{fantasy}\geometry{textwidth=330pt}
+%\documentclass{rntz}\usepackage{fantasy}%\geometry{textwidth=330pt,}
+\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}%\geometry{textwidth=345pt}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
 \usepackage{latexsym}               % \rightsquigarrow
@@ -25,21 +25,21 @@
 \makeatletter\crefname{section}{\S\@gobble}{\S\@gobble}\makeatother
 
 % hang is only relevant for long captions, which I don't have
-\usepackage[skip=.5\baselineskip,labelsep=period,labelfont=it,textfont=it,format=hang]{caption}
+%\usepackage[skip=.5\baselineskip,labelsep=period,labelfont=it,textfont=it,format=hang]{caption}
 %\usepackage[skip=.5\baselineskip,labelfont=sc,textfont=it,labelsep=period,format=hang]{caption}
+\usepackage[labelfont=sc,labelsep=period,format=hang]{caption}
 
 \usepackage{enumitem}\setlist{labelindent=1em,labelsep=.75em,leftmargin=*}
 \setlist{labelindent=.5em,labelsep=.75em,leftmargin=*}
 \setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
 
-%\PassOptionsToPackage{scaled=1.1}{rntzfont} % a4/b5, width=38em/373pt
-%\PassOptionsToPackage{scaled=1.0625}{rntzfont} % b5/a4 width=36.66em/360pt
+%\PassOptionsToPackage{scaled=1.0625}{rntzfont} % b5/a4
 \PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
 %\PassOptionsToPackage{scaled=.99}{rntzfont} %b6
 
 %% Note to self: don't use newmath, Neel's PC can't handle it.
-%\usepackage[charter,]{rntzfont}
-\usepackage[source,linespread=1.0233,]{rntzfont}
+\usepackage[charter,]{rntzfont}
+%\usepackage[source,linespread=1.0233,]{rntzfont}
 %\usepackage[source,scaled=1.01,linespread=1.0132,linespread=1.015,]{rntzfont}
 %\usepackage[librebaskerville,linespread=1.012,]{rntzfont} % zeu@Scale ≈ .98
 
@@ -47,7 +47,7 @@
 %% \usepackage[sfdefault,scaled=.89060]{noto}
 %% \usepackage{eulervm}\makeatletter\edef\zeu@Scale{1.04}\makeatother
 %% \usepackage[cal=cm,bb=esstix,scaled=.93,bbscaled=.93]{mathalfa}
-%% \renewcommand\mathit\textit\renewcommand\mathrm\text % argh
+%% \renewcommand\mathit\textit\renewcommand\mathrm\textmd % argh
 %% \usepackage[basic,defaultmathsizes]{mathastext}
 %% \linespread{1.05}%\linespread{1.08}
 
@@ -78,7 +78,7 @@
 \DTMlangsetup[en-GB]{ord=omit}
 \date{\today}
 
-\begin{document}
+\begin{document}%\the\textwidth
 
 %% \noindent
 %% % use a math environment to force loading math font.
@@ -103,17 +103,30 @@
 
 \section{Strategy}
 
+%% First, we generalize Datafun's \Poset{} semantics to any category with
+%% appropriate structures (a \emph{Datafun model}; \cref{sec:datafun-models}). We
+%% then define the category \CP{} of posets equipped with increasing changes, whose
+%% morphisms are monotone maps equipped with \emph{derivatives} taking input
+%% changes to output changes (\cref{sec:changeposets}). We construct two Datafun
+%% models in \CP{}, an \emph{incremental} (\cref{sec:incremental}) and a
+%% \emph{semi\naive} (\cref{sec:seminaive}), from which we read off our program
+%% transformations. By construction, the incremental semantics extends the one in
+%% \Poset{}. To prove the semi\naive{} transform correct, we construct a
+%% type-indexed family of natural isomorphisms relating the incremental and
+%% semi\naive{} semantics.
+
 First, we generalize Datafun's \Poset{} semantics to any category with
-appropriate structures (a \emph{Datafun model}; \cref{sec:datafun-models}). We
-then define the category \CP{} of posets equipped with increasing changes, whose
-morphisms are monotone maps equipped with \emph{derivatives} taking input
-changes to output changes (\cref{sec:changeposets}). We construct two Datafun
-models in \CP{}, an \emph{incremental} (\cref{sec:incremental}) and a
-\emph{semi\naive} (\cref{sec:seminaive}), from which we read off our program
-transformations. By construction, the incremental semantics extends the one in
-\Poset{}. To prove the semi\naive{} transform correct, we construct a
-type-indexed family of natural isomorphisms relating the incremental and
-semi\naive{} semantics.
+appropriate structures (\cref{sec:datafun-models}). With this in mind, we define
+a category \CP{} of posets equipped with a notion of \emph{increasing changes},
+whose morphisms are monotone maps possessing \emph{derivatives} relating input
+changes to output changes (\cref{sec:changeposets}). This gives us an
+\emph{incremental semantics} for Datafun (\cref{sec:incremental}). We observe
+that one can compute the fixed point of a function more efficiently using its
+derivative, and in a higher-order language function derivatives are \emph{zero
+  changes}. We give a \emph{``semi\naive{}''} static transformation on Datafun
+that augments the discreteness comonad to compute zero-changes. We prove this
+correct by relating it to the incremental semantics. \XXX
+
 
 %% TODO: rewrite to match above strategy and add section links
 
@@ -122,21 +135,22 @@ semi\naive{} semantics.
 \begin{figure*}
   \begin{mathpar}
     \setlength\arraycolsep{.33em}\begin{array}{r@{\hskip 1em}ccl}
-      \text{types} & A,B &\bnfeq& \tunit \bnfor A \x B \bnfor A + B
-      \bnfor A \to B \bnfor \isof A \bnfor \tdown{\eqt A}
+      \text{types} & A,B &\bnfeq& \isof A \bnfor \tset{\eqt A}
+      \bnfor \tunit \bnfor A \x B \bnfor A + B \bnfor A \to B
+      \\
+      \text{eqtypes} & \eqt A, \eqt B &\bnfeq&
+      \isof{\eqt A} \bnfor \tset{\eqt A} \bnfor
+      \tunit \bnfor \eqt A \x \eqt B \bnfor \eqt A + \eqt B
       \\
       \text{semilattices} & L,M &\bnfeq&
-      \tunit \bnfor L \x M \bnfor A \to L \bnfor \tdown{\eqt A}
-      \\
-      \text{eqtypes} & \eqt A, \eqt B &\bnfeq& \tunit \bnfor \eqt A \x \eqt B
-      \bnfor \eqt A + \eqt B \bnfor \isof{\eqt A} \bnfor \tdown{\eqt A}
+      \tset{\eqt A} \bnfor \tunit \bnfor L \x M \bnfor A \to L
       \\[.5em]
       \text{terms} & e,f,g &\bnfeq& x \bnfor \dvar x \bnfor \fnof{x} e
       \bnfor e\<f \bnfor \etuple{} \bnfor \etuple{e,f} \bnfor \pi_i\<e\\
-      &&&\inj i e \bnfor \ecase{e} (\inj i x \caseto f_i)_{i\in\{1,2\}}\\
-      &&&\bot \bnfor e \vee f \bnfor \edown{e} \bnfor \ebigvee x e f\\
+      &&& \inj i e \bnfor \ecase{e} (\inj i x \caseto f_i)_{i\in\{1,2\}}\\
       &&& \eboxd e \bnfor \elet{\eboxd x = e} f\\
-      &&& \prim{isEmpty}\<e \bnfor \esplit e \bnfor \prim{eq}\<e \bnfor \efix e
+      &&& \bot \bnfor e \vee f \bnfor \esetd{e_i}_i \bnfor \eford x e f\\
+      &&& \eeqd e f \bnfor \eisEmpty e \bnfor \esplit e \bnfor \efix e
       \\[.5em]
       \text{contexts} & \G &\bnfeq& (H_i)_i\\
       \text{hypotheses} & H &\bnfeq& \h x A \bnfor \hd x A
@@ -166,26 +180,36 @@ semi\naive{} semantics.
       \J {\ecase{e} (\inj i {x_i} \caseto f_i)_i} \G B
     }
 
-    \infer{\quad}{\J\bot\G L}
-
-    \infer{(\J{e_i}\G L)_i}{\J{e_1 \vee e_2}\G L}
-
-    \infer{\J e \G {\eqt A}}{\J {\edown e} \G {\tdown {\eqt A}}}
-
-    \infer{\J e \G {\tdown {\eqt A}} \\
-      \J f {\G,\h x {\eqt A}} L
-    }{\J {\ebigvee x e f} \G L}
-
     \infer{\J {\isocolor e} {\stripcxd\G} A}{\J{\eboxd e} \G {\isof A}}
 
     \infer{\J e \G {\isof A} \\ \J f {\G,\hd x A} B}{
       \J {\elet{\eboxd x = e} f} \G B}
 
-    \infer{\J e \G {\isof{\tdown\tunit}}}{\J {\prim{isEmpty}\<e} \G {\tunit + \tunit}}
+    \infer{\quad}{\J\bot\G L}
+
+    \infer{(\J{e_i}\G L)_i}{\J{e_1 \vee e_2}\G L}
+
+    %% \infer{\J e \G {\eqt A}}{\J {\edown e} \G {\tdown {\eqt A}}}
+    \infer{(\J {\isocolor e_i} {\stripcxd\G} {\eqt A})_i}{
+      \J {\esetd{e_i}_i} \G {\tset{\eqt A}}}
+
+    %% \infer{\J e \G {\tdown {\eqt A}} \\
+    %%   \J f {\G,\h x {\eqt A}} L
+    %% }{\J {\ebigvee x e f} \G L}
+    %%
+    \infer{
+      \J e \G {\tset A} \\
+      \J f {\G,\hd x A} L
+    }{\J {\eford x e f} \G L}
+
+    %%\infer{\J e \G {\isof{(\eqt A \x \eqt A)}}}{\J{\prim{eq}\<e} \G {\tdown\tunit}}
+    \infer{(\J {\isocolor e_i} {\stripcxd\G} {\eqt A})_i}
+          {\J {\eeqd{e_1}{e_2}} \G \tbool}
+
+    \infer{\J {\isocolor e} {\stripcxd\G} {\tset\tunit}}{
+      \J {\eisEmpty e} \G {\tunit + \tunit}}
 
     \infer{\J e \G {\isof{(A + B)}}}{\J{\esplit e} \G {\isof A + \isof B}}
-
-    \infer{\J e \G {\isof{(\eqt A \x \eqt A)}}}{\J{\prim{eq}\<e} \G {\tdown\tunit}}
 
     \infer{\J e \G {\isof{(\eqt L \to \eqt L)}}}{\J{\prim{fix}\< e} \G {\eqt L}}
   \end{mathpar}
@@ -196,26 +220,13 @@ semi\naive{} semantics.
 
 \begin{figure*}
   \[\setlength\arraycolsep{.33em}\begin{array}{r@{\hskip 1em}ccl}
-    \text{types} & A,B &\bnfeq& ... \bnfor \tbool \bnfor \tset{\eqt A}
-    \\
+    \text{types} & A,B &\bnfeq& ... \bnfor \tbool\\
     \text{terms} & e,f,g &\bnfeq&
-    ... \bnfor \esetd{e_i}_i \bnfor \eeqd{e}{f} \bnfor \eford{x}{e} f\\
-    &&& \efalse \bnfor \etrue \bnfor \eif e f g \bnfor \ewhen e f\\
+    ... \bnfor \efalse \bnfor \etrue \bnfor \eif e f g \bnfor \ewhen e f\\
     &&& \edcase{e} (\inj i {\dvar{x_i}} \caseto f_i)_{i\in\{1,2\}} \bnfor \efixisd x e
   \end{array}\]
 
   \begin{mathpar}
-    \infer{(\J {\isocolor e_i} {\stripcxd\G} A)_i}{
-      \J {\esetd{e_i}_i} \G {\tset{A}}}
-
-    \infer{(\J {\isocolor e_i} {\stripcxd\G} {\eqt A})_i}
-          {\J {\eeqd{e_1}{e_2}} \G \tbool}
-
-    \infer{
-      \J e \G {\tset A} \\
-      \J f {\G,\hd x A} L
-    }{\J {\eford x e f} \G L}
-
     \infer{\quad}{\J \etrue \G \tbool}
 
     \infer{\quad}{\J \efalse \G \tbool}
@@ -234,30 +245,28 @@ semi\naive{} semantics.
 \end{figure*}
 
 \begin{figure*}
-  \begin{align*}
-    \tbool &\desugars \tdown{\tunit} &
-    \tset{\eqt A} &\desugars \tdown{\isof {\eqt A}}
-    \\[.5em]
-    \efalse &\desugars \bot &
-    \etrue &\desugars \edown{\etuple{}}
-    \\
-    \eeqd e f &\desugars \prim{eq}\< \eboxd{\etuple{e, f}} &
-    \ewhen e f &\desugars \ebigvee {\freshvar\pwild} e f
-  \end{align*}
+  \[\tbool \desugars \tset{\tunit}\]
 
   \begin{align*}
-    \esetd{e_i}_i &\desugars \edown\eboxd{e_0} \vee ... \vee \edown\eboxd{e_n}
-    \quad \text{(or $\bot$ if $n=0$)}\\
-    \eford x e f &\desugars \ebigvee {\freshvar y} e {\elet{\eboxd x = \freshvar y} f}\\
-    \eif e {f_1}{f_2} &\desugars
-    \ecase{\prim{isEmpty}\<e} (\inj i {\freshvar\pwild} \caseto f_i)_i\\
-    \edcase e (\inj i {\dvar{x_i}} \caseto f_i)_i
-    &\desugars \ecase{\esplit \eboxd e}
-    (\inj i {\freshvar y} \caseto \elet{\eboxd{x_i} = \freshvar y} f_i)_i\\
+    \efalse &\desugars \esetd{} &
+    \etrue &\desugars \esetd{\etuple{}}
+    \\
+    \ewhen e f &\desugars \eford {\freshvar\pwild} e f &
     \efixisd x e &\desugars \efix \eboxd{\fnof {\color{black} x} e}
   \end{align*}
 
-  \vspace{-.5ex}
+  \begin{align*}
+    %% \eeqd e f &\desugars \prim{eq}\< \eboxd{\etuple{e, f}}\\
+    %% \esetd{e_i}_i &\desugars \edown\eboxd{e_0} \vee ... \vee \edown\eboxd{e_n} \quad \text{(or $\bot$ if $n=0$)}\\
+    %% \eford x e f &\desugars \ebigvee {\freshvar y} e {\elet{\eboxd x = \freshvar y} f}\\
+    \eifd e {f_1}{f_2} &\desugars
+    \ecase{\eisEmpty e} (\inj i {\freshvar\pwild} \caseto f_i)_i\\
+    \edcase e (\inj i {\dvar{x_i}} \caseto f_i)_i
+    &\desugars \ecase{\esplit \eboxd e}
+    (\inj i {\freshvar y} \caseto \elet{\eboxd{x_i} = \freshvar y} f_i)_i
+  \end{align*}
+
+  %\vspace{-.5ex}
   {\small Fresh variables ($\freshvar y$, $\freshvar\pwild$) are marked in \freshvar{pink}.}
 
   \vspace{.5ex}
@@ -349,7 +358,8 @@ bicartesian closed category \catC{} equipped with the following structures:
 
 \begin{enumerate}
 \item A \emph{``discreteness''} comonad $\tuple{\disco{}, \varepsilon, \delta}$
-  equipped with distributive maps
+  equipped with distributive maps:
+
   \begin{align*}
     \discox &: \prod_i \discof{A_i} \to \disco \prod_i A_i
     &
@@ -357,9 +367,10 @@ bicartesian closed category \catC{} equipped with the following structures:
   \end{align*}
 
 \item A \emph{``free semilattice''} functor \(\down : \catC \to \catC\) equipped
-  with maps
+  with maps:
+
   \begin{align*}
-    \morph{singleton}_A &: A \to \downof{A}\\
+    \morph{gen}_A &: A \to \downof{A}\\
     \morph{isEmpty} &: \discof{\downof{\termO}} \to \termO + \termO\\
     \morph{strong}_{A,B} &: A \x \downof{B} \to \downof{(A \x B)}
   \end{align*}
@@ -413,8 +424,9 @@ the standard model and use \emph{its} equational theory.
 
 
 %% ---- Semantics in a Datafun Model ----
+\newcommand\figsectionname\textsc
 \begin{figure*}
-  \emph{Types and contexts}\vspace{-.5ex}
+  \figsectionname{Types and contexts}\vspace{-.5ex}
 
   \begin{align*}
     \den{\tunit} &= \termO & \den{A \to B} &= \expO{\den{A}}{\den{B}}
@@ -429,7 +441,7 @@ the standard model and use \emph{its} equational theory.
     \den{\h x A} &= \den{A} & \den{\hd x A} &= \discof{\den{A}}
   \end{align*}
 
-  \vspace{1ex}\emph{Terms}\vspace{-.5ex}
+  \vspace{1ex}\figsectionname{Terms}\vspace{-.5ex}
 
   \begin{align*}
     \den{\dvar x} &= \pi_{\dvar x} \then \varepsilon \quad \text{($\dvar x$ discrete)}
@@ -441,36 +453,40 @@ the standard model and use \emph{its} equational theory.
     \den{\etuple{e_i}_i} &= \fork{\den{e_i}}_i
     & \den{\pi_i\<e} &= \den{e} \then \pi_i
     \\
-    \den{\inj i e} &= \den{e} \then \injc_i
-    &
-    \den{\bot} &= \termI \then \morph{join}_0
-    \\
-    \den{e \vee f} &= \fork{\den{e}, \den{f}} \then \morph{join}_2
-    &
-    \den{\edown e} &= \den{e} \then \morph{singleton}
-    \\
     \bigden{\eboxd e} &= \morph{strip} \then \discof{\den e}
     & \bigden{\elet{\eboxd x = e} f} &=
     \fork{\id, \den{e}} \then \den{f}
     \\
-    \den{\prim{isEmpty}\<e} &= \den{e} \then \morph{isEmpty}
+    \den{\bot} &= \termI \then \morph{join}_0
+    &
+    \den{e \vee f} &= \fork{\den{e}, \den{f}} \then \morph{join}_2
+    \\
+    %\den{\color{red}\prim{isEmpty}\<e} &= \den{e} \then \morph{isEmpty}
+    \den{\eisEmpty e} &= \den{\eboxd e} \then \morph{isEmpty}
     & \den{\esplit e} &= \den{e}\then \discosum
     \\
-    \den{\prim{eq}\<e} &= \den{e} \then \morph{eq}
+    %% FIXME: \eeqd!
+    %\den{\color{red}\prim{eq}\<e} &= \den{e} \then \morph{eq}
+    \den{\eeqd{e_1}{e_2}} &= \fork{\den{\eboxd{e_i}}}_i \then \morph{eq}
     & \den{\efix e} &= \den{e} \then \morph{fix}
   \end{align*}
 
   \begin{align*}
+    \den{\inj i e} &= \den{e} \then \injc_i
+    \\
     \den{\ecase{e} (\inj i{x_i} \caseto f_i)_i} &=
     \fork{\id, \den{e}} \then \morph{dist}^\x_+ \then \bigkrof{\den{f_i}}_i
     %\bigkrof{\den{f_i}}_i \circ \morph{dist}^\x_+ \circ \fork{\id, \den{e}}
     \\
-    \den{\ebigvee x e f} &=
+    %\den{\edown e} &= \den{e} \then \morph{gen}
+    \den{\esetd{e_i}_i} &= \fork{\den{\eboxd{e_i}} \then \morph{gen}}_i \then \morph{join}
+    \\
+    \den{\eford x e f} &=
+    %\den{\ebigvee x e f}
     \fork{\id,\den{e}} \then \morph{strong} \then \downof{\den{f}} \then \morph{collect}
-    %\morph{collect} \circ \downof{\den{f}} \circ \morph{strong} \circ \fork{\id,\den{e}}
   \end{align*}
 
-  \vspace{1ex}\emph{Lemmas}\vspace{-.5ex}
+  \vspace{1ex}\figsectionname{Lemmas}\vspace{-.5ex}
 
   \begin{align*}
     \morph{dist}^\x_+ &: A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)\\
@@ -481,6 +497,10 @@ the standard model and use \emph{its} equational theory.
     \morph{strip} &: \den\G \to \discof{\den{\stripcxd\G}}\\
     \morph{strip} &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \discox
   \end{align*}
+
+  %% \raggedright\footnotesize Strictly speaking, the cases for
+  %% $\den{\esetd{e_i}_i}$, $\den{\eisEmpty e}$, and $\den{\eeqd e f}$ are not
+  %% structurally inductive; nonetheless $\den{e}$ is well-defined.
 
   \caption{Datafun semantics in a Datafun model $\tuple{\catC, \disco, \down}$}
   \label{fig:general-semantics}
@@ -577,6 +597,7 @@ existence of derivatives.
 
 
 \subsection{Cartesian structure}
+\label{sec:CP-cartesian}
 
 \CP{} has all finite products and sums. The value-level structure is inherited
 from \Poset{} along \valfn{}. The change-poset structure is also inherited from
@@ -632,6 +653,7 @@ exploit this in \cref{sec:incremental} to avoid needing the axiom of choice
 
 
 \subsection{Exponentials}
+\label{sec:CP-exponentials}
 
 The change poset of the exponential object $\expO A B \in \CP$ consists of maps
 $\vals A \to \Poset(\chgs A, \chgs B)$, ordered pointwise. The update relation
@@ -724,6 +746,7 @@ correctness of $\deriv{(\fn f)}$ follows from correctness of \deriv{f}.
 
 
 \subsection{The lifted \iso{} comonad and its relatives}
+\label{sec:CP-iso}
 %% TODO: maybe call this \iso_{\boldsymbol\Delta} instead?
 
 \newcommand\setfor[2]{\ensuremath{\{#1 \mathrel{|} #2\}}}
@@ -757,17 +780,12 @@ fairly straightforward:
   \deriv{{\discosum}} \<(\inj i x) \<\tuple{} = \inj i {\tuple{}}
 \end{mathpar}
 
-\noindent
-\todo{TODO: since distribution over products \& sums isn't equality, what does
-  this mean for our actual \emph{implementation}? seems like $\delta(\esplit e)$
-  might have to actually do some work!}
+\newcommand\altiso{\texorpdfstring{\ensuremath{\iso_{\textrm{alt}}}}{altiso}}
 
-\newcommand\altiso{\iso_{\textrm{alt}}}
+\subsubsection{The alternative \altiso}
 
-\subsubsection{The alternative $\altiso$}
-
-There is another refinement of $\iso$ in \CP{}, which I'll call $\altiso$ for
-clarity, defined like so:
+Although we will not use it, there is another refinement of $\iso$ in \CP{},
+which I'll call $\altiso$ for clarity, defined like so:
 
 \begin{align*}
   \chgs{\altiso A} &= \altiso \chgs A
@@ -787,21 +805,22 @@ duplication, and extraction are different:
 \end{align*}
 
 \noindent
-Product- and sum-distribution are actually identity maps, because $\prod_i
-\altiso A_i = \altiso \prod_i A$ and $\sum_i \altiso A_i = \altiso \sum_i
+Product- and sum-distribution become identity maps, because $\prod_i \altiso A_i
+= \altiso \prod_i A$ and $\sum_i \altiso A_i = \altiso \sum_i
 A_i$.\footnote{Checking this is left as an exercise for the reader.}
 
-$\altiso$ avoids the need to use the non-constructive $\zero_x$ to define the
-comonad extraction $\varepsilon$. However, for us this will turn out not to be
-an issue. \todo{TODO: explain why $\chgs \isof A = \termO$ turns out to be handy
-  - it allows us to split up $\Phi$ and $\Delta$ on types.}
+$\altiso$ avoids needing the non-constructive $\zero_x$ in its comonad
+extraction $\varepsilon$. However, for our purposes this turns out not to be an
+issue, while the fact that $\chgs \isof A = \termO$ will be crucial.
+\todo{explain why?}
 
 
-\subsection{The lifted $\down$ monad}
+\subsection{The lifted \down\ monad}
 \XXX
 
 
 \subsection{Semilattice, equality, and fixed-point structure}
+\label{sec:CP-families}
 \XXX
 
 
@@ -814,35 +833,17 @@ $\disco = \iso_\CP$ and $\down = \down_\CP$. As we took care to show while
 constructing it, this \emph{refines} the standard model along the forgetful
 functor $\valfn$, that is:
 
-\begin{restatable}{theorem}{forgetInc}
-  \label{thm:forget-incremental}
+\begin{restatable}{theorem}{thmForget}
+  \label{thm:forget}
   \(\vals{\incden{-}} = \den{-}\).
 \end{restatable}
 
 \begin{proof}
-  By induction on types and typing derivations. 
-  For example,
-
-  \begin{align*}
-    \vals{\incden{e_1 \vee e_2}}
-    &= \vals{(\fork{\incdens{e_i}}_i \then \morph{join}_2)}
-    && \text{by definition}\\
-    &= \vals{\fork{\incdens{e_i}}_i} \then \vals{\morph{join}_2}
-    && \text{functoriality of }\valfn\\
-    &= \fork{\vals{\incdens{e_i}}}_i \then \morph{join}_2
-    && \text{refinement along \valfn{} (\cref{sec:refines})}\\
-    &= \fork{\den{e_i}}_i \then \morph{join}_2
-    && \text{inductive hypothesis}\\
-    &= \den{e_1 \vee e_2}
-    && \text{by definition}
-  \end{align*}
-
-  \noindent See \cpageref{proof:forget-incremental} for full proof.
+  By induction on types and typing derivations; see \cpageref{proof:forget}.
 \end{proof}
 
 
-\subsection{The change type translation}
-
+%\subsection{The change type translation}
 Given any Datafun type $A$, its change poset $\D\incdens A$ is internally
 definable via the following translation (also named $\D$, at the risk of
 possible semantic overload):
@@ -854,15 +855,16 @@ possible semantic overload):
   \D \isof A &= \tunit
   & \D(A + B) &= \D A + \D B
   \\
-  \D\tdown{\eqt A} &= \tdown{\eqt A}
+  \D\tset{\eqt A} &= \tset{\eqt A}
   & \D(A \to B) &= \isof A \to \D A \to \D B
 \end{align*}
 
-\begin{theorem}
+\begin{restatable}{theorem}{thmDeltaDen}
+  \label{thm:delta-den}
   \(\D\incdens A = \den{\D A}\).
-\end{theorem}
+\end{restatable}
 \begin{proof}
-  Induct on types.
+  Induct on types; see \cpageref{proof:delta-den}.
 \end{proof}
 
 
@@ -913,89 +915,140 @@ possible semantic overload):
 
 \todo{TODO: explain faster-fix?}
 
-\todo{TODO: explain semi\naive{} semantics --- it's the same except we interpret
-  $\iso$ as $\blackiso$ and fix as fast-fix. Read off the semi\naive{}
-  transform.}
+\todo{TODO: explain this type transformation:}
+\begin{align*}
+  \Phi\tunit &= \tunit &
+  \Phi(A \x B) &= \Phi A \x \Phi B\\
+  \Phi\isof A &= \isof{\Phi A \x \D \Phi A} &
+  \Phi(A + B) &= \Phi A + \Phi B\\
+  \Phi\tset A &= \tset{\Phi A} &
+  \Phi(A \to B) &= \Phi A \to \Phi B
+\end{align*}
+
+\noindent
+\Cref{fig:seminaive-phi,fig:seminaive-delta} define two mutually recursive
+static transformations: $\phi e$, which computes $e$ \emph{semi\naive{}ly},
+speeding up fixed point computation by using derivatives; and $\delta e$, which
+computes the \emph{derivative} of $\phi e$. The types of these expressions are
+related to $e$ as follows:
+
+\begin{restatable}[Type-correctness]{theorem}{thmTypeCorrect}
+  \label{thm:type-correct}
+  If $\J e \G A$, then
+  \[ \J {\phi e} {\Phi\G, \Delta\Phi\stripcxd\G} {\Phi A}
+  \qquad\text{and}\qquad
+  \J {\delta e} {\XXX} {\Delta \Phi A}
+  \]
+\end{restatable}
+\begin{proof}
+  By induction on typing derivations; see \cpageref{proof:typeCorrect}.
+\end{proof}
 
 \todo{TODO: Explain the use of weakening in semi\naive{} $\delta(e\<f)$,
   hilighted in {\color{Rhodamine}pink}.}
 
-\begin{figure*}
-  \begin{align*}
-    \Phi \tunit &= \tunit & \D\tunit &= \tunit\\
-    \Phi \tdown{\eqt A} &= \tdown{\Phi \eqt A} & \D\tdown{\eqt A} &= \tdown{\Phi \eqt A}\\
-    \Phi \isof A &= \isof{(\Phi A \x \D A)}
-    & \D\isof A &= \isof \D A\\
-    \Phi(A \to B) &= \Phi A \to \Phi B
-    & \D(A \to B) &= \isof \Phi A \to \D A \to \D B\\
-    \Phi(A \x B) &= \Phi A \x \Phi B & \D(A \x B) &= \D A \x \D B\\
-    \Phi(A + B) &= \Phi A + \Phi B & \D(A + B) &= \D A + \D B
-    %% % Syntax sugar cases.
-    %% \\
-    %% \Phi \tbool &= \tbool & \D\tbool &= \tbool\\
-    %% \Phi \tset{A} &= \tset{\Phi A} & \D\tset{A} &= \tset{\Phi A}
-  \end{align*}
-  \todo{TODO: delete this}
-  \caption{Semi\naive{} type translation}
-\end{figure*}
-
-\begin{figure*}
-  \[\setlength\arraycolsep{.3em}\begin{array}{lcl}
-    \dummy &:& A \to \D A\\
-    \dummy \<(\pwild : \tbool) &=& \efalse\\
-    \dummy \<(\pwild : \tset{A}) &=& \eset{}\\
-    \dummy \<\eboxd{x} &=& \eboxd{\dummy\<x}\\
-    \dummy \<(f : A \to B) &=& \fnof{x} \dummy\<(f\<x)\\
-    \dummy \<\etuple{x,y} &=& \etuple{\dummy\<x, \dummy\<y}\\
-    %% \dummy \<\etuple{x_i}_i &=& \etuple{\dummy\<x_i}_i\\
-    \dummy \<(\inj i x) &=& \inj i (\dummy\<x)
-  \end{array}\]
-  \caption{The \dummy\ function}
-  \label{fig:dummy}
-\end{figure*}
+
+%% \begin{figure*}
+%%   \begin{align*}
+%%     \Phi \tunit &= \tunit & \D\tunit &= \tunit\\
+%%     \Phi \tdown{\eqt A} &= \tdown{\Phi \eqt A} & \D\tdown{\eqt A} &= \tdown{\Phi \eqt A}\\
+%%     \Phi \isof A &= \isof{(\Phi A \x \D A)}
+%%     & \D\isof A &= \isof \D A\\
+%%     \Phi(A \to B) &= \Phi A \to \Phi B
+%%     & \D(A \to B) &= \isof \Phi A \to \D A \to \D B\\
+%%     \Phi(A \x B) &= \Phi A \x \Phi B & \D(A \x B) &= \D A \x \D B\\
+%%     \Phi(A + B) &= \Phi A + \Phi B & \D(A + B) &= \D A + \D B
+%%   \end{align*}
+%%   \caption{Semi\naive{} type translation}
+%% \end{figure*}
 
 
 %% ---- Seminaive ("go faster") term translation ----
 \begin{figure*}
-
   %% TODO: think about this translation and syntax sugar. for example, the
   %% case-split I use in \phi(\esplit e) is only valid *because* \esplit exists.
   %%
   %% Would be nice to give the syntax sugar explicitly, but maybe more effor
   %% than its worth? Might be clearer to mostly avoid syntax sugar? Not sure.
+  \figsectionname{Interesting Cases}\vspace{-.5ex}
 
   \begin{align*}
-    %% Ugh, I should really mark that some of these variables are monotone and
-    %% others discrete in some non-color way.
-    \phi x &= x & \delta x &= \dx\\
-    \phi \dvar x &= \dvar x & \delta \dvar x &= \dvar\dx\\
-    \phi(\fnof x e) &= \fnof x \phi e
-    & \delta(\fnof{x} e) &= \fnof{\eboxd x} \fnof\dx \delta e\\
-    \phi(e\<f) &= \phi e\<\phi f
-    & \delta(e\<f) &= \delta e \<\eboxd{\color{Rhodamine}\phi e} \<\delta f\\
-    \phi\etuple{e_i}_i &= \etuple{\phi e_i}_i
-    & \delta\etuple{e,f} &= \etuple{\delta e, \delta f}\\
-    \phi(\pi_i\<e) &= \pi_i\<\phi e
-    & \delta(\pi_i\<e) &= \pi_i\<\delta e\\
-    \phi(\inj i e) &= \inj i \phi e
-    & \delta(\inj i e) &= \inj i \delta e\\
-    \phi\bot &= \bot & \delta\bot &= \bot\\
-    \phi(e \vee f) &= \phi e \vee \phi f
-    & \delta(e \vee f) &= \delta e \vee \delta f\\
-    \phi(\edown e) &= \edown \phi e & \delta(\edown e) &= \bot\\
+    \phi(\prim{fix}\<e) &= \prim{fast-fix}\<\phi e\\
     \phi\eboxd{e} &= \eboxd{\etuple{\phi e, \delta e}}
-    & \delta\eboxd{e} &= \eboxd{\delta e}\\
-    %% ugh
-    \phi(\prim{eq}\<e) &= \elet{\eboxd{x,\pwild} = \phi e} \prim{eq}\<\dvar x
-    & \delta(\prim{eq}\<e) &= \bot\\
-    \phi(\prim{fix}\<e) &= \prim{fast-fix}\<\phi e
-    & \delta(\prim{fix}\<e) &= \bot
+    \\
+    \phi(\elet{\eboxd x = e} f) &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \phi f
+    \\
+    \phi(\eford x e f)
+    &= \eford x {\phi e} {\phi \substd{f}{dx \substo \zero\<x}}
+    \\
+    %% TODO: check this lines up with \delta(if then else), because that's where
+    %% it comes up.
+    \phi(\esplit e) &= \color{red} \elet{\eboxd{x} = \phi e}\\
+    &\phantom{{}={}} \esplit [\isocolor \ecase x\\
+    &\phantom{= \esplit}\quad\isocolor
+      (\etuple{\inj i y, \inj i \dy} \caseto \inj i \etuple{y,\dy})_i\\
+    &\phantom{= \esplit}\quad
+      {\isocolor(\etuple{\inj i y, \pwild}
+        \caseto \inj i \etuple{y, \dummy\<y})_i}]
+  \end{align*}
+
+  \vspace{1ex}\figsectionname{Distributive Cases}\vspace{-.5ex}
+
+  \begin{align*}
+    %% TODO: I should mark discrete vs. monotone variables in some
+    %% (colorblind/greyscale-printing)-safe way.
+    \phi x &= x & \phi \dvar x &= \dvar x\\
+    \phi(\fnof x e) &= \fnof x \phi e & \phi(e\<f) &= \phi e\<\phi f\\
+    \phi\etuple{e_i}_i &= \etuple{\phi e_i}_i &
+    \phi(\pi_i\<e) &= \pi_i\<\phi e\\
+    \phi(\inj i e) &= \inj i \phi e\\
+    \phi\bot &= \bot &
+    \phi(e \vee f) &= \phi e \vee \phi f\\
+    \phi(\esetd{e_i}_i) &= \esetd{\phi e_i}_i &
+    \phi(\eeqd e f) &= \eeqd {\phi e} {\phi f}
   \end{align*}
 
   \begin{align*}
     \phi(\ecase e (\inj i x \caseto f_i)_i)
     &= \ecase{\phi e} (\inj i x \caseto \phi f_i)_i
     \\
+    \phi(\eisEmpty e) &= \eisEmpty {\phi e}
+  \end{align*}
+
+  \todo{TODO: eta-expand $\vee$ etc. at functional types! Probably do this in
+    elaborator.}
+
+  \todo{TODO: distribution of $\iso$ over sums is no longer equality! does
+    $\phi(\esplit e)$ need to change?}
+
+  \caption{Semi\naive{} speed-up translation, $\phi$}
+  \label{fig:seminaive-phi}
+\end{figure*}
+
+
+%% ----- Figure: Seminaive δ derivative -----
+\begin{figure*}
+  \[ \delta\bot = \delta\esetd{e_i}_i = \delta(\eeqd e f) = \delta(\efix e) = \bot \]
+
+  \begin{align*}
+    \delta x &= \dx &
+    \delta \dvar x &= \dvar\dx\\
+    \delta(\fnof{x} e) &= \fnof{\eboxd x} \fnof\dx \delta e
+    & \delta(e\<f) &= \delta e \<\eboxd{\color{Rhodamine}\phi e} \<\delta f\\
+    \delta\etuple{e_i}_i &= \etuple{\delta e_i}_i
+    & \delta(\pi_i\<e) &= \pi_i\<\delta e\\
+    \delta(\inj i e) &= \inj i {\delta e} &
+    \delta(e \vee f) &= \delta e \vee \delta f\\
+    \delta\eboxd{e} &= \etuple{} &
+    \delta(\elet{\eboxd x = e} f)
+    &= \elet{\eboxd{\etuple{x,\dx}} = \color{Rhodamine}\phi e} \delta f\\
+    %% TODO: move these up to two-equations-per-line figure?
+    \delta(\eisEmpty e) &= \XXX &
+    \delta(\esplit e) &= \esplit \delta e
+  \end{align*}
+
+  \begin{align*}
+    %% TODO: double-check this!
     \delta(\ecase e (\inj i x \caseto f_i)_i)
     &= \ecase{\esplit{\eboxd{\color{Rhodamine} \phi e}},\, \delta e}\\
     &\qquad ({\inj i {\eboxd x},\, \inj i \dx} \caseto \delta f_i)_i\\
@@ -1007,42 +1060,26 @@ possible semantic overload):
     %% \phi(\eif e f g) &= \eif{\phi e}{\phi f}{\phi g}\\
     %% \delta(\eif e f g) &= \eif{\phi e}{\delta f}{\delta g}
     \\
-    \phi\bigl(\ebigvee x e f\bigr)
-    &= \ebigvee x {\phi e} {\phi f}
-    \\
-    %% wait, is weakening being used here?
-    \delta\bigl(\ebigvee x e f\bigr)
-    &= \bigl(\ebigvee x {\delta e} {\color{Rhodamine}\phi f}\bigr) \vee
-    \bigl(\ebigvee x {{\color{Rhodamine}\phi e} \vee \delta e} {\delta f}\bigr)
-%%     \delta(\eford x e f)
-%%     &= (\eford x{\delta e} \substd{\phi f}{\dx \substo \zero\<x}) \\
-%%     &\vee (\eford x{e \vee \delta e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
-%%     \substd{\delta f}{\dx \substo \zero\<x})
-    \\
-    \phi(\elet{\eboxd x = e} f) &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \phi f
-    \\
-    \delta(\elet{\eboxd x = e} f)
-    &= \elet{\eboxd{\etuple{x,\dx}} = \color{Rhodamine}\phi e} \delta f
-    \\
-    \phi(\prim{isEmpty}\<e) &=
-    %% ugh.
-    \elet{\eboxd{\etuple{x,\pwild}} = \phi e} \prim{isEmpty}\<\dvar x\\
-    %% TODO: check this lines up with \delta(if then else), because that's where
-    %% it comes up.
-    \delta(\prim{isEmpty}\<e) &= \XXX\\
-    \phi(\esplit e) &= \elet{\eboxd{x} = \phi e}\\
-    &\phantom{{}={}} \esplit [\isocolor \ecase x\\
-    &\phantom{= \esplit}\quad\isocolor
-      (\etuple{\inj i y, \inj i \dy} \caseto \inj i \etuple{y,\dy})_i\\
-    &\phantom{= \esplit}\quad
-      {\isocolor(\etuple{\inj i y, \pwild}
-        \caseto \inj i \etuple{y, \dummy\<y})_i}]
-    \\
-    \delta(\esplit e) &= \esplit \delta e
+    %% \delta(\ebigvee x e f)
+    %% &= (\ebigvee x {\delta e} {\color{Rhodamine}\phi f})
+    %% \vee
+    %% (\ebigvee x {{\color{Rhodamine}\phi e} \vee \delta e} {\delta f})
+    %% TODO: is weakening being used here?
+    \delta(\eford x e f)
+    &= (\eford x {\delta e} \substd{\phi f}{\dx \substo \zero\<x}) \\
+    &\vee (\eford x {\phi e \vee \delta e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
+    \substd{\delta f}{\dx \substo \zero\<x})
   \end{align*}
 
-  \caption{Semi\naive{} term translation}
+  \todo{TODO: double-check $\delta(\ecase e ...)$}\\
+  \todo{TODO: does $\delta(\eford x e f)$ weaken $\phi f$?}\\
+  \todo{TODO: since distribution of $\iso$ over sums isn't equality, doesn't
+    $\delta(\esplit e)$ need to be changed?}
+
+  \caption{Semi\naive{} derivative translation, $\delta$}
+  \label{fig:seminaive-delta}
 \end{figure*}
+
 
 %% ---- old seminaive term translation ----
 %% \begin{figure*}
@@ -1148,23 +1185,184 @@ possible semantic overload):
 %% \end{figure*}
 
 
-\subsection{The \blackiso{} comonad}
-
-\todo{TODO: explain $\blackiso$. show it's naturally isomorphic to $\iso$.}
+%% ----- Figure: Dummy function -----
+\begin{figure*}
+  \[\setlength\arraycolsep{.3em}\begin{array}{lcl}
+    \dummy &:& A \to \D A\\
+    \dummy \<(\pwild : \tbool) &=& \efalse\\
+    \dummy \<(\pwild : \tset{A}) &=& \eset{}\\
+    \dummy \<\eboxd{x} &=& \eboxd{\dummy\<x}\\
+    \dummy \<(f : A \to B) &=& \fnof{x} \dummy\<(f\<x)\\
+    \dummy \<\etuple{x,y} &=& \etuple{\dummy\<x, \dummy\<y}\\
+    %% \dummy \<\etuple{x_i}_i &=& \etuple{\dummy\<x_i}_i\\
+    \dummy \<(\inj i x) &=& \inj i (\dummy\<x)
+  \end{array}\]
+  \caption{The \dummy\ function}
+  \label{fig:dummy}
+\end{figure*}
 
 
 \clearpage
-\begin{center}
-  \Large \itshape Appendix: Proofs
-\end{center}
+\appendix
+\begin{center}\Large\scshape Proofs\end{center}
 
-\forgetInc*
-\begin{proof}\label{proof:forget-incremental}
-  Induct on types and typing derivations. We omit the proof for types; it
-  follows directly from the construction in \cref{sec:changeposets}. For typing
-  derivations:
+%\section{Proofs}
 
-  \todo{TODO} \XXX
+%% \[\setlength\arraycolsep{.33em}\begin{array}{r@{\hskip 1em}ccl}
+%%   \text{terms} & e,f,g &\bnfeq& x \bnfor \dvar x \bnfor \fnof{x} e
+%%   \bnfor e\<f \bnfor \etuple{} \bnfor \etuple{e,f} \bnfor \pi_i\<e\\
+%%   &&&\inj i e \bnfor \ecase{e} (\inj i x \caseto f_i)_{i\in\{1,2\}}\\
+%%   &&&\bot \bnfor e \vee f \bnfor \edown{e} \bnfor \ebigvee x e f\\
+%%   &&& \eboxd e \bnfor \elet{\eboxd x = e} f\\
+%%   &&& \prim{isEmpty}\<e \bnfor \esplit e \bnfor \prim{eq}\<e \bnfor \efix e
+%% \end{array}\]
+
+\newcommand\stareq{\overset{\boldsymbol\star}{=}}
+\newcommand\daggereq{\overset{\dagger}{=}}
+\newcommand\stardaggereq{\overset{\boldsymbol\star\dagger}{=}}
+
+\thmForget*
+\begin{proof}\label{proof:forget}
+
+  We will make frequent and unremarked use of definitions from
+  \cref{sec:changeposets}. First we induct on types to show $\vals{\incdens A} =
+  \den A$. Equalities given by an inductive hypothesis are marked with a star,
+  like so: $\stareq$.
+
+  \begin{description}
+    \item[Case $\isof A$:] \(\vals{\incdens{\isof A}}
+      = \vals{\discof{\incdens A}}
+      = \isof{\vals{\incdens A}} \stareq \isof{\den A}
+      = \den{\isof A} \)
+
+    \item[Case $\tset{\eqt A}$:]
+      \(\vals{\incdens{\tset{\eqt A}}} = \vals{\downof{\discof{\incdens{\eqt A}}}}
+      = \downof{\vals{\discof{\incdens{\eqt A}}}}
+      = \downof{\isof{\vals{\incdens{\eqt A}}}}
+      \stareq \downof{\isof{\den{\eqt A}}}
+      = \den{\tset{\eqt A}} \)
+
+    \item[Case $\tunit$:] \(\vals{\incdens \tunit} = \vals\termO = \termO = \den{\tunit}\)
+
+    \item[Case $A \x B$:] \(\vals{\incden{A \x B}}
+      = \vals{(\incdens A \x \incdens B)}
+      = \vals{\incdens A} \x \vals{\incdens B}
+      \stareq \den{A} \x \den{B}
+      = \den{A \x B} \)
+
+    \item[Case $A + B$:] \(\vals{\incden{A + B}}
+      = \vals{(\incdens A + \incdens B)}
+      = \vals{\incdens A} + \vals{\incdens B}
+      \stareq \den{A} + \den{B}
+      = \den{A + B}
+      \)
+
+    \item[Case $A \to B$:] \(\vals{\incden{A \to B}}
+      = \vals{(\expO{\incdens A}{\incdens B})}
+      = \expO{\vals\incdens A}{\vals\incdens B}
+      \stareq \expO{\den A}{\den B}
+      = \den{A \to B}
+      \)
+  \end{description}
+
+  \noindent
+  Then we induct on typing derivations to show $\vals \incdens e = \den e$:
+
+  \begin{description}
+  \item[Case $x$] \XXX
+  \item[Case $\dvar x$] \XXX
+  \item[Case $\fnof x e$] \XXX
+  \item[Case $e\<f$] \XXX
+  \item[Case $\etuple{}$] \XXX
+  \item[Case $\etuple{e,f}$] \XXX
+  \item[Case $\pi_i\<e$] \XXX
+  \item[Case $\inj i e$] \XXX
+  \item[Case $(\ecase{e} (\inj i x \caseto f_i)_i)$] \XXX
+  \item[Case $\eboxd e$] \XXX
+  \item[Case $\elet{\eboxd x = e} f$] \XXX
+  \item[Case $\bot$] \XXX
+
+  \item[Case $e_1 \vee e_2$]
+    \begin{align*}
+      \vals{\incden{e_1 \vee e_2}}
+      &= \vals{(\fork{\incdens{e_i}}_i \then \morph{join}_2)}
+      && \text{by definition}\\
+      &= \vals{\fork{\incdens{e_i}}_i} \then \vals{\morph{join}_2}
+      && \text{functoriality of }\valfn\\
+      &= \fork{\vals{\incdens{e_i}}}_i \then \morph{join}_2
+      && \text{refinement along $\valfn$ (\cref{sec:CP-cartesian,sec:CP-families})}\\
+      &= \fork{\den{e_i}}_i \then \morph{join}_2
+      && \text{inductive hypothesis}\\
+      &= \den{e_1 \vee e_2}
+      && \text{by definition}
+    \end{align*}
+
+  \item[Case $\esetd{e_i}_i$] \XXX
+  \item[Case $\eford x e f$] \XXX
+  \item[Case $\eisEmpty e$] \XXX
+  \item[Case $\esplit e$] \XXX
+  \item[Case $\eeqd e f$] \XXX
+  \item[Case $\efix e$] \XXX%
+  \end{description}%
+\end{proof}
+
+
+
+\thmDeltaDen*
+\begin{proof}
+  \label{proof:delta-den}
+  By induction on types. Again, $\stareq$ marks equalities given by an inductive
+  hypothesis; additionally, $\daggereq$ indicates an appeal to
+  \cref{thm:forget}.
+  \begin{description}
+    \item[Case $\isof A$:] \(\chgs{\incdens{\isof A}}
+      = \chgs{\discof{\incdens A}}
+      = \termO = \den{1} = \den{\D \isof A}\)
+
+    \item[Case $\tset{\eqt A}$:] \(\chgs{\incdens{\tseteq A}}
+      = \chgs{\downof{\discof{\incdens{\eqt A}}}}
+      = \downof{\vals{\discof{\incdens{\eqt A}}}}
+      = \downof{\isof{\vals{\incdens{\eqt A}}}}
+      \daggereq \downof{\isof{\den{\eqt A}}}
+      = \den{\tseteq A}
+      \)
+
+    \item[Case $\tunit$:] \(\chgs{\incdens \tunit}
+      = \chgs \termO = \termO = \den{\tunit} \)
+
+    \item[Case $A \x B$:] \(\chgs{\incden{A \x B}}
+      = \chgs{(\incdens A \x \incdens B)}
+      = \chgs{\incdens A} \x \chgs{\incdens B}
+      \stareq \den{\D A} \x \den{\D B}
+      = \den{\D A \x \D B}
+      = \den{\D(A \x B)} \)
+
+    \item[Case $A + B$:] \(\chgs{\incden{A + B}}
+      = \chgs{(\incdens A + \incdens B)}
+      = \chgs{\incdens A} + \chgs{\incdens B}
+      \stareq \den{\D A} + \den{\D B}
+      = \den{\D A + \D B}
+      = \den{\D(A + B)} \)
+
+    \item[Case $A \to B$:]
+      \begin{align*}
+        \chgs{\incden{A \to B}}
+        &= \chgs{(\expO{\incdens A}{\incdens B})}\\
+        &= \expO {\isof{\vals{\incdens A}}} {
+          \expO {\chgs{\incdens A}} {\chgs{\incdens B}}}
+        & \text{by definition in \cref{sec:CP-exponentials}}
+        \\
+        &\stardaggereq \expO {\isof {\den A}} {\expO {\den{\D A}} {\den{\D B}}}\\
+        &= \den{\isof A \to \D A \to \D B}\\
+        &= \den{\D(A \to B)}
+      \end{align*}
+  \end{description}
+\end{proof}
+
+
+\thmTypeCorrect*
+\begin{proof}\label{proof:typeCorrect}
+  \XXX
 \end{proof}
 
 \end{document}
