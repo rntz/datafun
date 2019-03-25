@@ -103,18 +103,6 @@
 
 \section{Strategy}
 
-%% First, we generalize Datafun's \Poset{} semantics to any category with
-%% appropriate structures (a \emph{Datafun model}; \cref{sec:datafun-models}). We
-%% then define the category \CP{} of posets equipped with increasing changes, whose
-%% morphisms are monotone maps equipped with \emph{derivatives} taking input
-%% changes to output changes (\cref{sec:changeposets}). We construct two Datafun
-%% models in \CP{}, an \emph{incremental} (\cref{sec:incremental}) and a
-%% \emph{semi\naive} (\cref{sec:seminaive}), from which we read off our program
-%% transformations. By construction, the incremental semantics extends the one in
-%% \Poset{}. To prove the semi\naive{} transform correct, we construct a
-%% type-indexed family of natural isomorphisms relating the incremental and
-%% semi\naive{} semantics.
-
 First, we generalize Datafun's \Poset{} semantics to any category with
 appropriate structures (\cref{sec:datafun-models}). With this in mind, we define
 a category \CP{} of posets equipped with a notion of \emph{increasing changes},
@@ -125,10 +113,9 @@ that one can compute the fixed point of a function more efficiently using its
 derivative, and in a higher-order language function derivatives are \emph{zero
   changes}. We give a \emph{``semi\naive{}''} static transformation on Datafun
 that augments the discreteness comonad to compute zero-changes. We prove this
-correct by relating it to the incremental semantics. \XXX
+correct by relating it to the incremental semantics.
 
-
-%% TODO: rewrite to match above strategy and add section links
+% TODO: more section links once I finish them.
 
 
 %% ---- Syntax & typing rules ----
@@ -431,7 +418,9 @@ the standard model and use \emph{its} equational theory.
   \begin{align*}
     \den{\tunit} &= \termO & \den{A \to B} &= \expO{\den{A}}{\den{B}}
     \\
-    \den{\tdown A} &= \downof{\den{A}} & \den{A \x B} &= \den{A} \x \den{B}
+    %% \den{\tdown A} &= \downof{\den{A}}
+    \den{\tseteq A} &= \downof{\isof{\den{\eqt A}}}
+    & \den{A \x B} &= \den{A} \x \den{B}
     \\
     \den{\isof A} &= \discof{\den{A}} & \den{A + B} &= \den{A} + \den{B}
   \end{align*}
@@ -919,7 +908,7 @@ possible semantic overload):
 \begin{align*}
   \Phi\tunit &= \tunit &
   \Phi(A \x B) &= \Phi A \x \Phi B\\
-  \Phi\isof A &= \isof{\Phi A \x \D \Phi A} &
+  \Phi\isof A &= \isof{(\Phi A \x \D \Phi A)} &
   \Phi(A + B) &= \Phi A + \Phi B\\
   \Phi\tset A &= \tset{\Phi A} &
   \Phi(A \to B) &= \Phi A \to \Phi B
@@ -1043,8 +1032,7 @@ related to $e$ as follows:
     \delta\eboxd{e} &= \etuple{} &
     \delta(\elet{\eboxd x = e} f)
     &= \elet{\eboxd{\etuple{x,\dx}} = \color{Rhodamine}\phi e} \delta f\\
-    %% TODO: move these up to two-equations-per-line figure?
-    \delta(\eisEmpty e) &= \XXX &
+    \delta(\eisEmpty e) &= \eisEmpty {\color{Rhodamine} \phi e} &
     \delta(\esplit e) &= \esplit \delta e
   \end{align*}
 
@@ -1067,8 +1055,8 @@ related to $e$ as follows:
     %% (\ebigvee x {{\color{Rhodamine}\phi e} \vee \delta e} {\delta f})
     %% TODO: is weakening being used here?
     \delta(\eford x e f)
-    &= (\eford x {\delta e} \substd{\phi f}{\dx \substo \zero\<x}) \\
-    &\vee (\eford x {\phi e \vee \delta e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
+    &= (\eford x {\delta e} \substd{\color{Rhodamine} \phi f}{\dx \substo \zero\<x}) \\
+    &\vee (\eford x {{\color{Rhodamine}\phi e} \vee \delta e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
     \substd{\delta f}{\dx \substo \zero\<x})
   \end{align*}
 
@@ -1299,7 +1287,7 @@ related to $e$ as follows:
     \end{align*}
 
   \item[Case $\esetd{e_i}_i$] \XXX
-  \item[Case $\eford x e f$] \XXX
+  \item[Case $(\eford x e f)$] \XXX
   \item[Case $\eisEmpty e$] \XXX
   \item[Case $\esplit e$] \XXX
   \item[Case $\eeqd e f$] \XXX
