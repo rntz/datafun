@@ -426,7 +426,7 @@ the standard model and use \emph{its} equational theory.
 %% ---- Semantics in a Datafun Model ----
 \newcommand\figsectionname\textsc
 \begin{figure*}
-  \figsectionname{Types and contexts}\vspace{-.5ex}
+  \figsectionname{Types and contexts}
 
   \begin{align*}
     \den{\tunit} &= \termO & \den{A \to B} &= \expO{\den{A}}{\den{B}}
@@ -441,7 +441,7 @@ the standard model and use \emph{its} equational theory.
     \den{\h x A} &= \den{A} & \den{\hd x A} &= \discof{\den{A}}
   \end{align*}
 
-  \vspace{1ex}\figsectionname{Terms}\vspace{-.5ex}
+  \figsectionname{Terms}
 
   \begin{align*}
     \den{\dvar x} &= \pi_{\dvar x} \then \varepsilon \quad \text{($\dvar x$ discrete)}
@@ -486,7 +486,7 @@ the standard model and use \emph{its} equational theory.
     \fork{\id,\den{e}} \then \morph{strong} \then \downof{\den{f}} \then \morph{collect}
   \end{align*}
 
-  \vspace{1ex}\figsectionname{Lemmas}\vspace{-.5ex}
+  \figsectionname{Lemmas}
 
   \begin{align*}
     \morph{dist}^\x_+ &: A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)\\
@@ -970,7 +970,7 @@ related to $e$ as follows:
   %%
   %% Would be nice to give the syntax sugar explicitly, but maybe more effor
   %% than its worth? Might be clearer to mostly avoid syntax sugar? Not sure.
-  \figsectionname{Interesting Cases}\vspace{-.5ex}
+  \figsectionname{Interesting Cases}
 
   \begin{align*}
     \phi(\prim{fix}\<e) &= \prim{fast-fix}\<\phi e\\
@@ -991,8 +991,9 @@ related to $e$ as follows:
       {\isocolor(\etuple{\inj i y, \pwild}
         \caseto \inj i \etuple{y, \dummy\<y})_i}]
   \end{align*}
+  \vspace{0pt} % <- yes, this matters.
 
-  \vspace{1ex}\figsectionname{Distributive Cases}\vspace{-.5ex}
+  \figsectionname{Distributive Cases}
 
   \begin{align*}
     %% TODO: I should mark discrete vs. monotone variables in some
