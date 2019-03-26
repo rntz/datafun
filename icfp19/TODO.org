@@ -41,18 +41,47 @@ could have, in no particular order:
    derivatives; could lazily compute them? Apply Paolo Giarrusso's thesis work?
    We didn't do this because it seems hard and Datalog can't do it.
 
-4. Decided to include the derivative transform, not just the seminaive
-   transform.
+4. Included the derivative transform, not just the seminaive transform.
 
 5. Augmented our target language with dependent types (to specify "zero change
    for a value") and quotients to try to make Φ□A more closely model the
    semantics.
 
 6. Used two _separate_ comonads, one for discreteness, one for preventing nested
-   fixed points. But then we'd have to think about how they interact!
+   fixed points. But then we'd have to think about how they interact! Future
+   work?
 
 7. Only stored zero-changes for _functions_, not for everything inside a boxed
-   type. This seems related to letting Φ(A_eq) = A_eq.
+   type. This seems related to letting Φ(A_eq) = A_eq. Or perhaps having
+   separate Δ□ and Δ.
+
+8. We have finite set types {-} in our syntax, but separate {A} into F□A in our
+   semantics. Why not put F directly into our syntax? This simplifies our typing
+   rules; it has the same intro & elim as {-} but without getting discreteness
+   involved! However, this creates two complications:
+
+   - First, then Φ{A} = ΦF□A = F□(ΦA × ΔΦA). So now our sets carry around extra,
+     seemingly unnecessary information. However, this is actually exactly the
+     information we need to reconstruct in φ(for ...)! However, we _know_ that
+     this extra information is a *zero-change*, and our current scheme exposes
+     this information to the optimizer (XXX DOES OUR OPTIMIZER USE IT?), while
+     this scheme would not make it quite so obvious.
+
+   - Second, letting ↓e be the intro for FA, what is δ↓e? Unlike {e}, it's not
+     ⊥, because e *can* change. It's also not ↓δe; this doesn't typecheck,
+     because ΔA ≠ A. It is ↓φe. But then what is δ{e}? It's
+
+         δ{e} = δ↓[e] = ↓φ[e] = ↓[φe,δe]
+
+     which is annoying, because we _know_ it's safe to let δ{e} = ⊥. So this
+     becomes an additional optimization, rather than a consequence of our translation.
+
+   Neither of these are deal-breakers, but they are annoying.
+
+9. Going the other direction, why not combine F and □ in the semantics into a
+   finite powerset functor? Because it would lack the tensorial strength
+   necessary to define ⟦for ...⟧! (There is a function strong : {A} × B → {A ×
+   B}, but it's not monotone in B!)
 
 * Syntax sugar / conveniences
 
