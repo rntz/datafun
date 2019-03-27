@@ -55,6 +55,34 @@ could have, in no particular order:
    type. This seems related to letting Φ(A_eq) = A_eq. Or perhaps having
    separate Δ□ and Δ.
 
+8. We chose to let Δ□A = 1. It's possible letting Δ□A = □ΔA would also work,
+   although I'm not sure. For example, then ΔΦ□A = Δ□(ΦA × ΔΦA) = □(ΔΦA ×
+   ΔΔΦA), which just feels icky.
+
+9. The finite set type, {-}, can conceptually be separated into F□A, where F is
+   the "free semilattice" functor. So why don't we do this - in our semantics at
+   least, if not in our syntax?
+
+   This would break our semantics into smaller components; for example, the
+   requirement that given (f : Γ × □A → L) we can construct (f^* : Γ × {A} → L)
+   can be satisfied by functoriality and tensorial strength of F and its
+   initiality property as the free semilattice. It would also simplify our
+   typing rules: the intro & elim rules for FA are the same as for {A} but
+   monotone where {A} is discrete, neatly separating discreteness from
+   "set"-ness.
+
+   Unfortunately, it turns out this separation works in Poset, but not in
+   ΔPoset. What is ΔFA? It's really not clear. Since Δ{A} = {A}, we want ΔF□A to
+   be something like F□A, but there's no compositional way to do that. We could
+   settle for ΔF□A = F□(A × ΔA) if we let ΔFA = F𝕍A and let ⊕ = ∨. But then what
+   is the derivative of gen? The obvious one is gen' x dx = gen(x ⊕ dx). But ⊕
+   is a *partial* function, so this doesn't work!
+
+   Although it's possible there is some way to make this work, in my experience
+   trying to separate {-} into F□ turned out to be a messy maze of dead-ends.
+
+   OLD UN-UPDATED REASONS:
+
 8. We have finite set types {-} in our syntax, but separate {A} into F□A in our
    semantics. Why not put F directly into our syntax? This simplifies our typing
    rules; it has the same intro & elim as {-} but without getting discreteness
@@ -69,19 +97,16 @@ could have, in no particular order:
 
    - Second, letting ↓e be the intro for FA, what is δ↓e? Unlike {e}, it's not
      ⊥, because e *can* change. It's also not ↓δe; this doesn't typecheck,
-     because ΔA ≠ A. It is ↓φe. But then what is δ{e}? It's
+     because ΔA ≠ A. Instead, the best I can think of is ↓(φe ⊕ δe), (which,
+     incidentally, requires defining the ⊕ operator in Datafun). But then what
+     is δ{e}? It's
 
-         δ{e} = δ↓[e] = ↓φ[e] = ↓[φe,δe]
+         δ{e} = δ↓[e] = ↓(φ[e] ⊕ δ[e]) = ↓[φe,δe]
 
      which is annoying, because we _know_ it's safe to let δ{e} = ⊥. So this
      becomes an additional optimization, rather than a consequence of our translation.
 
    Neither of these are deal-breakers, but they are annoying.
-
-9. Going the other direction, why not combine F and □ in the semantics into a
-   finite powerset functor? Because it would lack the tensorial strength
-   necessary to define ⟦for ...⟧! (There is a function strong : {A} × B → {A ×
-   B}, but it's not monotone in B!)
 
 * Syntax sugar / conveniences
 

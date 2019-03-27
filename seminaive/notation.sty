@@ -60,13 +60,21 @@
 
 
 %% ===== Datafun model notation =====
-\newcommand\down{\ensuremath{F}}
 %\newcommand\disco{\ensuremath{W}}
 \newcommand\disco{\iso}
-\newcommand\downof[1]{\down #1}
 \newcommand\discof[1]{\ensuremath{\disco #1}}
 \newcommand\discox{\ensuremath{\morph{dist}^\x_\disco}}
 \newcommand\discosum{\ensuremath{\morph{dist}^\disco_+}}
+
+\newcommand\pfin{\ensuremath{\mathcal{P}}}
+%\renewcommand\pfin{\texorpdfstring{\ensuremath{P_{\text{fin}}}}{Pfin}}
+\renewcommand\pfin{\ensuremath{P}}
+\newcommand\pfinof[1]{\pfin #1}
+\newcommand\pcollect[1]{\morph{collect}(#1)}
+%\newcommand\pcollect[1]{{#1}^\pfin}
+
+%% \newcommand\down{\ensuremath{\color{red} F}} %FIXME: remove!
+%% \newcommand\downof[1]{{\color{red}\down #1}}
 
 
 %% ===== Datafun syntax =====
@@ -82,8 +90,7 @@
 \newcommand\tset[1]{\{{#1}\}}
 \newcommand\tbool{2}
 \newcommand\tunit{1}
-%% FIXME: remove \tdown
-\newcommand\tdown[1]{\color{red}\downof{#1}}
+%\newcommand\tdown[1]{\color{red}\downof{#1}}
 \newcommand\eqt[1]{\underaccent{\textmd{eq}}{#1}}
 \newcommand\tseteq[1]{\tset{\eqt{#1}}}
 

@@ -1,10 +1,10 @@
-%\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=18cm,width=420pt,width=38em,]{narrow}
+%\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=18cm,width=38em,width=420pt,]{narrow}
 %\documentclass{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=152mm,width=351pt,width=373pt,]{narrow}
-%\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
+\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
 %\documentclass[nomarginums]{rntz}\usepackage[b6]{rntzgeometry}\usepackage[width=\textwidth,fullwidth=115mm,]{narrow}\pagestyle{empty}
 
 %\documentclass{rntz}\usepackage{fantasy}%\geometry{textwidth=330pt,}
-\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}%\geometry{textwidth=345pt}
+%\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}%\geometry{textwidth=345pt}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
 \usepackage{latexsym}               % \rightsquigarrow
@@ -305,6 +305,8 @@ correct by relating it to the incremental semantics.
   \newcommand\iexpr{\phi}
 \item I write $(\iexpr_i)_i$ for the tuple or sequence $(\iexpr_1,
   ..., \iexpr_n)$, leaving $n$ unspecified. For example,
+
+  \nopagebreak[2]
   \[ (2^ix + y_i)_i \quad\text{means}\quad
   (2^1x + y_1,~ 2^2x + y_2,~ ...,~ 2^nx + y_n) \]
 
@@ -325,12 +327,12 @@ correct by relating it to the incremental semantics.
 
 \item The comonad $\iso : \Poset \to \Poset$ takes a poset to the
   \emph{discrete} poset on the same elements, defined:
-  \[\setlength\arraycolsep{.33em}
-  \begin{array}{rcl}
+
+  \begin{eqnarray*}
     x \in \isof A &\iff& x \in A\\
     x \le y : \isof A &\iff& x = y\\
     \isof(f : A \to B) &=& f : \isof A \to \isof B
-  \end{array}\]
+  \end{eqnarray*}
 \end{enumerate}
 
 
@@ -344,32 +346,37 @@ bicartesian closed category \catC{} equipped with the following structures:
 \begin{enumerate}
 \item A \emph{``discreteness''} comonad $\tuple{\disco{}, \varepsilon, \delta}$
   equipped with distributive maps:
-%
+
+  \nopagebreak[2]
   \begin{align*}
     \discox &: \prod_i \discof{A_i} \to \disco \prod_i A_i
     &
     \discosum &: \disco \sum_i A_i \to \sum_i \discof{A_i}
   \end{align*}
 
-\item
-  A \emph{``free semilattice''} functor \(\down : \catC \to \catC\) equipped with maps:
-%
+\item A \emph{``finite powerset''} functor \(\pfin : \catC \to \catC\) equipped
+  with maps:
+
+  \nopagebreak[2]
   \begin{align*}
-    \morph{gen}_A &: A \to \downof{A}\\
-    \morph{isEmpty} &: \discof{\downof{\termO}} \to \termO + \termO\\
-    \morph{strong}_{A,B} &: A \x \downof{B} \to \downof{(A \x B)}
+    \morph{gen}_A &: \isof A \to \pfinof{A} &
+    \morph{isEmpty} &: \discof{\pfinof{\termO}} \to \termO + \termO
   \end{align*}
 
-\item \emph{Equality}, \emph{semilattice}, and \emph{fixed point
-  objects}, which must interpret equality, semilattice, and fixed point types
-  respectively. An object $A$ is:
-  %
+  \noindent
+  and, moreover, for any semilattice object $C$ and morphism $f : A \x \isof B
+  \to C$, a ``collecting'' morphism \( \pcollect{f} : A \x \pfinof B \to C \).
+
+\item \emph{Equality}, \emph{semilattice}, and \emph{fixed point objects}, which
+  must interpret equality, semilattice, and fixed point types respectively. An
+  object $A$ is:
+
   \begin{itemize}
   \item An equality object if equipped with a morphism $\morph{eq} : \discof A
-    \x \discof A \to \downof \termO$.
+    \x \discof A \to \pfinof \termO$.
 
-  \item A semilattice object if equipped with an \down-algebra $\morph{collect} :
-    \downof{A} \to A$ and a family of morphisms $\morph{join}_n : A^n \to A$.
+  \item A semilattice object if equipped with morphisms $\morph{join}_n : A^n
+    \to A$ for every $n : \N$.
 
   \item A fixed point object if equipped with a morphism $\morph{fix} :
     \discof{(\expO A A)} \to A$.
@@ -380,32 +387,12 @@ bicartesian closed category \catC{} equipped with the following structures:
 \noindent
 \Cref{fig:general-semantics} shows how to interpret Datafun into any Datafun
 model. The standard semantics is an instance of this, letting \catC{} be
-\Poset{}, \iso{} be \iso{}, and \down{} be the free semilattice monad (i.e.
-finitely-generated downward-closed sets).
+\Poset{}, \iso{} be \iso{}, and \pfin{} be the finite powerset functor.
+\todo{TODO: explain in more detail?}
 
 Since we have not imposed any laws, there is no useful general equational theory
 of Datafun models. Instead, our approach is to relate the models we construct to
 the standard model and use \emph{its} equational theory.
-
-
-%% \subsection{Object families}
-%% \label{sec:object-families}
-
-%% To be a Datafun model, semilattice types must be interpreted into
-%% \emph{semilattice objects}; equality types must be interpreted into
-%% \emph{equality objects}; and fixed point types must be interpreted into
-%% \emph{fixed point objects}. A given object $A$ is:
-
-%% \begin{itemize}
-%% \item A semilattice object when equipped with an \down-algebra $\morph{collect} :
-%%   \downof{A} \to A$ and a family of morphisms $\morph{join}_n : A^n \to A$.
-
-%% \item An equality object when equipped with a morphism $\morph{eq} : \discof A \x
-%% \discof A \to \downof \termO$.
-
-%% \item A fixed point object when equipped with a morphism $\morph{fix} :
-%% \discof{(\expO A A)} \to A$.
-%% \end{itemize}
 
 
 %% ---- Semantics in a Datafun Model ----
@@ -416,8 +403,7 @@ the standard model and use \emph{its} equational theory.
   \begin{align*}
     \den{\tunit} &= \termO & \den{A \to B} &= \expO{\den{A}}{\den{B}}
     \\
-    %% \den{\tdown A} &= \downof{\den{A}}
-    \den{\tseteq A} &= \downof{\isof{\den{\eqt A}}}
+    \den{\tseteq A} &= \pfinof{\den{\eqt A}}
     & \den{A \x B} &= \den{A} \x \den{B}
     \\
     \den{\isof A} &= \discof{\den{A}} & \den{A + B} &= \den{A} + \den{B}
@@ -453,10 +439,17 @@ the standard model and use \emph{its} equational theory.
     \den{\eisEmpty e} &= \den{\eboxd e} \then \morph{isEmpty}
     & \den{\esplit e} &= \den{e}\then \discosum
     \\
-    %% FIXME: \eeqd!
     %\den{\color{red}\prim{eq}\<e} &= \den{e} \then \morph{eq}
     \den{\eeqd{e_1}{e_2}} &= \fork{\den{\eboxd{e_i}}}_i \then \morph{eq}
     & \den{\efix e} &= \den{e} \then \morph{fix}
+    \\
+    %\den{\edown e} &= \den{e} \then \morph{gen}
+    \den{\esetd{e_i}_i} &= \fork{\den{\eboxd{e_i}} \then \morph{gen}}_i \then \morph{join}
+    &
+    \den{\eford x e f} &=
+    \fork{\id,\den{e}} \then \pcollect{\den{f}}
+    %\den{\ebigvee x e f} &=
+    %\fork{\id,\den{e}} \then \morph{strong} \then \downof{\den{f}} \then \morph{collect}
   \end{align*}
 
   \begin{align*}
@@ -465,13 +458,6 @@ the standard model and use \emph{its} equational theory.
     \den{\ecase{e} (\inj i{x_i} \caseto f_i)_i} &=
     \fork{\id, \den{e}} \then \morph{dist}^\x_+ \then \bigkrof{\den{f_i}}_i
     %\bigkrof{\den{f_i}}_i \circ \morph{dist}^\x_+ \circ \fork{\id, \den{e}}
-    \\
-    %\den{\edown e} &= \den{e} \then \morph{gen}
-    \den{\esetd{e_i}_i} &= \fork{\den{\eboxd{e_i}} \then \morph{gen}}_i \then \morph{join}
-    \\
-    \den{\eford x e f} &=
-    %\den{\ebigvee x e f}
-    \fork{\id,\den{e}} \then \morph{strong} \then \downof{\den{f}} \then \morph{collect}
   \end{align*}
 
   \vspace{.5\baselineskip}
@@ -491,7 +477,7 @@ the standard model and use \emph{its} equational theory.
   %% $\den{\esetd{e_i}_i}$, $\den{\eisEmpty e}$, and $\den{\eeqd e f}$ are not
   %% structurally inductive; nonetheless $\den{e}$ is well-defined.
 
-  \caption{Datafun semantics in a Datafun model $\tuple{\catC, \disco, \down}$}
+  \caption{Datafun semantics in a Datafun model $\tuple{\catC, \disco, \pfin}$}
   \label{fig:general-semantics}
 \end{figure*}
 
@@ -520,7 +506,8 @@ These must satisfy the following conditions:\footnote{There are other conditions
   one might sensibly impose here, most notably, that $x \upd \dx$ is monotone in
   $\dx$. I have not needed this, but the lack of an obvious ``correct'' set of
   conditions bothers me.}
-%
+
+\nopagebreak[2]
 \begin{align*}
   x \le y &\implies \ex{\dx} \vld{\dx} x y
   & \text{complete for increases}\\
@@ -535,11 +522,13 @@ These must satisfy the following conditions:\footnote{There are other conditions
 Morphisms $f \in \CP(A,B)$ are differentiable maps $f \in \Poset(\vals A, \vals
 B)$. A map is differentiable iff it has a derivative $\deriv f : \vals A \to
 \Poset(\chgs A, \chgs B)$ such that:
-%
+
+\nopagebreak[2]
 \[ \vld{\dx} x y \implies \longvld{\deriv f\<x\<\dx}{f\<x}{f\<y}\]
 
 \noindent Or, equivalently:
-%
+
+\nopagebreak[2]
 \[ f\<(x \upd \dx) = f\<x \upd \deriv f\<x\<\dx \]
 
 %% % Doesn't work on narrow paper, eg. a5.
@@ -555,6 +544,7 @@ term.
 
 Composition of derivatives follows the chain rule:
 
+\nopagebreak[2]
 \begin{align*}
   \deriv\id \<x\<\dx &= \dx
   & \deriv{(f \circ g)} \<x\<\dx &= \deriv f \<(g\<x) \<(\deriv g\<x\<\dx)
@@ -593,6 +583,7 @@ from \Poset{} along \valfn{}. The change-poset structure is also inherited from
 \Poset{}, while the projection and injection's derivatives operate pointwise on
 changes:
 
+\nopagebreak[2]
 \begin{align*}
   \chgs{\prod_{i \in I} A_i} &= \prod_{i \in I} \chgs A_i &
   \chgs{\sum_{i \in I} A_i} &= \sum_{i \in I} \chgs A_i
@@ -604,6 +595,7 @@ changes:
 \noindent Updates are pointwise, noting that $(\inj i x \upd \inj j \dx)$ is
 undefined for $i \ne j$:
 
+\nopagebreak[2]
 \begin{align*}
   (x_i)_i \upd (\dx_i)_i &= (x_i \upd \dx_i)_i &
   \inj i x \upd \inj i \dx &= \inj i (x \upd \dx)
@@ -615,25 +607,35 @@ orderings of products \& coproducts in \Poset{}.
 
 Fork's derivative $\deriv{\fork{f_i}_i}$ is $\fork{\deriv f_i}_i$:
 
-\begin{gather*}
+\nopagebreak[2]
+\begin{equation*}
   \fork{f_i}_i \<(x \upd \dx)
   = (f_i(x \upd \dx))_i
   = (f_i\<x \upd \deriv f_i \<x \<\dx)_i
   = \fork{f_i}_i \<x \upd \fork{\deriv f_i}_i \<x \<\dx
-\end{gather*}
+\end{equation*}
 
 \noindent
-A derivative for split must obey \[ \krof{f_i}_i\<(\inj i x \upd \inj i \dx)
-= f_i\<x \upd \deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj i \dx) \] so one
-valid choice is
+A derivative for split must obey
 
-\[\deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj j \dx)
-=
-\begin{cases}
-  \deriv f_i \<x \<\dx & \text{if}~i = j\\
-  \deriv f_i \<x \<\zero_x & \text{otherwise}
-\end{cases}
-\]
+\nopagebreak[2]
+\begin{equation*}
+\krof{f_i}_i\<(\inj i x \upd \inj i \dx)
+= f_i\<x \upd \deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj i \dx)
+\end{equation*}
+
+\noindent
+so one valid choice is
+
+\nopagebreak[2]
+\begin{equation*}
+  \deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj j \dx)
+  =
+  \begin{cases}
+    \deriv f_i \<x \<\dx & \text{if}~i = j\\
+    \deriv f_i \<x \<\zero_x & \text{otherwise}
+  \end{cases}
+\end{equation*}
 
 \noindent
 The second case is dead code; any value of the right type would do. We will
@@ -648,6 +650,7 @@ The change poset of the exponential object $\expO A B \in \CP$ consists of maps
 $\vals A \to \Poset(\chgs A, \chgs B)$, ordered pointwise. The update relation
 is:
 
+\nopagebreak[2]
 \begin{equation}\label{eqn:function-update}
   f \valid\df g : \expO A B
   \iff \fa{x \valid\dx y} f\<x \longvalid{\df\<x\<\dx} g\<y
@@ -664,11 +667,13 @@ $\longvld{\df\<x\<\zero_x}{f\<x}{h\<x}$. Then we know \(f\<x \upd
 \df\<x\<\zero_x = g\<x = h\<x \), proving $g = h$. And so, whenever $f \upd \df$
 is defined, we have
 
+\nopagebreak[2]
 \begin{equation*} (f \upd \df)\<x = f\<x \upd \df\<x\<\zero_x \end{equation*}
 
 \noindent
 and more generally, \cref{eqn:function-update} can be rewritten:
 
+\nopagebreak[2]
 \begin{equation*} f\<x \upd \df\<x\<\dx = (f \upd \df)\<(x \upd \dx) \end{equation*}
 
 \noindent
@@ -677,6 +682,7 @@ completeness at $A$ and $B$ and the axiom of choice. % TODO?: Elaborate?
 
 The derivative of the evaluation map is given by
 
+\nopagebreak[2]
 \[\begin{array}{l}
   \deriv{\fname{eval}} \,:\,
   %(\expO{\vals A}{\vals B})
@@ -743,6 +749,7 @@ only the change poset and update map. Since $\isof A$ is ordered discretely,
 values \emph{cannot} increase. So the simplest definition that is sound and
 complete for increases is:
 
+\nopagebreak[2]
 \begin{align*}
   \chgs{\isof A} &= \termO
   &
@@ -772,6 +779,7 @@ fairly straightforward:
 Although we will not use it, there is another refinement of $\iso$ in \CP{},
 which I'll call $\altiso$ for clarity, defined like so:
 
+\nopagebreak[2]
 \begin{align*}
   \chgs{\altiso A} &= \altiso \chgs A
   &
@@ -783,6 +791,7 @@ So $\altiso A$ inherits all of $A$'s changes, but ordered discretely and with
 \emph{only zero-changes still valid}. The derivatives of functoriality,
 duplication, and extraction are different:
 
+\nopagebreak[2]
 \begin{align*}
   \deriv{\altiso(f)} &= \deriv f
   & \deriv\delta_A \<x\<\dx &= \dx
@@ -797,34 +806,61 @@ Meanwhile, product- and sum-distribution become identity maps, because $\prod_i
 A_i$.\footnote{Checking this is left as an exercise for the reader.}
 
 
-\subsection{The lifted \down\ functor}
+\subsection{The lifted \pfin\ functor}
+\label{sec:CP-pfin}
 
-We lift the free semilattice functor $\down$ to \CP\ as follows:
-\begin{mathpar}
-  \chgs{\downof A} = \downof{\vals A}
+We lift the finite powerset functor \pfin\ to \CP\ as follows:
 
-  x \upd_{\downof A} \dx = x \vee_{\downof{\vals A}} \dx
-\end{mathpar}
+\nopagebreak[2]
+\begin{align*}
+  \chgs{\pfinof A} &= \pfinof{\vals A} &
+  x \upd_{\pfinof A} \dx &= x \cup \dx
+\end{align*}
 
 \noindent
-Derivatives for its associated morphisms are:
+Derivatives of \morph{gen}, \morph{isEmpty}, and $\pcollect f$ are
+given by:
 
+\nopagebreak[2]
 \begin{align*}
-  \morph{gen}_A &: A \to \downof{A}\\
-  \morph{isEmpty} &: \discof{\downof{\termO}} \to \termO + \termO\\
-  \morph{strong}_{A,B} &: A \x \downof{B} \to \downof{(A \x B)}
+  f &: \G \x \isof B \to L\\
+  \pcollect f &: \G \x \pfinof B \to L
   \\
-  \deriv{\morph{gen}}_A \<x \<\dx &= \color{red}\morph{gen} \<(x \upd \dx)
-  \\
-  %% shit, this sucks.
-  \deriv{\morph{isEmpty}} \<x \<\dx &= \XXX
-  \\
-  %% shit, this sucks.
-  \deriv{\morph{strong}}_{A,B} \<\tuple{a,x} \<\tuple{\da,\dx}
+  \deriv{\morph{gen}}_A \<x \<\dx &= \emptyset\\
+  \deriv{\morph{isEmpty}} \<x \<\tuple{} &= \morph{isEmpty} \< x\\
+  \deriv{\pcollect f} \<\tuple{\gamma,a} \<\tuple{d\gamma,\da}
   &= \XXX
 \end{align*}
 
-\todo{FIXME: $\upd$ isn't a total function so $\deriv{\morph{gen}}$ fails!}
+\noindent
+\todo{TODO: prove correctness of these derivatives, esp. $\deriv{\pcollect f}$. }
+
+%% We lift the free semilattice functor $\down$ to \CP\ as follows:
+%% \begin{mathpar}
+%%   \chgs{\downof A} = \downof{\vals A}
+
+%%   x \upd_{\downof A} \dx = x \vee_{\downof{\vals A}} \dx
+%% \end{mathpar}
+
+%% \noindent
+%% Derivatives for its associated morphisms are:
+
+%% \begin{align*}
+%%   \morph{gen}_A &: A \to \downof{A}\\
+%%   \morph{isEmpty} &: \discof{\downof{\termO}} \to \termO + \termO\\
+%%   \morph{strong}_{A,B} &: A \x \downof{B} \to \downof{(A \x B)}
+%%   \\
+%%   \deriv{\morph{gen}}_A \<x \<\dx &= \color{red}\morph{gen} \<(x \upd \dx)
+%%   \\
+%%   %% shit, this sucks.
+%%   \deriv{\morph{isEmpty}} \<x \<\dx &= \XXX
+%%   \\
+%%   %% shit, this sucks.
+%%   \deriv{\morph{strong}}_{A,B} \<\tuple{a,x} \<\tuple{\da,\dx}
+%%   &= \XXX
+%% \end{align*}
+
+%% \todo{FIXME: $\upd$ isn't a total function so $\deriv{\morph{gen}}$ fails!}
 
 
 \subsection{Semilattice, equality, and fixed-point structure}
@@ -837,7 +873,7 @@ Derivatives for its associated morphisms are:
 
 The \emph{incremental semantics} for Datafun, notated $\incden{-}$, is given
 by the Datafun model in \CP{} constructed in \cref{sec:changeposets}, letting
-$\disco = \iso_\CP$ and $\down = \down_\CP$. As we took care to show while
+$\disco = \iso_\CP$ and $\pfin = \pfin_\CP$. As we took care to show while
 constructing it, this \emph{refines} the standard model along the forgetful
 functor $\valfn$, that is:
 
@@ -856,6 +892,7 @@ Given any Datafun type $A$, its change poset $\D\incdens A$ is internally
 definable via the following translation (also named $\D$, despite the risk of
 confusion):
 
+\nopagebreak[2]
 \begin{align*}
   \D\tunit &= \tunit
   & \D(A \x B) &= \D A \x \D B
@@ -939,8 +976,9 @@ confusion):
 \Cref{fig:seminaive-phi,fig:seminaive-delta} define two mutually recursive
 static transformations: $\phi e$, which computes $e$ \emph{semi\naive{}ly},
 speeding up fixed point computation by using derivatives; and $\delta e$, which
-computes the \emph{derivative} of $\phi e$. The type of $\delta e$ involves an
-operator $\isocx{\G}$ that makes every variable in $\G$ discrete:
+computes the \emph{derivative} of $\phi e$. The type of $\delta e$ involves a
+strengthening operator $\isocx{\G}$ that makes every variable in $\G$
+discrete:
 %
 \begin{mathpar}
   \isocx{(H_i)_i} = (\isocx{H_i})_i
@@ -951,8 +989,9 @@ operator $\isocx{\G}$ that makes every variable in $\G$ discrete:
 \end{mathpar}
 
 \noindent
-Be careful not to confuse this with $\stripcxd{\G}$, which removes all
-\emph{except} the discrete variables from $\G$. These defined, we have:
+Be careful not to confuse this with $\stripcxd{\G}$, which weakens $\G$ by
+removing all \emph{except} the discrete variables from $\G$. These defined, we
+have:
 
 \begin{restatable}[Type-correctness]{theorem}{thmTypeCorrect}
   \label{thm:type-correct}
@@ -1265,12 +1304,21 @@ Be careful not to confuse this with $\stripcxd{\G}$, which removes all
       = \isof{\vals{\incdens A}} \stareq \isof{\den A}
       = \den{\isof A} \)
 
+    %% \item[Case $\tset{\eqt A}$:]
+    %%   \(\vals{\incdens{\tset{\eqt A}}} = \vals{\downof{\discof{\incdens{\eqt A}}}}
+    %%   = \downof{\vals{\discof{\incdens{\eqt A}}}}
+    %%   = \downof{\isof{\vals{\incdens{\eqt A}}}}
+    %%   \stareq \downof{\isof{\den{\eqt A}}}
+    %%   = \den{\tset{\eqt A}} \)
+
     \item[Case $\tset{\eqt A}$:]
-      \(\vals{\incdens{\tset{\eqt A}}} = \vals{\downof{\discof{\incdens{\eqt A}}}}
-      = \downof{\vals{\discof{\incdens{\eqt A}}}}
-      = \downof{\isof{\vals{\incdens{\eqt A}}}}
-      \stareq \downof{\isof{\den{\eqt A}}}
+      \(\vals{\incdens{\tset{\eqt A}}}
+      = \vals{\pfinof{\incdens{\eqt A}}}
+      = \pfinof{\vals{\incdens{\eqt A}}}
+      \stareq \pfinof{\den{\eqt A}}
       = \den{\tset{\eqt A}} \)
+
+      \todo{TODO: double-check against definitions in \cref{sec:CP-pfin}}
 
     \item[Case $\tunit$:] \(\vals{\incdens \tunit} = \vals\termO = \termO = \den{\tunit}\)
 
@@ -1349,13 +1397,22 @@ Be careful not to confuse this with $\stripcxd{\G}$, which removes all
       = \chgs{\discof{\incdens A}}
       = \termO = \den{1} = \den{\D \isof A}\)
 
+    %% \item[Case $\tset{\eqt A}$:] \(\chgs{\incdens{\tseteq A}}
+    %%   = \chgs{\downof{\discof{\incdens{\eqt A}}}}
+    %%   = \downof{\vals{\discof{\incdens{\eqt A}}}}
+    %%   = \downof{\isof{\vals{\incdens{\eqt A}}}}
+    %%   \daggereq \downof{\isof{\den{\eqt A}}}
+    %%   = \den{\tseteq A}
+    %%   \)
+
     \item[Case $\tset{\eqt A}$:] \(\chgs{\incdens{\tseteq A}}
-      = \chgs{\downof{\discof{\incdens{\eqt A}}}}
-      = \downof{\vals{\discof{\incdens{\eqt A}}}}
-      = \downof{\isof{\vals{\incdens{\eqt A}}}}
-      \daggereq \downof{\isof{\den{\eqt A}}}
+      = \chgs{\pfinof{\incdens{\eqt A}}}
+      = \pfinof{\vals{\incdens{\eqt A}}}
+      \daggereq \pfinof{\den{\eqt A}}
       = \den{\tseteq A}
       \)
+
+      \todo{TODO: double-check against definitions in \cref{sec:CP-pfin}}
 
     \item[Case $\tunit$:] \(\chgs{\incdens \tunit}
       = \chgs \termO = \termO = \den{\tunit} \)
