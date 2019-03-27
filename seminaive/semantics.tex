@@ -17,9 +17,7 @@
 \usepackage{accents}                %\underaccent
 \usepackage{nccmath}                % fix align* (etc.) spacing
 \usepackage{anyfontsize}
-
-% Allow re-statable theorems. Consider integrating into rntzthm.
-\usepackage{thmtools,thm-restate}
+\usepackage{thmtools,thm-restate}   % allow restatable theorems.
 
 % Make section name references use \S.
 \makeatletter\crefname{section}{\S\@gobble}{\S\@gobble}\makeatother
@@ -34,7 +32,7 @@
 \setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
 
 %\PassOptionsToPackage{scaled=1.0625}{rntzfont} % b5/a4
-\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
+%\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
 %\PassOptionsToPackage{scaled=.99}{rntzfont} %b6
 
 %% Note to self: don't use newmath, Neel's PC can't handle it.
@@ -346,16 +344,16 @@ bicartesian closed category \catC{} equipped with the following structures:
 \begin{enumerate}
 \item A \emph{``discreteness''} comonad $\tuple{\disco{}, \varepsilon, \delta}$
   equipped with distributive maps:
-
+%
   \begin{align*}
     \discox &: \prod_i \discof{A_i} \to \disco \prod_i A_i
     &
     \discosum &: \disco \sum_i A_i \to \sum_i \discof{A_i}
   \end{align*}
 
-\item A \emph{``free semilattice''} functor \(\down : \catC \to \catC\) equipped
-  with maps:
-
+\item
+  A \emph{``free semilattice''} functor \(\down : \catC \to \catC\) equipped with maps:
+%
   \begin{align*}
     \morph{gen}_A &: A \to \downof{A}\\
     \morph{isEmpty} &: \discof{\downof{\termO}} \to \termO + \termO\\
@@ -413,7 +411,7 @@ the standard model and use \emph{its} equational theory.
 %% ---- Semantics in a Datafun Model ----
 \newcommand\figsectionname\textsc
 \begin{figure*}
-  \figsectionname{Types and contexts}
+  \figsectionname{Types and Contexts}
 
   \begin{align*}
     \den{\tunit} &= \termO & \den{A \to B} &= \expO{\den{A}}{\den{B}}
@@ -430,6 +428,7 @@ the standard model and use \emph{its} equational theory.
     \den{\h x A} &= \den{A} & \den{\hd x A} &= \discof{\den{A}}
   \end{align*}
 
+  \vspace{.5\baselineskip}
   \figsectionname{Terms}
 
   \begin{align*}
@@ -475,6 +474,7 @@ the standard model and use \emph{its} equational theory.
     \fork{\id,\den{e}} \then \morph{strong} \then \downof{\den{f}} \then \morph{collect}
   \end{align*}
 
+  \vspace{.5\baselineskip}
   \figsectionname{Lemmas}
 
   \begin{align*}
@@ -520,7 +520,7 @@ These must satisfy the following conditions:\footnote{There are other conditions
   one might sensibly impose here, most notably, that $x \upd \dx$ is monotone in
   $\dx$. I have not needed this, but the lack of an obvious ``correct'' set of
   conditions bothers me.}
-
+%
 \begin{align*}
   x \le y &\implies \ex{\dx} \vld{\dx} x y
   & \text{complete for increases}\\
@@ -535,11 +535,11 @@ These must satisfy the following conditions:\footnote{There are other conditions
 Morphisms $f \in \CP(A,B)$ are differentiable maps $f \in \Poset(\vals A, \vals
 B)$. A map is differentiable iff it has a derivative $\deriv f : \vals A \to
 \Poset(\chgs A, \chgs B)$ such that:
-
-\nopagebreak
+%
 \[ \vld{\dx} x y \implies \longvld{\deriv f\<x\<\dx}{f\<x}{f\<y}\]
 
 \noindent Or, equivalently:
+%
 \[ f\<(x \upd \dx) = f\<x \upd \deriv f\<x\<\dx \]
 
 %% % Doesn't work on narrow paper, eg. a5.
@@ -581,7 +581,7 @@ example, for cartesian products, $\vals{(A \x B)} = \vals{A} \x \vals{B}$ and
 $\vals{\fork{f,g}} = \fork{\vals f, \vals g}$.
 %
 For brevity, we omit the ``value components'' of our constructions when they can
-be derived from this fact, only defining $\chgs{A}$ and $\oplus$ and showing the
+be derived from this fact, only defining $\chgs{A}$ and $\upd$ and showing the
 existence of derivatives.
 
 
@@ -663,14 +663,13 @@ $\vld{\zero_x} x x$ gives us $\longvld{\df\<x\<\zero_x}{f\<x}{g\<x}$ and
 $\longvld{\df\<x\<\zero_x}{f\<x}{h\<x}$. Then we know \(f\<x \upd
 \df\<x\<\zero_x = g\<x = h\<x \), proving $g = h$. And so, whenever $f \upd \df$
 is defined, we have
-%
-\[ (f \upd \df)\<x = f\<x \upd \df\<x\<\zero_x \]
-%
+
+\begin{equation*} (f \upd \df)\<x = f\<x \upd \df\<x\<\zero_x \end{equation*}
+
+\noindent
 and more generally, \cref{eqn:function-update} can be rewritten:
-%
-\begin{equation*}
-  f\<x \upd \df\<x\<\dx = (f \upd \df)\<(x \upd \dx)
-\end{equation*}
+
+\begin{equation*} f\<x \upd \df\<x\<\dx = (f \upd \df)\<(x \upd \dx) \end{equation*}
 
 \noindent
 Soundness \& completeness for increases at $\expO A B$ follows from soundness \&
@@ -734,11 +733,9 @@ correctness of $\deriv{(\fn f)}$ follows from correctness of \deriv{f}.
 %% \end{align*}
 
 
+%% TODO: maybe call this \iso_{\boldsymbol\Delta} instead?
 \subsection{The lifted \iso{} comonad and its relatives}
 \label{sec:CP-iso}
-%% TODO: maybe call this \iso_{\boldsymbol\Delta} instead?
-
-\newcommand\setfor[2]{\ensuremath{\{#1 \mathrel{|} #2\}}}
 
 Now we construct a comonad $\iso$ on \CP\ such that $\valfn\iso_\CP =
 \iso_\Poset\valfn$. This requirement defines the value-level structure, leaving
@@ -749,7 +746,7 @@ complete for increases is:
 \begin{align*}
   \chgs{\isof A} &= \termO
   &
-  x \oplus_{\isof A} \tuple{} = x
+  x \upd_{\isof A} \tuple{} = x
 \end{align*}
 
 \noindent
@@ -769,8 +766,7 @@ fairly straightforward:
   \deriv{{\discosum}} \<(\inj i x) \<\tuple{} = \inj i {\tuple{}}
 \end{mathpar}
 
-\newcommand\altiso{\texorpdfstring{\ensuremath{\iso_{\textrm{alt}}}}{altiso}}
-
+
 \subsubsection{The alternative \altiso}
 
 Although we will not use it, there is another refinement of $\iso$ in \CP{},
@@ -779,7 +775,7 @@ which I'll call $\altiso$ for clarity, defined like so:
 \begin{align*}
   \chgs{\altiso A} &= \altiso \chgs A
   &
-  x \oplus_{\altiso A} \dx = y &\iff x = y \wedge x \oplus_A \dx = y
+  x \upd_{\altiso A} \dx = y &\iff x = y \wedge x \upd_A \dx = y
 \end{align*}
 
 \noindent
@@ -794,18 +790,41 @@ duplication, and extraction are different:
 \end{align*}
 
 \noindent
-Product- and sum-distribution become identity maps, because $\prod_i \altiso A_i
-= \altiso \prod_i A$ and $\sum_i \altiso A_i = \altiso \sum_i
+Observe that we no longer need the non-constructive $\zero_x$ to define comonad
+extraction $\varepsilon$! However, for our purposes this will not be an issue.
+Meanwhile, product- and sum-distribution become identity maps, because $\prod_i
+\altiso A_i = \altiso \prod_i A$ and $\sum_i \altiso A_i = \altiso \sum_i
 A_i$.\footnote{Checking this is left as an exercise for the reader.}
 
-$\altiso$ avoids needing the non-constructive $\zero_x$ in its comonad
-extraction $\varepsilon$. However, for our purposes this turns out not to be an
-issue, while the fact that $\chgs \isof A = \termO$ will be crucial.
-\todo{explain why?}
-
 
-\subsection{The lifted \down\ monad}
-\XXX
+\subsection{The lifted \down\ functor}
+
+We lift the free semilattice functor $\down$ to \CP\ as follows:
+\begin{mathpar}
+  \chgs{\downof A} = \downof{\vals A}
+
+  x \upd_{\downof A} \dx = x \vee_{\downof{\vals A}} \dx
+\end{mathpar}
+
+\noindent
+Derivatives for its associated morphisms are:
+
+\begin{align*}
+  \morph{gen}_A &: A \to \downof{A}\\
+  \morph{isEmpty} &: \discof{\downof{\termO}} \to \termO + \termO\\
+  \morph{strong}_{A,B} &: A \x \downof{B} \to \downof{(A \x B)}
+  \\
+  \deriv{\morph{gen}}_A \<x \<\dx &= \color{red}\morph{gen} \<(x \upd \dx)
+  \\
+  %% shit, this sucks.
+  \deriv{\morph{isEmpty}} \<x \<\dx &= \XXX
+  \\
+  %% shit, this sucks.
+  \deriv{\morph{strong}}_{A,B} \<\tuple{a,x} \<\tuple{\da,\dx}
+  &= \XXX
+\end{align*}
+
+\todo{FIXME: $\upd$ isn't a total function so $\deriv{\morph{gen}}$ fails!}
 
 
 \subsection{Semilattice, equality, and fixed-point structure}
@@ -834,8 +853,8 @@ functor $\valfn$, that is:
 
 %\subsection{The change type translation}
 Given any Datafun type $A$, its change poset $\D\incdens A$ is internally
-definable via the following translation (also named $\D$, at the risk of
-possible semantic overload):
+definable via the following translation (also named $\D$, despite the risk of
+confusion):
 
 \begin{align*}
   \D\tunit &= \tunit
@@ -914,19 +933,33 @@ possible semantic overload):
   \Phi(A \to B) &= \Phi A \to \Phi B
 \end{align*}
 
+\newcommand\isocx[1]{{\color{ACMPurple}\lfloor{#1}\rfloor}}
+
 \noindent
 \Cref{fig:seminaive-phi,fig:seminaive-delta} define two mutually recursive
 static transformations: $\phi e$, which computes $e$ \emph{semi\naive{}ly},
 speeding up fixed point computation by using derivatives; and $\delta e$, which
-computes the \emph{derivative} of $\phi e$. The types of these expressions are
-related to $e$ as follows:
+computes the \emph{derivative} of $\phi e$. The type of $\delta e$ involves an
+operator $\isocx{\G}$ that makes every variable in $\G$ discrete:
+%
+\begin{mathpar}
+  \isocx{(H_i)_i} = (\isocx{H_i})_i
+
+  \isocx{\h x A} = \hd x A
+
+  \isocx{\hd x A} = \hd x A
+\end{mathpar}
+
+\noindent
+Be careful not to confuse this with $\stripcxd{\G}$, which removes all
+\emph{except} the discrete variables from $\G$. These defined, we have:
 
 \begin{restatable}[Type-correctness]{theorem}{thmTypeCorrect}
   \label{thm:type-correct}
   If $\J e \G A$, then
-  \[ \J {\phi e} {\Phi\G, \Delta\Phi\stripcxd\G} {\Phi A}
+  \[ \J {\phi e} {\Phi\G, \D\Phi\stripcxd{\G}} {\Phi A}
   \qquad\text{and}\qquad
-  \J {\delta e} {\XXX} {\Delta \Phi A}
+  \J {\delta e} {\isocx{\Phi\G}, \D\Phi\G} {\D\Phi A}
   \]
 \end{restatable}
 \begin{proof}
@@ -959,7 +992,7 @@ related to $e$ as follows:
   %%
   %% Would be nice to give the syntax sugar explicitly, but maybe more effor
   %% than its worth? Might be clearer to mostly avoid syntax sugar? Not sure.
-  \figsectionname{Interesting Cases}
+  \figsectionname{Interesting cases}
 
   \begin{align*}
     \phi(\prim{fix}\<e) &= \prim{fast-fix}\<\phi e\\
@@ -972,17 +1005,25 @@ related to $e$ as follows:
     \\
     %% TODO: check this lines up with \delta(if then else), because that's where
     %% it comes up.
-    \phi(\esplit e) &= \color{red} \elet{\eboxd{x} = \phi e}\\
-    &\phantom{{}={}} \esplit [\isocolor \ecase x\\
-    &\phantom{= \esplit}\quad\isocolor
-      (\etuple{\inj i y, \inj i \dy} \caseto \inj i \etuple{y,\dy})_i\\
-    &\phantom{= \esplit}\quad
-      {\isocolor(\etuple{\inj i y, \pwild}
-        \caseto \inj i \etuple{y, \dummy\<y})_i}]
+    \phi(\esplit e) &= \ecase{\phi e}\\
+    &\phantom{{}={}}\quad
+    \left(\eboxd{\etuple{\inj i x, \inj i \dx}}
+    \caseto \inj i {\eboxd {\etuple{x,\dx}}}\right)_{i\in\{1,2\}}
+    \\
+    &\phantom{{}={}}\quad
+    \left(\eboxd{\etuple{\inj i x, \pwild}}
+    \caseto \inj i {\eboxd {\etuple{x, \dummy\<x}}} \right)_{i\in\{1,2\}}
+    %% \phi(\esplit e) &= \color{red} \elet{\eboxd{x} = \phi e}\\
+    %% &\phantom{{}={}} \esplit [\isocolor \ecase x\\
+    %% &\phantom{= \esplit}\quad\isocolor
+    %%   (\etuple{\inj i y, \inj i \dy} \caseto \inj i \etuple{y,\dy})_i\\
+    %% &\phantom{= \esplit}\quad
+    %%   {\isocolor(\etuple{\inj i y, \pwild}
+    %%     \caseto \inj i \etuple{y, \dummy\<y})_i}]
   \end{align*}
   \vspace{0pt} % <- yes, this matters.
 
-  \figsectionname{Distributive Cases}
+  \figsectionname{Distributive cases}
 
   \begin{align*}
     %% TODO: I should mark discrete vs. monotone variables in some
@@ -1033,7 +1074,7 @@ related to $e$ as follows:
     \delta(\elet{\eboxd x = e} f)
     &= \elet{\eboxd{\etuple{x,\dx}} = \color{Rhodamine}\phi e} \delta f\\
     \delta(\eisEmpty e) &= \eisEmpty {\color{Rhodamine} \phi e} &
-    \delta(\esplit e) &= \esplit \delta e
+    \delta(\esplit e) &= \color{red} \esplit \delta e
   \end{align*}
 
   \begin{align*}
