@@ -1,9 +1,9 @@
 %\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=18cm,width=38em,width=420pt,]{narrow}
 %\documentclass{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=152mm,width=351pt,width=373pt,]{narrow}
-\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
+%\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
 %\documentclass[nomarginums]{rntz}\usepackage[b6]{rntzgeometry}\usepackage[width=\textwidth,fullwidth=115mm,]{narrow}\pagestyle{empty}
 
-%\documentclass{rntz}\usepackage{fantasy}%\geometry{textwidth=330pt,}
+\documentclass{rntz}\usepackage{fantasy}%\geometry{textwidth=330pt,}
 %\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}%\geometry{textwidth=345pt}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
@@ -50,7 +50,8 @@
 %% \linespread{1.05}%\linespread{1.08}
 
 \ifdefined\mathbold\else\newcommand\mathbold{\boldsymbol}\fi
-\usepackage[spacing=true]{microtype}\frenchspacing
+\usepackage[spacing=true]{microtype}
+\frenchspacing
 
 \newcommand\mathvar[1]{\ensuremath{#1}} % For upright math font.
 %\renewcommand\mathvar[1]{\ensuremath{\mathit{#1}}} % For italic math font.
@@ -359,18 +360,19 @@ bicartesian closed category \catC{} equipped with the following structures:
 
   \nopagebreak[2]
   \begin{align*}
-    \morph{gen}_A &: \isof A \to \pfinof{A} &
+    \morph{singleton}_A &: \isof A \to \pfinof{A} &
     \morph{isEmpty} &: \discof{\pfinof{\termO}} \to \termO + \termO
   \end{align*}
 
   \noindent
-  and, moreover, for any semilattice object $C$ and morphism $f : A \x \isof B
-  \to C$, a ``collecting'' morphism \( \pcollect{f} : A \x \pfinof B \to C \).
+  and, moreover, for any objects $\G,A$, semilattice object $L$, and morphism $f
+  : \G \x \isof A \to L$, a ``collecting'' morphism \( \pcollect{f} : \G \x
+  \pfinof A \to L \).
 
 \item \emph{Equality}, \emph{semilattice}, and \emph{fixed point objects}, which
   must interpret equality, semilattice, and fixed point types respectively. An
   object $A$ is:
-
+%
   \begin{itemize}
   \item An equality object if equipped with a morphism $\morph{eq} : \discof A
     \x \discof A \to \pfinof \termO$.
@@ -443,8 +445,8 @@ the standard model and use \emph{its} equational theory.
     \den{\eeqd{e_1}{e_2}} &= \fork{\den{\eboxd{e_i}}}_i \then \morph{eq}
     & \den{\efix e} &= \den{e} \then \morph{fix}
     \\
-    %\den{\edown e} &= \den{e} \then \morph{gen}
-    \den{\esetd{e_i}_i} &= \fork{\den{\eboxd{e_i}} \then \morph{gen}}_i \then \morph{join}
+    %\den{\edown e} &= \den{e} \then \morph{gen} % <- THIS IS WRONG
+    \den{\esetd{e_i}_i} &= \fork{\den{\eboxd{e_i}} \then \morph{singleton}}_i \then \morph{join}
     &
     \den{\eford x e f} &=
     \fork{\id,\den{e}} \then \pcollect{\den{f}}
@@ -818,22 +820,18 @@ We lift the finite powerset functor \pfin\ to \CP\ as follows:
 \end{align*}
 
 \noindent
-Derivatives of \morph{gen}, \morph{isEmpty}, and $\pcollect f$ are
-given by:
+Since the arguments to \morph{singleton} and \morph{isEmpty} cannot change
+(having $\iso$ type), their derivatives always return zero-changes:
 
 \nopagebreak[2]
 \begin{align*}
-  f &: \G \x \isof A \to L\\
-  \pcollect f &: \G \x \pfinof A \to L
-  \\
-  \deriv{\morph{gen}}_A \<x \<\dx &= \emptyset\\
-  \deriv{\morph{isEmpty}} \<x \<\tuple{} &= \morph{isEmpty} \< x\\
-  \deriv{\pcollect f} \<\tuple{\gamma,a} \<\tuple{d\gamma,\da}
-  &= \XXX
+  \deriv{\morph{singleton}}_A \<x \<\tuple{} &= \emptyset &
+  \deriv{\morph{isEmpty}} \<x \<\tuple{} &= \morph{isEmpty} \< x
 \end{align*}
 
 \noindent
-\todo{TODO: prove correctness of these derivatives, esp. $\deriv{\pcollect f}$. }
+The derivative of $\pcollect f$ is more complicated and is given in
+\cref{sec:CP-collect}.
 
 %% We lift the free semilattice functor $\down$ to \CP\ as follows:
 %% \begin{mathpar}
@@ -866,6 +864,48 @@ given by:
 \subsection{Semilattice, equality, and fixed-point structure}
 \label{sec:CP-families}
 \XXX
+
+
+\subsection{Collecting morphisms}
+\label{sec:CP-collect}
+
+Let $\G, A$ be objects, $L$ be a semilattice object, and $f : \G \x \isof A \to
+L$. Our derivative for $\pcollect f : \G \x \pfinof A \to L$ is:
+
+\nopagebreak[2]
+\begin{align*}
+  \deriv{\pcollect f} \<\tuple{\gamma,s} \<\tuple{d\gamma,\ds}
+  &= \bigvee_{x \in \ds} f\<\tuple{\gamma,x} \vee
+  \bigvee_{x \in s \cup \ds} \deriv f \<\tuple{\gamma,x} \<\tuple{d\gamma, \zero_x}
+\end{align*}
+
+\noindent To establish that this is correct (and even that it type-checks),
+recall that for any semilattice object $A \in \CP$, we have $\chgs A = \vals A$
+and $x \upd_A y = x \vee_{\vals A} y$. Now, suppose
+$\longvld{d\gamma}{\gamma}{\gamma'} : \G$. From this we have:
+
+\nopagebreak[2]
+\begin{align*}
+  &\phantom{{}={}}\pcollect{f} \<\tuple{\gamma', s \cup \ds}
+  \\
+  &= \bigvee_{x \in s \cup \ds} f \<\tuple{\gamma', x}
+  \\
+  &\overset{\footnotemark}{=} \bigvee_{x \in s \cup \ds} \bigl(f \<\tuple{\gamma,x}
+  \vee \deriv f \<\tuple{\gamma,x} \<\tuple{d\gamma,\zero_x}\bigr)
+  \\
+  &= \bigvee_{x \in s} f\<\tuple{\gamma,x}
+  \upd \bigvee_{x \in \ds} f\<\tuple{\gamma,x}
+  \vee \bigvee_{x \in s \cup \ds} \deriv f \<\tuple{\gamma,x} \<\tuple{d\gamma,\zero_x}
+  \\
+  &= \pcollect f \<\tuple{\gamma,s}
+  \upd \deriv{\pcollect f} \<\tuple{\gamma,s} \<\tuple{d\gamma,\ds}
+\end{align*}
+
+\nopagebreak% for footnote to be on same page as mark
+\noindent
+Which is what we wished to show.\footnotetext{This equality follows from the
+  correctness of $\deriv f$ applied to
+  \(\longvld{\tuple{d\gamma,\zero_x}}{\tuple{\gamma,x}}{\tuple{\gamma',x}}\).}
 
 
 \section{Incrementalization}
@@ -1285,10 +1325,6 @@ have:
 %%   &&& \eboxd e \bnfor \elet{\eboxd x = e} f\\
 %%   &&& \prim{isEmpty}\<e \bnfor \esplit e \bnfor \prim{eq}\<e \bnfor \efix e
 %% \end{array}\]
-
-\newcommand\stareq{\overset{\boldsymbol\star}{=}}
-\newcommand\daggereq{\overset{\dagger}{=}}
-\newcommand\stardaggereq{\overset{\boldsymbol\star\dagger}{=}}
 
 \thmForget*
 \begin{proof}\label{proof:forget}
