@@ -92,16 +92,19 @@
 %\renewcommand\desugars{~\coloneqq~}
 %\renewcommand\desugars{\,\xrsquigarrow{\text{expand}}\,}
 
+\newcommand\eqt[1]{\underaccent{\textmd{eq}}{#1}}
+\newcommand\fixt[1]{\underaccent{\textmd{fix}}{#1}}
+
 \newcommand\tset[1]{\{{#1}\}}
 \newcommand\tbool{2}
 \newcommand\tunit{1}
 %\newcommand\tdown[1]{\color{red}\downof{#1}}
-\newcommand\eqt[1]{\underaccent{\textmd{eq}}{#1}}
 \newcommand\tseteq[1]{\tset{\eqt{#1}}}
 
 \newcommand\ebox[1]{[{#1}]}
 \newcommand\elet[1]{\kwname{let}\;{#1}\;\kwname{in}\;}
 \newcommand\etuple[1]{\langle{#1}\rangle}
+\newcommand\Etuple[1]{\left\langle{#1}\right\rangle}
 \newcommand\ecase[1]{\kwname{case} \;{#1}\; \kwname{of}\;}
 \newcommand\eset[1]{\{{#1}\}}
 \newcommand\efor[1]{\kwname{for}\:({#1})\fnspace}

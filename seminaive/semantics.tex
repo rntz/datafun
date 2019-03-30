@@ -1,9 +1,9 @@
 %\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=18cm,width=38em,width=420pt,]{narrow}
 %\documentclass{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=152mm,width=351pt,width=373pt,]{narrow}
-%\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
+\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
 %\documentclass[nomarginums]{rntz}\usepackage[b6]{rntzgeometry}\usepackage[width=\textwidth,fullwidth=115mm,]{narrow}\pagestyle{empty}
 
-\documentclass{rntz}\usepackage{fantasy}%\geometry{textwidth=330pt,}
+%\documentclass{rntz}\usepackage{fantasy}%\geometry{textwidth=330pt,}
 %\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}%\geometry{textwidth=345pt}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
@@ -117,6 +117,49 @@ correct by relating it to the incremental semantics.
 % TODO: more section links once I finish them.
 
 
+\section{Notation and conventions}
+
+\begin{enumerate}
+\item Adjacency $f\<x$ denotes the function $f$ applied to an argument $x$.
+
+\item I write $f \then g$ for the composition of morphisms $f : A \to B$ and $g
+  : B \to C$. This is the reverse of the usual composition operator, $g \circ
+  f$.
+
+  \newcommand\iexpr{\phi}
+\item I write $(\iexpr_i)_i$ for the tuple or sequence $(\iexpr_1,
+  ..., \iexpr_n)$, leaving $n$ unspecified. For example,
+
+  \nopagebreak[2]
+  \[ (2^ix + y_i)_i \quad\text{means}\quad
+  (2^1x + y_1,~ 2^2x + y_2,~ ...,~ 2^nx + y_n) \]
+
+  \noindent
+  I also use this notation with other braces, eg. $\fork{\iexpr_i}_i =
+  \fork{\iexpr_0, ..., \iexpr_n}$.
+
+\item $\expO A B$ denotes the exponential $B^A$ in a cartesian closed category.
+
+\item Given a family of morphisms $f_i : A \to B_i$ in a category with finite
+  products, their \emph{``fork''} $\fork{f_i}_i : A \to \textstyle\prod_{i} B_i$
+  uniquely satisfies $\fork{f_i}_i \then \pi_i = f_i$. Dually, given $f_i : A_i
+  \to B$ in a category with finite sums, their \emph{``split''} $\krof{f_i}_i :
+  \sum_i A_i \to B$ uniquely satisfies $\injc_i \then \krof{f_i}_i = f_i$.
+  %
+  So in particular, $\termI : A \to \termO$ is the unique map into the terminal
+  object and $\initE : \initO \to B$ the unique map out of the initial object.
+
+\item The comonad $\iso : \Poset \to \Poset$ takes a poset to the
+  \emph{discrete} poset on the same elements, defined:
+
+  \begin{eqnarray*}
+    x \in \isof A &\iff& x \in A\\
+    x \le y : \isof A &\iff& x = y\\
+    \isof(f : A \to B) &=& f : \isof A \to \isof B
+  \end{eqnarray*}
+\end{enumerate}
+
+
 %% ---- Syntax & typing rules ----
 \begin{figure*}
   \begin{mathpar}
@@ -185,8 +228,8 @@ correct by relating it to the incremental semantics.
     %%
     \infer{
       \J e \G {\tset A} \\
-      \J f {\G,\hd x A} L
-    }{\J {\eford x e f} \G L}
+      \J f {\G,\hd x A} {\eqt L}
+    }{\J {\eford x e f} \G {\eqt L}}
 
     %%\infer{\J e \G {\isof{(\eqt A \x \eqt A)}}}{\J{\prim{eq}\<e} \G {\tdown\tunit}}
     \infer{(\J {\isocolor e_i} {\stripcxd\G} {\eqt A})_i}
@@ -209,7 +252,9 @@ correct by relating it to the incremental semantics.
     \text{types} & A,B &\bnfeq& ... \bnfor \tbool\\
     \text{terms} & e,f,g &\bnfeq&
     ... \bnfor \efalse \bnfor \etrue \bnfor \eif e f g \bnfor \ewhen e f\\
-    &&& \edcase{e} (\inj i {\dvar{x_i}} \caseto f_i)_{i\in\{1,2\}} \bnfor \efixisd x e
+    &&& \efixisd x e
+    % NB. no more \edcase because we just use pattern-matching elaboration
+    %\\ &&& %\edcase{e} (\inj i {\dvar{x_i}} \caseto f_i)_{i\in\{1,2\}}
   \end{array}\]
 
   \begin{mathpar}
@@ -224,6 +269,9 @@ correct by relating it to the incremental semantics.
 
     \infer{\J {\isocolor e} {\stripcxd{\G}, \h x {\eqt L}} {\eqt L}}
           {\J {\efixisd x e} \G {\eqt L}}
+
+    \infer{\J e \G {\tseteq A} \\ \J f {\G,\hd x A} L}{
+      \J {\eford x e f} \G L}
   \end{mathpar}
 
   \caption{Surface syntax and typing rules}
@@ -246,10 +294,18 @@ correct by relating it to the incremental semantics.
     %% \esetd{e_i}_i &\desugars \edown\eboxd{e_0} \vee ... \vee \edown\eboxd{e_n} \quad \text{(or $\bot$ if $n=0$)}\\
     %% \eford x e f &\desugars \ebigvee {\freshvar y} e {\elet{\eboxd x = \freshvar y} f}\\
     \eifd e {f_1}{f_2} &\desugars
-    \ecase{\eisEmpty e} (\inj i {\freshvar\pwild} \caseto f_i)_i\\
-    \edcase e (\inj i {\dvar{x_i}} \caseto f_i)_i
-    &\desugars \ecase{\esplit \eboxd e}
-    (\inj i {\freshvar y} \caseto \elet{\eboxd{x_i} = \freshvar y} f_i)_i
+    \ecase{\eisEmpty e} (\inj i {\freshvar\pwild} \caseto f_i)_i
+    \\
+    %% %% NB. This is mostly redundant with the pattern-matching elaboration in fig:
+    %% \edcase e (\inj i {\dvar{x_i}} \caseto f_i)_i
+    %% &\desugars \ecase{\esplit \eboxd e}
+    %% (\inj i {\freshvar y} \caseto \elet{\eboxd{x_i} = \freshvar y} f_i)_i
+    %% \\
+    (\eford x e f) : A \to L &\desugars
+    \fnof{\freshvar y} \eford x e {f\<\freshvar y}
+    \\
+    (\eford x e f) : L \x M &\desugars
+    \Etuple{\bigl(\eford x e {\pi_1\<f}\bigr), \bigl(\eford x e {\pi_2\<f}\bigr)}
   \end{align*}
 
   %\vspace{-.5ex}
@@ -291,49 +347,43 @@ correct by relating it to the incremental semantics.
     &\desugars& \ecase{\esplit e} (\inj i \eboxd{p_i} \caseto f_i)_i
   \end{array}\]
   \caption{Some pattern-matching elaboration rules}
+  \label{fig:desugaring-pattern-matching}
 \end{figure*}
 
 
-\section{Notation and conventions}
+\section{Surface syntax and its desugaring}
 
+We present Datafun as two languages: a simpler \emph{core}
+(\cref{fig:core-datafun}) and a more liberal \emph{surface}
+(\cref{fig:surface-syntax}) which can be translated into the core
+(\crefrange{fig:desugaring}{fig:desugaring-pattern-matching}).
+%
+Being simpler, core terms are easier to \emph{analyse}, so our semantics and
+static transformations consume core terms. Conversely, surface terms are easier
+to \emph{construct}, so we use them in example programs and in the outputs of
+our static transformations.
+
+The specific surface features we add are:
 \begin{enumerate}
-\item Adjacency $f\<x$ denotes the function $f$ applied to an argument $x$.
+\item Booleans, which in Datafun are \emph{not} simply a sum of units, because
+  while sum types are ordered disjointly, booleans are ordered $\efalse <
+  \etrue$. In the core, booleans are represented by sets of zero-length tuples,
+  with $\efalse = \emptyset$ and $\etrue = \eset{\etuple{}}$. \todo{TODO:
+    explain $(\eisEmpty e)$}.
 
-\item I write $f \then g$ for the composition of morphisms $f : A \to B$ and $g
-  : B \to C$. This is the reverse of the usual composition operator, $g \circ
-  f$.
+\item Pattern matching on tuples and boxes. \todo{TODO: explain $\prim{split}$.}
 
-  \newcommand\iexpr{\phi}
-\item I write $(\iexpr_i)_i$ for the tuple or sequence $(\iexpr_1,
-  ..., \iexpr_n)$, leaving $n$ unspecified. For example,
+\item In the core language, \kwname{for}-loops are limited to only first-order
+  semilattice types $\eqt L$; this simplifies the semantics and semi\naive{}
+  transformation. However, uses for \kwname{for} at higher-order types can be
+  $\eta$-expanded away (\cref{fig:desugaring}), so there is no loss of
+  expressivity in the surface language.
 
-  \nopagebreak[2]
-  \[ (2^ix + y_i)_i \quad\text{means}\quad
-  (2^1x + y_1,~ 2^2x + y_2,~ ...,~ 2^nx + y_n) \]
+\item In the core language, it's convenient to express fixed point computations
+  in terms of (essentially) a higher-order operator $\prim{fix} : \isof{(\fixt L
+    \to \fixt L)} \to \fixt L$. In the surface language it's handy to have the
+  same thing expressed as a binding form, $\efixisd x e$.
 
-  \noindent
-  I also use this notation with other braces, eg. $\fork{\iexpr_i}_i =
-  \fork{\iexpr_0, ..., \iexpr_n}$.
-
-\item $\expO A B$ denotes the exponential $B^A$ in a cartesian closed category.
-
-\item Given a family of morphisms $f_i : A \to B_i$ in a category with finite
-  products, their \emph{``fork''} $\fork{f_i}_i : A \to \textstyle\prod_{i} B_i$
-  uniquely satisfies $\fork{f_i}_i \then \pi_i = f_i$. Dually, given $f_i : A_i
-  \to B$ in a category with finite sums, their \emph{``split''} $\krof{f_i}_i :
-  \sum_i A_i \to B$ uniquely satisfies $\injc_i \then \krof{f_i}_i = f_i$.
-  %
-  So in particular, $\termI : A \to \termO$ is the unique map into the terminal
-  object and $\initE : \initO \to B$ the unique map out of the initial object.
-
-\item The comonad $\iso : \Poset \to \Poset$ takes a poset to the
-  \emph{discrete} poset on the same elements, defined:
-
-  \begin{eqnarray*}
-    x \in \isof A &\iff& x \in A\\
-    x \le y : \isof A &\iff& x = y\\
-    \isof(f : A \to B) &=& f : \isof A \to \isof B
-  \end{eqnarray*}
 \end{enumerate}
 
 
@@ -1309,6 +1359,43 @@ have:
   \caption{The \dummy\ function}
   \label{fig:dummy}
 \end{figure*}
+
+
+\section{Proof obligations when extending Datafun}
+
+%% TODO: section on "proof obligations when extending Datafun"
+
+\todo{This is all pretty speculative. I haven't given a proof that is
+  parameterized enough to state that I've covered all my bases here. TODO: more.}
+
+\begin{enumerate}
+\item If you add a new first-order type, you must extend \dummy{} to compute
+  $\zero$ for it.
+
+\item Make sure that $\delta\bot$, $\delta(e \vee f)$, and $\delta(\eford x e
+  f)$ are still correct. In particular, suppose you add a new type constructor
+  $T$ and consider any $\vec A$ such that $T\vec A$ is a semilattice
+  type.\footnote{A base type is simply a nullary type constructor. If there are
+    no $\vec A$ such that $T\vec A$ is a semilattice, you're done.}
+
+  The simplest way to keep everything working is to ensure that $\D(T\vec A) =
+  T\vec A$ and $\upd_{T\vec A} = \vee$; then you're done. But if $T\vec A$ is
+  higher-order, this is unlikely to be true.
+
+  Alternatively, so long as $\D(T\vec A)$ is a semilattice type whose join composes
+  changes~--- that is, if $x \upd \bot = x$ and $x \upd (y \vee z) = (x \upd y)
+  \upd z$~--- then $\delta\bot$ and $\delta(e \vee f)$ remain correct. This
+  \emph{is} the case for functions. So how do we repair $\delta(\eford x e f)$?
+  Well, Datafun's current solution is to \emph{expand away} higher-order uses of
+  \kwname{for}; if you can likewise expand away uses of \kwname{for} at type
+  $T\vec A$, you're set.
+
+  Otherwise, you're on your own. You'll have to find a new definition of
+  $\delta(\eford x e f)$ at type $T\vec A$ and prove it correct. Likewise, if
+  $\D(T\vec A)$ isn't a semilattice whose join corresponds to change
+  composition, you'll need new definitions of $\delta\bot$ and $\delta(e \vee f)$.
+
+\end{enumerate}
 
 
 \clearpage
