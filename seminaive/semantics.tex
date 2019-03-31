@@ -1,10 +1,10 @@
 %\documentclass[12pt]{rntz}\usepackage[a4]{rntzgeometry}\usepackage[fullwidth=18cm,width=38em,width=420pt,]{narrow}
 %\documentclass{rntz}\usepackage[b5]{rntzgeometry}\usepackage[fullwidth=152mm,width=351pt,width=373pt,]{narrow}
-\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
+%\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
 %\documentclass[nomarginums]{rntz}\usepackage[b6]{rntzgeometry}\usepackage[width=\textwidth,fullwidth=115mm,]{narrow}\pagestyle{empty}
 
 %\documentclass{rntz}\usepackage{fantasy}%\geometry{textwidth=330pt,}
-%\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}%\geometry{textwidth=345pt}
+\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}%\geometry{textwidth=345pt}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
 \usepackage{latexsym}               % \rightsquigarrow
@@ -12,7 +12,7 @@
 \usepackage{amssymb,amsmath,amsthm} % \square etc.
 \usepackage{mathtools}              %\dblcolon
 %\usepackage{array}                  % >{blah}, <{blah} in array formats.
-%\usepackage{booktabs}               % \midrule
+\usepackage{booktabs}               % \midrule
 \usepackage{mathpartir}             % \begin{mathpar}, \infer, etc.
 \usepackage{accents}                %\underaccent
 \usepackage{nccmath}                % fix align* (etc.) spacing
@@ -32,7 +32,7 @@
 \setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
 
 %\PassOptionsToPackage{scaled=1.0625}{rntzfont} % b5/a4
-%\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
+\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
 %\PassOptionsToPackage{scaled=.99}{rntzfont} %b6
 
 %% Note to self: don't use newmath, Neel's PC can't handle it.
@@ -126,6 +126,9 @@ correct by relating it to the incremental semantics.
   : B \to C$. This is the reverse of the usual composition operator, $g \circ
   f$.
 
+\item I write $\subst{e}{x \substo f}$ to mean ``$e$ with all free occurrences of $x$
+  replaced by $f$ ($\alpha$-varying as necessary to avoid capture)''.
+
   \newcommand\iexpr{\phi}
 \item I write $(\iexpr_i)_i$ for the tuple or sequence $(\iexpr_1,
   ..., \iexpr_n)$, leaving $n$ unspecified. For example,
@@ -173,6 +176,8 @@ correct by relating it to the incremental semantics.
       \\
       \text{semilattices} & L,M &\bnfeq&
       \tset{\eqt A} \bnfor \tunit \bnfor L \x M \bnfor A \to L
+      \\
+      \text{fixtypes} & \fixt L, \fixt M &\bnfeq& \XXX
       \\[.5em]
       \text{terms} & e,f,g &\bnfeq& x \bnfor \dvar x \bnfor \fnof{x} e
       \bnfor e\<f \bnfor \etuple{} \bnfor \etuple{e,f} \bnfor \pi_i\<e\\
@@ -214,9 +219,9 @@ correct by relating it to the incremental semantics.
     \infer{\J e \G {\isof A} \\ \J f {\G,\hd x A} B}{
       \J {\elet{\eboxd x = e} f} \G B}
 
-    \infer{\quad}{\J\bot\G L}
+    \infer{\quad}{\J\bot\G {\eqt L}}
 
-    \infer{(\J{e_i}\G L)_i}{\J{e_1 \vee e_2}\G L}
+    \infer{(\J{e_i} \G {\eqt L})_i}{\J{e_1 \vee e_2}\G {\eqt L}}
 
     %% \infer{\J e \G {\eqt A}}{\J {\edown e} \G {\tdown {\eqt A}}}
     \infer{(\J {\isocolor e_i} {\stripcxd\G} {\eqt A})_i}{
@@ -240,7 +245,7 @@ correct by relating it to the incremental semantics.
 
     \infer{\J e \G {\isof{(A + B)}}}{\J{\esplit e} \G {\isof A + \isof B}}
 
-    \infer{\J e \G {\isof{(\eqt L \to \eqt L)}}}{\J{\prim{fix}\< e} \G {\eqt L}}
+    \infer{\J e \G {\isof{(\fixt L \to \fixt L)}}}{\J{\prim{fix}\< e} \G {\fixt L}}
   \end{mathpar}
 
   \caption{Datafun core syntax and typing rules}
@@ -251,13 +256,25 @@ correct by relating it to the incremental semantics.
   \[\setlength\arraycolsep{.33em}\begin{array}{r@{\hskip 1em}ccl}
     \text{types} & A,B &\bnfeq& ... \bnfor \tbool\\
     \text{terms} & e,f,g &\bnfeq&
-    ... \bnfor \efalse \bnfor \etrue \bnfor \eif e f g \bnfor \ewhen e f\\
-    &&& \efixisd x e
+    ... \bnfor \elet{x = e} f \bnfor \efixisd x e\\
+    &&& \efalse \bnfor \etrue \bnfor \eif e f g \bnfor \ewhen e f
     % NB. no more \edcase because we just use pattern-matching elaboration
     %\\ &&& %\edcase{e} (\inj i {\dvar{x_i}} \caseto f_i)_{i\in\{1,2\}}
   \end{array}\]
 
   \begin{mathpar}
+    \infer{\quad}{\J\bot\G L}
+
+    \infer{(\J{e_i} \G L)_i}{\J{e_1 \vee e_2}\G L}
+
+    \infer{\J e \G {\tseteq A} \\ \J f {\G,\hd x A} L}{
+      \J {\eford x e f} \G L}
+
+    \infer{\J e \G A \\ \J f {\G,\h x A} B}{\J{\elet{x = e} f} \G B}
+
+    \infer{\J {\isocolor e} {\stripcxd{\G}, \h x {\fixt L}} {\fixt L}}
+          {\J {\efixisd x e} \G {\fixt L}}
+
     \infer{\quad}{\J \etrue \G \tbool}
 
     \infer{\quad}{\J \efalse \G \tbool}
@@ -266,12 +283,6 @@ correct by relating it to the incremental semantics.
           {\J {\eifd e{f_1}{f_2}} \G {B}}
 
     \infer{\J e \G \tbool \\ \J f \G L}{\J {\ewhen e f} \G L}
-
-    \infer{\J {\isocolor e} {\stripcxd{\G}, \h x {\eqt L}} {\eqt L}}
-          {\J {\efixisd x e} \G {\eqt L}}
-
-    \infer{\J e \G {\tseteq A} \\ \J f {\G,\hd x A} L}{
-      \J {\eford x e f} \G L}
   \end{mathpar}
 
   \caption{Surface syntax and typing rules}
@@ -279,72 +290,88 @@ correct by relating it to the incremental semantics.
 \end{figure*}
 
 \begin{figure*}
-  \[\tbool \desugars \tset{\tunit}\]
 
   \begin{align*}
-    \efalse &\desugars \esetd{} &
-    \etrue &\desugars \esetd{\etuple{}}
+    \tbool &\desugars \tset{\tunit}
     \\
-    \ewhen e f &\desugars \eford {\freshvar\pwild} e f &
-    \efixisd x e &\desugars \efix \eboxd{\fnof {\color{black} x} e}
-  \end{align*}
-
-  \begin{align*}
     %% \eeqd e f &\desugars \prim{eq}\< \eboxd{\etuple{e, f}}\\
     %% \esetd{e_i}_i &\desugars \edown\eboxd{e_0} \vee ... \vee \edown\eboxd{e_n} \quad \text{(or $\bot$ if $n=0$)}\\
     %% \eford x e f &\desugars \ebigvee {\freshvar y} e {\elet{\eboxd x = \freshvar y} f}\\
     \eifd e {f_1}{f_2} &\desugars
     \ecase{\eisEmpty e} (\inj i {\freshvar\pwild} \caseto f_i)_i
-    \\
     %% %% NB. This is mostly redundant with the pattern-matching elaboration in fig:
     %% \edcase e (\inj i {\dvar{x_i}} \caseto f_i)_i
     %% &\desugars \ecase{\esplit \eboxd e}
     %% (\inj i {\freshvar y} \caseto \elet{\eboxd{x_i} = \freshvar y} f_i)_i
     %% \\
-    (\eford x e f) : A \to L &\desugars
-    \fnof{\freshvar y} \eford x e {f\<\freshvar y}
+  \end{align*}
+
+  \begin{align*}
+    \efalse &\desugars \esetd{} &
+    \etrue &\desugars \esetd{\etuple{}}
     \\
-    (\eford x e f) : L \x M &\desugars
-    \Etuple{\bigl(\eford x e {\pi_1\<f}\bigr), \bigl(\eford x e {\pi_2\<f}\bigr)}
+    \elet{x = e} f &\desugars (\fnof{x} f)\<e &
+    \efixisd x e &\desugars \efix \eboxd{\fnof {\color{black} x} e}
   \end{align*}
 
   %\vspace{-.5ex}
   {\small Fresh variables ($\freshvar y$, $\freshvar\pwild$) are marked in \freshvar{pink}.}
+  %\vspace{.5ex}
 
-  \vspace{.5ex}
-  %% TODO: consider the pattern-matching desugaring in "Some pattern-matching
-  %% elaboration rules". if we have that, we probably don't also need \edcase.
-  %% Only include one in final paper.
   \caption{Desugaring of surface syntax}
   \label{fig:desugaring}
 \end{figure*}
 
-%% TODO: do we need all of these?
+\begin{figure*}
+  \begin{tabular}{rll}
+    Surface term & expanded at $A \to L$ & expanded at $L \x M$\\\midrule
+    $\bot$
+    & \(\fnof{\freshvar\pwild} \bot\)
+    & \(\etuple{\bot,\bot}\)
+    \\
+    \(e \vee f\)
+    & \(\fnof{\freshvar x} e\<{\freshvar x} \vee f\<{\freshvar x}\)
+    & \(\etuple{\pi_1\<e \vee \pi_1\<f,\, \pi_2\<e\vee\pi_2\<f}\)
+    \\
+    \(\eford x e f\)
+    & \(\fnof{\freshvar y} \eford x e {f\<\freshvar y}\)
+    & \(\Etuple{\bigl(\eford x e {\pi_1\<f}\bigr), \bigl(\eford x e {\pi_2\<f}\bigr)}\)
+  \end{tabular}
+
+  \caption{Desugaring higher-order semilattice operations}
+  \label{fig:desugaring-higher-order-semilattice}
+\end{figure*}
+
+%% TODO: check that we have every rule we need.
+%% TODO: are any of these redundant/unnecessary?
 \begin{figure*}
   \[\setlength\arraycolsep{.15em}\begin{array}{rcl}
-    \ecase{e,\vec f} (p_i, \vec q_{i,j} \caseto g_{i,j})_{i,j}
-    &\desugars& \ecase{e} (p_i \caseto \ecase{\vec f} (\vec q_{i,j} \caseto g_{i,j})_j)_i
+    \ecase{e} x \caseto f &\desugars& \elet{x = e} f\\[.33em]
+    \ecase{e} \eboxd x \caseto f &\desugars& \elet{\eboxd x = e} f
     \\[.33em]
-    \ecase{e} x \caseto f;\ (p_i \caseto g_i)_i
-    &\desugars& \elet{x = e} f
-    \\[.33em]
-    \ecase{e} \eboxd x \caseto f;\ (p_i \caseto g_i)_i
-    &\desugars& \elet{\eboxd x = e} f
-    \\[.33em]
+    %% A * B
     \ecase{e} (\etuple{p_i,q_i} \caseto f_i)_i
-    &\desugars& \elet{x = e}\\
-    && \ecase{\pi_1\< x,\, \pi_2\< x} (p_i,q_i \caseto f_i)_i
+    &\desugars& \elet{\freshvar x = e}\\
+    && \ecase{\pi_1\< {\freshvar x},\, \pi_2\< {\freshvar x}} (p_i,q_i \caseto f_i)_i
     \\[.33em]
+    %% A + B
+    \ecase{e} (\inj i p_{i,j} \caseto f_{i,j})_{i,j}
+    &\desugars& \ecase{e} (\inj i {\freshvar x}
+    \caseto \ecase{\freshvar x} (p_{i,j} \caseto f_{i,j})_j)_i
+    \\[.33em]
+    %% [](A * B)
     \ecase{e} (\eboxd{\etuple{p_i,q_i}} \caseto f_i)_i
-    &\desugars& \elet{\eboxd x = e}\\
-    && \ecase{\eboxd{\pi_1\<x}, \eboxd{\pi_2\<x}}
+    &\desugars& \elet{\eboxd {\freshvar x} = e}\\
+    && \ecase{\eboxd{\pi_1\<\freshvar x}, \eboxd{\pi_2\<\freshvar x}}
     (\eboxd{p_i}, \eboxd{q_i} \caseto f_i)
     \\[.33em]
-    \ecase{e} (\inj i p_{i,j} \caseto f_{i,j})_{i,j}
-    &\desugars& \ecase{e} (\inj i x \caseto \ecase{x} (p_{i,j} \caseto f_{i,j})_j)_i
-    \\[.33em]
+    %% [](A + B)
     \ecase{e} (\eboxd{\inj i p_i} \caseto f_i)_i
     &\desugars& \ecase{\esplit e} (\inj i \eboxd{p_i} \caseto f_i)_i
+    \\[.33em]
+    %% multi-case -> nested case
+    \ecase{e,\vec f} (p_i, \vec q_{i,j} \caseto g_{i,j})_{i,j}
+    &\desugars& \ecase{e} (p_i \caseto \ecase{\vec f} (\vec q_{i,j} \caseto g_{i,j})_j)_i
   \end{array}\]
   \caption{Some pattern-matching elaboration rules}
   \label{fig:desugaring-pattern-matching}
@@ -353,36 +380,36 @@ correct by relating it to the incremental semantics.
 
 \section{Surface syntax and its desugaring}
 
-We present Datafun as two languages: a simpler \emph{core}
+We present Datafun in two layers: a simpler \emph{core}
 (\cref{fig:core-datafun}) and a more liberal \emph{surface}
-(\cref{fig:surface-syntax}) which can be translated into the core
+(\cref{fig:surface-syntax}) whose extensions are desugared into core terms
 (\crefrange{fig:desugaring}{fig:desugaring-pattern-matching}).
 %
-Being simpler, core terms are easier to \emph{analyse}, so our semantics and
-static transformations consume core terms. Conversely, surface terms are easier
-to \emph{construct}, so we use them in example programs and in the outputs of
-our static transformations.
+The simpler core terms are easier to \emph{analyse}, so our semantics and static
+transformations consume core terms; conversely, surface terms are easier to
+\emph{construct}, so we use them in example programs and in the outputs of our
+static transformations.
 
 The specific surface features we add are:
 \begin{enumerate}
-\item Booleans, which in Datafun are \emph{not} simply a sum of units, because
-  while sum types are ordered disjointly, booleans are ordered $\efalse <
-  \etrue$. In the core, booleans are represented by sets of zero-length tuples,
-  with $\efalse = \emptyset$ and $\etrue = \eset{\etuple{}}$. \todo{TODO:
-    explain $(\eisEmpty e)$}.
+\item Let-bindings.
+
+\item Booleans, ordered $\efalse < \etrue$. Since sum types are ordered
+  disjointly, booleans are instead desugared into sets of empty tuples, with
+  $\efalse = \emptyset$ and $\etrue = \eset{\etuple{}}$. \todo{TODO: explain
+    $(\eisEmpty e)$}.
 
 \item Pattern matching on tuples and boxes. \todo{TODO: explain $\prim{split}$.}
 
-\item In the core language, \kwname{for}-loops are limited to only first-order
-  semilattice types $\eqt L$; this simplifies the semantics and semi\naive{}
-  transformation. However, uses for \kwname{for} at higher-order types can be
-  $\eta$-expanded away (\cref{fig:desugaring}), so there is no loss of
-  expressivity in the surface language.
+\item In the core language, semilattice operations ($\bot$, $e \vee f$, and
+  \kwname{for}-loops) are permitted only at \emph{first-order} semilattice types
+  $\eqt L$. This limitation is lifted in the surface language using
+  $\eta$-expansion (\cref{fig:desugaring-higher-order-semilattice}).
 
-\item In the core language, it's convenient to express fixed point computations
-  in terms of (essentially) a higher-order operator $\prim{fix} : \isof{(\fixt L
-    \to \fixt L)} \to \fixt L$. In the surface language it's handy to have the
-  same thing expressed as a binding form, $\efixisd x e$.
+\item In the core language, we express fixed point computations using what
+  amounts to a higher-order operator $\prim{fix} : \isof{(\fixt L \to \fixt L)}
+  \to \fixt L$. In the surface language there is a more convenient binding form,
+  $\efixisd x e$.
 
 \end{enumerate}
 
@@ -396,7 +423,7 @@ bicartesian closed category \catC{} equipped with the following structures:
 
 \begin{enumerate}
 \item A \emph{``discreteness''} comonad $\tuple{\disco{}, \varepsilon, \delta}$
-  equipped with distributive maps:
+  equipped with distributive morphisms:
 
   \nopagebreak[2]
   \begin{align*}
@@ -406,7 +433,7 @@ bicartesian closed category \catC{} equipped with the following structures:
   \end{align*}
 
 \item A \emph{``finite powerset''} functor \(\pfin : \catC \to \catC\) equipped
-  with maps:
+  with morphisms:
 
   \nopagebreak[2]
   \begin{align*}
@@ -414,25 +441,50 @@ bicartesian closed category \catC{} equipped with the following structures:
     \morph{isEmpty} &: \discof{\pfinof{\termO}} \to \termO + \termO
   \end{align*}
 
-  \noindent
-  and, moreover, for any objects $\G,A$, semilattice object $L$, and morphism $f
-  : \G \x \isof A \to L$, a ``collecting'' morphism \( \pcollect{f} : \G \x
-  \pfinof A \to L \).
+  %% \noindent
+  %% and, moreover, for any objects $\G,A$, semilattice object $L$, and morphism $f
+  %% : \G \x \isof A \to L$, a ``collecting'' morphism \( \pcollect{f} : \G \x
+  %% \pfinof A \to L \).
 
-\item \emph{Equality}, \emph{semilattice}, and \emph{fixed point objects}, which
-  must interpret equality, semilattice, and fixed point types respectively. An
-  object $A$ is:
-%
-  \begin{itemize}
-  \item An equality object if equipped with a morphism $\morph{eq} : \discof A
-    \x \discof A \to \pfinof \termO$.
+%% \item \emph{Equality}, \emph{eqsemilattice}, and \emph{fixed point objects},
+%%   which must interpret equality types $\eqt A$, equality semilattice types $\eqt
+%%   L$, and fixed point types $\fixt L$ respectively. An object $A$ is:
+%% %
+%%   \begin{itemize}
+%%   \item An equality object when equipped with a morphism $\morph{eq} : \discof A
+%%     \x \discof A \to \pfinof \termO$.
 
-  \item A semilattice object if equipped with morphisms $\morph{join}_n : A^n
-    \to A$ for every $n : \N$.
+%%   \item A semilattice object when \emph{also} equipped with morphisms
+%%     $\morph{join}_n : A^n \to A$ for every $n : \N$.
 
-  \item A fixed point object if equipped with a morphism $\morph{fix} :
-    \discof{(\expO A A)} \to A$.
-  \end{itemize}
+%%   \item A fixed point object when \emph{also} equipped with a morphism
+%%     $\morph{fix} : \discof{(\expO A A)} \to A$.
+%%   \end{itemize}
+
+\item Type-indexed families of morphisms interpreting equality, semilattice
+  join, and fixed-point computations:\footnote{It may seem circular to use the
+    denotation $\den{-}$ of types in a Datafun model in my \emph{definition} of
+    a Datafun model. But there is no real circularity: types' denotations $\den
+    A$ do not require these morphism families to exist; only terms' denotations
+    $\den e$ do.}
+  %
+  \begin{mathpar}
+    \morph{eq} : \isof{\den{\eqt A}} \x \isof{\den{\eqt A}} \to \pfinof\termO
+
+    \morph{join}_n : \den{\eqt L}^n \to \den{\eqt L}
+
+    \morph{fix} : \isof{\expO{\den{\fixt L}}{\den{\fixt L}}} \to \den{\fixt L}
+  \end{mathpar}
+
+\item A family of \emph{collecting morphisms} to interpret \kwname{for}-loops.
+  Given objects $\G, A$, a semilattice equality type $\eqt L$, and a morphism $f
+  : \G \x \isof{A} \to \den{\eqt L}$, we require a morphism $\pcollect{f} : \G
+  \x \pfinof{A} \to \den{\eqt L}$. Or, abusing inference rule notation:
+  %
+  \[
+    \infer{f : \G \x \isof A \to \den{\eqt L}}
+          {\pcollect{f} : \G \x \pfinof{A} \to \den{\eqt L}}
+  \]
 
 \end{enumerate}
 
@@ -448,7 +500,6 @@ the standard model and use \emph{its} equational theory.
 
 
 %% ---- Semantics in a Datafun Model ----
-\newcommand\figsectionname\textsc
 \begin{figure*}
   \figsectionname{Types and Contexts}
 
@@ -539,21 +590,16 @@ the standard model and use \emph{its} equational theory.
 
 Objects $A$ of \CP{} are tuples $(\vals A, \chgs A, \updfn_A)$, where
 %
-\begin{enumerate}
-\item $\vals A \in \Poset$ is the poset of values.
-
-\item $\chgs A \in \Poset$ is the poset of changes.
-
-\item $\updfn : \vals A \x \chgs A \pto \vals A$ is a partial map taking a value
-  and a change to an updated value. If $x \upd \dx$ is defined, we say $\dx$ is a
-  \emph{valid} change to $x$.
-
-  $\vld{\dx} x y$ means $x \upd \dx$ is defined and equal to $y$. Otherwise,
-  equations inv\-olv\-ing \updfn{} should be understood to hold only when it is
-  defined.
-\end{enumerate}
-
-\noindent
+$\vals A$ is a poset of values;
+%
+$\chgs A$ is a poset of changes;
+%
+and $\updfn : \vals A \x \chgs A \pto \vals A$ is a \strong{partial} map taking
+a value and a change to an updated value.
+%
+We may also write $\vld{\dx} x y$ to mean that $x \upd \dx = y$ is defined. In
+this case we say $\dx$ is a \emph{valid} change to $x$.
+%
 These must satisfy the following conditions:\footnote{There are other conditions
   one might sensibly impose here, most notably, that $x \upd \dx$ is monotone in
   $\dx$. I have not needed this, but the lack of an obvious ``correct'' set of
@@ -591,8 +637,7 @@ B)$. A map is differentiable iff it has a derivative $\deriv f : \vals A \to
 
 \noindent
 The same morphism may have many different derivatives; all that matters is that
-one exist. We will later exhibit an algorithm to find a derivative of a Datafun
-term.
+one exist.
 
 Composition of derivatives follows the chain rule:
 
