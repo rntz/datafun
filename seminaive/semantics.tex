@@ -23,9 +23,9 @@
 \makeatletter\crefname{section}{\S\@gobble}{\S\@gobble}\makeatother
 
 % hang is only relevant for long captions, which I don't have
-%\usepackage[skip=.5\baselineskip,labelsep=period,labelfont=it,textfont=it,format=hang]{caption}
+\usepackage[labelsep=period,labelfont=it,textfont=it,format=hang]{caption}
 %\usepackage[skip=.5\baselineskip,labelfont=sc,textfont=it,labelsep=period,format=hang]{caption}
-\usepackage[labelfont=sc,labelsep=period,format=hang]{caption}
+%\usepackage[labelfont=sc,labelsep=period,format=hang]{caption}
 
 \usepackage{enumitem}\setlist{labelindent=1em,labelsep=.75em,leftmargin=*}
 \setlist{labelindent=.5em,labelsep=.75em,leftmargin=*}
@@ -473,7 +473,7 @@ bicartesian closed category \catC{} equipped with the following structures:
 
     \morph{join}_n : \den{\eqt L}^n \to \den{\eqt L}
 
-    \morph{fix} : \isof{\expO{\den{\fixt L}}{\den{\fixt L}}} \to \den{\fixt L}
+    \morph{fix} : \isof{(\expO{\den{\fixt L}}{\den{\fixt L}})} \to \den{\fixt L}
   \end{mathpar}
 
 \item A family of \emph{collecting morphisms} to interpret \kwname{for}-loops.
@@ -909,10 +909,11 @@ A_i$.\footnote{Checking this is left as an exercise for the reader.}
 We lift the finite powerset functor \pfin\ to \CP\ as follows:
 
 \nopagebreak[2]
-\begin{align*}
+\begin{align}
   \chgs{\pfinof A} &= \pfinof{\vals A} &
   x \upd_{\pfinof A} \dx &= x \cup \dx
-\end{align*}
+  \label{eqn:CP-P-upd}
+\end{align}
 
 \noindent
 Since the arguments to \morph{singleton} and \morph{isEmpty} cannot change
@@ -924,9 +925,9 @@ Since the arguments to \morph{singleton} and \morph{isEmpty} cannot change
   \deriv{\morph{isEmpty}} \<x \<\tuple{} &= \morph{isEmpty} \< x
 \end{align*}
 
-\noindent
-The derivative of $\pcollect f$ is more complicated and is given in
-\cref{sec:CP-collect}.
+%% \noindent
+%% The derivative of $\pcollect f$ is more complicated and is given in
+%% \cref{sec:CP-collect}.
 
 %% We lift the free semilattice functor $\down$ to \CP\ as follows:
 %% \begin{mathpar}
@@ -956,16 +957,54 @@ The derivative of $\pcollect f$ is more complicated and is given in
 %% \todo{FIXME: $\upd$ isn't a total function so $\deriv{\morph{gen}}$ fails!}
 
 
-\subsection{Semilattice, equality, and fixed-point structure}
+\subsection{Equality, join, and fixed-point morphisms}
 \label{sec:CP-families}
-\XXX
+
+The derivatives of \morph{eq}, \morph{join}, and \morph{fix} are as follows:
+
+\nopagebreak[2]
+\begin{align*}
+  \deriv{\morph{eq}} \<x \<\tuple{\tuple{},\tuple{}} &= \emptyset &
+  \deriv{\morph{join}} \<x \<\dx &= \bigvee_i \pi_i\<\dx &
+  \deriv{\morph{fix}} \<x \<\tuple{} &= \bot
+\end{align*}
+
+\noindent
+Since the inputs to \morph{eq} and \morph{fix} cannot change, being of
+\iso\ type, their derivatives need only produce zero-changes. $\emptyset$ is a
+zero-change at $\pfinof\termO$ by \cref{eqn:CP-P-upd}; to see why $\bot$ is a
+zero-change to $\den{\fixt L}$, and why $\deriv{\morph{join}}$ is correct (or
+even well-typed), we'll need a small lemma:
+
+\nopagebreak[2]
+\begin{restatable}{lemma}{lemEqsemi}
+  \label{lem:eqsemi}
+  \(\vals{\den{\eqt L}} = \chgs{\den{\eqt L}}\) is a semilattice and $x
+  \upd_{\den{\eqt L}} \dx = x \vee \dx$.
+\end{restatable}
+\begin{proof}
+  By induction on $\eqt L$. See \cpageref{proof:eqsemi}.
+\end{proof}
+
+\noindent This immediately entails that $\bot$ is a zero-change at
+$\den{\eqt{L}}$, and consequently at $\den{\fixt L}$, proving
+$\deriv{\morph{fix}}$ correct. It also shows that $\deriv{\morph{join}}$ is
+correct:
+
+\nopagebreak[2]
+\begin{align*}
+  \morph{join}\<(x \upd \dx) &= \bigvee_i \pi_i \<(x \vee \dx)\\
+  &= \left(\bigvee_i \pi_i\<x\right) \vee \left(\bigvee_i \pi_i\<\dx\right)\\
+  &= \morph{join}\<x \upd \deriv{\morph{join}}\<x\<\dx
+\end{align*}
 
 
 \subsection{Collecting morphisms}
 \label{sec:CP-collect}
 
-Let $\G, A$ be objects, $L$ be a semilattice object, and $f : \G \x \isof A \to
-L$. Our derivative for $\pcollect f : \G \x \pfinof A \to L$ is:
+Let $\G, A$ be objects, $\eqt L$ be a semilattice equality type, and $f : \G \x
+\isof A \to \den{\eqt L}$. Our derivative for $\pcollect f : \G \x \pfinof A \to
+\den{\eqt L}$ is:
 
 \nopagebreak[2]
 \begin{align*}
@@ -975,9 +1014,9 @@ L$. Our derivative for $\pcollect f : \G \x \pfinof A \to L$ is:
 \end{align*}
 
 \noindent To establish that this is correct (and even that it type-checks),
-recall that for any semilattice object $A \in \CP$, we have $\chgs A = \vals A$
-and $x \upd_A y = x \vee_{\vals A} y$. Now, suppose
-$\longvld{d\gamma}{\gamma}{\gamma'} : \G$. From this we have:
+\todo{recall that for any semilattice equality type $\eqt L$, we have
+  $\chgs{\den{\eqt L}} = \vals{\den{\eqt L}}$ and $x \upd y = x \vee y$}. Now,
+suppose $\longvld{d\gamma}{\gamma}{\gamma'} : \G$. From this we have:
 
 \nopagebreak[2]
 \begin{align*}
@@ -1458,6 +1497,33 @@ have:
 %%   &&& \prim{isEmpty}\<e \bnfor \esplit e \bnfor \prim{eq}\<e \bnfor \efix e
 %% \end{array}\]
 
+
+\todo{FIXME: wrong numbering!}
+\lemEqsemi*
+\begin{proof}\label{proof:eqsemi}
+  By induction on $\eqt L$.
+
+  \begin{description}
+  \item[Case $\tunit$:] \(\vals{\den \tunit} = \chgs{\den \tunit} = \termO\),
+    which is the trivial semilattice, and \(\tuple{} \upd \tuple{} = \tuple{}
+    = \tuple{} \vee \tuple{}\).
+
+  \item[Case $\eqt L \x \eqt M$:] \(\den{\eqt L \x \eqt M} = \den{\eqt L} \x
+    \den{\eqt M}\), and by IH $\vals{\den{\eqt L}} = \chgs{\den{\eqt L}}$ and
+    \(\vals{\den{\eqt M}} = \chgs{\den{\eqt M}}\) and both are semilattices.
+    The product of semilattices is a semilattice itself, and we have:
+    \begin{align*}
+      \tuple{x,y} \upd_{\den{\eqt L} \x \den{\eqt M}} \tuple{\dx,\dy}
+      &= \tuple{x \upd \dx,\, y \upd dy}\\
+      &= \tuple{x \vee \dx,\, y \vee dy} & \text{by IH}\\
+      &= \tuple{x,y} \vee \tuple{\dx,\dy}
+    \end{align*}
+
+  \item[Case $\tseteq A$:] \XXX
+  \end{description}
+\end{proof}
+
+
 \thmForget*
 \begin{proof}\label{proof:forget}
 
@@ -1620,4 +1686,5 @@ have:
   \XXX
 \end{proof}
 
+
 \end{document}
