@@ -1015,8 +1015,8 @@ Let $\G, A$ be objects, $\eqt L$ be a semilattice equality type, and $f : \G \x
 
 \noindent To establish that this is correct (and even that it type-checks),
 recall from \cref{lem:eqsemi} that $\chgs{\den{\eqt L}} = \vals{\den{\eqt L}}$
-and $x \upd_{\den{\eqt L}} y = x \vee y$. Now, suppose
-$\longvld{d\gamma}{\gamma}{\gamma'} : \G$. From this we have:
+and $x \upd_{\den{\eqt L}} y = x \vee y$. Now, suppose $\longvld{d\gamma}{\gamma}{\gamma'} :
+\G$. From this we have:
 
 \nopagebreak[2]
 \begin{align*}
@@ -1259,12 +1259,6 @@ have:
     \phi(\eisEmpty e) &= \eisEmpty {\phi e}
   \end{align*}
 
-  \todo{TODO: eta-expand $\vee$ etc. at functional types! Probably do this in
-    elaborator.}
-
-  \todo{TODO: distribution of $\iso$ over sums is no longer equality! does
-    $\phi(\esplit e)$ need to change?}
-
   \caption{Semi\naive{} speed-up translation, $\phi$}
   \label{fig:seminaive-phi}
 \end{figure*}
@@ -1285,9 +1279,7 @@ have:
     \delta(e \vee f) &= \delta e \vee \delta f\\
     \delta\eboxd{e} &= \etuple{} &
     \delta(\elet{\eboxd x = e} f)
-    &= \elet{\eboxd{\etuple{x,\dx}} = \color{Rhodamine}\phi e} \delta f\\
-    \delta(\eisEmpty e) &= \eisEmpty {\color{Rhodamine} \phi e} &
-    \delta(\esplit e) &= \color{red} \esplit \delta e
+    &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \delta f
   \end{align*}
 
   \begin{align*}
@@ -1309,15 +1301,16 @@ have:
     %% (\ebigvee x {{\color{Rhodamine}\phi e} \vee \delta e} {\delta f})
     %% TODO: is weakening being used here?
     \delta(\eford x e f)
-    &= (\eford x {\delta e} \substd{\color{Rhodamine} \phi f}{\dx \substo \zero\<x}) \\
-    &\vee (\eford x {{\color{Rhodamine}\phi e} \vee \delta e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
+    &= (\eford x {\delta e} \substd{\phi f}{\dx \substo \zero\<x}) \\
+    &\vee (\eford x {{\phi e} \vee \delta e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
     \substd{\delta f}{\dx \substo \zero\<x})
+    \\
+    \delta(\eisEmpty e) &= \eisEmpty {\color{Rhodamine} \phi e}
+    \\
+    \delta(\esplit e) &= \ecase{\phi e}
+    (\eboxd{\eboxd{\etuple{\inj i \pwild, \pwild}}}
+    \caseto \inj i {\etuple{}} )_i
   \end{align*}
-
-  \todo{TODO: double-check $\delta(\ecase e ...)$}\\
-  \todo{TODO: does $\delta(\eford x e f)$ weaken $\phi f$?}\\
-  \todo{TODO: since distribution of $\iso$ over sums isn't equality, doesn't
-    $\delta(\esplit e)$ need to be changed?}
 
   \caption{Semi\naive{} derivative translation, $\delta$}
   \label{fig:seminaive-delta}
