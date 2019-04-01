@@ -1014,9 +1014,9 @@ Let $\G, A$ be objects, $\eqt L$ be a semilattice equality type, and $f : \G \x
 \end{align*}
 
 \noindent To establish that this is correct (and even that it type-checks),
-\todo{recall that for any semilattice equality type $\eqt L$, we have
-  $\chgs{\den{\eqt L}} = \vals{\den{\eqt L}}$ and $x \upd y = x \vee y$}. Now,
-suppose $\longvld{d\gamma}{\gamma}{\gamma'} : \G$. From this we have:
+recall from \cref{lem:eqsemi} that $\chgs{\den{\eqt L}} = \vals{\den{\eqt L}}$
+and $x \upd_{\den{\eqt L}} y = x \vee y$. Now, suppose
+$\longvld{d\gamma}{\gamma}{\gamma'} : \G$. From this we have:
 
 \nopagebreak[2]
 \begin{align*}
@@ -1485,6 +1485,7 @@ have:
 \clearpage
 \appendix
 \begin{center}\Large\scshape Proofs\end{center}
+\renewcommand\qed{\vspace{.5\baselineskip}\hrule\vspace{.5\baselineskip}}         %FIXME hack.
 
 %\section{Proofs}
 
@@ -1576,7 +1577,11 @@ have:
   Then we induct on typing derivations to show $\vals \incdens e = \den e$:
 
   \begin{description}
-  \item[Case $x$] \XXX
+  \item[Case $x$] 
+    \[
+      \vals{\incden{x}} = \vals\pi_x = \pi_x
+      \]
+
   \item[Case $\dvar x$] \XXX
   \item[Case $\fnof x e$] \XXX
   \item[Case $e\<f$] \XXX
