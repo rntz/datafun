@@ -1570,22 +1570,87 @@ have:
   Then we induct on typing derivations to show $\vals \incdens e = \den e$:
 
   \begin{description}
-  \item[Case $x$] 
-    \[
-      \vals{\incden{x}} = \vals\pi_x = \pi_x
-      \]
+    %% FIXME: need to use something other than color to distinguish monotone &
+    %% discrete variables here!
+  \item[Case $x$] \( \vals{\incdens x} = \vals\pi_x = \pi_x = \den{x} \)
 
-  \item[Case $\dvar x$] \XXX
-  \item[Case $\fnof x e$] \XXX
-  \item[Case $e\<f$] \XXX
-  \item[Case $\etuple{}$] \XXX
-  \item[Case $\etuple{e,f}$] \XXX
-  \item[Case $\pi_i\<e$] \XXX
-  \item[Case $\inj i e$] \XXX
-  \item[Case $(\ecase{e} (\inj i x \caseto f_i)_i)$] \XXX
-  \item[Case $\eboxd e$] \XXX
-  \item[Case $\elet{\eboxd x = e} f$] \XXX
-  \item[Case $\bot$] \XXX
+  \item[Case $\dvar x$] \( \vals{\incdens {\dvar x}}
+    = \vals{(\pi_{\dvar x} \then \varepsilon)}
+    = \vals\pi_{\dvar x} \then \vals\varepsilon
+    = \pi_{\dvar x} \then \varepsilon
+    = \den{\dvar x} \)
+
+  \item[Case $\fnof x e$]
+    \( \vals{\incden{\fnof x e}}
+    = \vals{\lambda\incdens e}
+    = \lambda\vals{\incdens e}
+    \stareq \lambda\den{e}
+    \)
+
+  \item[Case $e\<f$]
+    \( \vals{\incden{e\<f}}
+    = \vals{(\tuple{\incdens e, \incdens f} \then \morph{eval})}
+    = \tuple{\vals{\incdens e}, \vals{\incdens f}} \then \morph{eval}
+    \stareq \tuple{\den e, \den f} \then \morph{eval}
+    = \den{e\<f}
+    \)
+
+  \item[Case $\etuple{e_i}_i$]
+    \( \vals{\incdens\etuple{e_i}_i}
+    = \vals{\tuple{\incdens {e_i}}_i}
+    = \tuple{\vals{\incdens{e_i}}}_i
+    \stareq \tuple{\den{e_i}}_i = \den{\etuple{e_i}_i}
+    \)
+
+  \item[Case $\pi_i\<e$]
+    \( \vals{\incden{\pi_i\<e}} = \vals{(\incdens e \then \pi_i)}
+    = \vals\incdens e \then \pi_i \stareq \den{e} \then \pi_i = \den{\pi_i\<e}
+    \)
+
+  \item[Case $\inj i e$]
+    \(
+    \vals{\incden{\inj i e}} = \vals{(\incdens e \then \injc_i)}
+    = \vals\incdens e \then \injc_i
+    \stareq \den{e} \then \injc_i = \den{\inj i e}
+    \)
+
+  \item[Case $(\ecase{e} (\inj i x \caseto f_i)_i)$]
+    \begin{align*}
+      \vals{\incden{\ecase{e} (\inj i x \caseto f_i)_i}}
+      &= \vals{\left(\tuple{\id, \incdens{e}} \then \morph{dist}^\x_+
+        \then \bigkrof{\incdens{f_i}}_i\right)}
+      \\
+      &= \tuple{\id,\vals\incdens e} \then \morph{dist}^\x_+
+      \then \bigkrof{\vals\incdens{f_i}}_i
+      && \text{by \cref{lem:vals-distx+}}
+      \\
+      &\stareq \tuple{\id, \den e} \then \morph{dist}^\x_+ \then \bigkrof{\den{f_i}}_i
+      && \text{by IH}
+      \\
+      &= \den{\ecase{e} (\inj i x \caseto f_i)_i}
+    \end{align*}
+
+  \item[Case $\eboxd e$]
+    \begin{align*}
+      \vals\incdens{\eboxd e}
+      &= \vals(\morph{strip} \then \isof{\incdens e})\\
+      &= \morph{strip} \then \isof{\vals\incdens e}
+      && \text{by \cref{lem:vals-strip}}\\
+      &\stareq \morph{strip} \then \isof{\den e} && \text{by IH}\\
+      &= \den{\eboxd e}
+    \end{align*}
+
+  \item[Case $(\elet{\eboxd x = e} f)$]
+    \begin{align*}
+      \vals\incden{\elet{\eboxd x = e} f}
+      &= \vals(\tuple{\id, \incdens{e}} \then \incdens{f}))\\
+      &= \tuple{\id, \vals\incdens e} \then \vals\incdens f\\
+      &\stareq \tuple{\id, \den{e}} \then \den f &&\text{by IH}\\
+      &= \den{\elet{\eboxd x = e} f}
+    \end{align*}
+
+  \item[Case $\bot$] \( \vals\incdens\bot = \vals{(\termI \then \morph{join}_0)}
+    = \termI \then \morph{join}_0 = \den\bot \)
 
   \item[Case $e_1 \vee e_2$]
     \begin{align*}
@@ -1602,17 +1667,90 @@ have:
       && \text{by definition}
     \end{align*}
 
-  \item[Case $\esetd{e_i}_i$] \XXX
-  \item[Case $(\eford x e f)$] \XXX
-  \item[Case $\eisEmpty e$] \XXX
-  \item[Case $\esplit e$] \XXX
-  \item[Case $\eeqd e f$] \XXX
-  \item[Case $\efix e$] \XXX%
-  \end{description}%
+  \item[Case $\esetd{e_i}_i$]
+    \begin{align*}
+      \vals{\incdens{\esetd{e_i}_i}}
+      &= \vals{(\tuple{\incdens{\eboxd{e_i}} \then \morph{singleton}}_i \then \morph{join})}
+      \\
+      &= \tuple{\vals{\incdens{\eboxd{e_i}}} \then \morph{singleton}}_i \then \morph{join}
+      && \text{refinement along \valfn}
+      \\
+      &\stareq \tuple{\den{\eboxd{e_i}} \then \morph{singleton}}_i \then \morph{join}
+      && \text{same as case for $\eboxd e$}\\
+      &= \den{\esetd{e_i}_i}
+    \end{align*}
+
+  \item[Case $(\eford x e f)$]
+    \begin{align*}
+      \vals{\incden{\eford x e f}}
+      &= \vals{(\tuple{\id, \incdens e} \then \pcollect{\incdens f})}\\
+      &= \tuple{\id, \vals{\incdens e}} \then \pcollect{\vals{\incdens f}}
+      && \text{refinement along \valfn}\\
+      &\stareq \tuple{\id,\den e} \then \pcollect{\den f} && \text{by IH}\\
+      &= \den{\eford x e f}
+    \end{align*}
+
+  \item[Case $\eisEmpty e$]
+    \begin{align*}
+      \vals{\incden{\eisEmpty e}}
+      &= \vals{(\incdens{\eboxd e} \then \morph{isEmpty})}\\
+      &= \vals{\incdens{\eboxd e}} \then \morph{isEmpty}
+      && \text{refinement along \valfn}\\
+      &\stareq \den{\eboxd e} \then \morph{isEmpty}
+      && \text{same as case for $\eboxd e$}\\
+      &= \den{\eisEmpty e}
+    \end{align*}
+
+  \item[Case $\esplit e$]
+    \begin{align*}
+      \vals{\incden{\esplit e}}
+      &= \vals{(\incdens{e} \then \morph{dist}^\iso_+)}\\
+      &= \vals{\incdens e} \then \morph{dist}^\iso_+
+      && \text{refinement along \valfn}\\
+      &\stareq \den e \then \morph{dist}^\iso_+
+      && \text{by IH}\\
+      &= \den{\esplit e}
+    \end{align*}
+
+  \item[Case $\eeqd e f$]
+    \begin{align*}
+      \vals{\incden{\eeqd e f}}
+      &= \vals{(\tuple{\incdens e, \incdens f} \then \morph{eq})}\\
+      &= \tuple{\vals{\incdens e}, \vals{\incdens f}} \then \morph{eq}
+      && \text{refinement along \valfn}\\
+      &\stareq \tuple{\den e, \den f} \then \morph{eq}
+      && \text{by IH}\\
+      &= \den{\eeqd e f}
+    \end{align*}
+
+  \item[Case $\efix e$]
+    \begin{align*}
+      \vals{\incden{\efix e}}
+      &= \vals{(\incdens e \then \morph{fix})}\\
+      &= \vals{\incdens e} \then \morph{fix}
+      && \text{refinement along \valfn}\\
+      &\stareq \den{e} \then \morph{fix}\\
+      &= \den{\efix e}
+    \end{align*}
+  \end{description}
 \end{proof}
 
 
+\begin{lemma}\label{lem:vals-distx+}
+  \(\vals{\morph{dist}^\x_+} = \morph{dist}^\x_+\)
+\end{lemma}
+\begin{proof}
+  \XXX
+\end{proof}
 
+\begin{lemma}\label{lem:vals-strip}
+  \(\vals{\morph{strip}} = \morph{strip}\)
+\end{lemma}
+\begin{proof}
+  \XXX
+\end{proof}
+
+
 \thmDeltaDen*
 \begin{proof}
   \label{proof:delta-den}
