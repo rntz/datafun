@@ -56,8 +56,9 @@ could have, in no particular order:
    separate Δ□ and Δ.
 
 8. We chose to let Δ□A = 1. It's possible letting Δ□A = □ΔA would also work,
-   although I'm not sure. For example, then ΔΦ□A = Δ□(ΦA × ΔΦA) = □(ΔΦA ×
-   ΔΔΦA), which just feels icky.
+   although I'm not sure. For example, then ΔΦ□A = Δ□(ΦA × ΔΦA) = □(ΔΦA × ΔΔΦA),
+   which just feels icky. However, it does considerably simplify φ(split e) and
+   δ(split e)! eg. δ(split e) = split δe.
 
 9. The finite set type, {-}, can conceptually be separated into F□A, where F is
    the "free semilattice" functor. So why don't we do this - in our semantics at
