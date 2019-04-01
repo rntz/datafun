@@ -3,8 +3,8 @@
 %\documentclass{rntz}\usepackage[a5]{rntzgeometry}\usepackage[fullwidth=130mm,width=330pt,]{narrow}
 %\documentclass[nomarginums]{rntz}\usepackage[b6]{rntzgeometry}\usepackage[width=\textwidth,fullwidth=115mm,]{narrow}\pagestyle{empty}
 
-%\documentclass{rntz}\usepackage{fantasy}%\geometry{textwidth=330pt,}
-\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}%\geometry{textwidth=345pt}
+\documentclass{rntz}\usepackage{fantasy}%\geometry{textwidth=330pt,}
+%\documentclass[nomarginums]{rntz}\usepackage[tablet]{fantasy}%\geometry{textwidth=345pt}
 %\documentclass[nomarginums]{rntz}\usepackage[phone]{fantasy}
 
 \usepackage{latexsym}               % \rightsquigarrow
@@ -32,7 +32,7 @@
 \setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
 
 %\PassOptionsToPackage{scaled=1.0625}{rntzfont} % b5/a4
-\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
+%\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
 %\PassOptionsToPackage{scaled=.99}{rntzfont} %b6
 
 %% Note to self: don't use newmath, Neel's PC can't handle it.
@@ -463,10 +463,10 @@ bicartesian closed category \catC{} equipped with the following structures:
 
 \item Type-indexed families of morphisms interpreting equality, semilattice
   join, and fixed-point computations:\footnote{It may seem circular to use the
-    denotation $\den{-}$ of types in a Datafun model in my \emph{definition} of
-    a Datafun model. But there is no real circularity: types' denotations $\den
-    A$ do not require these morphism families to exist; only terms' denotations
-    $\den e$ do.}
+    denotation $\den{A}$ of types in a Datafun model in my \emph{definition} of
+    a Datafun model. But there is no real circularity: type denotations do not
+    require these morphism families to exist; only term denotations $\den e$
+    do.}
   %
   \begin{mathpar}
     \morph{eq} : \isof{\den{\eqt A}} \x \isof{\den{\eqt A}} \to \pfinof\termO
@@ -912,7 +912,7 @@ We lift the finite powerset functor \pfin\ to \CP\ as follows:
 \begin{align}
   \chgs{\pfinof A} &= \pfinof{\vals A} &
   x \upd_{\pfinof A} \dx &= x \cup \dx
-  \label{eqn:CP-P-upd}
+  \label{eqn:CP-pfin}
 \end{align}
 
 \noindent
@@ -972,7 +972,7 @@ The derivatives of \morph{eq}, \morph{join}, and \morph{fix} are as follows:
 \noindent
 Since the inputs to \morph{eq} and \morph{fix} cannot change, being of
 \iso\ type, their derivatives need only produce zero-changes. $\emptyset$ is a
-zero-change at $\pfinof\termO$ by \cref{eqn:CP-P-upd}; to see why $\bot$ is a
+zero-change at $\pfinof\termO$ by \cref{eqn:CP-pfin}; to see why $\bot$ is a
 zero-change to $\den{\fixt L}$, and why $\deriv{\morph{join}}$ is correct (or
 even well-typed), we'll need a small lemma:
 
@@ -1501,7 +1501,7 @@ have:
 \todo{FIXME: wrong numbering!}
 \lemEqsemi*
 \begin{proof}\label{proof:eqsemi}
-  By induction on $\eqt L$.
+  By induction on $\eqt L$:
 
   \begin{description}
   \item[Case $\tunit$:] \(\vals{\den \tunit} = \chgs{\den \tunit} = \termO\),
@@ -1510,16 +1510,11 @@ have:
 
   \item[Case $\eqt L \x \eqt M$:] \(\den{\eqt L \x \eqt M} = \den{\eqt L} \x
     \den{\eqt M}\), and by IH $\vals{\den{\eqt L}} = \chgs{\den{\eqt L}}$ and
-    \(\vals{\den{\eqt M}} = \chgs{\den{\eqt M}}\) and both are semilattices.
-    The product of semilattices is a semilattice itself, and we have:
-    \begin{align*}
-      \tuple{x,y} \upd_{\den{\eqt L} \x \den{\eqt M}} \tuple{\dx,\dy}
-      &= \tuple{x \upd \dx,\, y \upd dy}\\
-      &= \tuple{x \vee \dx,\, y \vee dy} & \text{by IH}\\
-      &= \tuple{x,y} \vee \tuple{\dx,\dy}
-    \end{align*}
+    \(\vals{\den{\eqt M}} = \chgs{\den{\eqt M}}\) and both are semilattices. The
+    product of semilattices is a semilattice itself, and update and semilattice
+    join on products are both pointwise.
 
-  \item[Case $\tseteq A$:] \XXX
+  \item[Case $\tseteq A$:] By \cref{eqn:CP-pfin}.
   \end{description}
 \end{proof}
 
