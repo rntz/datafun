@@ -32,7 +32,7 @@
 \setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
 
 %\PassOptionsToPackage{scaled=1.0625}{rntzfont} % b5/a4
-%\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
+\PassOptionsToPackage{scaled=1.036}{rntzfont} % fantasy[laptop,tablet]
 %\PassOptionsToPackage{scaled=.99}{rntzfont} %b6
 
 %% Note to self: don't use newmath, Neel's PC can't handle it.
@@ -1438,6 +1438,58 @@ have:
 \end{figure*}
 
 
+\section{Logical relation}
+
+We define a type-indexed logical relation ${\impls_A} \subseteq \den{\Phi A} \x
+\den{A}$ as follows:
+
+\nopagebreak[2]
+\begin{align*}
+  %% unit & products
+  \tuple{x_i}_i \impls \tuple{y_i}_i &\iff \fa{i} x_i \impls y_i
+  \\
+  %% sums
+  \inj i x \impls \inj j y &\iff i = j \wedge x \impls y
+  \\
+  %% functions
+  f \impls_{A \to B} g &\iff \fa{x \impls_A y} f\<x \impls_B g\<y
+  \\
+  %% boxes
+  \tuple{x,\dx} \impls_{\isof A} y
+  &\iff x \impls_A y \wedge \vld{\dx} x x
+  \\
+  %% sets
+  s \impls_{\tseteq A} t
+  &\iff (\forall x \in s, \exists y \in t)~x\approx_{\eqt A} y
+  \wedge (\forall y \in t, \exists x \in s)~x \approx_{\eqt A} y
+\end{align*}
+
+\noindent
+We lift this from types to contexts as follows: \todo{(TODO: notation)}
+
+\nopagebreak[2]
+\begin{align*}
+  {\impls_\G} &\subseteq \den{\Phi\G, \D\Phi\stripcxd\G} \x \den{\G}
+  \\
+  \gamma \impls_\G \gamma'
+  &\iff \fa{\h x A \in \G} \gamma_x \impls \gamma'_x\\
+  &\phantom{\iff} \wedge \fa{\hd x A \in \G}
+  \gamma_{\dvar x} \impls \gamma'_{\dvar x}
+  \wedge \longvld{\gamma_{\dvar \dx}}{\gamma_{\dvar x}}{\gamma_{\dvar x}}
+\end{align*}
+
+\noindent
+\todo{TODO: lift to open terms}
+
+\begin{restatable}[Correctness]{theorem}{thmCorrect}
+  $\den{\phi e} \impls \den{e}$ and
+  $\longvld{\den{\delta e}}{\den{\phi e}}{\den{\phi e}}$.
+\end{restatable}
+\begin{proof}
+  \todo{TODO}
+\end{proof}
+
+
 \section{Proof obligations when extending Datafun}
 
 %% TODO: section on "proof obligations when extending Datafun"
@@ -1740,7 +1792,10 @@ have:
   \(\vals{\morph{dist}^\x_+} = \morph{dist}^\x_+\)
 \end{lemma}
 \begin{proof}
-  \XXX
+  \begin{align*}
+    \fork{\pi_2 \then \krof{\lambda (\fork{\pi_2,\pi_1} \then \injc_i)}_i, \pi_1}
+    \then \morph{eval}
+  \end{align*}
 \end{proof}
 
 \begin{lemma}\label{lem:vals-strip}
