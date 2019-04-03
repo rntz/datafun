@@ -129,7 +129,8 @@
 %% Note: \begin{abstract}...\end{abstract} environment must come
 %% before \maketitle command
 \begin{abstract}
-Text of abstract \ldots.
+  In this paper, we reformulate the classic semi-naive evaluation transformation for optimizing
+  Datalog programs in terms of static
 \end{abstract}
 
 
@@ -167,64 +168,32 @@ Text of abstract \ldots.
 \maketitle
 
 
-\section{Introduction}
+\input{intro.tex}
+\input{datalog-and-fun.tex}
+\input{motivation.tex}
+\input{type-theory.tex}
 
-
-
-\paragraph{Contributions} The main contribution of this paper is
-extending Datalog's semi-naive evaluation into a program transformation
-which works on higher-order programs.
-\begin{itemize}
-\item We define a kernel language for the higher-order query language Datafun, and
-  present its semantics in a categorical style, showing that its old semantics
-  in terms of monotone function on partially ordered sets satisfies this presentation.
-\item Next, we define a category of ``changeable posets'', which
-  integrates the partially-ordered sets used to interpret Datafun with
-  the \emph{change structures} of \citet{cai-et-al}. This gives us a semantic
-  criterion for identifying programs which have an incrementalization. We then
-  interpret the semantics of Datafun in changeable posets,
-  and show that this new semantics is equivalent to the old
-  one. This establishes that every well-typed Datafun program is
-  incrementalizable.
-\item Guided by this incremental semantics, we read off a program
-  transformation to statically converts all well-typed Datafun
-  programs (including ones that use higher-order functions) into an
-  incrementalized version. We then use a logical relation to show that
-  our incrementalization is correct, and so can be used to optimize
-  Datafun programs.
-\item We also implement our program transformation in a small compiler,
-  and use this to show that we can automatically compile Datafun terms
-  into optimized Haskell programs with the expected operational behaviour.
-\end{itemize}
+\section{Semantics}
+\section{Transformation}
+\section{Implementation}
+\section{Related Work}
 
 
 %% Acknowledgments
-\begin{acks}                            %% acks environment is optional
-                                        %% contents suppressed with 'anonymous'
-  %% Commands \grantsponsor{<sponsorID>}{<name>}{<url>} and
-  %% \grantnum[<url>]{<sponsorID>}{<number>} should be used to
-  %% acknowledge financial support and will be used by metadata
-  %% extraction tools.
-  This material is based upon work supported by the
-  \grantsponsor{GS100000001}{National Science
-    Foundation}{http://dx.doi.org/10.13039/100000001} under Grant
-  No.~\grantnum{GS100000001}{nnnnnnn} and Grant
-  No.~\grantnum{GS100000001}{mmmmmmm}.  Any opinions, findings, and
-  conclusions or recommendations expressed in this material are those
-  of the author and do not necessarily reflect the views of the
-  National Science Foundation.
+\begin{acks}
+  We would like to thank\ldots
 \end{acks}
 
 
 
 %% Bibliography
-%\bibliography{bibfile}
+\bibliography{bibfile}
 
 
-%% Appendix
-\appendix
-\section{Appendix}
-
-Text of appendix \ldots
+% %% Appendix
+% \appendix
+% \section{Appendix}
+% 
+% Text of appendix \ldots
 
 \end{document}
