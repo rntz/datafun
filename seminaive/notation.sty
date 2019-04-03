@@ -10,7 +10,9 @@
 
 %% ===== General math & PL notation =====
 \ifdefined\G\renewcommand\G\Gamma\else\newcommand\G\Gamma\fi
+\newcommand\emptycx{{\cdot}}
 \newcommand\D\Delta
+\newcommand\DP{\D\Phi}
 \newcommand\x\times
 \newcommand\pto\rightharpoonup
 \newcommand\fn\lambda
@@ -32,8 +34,8 @@
 \newcommand\fnof[1]{\fn{#1}.\fnspace}
 %\newcommand\setfor[2]{\ensuremath{\{#1 \mathrel{|} #2\}}}
 
-\renewcommand\fa[1]{(\forall #1)~}
-\renewcommand\ex[1]{(\exists #1)~}
+%% \renewcommand\fa[1]{(\forall #1)~}
+%% \renewcommand\ex[1]{(\exists #1)~}
 
 %% various marked equalities
 \newcommand\stareq{\overset{\boldsymbol\star}{=}}
@@ -97,6 +99,8 @@
 %\renewcommand\desugars{\,\xrsquigarrow{\text{expand}}\,}
 
 \newcommand\eqt[1]{\underaccent{\textmd{eq}}{#1}}
+\newcommand\fint[1]{\underaccent{\textmd{fin}}{#1}}
+\newcommand\acct[1]{\underaccent{\textmd{acc}}{#1}}
 \newcommand\fixt[1]{\underaccent{\textmd{fix}}{#1}}
 
 \newcommand\tset[1]{\{{#1}\}}
@@ -145,11 +149,11 @@
 \newcommand\dvar[1]{{\isocolor #1}}
 \newcommand\freshvar[1]{{\color{Rhodamine}#1}}
 \newcommand\hd[2]{\dvar{#1} \dblcolon {#2}}
-%% TODO: better notation
+
 \newcommand\stripcx[1]{\textit{strip}({#1})}
 \renewcommand\stripcx[1]{\lceil{#1}\rceil}
-%% FIXME: should the context get iso-colored? really?
 \newcommand\stripcxd[1]{{\isocolor\stripcx{\isocolor #1}}}
+\newcommand\isocx[1]{{\color{ACMPurple}\lfloor{#1}\rfloor}}
 
 
 %% ===== Poset, ChangePoset, derivative & seminaive notation =====

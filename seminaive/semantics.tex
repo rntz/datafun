@@ -17,7 +17,7 @@
 \usepackage{accents}                %\underaccent
 \usepackage{nccmath}                % fix align* (etc.) spacing
 \usepackage{anyfontsize}
-\usepackage{thmtools,thm-restate}   % allow restatable theorems.
+%\usepackage{thmtools,thm-restate}   % allow restatable theorems.
 
 % Make section name references use \S.
 \makeatletter\crefname{section}{\S\@gobble}{\S\@gobble}\makeatother
@@ -174,10 +174,10 @@ correct by relating it to the incremental semantics.
       \isof{\eqt A} \bnfor \tset{\eqt A} \bnfor
       \tunit \bnfor \eqt A \x \eqt B \bnfor \eqt A + \eqt B
       \\
-      \text{semilattices} & L,M &\bnfeq&
-      \tset{\eqt A} \bnfor \tunit \bnfor L \x M \bnfor A \to L
+      \text{semilattices} & L,M &\bnfeq& \tset{\eqt A} \bnfor \tunit \bnfor L \x M
       \\
-      \text{fixtypes} & \fixt L, \fixt M &\bnfeq& \XXX
+      \text{fixtypes} & \fixt L, \fixt M &\bnfeq&
+      \tset{\color{red}\fint A} \bnfor \tunit \bnfor \fixt L \x \fixt M
       \\[.5em]
       \text{terms} & e,f,g &\bnfeq& x \bnfor \dvar x \bnfor \fnof{x} e
       \bnfor e\<f \bnfor \etuple{} \bnfor \etuple{e,f} \bnfor \pi_i\<e\\
@@ -433,58 +433,51 @@ bicartesian closed category \catC{} equipped with the following structures:
   \end{align*}
 
 \item A \emph{``finite powerset''} functor \(\pfin : \catC \to \catC\) equipped
-  with morphisms:
+  with morphism families:
 
   \nopagebreak[2]
   \begin{align*}
-    \morph{singleton}_A &: \isof A \to \pfinof{A} &
+    \morph{singleton} &: \isof A \to \pfinof{A} &
     \morph{isEmpty} &: \discof{\pfinof{\termO}} \to \termO + \termO
   \end{align*}
 
   %% \noindent
-  %% and, moreover, for any objects $\G,A$, semilattice object $L$, and morphism $f
-  %% : \G \x \isof A \to L$, a ``collecting'' morphism \( \pcollect{f} : \G \x
+  %% and, moreover, for any objects $\G,A$, semilattice object $L$, and morphism
+  %% $f : \G \x \isof A \to L$, a ``collecting'' morphism \( \pcollect{f} : \G \x
   %% \pfinof A \to L \).
 
-%% \item \emph{Equality}, \emph{eqsemilattice}, and \emph{fixed point objects},
-%%   which must interpret equality types $\eqt A$, equality semilattice types $\eqt
-%%   L$, and fixed point types $\fixt L$ respectively. An object $A$ is:
-%% %
-%%   \begin{itemize}
-%%   \item An equality object when equipped with a morphism $\morph{eq} : \discof A
-%%     \x \discof A \to \pfinof \termO$.
+\item \emph{Equality}, \emph{semilattice}, and \emph{fixed point objects}, which
+  must interpret equality, semilattice, and fixed point types respectively.
+  Letting $\eqt A$ be an equality object, $L$ be a semilattice object, and
+  $\fixt L$ be a fixed point object, these must have morphisms:
 
-%%   \item A semilattice object when \emph{also} equipped with morphisms
-%%     $\morph{join}_n : A^n \to A$ for every $n : \N$.
+  \nopagebreak[2]
+  \begin{align*}
+    \morph{eq} &: \isof{\eqt A} \x \isof{\eqt A} \to \pfinof\termO
+    &
+    \morph{join}_n &: L^n \to L
+    &
+    \morph{fix} &: \isof{(\expO{\fixt L}{\fixt L})} \to \fixt L
+  \end{align*}
 
-%%   \item A fixed point object when \emph{also} equipped with a morphism
-%%     $\morph{fix} : \discof{(\expO A A)} \to A$.
-%%   \end{itemize}
+\item To interpret \kwname{for}-loops, for any objects $\G, A$ and any
+  semilattice object $L$ we require a family of morphisms $\pcollect{f}$:
 
-\item Type-indexed families of morphisms interpreting equality, semilattice
-  join, and fixed-point computations:\footnote{It may seem circular to use the
-    denotation $\den{A}$ of types in a Datafun model in my \emph{definition} of
-    a Datafun model. But there is no real circularity: type denotations do not
-    require these morphism families to exist; only term denotations $\den e$
-    do.}
-  %
-  \begin{mathpar}
-    \morph{eq} : \isof{\den{\eqt A}} \x \isof{\den{\eqt A}} \to \pfinof\termO
-
-    \morph{join}_n : \den{\eqt L}^n \to \den{\eqt L}
-
-    \morph{fix} : \isof{(\expO{\den{\fixt L}}{\den{\fixt L}})} \to \den{\fixt L}
-  \end{mathpar}
-
-\item A family of \emph{collecting morphisms} to interpret \kwname{for}-loops.
-  Given objects $\G, A$, a semilattice equality type $\eqt L$, and a morphism $f
-  : \G \x \isof{A} \to \den{\eqt L}$, we require a morphism $\pcollect{f} : \G
-  \x \pfinof{A} \to \den{\eqt L}$. Or, abusing inference rule notation:
-  %
+  \nopagebreak[2]
   \[
     \infer{f : \G \x \isof A \to \den{\eqt L}}
           {\pcollect{f} : \G \x \pfinof{A} \to \den{\eqt L}}
   \]
+
+%% , Given objects $\G, A$, a semilattice equality type $\eqt L$, and
+%%   a morphism $f : \G \x \isof{A} \to \den{\eqt L}$, we require a morphism
+%%   $\pcollect{f} : \G \x \pfinof{A} \to \den{\eqt L}$. Or, abusing inference rule
+%%   notation:
+%%   %
+%%   \[
+%%     \infer{f : \G \x \isof A \to \den{\eqt L}}
+%%           {\pcollect{f} : \G \x \pfinof{A} \to \den{\eqt L}}
+%%   \]
 
 \end{enumerate}
 
@@ -575,6 +568,9 @@ the standard model and use \emph{its} equational theory.
     \morph{strip} &: \den\G \to \discof{\den{\stripcxd\G}}\\
     \morph{strip} &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \discox
   \end{align*}
+
+  \todo{TODO: add a function $\morph{box}(f) = \morph{strip} \then \isof f$, so
+    $\den{\eboxd e} = \morph{box}(\den{e})$?}
 
   %% \raggedright\footnotesize Strictly speaking, the cases for
   %% $\den{\esetd{e_i}_i}$, $\den{\eisEmpty e}$, and $\den{\eeqd e f}$ are not
@@ -925,86 +921,57 @@ Since the arguments to \morph{singleton} and \morph{isEmpty} cannot change
   \deriv{\morph{isEmpty}} \<x \<\tuple{} &= \morph{isEmpty} \< x
 \end{align*}
 
-%% \noindent
-%% The derivative of $\pcollect f$ is more complicated and is given in
-%% \cref{sec:CP-collect}.
-
-%% We lift the free semilattice functor $\down$ to \CP\ as follows:
-%% \begin{mathpar}
-%%   \chgs{\downof A} = \downof{\vals A}
-
-%%   x \upd_{\downof A} \dx = x \vee_{\downof{\vals A}} \dx
-%% \end{mathpar}
-
-%% \noindent
-%% Derivatives for its associated morphisms are:
-
-%% \begin{align*}
-%%   \morph{gen}_A &: A \to \downof{A}\\
-%%   \morph{isEmpty} &: \discof{\downof{\termO}} \to \termO + \termO\\
-%%   \morph{strong}_{A,B} &: A \x \downof{B} \to \downof{(A \x B)}
-%%   \\
-%%   \deriv{\morph{gen}}_A \<x \<\dx &= \color{red}\morph{gen} \<(x \upd \dx)
-%%   \\
-%%   %% shit, this sucks.
-%%   \deriv{\morph{isEmpty}} \<x \<\dx &= \XXX
-%%   \\
-%%   %% shit, this sucks.
-%%   \deriv{\morph{strong}}_{A,B} \<\tuple{a,x} \<\tuple{\da,\dx}
-%%   &= \XXX
-%% \end{align*}
-
-%% \todo{FIXME: $\upd$ isn't a total function so $\deriv{\morph{gen}}$ fails!}
-
 
-\subsection{Equality, join, and fixed-point morphisms}
-\label{sec:CP-families}
+\subsection{Equality objects}
+\label{sec:CP-eq}
 
-The derivatives of \morph{eq}, \morph{join}, and \morph{fix} are as follows:
+Every object in \CP{} is an equality object, with \morph{eq} and its derivative
+defined by:
 
 \nopagebreak[2]
 \begin{align*}
-  \deriv{\morph{eq}} \<x \<\tuple{\tuple{},\tuple{}} &= \emptyset &
-  \deriv{\morph{join}} \<x \<\dx &= \bigvee_i \pi_i\<\dx &
-  \deriv{\morph{fix}} \<x \<\tuple{} &= \bot
+  \morph{eq}\<\tuple{x,y} &= 
+  \begin{cases}
+    \{\tuple{}\} & \text{if}~ x = y\\
+    \emptyset & \text{otherwise}
+  \end{cases}
+  &
+  \deriv{\morph{eq}} \<\pwild \<\pwild &= \emptyset
 \end{align*}
 
-\noindent
-Since the inputs to \morph{eq} and \morph{fix} cannot change, being of
-\iso\ type, their derivatives need only produce zero-changes. $\emptyset$ is a
-zero-change at $\pfinof\termO$ by \cref{eqn:CP-pfin}; to see why $\bot$ is a
-zero-change to $\den{\fixt L}$, and why $\deriv{\morph{join}}$ is correct (or
-even well-typed), we'll need a small lemma:
+\noindent Since \emph{every} object is an equality object, every equality type
+is trivially interpreted into an equality object. \todo{TODO more explanation
+  --- why isn't every type an equality type, then?}
 
-\nopagebreak[2]
-\begin{restatable}{lemma}{lemEqsemi}
-  \label{lem:eqsemi}
-  \(\vals{\den{\eqt L}} = \chgs{\den{\eqt L}}\) is a semilattice and $x
-  \upd_{\den{\eqt L}} \dx = x \vee \dx$.
-\end{restatable}
-\begin{proof}
-  By induction on $\eqt L$. See \cpageref{proof:eqsemi}.
-\end{proof}
+
+\subsection{Semilattice objects and collecting morphisms}
+\label{sec:CP-semilattice-objects}
 
-\noindent This immediately entails that $\bot$ is a zero-change at
-$\den{\eqt{L}}$, and consequently at $\den{\fixt L}$, proving
-$\deriv{\morph{fix}}$ correct. It also shows that $\deriv{\morph{join}}$ is
-correct:
+A semilattice object $L$ in \CP\ is one where $\vals L = \chgs L$ is a
+semilattice and $x \upd_L y = x \vee y$. This immediately justifies letting
+$\deriv{\morph{join}} \<x \<\dx = \morph{join}\<\dx$, because:
 
 \nopagebreak[2]
 \begin{align*}
   \morph{join}\<(x \upd \dx) &= \bigvee_i \pi_i \<(x \vee \dx)\\
   &= \left(\bigvee_i \pi_i\<x\right) \vee \left(\bigvee_i \pi_i\<\dx\right)\\
+  &= \morph{join}\<x \vee \morph{join}\<\dx\\
   &= \morph{join}\<x \upd \deriv{\morph{join}}\<x\<\dx
 \end{align*}
+
+\begin{restatable}{lemma}{lemSemi}
+  \label{lem:semi} $\incdens L$ is a semilattice object.
+\end{restatable}
+\begin{proof}
+  By induction on $\eqt L$. See \cpageref{proof:semi}.
+\end{proof}
 
 
 \subsection{Collecting morphisms}
 \label{sec:CP-collect}
 
-Let $\G, A$ be objects, $\eqt L$ be a semilattice equality type, and $f : \G \x
-\isof A \to \den{\eqt L}$. Our derivative for $\pcollect f : \G \x \pfinof A \to
-\den{\eqt L}$ is:
+Let $\G, A$ be objects, $L$ be a semilattice object, and $f : \G \x \isof A \to
+L$. Our derivative for $\pcollect f : \G \x \pfinof A \to L$ is:
 
 \nopagebreak[2]
 \begin{align*}
@@ -1013,10 +980,8 @@ Let $\G, A$ be objects, $\eqt L$ be a semilattice equality type, and $f : \G \x
   \bigvee_{x \in s \cup \ds} \deriv f \<\tuple{\gamma,x} \<\tuple{d\gamma, \zero_x}
 \end{align*}
 
-\noindent To establish that this is correct (and even that it type-checks),
-recall from \cref{lem:eqsemi} that $\chgs{\den{\eqt L}} = \vals{\den{\eqt L}}$
-and $x \upd_{\den{\eqt L}} y = x \vee y$. Now, suppose $\longvld{d\gamma}{\gamma}{\gamma'} :
-\G$. From this we have:
+\noindent To establish that this is correct, suppose
+$\longvld{d\gamma}{\gamma}{\gamma'} : \G$. From this we have:
 
 \nopagebreak[2]
 \begin{align*}
@@ -1042,41 +1007,67 @@ Which is what we wished to show.\footnotetext{This equality follows from the
   \(\longvld{\tuple{d\gamma,\zero_x}}{\tuple{\gamma,x}}{\tuple{\gamma',x}}\).}
 
 
+\subsection{Fixed point objects}
+\label{sec:CP-fix}
+
+A fixed point object $\fixt L$ in \CP\ is a semilattice object such that
+$\vals{\fixt L}$ satisfies the ascending chain condition. \todo{TODO more
+  explanation.} Since the argument to \morph{fix} is boxed and cannot change,
+$\deriv{\morph{fix}}$ needs to produce a zero change; and at any semilattice
+object, $\bot$ is a zero change, so:
+
+\nopagebreak[2]
+\[ \deriv{\morph{fix}} \<x \<\tuple{} = \bot \]
+
+\begin{lemma}\label{lem:fixobject}
+  \(\incdens{\fixt L}\) is a fixed point object.
+\end{lemma}
+\begin{proof}
+  By induction on $\fixt L$. \todo{TODO}
+\end{proof}
+
+
 \section{Incrementalization}
 \label{sec:incremental}
 
-The \emph{incremental semantics} for Datafun, notated $\incden{-}$, is given
-by the Datafun model in \CP{} constructed in \cref{sec:changeposets}, letting
+The \emph{incremental semantics} for Datafun, notated $\incden{-}$, is given by
+the Datafun model in \CP{} constructed in \cref{sec:changeposets}, letting
 $\disco = \iso_\CP$ and $\pfin = \pfin_\CP$. As we took care to show while
 constructing it, this \emph{refines} the standard model along the forgetful
 functor $\valfn$, that is:
 
 \begin{restatable}{theorem}{thmForget}
   \label{thm:forget}
-  \(\vals{\incden{-}} = \den{-}\).
+  \(\vals{\incden{-}} = \den{-}_\Poset\).
 \end{restatable}
 
 \begin{proof}
   By induction on types and typing derivations; see \cpageref{proof:forget}.
 \end{proof}
 
-
-%\subsection{The change type translation}
-Given any Datafun type $A$, its change poset $\D\incdens A$ is internally
-definable via the following translation (also named $\D$, despite the risk of
-confusion):
+The change poset $\D\incdens A$ of a Datafun type $A$ is internally definable
+via a type translation given in \cref{fig:PhiDelta}, also named $\D$, despite
+the risk of confusion.
 
-\nopagebreak[2]
-\begin{align*}
-  \D\tunit &= \tunit
-  & \D(A \x B) &= \D A \x \D B
-  \\
-  \D \isof A &= \tunit
-  & \D(A + B) &= \D A + \D B
-  \\
-  \D\tset{\eqt A} &= \tset{\eqt A}
-  & \D(A \to B) &= \isof A \to \D A \to \D B
-\end{align*}
+\begin{figure*}
+  \begin{align*}
+    \D\tunit &= \tunit & \Phi\tunit &= \tunit
+    \\
+    \D \isof A &= \tunit & \Phi \isof A &= \isof{(\Phi A \x \DP A)}
+    \\
+    \D\tseteq A &= \tseteq A &
+    \Phi\tseteq A &= \tset{\Phi{\eqt A}}\\
+    \D(A \x B) &= \D A \x \D B & \Phi(A \x B) &= \Phi A \x \Phi B\\
+    \D(A + B) &= \D A + \D B & \Phi(A + B) &= \Phi A + \Phi B\\
+    \D(A \to B) &= \isof A \to \D A \to \D B &
+    \Phi(A \to B) &= \Phi A \to \Phi B
+  \end{align*}
+
+  \todo{TODO: need lemma that $\Phi{\eqt A}$ is an eqtype}
+
+  \caption{The $\D$ and $\Phi$ type translations}
+  \label{fig:PhiDelta}
+\end{figure*}
 
 \begin{restatable}{theorem}{thmDeltaDen}
   \label{thm:delta-den}
@@ -1132,52 +1123,93 @@ confusion):
 \section{Semi\naive{} evaluation}
 \label{sec:seminaive}
 
+%\renewcommand\isocx\isof
+
 \todo{TODO: explain faster-fix?}
+\todo{TODO: explain $\Phi$ type transformation.}
 
-\todo{TODO: explain this type transformation:}
-\begin{align*}
-  \Phi\tunit &= \tunit &
-  \Phi(A \x B) &= \Phi A \x \Phi B\\
-  \Phi\isof A &= \isof{(\Phi A \x \D \Phi A)} &
-  \Phi(A + B) &= \Phi A + \Phi B\\
-  \Phi\tset A &= \tset{\Phi A} &
-  \Phi(A \to B) &= \Phi A \to \Phi B
-\end{align*}
-
-\newcommand\isocx[1]{{\color{ACMPurple}\lfloor{#1}\rfloor}}
-
-\noindent
 \Cref{fig:seminaive-phi,fig:seminaive-delta} define two mutually recursive
 static transformations: $\phi e$, which computes $e$ \emph{semi\naive{}ly},
 speeding up fixed point computation by using derivatives; and $\delta e$, which
-computes the \emph{derivative} of $\phi e$. The type of $\delta e$ involves a
-strengthening operator $\isocx{\G}$ that makes every variable in $\G$
-discrete:
+computes the \emph{derivative} of $\phi e$.
+%
+To describe the types of $\phi e$ and $\delta e$, we'll need three new operators
+on contexts: $\isocx\G$, $\D\G$, and $\Phi\G$. We define these by their
+pointwise action on hypotheses: \todo{TODO: intuition}
+
+\nopagebreak[2]
+\begin{align*}
+  \isocx{\h x A} &= \hd x A & \isocx{\hd x A} &= \hd x A\\
+  \D(\h x A) &= \h \dx {\D A} & \D(\hd x A) &= \emptycx \quad\text{(the empty context)}\\
+  \Phi(\h x A) &= \h x {\Phi A} & \Phi(\hd x A) &= \hd x {\Phi A}, \hd \dx {\DP A}
+\end{align*}
+
+\noindent For example,
 %
 \begin{mathpar}
-  \isocx{(H_i)_i} = (\isocx{H_i})_i
+  \isocx{\h x A, \hd y B} = \hd x A, \hd y B
 
-  \isocx{\h x A} = \hd x A
+  \D(\h x A, \hd y B) = \h \dx {\D A}
 
-  \isocx{\hd x A} = \hd x A
+  \Phi(\h x A, \hd y B) = \h x {\Phi A}, \hd y {\Phi B}, \hd \dy {\DP B}
 \end{mathpar}
 
 \noindent
-Be careful not to confuse this with $\stripcxd{\G}$, which weakens $\G$ by
-removing all \emph{except} the discrete variables from $\G$. These defined, we
-have:
+The idea here is that:
+
+\nopagebreak[2]
+\begin{align*}
+  \den{\isocx\G} &\cong \isof{\den\G} &
+  \den{\D\G} &\cong \D\incdens\G &
+  \den{\Phi\G} &\cong \text{\todo{harder to describe}}
+\end{align*}
+
+%% The type of $\delta e$ involves a
+%% strengthening operator $\isocx{\G}$ that makes every variable in $\G$
+%% discrete:
+%% %
+%% \begin{mathpar}
+%%   \isocx{(H_i)_i} = (\isocx{H_i})_i
+
+%%   \isocx{\h x A} = \hd x A
+
+%%   \isocx{\hd x A} = \hd x A
+%% \end{mathpar}
+
+\noindent
+Be careful not to confuse $\isocx\G$, which strengthens $\G$ by making every
+variable discrete, with $\stripcxd{\G}$, which weakens $\G$ by removing all
+\emph{except} the discrete variables.
+
+%% \begin{restatable}[Type-correctness]{theorem}{thmTypeCorrect}
+%%   \label{thm:type-correct}
+%%   If $\J e \G A$, then
+%%   \[ \J {\phi e} {\Phi\G, \D\Phi\stripcxd{\G}} {\Phi A}
+%%   \qquad\text{and}\qquad
+%%   \J {\delta e} {\isocx{\Phi\G}, \D\Phi\G} {\D\Phi A}
+%%   \]
+%% \end{restatable}
 
 \begin{restatable}[Type-correctness]{theorem}{thmTypeCorrect}
   \label{thm:type-correct}
   If $\J e \G A$, then
-  \[ \J {\phi e} {\Phi\G, \D\Phi\stripcxd{\G}} {\Phi A}
+  \[ \J {\phi e} {\Phi\G} {\Phi A}
   \qquad\text{and}\qquad
-  \J {\delta e} {\isocx{\Phi\G}, \D\Phi\G} {\D\Phi A}
+  \J {\delta e} {\isocx{\Phi\G}, \DP\G} {\DP A}
   \]
 \end{restatable}
 \begin{proof}
   By induction on typing derivations; see \cpageref{proof:typeCorrect}.
 \end{proof}
+
+\noindent To get the hang of these context and type transformations, let's
+suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
+%
+\begin{mathpar}
+  \J {\phi e} {\h x {\Phi A}, \hd y {\Phi B}, \hd \dy {\DP B}} {\Phi C}
+
+  \J {\delta e} {\hd x {\Phi A}, \h\dx{\DP A}, \hd y {\Phi B}, \hd \dy {\DP B}} {\DP C}
+\end{mathpar}
 
 \todo{TODO: Explain the use of weakening in semi\naive{} $\delta(e\<f)$,
   hilighted in {\color{Rhodamine}pink}.}
@@ -1501,11 +1533,12 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
 \item If you add a new first-order type, you must extend \dummy{} to compute
   $\zero$ for it.
 
-\item Make sure that $\delta\bot$, $\delta(e \vee f)$, and $\delta(\eford x e
-  f)$ are still correct. In particular, suppose you add a new type constructor
-  $T$ and consider any $\vec A$ such that $T\vec A$ is a semilattice
-  type.\footnote{A base type is simply a nullary type constructor. If there are
-    no $\vec A$ such that $T\vec A$ is a semilattice, you're done.}
+\item \todo{TODO: this is out of date.} Make sure that $\delta\bot$, $\delta(e
+  \vee f)$, and $\delta(\eford x e f)$ are still correct. In particular, suppose
+  you add a new type constructor $T$ and consider any $\vec A$ such that $T\vec
+  A$ is a semilattice type.\footnote{A base type is simply a nullary type
+    constructor. If there are no $\vec A$ such that $T\vec A$ is a semilattice,
+    you're done.}
 
   The simplest way to keep everything working is to ensure that $\D(T\vec A) =
   T\vec A$ and $\upd_{T\vec A} = \vee$; then you're done. But if $T\vec A$ is
@@ -1524,13 +1557,18 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
   $\D(T\vec A)$ isn't a semilattice whose join corresponds to change
   composition, you'll need new definitions of $\delta\bot$ and $\delta(e \vee f)$.
 
+\item \todo{TODO: talk about letting $A \to L$ be a semilattice type and the
+  pain that causes: have to $\eta$-expand \kwname{for}-loops at higher order
+  types and either do the same for $\vee$ and $\bot$ or else change the semantic
+  correctness proof.}
+
 \end{enumerate}
 
 
 \clearpage
 \appendix
 \begin{center}\Large\scshape Proofs\end{center}
-\renewcommand\qed{\vspace{.5\baselineskip}\hrule\vspace{.5\baselineskip}}         %FIXME hack.
+\renewcommand\qed{\vspace{\baselineskip}\hrule\vspace{.5\baselineskip}}         %FIXME hack.
 
 %\section{Proofs}
 
@@ -1544,9 +1582,8 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
 %% \end{array}\]
 
 
-\todo{FIXME: wrong numbering!}
-\lemEqsemi*
-\begin{proof}\label{proof:eqsemi}
+\lemSemi*
+\begin{proof}\label{proof:semi}
   By induction on $\eqt L$:
 
   \begin{description}
@@ -1593,8 +1630,6 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
       \stareq \pfinof{\den{\eqt A}}
       = \den{\tset{\eqt A}} \)
 
-      \todo{TODO: double-check against definitions in \cref{sec:CP-pfin}}
-
     \item[Case $\tunit$:] \(\vals{\incdens \tunit} = \vals\termO = \termO = \den{\tunit}\)
 
     \item[Case $A \x B$:] \(\vals{\incden{A \x B}}
@@ -1624,9 +1659,9 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
   \begin{description}
     %% FIXME: need to use something other than color to distinguish monotone &
     %% discrete variables here!
-  \item[Case $x$] \( \vals{\incdens x} = \vals\pi_x = \pi_x = \den{x} \)
+  \item[Case $x$ (monotone)] \( \vals{\incdens x} = \vals\pi_x = \pi_x = \den{x} \)
 
-  \item[Case $\dvar x$] \( \vals{\incdens {\dvar x}}
+  \item[Case $\dvar x$ (discrete)] \( \vals{\incdens {\dvar x}}
     = \vals{(\pi_{\dvar x} \then \varepsilon)}
     = \vals\pi_{\dvar x} \then \vals\varepsilon
     = \pi_{\dvar x} \then \varepsilon
@@ -1712,7 +1747,7 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
       &= \vals{\fork{\incdens{e_i}}_i} \then \vals{\morph{join}_2}
       && \text{functoriality of }\valfn\\
       &= \fork{\vals{\incdens{e_i}}}_i \then \morph{join}_2
-      && \text{refinement along $\valfn$ (\cref{sec:CP-cartesian,sec:CP-families})}\\
+      && \text{refinement along $\valfn$ (\cref{sec:CP-cartesian,sec:CP-semilattice})}\\
       &= \fork{\den{e_i}}_i \then \morph{join}_2
       && \text{inductive hypothesis}\\
       &= \den{e_1 \vee e_2}
@@ -1793,8 +1828,13 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
 \end{lemma}
 \begin{proof}
   \begin{align*}
-    \fork{\pi_2 \then \krof{\lambda (\fork{\pi_2,\pi_1} \then \injc_i)}_i, \pi_1}
+    \vals{\morph{dist}^\x_+} &=
+    \vals{(\fork{\pi_2 \then \krof{\lambda (\fork{\pi_2,\pi_1} \then \injc_i)}_i, \pi_1}
+    \then \morph{eval})}\\
+    &= \fork{\pi_2 \then \krof{\lambda (\fork{\pi_2,\pi_1} \then \injc_i)}_i, \pi_1}
     \then \morph{eval}
+    && \text{refinement along \valfn}\\
+    &= \morph{dist}^\x_+
   \end{align*}
 \end{proof}
 
@@ -1832,8 +1872,6 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
       = \den{\tseteq A}
       \)
 
-      \todo{TODO: double-check against definitions in \cref{sec:CP-pfin}}
-
     \item[Case $\tunit$:] \(\chgs{\incdens \tunit}
       = \chgs \termO = \termO = \den{\tunit} \)
 
@@ -1868,9 +1906,88 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
 
 
 \thmTypeCorrect*
+
+\newcommand\phicx[1]{\Phi{#1},\DP\stripcxd{#1}}
+\newcommand\deltacx[1]{\isocx{\Phi{#1}},\DP{#1}}
+\newcommand\weirdover[2]{\hbox{\(\displaystyle\genfrac{}{}{-1pt}{}{#1}{#2}\)}}
+\newcommand\deduce[2]{\infer*[myfraction=\weirdover]{#1}{#2}}
+
 \begin{proof}\label{proof:typeCorrect}
-  \XXX
+  By induction on the typing derivation for $\J e \G A$.
+  \begin{description}
+  \item[Case $x$ (monotone):] $\phi x = x$ and $\delta x = dx$. Since $\h x A
+    \in \G$, we have $\h x {\Phi A} \in \Phi\G$ and $\h\dx{\DP A} \in
+    \DP\G$, so by weakening:
+    %
+    \begin{mathpar}
+      \infer{\h x {\Phi A} \in \phicx\G}{\J x {\phicx\G} {\Phi A}}
+
+      \infer{\h\dx{\DP A} \in \deltacx\G}{\J \dx {\deltacx\G} {\DP A}}
+    \end{mathpar}
+
+  \item[Case $\dvar x$ (discrete):] $\phi{\dvar x} = \dvar x$ and $\delta{\dvar
+    x} = \dvar\dx$. Since $\hd x A \in \G$, we have $\hd x {\Phi A} \in \Phi\G$
+    and $\dvar\dx \in \DP\G$, so by weakening:
+    %
+    \begin{mathpar}
+      \infer{\hd x {\Phi A} \in \phicx\G}{\J {\dvar x} {\phicx\G} {\Phi A}}
+
+      \infer{\hd\dx{\DP A} \in \deltacx\G}{\J{\dvar\dx}{\deltacx\G}{\DP A}}
+    \end{mathpar}
+
+  \item[Case $\fnof x e$:]
+    \begin{align*}
+      \phi(\fnof x e) &= \fnof x \phi e &
+      \delta(\fnof x e) &= \fnof{\eboxd x} \fnof \dx \delta e\\
+      &&&\desugars \fnof y \elet{\eboxd x = y} \fnof \dx \delta e
+    \end{align*}
+
+    So:
+    \begin{mathpar}
+      \infer*{
+        \infer*[fraction={===},leftstyle={},Left={rewrite context}]{
+          \deduce{\textit{by IH}}{\J{\phi e} {\phicx{(\G,\h x A)}} B}
+        }{\J {\phi e} {\phicx{\G}, \h x {\Phi A}} {\Phi B}}
+      }{\J {\fnof x \phi e} {\phicx\G} {\Phi A \to \Phi B}}
+
+      \infer*{
+        \infer*{
+          \J y {\XXX} {\isof \Phi A} \\
+          \J {\fnof\dx \delta e}
+             {\deltacx\G, \h y {\isof{\Phi A}}, \hd x {\Phi A}}
+             {\DP A \to \DP B}}{
+          \J {\elet{\eboxd x = y} \fnof\dx \delta e}
+             {\deltacx\G, \h y {\isof{\Phi A}}}
+             {\DP A \to \DP B}}}{
+        \J {\fnof y \elet{\eboxd x = y} \fnof{\dx} \delta e}
+           {\deltacx\G}
+           {\isof{\Phi A} \to \DP A \to \DP B}}
+    \end{mathpar}
+
+  \item[Case \(e\<f\):] \XXX
+  \item[Case \(\etuple{}\):] \XXX
+  \item[Case \(\etuple{e,f}\):] \XXX
+  \item[Case \(\pi_i\<e\):] \XXX
+  \item[Case \(\inj i e\):] \XXX
+  \item[Case \((\ecase{e} (\inj i x \caseto f_i)_i)\):] \XXX
+  \item[Case \(\eboxd e\):] \XXX
+  \item[Case \(\elet{\eboxd x = e} f\):] \XXX
+  \item[Case \(\bot\):] \XXX
+  \item[Case \(e \vee f\):] \XXX
+  \item[Case \(\esetd{e_i}_i\):] \XXX
+  \item[Case \(\eford x e f\):] \XXX
+  \item[Case \(\eeqd e f\):] \XXX
+  \item[Case \(\eisEmpty e\):] \XXX
+  \item[Case \(\esplit e\):] \XXX
+  \item[Case \(\efix e\):] \XXX
+  \end{description}
 \end{proof}
 
 
+\thmCorrect*
+\begin{proof}
+  \label{proof:correct}
+  \XXX
+\end{proof}
+
 \end{document}
