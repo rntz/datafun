@@ -262,6 +262,8 @@ end
 
 module type MODAL = sig
   include BASE with type tp = modaltp
+  (* var is now for monotone variables only *)
+  val discvar: tp -> sym -> term (* for discrete variables *)
   val box: tp -> term -> term
   val letBox: tp -> tp -> sym -> term -> term -> term
 end
@@ -419,7 +421,8 @@ module Typecheck(Imp: MODAL): BIDIR
 
   let var (x: sym) (cx: cx): tp * Imp.term =
     match Cx.find x cx with
-    | (Box | Id), tp -> tp, Imp.var tp x
+    | Box, tp -> tp, Imp.discvar tp x
+    | Id, tp -> tp, Imp.var tp x
     | Hidden, _ -> typeError (Printf.sprintf "variable %s is hidden" (Sym.to_string x))
 
   let app (fnc: expr) (arg: term) (cx: cx): tp * Imp.term =
@@ -451,6 +454,7 @@ module DropBoxes(Imp: SIMPLE): MODAL with type term = Imp.term
     | `Tuple tps -> `Tuple List.(map debox tps)
   let deboxLat: modaltp semilat -> rawtp semilat = Obj.magic debox
   let var a = Imp.var (debox a)
+  let discvar = var
   let letIn a b = Imp.letIn (debox a) (debox b)
   let lam a b = Imp.lam (debox a) (debox b)
   let app a b = Imp.app (debox a) (debox b)
@@ -514,11 +518,13 @@ module Seminaive(Imp: SIMPLE): MODAL
     else fA
 
   (* φx = x                 δx = dx *)
-  (* TODO: optimization opportunity! if variable is discrete, we know
-   * its derivative is a zero change; if it's first-order, we can inline
-   * zero applied to it. Unfortunately, we can't tell whether the variable
-   * is discrete or not here. Argh! *)
   let var (a: tp) (x: sym) = Imp.var (phi a) x, Imp.var (delta a) (Sym.d x)
+
+  (* If the variable is discrete, we know its derivative is a zero change; so if
+   * it's first-order, we can inline zero applied to it. *)
+  let discvar (a: tp) (x: sym) =
+    if not (firstOrder a) then var a x else
+    let phix = Imp.var (phi a) x in phix, zero a phix
 
   (* φ(box M) = φM, δM      δ(box M) = δM *)
   let box (a: tp) (fTerm, dTerm: term): term =
@@ -645,6 +651,45 @@ end
 
 
 (* Optimization/simplification. This is ugly and hackish, but works. *)
+(* module IsEmpty: SIMPLE with type term = rawtp semilat cx -> rawtp semilat option
+ * = struct
+ *   type tp = rawtp
+ *   type isEmpty = rawtp semilat
+ *   type term = isEmpty cx -> isEmpty option
+ *   let var a x = (??)
+ *   let letIn a b x m n = (??)
+ *   let lam a b x m = (??)
+ *   let app a b m n = (??)
+ *   let tuple tpterms = (??)
+ *   let proj tps i m = (??)
+ *   let letTuple tpxs b m n = (??)
+ *   let string x = (??)
+ *   let bool x = (??)
+ *   let ifThenElse a cnd thn els = (??)
+ *   let guard a cnd body = (??)
+ *   let set eltp elems = (??)
+ *   let union a terms = (??)
+ *   let forIn a b x m n = (??)
+ *   let fix a m = (??)
+ *   let equals a m n = (??)
+ *   let fastfix a m = (??)
+ * end
+ * 
+ * module Fuzz(Imp: SIMPLE) = struct
+ *   type tp = rawtp
+ *   type isEmpty = rawtp semilat
+ *   type value = isEmpty option * Imp.term
+ *   type term = isEmpty cx -> value
+ *   let wat (isEmpty: IsEmpty.term) (imp: Imp.term): term =
+ *     fun cx -> match isEmpty cx with
+ *               | None -> None, imp
+ *               | Some a -> Some a, Imp.union a []
+ *   let var a x = wat (IsEmpty.var a x) (Imp.var a x)
+ *   let app (a:tp) (b:tp) (m:term) (n:term) (cx:isEmpty cx): value =
+ *     let mE,mX = m cx and nE,nX = n cx in
+ *     wat (IsEmpty.app a b mE nE) (Imp.app a b mX nX) cx
+ * end *)
+
 module Simplify(Imp: SIMPLE): sig
   include SIMPLE
           with type term = rawtp semilat cx -> Imp.term * rawtp semilat option
@@ -807,6 +852,8 @@ module Examples(Modal: MODAL) = struct
   let a = Sym.gen "a" let b = Sym.gen "b"
   let x1 = Sym.gen "x1" let x2 = Sym.gen "x2"
   let y1 = Sym.gen "y1" let y2 = Sym.gen "y2"
+  let path = Sym.gen "path"
+  let edge = Sym.gen "edge"
 
   type test = Modal.term
   let testIn (tp: tp) cx (ex: term): Modal.term =
@@ -854,14 +901,21 @@ module Examples(Modal: MODAL) = struct
                    (guard (expr (equals (var x) (var y)))
                       (set [expr (var x)]))))
 
-  (* TODO: transitive closure *)
-
   (* Test for letBox at first-order type.
    * Should optimize derivative to False. *)
   let t9 = testIn `Bool [x,Id,`Box `Bool]
              (letBox y (var x) (expr (var y)))
 
-  let tests = [t0;t1;t2;t3;t4;t5;t6;t7;t8;t9]
+  (* Transitive closure *)
+  let t10 = testIn strel [edge, Box, strel]
+          (fix path (union [expr (var edge);
+                            forIn a (var edge)
+                              (forIn b (var path)
+                                 (guard (expr (equals (proj 1 (var a)) (proj 0 (var b))))
+                                    (set [tuple [expr (proj 0 (var a));
+                                                 expr (proj 1 (var b))]])))]))
+
+  let tests = [t0;t1;t2;t3;t4;t5;t6;t7;t8;t9;t10]
 end
 
 module Simplified = Simplify(ToHaskell)
@@ -873,6 +927,15 @@ let runTest (i: int) (x,y: Debug.test) =
     i (StringBuilder.finish (Simplified.finish x))
     i (StringBuilder.finish (Simplified.finish y))
 let runTests () = List.iteri runTest Debug.tests
+
+(* Faster version of transitive closure:
+
+fastfix
+(\path. edge ∪ for (a in edge) for (b in path) when (snd a == fst b) set [((fst a), (snd b))]),
+(\path dpath. for (a in edge) for (b in dpath) when (snd a == fst b) set [(fst a, snd b)])
+
+Which is what we wanted!
+*)
 
 (* Results of t7, tidied up, without Simplify:
 
