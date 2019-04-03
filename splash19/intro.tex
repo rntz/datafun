@@ -1,0 +1,35 @@
+\section{Introduction}
+\label{sec:intro}
+
+
+\paragraph{Contributions} The main contribution of this paper is
+extending Datalog's semi-naive evaluation into a program transformation
+which works on higher-order programs.
+\begin{itemize}
+\item We define a kernel language for the higher-order query language Datafun, and
+  present its semantics in a categorical style, showing that its old semantics
+  in terms of monotone function on partially ordered sets satisfies this presentation.
+\item Next, we define a category of ``changeable posets'', which
+  integrates the partially-ordered sets used to interpret Datafun with
+  the \emph{change structures} of \citet{cai-et-al}. This gives us a semantic
+  criterion for identifying programs which have an incrementalization. We then
+  interpret the semantics of Datafun in changeable posets,
+  and show that this new semantics is equivalent to the old
+  one. This establishes that every well-typed Datafun program is
+  incrementalizable.
+\item Guided by this incremental semantics, we read off a program
+  transformation to statically converts all well-typed Datafun
+  programs (including ones that use higher-order functions) into an
+  incrementalized version. We then use a logical relation to show that
+  our incrementalization is correct, and so can be used to optimize
+  Datafun programs.
+\item We also implement our program transformation in a small compiler,
+  and use this to show that we can automatically compile Datafun terms
+  into optimized Haskell programs with the expected operational behaviour.
+\end{itemize}
+
+
+
+%%% Local Variables:
+%%% TeX-master: "seminaive-datafun"
+%%% End:
