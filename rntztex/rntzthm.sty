@@ -2,14 +2,11 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{rntzthm}[2018/11/16]
 \RequirePackage{amsthm}
+\RequirePackage{thmtools,thm-restate} % for restatable theorems.
 
-%% Everything is numbered sequentially with a single counter.
-\theoremstyle{definition}
-\newtheorem{theorem}{Theorem}
-\newtheorem{conjecture}[theorem]{Conjecture}
-\newtheorem{lemma}[theorem]{Lemma}
-\theoremstyle{definition}
-\newtheorem{definition}[theorem]{Definition}
-\theoremstyle{remark}
-\newtheorem*{corollary}{Corollary}
-\theoremstyle{plain}            %back to default
+% Everything is numbered sequentially with a single counter.
+\declaretheorem[style=definition]{theorem}
+\declaretheorem[style=definition,sibling=theorem]{lemma}
+\declaretheorem[style=definition,sibling=theorem]{conjecture}
+\declaretheorem[style=definition,sibling=theorem]{definition}
+\declaretheorem[style=remark,sibling=theorem]{corollary}
