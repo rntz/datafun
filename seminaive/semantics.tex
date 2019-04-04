@@ -53,7 +53,7 @@
 \usepackage[spacing=true]{microtype}
 \frenchspacing
 
-\newcommand\mathvar[1]{\ensuremath{#1}} % For upright math font.
+\newcommand\mathvar[1]{\ensuremath{{#1}}} % For upright math font.
 %\renewcommand\mathvar[1]{\ensuremath{\mathit{#1}}} % For italic math font.
 
 %% Ooh, check out the typeface package:
@@ -482,7 +482,7 @@ bicartesian closed category \catC{} equipped with the following structures:
 \end{enumerate}
 
 \noindent
-\Cref{fig:general-semantics} shows how to interpret Datafun into any Datafun
+\Cref{fig:semantics} shows how to interpret Datafun into any Datafun
 model. The standard semantics is an instance of this, letting \catC{} be
 \Poset{}, \iso{} be \iso{}, and \pfin{} be the finite powerset functor.
 \todo{TODO: explain in more detail?}
@@ -507,7 +507,8 @@ the standard model and use \emph{its} equational theory.
 
   \begin{align*}
     \den{\G} &= \prod_{H \in \G} \den{H} &
-    \den{\h x A} &= \den{A} & \den{\hd x A} &= \discof{\den{A}}
+    \den{\h x A} &= \den{A} & \den{\hd x A} &= \discof{\den{A}} &
+    \den{\G \vdash A} &= \catC(\den\G, \den A)
   \end{align*}
 
   \vspace{.5\baselineskip}
@@ -523,7 +524,7 @@ the standard model and use \emph{its} equational theory.
     \den{\etuple{e_i}_i} &= \fork{\den{e_i}}_i
     & \den{\pi_i\<e} &= \den{e} \then \pi_i
     \\
-    \bigden{\eboxd e} &= \morph{strip} \then \discof{\den e}
+    \bigden{\eboxd e} &= \strip \then \discof{\den e}
     & \bigden{\elet{\eboxd x = e} f} &=
     \fork{\id, \den{e}} \then \den{f}
     \\
@@ -565,11 +566,11 @@ the standard model and use \emph{its} equational theory.
     \morph{dist}^\x_+ &= \fork{\pi_2 \then \krof{\lambda (\fork{\pi_2,\pi_1} \then \injc_i)}_i, \pi_1}
     \then \morph{eval}
     \\[1ex]
-    \morph{strip} &: \den\G \to \discof{\den{\stripcxd\G}}\\
-    \morph{strip} &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \discox
+    \strip &: \den\G \to \discof{\den{\stripcxd\G}}\\
+    \strip &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \discox
   \end{align*}
 
-  \todo{TODO: add a function $\morph{box}(f) = \morph{strip} \then \isof f$, so
+  \todo{TODO: add a function $\morph{box}(f) = \strip \then \isof f$, so
     $\den{\eboxd e} = \morph{box}(\den{e})$?}
 
   %% \raggedright\footnotesize Strictly speaking, the cases for
@@ -577,7 +578,7 @@ the standard model and use \emph{its} equational theory.
   %% structurally inductive; nonetheless $\den{e}$ is well-defined.
 
   \caption{Datafun semantics in a Datafun model $\tuple{\catC, \disco, \pfin}$}
-  \label{fig:general-semantics}
+  \label{fig:semantics}\label{def:strip}
 \end{figure*}
 
 
@@ -745,8 +746,8 @@ is:
 
 \nopagebreak[2]
 \begin{equation}\label{eqn:function-update}
-  f \valid\df g : \expO A B
-  \iff \fa{x \valid\dx y} f\<x \longvalid{\df\<x\<\dx} g\<y
+  \vld{\df}{f}{g} : \expO A B
+  \iff \fa{\vld\dx x y} \longvld{\df\<x\<\dx} {f\<x} {g\<y}
 \end{equation}
 
 \noindent Informally, this says a function change $\df$ is valid so long as it
@@ -793,8 +794,8 @@ And for $f : \CP(\G \x A, B)$, the derivative of the curried $\fn f : \CP(\G,
 \[
 \begin{array}{l}
   \deriv{(\fn f)} \,:\, \vals\G \to \expO{\chgs \G}{\chgs{(\expO A B)}}\\
-  \deriv{(\fn f)} \<\gamma \<\mathvar{d\gamma} \<a \<\da
-  = \deriv f \<(\gamma,a) \<(\mathvar{d\gamma}, \da)
+  \deriv{(\fn f)} \<\gamma \<\mathvar{\dgamma} \<a \<\da
+  = \deriv f \<(\gamma,a) \<(\mathvar{\dgamma}, \da)
 \end{array}
 \]
 
@@ -945,7 +946,7 @@ is trivially interpreted into an equality object. \todo{TODO more explanation
 
 
 \subsection{Semilattice objects and collecting morphisms}
-\label{sec:CP-semilattice-objects}
+\label{sec:CP-semilattice}
 
 A semilattice object $L$ in \CP\ is one where $\vals L = \chgs L$ is a
 semilattice and $x \upd_L y = x \vee y$. This immediately justifies letting
@@ -975,13 +976,13 @@ L$. Our derivative for $\pcollect f : \G \x \pfinof A \to L$ is:
 
 \nopagebreak[2]
 \begin{align*}
-  \deriv{\pcollect f} \<\tuple{\gamma,s} \<\tuple{d\gamma,\ds}
+  \deriv{\pcollect f} \<\tuple{\gamma,s} \<\tuple{\dgamma,\ds}
   &= \bigvee_{x \in \ds} f\<\tuple{\gamma,x} \vee
-  \bigvee_{x \in s \cup \ds} \deriv f \<\tuple{\gamma,x} \<\tuple{d\gamma, \zero_x}
+  \bigvee_{x \in s \cup \ds} \deriv f \<\tuple{\gamma,x} \<\tuple{\dgamma, \zero_x}
 \end{align*}
 
 \noindent To establish that this is correct, suppose
-$\longvld{d\gamma}{\gamma}{\gamma'} : \G$. From this we have:
+$\longvld{\dgamma}{\gamma}{\gamma'} : \G$. From this we have:
 
 \nopagebreak[2]
 \begin{align*}
@@ -990,21 +991,21 @@ $\longvld{d\gamma}{\gamma}{\gamma'} : \G$. From this we have:
   &= \bigvee_{x \in s \cup \ds} f \<\tuple{\gamma', x}
   \\
   &\overset{\footnotemark}{=} \bigvee_{x \in s \cup \ds} \bigl(f \<\tuple{\gamma,x}
-  \vee \deriv f \<\tuple{\gamma,x} \<\tuple{d\gamma,\zero_x}\bigr)
+  \vee \deriv f \<\tuple{\gamma,x} \<\tuple{\dgamma,\zero_x}\bigr)
   \\
   &= \bigvee_{x \in s} f\<\tuple{\gamma,x}
   \upd \bigvee_{x \in \ds} f\<\tuple{\gamma,x}
-  \vee \bigvee_{x \in s \cup \ds} \deriv f \<\tuple{\gamma,x} \<\tuple{d\gamma,\zero_x}
+  \vee \bigvee_{x \in s \cup \ds} \deriv f \<\tuple{\gamma,x} \<\tuple{\dgamma,\zero_x}
   \\
   &= \pcollect f \<\tuple{\gamma,s}
-  \upd \deriv{\pcollect f} \<\tuple{\gamma,s} \<\tuple{d\gamma,\ds}
+  \upd \deriv{\pcollect f} \<\tuple{\gamma,s} \<\tuple{\dgamma,\ds}
 \end{align*}
 
 \nopagebreak% for footnote to be on same page as mark
 \noindent
 Which is what we wished to show.\footnotetext{This equality follows from the
   correctness of $\deriv f$ applied to
-  \(\longvld{\tuple{d\gamma,\zero_x}}{\tuple{\gamma,x}}{\tuple{\gamma',x}}\).}
+  \(\longvld{\tuple{\dgamma,\zero_x}}{\tuple{\gamma,x}}{\tuple{\gamma',x}}\).}
 
 
 \subsection{Fixed point objects}
@@ -1123,7 +1124,7 @@ the risk of confusion.
 \section{Semi\naive{} evaluation}
 \label{sec:seminaive}
 
-%\renewcommand\isocx\isof
+\renewcommand\isocx\isof
 
 \todo{TODO: explain faster-fix?}
 \todo{TODO: explain $\Phi$ type transformation.}
@@ -1139,7 +1140,7 @@ pointwise action on hypotheses: \todo{TODO: intuition}
 
 \nopagebreak[2]
 \begin{align*}
-  \isocx{\h x A} &= \hd x A & \isocx{\hd x A} &= \hd x A\\
+  \isocx{(\h x A)} &= \hd x A & \isocx{(\hd x A)} &= \hd x A\\
   \D(\h x A) &= \h \dx {\D A} & \D(\hd x A) &= \emptycx \quad\text{(the empty context)}\\
   \Phi(\h x A) &= \h x {\Phi A} & \Phi(\hd x A) &= \hd x {\Phi A}, \hd \dx {\DP A}
 \end{align*}
@@ -1147,7 +1148,7 @@ pointwise action on hypotheses: \todo{TODO: intuition}
 \noindent For example,
 %
 \begin{mathpar}
-  \isocx{\h x A, \hd y B} = \hd x A, \hd y B
+  \isocx{(\h x A, \hd y B)} = \hd x A, \hd y B
 
   \D(\h x A, \hd y B) = \h \dx {\D A}
 
@@ -1176,10 +1177,10 @@ The idea here is that:
 %%   \isocx{\hd x A} = \hd x A
 %% \end{mathpar}
 
-\noindent
-Be careful not to confuse $\isocx\G$, which strengthens $\G$ by making every
-variable discrete, with $\stripcxd{\G}$, which weakens $\G$ by removing all
-\emph{except} the discrete variables.
+%% \noindent
+%% Be careful not to confuse $\isocx\G$, which strengthens $\G$ by making every
+%% variable discrete, with $\stripcxd{\G}$, which weakens $\G$ by removing all
+%% \emph{except} the discrete variables.
 
 %% \begin{restatable}[Type-correctness]{theorem}{thmTypeCorrect}
 %%   \label{thm:type-correct}
@@ -1472,53 +1473,80 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
 
 \section{Logical relation}
 
-We define a type-indexed logical relation ${\impls_A} \subseteq \den{\Phi A} \x
-\den{A}$ as follows:
+\begin{definition}\label{def:approx}\label{def:approx-contexts}
+  We define a type-indexed logical relation ${\impls_A} \subseteq \den{\Phi A} \x
+  \den{A}$ as follows:
 
-\nopagebreak[2]
-\begin{align*}
-  %% unit & products
-  \tuple{x_i}_i \impls \tuple{y_i}_i &\iff \fa{i} x_i \impls y_i
-  \\
-  %% sums
-  \inj i x \impls \inj j y &\iff i = j \wedge x \impls y
-  \\
-  %% functions
-  f \impls_{A \to B} g &\iff \fa{x \impls_A y} f\<x \impls_B g\<y
-  \\
-  %% boxes
-  \tuple{x,\dx} \impls_{\isof A} y
-  &\iff x \impls_A y \wedge \vld{\dx} x x
-  \\
-  %% sets
-  s \impls_{\tseteq A} t
-  &\iff (\forall x \in s, \exists y \in t)~x\approx_{\eqt A} y
-  \wedge (\forall y \in t, \exists x \in s)~x \approx_{\eqt A} y
-\end{align*}
+  \nopagebreak[2]
+  \begin{align*}
+    %% unit & products
+    \tuple{x_i}_i \impls \tuple{y_i}_i &\iff \fa{i} x_i \impls y_i
+    \\
+    %% sums
+    \inj i x \impls \inj j y &\iff i = j \wedge x \impls y
+    \\
+    %% functions
+    f \impls_{A \to B} g &\iff \fa{x \impls_A y} f\<x \impls_B g\<y
+    \\
+    %% boxes
+    \tuple{x,\dx} \impls_{\isof A} y
+    &\iff x \impls_A y \wedge \vld{\dx} x x
+    \\
+    %% sets
+    s \impls_{\tseteq A} t
+    %% &\iff (\forall x \in s, \exists y \in t)~x\approx_{\eqt A} y
+    %% \wedge (\forall y \in t, \exists x \in s)~x \approx_{\eqt A} y
+    &\iff \faex{x \in s}{y \in t} x\approx_{\eqt A} y
+    \wedge \faex{y \in t}{x \in s} x \approx_{\eqt A} y
+  \end{align*}
 
-\noindent
-We lift this from types to contexts as follows: \todo{(TODO: notation)}
+  \noindent
+  This lifts to contexts, ${\impls_\G} \subseteq \den{\Phi\G} \x \den\G$, as
+  follows:
 
-\nopagebreak[2]
-\begin{align*}
-  {\impls_\G} &\subseteq \den{\Phi\G, \D\Phi\stripcxd\G} \x \den{\G}
-  \\
-  \gamma \impls_\G \gamma'
-  &\iff \fa{\h x A \in \G} \gamma_x \impls \gamma'_x\\
-  &\phantom{\iff} \wedge \fa{\hd x A \in \G}
-  \gamma_{\dvar x} \impls \gamma'_{\dvar x}
-  \wedge \longvld{\gamma_{\dvar \dx}}{\gamma_{\dvar x}}{\gamma_{\dvar x}}
-\end{align*}
+  \nopagebreak[2]
+  \begin{align*}
+    \gamma \impls_\G \rho
+    &\iff \fa{\h x A \in \G} \gamma_x \impls \rho_x
+    \\ &\phantom{\iff}
+    \wedge \fa{\hd x A \in \G}
+    (\gamma_{\dvar x} \impls \rho_{\dvar x}
+    \wedge \longvld{\gamma_{\dvar{\dx}}}{\gamma_{\dvar x}}{\gamma_{\dvar x}})
+  \end{align*}
+\end{definition}
 
-\noindent
-\todo{TODO: lift to open terms}
+%% \noindent
+%% Which can be lifted to morphisms (and thus term denotations) as follows:
 
-\begin{restatable}[Correctness]{theorem}{thmCorrect}
-  $\den{\phi e} \impls \den{e}$ and
-  $\longvld{\den{\delta e}}{\den{\phi e}}{\den{\phi e}}$.
+%% \begin{align*}
+%%   \impls_{\G \vdash A} &\subseteq \den{\Phi\G \vdash \Phi A} \x \den{\G \vdash A}\\
+%%   f \impls_{\G \vdash A} g &\iff \fa{\gamma \impls_\G \gamma'} f\<\gamma \impls_A g\<\gamma'
+%% \end{align*}
+
+\begin{restatable}[Correctness]{theorem}{thmCorrect}\label{thm:correct}
+  If $\J e \G A$ and $\gamma \impls_\G \rho$ and
+  $\longvld{\dgamma}{\gamma}{\gamma'} : \incdens{\Phi\G}$, then
+
+  %% \begin{enumerate}
+  %% \item \(\den{\phi e} \<\gamma \impls_A \den{e} \<\rho\)
+  %% \item \(\longvld{\den{\delta e} \tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e} \<\gamma'}\)
+  %% \end{enumerate}
+
+  \nopagebreak[2]
+  \begin{gather*}
+  \text{(1)}~~ \den{\phi e}\<\gamma \impls_A \den{e}\<\rho
+  \qquad\text{and}\qquad
+  \text{(2)}~~
+  \longvld{\den{\delta e} \tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e} \<\gamma'}
+  : \incdens{\Phi{A}}
+  \end{gather*}
+
+  \noindent
+  Note that $\tuple{\gamma,\dgamma}$ is a slight abuse of notation here;
+  \todo{TODO explain}.
 \end{restatable}
 \begin{proof}
-  \todo{TODO}
+  By induction on the derivation of $\J e \G A$. See \cpageref{proof:correct}.
 \end{proof}
 
 
@@ -1720,10 +1748,10 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
   \item[Case $\eboxd e$]
     \begin{align*}
       \vals\incdens{\eboxd e}
-      &= \vals(\morph{strip} \then \isof{\incdens e})\\
-      &= \morph{strip} \then \isof{\vals\incdens e}
+      &= \vals(\strip \then \isof{\incdens e})\\
+      &= \strip \then \isof{\vals\incdens e}
       && \text{by \cref{lem:vals-strip}}\\
-      &\stareq \morph{strip} \then \isof{\den e} && \text{by IH}\\
+      &\stareq \strip \then \isof{\den e} && \text{by IH}\\
       &= \den{\eboxd e}
     \end{align*}
 
@@ -1839,7 +1867,7 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
 \end{proof}
 
 \begin{lemma}\label{lem:vals-strip}
-  \(\vals{\morph{strip}} = \morph{strip}\)
+  \(\vals{\strip} = \strip\)
 \end{lemma}
 \begin{proof}
   \XXX
@@ -1907,7 +1935,6 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
 
 \thmTypeCorrect*
 
-\newcommand\phicx[1]{\Phi{#1},\DP\stripcxd{#1}}
 \newcommand\deltacx[1]{\isocx{\Phi{#1}},\DP{#1}}
 \newcommand\weirdover[2]{\hbox{\(\displaystyle\genfrac{}{}{-1pt}{}{#1}{#2}\)}}
 \newcommand\deduce[2]{\infer*[myfraction=\weirdover]{#1}{#2}}
@@ -1920,22 +1947,23 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
     \DP\G$, so by weakening:
     %
     \begin{mathpar}
-      \infer{\h x {\Phi A} \in \phicx\G}{\J x {\phicx\G} {\Phi A}}
+      \infer{\h x {\Phi A} \in \Phi\G}{\J x {\Phi\G} {\Phi A}}
 
       \infer{\h\dx{\DP A} \in \deltacx\G}{\J \dx {\deltacx\G} {\DP A}}
     \end{mathpar}
 
   \item[Case $\dvar x$ (discrete):] $\phi{\dvar x} = \dvar x$ and $\delta{\dvar
     x} = \dvar\dx$. Since $\hd x A \in \G$, we have $\hd x {\Phi A} \in \Phi\G$
-    and $\dvar\dx \in \DP\G$, so by weakening:
+    and $\hd\dx{\DP A} \in \isof{\Phi\G}$, so by weakening:
     %
     \begin{mathpar}
-      \infer{\hd x {\Phi A} \in \phicx\G}{\J {\dvar x} {\phicx\G} {\Phi A}}
+      \infer{\hd x {\Phi A} \in \Phi\G}{\J {\dvar x} {\Phi\G} {\Phi A}}
 
       \infer{\hd\dx{\DP A} \in \deltacx\G}{\J{\dvar\dx}{\deltacx\G}{\DP A}}
     \end{mathpar}
 
   \item[Case $\fnof x e$:]
+    \todo{FIXME: this is all wrong now that I've changed notations!}
     \begin{align*}
       \phi(\fnof x e) &= \fnof x \phi e &
       \delta(\fnof x e) &= \fnof{\eboxd x} \fnof \dx \delta e\\
@@ -1946,9 +1974,9 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
     \begin{mathpar}
       \infer*{
         \infer*[fraction={===},leftstyle={},Left={rewrite context}]{
-          \deduce{\textit{by IH}}{\J{\phi e} {\phicx{(\G,\h x A)}} B}
-        }{\J {\phi e} {\phicx{\G}, \h x {\Phi A}} {\Phi B}}
-      }{\J {\fnof x \phi e} {\phicx\G} {\Phi A \to \Phi B}}
+          \deduce{\textit{by IH}}{\J{\phi e} {\Phi{(\G,\h x A)}} B}
+        }{\J {\phi e} {\Phi{\G}, \h x {\Phi A}} {\Phi B}}
+      }{\J {\fnof x \phi e} {\Phi\G} {\Phi A \to \Phi B}}
 
       \infer*{
         \infer*{
@@ -1971,7 +1999,7 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
   \item[Case \(\inj i e\):] \XXX
   \item[Case \((\ecase{e} (\inj i x \caseto f_i)_i)\):] \XXX
   \item[Case \(\eboxd e\):] \XXX
-  \item[Case \(\elet{\eboxd x = e} f\):] \XXX
+  \item[Case \((\elet{\eboxd x = e} f)\):] \XXX
   \item[Case \(\bot\):] \XXX
   \item[Case \(e \vee f\):] \XXX
   \item[Case \(\esetd{e_i}_i\):] \XXX
@@ -1985,9 +2013,140 @@ We lift this from types to contexts as follows: \todo{(TODO: notation)}
 
 
 \thmCorrect*
+\begin{proof} \label{proof:correct}
+  By induction on $\J e \G A$. But first, it is useful to observe some facts
+  about variable denotations. For monotone $x$,
+  \[ \den{x}\<\rho = \rho_x
+  \quad\text{and}\quad
+  \den{\phi x}\<\g = \g_x
+  \quad\text{and}\quad
+  \den{\delta x}\<\tuple{\g,\dgamma} = \dgamma_\dx
+  \]
+  while for discrete $\dvar x$,
+  \[ \den{\dvar x}\<\rho = \rho_{\dvar x}
+  \quad\text{and}\quad
+  \den{\phi{\dvar x}}\<\g = \g_{\dvar x}
+  \quad\text{and}\quad
+  \den{\delta{\dvar x}}\<\tuple{\g,\dgamma} = \gamma_{\dvar \dx}
+  \]
+  These follow by chasing the definitions in
+  \cref{fig:semantics,fig:seminaive-phi,fig:seminaive-delta}. Now for our
+  inductive cases:
+
+  \begin{description}
+  \item[Case $x$ (monotone):]\
+    \begin{enumerate}
+    \item \(\den{\phi x}\<\g = \g_x \approx \rho_x = \den{x}\<\rho\).
+    \item \(\den{\delta x}\<\tuple{\g,\dgamma} = \dgamma_x\) and
+      from $\vld{\dgamma}{\g}{\g'}$ we have \(\longvld{\dgamma_\dx}{\g_x}{\g_x}\).
+    \end{enumerate}
+
+  \item[Case \(\dvar x\) (discrete):]\
+    \begin{enumerate}
+    \item \(\den{\phi{\dvar x}}\<\g = \g_{\dvar x} \approx \rho_{\dvar x} = \den{\dvar x}\<\rho\).
+    \item \(\den{\delta{\dvar x}}\<\tuple{\g,\dgamma} = \g_{\dvar\dx}\) and from
+      \(\g \approx \rho\) and \cref{def:approx-contexts} we have
+      \(\longvld{\g_{\dvar\dx}}{\g_{\dvar x}}{\g_{\dvar x}}\).
+    \end{enumerate}
+
+  \item[Case \(\fnof x e\):] \XXX
+
+  \item[Case \(e\<f\):] \XXX
+
+  \item[Case \(\etuple{}\):] \XXX
+
+  \item[Case \(\etuple{e,f}\):] \XXX
+
+  \item[Case \(\pi_i\<e\):] \XXX
+
+  \item[Case \(\inj i e\):] \XXX
+
+  \item[Case \((\ecase{e} (\inj i x \caseto f_i)_i)\):] \XXX
+
+  \item[Case \(\eboxd e : \isof A\):] Note that $\phi\eboxd{e} = \eboxd{\phi e, \delta e}$
+    and $\delta\eboxd{e} = \etuple{}$ and $\den{\eboxd e} = \strip \then
+    \isof{\den e}$. Applying our semantics, we have
+
+    \nopagebreak[2]
+    \begin{align*}
+      \den{\phi{\eboxd e}}\<\g
+      &= \isof{\fork{\den{\phi e}, \den{\delta e}}} (\strip\<\g)\\
+      &= \tuple{\den{\phi e} (\strip\<\g), \den{\delta e} (\strip \<\g)}
+      && \text{b/c $\isof f = f$ for morphisms $f$}
+      \\
+      \den{\eboxd e}\<\rho &= \den e (\strip\<\rho) && \text{similarly}
+    \end{align*}
+
+    \begin{enumerate}
+    \item Applying \cref{def:approx} we need to show:
+
+      \nopagebreak[2]
+      \begin{gather*}
+        \den{\phi e} (\strip\<\g) \approx_A \den e (\strip\<\rho)
+        \\\text{and}\\
+        \longvld{\den{\delta e}(\strip\<\g)}
+                {\den{\phi e} (\strip\<\g)}
+                {\den{\phi e} (\strip\<\g)}
+      \end{gather*}
+
+      Since $\strip\<\g \approx \strip\<\rho$ by \cref{lem:strip-approx} and
+      $\vld{\tuple{}}{\strip\<\g}{\strip\<\g}$ by \XXX, these follow follow from
+      our IH, \todo{TODO: explain why $\den{\delta e}(\strip\<\g)$ typechecks}.
+
+    \item We wish to show
+      \[\vld{\tuple{}}
+            {\tuple{\den{\phi e}(\strip\<\g), \den{\delta e}(\strip\<\g)}}
+            {\tuple{\den{\phi e}(\strip\<\g'), \den{\delta e}(\strip\<\g')}}
+       \]
+
+      At $\incdens{\Phi{\isof A}} = \incden{\isof{(\Phi A \x \DP A)}} =
+      \isof{(\incdens{\Phi A} \x \incdens{\DP A})}$, this is true iff both sides
+      are equal (\cref{sec:CP-iso}). Thankfully, by \cref{lem:strip-equal}, we
+      have $\strip\<\g = \strip\<\g'$, so they are.
+    \end{enumerate}
+
+  \item[Case \((\elet{\eboxd x = e} f)\):] \XXX
+
+  \item[Case \(\bot\):] \XXX
+
+  \item[Case \(e \vee f\):] \XXX
+
+  \item[Case \(\esetd{e_i}_i\):] \XXX
+
+  \item[Case \(\eford x e f\):] \XXX
+
+  \item[Case \(\eeqd e f\):] \XXX
+
+  \item[Case \(\eisEmpty e\):] \XXX
+
+  \item[Case \(\esplit e\):] \XXX
+
+  \item[Case \(\efix e\):] \XXX
+
+  \end{description}
+\end{proof}
+
+
+\begin{lemma}\label{lem:strip-approx}
+  If $\gamma \approx_\G \rho$ then $\strip\<\gamma \approx_{\stripcxd\G}
+  \strip\<\rho$.
+\end{lemma}
 \begin{proof}
-  \label{proof:correct}
   \XXX
 \end{proof}
 
+
+\begin{lemma}\label{lem:strip-equal}
+  If $\vld{\dgamma}{\g}{\g'} : \incdens\G$ then $\strip\<\g = \strip\<\g'$.
+\end{lemma}
+\begin{proof}
+  From \cref{def:strip}, we have \(\strip\<\g = \tuple{\gamma_{\dvar x}}_{\hd x
+    A \in \G}\) and \(\strip\<\g' = \tuple{\gamma'_{\dvar x}}_{\hd x A \in
+    \G}\). From our assumption (\todo{TODO: intuition? reference to
+    \emph{something}!}) we have $\vld{\tuple{}}{\gamma_{\dvar x}}{\gamma'_{\dvar
+      x}} : \isof{\incdens A}$, which means $\gamma_{\dvar x} = \gamma'_{\dvar
+    x}$ (see \cref{sec:CP-iso}), so we are done.
+\end{proof}
+
+
 \end{document}

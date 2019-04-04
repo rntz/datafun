@@ -10,6 +10,7 @@
 
 %% ===== General math & PL notation =====
 \ifdefined\G\renewcommand\G\Gamma\else\newcommand\G\Gamma\fi
+\newcommand\g\gamma
 \newcommand\emptycx{{\cdot}}
 \newcommand\D\Delta
 \newcommand\DP{\D\Phi}
@@ -27,15 +28,20 @@
 % Space for function application. Between \; and \:.
 \newcommand\<{\mskip 4mu plus 4mu minus 1mu}
 %\renewcommand\<\;
-\newcommand\quantifierspace{~\,}
 \newcommand\fnspace{\;}
-\newcommand\fa[1]{\forall #1.\quantifierspace}
-\newcommand\ex[1]{\exists #1.\quantifierspace}
 \newcommand\fnof[1]{\fn{#1}.\fnspace}
 %\newcommand\setfor[2]{\ensuremath{\{#1 \mathrel{|} #2\}}}
 
-%% \renewcommand\fa[1]{(\forall #1)~}
-%% \renewcommand\ex[1]{(\exists #1)~}
+\newcommand\quantcolor\relax
+%\renewcommand\quantcolor{\color{green}}
+\newcommand\fa[1]{({\quantcolor\forall #1})~}
+\newcommand\ex[1]{({\quantcolor\exists #1})~}
+\newcommand\faex[2]{({\quantcolor\forall #1, \exists #2})~}
+
+%% \renewcommand\quantifierspace{~\,}
+%% \renewcommand\fa[1]{\forall #1.\quantifierspace}
+%% \renewcommand\ex[1]{\exists #1.\quantifierspace}
+%% \renewcommand\faex[2]{\forall {#1}.~ \exists {#2}.\quantifierspace}
 
 %% various marked equalities
 \newcommand\stareq{\overset{\boldsymbol\star}{=}}
@@ -83,6 +89,8 @@
 \newcommand\pfinof[1]{\pfin #1}
 \newcommand\pcollect[1]{\morph{collect}(#1)}
 %\newcommand\pcollect[1]{{#1}^\pfin}
+
+\newcommand\strip{\morph{strip}}
 
 %% \newcommand\down{\ensuremath{\color{red} F}} %FIXME: remove!
 %% \newcommand\downof[1]{{\color{red}\down #1}}
@@ -204,6 +212,7 @@
 %\renewcommand\df{d\kern-.1em f\kern-.1em} % fucking kerning.
 \newcommand\dg{\mathvar{dg}}
 \newcommand\ds{\mathvar{ds}}
+\newcommand\dgamma{d\gamma}
 
 
 %% ===== Logical relation notation =====
@@ -218,6 +227,9 @@
 \newcommand\longvalid[1]{\mathrel{\xrightarrow{#1}}}
 \newcommand\vld[3]{{#2 \valid{#1} #3}}
 \newcommand\longvld[3]{{#2 \longvalid{#1} #3}}
+
+%% \renewcommand\longvld[3]{{#1} : {#2} \validarrow {#3}}
+%% \renewcommand\vld\longvld
 
 %% %% Option B
 %% \renewcommand\validarrow\leadsto
