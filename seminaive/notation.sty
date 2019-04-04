@@ -48,6 +48,13 @@
 \newcommand\daggereq{\overset{\dagger}{=}}
 \newcommand\stardaggereq{\overset{\boldsymbol\star\dagger}{=}}
 
+\newcommand\subst[2]{{#1}\,\{{#2}\}}
+\newcommand\substd[2]{\subst{#1}{\isocolor #2}}
+\newcommand\substo\coloneqq
+\renewcommand\substo\mapsto
+%% for extending a substitution
+\newcommand\extend[2]{\tuple{#1,\, #2}}
+
 
 %% ===== Categorical notation =====
 \newcommand\cat\textbf
@@ -146,10 +153,6 @@
 \newcommand\eifd[2]{\eif{\isocolor #1}{#2}}
 \newcommand\efixisd[2]{\efixis{#1}{\isocolor #2}}
 \newcommand\eeqd[2]{\eeq{\isocolor #1}{\isocolor #2}}
-
-\newcommand\subst[2]{{#1}\,\{{#2}\}}
-\newcommand\substd[2]{\subst{#1}{\isocolor #2}}
-\newcommand\substo\coloneqq
 
 %\newcommand\J[3]{{#1} \mathrel{\,:\,} {#2} \vdash {#3}}
 \newcommand\J[3]{{#2} \vdash {#1} \mathrel{:} {#3}}

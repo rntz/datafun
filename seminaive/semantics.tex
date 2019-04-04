@@ -1596,7 +1596,7 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
 \clearpage
 \appendix
 \begin{center}\Large\scshape Proofs\end{center}
-\renewcommand\qed{\vspace{\baselineskip}\hrule\vspace{.5\baselineskip}}         %FIXME hack.
+\renewcommand\qed{\vspace{\baselineskip}\hrule}%FIXME hack.
 
 %\section{Proofs}
 
@@ -2105,7 +2105,72 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
       have $\strip\<\g = \strip\<\g'$, so they are.
     \end{enumerate}
 
-  \item[Case \((\elet{\eboxd x = e} f)\):] \XXX
+  \item[Case \((\elet{\eboxd {x : A} = e} f)\):] From
+    \cref{fig:seminaive-phi,fig:seminaive-delta} we have:
+    \begin{align*}
+      \phi(\elet{\eboxd x = e} f) &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \phi f\\
+      \delta(\elet{\eboxd x = e} f) &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \delta f
+    \end{align*}
+
+    \noindent
+    From our semantics and \cref{lem:letboxtuple} we have
+    \begin{align*}
+      \den{\elet{\eboxd x = e} f} \<\rho
+      &= \den{f} \<\extend{\rho}{\dvar x \substo \den{e}\<\rho}
+      \\
+      \den{\elet{\eboxd{\etuple{x,\dx}} = \phi e} \phi f}\<\g
+      &= \den{\phi f} \<\extend{\g}{
+        \dvar x \substo \pi_1(\den{\phi e}\<\g),\,
+        \dvar\dx \substo \pi_2(\den{\phi e}\<\g)}
+      \\
+      \den{\elet{\eboxd{\etuple{x,\dx}} = \phi e} \delta f}\<\g
+      &= \den{\delta f} \<\extend{\g}{
+        \dvar x \substo \pi_1(\den{\phi e}\<\g),\,
+        \dvar\dx \substo \pi_2(\den{\phi e}\<\g)}
+    \end{align*}
+
+    \begin{enumerate}
+    \item We want to show:
+      \[
+      \den{\phi f} \<\extend{\g}{
+        \dvar x \substo \pi_1(\den{\phi e}\<\g),\,
+        \dvar\dx \substo \pi_2(\den{\phi e}\<\g)}
+      \approx
+      \den{f} \<\extend{\rho}{\dvar x \substo \den{e}\<\rho}
+      \]
+
+      \noindent
+      By our IH for $f$, it suffices to show that
+      \[
+      \extend{\g}{
+        \dvar x \substo \pi_1(\den{\phi e}\<\g),\,
+        \dvar\dx \substo \pi_2(\den{\phi e}\<\g)}
+      \approx
+      \extend{\rho}{\dvar x \substo \den{e}\<\rho}
+      \]
+
+      By our IH for $e$ we have $\den{\phi e}\<\g \approx_{\isof A}
+      \den{e}\<\rho$, and therefore $\pi_1\<(\den{\phi e}\<\g) \approx_A
+      \den{e}\<\rho$ and $\longvld{\pi_2\<(\den{\phi e}\<\g)}{\pi_1\<(\den{\phi
+          e}\<\g)}{\pi_1\<(\den{\phi e}\<\g)}$. Combined with $\gamma \approx
+      \rho$, this suffices.
+
+    \item We wish to show that
+      \[
+      \longvld
+          {\den{\delta f} \<\extend{\g}{
+              \dvar x \substo \pi_1(\den{\phi e}\<\g),\,
+              \dvar\dx \substo \pi_2(\den{\phi e}\<\g)}}
+          {\den{\phi f} \<\extend{\g}{
+              \dvar x \substo \pi_1(\den{\phi e}\<\g),\,
+              \dvar\dx \substo \pi_2(\den{\phi e}\<\g)}}
+          {\den{\phi f} \<\extend{\g'}{
+              \dvar x \substo \pi_1(\den{\phi e}\<\g'),\,
+              \dvar\dx \substo \pi_2(\den{\phi e}\<\g')}}
+      \]
+      \todo{darn, this doesn't even fit on the page}
+      \XXX
+    \end{enumerate}
 
   \item[Case \(\bot\):] \XXX
 
@@ -2146,6 +2211,70 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
     \emph{something}!}) we have $\vld{\tuple{}}{\gamma_{\dvar x}}{\gamma'_{\dvar
       x}} : \isof{\incdens A}$, which means $\gamma_{\dvar x} = \gamma'_{\dvar
     x}$ (see \cref{sec:CP-iso}), so we are done.
+\end{proof}
+
+
+\begin{lemma}\label{lem:letboxtuple}
+  \[\den{\elet{\eboxd{\etuple{x,y}} = e} f} \<\g
+  = \den{f} \<\extend{\g}{
+    \dvar x \substo \pi_1\<(\den{e}\<\g),\,
+    \dvar y \substo \pi_2 \<(\den{e}\<\g)}
+  \]
+\end{lemma}
+\begin{proof}
+  First, observe that for any $\hd z A \in \G$ and $\g : \den\G$,
+
+  \nopagebreak[2]
+  \begin{equation}\label{eqn:piz}
+    \den{\eboxd{\pi_i\<\dvar z}}\<\g
+  = \pi_i\<(\pi_{\dvar z}\<(\strip\<\g))
+  = \pi_i\<\g_{\dvar z}
+  \end{equation}
+
+  \noindent So furthermore, for any $\dvar x$ and $e$:
+
+  \nopagebreak[2]
+  \begin{align*}
+  \den{\elet{\eboxd{\dvar x} = \eboxd{\pi_i\<\dvar z}} e} \<\g
+  &= \den{e} \<\extend{\g}{\dvar x \substo \den{\eboxd{\pi_i\<\dvar z}}\<\g}
+  && \text{by \cref{fig:semantics}}\\
+  &= \den{e} \<\extend{\g}{\dvar x \substo \pi_i\<\g_{\dvar z}}
+  && \text{by \cref{eqn:piz}}
+  \end{align*}
+
+  \noindent
+  Finally:
+
+  \nopagebreak[2]
+  \begin{align*}
+    &\den{\elet{\eboxd{\etuple{x,y}} = e} f} \<\g\\
+    &= \den{\elet{\eboxd{\freshvar z} = e}
+      \elet{\eboxd{x} = \eboxd{\pi_1\<\freshvar z}}
+      \elet{\eboxd{y} = \eboxd{\pi_2\<\freshvar z}}
+      f}\<\g
+    && \text{by \cref{fig:desugaring-pattern-matching}}\\
+    &= \den{\elet{\eboxd{x} = \eboxd{\pi_1\<\freshvar z}}
+      \elet{\eboxd{y} = \eboxd{\pi_2\<\freshvar z}} f}
+    \<\extend{\g}{\freshvar z \substo \den{e} \<\g}
+    && \text{by \cref{fig:semantics}}
+    \\
+    &= \den{\elet{\eboxd{y} = \eboxd{\pi_2\<\freshvar z}} f}
+    \<\extend{\g}{
+      \freshvar z \substo \den{e} \<\g,\,
+      \dvar x \substo \pi_1\<(\den{e}\<\g)}
+    \\
+    &=
+    \den{f} \<\extend{\g}{
+      \freshvar z \substo \den{e} \<\g,\,
+      \dvar x \substo \pi_1\<(\den{e}\<\g),\,
+      \dvar y \substo \pi_2\<(\den{e}\<\g)}
+    \\
+    &=
+    \den{f} \<\extend{\g}{
+      \dvar x \substo \pi_1\<(\den{e}\<\g),\,
+      \dvar y \substo \pi_2\<(\den{e}\<\g)}
+    && \text{$\freshvar z$ is fresh}
+  \end{align*}
 \end{proof}
 
 
