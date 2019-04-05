@@ -1524,22 +1524,22 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
 %% \end{align*}
 
 \begin{restatable}[Correctness]{theorem}{thmCorrect}\label{thm:correct}
-  If $\J e \G A$ and $\gamma \impls_\G \rho$ and
-  $\longvld{\dgamma}{\gamma}{\gamma'} : \incdens{\Phi\G}$, then
+  If $\J e \G A$ and $\gamma \impls_\G \rho$ then
 
-  %% \begin{enumerate}
-  %% \item \(\den{\phi e} \<\gamma \impls_A \den{e} \<\rho\)
-  %% \item \(\longvld{\den{\delta e} \tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e} \<\gamma'}\)
-  %% \end{enumerate}
+  \begin{enumerate}
+  \item \(\den{\phi e} \<\gamma \impls_A \den{e} \<\rho\).
+  \item If $\longvld{\dgamma}{\g}{\g'}$ then \(\longvld{\den{\delta e}
+    \tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e} \<\gamma'}\).
+  \end{enumerate}
 
-  \nopagebreak[2]
-  \begin{gather*}
-  \text{(1)}~~ \den{\phi e}\<\gamma \impls_A \den{e}\<\rho
-  \qquad\text{and}\qquad
-  \text{(2)}~~
-  \longvld{\den{\delta e} \tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e} \<\gamma'}
-  : \incdens{\Phi{A}}
-  \end{gather*}
+  %% \nopagebreak[2]
+  %% \begin{gather*}
+  %% \text{(1)}~~ \den{\phi e}\<\gamma \impls_A \den{e}\<\rho
+  %% \qquad\text{and}\qquad
+  %% \text{(2)}~~
+  %% \longvld{\den{\delta e} \tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e} \<\gamma'}
+  %% : \incdens{\Phi{A}}
+  %% \end{gather*}
 
   \noindent
   Note that $\tuple{\gamma,\dgamma}$ is a slight abuse of notation here;
@@ -2113,62 +2113,44 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
     \end{align*}
 
     \noindent
-    From our semantics and \cref{lem:letboxtuple} we have
+    Let \(\sigma_\g = \tuple{ \dvar x \substo \pi_1 \<(\den{\phi e}\<\g),\,
+      \dvar \dx \substo \pi_2 \<(\den{\phi e}\<\g)}\). Then from our semantics
+    and \cref{lem:letboxtuple} we have
     \begin{align*}
       \den{\elet{\eboxd x = e} f} \<\rho
       &= \den{f} \<\extend{\rho}{\dvar x \substo \den{e}\<\rho}
       \\
       \den{\elet{\eboxd{\etuple{x,\dx}} = \phi e} \phi f}\<\g
-      &= \den{\phi f} \<\extend{\g}{
-        \dvar x \substo \pi_1(\den{\phi e}\<\g),\,
-        \dvar\dx \substo \pi_2(\den{\phi e}\<\g)}
+      &= \den{\phi f} \<\extend{\g}{\sigma_\g}
       \\
-      \den{\elet{\eboxd{\etuple{x,\dx}} = \phi e} \delta f}\<\g
-      &= \den{\delta f} \<\extend{\g}{
-        \dvar x \substo \pi_1(\den{\phi e}\<\g),\,
-        \dvar\dx \substo \pi_2(\den{\phi e}\<\g)}
+      \den{\elet{\eboxd{\etuple{x,\dx}} = \phi e} \delta f}\<\extend{\g}{\dgamma}
+      &= \den{\delta f} \<\extend{\g,\,\dgamma}{\sigma_{\extend{\g}{\dgamma}}}
     \end{align*}
 
     \begin{enumerate}
-    \item We want to show:
-      \[
-      \den{\phi f} \<\extend{\g}{
-        \dvar x \substo \pi_1(\den{\phi e}\<\g),\,
-        \dvar\dx \substo \pi_2(\den{\phi e}\<\g)}
+    \item We want to show that
+      \(
+      \den{\phi f} \<\extend{\g}{\sigma_\g}
       \approx
       \den{f} \<\extend{\rho}{\dvar x \substo \den{e}\<\rho}
-      \]
-
-      \noindent
-      By our IH for $f$, it suffices to show that
-      \[
-      \extend{\g}{
-        \dvar x \substo \pi_1(\den{\phi e}\<\g),\,
-        \dvar\dx \substo \pi_2(\den{\phi e}\<\g)}
-      \approx
-      \extend{\rho}{\dvar x \substo \den{e}\<\rho}
-      \]
-
-      By our IH for $e$ we have $\den{\phi e}\<\g \approx_{\isof A}
-      \den{e}\<\rho$, and therefore $\pi_1\<(\den{\phi e}\<\g) \approx_A
-      \den{e}\<\rho$ and $\longvld{\pi_2\<(\den{\phi e}\<\g)}{\pi_1\<(\den{\phi
-          e}\<\g)}{\pi_1\<(\den{\phi e}\<\g)}$. Combined with $\gamma \approx
-      \rho$, this suffices.
+      \).
+%
+      By our IH for $f$, it suffices to show that $\extend{\g}{\sigma_\g}
+      \approx \extend{\rho}{\dvar x \substo \den{e}\<\rho}$, and since $\g
+      \approx \rho$ we merely need show $\sigma_\g \approx \tuple{\dvar x
+        \substo \den{e}\<\rho}$. This follows from $\den{\phi e}\<\g
+      \approx_{\isof A} \den{e}\<\rho$, which we get from our IH for $e$.
 
     \item We wish to show that
       \[
       \longvld
-          {\den{\delta f} \<\extend{\g}{
-              \dvar x \substo \pi_1(\den{\phi e}\<\g),\,
-              \dvar\dx \substo \pi_2(\den{\phi e}\<\g)}}
-          {\den{\phi f} \<\extend{\g}{
-              \dvar x \substo \pi_1(\den{\phi e}\<\g),\,
-              \dvar\dx \substo \pi_2(\den{\phi e}\<\g)}}
-          {\den{\phi f} \<\extend{\g'}{
-              \dvar x \substo \pi_1(\den{\phi e}\<\g'),\,
-              \dvar\dx \substo \pi_2(\den{\phi e}\<\g')}}
+          {\den{\delta f} \<\extend{\g}{\dgamma, \sigma_{\extend\g\dgamma}}}
+          {\den{\phi f} \<\extend{\g}{\sigma_\g}}
+          {\den{\phi f} \<\extend{\g'}{\sigma_{\g'}}}
       \]
-      \todo{darn, this doesn't even fit on the page}
+
+      \todo{TODO: hold on, since $\phi e$ is weakened wherever it appears in
+        $\delta e$ we can actually project out $d\gamma$ and just use $\sigma_\g$. hm.}
       \XXX
     \end{enumerate}
 
@@ -2275,6 +2257,12 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
       \dvar y \substo \pi_2\<(\den{e}\<\g)}
     && \text{$\freshvar z$ is fresh}
   \end{align*}
+
+  \noindent
+  \todo{TODO: Don't feel entirely comfortable with ``$\freshvar z$ is fresh''
+    reasoning. Really it needs the following lemma: if $f_{\Psi}$ is $\J f \G A$
+    weakened to $\J f {\G,\Psi} A$, then $\den{f_\Psi}\<\extend{\g}{\psi} =
+    \den{f}\<\g$.}
 \end{proof}
 
 
