@@ -1,5 +1,6 @@
 -- The Datafun runtime.
-module Runtime where
+module Runtime (Set, Preord (..), Semilat (..), set, guard, forIn, fix, fastfix)
+where
 
 import qualified Data.Set as Set
 import Data.Set (Set)
