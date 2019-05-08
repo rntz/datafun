@@ -2049,7 +2049,29 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
       \(\longvld{\g_{\dvar\dx}}{\g_{\dvar x}}{\g_{\dvar x}}\).
     \end{enumerate}
 
-  \item[Case \(\fnof x e\):] \XXX
+  \item[Case \(\fnof x e\):] Then \(\phi(\fnof x e) = \fnof x \phi e\) and
+    \(\delta(\fnof x e) = \fnof{\eboxd x} \fnof\dx \delta e\). By our semantics
+    and \cref{lem:lambox} we have:
+
+    \begin{align*}
+      \den{\fnof x e} \<\rho
+      &= \lambda_x\den{e} \<\rho
+      = a \mapsto \den{e}\<\extend\rho{x \substo a}
+      \\
+      \den{\fnof x \phi e} \<\g
+      &= \lambda_x\den{\phi e} \<\g
+      = a \mapsto \den{\phi e}\<\extend{\g}{x \substo a}
+      \\
+      \den{\fnof{\eboxd x} \fnof\dx \delta e} \<\extend\g\dgamma
+      &= \lambda_{\dvar x} \lambda_\dx \den{\delta e} \<\extend\g\dgamma\\
+      &= a \mapsto \da \mapsto \den{\delta e} \<\extend\g{\dgamma,\,
+        \dvar x \substo a,\, \dx \substo \da}
+    \end{align*}
+
+    \begin{enumerate}
+    \item \XXX
+    \item \XXX
+    \end{enumerate}
 
   \item[Case \(e\<f\):] \XXX
 
@@ -2263,6 +2285,17 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
     reasoning. Really it needs the following lemma: if $f_{\Psi}$ is $\J f \G A$
     weakened to $\J f {\G,\Psi} A$, then $\den{f_\Psi}\<\extend{\g}{\psi} =
     \den{f}\<\g$.}
+\end{proof}
+
+
+\newcommand\weaken[2]{\morph{weaken}_{#2}({#1})}
+
+\begin{lemma}\label{lem:lambox}
+  \(\den{\fnof{\eboxd x} e} = \lambda_x\den{e}\).
+\end{lemma}
+\begin{proof}
+  By desugaring (\cref{fig:desugaring}), $\fnof{\eboxd x} e \desugars
+  \fnof{\freshvar y} \elet{\eboxd x = \freshvar y} \weaken{e}{\freshvar y}$. \XXX
 \end{proof}
 
 
