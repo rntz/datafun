@@ -171,7 +171,11 @@ correct by relating it to the incremental semantics.
       \bnfor \tunit \bnfor A \x B \bnfor A + B \bnfor A \to B
       \\
       \text{eqtypes} & \eqt A, \eqt B &\bnfeq&
-      \isof{\eqt A} \bnfor \tset{\eqt A} \bnfor
+      %% TODO: revamp to make \isof an eqtype. this requires \Phi(\isof{\eqt A})
+      %% = \isof{\Phi{\eqt A}} = \isof{\eqt A} and changing \phi & \delta
+      %% accordingly.
+      %\isof{\eqt A} \bnfor
+      \tset{\eqt A} \bnfor
       \tunit \bnfor \eqt A \x \eqt B \bnfor \eqt A + \eqt B
       \\
       \text{semilattices} & L,M &\bnfeq& \tset{\eqt A} \bnfor \tunit \bnfor L \x M
@@ -447,7 +451,7 @@ bicartesian closed category \catC{} equipped with the following structures:
   %% \pfinof A \to L \).
 
 \item \emph{Equality}, \emph{semilattice}, and \emph{fixed point objects}, which
-  must interpret equality, semilattice, and fixed point types respectively.
+  must interpret first-order, semilattice, and fixed point types respectively.
   Letting $\eqt A$ be an equality object, $L$ be a semilattice object, and
   $\fixt L$ be a fixed point object, these must have morphisms:
 
@@ -465,8 +469,8 @@ bicartesian closed category \catC{} equipped with the following structures:
 
   \nopagebreak[2]
   \[
-    \infer{f : \G \x \isof A \to \den{\eqt L}}
-          {\pcollect{f} : \G \x \pfinof{A} \to \den{\eqt L}}
+    \infer{f : \G \x \isof A \to L}
+          {\pcollect{f} : \G \x \pfinof{A} \to L}
   \]
 
 %% , Given objects $\G, A$, a semilattice equality type $\eqt L$, and
@@ -964,7 +968,7 @@ $\deriv{\morph{join}} \<x \<\dx = \morph{join}\<\dx$, because:
   \label{lem:semi} $\incdens L$ is a semilattice object.
 \end{restatable}
 \begin{proof}
-  By induction on $\eqt L$. See \cpageref{proof:semi}.
+  By induction on $L$. See \cpageref{proof:semi}.
 \end{proof}
 
 
@@ -1015,10 +1019,8 @@ A fixed point object $\fixt L$ in \CP\ is a semilattice object such that
 $\vals{\fixt L}$ satisfies the ascending chain condition. \todo{TODO more
   explanation.} Since the argument to \morph{fix} is boxed and cannot change,
 $\deriv{\morph{fix}}$ needs to produce a zero change; and at any semilattice
-object, $\bot$ is a zero change, so:
-
-\nopagebreak[2]
-\[ \deriv{\morph{fix}} \<x \<\tuple{} = \bot \]
+object, $\bot$ is a zero change, so \( \deriv{\morph{fix}} \<x \<\tuple{} = \bot
+\).
 
 \begin{lemma}\label{lem:fixobject}
   \(\incdens{\fixt L}\) is a fixed point object.
@@ -1126,8 +1128,9 @@ the risk of confusion.
 
 \renewcommand\isocx\isof
 
-\todo{TODO: explain faster-fix?}
-\todo{TODO: explain $\Phi$ type transformation.}
+\todo{TODO: explain \prim{fast-fix}. explain $\Phi$ type transformation as
+  ``decorating'' $\isof A$ values with their zero changes so that \prim{fix}
+  gets its argument's derivative and can be implemented via \prim{fast-fix}.}
 
 \Cref{fig:seminaive-phi,fig:seminaive-delta} define two mutually recursive
 static transformations: $\phi e$, which computes $e$ \emph{semi\naive{}ly},
@@ -1135,13 +1138,14 @@ speeding up fixed point computation by using derivatives; and $\delta e$, which
 computes the \emph{derivative} of $\phi e$.
 %
 To describe the types of $\phi e$ and $\delta e$, we'll need three new operators
-on contexts: $\isocx\G$, $\D\G$, and $\Phi\G$. We define these by their
-pointwise action on hypotheses: \todo{TODO: intuition}
+on contexts: $\isocx\G$, $\D\G$, and $\Phi\G$.
+%
+We define these by their pointwise action on hypotheses:
 
 \nopagebreak[2]
 \begin{align*}
   \isocx{(\h x A)} &= \hd x A & \isocx{(\hd x A)} &= \hd x A\\
-  \D(\h x A) &= \h \dx {\D A} & \D(\hd x A) &= \emptycx \quad\text{(the empty context)}\\
+  \D(\h x A) &= \h \dx {\D A} & \D(\hd x A) &= \emptycx\quad\text{(the empty context)}\\
   \Phi(\h x A) &= \h x {\Phi A} & \Phi(\hd x A) &= \hd x {\Phi A}, \hd \dx {\DP A}
 \end{align*}
 
@@ -1156,40 +1160,23 @@ pointwise action on hypotheses: \todo{TODO: intuition}
 \end{mathpar}
 
 \noindent
-The idea here is that:
+The idea is that $\isof\G$, $\D\G$, and $\Phi\G$ mirror the effect of $\iso$,
+$\D$, and $\Phi$ on the semantics of $\G$. In particular:
 
 \nopagebreak[2]
 \begin{align*}
-  \den{\isocx\G} &\cong \isof{\den\G} &
-  \den{\D\G} &\cong \D\incdens\G &
-  \den{\Phi\G} &\cong \text{\todo{harder to describe}}
+  \den{\isocx\G} &\cong \isof{\den\G}
+  &
+  \den{\Phi(\h x A)} &\cong \den{\Phi A}
+  \\
+  \den{\D\G} &\cong \D\incdens\G
+  &
+  \den{\Phi(\hd x A)} &\cong \den{\Phi \isof A}
 \end{align*}
 
-%% The type of $\delta e$ involves a
-%% strengthening operator $\isocx{\G}$ that makes every variable in $\G$
-%% discrete:
-%% %
-%% \begin{mathpar}
-%%   \isocx{(H_i)_i} = (\isocx{H_i})_i
-
-%%   \isocx{\h x A} = \hd x A
-
-%%   \isocx{\hd x A} = \hd x A
-%% \end{mathpar}
-
-%% \noindent
-%% Be careful not to confuse $\isocx\G$, which strengthens $\G$ by making every
-%% variable discrete, with $\stripcxd{\G}$, which weakens $\G$ by removing all
-%% \emph{except} the discrete variables.
-
-%% \begin{restatable}[Type-correctness]{theorem}{thmTypeCorrect}
-%%   \label{thm:type-correct}
-%%   If $\J e \G A$, then
-%%   \[ \J {\phi e} {\Phi\G, \D\Phi\stripcxd{\G}} {\Phi A}
-%%   \qquad\text{and}\qquad
-%%   \J {\delta e} {\isocx{\Phi\G}, \D\Phi\G} {\D\Phi A}
-%%   \]
-%% \end{restatable}
+\noindent
+These defined, we can state the sense in which $\phi$ and $\delta$ are
+type-correct:
 
 \begin{restatable}[Type-correctness]{theorem}{thmTypeCorrect}
   \label{thm:type-correct}
@@ -1205,15 +1192,13 @@ The idea here is that:
 
 \noindent To get the hang of these context and type transformations, let's
 suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
-%
-\begin{mathpar}
-  \J {\phi e} {\h x {\Phi A}, \hd y {\Phi B}, \hd \dy {\DP B}} {\Phi C}
 
-  \J {\delta e} {\hd x {\Phi A}, \h\dx{\DP A}, \hd y {\Phi B}, \hd \dy {\DP B}} {\DP C}
-\end{mathpar}
-
-\todo{TODO: Explain the use of weakening in semi\naive{} $\delta(e\<f)$,
-  hilighted in {\color{Rhodamine}pink}.}
+\nopagebreak[2]
+\begin{align*}
+  \Jalign {\phi e} {\h x {\Phi A}, \hd y {\Phi B}, \hd \dy {\DP B}} {\Phi C}
+  \\
+  \Jalign {\delta e} {\hd x {\Phi A}, \h\dx{\DP A}, \hd y {\Phi B}, \hd \dy {\DP B}} {\DP C}
+\end{align*}
 
 
 %% \begin{figure*}
@@ -1291,6 +1276,12 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
     \\
     \phi(\eisEmpty e) &= \eisEmpty {\phi e}
   \end{align*}
+
+  \noindent
+  \todo{TODO: Explain the use of weakening in semi\naive{} $\delta(e\<f)$,
+  hilighted in {\color{Rhodamine}pink}.}
+
+  \todo{TODO: explain implementation of \zero{} via \dummy{}.}
 
   \caption{Semi\naive{} speed-up translation, $\phi$}
   \label{fig:seminaive-phi}

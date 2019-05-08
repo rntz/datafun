@@ -11,7 +11,7 @@
 %% ===== General math & PL notation =====
 \ifdefined\G\renewcommand\G\Gamma\else\newcommand\G\Gamma\fi
 \newcommand\g\gamma
-\newcommand\emptycx{{\cdot}}
+\newcommand\emptycx{\varepsilon}
 \newcommand\D\Delta
 \newcommand\DP{\D\Phi}
 \newcommand\x\times
@@ -156,6 +156,7 @@
 
 %\newcommand\J[3]{{#1} \mathrel{\,:\,} {#2} \vdash {#3}}
 \newcommand\J[3]{{#2} \vdash {#1} \mathrel{:} {#3}}
+\newcommand\Jalign[3]{{#2} &\vdash {#1} \mathrel{:} {#3}}
 \newcommand\h[2]{{#1} : {#2}}
 \newcommand\dvar[1]{{\isocolor #1}}
 \newcommand\freshvar[1]{{\color{Rhodamine}#1}}
