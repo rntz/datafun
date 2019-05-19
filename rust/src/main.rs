@@ -84,7 +84,7 @@ but got:  {:?}",
 
         Row(es) => match expect {
             // for now, we can't infer singleton relations. TODO.
-            None => panic!(),
+            None => panic!("can't infer singleton relations... yet "),
             Some(Type::Rel(ts)) => {
                 if es.len() != ts.len() {
                     type_error!("relation has wrong # columns")
@@ -245,6 +245,19 @@ mod test {
         assert_eq!(
             parse_and_infer("@ {} -> {} x -> {} or x").1,
             Ok(Type::Fn(Box::new(Type::Rel(vec![])), Box::new(Type::Rel(vec![]))))
+        );
+        assert!(
+            parse_and_infer("@ {} -> {} x -> {x} or x").1.is_err()
         )
+    }
+
+    #[test]
+    fn test_for() {
+        // TODO: write the code so that we don't need a type annotation here
+        assert_eq!(
+            parse_and_infer(
+                "@{}
+for x in (@{Num} {0}) do x = 0").1,
+            Ok(Type::Rel(vec![])))
     }
 }
