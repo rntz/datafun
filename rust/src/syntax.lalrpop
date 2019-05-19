@@ -1,0 +1,72 @@
+use std::str::FromStr;
+use super::{Type, Expr, Var};
+
+grammar;
+
+pub Num: i32 =
+    <s:r"[0-9]+"> => i32::from_str(s).unwrap();
+
+pub Var: Var = {
+    <n:r"[[:alpha:]]([[:alnum:]]|[-_\?!])*"> => n.to_owned(),
+}
+
+pub Type: Type = {
+    <t1: Type0> "->" <t2: Type> => Type::Fn(Box::new(t1), Box::new(t2)),
+    Type0
+}
+
+pub Type0: Type = {
+    "Num" => Type::Num,
+    "Str" => Type::Str,
+    "{" <ts: Comma<Type>> "}" => Type::Rel(ts),
+    "(" <t: Type> ")" => t,
+}
+
+pub Expr: Expr = {
+    "let" <v:Var> "=" <e1:Expr3> "in" <e2:Expr> => Expr::Let(v, Box::new(e1), Box::new(e2)),
+    "for" <vs:Comma<Var>> "in" <e1:Expr3> "do" <e2:Expr> => Expr::For(vs, Box::new(e1), Box::new(e2)),
+    "if" <e1:Expr> "then" <e2:Expr> "else" <e3:Expr> => Expr::If(Box::new(e1), Box::new(e2), Box::new(e3)),
+    "@" <t:Type> <e:Expr> => Expr::Asc(t, Box::new(e)),
+    <v:Var> "->" <e:Expr> => Expr::Lam(v, Box::new(e)),
+    Expr3,
+}
+
+pub Expr3: Expr = {
+    <e1:Expr2> "=" <e2:Expr2> => Expr::Eq(Box::new(e1), Box::new(e2)),
+    Expr2,
+}
+
+pub Expr2: Expr = {
+    <e1:Expr1> "or" <e2:Expr2> => Expr::Join(vec![e1, e2]),
+    Expr1,
+}
+
+pub Expr1: Expr = {
+    <e1:Expr1> <e2:Expr0> => Expr::App(Box::new(e1), Box::new(e2)),
+    Expr0,
+}
+
+pub Expr0: Expr = {
+    <v:Var> => Expr::Var(v),
+    <n:Num> => Expr::Num(n),
+    <s:r#""(\\.|[^"])*""#> => Expr::Str(unescape::unescape(&s[1..(s.len()-1)]).unwrap()),
+    "{" <es: Comma<Expr>> "}" => Expr::Row(es),
+    "nil" => Expr::Join(vec![]),
+    "(" <e:Expr> ")" => e,
+}
+
+// pub Scalar: Scalar = {
+//     <s:r#""(\\.|[^"])*""#> => Scalar::String(unescape::unescape(&s[1..(s.len()-1)]).unwrap()),
+//     <n:r"[0-9]+"> => Scalar::Number(i64::from_str(n).unwrap()),
+// }
+
+Comma<T>: Vec<T> = { // (1)
+    <v:(<T> ",")*> <e:T?> => match e { // (2)
+        None => v,
+        Some(e) => {
+            let mut v = v;
+            v.push(e);
+            v
+        }
+    }
+};
