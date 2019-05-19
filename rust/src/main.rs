@@ -25,6 +25,7 @@ pub enum Expr {
     For(Vec<Var>, Box<Expr>, Box<Expr>),
     // conditionals
     If(Box<Expr>, Box<Expr>, Box<Expr>),
+    // TODO: fixed points
 }
 use Expr::*;
 
