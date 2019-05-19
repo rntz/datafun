@@ -9,6 +9,7 @@ pub enum Type {
 
 type Var = String;
 
+#[derive(Debug,Clone,PartialEq,Eq,PartialOrd,Ord)]
 pub enum Expr {
     Var(Var),
     Num(i32), Str(String),          // scalar literals
@@ -37,9 +38,10 @@ lazy_static::lazy_static!{
 pub fn type_check(cx: &Cx, expect: Option<&Type>, expr: &Expr) -> Type {
     let infers = |got| {
         match expect {
-            Some(t) if subtype(&got, t) => got,
             None => got,
-            _ => type_error("fux")
+            Some(t) if subtype(&got, t) => got,
+            Some(t) => type_error(&format!("expected: {:?}
+but got:  {:?}", t, got))
         }
     };
     let check = || {
@@ -172,7 +174,9 @@ fn assert_valid(x: &Type) {
     }
 }
 
-fn type_error(_: &str) -> ! { panic!() } // TODO
+fn type_error(s: &str) -> ! {
+    panic!("\n\n{}\n\n", s);
+}
 fn subtype(x: &Type, y: &Type) -> bool { x == y }
 
 // match e {
@@ -190,6 +194,15 @@ fn subtype(x: &Type, y: &Type) -> bool { x == y }
 //     If(e,f,g) => { panic!() }
 // }
 
+fn test_check(tp: &Type, e: &Expr) {
+    let cx = HashMap::new();
+    type_check(&cx, Some(tp), &e);
+}
+
 fn main() {
-    println!("Hello, world!");
+    test_check(&Type::Rel(vec![Type::Num]), &Row(vec![Num(2)]));
+    test_check(
+        &Type::Fn(Box::new(Type::Num), Box::new(Type::Num)),
+        &Lam("x".to_string(), Box::new(Var("x".to_string())))
+    );
 }
