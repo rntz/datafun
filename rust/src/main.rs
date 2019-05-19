@@ -39,19 +39,19 @@ pub fn type_check(cx: &Cx, expect: Option<&Type>, expr: &Expr) -> Type {
         match expect {
             Some(t) if subtype(&got, t) => got,
             None => got,
-            _ => typeError("fux")
+            _ => type_error("fux")
         }
     };
     let check = || {
         match expect {
             Some(t) => t,
-            None => typeError("cannot infer this expression"),
+            None => type_error("cannot infer this expression"),
         }
     };
     match expr {
         Asc(a, e) => infers(type_check(cx, Some(a), e)),
         Var(x) => match cx.get(x) {
-            None => typeError("unbound variable"),
+            None => type_error("unbound variable"),
             Some(tp) => infers(tp.clone()),
         },
         Num(_) => { infers(Type::Num) }
@@ -59,8 +59,8 @@ pub fn type_check(cx: &Cx, expect: Option<&Type>, expr: &Expr) -> Type {
         Eq(e1,e2) => {
             let t1 = type_check(cx, None, e1);
             let t2 = type_check(cx, None, e2);
-            if t1 != t2 { typeError("types are not equal") }
-            if !equality_type(&t1) { typeError("cannot compare at that type") }
+            if t1 != t2 { type_error("types are not equal") }
+            if !equality_type(&t1) { type_error("cannot compare at that type") }
             infers(BOOL.clone())
         }
 
@@ -69,13 +69,13 @@ pub fn type_check(cx: &Cx, expect: Option<&Type>, expr: &Expr) -> Type {
             None => { panic!() },
             Some(Type::Rel(ts)) => {
                 if es.len() != ts.len() {
-                    typeError("relation has wrong # columns")
+                    type_error("relation has wrong # columns")
                 }
                 Type::Rel(ts.iter().zip(es.iter())
                           .map(|(t,e)| type_check(cx, Some(t), e))
                           .collect())
             },
-            Some(_) => typeError("relation must have relation type"),
+            Some(_) => type_error("relation must have relation type"),
         },
 
         Let(_x,_e,_f) => { panic!() }
@@ -87,7 +87,7 @@ pub fn type_check(cx: &Cx, expect: Option<&Type>, expr: &Expr) -> Type {
                 type_check(&cx2, Some(b), e);
                 Type::Fn(a.clone(), b.clone())
             }
-            _ => typeError("lambda needs function type"),
+            _ => type_error("lambda needs function type"),
         },
 
         App(e,f) => match type_check(cx, None, e) {
@@ -95,14 +95,14 @@ pub fn type_check(cx: &Cx, expect: Option<&Type>, expr: &Expr) -> Type {
                 type_check(cx, Some(&a), f);
                 *b
             }
-            _ => typeError("can't apply a non-function"),
+            _ => type_error("can't apply a non-function"),
         },
 
         Join(es) => match expect {
             // TODO: implement inferring the types of non-empty joins
             None => { panic!() },
             Some(a) => {
-                if !lattice_type(a) { typeError("can't take join at non-lattice type") }
+                if !lattice_type(a) { type_error("can't take join at non-lattice type") }
                 for e in es { type_check(cx, Some(a), e); }
                 a.clone()
             }
@@ -111,17 +111,17 @@ pub fn type_check(cx: &Cx, expect: Option<&Type>, expr: &Expr) -> Type {
         For(xs,e,f) => match type_check(cx, None, e) {
             Type::Rel(ts) => {
                 if xs.len() != ts.len() {
-                    typeError("wrong number of variables for relation")
+                    type_error("wrong number of variables for relation")
                 }
                 let mut cx2 = cx.clone();
                 for (x,t) in xs.iter().zip(ts.iter()) {
                     cx2.insert(x.clone(), t.clone());
                 }
                 let got = type_check(&cx2, expect, f);
-                if !lattice_type(&got) { typeError("cannot loop at non-lattice type") }
+                if !lattice_type(&got) { type_error("cannot loop at non-lattice type") }
                 got
             }
-            _ => typeError("cannot loop over non-relation")
+            _ => type_error("cannot loop over non-relation")
         },
 
         If(e,f,g) => {
@@ -139,7 +139,7 @@ pub fn type_check(cx: &Cx, expect: Option<&Type>, expr: &Expr) -> Type {
 // - booleans?
 // - numbers under max?
 fn lattice_type(x: &Type) -> bool {
-    assertValid(x);
+    assert_valid(x);
     match x {
         Type::Fn(_,_) | Type::Str | Type::Num => false,
         Type::Rel(_) => true
@@ -153,8 +153,8 @@ fn equality_type(x: &Type) -> bool {
     }
 }
 
-fn scalarType(x: &Type) -> bool {
-    assertValid(x);
+fn scalar_type(x: &Type) -> bool {
+    assert_valid(x);
     match x {
         Type::Rel(_) | Type::Fn(_,_) => false,
         _ => true,
@@ -162,17 +162,17 @@ fn scalarType(x: &Type) -> bool {
 }
 
 // TODO: smart constructors so we never make invalid types.
-fn assertValid(x: &Type) {
+fn assert_valid(x: &Type) {
     match x {
         Type::Rel(ts) =>
-            if !ts.iter().all(scalarType) {
-                typeError("columns of relation must be scalars");
+            if !ts.iter().all(scalar_type) {
+                type_error("columns of relation must be scalars");
             },
         _ => {}
     }
 }
 
-fn typeError(_: &str) -> ! { panic!() } // TODO
+fn type_error(_: &str) -> ! { panic!() } // TODO
 fn subtype(x: &Type, y: &Type) -> bool { x == y }
 
 // match e {
