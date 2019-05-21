@@ -37,7 +37,7 @@ pub Expr3: Expr = {
 }
 
 pub Expr2: Expr = {
-    <e1:Expr1> "or" <e2:Expr2> => Expr::Join(vec![e1, e2]),
+    <e1:Expr1> "or" <e2:Expr2> => Expr::Join(Box::new(e1), Box::new(e2)),
     Expr1,
 }
 
@@ -51,7 +51,7 @@ pub Expr0: Expr = {
     <n:Num> => Expr::Num(n),
     <s:r#""(\\.|[^"])*""#> => Expr::Str(unescape::unescape(&s[1..(s.len()-1)]).unwrap()),
     "{" <es: Comma<Expr>> "}" => Expr::Row(es),
-    "nil" => Expr::Join(vec![]),
+    "nil" => Expr::Bottom(),
     "(" <e:Expr> ")" => e,
 }
 

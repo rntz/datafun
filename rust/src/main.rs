@@ -17,24 +17,26 @@ type Var = String;
 pub enum Expr {
     Var(Var),
     Num(i32),
-    Str(String),                    // scalar literals
-    Eq(Box<Expr>, Box<Expr>),       // equality tests
-    Row(Vec<Expr>),                 // singleton relation
-    Asc(Type, Box<Expr>),           // type ascription
-    Let(Var, Box<Expr>, Box<Expr>), // let binding
+    Str(String),                         // scalar literals
+    Eq(Box<Expr>, Box<Expr>),            // equality tests
+    Row(Vec<Expr>),                      // singleton relation
+    Asc(Type, Box<Expr>),                // type ascription
+    Let(Var, Box<Expr>, Box<Expr>),      // let binding
+    If(Box<Expr>, Box<Expr>, Box<Expr>), // conditionals
     // functions
     Lam(Var, Box<Expr>),
     App(Box<Expr>, Box<Expr>),
     // semilattices
-    Join(Vec<Expr>),
-    For(Vec<Var>, Box<Expr>, Box<Expr>),
-    // conditionals
-    If(Box<Expr>, Box<Expr>, Box<Expr>),
-    // TODO: fixed points
+    Bottom(),                            // 0-ary lubs
+    Join(Box<Expr>, Box<Expr>),          // binary lubs
+    For(Vec<Var>, Box<Expr>, Box<Expr>), // comprehensions / big lubs
+    Fix(Var, Box<Expr>),                 // fixed points
 }
 use Expr::*;
 
 type TypeError = String;
+type Check<A> = Result<A, TypeError>;
+type Cx = HashMap<Var, Type>;
 
 macro_rules! type_error {
     ($($arg:tt)*) => ({
@@ -42,28 +44,67 @@ macro_rules! type_error {
     })
 }
 
-type Cx = HashMap<Var, Type>;
+lazy_static::lazy_static! { static ref BOOL: Type = Type::Rel(vec![]); }
 
-//const boolean: Type = Type::Rel(vec![]);
-lazy_static::lazy_static! {
-    static ref BOOL: Type = Type::Rel(vec![]);
+impl Type {
+    fn subtype(self: &Type, other: &Type) -> bool {
+        self == other
+    }
+
+    fn check(self: &Type) -> Check<()> {
+        match self {
+            Type::Rel(ts) => ts.iter().map(|x| x.check_column()).collect(),
+            _ => Ok(()),
+        }
+    }
+
+    fn check_column(self: &Type) -> Check<()> {
+        match self {
+            Type::Rel(_) | Type::Fn(_, _) => type_error!("columns of relation must be scalars"),
+            _ => self.check(),
+        }
+    }
+
+    // For now our only semilattices are relations
+    // later:
+    // - tuples of semilattice types
+    // - booleans?
+    // - numbers under max?
+    fn is_semilattice(self: &Type) -> bool {
+        match self {
+            Type::Rel(_) => true,
+            Type::Fn(_, _) | Type::Str | Type::Num => false,
+        }
+    }
+
+    fn has_equality(self: &Type) -> bool {
+        match self {
+            Type::Fn(_, _) => false,
+            Type::Num | Type::Str | Type::Rel(_) => true,
+        }
+    }
 }
 
-pub fn type_check(cx: &Cx, expect: Option<&Type>, expr: &Expr) -> Result<Type, TypeError> {
-    let infers = |got| match expect {
-        None => Ok(got),
-        Some(t) if subtype(&got, t) => Ok(got),
-        Some(t) => type_error!(
+pub fn type_check(cx: &Cx, expect: Option<&Type>, expr: &Expr) -> Check<Type> {
+    // Called when we infer a type to check it matches the expected type, if any.
+    let infers = |got: Type| match expect {
+        Some(t) if !got.subtype(t) => type_error!(
             "expected: {:?}
 but got:  {:?}",
-            t, got
+            t,
+            got
         ),
+        _ => Ok(got),
     };
+
+    // Called when we cannot infer a type, to get the type to check against, or
+    // fail if no type was provided.
     let check = || match expect {
         Some(t) => Ok(t),
-        None => type_error!("cannot infer this expression"),
+        None => type_error!("cannot infer this expression; try adding a type annotation"),
     };
-    let typ = match expr {
+
+    let typ: Type = match expr {
         Asc(a, e) => infers(type_check(cx, Some(a), e)?)?,
         Var(x) => match cx.get(x) {
             None => type_error!("unbound variable"),
@@ -75,17 +116,29 @@ but got:  {:?}",
             let t1 = type_check(cx, None, e1)?;
             let t2 = type_check(cx, None, e2)?;
             if t1 != t2 {
-                type_error!("types are not equal")
+                type_error!("types are not equal: {:?} versus {:?}", t1, t2)
             }
-            if !equality_type(&t1) {
-                type_error!("cannot compare at that type")
+            if !t1.has_equality() {
+                type_error!("cannot test equality at type {:?}", t1)
             }
             infers(BOOL.clone())?
         }
 
+        If(e, f, g) => {
+            type_check(cx, Some(&BOOL), e)?;
+            let got = type_check(cx, expect, f)?;
+            type_check(cx, Some(&got), g)?;
+            got
+        }
+
         Row(es) => match expect {
-            // for now, we can't infer singleton relations. TODO.
-            None => panic!("can't infer singleton relations... yet "),
+            // Infer each column
+            None => Type::Rel(
+                es.iter()
+                    .map(|e: &Expr| type_check(cx, None, e))
+                    .collect::<Check<_>>()?,
+            ),
+            // Check each column
             Some(Type::Rel(ts)) => {
                 if es.len() != ts.len() {
                     type_error!("relation has wrong # columns")
@@ -94,13 +147,18 @@ but got:  {:?}",
                     ts.iter()
                         .zip(es.iter())
                         .map(|(t, e)| type_check(cx, Some(t), e))
-                        .collect::<Result<Vec<_>, _>>()?,
+                        .collect::<Check<Vec<_>>>()?,
                 )
             }
             Some(_) => type_error!("relation must have relation type"),
         },
 
-        Let(_x, _e, _f) => panic!(),
+        Let(x, e, f) => {
+            let etype = type_check(cx, None, e)?;
+            let mut cx2 = cx.clone();
+            cx2.insert(x.clone(), etype);
+            type_check(&cx2, expect, f)?
+        }
 
         Lam(x, e) => match check()? {
             Type::Fn(a, b) => {
@@ -120,19 +178,26 @@ but got:  {:?}",
             _ => type_error!("can't apply a non-function"),
         },
 
-        Join(es) => match expect {
-            // TODO: implement inferring the types of non-empty joins
-            None => panic!(),
-            Some(a) => {
-                if !lattice_type(a)? {
-                    type_error!("can't take join at non-lattice type")
-                }
-                for e in es {
-                    type_check(cx, Some(a), e)?;
-                }
-                a.clone()
+        Bottom() => {
+            let tp = check()?;
+            if !tp.is_semilattice() {
+                type_error!("'nil' must have semilattice type")
+            };
+            tp.clone()
+        }
+
+        Join(e1, e2) => {
+            // Check or infer our subterms as appropriate.
+            let got = type_check(cx, expect, e1)?;
+            let got2 = type_check(cx, expect, e2)?;
+            if got != got2 {
+                type_error!("arguments to 'or' must have same type")
             }
-        },
+            if !got.is_semilattice() {
+                type_error!("'or' must be used at semilattice type")
+            }
+            got
+        }
 
         For(xs, e, f) => match type_check(cx, None, e)? {
             Type::Rel(ts) => {
@@ -144,7 +209,7 @@ but got:  {:?}",
                     cx2.insert(x.clone(), t.clone());
                 }
                 let got = type_check(&cx2, expect, f)?;
-                if !lattice_type(&got)? {
+                if !got.is_semilattice() {
                     type_error!("cannot loop at non-lattice type")
                 }
                 got
@@ -152,89 +217,34 @@ but got:  {:?}",
             _ => type_error!("cannot loop over non-relation"),
         },
 
-        If(e, f, g) => {
-            type_check(cx, Some(&BOOL), e)?;
-            let got = type_check(cx, expect, f)?;
-            type_check(cx, Some(&got), g)?;
-            got
+        Fix(x, body) => {
+            // We can't infer 'fix' expressions, only check them.
+            let tp = check()?;
+            if !tp.is_semilattice() {
+                type_error!("'fix' can only be used at semilattice type")
+            };
+            let mut cx2 = cx.clone();
+            cx2.insert(x.clone(), tp.clone());
+            type_check(&cx2, expect, body)?
         }
     };
+    typ.check()?; // don't return ill-formed types.
     Ok(typ)
 }
-
-// for now our only lattices are relations
-// later:
-// - tuples of lattice types
-// - booleans?
-// - numbers under max?
-fn lattice_type(x: &Type) -> Result<bool, TypeError> {
-    assert_valid(x);
-    match x {
-        Type::Fn(_, _) | Type::Str | Type::Num => Ok(false),
-        Type::Rel(_) => Ok(true),
-    }
-}
-
-fn equality_type(x: &Type) -> bool {
-    match x {
-        Type::Fn(_, _) => false,
-        Type::Num | Type::Str | Type::Rel(_) => true,
-    }
-}
-
-fn scalar_type(x: &Type) -> bool {
-    assert_valid(x);
-    match x {
-        Type::Rel(_) | Type::Fn(_, _) => false,
-        _ => true,
-    }
-}
-
-// TODO: smart constructors so we never make invalid types.
-fn assert_valid(x: &Type) -> Result<(), TypeError> {
-    match x {
-        Type::Rel(ts) => {
-            if !ts.iter().all(scalar_type) {
-                type_error!("columns of relation must be scalars");
-            } 
-        }
-        _ => {}
-    }
-    Ok(())
-}
-
-fn subtype(x: &Type, y: &Type) -> bool {
-    x == y
-}
-
-// match e {
-//     Asc(a,e) => { panic!() }
-//     Var(x) => { panic!() }
-//     Num(x) => { panic!() }
-//     Str(x) => { panic!() }
-//     Eq(e1,e2) => { panic!() }
-//     Set(es) => { panic!() }
-//     Let(x,e,f) => { panic!() }
-//     Lam(x,e) => { panic!() }
-//     App(e,f) => { panic!() }
-//     Join(es) => { panic!() }
-//     For(x,e,f) => { panic!() }
-//     If(e,f,g) => { panic!() }
-// }
 
 fn main() {
     let expr = syntax::ExprParser::new()
         .parse("@ {} -> {} x -> {} or x")
         .unwrap();
     let cx = HashMap::new();
-    dbg!(type_check(&cx, None, &expr));
+    println!("{:?}", type_check(&cx, None, &expr));
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
 
-    fn parse_and_infer(code: &str) -> (Expr, Result<Type, TypeError>) {
+    fn parse_and_infer(code: &str) -> (Expr, Check<Type>) {
         let e = syntax::ExprParser::new().parse(code).unwrap();
         let cx = HashMap::new();
         let t = type_check(&cx, None, &e);
@@ -245,11 +255,12 @@ mod test {
     fn test_this_thing() {
         assert_eq!(
             parse_and_infer("@ {} -> {} x -> {} or x").1,
-            Ok(Type::Fn(Box::new(Type::Rel(vec![])), Box::new(Type::Rel(vec![]))))
+            Ok(Type::Fn(
+                Box::new(Type::Rel(vec![])),
+                Box::new(Type::Rel(vec![]))
+            ))
         );
-        assert!(
-            parse_and_infer("@ {} -> {} x -> {x} or x").1.is_err()
-        )
+        assert!(parse_and_infer("@ {} -> {} x -> {x} or x").1.is_err())
     }
 
     #[test]
@@ -258,7 +269,10 @@ mod test {
         assert_eq!(
             parse_and_infer(
                 "@{}
-for x in (@{Num} {0}) do x = 0").1,
-            Ok(Type::Rel(vec![])))
+for x in {0} do x = 0"
+            )
+            .1,
+            Ok(Type::Rel(vec![]))
+        )
     }
 }
