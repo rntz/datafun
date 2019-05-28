@@ -125,6 +125,11 @@ module _ {i j k} {C : Cat i j}
  ---------- Tones ----------
 -- ARGH! Without eta-equality on categories, (Tone.at tone-id C) isn't
 -- definitionally equal to C!
+--
+-- This could be fixed by making (at : Cat i j → Cat i j) a field rather than a
+-- defined function, and adding a field requiring that the at field agrees with
+-- its definition. However, this still won't get (op (op C)) to be
+-- definitionally equal to C!
 record Tone i j : Set (suc (i ⊔ j)) where
   constructor Tone:
 

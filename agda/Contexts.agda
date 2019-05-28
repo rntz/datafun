@@ -10,15 +10,6 @@ Cx = Type -> Set
 hyp : Type -> Cx
 hyp = _≡_
 
--- TODO: Stop using _∪_, use _∨_ instead.
-infixr 4 _∪_
-_∪_ : Cx -> Cx -> Cx
-(X ∪ Y) a = X a ⊎ Y a
-
-infixr 4 _∷_
-_∷_ : Type -> Cx -> Cx
-a ∷ X = hyp a ∪ X
-
 pattern here = inj₁ Eq.refl
 pattern next x = inj₂ x
 
@@ -34,7 +25,20 @@ instance
 
   cx-sums : Sums cxs
   bottom cx-sums = (λ a → ⊥) , λ _ ()
-  lub cx-sums X Y = (λ a → X a ⊎ Y a) / (λ _ → inj₁) / (λ _ → inj₂) / λ f g x → [ f x , g x ]
+  lub cx-sums X Y .a∧b a = X a ⊎ Y a
+  lub cx-sums X Y .∧E₁ _ = inj₁
+  lub cx-sums X Y .∧E₂ _ = inj₂
+  lub cx-sums X Y .∧I f g x = [ f x , g x ]
 
-∪/⊆ : ∀ {X L R} -> L ⊆ R -> X ∪ L ⊆ X ∪ R
+infixr 4 _∷_
+_∷_ : Type -> Cx -> Cx
+a ∷ X = hyp a ∨ X
+
+∪/⊆ : ∀ {X L R} -> L ⊆ R -> X ∨ L ⊆ X ∨ R
 ∪/⊆ = map∨ id
+
+-- TODO: Stop using _∪_, use _∨_ instead.
+-- Main barrier at this point is differing precedences.
+infixr 4 _∪_
+_∪_ : Cx -> Cx -> Cx
+(X ∪ Y) a = X a ⊎ Y a

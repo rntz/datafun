@@ -1,3 +1,6 @@
+-- Generalizing "contexts as functions from types to Set", contexts as
+-- _functors_ from types to sets. Here, the preorder on types could be a
+-- subtyping relation, for example.
 open import Prelude
 open import Cat
 

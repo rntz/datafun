@@ -20,7 +20,21 @@ instance
   _≺?_ : (T U : Mode) -> Dec (T ≺ U)
   _≺?_ = λ { ID ID → yes ≺refl ; ID OP → no λ () ; ID □ → no λ () ; ID ◇ → yes ≺◇ ; OP ID → no λ () ; OP OP → yes ≺refl ; OP □ → no λ () ; OP ◇ → yes ≺◇ ; □ y → yes □≺ ; ◇ ID → no λ () ; ◇ OP → no λ () ; ◇ □ → no λ () ; ◇ ◇ → yes ≺refl }
 
-  modes : Proset
+  -- Really, modes form a lattice-ordered monoid. Or, to a category theorist, a
+  -- 2-category with one object, four 1-morphisms (the four modes), and where
+  -- the 2-morphisms are posetal. Unfortunately, I haven't captured higher
+  -- category theory. So we make do with representing the poset on modes as a
+  -- category, and mode composition as an Action.
+  mode-compose : Action Mode Mode
+  action mode-compose ID T = T
+  action mode-compose T ID = T
+  action mode-compose T □ = □
+  action mode-compose T ◇ = ◇
+  action mode-compose □ OP = □
+  action mode-compose ◇ OP = ◇
+  action mode-compose OP OP = ID
+
+  modes : Cat _ _
   modes = Cat: Mode _≺_ ≺refl λ { ≺refl g → g ; □≺ g → □≺ ; ≺◇ ≺refl → ≺◇ ; ≺◇ ≺◇ → ≺◇ }
 
   mode-sums : Sums modes
@@ -44,15 +58,6 @@ instance
   glb mode-products OP OP = OP / id / id / const
   glb mode-products ID OP = □ / □≺ / □≺ / λ { ≺refl () ; □≺ □≺ → □≺ }
   glb mode-products OP ID = □ / □≺ / □≺ / λ { ≺refl () ; □≺ □≺ → □≺ }
-
-  mode-compose : Action Mode Mode
-  action mode-compose ID T = T
-  action mode-compose T ID = T
-  action mode-compose T □ = □
-  action mode-compose T ◇ = ◇
-  action mode-compose □ OP = □
-  action mode-compose ◇ OP = ◇
-  action mode-compose OP OP = ID
 
 -- Denotation of modes as tones.
 mode⇒tone : ∀{i} → Fun modes (tones {i}{i})
