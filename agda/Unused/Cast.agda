@@ -1,4 +1,4 @@
-module Cast where
+module Unused.Cast where
 
 open import Level
 

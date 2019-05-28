@@ -1,6 +1,6 @@
 -- Hypothesis: this file is out-of-date and not used. When I opened it, it used
 -- false≤ instead of f≤* from Prosets.agda.
-module ACC where
+module Unused.ACC where
 
 open import Prelude
 open import Cat
@@ -100,7 +100,7 @@ module DefnWf where
 
 
 module DefnClassical where
-  open import Classical
+  open import Unused.Classical
 
   module _  (P : Proset) where
     private instance pp = P

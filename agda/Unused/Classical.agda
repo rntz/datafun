@@ -1,4 +1,4 @@
-module Classical where
+module Unused.Classical where
 
 open import Prelude
 open import Cat

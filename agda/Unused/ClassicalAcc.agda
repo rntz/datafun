@@ -1,5 +1,7 @@
 open import Prelude
-open import Classical
+open import Unused.Classical
+
+module Unused.ClassicalAcc where
 
 record Acc {i j} {A : Set i} (_<_ : Rel A j) (x : A) : Set (i ⊔ j) where
   inductive

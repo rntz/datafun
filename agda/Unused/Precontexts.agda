@@ -4,7 +4,7 @@
 open import Prelude
 open import Cat
 
-module Precontexts (types : Proset) where
+module Unused.Precontexts (types : Proset) where
 
 private Type = Obj types
 private instance types-instance = types

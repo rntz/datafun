@@ -1,7 +1,7 @@
-module Markov where
+module Unused.Markov where
 
 open import Prelude
-open import Classical
+open import Unused.Classical
 
 module _ {i} {P : ℕ -> Set i} (P? : ∀ n -> Dec (P n)) .(terminates : Σ? ℕ P) where
   -- This is https://en.wikipedia.org/wiki/Markov%27s_principle.
