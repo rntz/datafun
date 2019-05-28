@@ -12,16 +12,6 @@ instance
   Comonad.dup Iso-comonad = fun ⟨ id , swap ⟩
   Comonad.extract Iso-comonad = fun proj₁
 
--- Comonads as monads on the opposite category.
--- TODO FIXME: remove this, it's how I define comonads anyway.
-Com : ∀{i j C} (□ : Fun {i}{j} C C) → Set (i ⊔ j)
-Com □ = Monad (map Op □)
-
-instance
-  Iso-com : ∀{i j} → Com (Iso {i}{j})
-  Monad.join Iso-com = fun ⟨ id , swap ⟩
-  Monad.pure Iso-com = fun proj₁
-
 iso≤? : ∀{i j} (A : Cat i j) -> Decidable≤ A -> Decidable≤ (iso A)
 iso≤? _ test x y = dec× (test x y) (test y x)
 
