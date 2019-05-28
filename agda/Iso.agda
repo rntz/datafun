@@ -13,6 +13,7 @@ instance
   Comonad.extract Iso-comonad = fun proj₁
 
 -- Comonads as monads on the opposite category.
+-- TODO FIXME: remove this, it's how I define comonads anyway.
 Com : ∀{i j C} (□ : Fun {i}{j} C C) → Set (i ⊔ j)
 Com □ = Monad (map Op □)
 
