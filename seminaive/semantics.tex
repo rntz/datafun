@@ -1534,7 +1534,9 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
 
   \noindent
   Note that $\tuple{\gamma,\dgamma}$ is a slight abuse of notation here;
-  \todo{TODO explain}.
+  \todo{TODO explain that \emph{monotone} variables in $\g$ when we use it as
+    $\den{\phi e}\<\g$ turn into \emph{discrete} variables in $\extend\g\dgamma$
+    when we use it in $\den{\delta e} \<\extend\g\dgamma$}.
 \end{restatable}
 \begin{proof}
   By induction on the derivation of $\J e \G A$. See \cpageref{proof:correct}.
@@ -2060,8 +2062,62 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
     \end{align*}
 
     \begin{enumerate}
-    \item \XXX
-    \item \XXX
+    \item We wish to show that
+      \( \den{\fnof x \phi e} \<\g \approx \den{\fnof x e} \<\rho \).
+      Applying the above, this reduces to
+
+      %% TODO: clean this up
+      \begin{align*}
+        && \den{\fnof x \phi e} \<\g &\approx \den{\fnof x e} \<\rho
+        \\
+        &\impliedby&
+        a \mapsto \den{\phi e}\<\extend{\g}{x \substo a}
+        &\approx
+        a \mapsto \den{e}\<\extend\rho{x \substo a}
+        \\
+        &\impliedby&
+        \fa{a_1 \approx_A a_2}
+        \den{\phi e}\<\extend{\g}{x \substo a_1}
+        &\approx \den{e}\<\extend\rho{x \substo a_2}
+      \end{align*}
+
+      which follows from our IH for $e$ because $a_1 \approx a_2$ implies
+      $\extend\gamma{x \substo a_1} \approx \extend\rho{x \substo a_2}$ by
+      definition.
+
+    \item We wish to show that if $\longvld{\dgamma}\g{\g'}$ then
+      %% FIXME: this runs off the page!
+
+      \begin{align*}
+        %% {\den{\fnof x \phi e} \<\g}
+        %% &\longvalid{\den{\fnof{\eboxd x} \fnof{\dx} \delta e} \<\extend\g{\dgamma}}
+        %% {\den{\fnof x \phi e} \<\g'}
+        %% \\
+        a \mapsto \den{\phi e}\<\extend{\g}{x \substo a}
+        &
+        \longvalid{a \mapsto \da \mapsto \den{\delta e} \<\extend\g{\dgamma,\,
+        \dvar x \substo a,\, \dx \substo \da}}
+        a \mapsto \den{\phi e}\<\extend{\g'}{x \substo a}
+      \end{align*}
+
+      Which by \cref{sec:CP-exponentials} holds iff whenever
+      $\longvld{\da}{a_1}{a_2}$ we have
+
+      \[
+      \longvld{\den{\delta e} \<\extend\g{\dgamma,\, \dvar x \substo a_1,\, \dx \substo \da}}
+              {\den{\phi e} \<\extend\g{x \substo a_1}}
+              {\den{\phi e} \<\extend\g{x \substo a_2}}
+      \]
+
+      Which follows from our IH for $e$, since
+
+      \[
+      \longvld{\extend\dgamma{\dx \substo \da}}
+              {\extend\g{x \substo a_1}}{\extend\g{x\substo a_2}}
+      \]
+
+      because $\longvld\dgamma\g{\g'}$ and $\longvld{\da}{a_1}{a_2}$.
+
     \end{enumerate}
 
   \item[Case \(e\<f\):] \XXX
