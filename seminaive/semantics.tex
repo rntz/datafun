@@ -2233,7 +2233,76 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
 
   \item[Case \(\eeqd e f\):] \XXX
 
-  \item[Case \(\eisEmpty e\):] \XXX
+  \item[Case \(\eisEmpty e\):] Note that $\phi(\eisEmpty e) = \delta(\eisEmpty
+    e) = \eisEmpty {\phi e}$; however, there is weakening at work in
+    $\delta(\eisEmpty e)$. \todo{TODO: clarify}
+
+    \begin{enumerate}
+    \item Assume $\g \approx \rho$. We wish to show that $\den{\phi(\eisEmpty
+      e)}\<\g \approx \den{\eisEmpty e}\<\rho$. So then:
+
+      \begin{align*}
+        \den{\phi(\eisEmpty e)}\<\g
+        &= \den{\eisEmpty {\phi e}} \<\g\\
+        &= \morph{isEmpty} \<(\den{\eboxd{\phi e}} \<\g)\\
+        &= \morph{isEmpty} \<(\den{\phi e} \<(\strip\< \g))
+      \end{align*}
+
+      And similarly:
+
+      \begin{align*}
+        \den{\eisEmpty e}\<\rho
+        = \morph{isEmpty} \<(\den{\eboxd e} \<\rho)
+        = \morph{isEmpty} \<(\den{e} \<(\strip\<\rho))
+      \end{align*}
+
+      From \cref{lem:strip-approx} we have $\strip\<\g \approx \strip\<\rho$.
+      From our IH we get that $\den{\phi e}\<(\strip\<\g) \approx
+      \den{e}\<(\strip\<\rho)$. \todo{TODO: finish this using lemmas that (1)
+        $\Phi(\eqt A) = \eqt A$ and (2) $x \approx_{\eqt A} y \iff x = y$.}
+
+    \item We wish to show that, if $\longvld\dgamma\g{\g'}$ then
+
+      \[ \longvld{\den{\eisEmpty {\phi e}} \<\extend\g{\dgamma}}{
+        \den{\eisEmpty{\phi e}} \<\g}{
+        \den{\eisEmpty{\phi e}} \<\g'}
+      \]
+
+      By the same reasoning as in part one, we have \[\den{\eisEmpty{\phi
+          e}}\<\g = \morph{isEmpty}\<(\den{\phi e}\<(\strip\<\g))\]
+
+      By \cref{lem:strip-equal} we have that
+
+      \begin{align*}
+        \den{\eisEmpty{\phi e}}\<\g' &= \morph{isEmpty}\<(\den{\phi e}\<(\strip\<\g'))\\
+        &= \morph{isEmpty}\<(\den{\phi e}\<(\strip\<\g))\\
+        &= \den{\eisEmpty{\phi e}}\<\g
+      \end{align*}
+
+      The same holds for $\den{\delta(\eisEmpty{\phi e})}$, namely:
+
+      \begin{align*}
+        \den{\delta(\eisEmpty e)} \<\extend\g\dgamma
+        &= \den{\eisEmpty{\phi e}} \<\extend\g\dgamma\\
+        &= \morph{isEmpty}\<(\den{\phi e} \<(\strip\<\extend\g\dgamma))\\
+        &\daggereq \morph{isEmpty}\<(\den{\phi e} \<(\strip\<\g))
+      \end{align*}
+
+      Where the step marked $\dagger$ holds because $\phi e$ is weakened and
+      does not use any derivative variables. \todo{This is a handwave.} So in
+      the end we wish to show that $\den{\eisEmpty {\phi e}}$ is a zero-change
+      to \emph{itself}:
+
+      \[
+      \longvld{\morph{isEmpty}\<(\den{\phi e} \<(\strip\<\g))}
+              {\morph{isEmpty}\<(\den{\phi e} \<(\strip\<\g))}
+              {\morph{isEmpty}\<(\den{\phi e} \<(\strip\<\g))}
+      \]
+
+      Luckily, this is true of \emph{all} changes at this type: $\fa{x : \termO
+        + \termO : \CP} \longvld{x}{x}{x}$. \todo{TODO explain}
+
+    \end{enumerate}
 
   \item[Case \(\esplit e\):] \XXX
 
