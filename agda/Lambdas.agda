@@ -11,18 +11,21 @@ open import Prelude
 open import Cat
 
 module _ {i j} {{C : Cat i j}} {{P : Products C}} where
+  -- should these be prefix operators so that they chain without parens?
   πl : ∀{Γ a b : Obj C} -> Γ ≤ a ∧ b -> Γ ≤ a; πl f = f ∙ π₁
   πr : ∀{Γ a b : Obj C} -> Γ ≤ a ∧ b -> Γ ≤ b; πr f = f ∙ π₂
 
 module _ {i j} {{C : Cat i j}} where
   module _ {{cc : CC C}} where
-    -- TODO: find the right infixity for _$_
-    open CC cc public using () renaming (curry to fn; call to _$_)
+    -- TODO: find the right infixity for _$_. Must be < 9 to bind less tightly
+    -- than ∙.
+    infixr 8 _$_
+    open CC cc public using () renaming (curry to fn)
 
     -- fn : ∀{Γ a b : Obj C} -> (Γ ∧ a) ≤ b -> Γ ≤ (a ⇨ b)
     -- fn = curry
-    -- _$_ : ∀{Γ a b : Obj C} -> Γ ≤ a ⇨ b -> Γ ≤ a -> Γ ≤ b
-    -- _$_ = call
+    _$_ : ∀{Γ a b : Obj C} -> Γ ≤ a ⇨ b -> Γ ≤ a -> Γ ≤ b
+    _$_ = call
 
   module _ {{sums : Sums C}} where
     inl : ∀{Γ a b : Obj C} -> Γ ≤ a -> Γ ≤ a ∨ b; inl x = x ∙ in₁
