@@ -86,7 +86,7 @@ data _⊩_ : Premise -> Type -> Set where
   -- sums
   inj    : ∀{a b} d -> term (if d then a else b) ⊩ a + b
   case   : ∀{a b c} -> term (a + b) , (a is mono ▷ term c) , (b is mono ▷ term c) ⊩ c
-  splitsum : ∀{a b} -> term (□ (a + b)) ⊩ □ a + □ b
+  split : ∀{a b} -> term (□ (a + b)) ⊩ □ a + □ b
   -- booleans
   bool   : Bool -> nil ⊩ bool
   if     : ∀{a} -> □ (term bool) , term a , term a ⊩ a

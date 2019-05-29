@@ -17,9 +17,9 @@ module _ {i j} {{C : Cat i j}} {{P : Products C}} where
 
 module _ {i j} {{C : Cat i j}} where
   module _ {{cc : CC C}} where
-    -- TODO: find the right infixity for _$_. Must be < 9 to bind less tightly
-    -- than ∙.
-    infixr 8 _$_
+    -- Is this the right infixity for _$_?
+    -- It must be < 9 to bind less tightly than ∙.
+    infixr 1 _$_
     open CC cc public using () renaming (curry to fn)
 
     -- fn : ∀{Γ a b : Obj C} -> (Γ ∧ a) ≤ b -> Γ ≤ (a ⇨ b)
