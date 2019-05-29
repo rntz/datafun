@@ -4,7 +4,7 @@
 open import Prelude
 open import Cat
 
-module Unused.Precontexts (types : Proset) where
+module Unused.Procontexts (types : Proset) where
 
 private Type = Obj types
 private instance types-instance = types
@@ -12,7 +12,7 @@ private instance types-instance = types
 ---------- Contexts ----------
 instance
   cxs : Cat (suc zero) zero
-  cxs = cat→ types (sets {zero})
+  cxs = cat→ types (sets zero)
 
 cx-sums : Sums cxs
 cx-sums = it
