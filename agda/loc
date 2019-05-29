@@ -7,7 +7,7 @@ filter() {
     egrep --no-filename -v -- '^\s*(--.*)?$' "$@"
 }
 
-find * -iname '*.agda' '!' -name '.*' |
+find * -iname '*.agda' '!' -name '.*' '!' -iregex '.*trash/.*' |
     while read name; do
         modname=${name%.agda}
         modname=${modname//\//.}
