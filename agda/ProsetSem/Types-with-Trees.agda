@@ -27,9 +27,6 @@ map singleton (U≤T , refl) = map mode⇒tone U≤T
 
 context : Fun cxs (op prosets)
 context = mapreduce singleton
-  where instance x : Products (op (op prosets))
-        x = Products: (top cat-products)
-            λ a b → a ∧ b / π₁ / π₂ / ⟨_,_⟩
 
 ⟦_⟧ : Cx -> Proset
 ⟦_⟧ = ap context

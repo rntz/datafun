@@ -57,13 +57,19 @@ eval⊩ (bool b) = Fun: (λ _ -> b) (λ _ → id)
 eval⊩ if = uncurry (antisym⇒ antisym:bool≤ (λ x → if x then π₁ else π₂))
 eval⊩ (inj true)  = in₁
 eval⊩ (inj false) = in₂
--- TODO: make more use of Lambdas.
-eval⊩ case = cases π₁ (map∧ (π₂ ∙ π₁) (fun id) ∙ apply)
-                      (map∧ (π₂ ∙ π₂) (fun id) ∙ apply)
-  where open import Lambdas
 -- eval⊩ case = distrib-∧/∨
 --            ∙ [ map∧ (fun id) π₁ ∙ swapply
 --              , map∧ (fun id) π₂ ∙ swapply ]
+
+-- TODO: make more use of Lambdas.
+eval⊩ case = cases π₁ (map∧ (πl π₂) (fun id) ∙ apply)
+                      (map∧ (πr π₂) (fun id) ∙ apply)
+  where open import Lambdas
+
+-- -- This only works with eta-equality enabled on Cat. Not sure why.
+-- eval⊩ case = cases π₁ (π₁ ∙ πl π₂ $ π₂) (π₁ ∙ πr π₂ $ π₂)
+--   where open import Lambdas
+
 eval⊩ splitsum .ap x = x
 eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
 eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)

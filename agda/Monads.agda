@@ -21,12 +21,6 @@ module Comonad {i j C} (□ : Fun {i}{j} C C) (Com : Monad (map Op □)) where
   open Monad Com public using ()
     renaming (join to dup; pure to extract; bind to extend)
 
--- Autoconversion. The other direction is true definitionally.
--- If I remove "no-eta-equality" from Cat, this becomes definitional too!
-instance
-  auto:monad→comonad : ∀{i j} {{C}} {◇ : Fun {i}{j} C C} → Monad ◇ → Comonad (map Op ◇)
-  auto:monad→comonad m = Monad: (Monad.join m) (Monad.pure m)
-
 -- A functor is a (co)monad in at most one way, so if you make the (co)Monad an
 -- instance, you can call join, pure, &c by only supplying the functor.
 module _ {i j} {{C}} (◇ : Fun {i}{j} C C) {{Mon : Monad ◇}} where
@@ -39,6 +33,12 @@ module _ {i j} {{C}} (□ : Fun {i}{j} C C) {{Com : Comonad □}} where
   extract : ∀{a} → ap □ a ≤ a
   extract = Comonad.extract {□ = □} Com
 
+-- Autoconversion. The other direction is true definitionally. If I remove
+-- "no-eta-equality" from Cat, this becomes definitional too!
+instance -- ETA
+  auto:monad→comonad : ∀{i j} {{C}} {◇ : Fun {i}{j} C C} → Monad ◇ → Comonad (map Op ◇)
+  auto:monad→comonad m = Monad: (Monad.join m) (Monad.pure m)
+
 
 module Tests where
   postulate C : Proset
@@ -47,7 +47,8 @@ module Tests where
     postulate □ : C ⇒ C; instance shub : Comonad □
     blub : Monad (map Op □); blub = shub
 
-  module Mon→Com where
+  -- Fails when eta-equality for categories is enabled.
+  module Mon→Com where -- ETA
     postulate ◇ : C ⇒ C; instance blub : Monad ◇
     □ : op C ⇒ op C; □ = map Op ◇
     shub : Comonad □; shub = it

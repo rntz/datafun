@@ -7,7 +7,7 @@ open import Decidability
 module Iso where
 
 instance
-  -- This comonad factors into an adjunction to groupoids, I believe.
+  -- This comonad factors into an adjunction to groupoids.
   Iso-comonad : ∀{i j} -> Comonad (Iso {i}{j})
   Comonad.dup Iso-comonad = fun ⟨ id , swap ⟩
   Comonad.extract Iso-comonad = fun proj₁
