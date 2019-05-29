@@ -1,9 +1,9 @@
 {-# OPTIONS --postfix-projections #-}
-module Modes where
+module Unused.Modes where
 
 open import Prelude
 open import Cat
-open import Action
+open import Unused.Action
 
 data Mode : Set where
   ID OP □ ◇ : Mode

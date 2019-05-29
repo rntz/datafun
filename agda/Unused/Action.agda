@@ -1,4 +1,4 @@
-module Action where
+module Unused.Action where
 
 open import Level using (_⊔_)
 open import Function using (_∘_)
