@@ -30,10 +30,10 @@ instance
   decidable+ : ∀{i j k l A B} {R : Rel {i} A j} {S : Rel {k} B l}
              -> Decidable R -> Decidable S -> Decidable (rel+ R S)
   decidable+ P Q (inj₁ x) (inj₁ y) with P x y
-  ... | yes p = yes (rel₁ p)
-  ... | no ¬p = no (λ { (rel₁ x) → ¬p x })
+  ... | yes p = yes (inj₁ p)
+  ... | no ¬p = no (λ { (inj₁ x) → ¬p x })
   decidable+ P Q (inj₂ x) (inj₂ y) with Q x y
-  ... | yes p = yes (rel₂ p)
-  ... | no ¬p = no (λ { (rel₂ x) → ¬p x })
+  ... | yes p = yes (inj₂ p)
+  ... | no ¬p = no (λ { (inj₂ x) → ¬p x })
   decidable+ P Q (inj₁ x) (inj₂ y) = no λ {()}
   decidable+ P Q (inj₂ y) (inj₁ x) = no λ {()}

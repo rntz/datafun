@@ -89,8 +89,8 @@ rel× : ∀{a b c d r s} {A : Set a} {B : Set b} {C : Set c} {D : Set d}
 rel× R S (a , x) (b , y) = R a b × S x y
 
 data rel+ {i j k l A B} (R : Rel {i} A j) (S : Rel {k} B l) : Rel (A ⊎ B) (j ⊔ l) where
-  rel₁ : ∀{a b} -> R a b -> rel+ R S (inj₁ a) (inj₁ b)
-  rel₂ : ∀{a b} -> S a b -> rel+ R S (inj₂ a) (inj₂ b)
+  inj₁ : ∀{a b} -> R a b -> rel+ R S (inj₁ a) (inj₁ b)
+  inj₂ : ∀{a b} -> S a b -> rel+ R S (inj₂ a) (inj₂ b)
 
 cat× cat+ : ∀{i j k l} (C : Cat i j) (D : Cat k l) -> Cat _ _
 cat× C D .Obj = Obj C × Obj D
@@ -100,10 +100,10 @@ cat× C D .compo (f₁ , g₁) (f₂ , g₂) = compo C f₁ f₂ , compo D g₁ 
 
 cat+ C D .Obj = Obj C ⊎ Obj D
 cat+ C D .Hom = rel+ (Hom C) (Hom D)
-cat+ C D .ident {inj₁ _} = rel₁ (ident C)
-cat+ C D .ident {inj₂ _} = rel₂ (ident D)
-cat+ C D .compo (rel₁ x) (rel₁ y) = rel₁ (compo C x y)
-cat+ C D .compo (rel₂ x) (rel₂ y) = rel₂ (compo D x y)
+cat+ C D .ident {inj₁ _} = inj₁ (ident C)
+cat+ C D .ident {inj₂ _} = inj₂ (ident D)
+cat+ C D .compo (inj₁ x) (inj₁ y) = inj₁ (compo C x y)
+cat+ C D .compo (inj₂ x) (inj₂ y) = inj₂ (compo D x y)
 
 -- Functor category, sans the naturality condition.
 cat→ : ∀{i j k l} (A : Cat i j) (B : Cat k l) -> Cat (i ⊔ j ⊔ k ⊔ l) _

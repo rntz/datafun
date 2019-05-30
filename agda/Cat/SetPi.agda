@@ -33,3 +33,7 @@ record SetΠ k {i j} (C : Cat i j) : Set (i ⊔ j ⊔ suc k) where
     -- fwiddle = Πi Data.Sum.[ (λ x → π₁ ∙ Πe x) , (λ x → π₂ ∙ Πe x) ]
 
 module _ {i j k} {{C : Cat i j}} {{Pi : SetΠ k C}} where open SetΠ Pi public
+
+-- TODO: I should be able construct Products on a category given SetΠ for it.
+-- This may not produce the easiest to work with definition of products, but it
+-- could be useful sometimes.

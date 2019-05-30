@@ -18,11 +18,6 @@ iso≤? _ test x y = dec× (test x y) (test y x)
 ⊤⇒iso : ⊤ ⇒ iso ⊤
 ⊤⇒iso = fun (λ {TT  → TT , TT})
 
-juggle : ∀{i j k l} {A B C D}
-       -> Σ {i}{j} A C × Σ {k}{l} B D
-       -> Σ (A × B) λ { (a , b) -> C a × D b }
-juggle ((a , c) , (b , d)) = (a , b) , (c , d)
-
 ∧/iso : ∀{A B} -> iso A ∧ iso B ⇒ iso (A ∧ B)
 ∧/iso = fun juggle
 
@@ -31,8 +26,8 @@ iso/∧ = fun juggle
 
 iso/∨ : ∀{A B} -> iso (A ∨ B) ⇒ iso A ∨ iso B
 iso/∨ .ap = id
-iso/∨ .map (rel₁ p , rel₁ q) = rel₁ (p , q)
-iso/∨ .map (rel₂ p , rel₂ q) = rel₂ (p , q)
+iso/∨ .map (inj₁ p , inj₁ q) = inj₁ (p , q)
+iso/∨ .map (inj₂ p , inj₂ q) = inj₂ (p , q)
 
 isojuggle : ∀{A B C D} -> (iso A ∧ B) ∧ (iso C ∧ D) ⇒ iso (A ∧ C) ∧ (B ∧ D)
 isojuggle = fun juggle ∙ map∧ ∧/iso id

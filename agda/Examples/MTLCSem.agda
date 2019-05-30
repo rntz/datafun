@@ -56,7 +56,7 @@ map singleton x≤y (Var Eq.refl) = x≤y
 wipe-sym : ∀{X x y} -> Hom ⟦ wipe X ⟧ x y -> Hom ⟦ wipe X ⟧ y x
 wipe-sym f (Var {mono} ())
 -- Argh!
-wipe-sym f (Var {disc} p) = swap {{sets}} (f (Var {disc} p))
+wipe-sym f (Var {disc} p) = swap {{sets _}} (f (Var {disc} p))
 
 wipe⇒iso : ∀{X} -> ⟦ wipe X ⟧ ⇒ iso ⟦ wipe X ⟧
 wipe⇒iso = fun ⟨ id , wipe-sym ⟩
@@ -91,6 +91,6 @@ eval⊩ (inj false) = in₂
 eval⊩ case = distrib-∧/∨
            ∙ [ map∧ singleton π₁ ∙ swap ∙ apply
              , map∧ singleton π₂ ∙ swap ∙ apply ]
-eval⊩ splitsum .ap x = x
-eval⊩ splitsum .map (rel₁ x , rel₁ y) = rel₁ (x , y)
-eval⊩ splitsum .map (rel₂ x , rel₂ y) = rel₂ (x , y)
+eval⊩ split .ap x = x
+eval⊩ split .map (inj₁ x , inj₁ y) = inj₁ (x , y)
+eval⊩ split .map (inj₂ x , inj₂ y) = inj₂ (x , y)

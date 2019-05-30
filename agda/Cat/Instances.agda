@@ -44,9 +44,9 @@ instance
 
   sums:cat : ∀{i j} -> Sums (cats i j)
   bottom sums:cat = ⊥-cat , Fun: ⊥≤ λ{ {()} }
-  lub sums:cat a b = cat+ a b / fun rel₁ / fun rel₂ / disj
+  lub sums:cat a b = cat+ a b / fun inj₁ / fun inj₂ / disj
     where disj : ∀{a b c} -> a ≤ c -> b ≤ c -> cat+ a b ≤ c
-          disj F G = Fun: [ ap F , ap G ] λ { (rel₁ x) → map F x ; (rel₂ x) → map G x }
+          disj F G = Fun: [ ap F , ap G ] λ { (inj₁ x) → map F x ; (inj₂ x) → map G x }
 
   cc:cat : ∀{i} -> CC (cats i i)
   CC.products cc:cat = products:cat

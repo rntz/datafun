@@ -42,5 +42,10 @@ it {{x}} = x
 ∃-map : ∀{i j k A P Q} -> ((x : A) -> P x -> Q x) -> ∃ {i}{j} P -> ∃ {i}{k} Q
 ∃-map f (, p) = , f _ p
 
+juggle : ∀{i j k l} {A B C D}
+       -> Σ {i}{j} A C × Σ {k}{l} B D
+       -> Σ (A × B) λ { (a , b) -> C a × D b }
+juggle ((a , c) , (b , d)) = (a , b) , (c , d)
+
 -- TODO: remove this once I think I've proved everything
 postulate TODO : ∀{i}{A : Set i} -> A
