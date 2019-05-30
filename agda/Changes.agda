@@ -3,9 +3,13 @@ module Changes where
 
 open import Prelude
 open import Cat
+import Data.Product
 
 record ΔProset : Set1 where
-  field {{𝕍}} {{Δ}} : Proset
+  no-eta-equality
+  constructor ΔProset:
+  field 𝕍 Δ : Proset
+  private instance -𝕍 = 𝕍; -Δ = Δ
   𝕍₀ = Obj 𝕍
   Δ₀ = Obj Δ
 
@@ -27,6 +31,7 @@ record ΔProset : Set1 where
 open ΔProset public using (𝕍; Δ; valid; complete; sound; 𝟎; is𝟎; 𝕍₀; Δ₀)
 
 record ΔFun (A B : ΔProset) : Set where
+  constructor ΔFun:
   field 𝕍 : 𝕍 A ⇒ 𝕍 B
   field Δ : 𝕍₀ A → Δ A ⇒ Δ B
   field valid : ∀{dx x y}
@@ -41,10 +46,67 @@ instance
   Obj Δprosets = ΔProset
   Hom Δprosets = ΔFun
   ident Δprosets = record { 𝕍 = id ; Δ = λ x → id ; valid = id }
-  compo Δprosets F G .𝕍 = 𝕍 F ∙ 𝕍 G
-  compo Δprosets F G .Δ x .ap dx = Δ G (𝕍 F .ap x) .ap (Δ F x .ap dx)
-  compo Δprosets F G .Δ a .map dx≤dy = Δ G (𝕍 F .ap a) .map (Δ F a .map dx≤dy)
-  compo Δprosets F G .valid dx:x→y = valid G (valid F dx:x→y)
+  compo Δprosets f g .𝕍 = 𝕍 f ∙ 𝕍 g
+  compo Δprosets f g .Δ x .ap dx = Δ g (𝕍 f .ap x) .ap (Δ f x .ap dx)
+  compo Δprosets f g .Δ a .map dx≤dy = Δ g (𝕍 f .ap a) .map (Δ f a .map dx≤dy)
+  compo Δprosets f g .valid dx:x→y = valid g (valid f dx:x→y)
 
 
 -- Categorical structures (cartesian etc.)
+⊤-Δproset ⊥-Δproset : ΔProset
+⊤-Δproset = ΔProset: ⊤ ⊤ (λ { TT TT TT → ⊤ }) _ _
+⊥-Δproset = ΔProset: ⊥ ⊥ (λ{()}) (λ { {()} }) λ { {()} }
+
+module _ (A B : ΔProset) where
+  Δproset× : ΔProset
+  Δproset× .𝕍 = 𝕍 A ∧ 𝕍 B
+  Δproset× .Δ = Δ A ∧ Δ B
+  Δproset× .valid (da , db) (a , b) (a₂ , b₂) = valid A da a a₂ × valid B db b b₂
+  Δproset× .complete = map∧ (complete A) (complete B) ∙ juggle
+  Δproset× .sound = map∧ (sound A) (sound B)
+
+  data Δproset+valid : Δ₀ A ∨ Δ₀ B → 𝕍₀ A ∨ 𝕍₀ B → 𝕍₀ A ∨ 𝕍₀ B → Set where
+    inj₁ : ∀{dx x y} → valid A dx x y → Δproset+valid (inj₁ dx) (inj₁ x) (inj₁ y)
+    inj₂ : ∀{dx x y} → valid B dx x y → Δproset+valid (inj₂ dx) (inj₂ x) (inj₂ y)
+
+  Δproset+ : ΔProset
+  Δproset+ .𝕍 = 𝕍 A ∨ 𝕍 B
+  Δproset+ .Δ = Δ A ∨ Δ B
+  Δproset+ .valid = Δproset+valid
+  Δproset+ .complete (inj₁ x) = Data.Product.map inj₁ inj₁ (complete A x)
+  Δproset+ .complete (inj₂ x) = Data.Product.map inj₂ inj₂ (complete B x) 
+  Δproset+ .sound (inj₁ x) = inj₁ (sound A x)
+  Δproset+ .sound (inj₂ x) = inj₂ (sound B x)
+
+  Δproset⇒ : ΔProset
+  𝕍 Δproset⇒ = 𝕍 A ⇨ 𝕍 B
+  Δ Δproset⇒ = iso (𝕍 A) ⇨ (Δ A ⇨ Δ B)
+  valid Δproset⇒ = {!!}
+  complete Δproset⇒ = {!!}
+  sound Δproset⇒ = {!!}
+
+instance
+  products:Δproset : Products Δprosets
+  top products:Δproset = ⊤-Δproset , ΔFun: ≤⊤ (const ≤⊤) λ _ → TT
+  glb products:Δproset A B .a∧b = Δproset× A B
+  glb products:Δproset A B .∧E₁ = ΔFun: π₁ (const π₁) π₁
+  glb products:Δproset A B .∧E₂ = ΔFun: π₂ (const π₂) π₂
+  glb products:Δproset A B .∧I f g .𝕍 = ⟨ 𝕍 f , 𝕍 g ⟩
+  glb products:Δproset A B .∧I f g .Δ x = ⟨ Δ f x , Δ g x ⟩
+  glb products:Δproset A B .∧I f g .valid = ⟨ valid f , valid g ⟩
+
+  sums:Δproset : Sums Δprosets
+  bottom sums:Δproset = ⊥-Δproset , ΔFun: ⊥≤ (const ⊥≤) λ { {()} }
+  lub sums:Δproset A B .a∧b = Δproset+ A B
+  lub sums:Δproset A B .∧E₁ = ΔFun: in₁ (const in₁) inj₁
+  lub sums:Δproset A B .∧E₂ = ΔFun: in₂ (const in₂) inj₂
+  lub sums:Δproset A B .∧I f g .𝕍 = [ 𝕍 f , 𝕍 g ]
+  lub sums:Δproset A B .∧I f g .Δ (inj₁ x) = [ Δ f x , constant (Δ f x .ap (𝟎 A x)) ]
+  lub sums:Δproset A B .∧I f g .Δ (inj₂ y) = [ constant (Δ g y .ap (𝟎 B y)) , Δ g y ]
+  lub sums:Δproset A B .∧I f g .valid (inj₁ x) = valid f x
+  lub sums:Δproset A B .∧I f g .valid (inj₂ y) = valid g y
+
+  cc:Δproset : CC Δprosets
+  cc:Δproset .hom = {!!}
+  cc:Δproset .CC.apply = {!!}
+  cc:Δproset .CC.curry = {!!}
