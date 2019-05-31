@@ -58,6 +58,7 @@ instance
 ⊥-Δproset = ΔProset: ⊥ ⊥ (λ{()}) (λ { {()} }) λ { {()} }
 
 module _ (A B : ΔProset) where
+  private instance -A = A; -B = B
   Δproset× : ΔProset
   Δproset× .𝕍 = 𝕍 A ∧ 𝕍 B
   Δproset× .Δ = Δ A ∧ Δ B
@@ -78,11 +79,15 @@ module _ (A B : ΔProset) where
   Δproset+ .sound (inj₁ x) = inj₁ (sound A x)
   Δproset+ .sound (inj₂ x) = inj₂ (sound B x)
 
+  open Fun!%
   Δproset⇒ : ΔProset
   𝕍 Δproset⇒ = 𝕍 A ⇨ 𝕍 B
   Δ Δproset⇒ = iso (𝕍 A) ⇨ (Δ A ⇨ Δ B)
-  valid Δproset⇒ = {!!}
-  complete Δproset⇒ = {!!}
+  valid Δproset⇒ df f g = ∀{dx x y} → valid A dx x y
+                        → valid B (df ! x ! dx) (f ! x) (g ! y)
+  -- uh-oh, this just doesn't hold in general. back to the drawing board.
+  complete Δproset⇒ {f} {g} f≤g .proj₁ = {!!}
+  complete Δproset⇒ {f} {g} f≤g .proj₂ = {!!}
   sound Δproset⇒ = {!!}
 
 instance
