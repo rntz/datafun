@@ -29,11 +29,15 @@ open Cat {{...}} public using () renaming (Hom to _≤_; ident to id; compo to _
 -- Functors
 record Fun {i j k l} (C : Cat i j) (D : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l) where
   constructor Fun:
+  -- Fun.map should bind tighter than Cat.compo.
+  infixl 10 ap map
   field ap  : Obj C -> Obj D
   field map : Hom C =[ ap ]⇒ Hom D
 
 open Fun public
 pattern fun {F} f = Fun: F f
+-- Convenient infix syntax.
+module Fun!% where open Fun public using () renaming (ap to _!_; map to _%_)
 
 -- TODO: remove if unused.
 -- -- Composition of functors across different levels.

@@ -110,18 +110,17 @@ tree-map F .map (leaf≤ x) = leaf≤ (map F x)
 tree-map F .map (node≤ x y) = node≤ (tree-map F .map x) (tree-map F .map y)
 tree-map F .map (≤node p) = ≤node (map∨ (tree-map F .map) (tree-map F .map) p)
 
-Trees : cats ≤ cats
+Trees : cats _ _ ≤ cats _ _
 ap Trees = trees
 map Trees = tree-map
 
 -- I think this is 2-functoriality? Not sure.
 Tree-map : ∀{A B} -> A ⇨ B ⇒ trees A ⇨ trees B
 ap Tree-map = tree-map
-map (Tree-map {A} {B}) {f} {g} f≤g {empty} = empty≤
-map (Tree-map {A} {B}) {f} {g} f≤g {leaf x} = leaf≤ f≤g
-map (Tree-map {A} {B}) {f} {g} f≤g {node l r} =
-  node≤ (split₁ (Tree-map {A} .map f≤g {l}))
-        (split₂ (Tree-map {A} .map f≤g {r}))
+map Tree-map f≤g {empty} = empty≤
+map Tree-map f≤g {leaf x} = leaf≤ f≤g
+map Tree-map f≤g {node l r} =
+  node≤ (split₁ (map Tree-map f≤g)) (split₂ (map Tree-map f≤g))
 
 
 -- Or foldMap, to a Haskeller.
