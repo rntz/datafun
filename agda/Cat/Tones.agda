@@ -29,7 +29,7 @@ record Tone i j : Set (suc (i ⊔ j)) where
   at A .ident = rel-id
   at A .compo = rel∙
 
-  functor : cats i j ≤ cats _ _
+  functor : cats ≤ cats
   ap functor = at
   map functor f = fun (covary f)
 
@@ -61,7 +61,7 @@ Tone.covary tone-path f = path-fold _ (path-by ∘ map f) path⁻¹ path∙
 iso op : ∀{i j} → Cat i j → Cat i j
 iso = Tone.at tone-iso; op = Tone.at tone-op
 
-Iso Op : ∀{i j} → cats i j ≤ cats _ _
+Iso Op : ∀{i j} → cats {i} {j} ≤ cats
 Iso = Tone.functor tone-iso; Op = Tone.functor tone-op
 
 instance -- The category of tones.

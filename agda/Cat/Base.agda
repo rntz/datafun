@@ -29,8 +29,13 @@ open Cat {{...}} public using () renaming (Hom to _≤_; ident to id; compo to _
 -- Functors
 record Fun {i j k l} (C : Cat i j) (D : Cat k l) : Set (i ⊔ j ⊔ k ⊔ l) where
   constructor Fun:
-  -- Fun.map should bind tighter than Cat.compo.
-  infixl 10 ap map
+  -- Fun.ap binds looser than (infixr 4 _,_). Fun.map binds tighter than
+  -- (infixr 9 Cat.compo). Thus (opening Fun!%, below):
+  --
+  --    f ! x , y = f !(x , y)
+  --    f ∙ g % y = f ∙ (g % y)
+  infixl 3  ap
+  infixl 10 map
   field ap  : Obj C -> Obj D
   field map : Hom C =[ ap ]⇒ Hom D
 
@@ -49,18 +54,17 @@ module Fun!% where open Fun public using () renaming (ap to _!_; map to _%_)
 -- Conveniences.
 pattern TT = lift tt
 
-sets : ∀ i -> Cat (suc i) i
-sets i .Obj = Set i
-sets i .Hom a b = a -> b
-sets i .ident x = x
-sets i .compo f g x = g (f x)
+-- Why are the level arguments to sets, cats, &c implicit? So that it doesn't
+-- show up in goal types for holes, where it's usually irrelevant.
+instance
+  sets : ∀{i} -> Cat (suc i) i
+  Obj (sets {i}) = Set i
+  Hom sets a b = a -> b
+  ident sets x = x
+  compo sets f g x = g (f x)
 
-instance auto:sets = λ{i} → sets i
-
-cats : ∀ i j -> Cat (suc (i ⊔ j)) (i ⊔ j)
-cats i j = Cat: (Cat i j) Fun (fun id) λ { (fun f) (fun g) → fun (f ∙ g) }
-
-instance auto:cats = λ{i}{j} → cats i j
+  cats : ∀{i j} -> Cat (suc (i ⊔ j)) (i ⊔ j)
+  cats {i} {j} = Cat: (Cat i j) Fun (fun id) λ { (fun f) (fun g) → fun (f ∙ g) }
 
 ⊤-cat ⊥-cat : ∀{i j} -> Cat i j
 ⊥-cat = Cat: (Lift ∅) (λ{()}) (λ { {()} }) λ { {()} }
@@ -70,7 +74,7 @@ Proset : Set1
 Proset = Cat zero zero
 
 prosets : Cat _ _
-prosets = cats zero zero
+prosets = cats {zero} {zero}
 
 infix 1 _⇒_
 _⇒_ : Rel Proset _
@@ -147,5 +151,5 @@ discrete A .Hom = _≡_
 discrete A .ident = refl
 discrete A .compo refl refl = refl
 
-Discrete : ∀{i} → Fun (sets i) (cats i i)
+Discrete : ∀{i} → Fun (sets {i}) cats
 Discrete = Fun: discrete λ f → Fun: f λ { refl → refl }

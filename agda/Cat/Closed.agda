@@ -17,6 +17,9 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   field apply : ∀{a b} -> hom a b ∧ a ≤ b
   field curry : ∀{Γ a b} -> Γ ∧ a ≤ b -> Γ ≤ hom a b
 
+  curryₗ : ∀{Γ a b} → a ∧ Γ ≤ b → Γ ≤ hom a b
+  curryₗ f = curry (swap ∙ f)
+
   call : ∀{Γ a b} -> Γ ≤ hom a b -> Γ ≤ a -> Γ ≤ b
   call f a = ⟨ f , a ⟩ ∙ apply
 
@@ -27,14 +30,18 @@ record CC {i j} (C : Cat i j) : Set (i ⊔ j) where
   uncurry f = map∧ f id ∙ apply
 
   flip : ∀{a b c : Obj C} -> a ≤ hom b c -> b ≤ hom a c
-  flip f = curry (swap ∙ uncurry f)
+  flip f = curryₗ (uncurry f)
 
   precompose : ∀{a b c : Obj C} -> a ≤ b -> hom b c ≤ hom a c
   precompose f = curry (map∧ id f ∙ apply)
 
   module _ {{S : Sums C}} where
-    distrib-∧/∨ : ∀{a b c : Obj C} -> (a ∨ b) ∧ c ≤ (a ∧ c) ∨ (b ∧ c)
-    distrib-∧/∨ = map∧ [ curry in₁ , curry in₂ ] id ∙ apply
+    distrib-∧/∨ₗ : ∀{a b c : Obj C} -> (a ∨ b) ∧ c ≤ (a ∧ c) ∨ (b ∧ c)
+    distrib-∧/∨ₗ = map∧ [ curry in₁ , curry in₂ ] id ∙ apply
+
+    distrib-∧/∨ᵣ : ∀{a b c : Obj C} -> a ∧ (b ∨ c) ≤ (a ∧ b) ∨ (a ∧ c)
+    -- b ∧ a ⇒ (a ∧ b) ∨ (a ∧ c)
+    distrib-∧/∨ᵣ = map∧ id [ curryₗ in₁ , curryₗ in₂ ] ∙ swapply
 
 open CC public using (hom)
 module _ {i j} {{C : Cat i j}} {{cc : CC C}} where

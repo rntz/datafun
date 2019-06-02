@@ -22,33 +22,33 @@ instance -- ETA
 
 -- Structure of basic categories.
 instance
-  products:set : ∀{i} -> Products (sets i)
+  products:set : ∀{i} -> Products (sets {i})
   top products:set = Lift Unit , _
   glb products:set a b = a × b / proj₁ / proj₂ / Data.Product.<_,_>
     where import Data.Product
 
-  sums:set : ∀{i} -> Sums (sets i)
+  sums:set : ∀{i} -> Sums (sets {i})
   bottom sums:set = Lift ∅ , λ{()}
   lub sums:set a b = a ⊎ b / inj₁ / inj₂ / Data.Sum.[_,_]
 
-  cc:set : ∀{i} -> CC (sets i)
+  cc:set : ∀{i} -> CC (sets {i})
   cc:set = CC: Function (λ { (f , a) -> f a }) (λ f x y -> f (x , y))
 
-  setΠ:set : ∀{i} -> SetΠ i (sets i)
+  setΠ:set : ∀{i} -> SetΠ i (sets {i})
   setΠ:set = SetΠ: (λ A P → (x : A) -> P x) (λ Γ→P γ a → Γ→P a γ) (λ a ∀P → ∀P a)
 
 instance
-  products:cat : ∀{i j} -> Products (cats i j)
+  products:cat : ∀{i j} -> Products (cats {i} {j})
   top products:cat = ⊤-cat , fun ≤⊤
   glb products:cat a b = cat× a b / fun π₁ / fun π₂ / λ { (fun f) (fun g) → fun ⟨ f , g ⟩ }
 
-  sums:cat : ∀{i j} -> Sums (cats i j)
+  sums:cat : ∀{i j} -> Sums (cats {i} {j})
   bottom sums:cat = ⊥-cat , Fun: ⊥≤ λ{ {()} }
   lub sums:cat a b = cat+ a b / fun inj₁ / fun inj₂ / disj
     where disj : ∀{a b c} -> a ≤ c -> b ≤ c -> cat+ a b ≤ c
           disj F G = Fun: [ ap F , ap G ] λ { (inj₁ x) → map F x ; (inj₂ x) → map G x }
 
-  cc:cat : ∀{i} -> CC (cats i i)
+  cc:cat : ∀{i} -> CC (cats {i} {i})
   CC.products cc:cat = products:cat
   _⇨_   {{cc:cat}} = cat→
   apply {{cc:cat}} .ap (F , a) = ap F a
@@ -57,7 +57,7 @@ instance
   curry {{cc:cat}} {A}{B} F .ap a .map b≤b' = map F (ident A , b≤b')
   curry {{cc:cat}} {A}{B} F .map a≤a' = map F (a≤a' , ident B)
 
-  setΠ:cat : ∀{i j k} -> SetΠ k (cats (i ⊔ k) (j ⊔ k))
+  setΠ:cat : ∀{i j k} -> SetΠ k (cats {i ⊔ k} {j ⊔ k})
   setΠ:cat = SetΠ: catΠ (λ Γ→P → fun (λ γ a → Γ→P a .map γ)) (λ a → fun (λ ∀P≤ → ∀P≤ a))
 
 
