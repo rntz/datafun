@@ -1,16 +1,4 @@
 % -*- mode: LaTeX -*-
-\usepackage{microtype}
-
-\hyphenation{eq-uip-ped}
-\hyphenation{inv-olv-ing}
-\usepackage{notation}
-
-\title{Change Semantics for Semi\naive{} Datafun}
-\author{\scshape Michael Arntzenius}
-\usepackage[en-GB]{datetime2}\DTMlangsetup[en-GB]{ord=omit}\date{\today}
-
-\begin{document}
-
 \maketitle
 
 \begin{abstract}
@@ -29,5 +17,3 @@ relating input and output changes (\cref{sec:changeposets}). We show this
 reinterprets the discreteness comonad to compute derivatives, and uses these to
 speed up fixed point computations. Finally, we prove this semi\naive{}
 evaluation transform correct.
-
-\end{document}

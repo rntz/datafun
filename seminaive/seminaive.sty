@@ -1,0 +1,35 @@
+%\usepackage{array}                  % >{blah}, <{blah} in array formats.
+\usepackage{accents}                %\underaccent
+\usepackage{amssymb,amsmath,amsthm} % \square etc.
+\usepackage{anyfontsize}
+\usepackage{booktabs}               % \midrule
+\usepackage{latexsym}               % \rightsquigarrow
+\usepackage{mathpartir}             % \begin{mathpar}, \infer, etc.
+\usepackage{mathtools}              %\dblcolon
+\usepackage{nccmath}                % fix align* (etc.) spacing
+\usepackage{stmaryrd}               % \shortrightarrow, \llbracket, etc.
+
+% Make section name references use \S.
+\makeatletter\crefname{section}{\S\@gobble}{\S\@gobble}\makeatother
+
+% hang is only relevant for long captions, which I don't have
+\usepackage[labelsep=period,labelfont=it,textfont=it,format=hang]{caption}
+%\usepackage[skip=.5\baselineskip,labelfont=sc,textfont=it,labelsep=period,format=hang]{caption}
+%\usepackage[labelfont=sc,labelsep=period,format=hang]{caption}
+
+\usepackage{enumitem}\setlist{labelindent=1em,labelsep=.75em,leftmargin=*}
+\setlist{labelindent=.5em,labelsep=.75em,leftmargin=*}
+\setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
+
+% Unfortunately, only pdftex supports most of the features of microtype.
+\usepackage{iftex}
+\ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=10}{microtype}\else\fi
+\usepackage{microtype}\frenchspacing
+
+\hyphenation{eq-uip-ped}
+\hyphenation{inv-olv-ing}
+\usepackage{notation}
+
+\title{Change Semantics for Semi\naive{} Datafun}
+\author{\scshape Michael Arntzenius}
+\usepackage[en-GB]{datetime2}\DTMlangsetup[en-GB]{ord=omit}\date{\today}

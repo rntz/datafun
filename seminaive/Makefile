@@ -14,16 +14,18 @@ LATEXRUN := $(RNTZTEXDIR)/latexrun/latexrun
 TEXS  := $(wildcard *.tex)
 PDFS  := $(addsuffix .pdf,$(basename $(TEXS)))
 
-.PHONY: all watch clean FORCE
+.PHONY: all clean FORCE
 all: $(PDFS) seminaive-a5-2up.pdf
 
-# If you have inotify-tools, this will automatically recompile your pdfs "live".
-# It's a bit overenthusiastic, though; it reruns `make` when ANYTHING changes.
-watch: all
+# If you have inotify-tools, `make watch` will automatically recompile your pdfs
+# "live". You can also specify a target to recompile, eg. `make watch:foo.pdf`.
+# It's a bit overenthusiastic, though; it reruns when ANYTHING changes.
+watch: watch\:all
+watch\:%: % FORCE
 	@while inotifywait -e modify -r . >/dev/null 2>&1; do \
 		echo; \
-		make --no-print-directory -j all; \
-		make --no-print-directory -j all; \
+		make --no-print-directory -j $<; \
+		make --no-print-directory -j $<; \
 	done
 
 %.pdf: %.tex FORCE
