@@ -1,6 +1,6 @@
 # Copy this Makefile to where your .tex files are and change $(RNTZTEXDIR) to
 # point to rntztex's directory and this Makefile will still work.
-RNTZTEXDIR := ../rntztex/
+RNTZTEXDIR := ../../rntztex/
 
 # The TEXINPUTS environment variable tells TeX where to find .sty and .cls
 # files. This is necessary if you set RNTZTEXDIR to something other than ".".
@@ -15,7 +15,7 @@ TEXS  := $(wildcard *.tex)
 PDFS  := $(addsuffix .pdf,$(basename $(TEXS)))
 
 .PHONY: all watch clean FORCE
-all: $(PDFS) seminaive-a5-2up.pdf
+all: $(PDFS)
 
 # If you have inotify-tools, this will automatically recompile your pdfs "live".
 # It's a bit overenthusiastic, though; it reruns `make` when ANYTHING changes.
@@ -48,7 +48,6 @@ watch: all
 
 clean:
 	$(LATEXRUN) --clean-all
-	rm -f seminaive-a5-2up.pdf
 	rm -r latex.out
 
 # debugging: `make print-FOO` will print the value of $(FOO)
