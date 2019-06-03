@@ -59,7 +59,7 @@
 %% ===== Categorical notation =====
 \newcommand\cat\textbf
 \ifdefined\textsb\renewcommand\cat\textsb\else\fi
-\ifdefined\strong\else\newcommand\strong\textbf\fi
+\providecommand\strong\textbf
 \newcommand\BD{{\texorpdfstring{\ensuremath{\boldsymbol\Delta}}{Delta}}}
 \newcommand\CP{\cat{\BD{}Poset}}
 \newcommand\Poset{\cat{Poset}}
@@ -114,7 +114,8 @@
 %\renewcommand\desugars{\,\xrsquigarrow{\text{expand}}\,}
 
 \newcommand\eqt[1]{\underaccent{\textmd{eq}}{#1}}
-\newcommand\fint[1]{\underaccent{\textmd{fin}}{#1}}
+\providecommand\fint{}
+\renewcommand\fint[1]{\underaccent{\textmd{fin}}{#1}}
 \newcommand\acct[1]{\underaccent{\textmd{acc}}{#1}}
 \newcommand\fixt[1]{\underaccent{\textmd{fix}}{#1}}
 

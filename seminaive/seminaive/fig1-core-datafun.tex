@@ -1,0 +1,91 @@
+\begin{figure*}
+  \begin{mathpar}
+    \setlength\arraycolsep{.33em}\begin{array}{r@{\hskip 1em}ccl}
+      \text{types} & A,B &\bnfeq& \isof A \bnfor \tset{\eqt A}
+      \bnfor \tunit \bnfor A \x B \bnfor A + B \bnfor A \to B
+      \\
+      \text{eqtypes} & \eqt A, \eqt B &\bnfeq&
+      %% TODO: revamp to make \isof an eqtype. this requires \Phi(\isof{\eqt A})
+      %% = \isof{\Phi{\eqt A}} = \isof{\eqt A} and changing \phi & \delta
+      %% accordingly.
+      %\isof{\eqt A} \bnfor
+      \tset{\eqt A} \bnfor
+      \tunit \bnfor \eqt A \x \eqt B \bnfor \eqt A + \eqt B
+      \\
+      \text{semilattices} & L,M &\bnfeq& \tset{\eqt A} \bnfor \tunit \bnfor L \x M
+      \\
+      \text{fixtypes} & \fixt L, \fixt M &\bnfeq&
+      \tset{\color{red}\fint A} \bnfor \tunit \bnfor \fixt L \x \fixt M
+      \\[.5em]
+      \text{terms} & e,f,g &\bnfeq& x \bnfor \dvar x \bnfor \fnof{x} e
+      \bnfor e\<f \bnfor \etuple{} \bnfor \etuple{e,f} \bnfor \pi_i\<e\\
+      &&& \inj i e \bnfor \ecase{e} (\inj i x \caseto f_i)_{i\in\{1,2\}}\\
+      &&& \eboxd e \bnfor \elet{\eboxd x = e} f\\
+      &&& \bot \bnfor e \vee f \bnfor \esetd{e_i}_i \bnfor \eford x e f\\
+      &&& \eeqd e f \bnfor \eisEmpty e \bnfor \esplit e \bnfor \efix e
+      \\[.5em]
+      \text{contexts} & \G &\bnfeq& (H_i)_i\\
+      \text{hypotheses} & H &\bnfeq& \h x A \bnfor \hd x A
+    \end{array}
+    \\
+    \stripcxd\G = (\hd x A)_{\hd x A \in \G}
+    \\
+    \infer{\h x A \in \G}{\J x \G A}
+
+    \infer{\hd x A \in \G}{\J {\dvar x} \G A}
+
+    \infer{\J e {\G,\h x A} B}{\J {\fnof x e} \G {A \to B}}
+
+    \infer{\J e \G {A \to B} \\ \J f \G A}{\J {e\<f} \G B}
+
+    \infer{\quad}{\J {\etuple{}} \G \tunit}
+
+    \infer{(\J{e_i}\G{A_i})_i}{\J{\etuple{e_1,e_2}} \G {A_1 \x A_2}}
+
+    \infer{\J e \G {A_1 \x A_2}}{\J{\pi_i\<e}\G{A_i}}
+
+    \infer{\J e \G A_i}{\J{\inj i e}\G{A_1 + A_2}}
+
+    \infer{\J e \G {A_1 + A_2} \\
+      (\J {f_i} {\G,\h {x_i} {A_i}} {B})_i
+    }{
+      \J {\ecase{e} (\inj i {x_i} \caseto f_i)_i} \G B
+    }
+
+    \infer{\J {\isocolor e} {\stripcxd\G} A}{\J{\eboxd e} \G {\isof A}}
+
+    \infer{\J e \G {\isof A} \\ \J f {\G,\hd x A} B}{
+      \J {\elet{\eboxd x = e} f} \G B}
+
+    \infer{\quad}{\J\bot\G {\eqt L}}
+
+    \infer{(\J{e_i} \G {\eqt L})_i}{\J{e_1 \vee e_2}\G {\eqt L}}
+
+    %% \infer{\J e \G {\eqt A}}{\J {\edown e} \G {\tdown {\eqt A}}}
+    \infer{(\J {\isocolor e_i} {\stripcxd\G} {\eqt A})_i}{
+      \J {\esetd{e_i}_i} \G {\tset{\eqt A}}}
+
+    %% \infer{\J e \G {\tdown {\eqt A}} \\
+    %%   \J f {\G,\h x {\eqt A}} L
+    %% }{\J {\ebigvee x e f} \G L}
+    %%
+    \infer{
+      \J e \G {\tset A} \\
+      \J f {\G,\hd x A} {\eqt L}
+    }{\J {\eford x e f} \G {\eqt L}}
+
+    %%\infer{\J e \G {\isof{(\eqt A \x \eqt A)}}}{\J{\prim{eq}\<e} \G {\tdown\tunit}}
+    \infer{(\J {\isocolor e_i} {\stripcxd\G} {\eqt A})_i}
+          {\J {\eeqd{e_1}{e_2}} \G \tbool}
+
+    \infer{\J {\isocolor e} {\stripcxd\G} {\tset\tunit}}{
+      \J {\eisEmpty e} \G {\tunit + \tunit}}
+
+    \infer{\J e \G {\isof{(A + B)}}}{\J{\esplit e} \G {\isof A + \isof B}}
+
+    \infer{\J e \G {\isof{(\fixt L \to \fixt L)}}}{\J{\prim{fix}\< e} \G {\fixt L}}
+  \end{mathpar}
+
+  \caption{Datafun core syntax and typing rules}
+  \label{fig:core-datafun}
+\end{figure*}

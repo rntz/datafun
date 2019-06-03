@@ -1,0 +1,69 @@
+\maketitle
+
+\begin{abstract}
+  We generalize semi\naive{} evaluation from Datalog to Datafun and prove it
+  correct.
+\end{abstract}
+
+\section{Strategy}
+We first generalize Datafun's \Poset{} semantics to any category with
+appropriate structures (\cref{sec:datafun-models}). We construct such a
+category, \CP{}, whose objects are posets equipped with a notion of increasing
+changes, and whose morphisms are monotone maps possessing \emph{derivatives}
+relating input and output changes (\cref{sec:changeposets}). We show this
+``incremental'' semantics agrees with Datafun's standard semantics
+(\cref{sec:incremental}). We give a static transformation on Datafun that
+reinterprets the discreteness comonad to compute derivatives, and uses these to
+speed up fixed point computations. Finally, we prove this semi\naive{}
+evaluation transform correct.
+
+% TODO: more section links once I finish them.
+
+
+\section{Notation and conventions}
+
+\begin{enumerate}
+\item Adjacency $f\<x$ denotes the function $f$ applied to an argument $x$.
+
+\item I write $f \then g$ for the composition of morphisms $f : A \to B$ and $g
+  : B \to C$. This is the reverse of the usual composition operator, $g \circ
+  f$.
+
+\item I write $\subst{e}{x \substo f}$ to mean ``$e$ with all free occurrences of $x$
+  replaced by $f$ ($\alpha$-varying as necessary to avoid capture)''.
+
+  \newcommand\iexpr{\phi}
+\item I write $(\iexpr_i)_i$ for the tuple or sequence $(\iexpr_1,
+  ..., \iexpr_n)$, leaving $n$ unspecified. For example,
+
+  \nopagebreak[2]
+  \[ (2^ix + y_i)_i \quad\text{means}\quad
+  (2^1x + y_1,~ 2^2x + y_2,~ ...,~ 2^nx + y_n) \]
+
+  \noindent
+  I also use this notation with other braces, eg. $\fork{\iexpr_i}_i =
+  \fork{\iexpr_0, ..., \iexpr_n}$.
+
+\item $\expO A B$ denotes the exponential $B^A$ in a cartesian closed category.
+
+\item Given a family of morphisms $f_i : A \to B_i$ in a category with finite
+  products, their \emph{``fork''} $\fork{f_i}_i : A \to \textstyle\prod_{i} B_i$
+  uniquely satisfies $\fork{f_i}_i \then \pi_i = f_i$. Dually, given $f_i : A_i
+  \to B$ in a category with finite sums, their \emph{``split''} $\krof{f_i}_i :
+  \sum_i A_i \to B$ uniquely satisfies $\injc_i \then \krof{f_i}_i = f_i$.
+  %
+  So in particular, $\termI : A \to \termO$ is the unique map into the terminal
+  object and $\initE : \initO \to B$ the unique map out of the initial object.
+
+\item The comonad $\iso : \Poset \to \Poset$ takes a poset to the
+  \emph{discrete} poset on the same elements, defined:
+
+  \begin{eqnarray*}
+    x \in \isof A &\iff& x \in A\\
+    x \le y : \isof A &\iff& x = y\\
+    \isof(f : A \to B) &=& f : \isof A \to \isof B
+  \end{eqnarray*}
+\end{enumerate}
+
+
+\input{seminaive/fig1-core-datafun.tex}
