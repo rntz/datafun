@@ -1,0 +1,273 @@
+% ========== Notation for semantics.tex ==========
+\newcommand\todo[1]{{\color{ACMRed}#1}}
+\newcommand\XXX{\todo{\text{XXX}}}
+\newcommand\naive{na\"ive}
+\newcommand\Naive{Na\"ive}
+\newcommand\isocolor{\color{ForestGreen}} % ACMBlue is used in links
+\newcommand\commentcolor{\color{ACMPurple}}
+\newcommand\figsectionname\textsc
+
+
+%% ===== General math & PL notation =====
+\ifdefined\G\renewcommand\G\Gamma\else\newcommand\G\Gamma\fi
+\newcommand\g\gamma
+\newcommand\emptycx{\varepsilon}
+\newcommand\D\Delta
+\newcommand\DP{\D\Phi}
+\newcommand\x\times
+\newcommand\pto\rightharpoonup
+\newcommand\fn\lambda
+\newcommand\injc{\mathrm{in}}
+\newcommand\inj[1]{\injc_{#1}\,}
+\newcommand\bnfor{~~|~~}
+\newcommand\bnfeq\Coloneqq
+\newcommand\N{\mathbb{N}}
+\newcommand\tuple[1]{\langle{#1}\rangle}
+\newcommand\den[1]{\ensuremath{\llbracket{#1}\rrbracket}}
+\newcommand\bigden[1]{\ensuremath{\bigl\llbracket{#1}\bigr\rrbracket}}
+% Space for function application. Between \; and \:.
+\newcommand\<{\mskip 4mu plus 4mu minus 1mu}
+%\renewcommand\<\;
+\newcommand\fnspace{\;}
+\newcommand\fnof[1]{\fn{#1}.\fnspace}
+%\newcommand\setfor[2]{\ensuremath{\{#1 \mathrel{|} #2\}}}
+
+\newcommand\quantcolor\relax
+%\renewcommand\quantcolor{\color{green}}
+\newcommand\fa[1]{({\quantcolor\forall #1})~}
+\newcommand\ex[1]{({\quantcolor\exists #1})~}
+\newcommand\faex[2]{({\quantcolor\forall #1, \exists #2})~}
+
+%% \renewcommand\quantifierspace{~\,}
+%% \renewcommand\fa[1]{\forall #1.\quantifierspace}
+%% \renewcommand\ex[1]{\exists #1.\quantifierspace}
+%% \renewcommand\faex[2]{\forall {#1}.~ \exists {#2}.\quantifierspace}
+
+%% various marked equalities
+\newcommand\stareq{\overset{\boldsymbol\star}{=}}
+\newcommand\daggereq{\overset{\dagger}{=}}
+\newcommand\stardaggereq{\overset{\boldsymbol\star\dagger}{=}}
+
+\newcommand\subst[2]{{#1}\,\{{#2}\}}
+\newcommand\substd[2]{\subst{#1}{\isocolor #2}}
+\newcommand\substo\coloneqq
+\renewcommand\substo\mapsto
+%% for extending a substitution
+\newcommand\extend[2]{\tuple{#1,\, #2}}
+
+
+%% ===== Categorical notation =====
+\newcommand\cat\textbf
+\ifdefined\textsb\renewcommand\cat\textsb\else\fi
+\ifdefined\strong\else\newcommand\strong\textbf\fi
+\newcommand\BD{{\texorpdfstring{\ensuremath{\boldsymbol\Delta}}{Delta}}}
+\newcommand\CP{\cat{\BD{}Poset}}
+\newcommand\Poset{\cat{Poset}}
+\newcommand\initO{0}
+\newcommand\termO{1}
+\newcommand\expO[2]{#1 \Rightarrow #2}
+\newcommand\then\cdot
+%\renewcommand\then{\mathbin{;}}
+%\renewcommand\then{\,{;}\,}
+\newcommand\catC{\ensuremath{\mathcal{C}}}
+\newcommand\morph\textit
+\newcommand\id{\morph{id}}
+\newcommand\idfunctor{\morph{Id}} % not used yet
+
+\newcommand\fork[1]{\langle{#1}\rangle}
+\newcommand\krof[1]{[{#1}]}
+\newcommand\bigkrof[1]{\bigl[{#1}\bigr]}
+%\newcommand\Fork[1]{\left\langle{#1}\right\rangle}
+%\newcommand\Krof[1]{\left[{#1}\right]}
+\newcommand\initE{\krof{\kern .08em}}
+\newcommand\termI{\fork{}}
+
+
+%% ===== Datafun model notation =====
+%\newcommand\disco{\ensuremath{W}}
+\newcommand\disco{\iso}
+\newcommand\discof[1]{\ensuremath{\disco #1}}
+\newcommand\discox{\ensuremath{\morph{dist}^\x_\disco}}
+\newcommand\discosum{\ensuremath{\morph{dist}^\disco_+}}
+
+\newcommand\pfin{\ensuremath{\mathcal{P}}}
+%\renewcommand\pfin{\texorpdfstring{\ensuremath{P_{\text{fin}}}}{Pfin}}
+\renewcommand\pfin{\ensuremath{P}}
+\newcommand\pfinof[1]{\pfin #1}
+\newcommand\pcollect[1]{\morph{collect}(#1)}
+%\newcommand\pcollect[1]{{#1}^\pfin}
+
+\newcommand\strip{\morph{strip}}
+
+%% \newcommand\down{\ensuremath{\color{red} F}} %FIXME: remove!
+%% \newcommand\downof[1]{{\color{red}\down #1}}
+
+
+%% ===== Datafun syntax =====
+\newcommand\kwname\textbf
+\newcommand\prim[1]{\textmd{\itshape #1}}
+\newcommand\caseto\shortrightarrow
+\newcommand\pwild{\underline{\phantom{a}}}
+\newcommand\desugars{~\leadsto~}
+%\renewcommand\desugars{~\overset{\text{def}}{=}~}
+%\renewcommand\desugars{~\coloneqq~}
+%\renewcommand\desugars{\,\xrsquigarrow{\text{expand}}\,}
+
+\newcommand\eqt[1]{\underaccent{\textmd{eq}}{#1}}
+\newcommand\fint[1]{\underaccent{\textmd{fin}}{#1}}
+\newcommand\acct[1]{\underaccent{\textmd{acc}}{#1}}
+\newcommand\fixt[1]{\underaccent{\textmd{fix}}{#1}}
+
+\newcommand\tset[1]{\{{#1}\}}
+\newcommand\tbool{2}
+\newcommand\tunit{1}
+%\newcommand\tdown[1]{\color{red}\downof{#1}}
+\newcommand\tseteq[1]{\tset{\eqt{#1}}}
+
+\newcommand\ebox[1]{[{#1}]}
+\newcommand\elet[1]{\kwname{let}\;{#1}\;\kwname{in}\;}
+\newcommand\etuple[1]{\langle{#1}\rangle}
+\newcommand\Etuple[1]{\left\langle{#1}\right\rangle}
+\newcommand\ecase[1]{\kwname{case} \;{#1}\; \kwname{of}\;}
+\newcommand\eset[1]{\{{#1}\}}
+\newcommand\efor[1]{\kwname{for}\:({#1})\fnspace}
+\newcommand\eeq[2]{{#1} = {#2}}
+%% surface syntax
+\newcommand\ewhen[1]{\kwname{when}\:({#1})\fnspace}
+\newcommand\edcase[1]{\kwname{case}^\iso \;{\isocolor #1}\; \kwname{of}\;}
+\newcommand\etrue{\prim{true}}\newcommand\efalse{\prim{false}}
+\newcommand\eif[2]{\kwname{if}\;{#1}\;\kwname{then}\;{#2}\;\kwname{else}\;}
+\newcommand\efixis[1]{\kwname{fix}\;#1\;\kwname{is}\;}
+%% desugared syntax
+\newcommand\efix{\prim{fix}\<}
+\newcommand\esplit{\prim{split}\<}
+%\newcommand\esplitd[1]{\esplit{\isocolor #1}}
+\newcommand\eisEmpty[1]{\prim{isEmpty}\<{\isocolor #1}}
+%% TODO: remove \edown, \ebigvee
+\newcommand\edown{\color{red}\mathop{\downarrow}}
+\newcommand\ebigvee[2]{\color{red}\mathop{\textstyle\bigvee}({#1} \in {#2})\fnspace}
+
+\newcommand\esetd[1]{\eset{\isocolor #1}}
+\newcommand\eboxd[1]{\ebox{\isocolor #1}}
+\newcommand\eford[2]{\efor{{\isocolor #1} \in #2}}
+\newcommand\eifd[2]{\eif{\isocolor #1}{#2}}
+\newcommand\efixisd[2]{\efixis{#1}{\isocolor #2}}
+\newcommand\eeqd[2]{\eeq{\isocolor #1}{\isocolor #2}}
+
+%\newcommand\J[3]{{#1} \mathrel{\,:\,} {#2} \vdash {#3}}
+\newcommand\J[3]{{#2} \vdash {#1} \mathrel{:} {#3}}
+\newcommand\Jalign[3]{{#2} &\vdash {#1} \mathrel{:} {#3}}
+\newcommand\h[2]{{#1} : {#2}}
+\newcommand\dvar[1]{{\isocolor #1}}
+\newcommand\freshvar[1]{{\color{Rhodamine}#1}}
+\newcommand\hd[2]{\dvar{#1} \dblcolon {#2}}
+
+\newcommand\stripcx[1]{\textit{strip}({#1})}
+\renewcommand\stripcx[1]{\lceil{#1}\rceil}
+\newcommand\stripcxd[1]{{\isocolor\stripcx{\isocolor #1}}}
+\newcommand\isocx[1]{{\color{ACMPurple}\lfloor{#1}\rfloor}}
+
+
+%% ===== Poset, ChangePoset, derivative & seminaive notation =====
+\newcommand\semiden[1]{\den{#1}_\phi}
+
+%% TODO: replace \fname with \morph or vice-versa?
+\newcommand\fname\morph
+\newcommand\dummy{\fname{dummy}}
+
+\newcommand\iso{{\texorpdfstring{\ensuremath{\square}}{iso}}}
+\newcommand\isof{\iso}
+%% \newcommand\blackiso{{\texorpdfstring{\ensuremath{\blacksquare}}{black-box}}}
+%% \newcommand\blackisof{\blackiso}
+\newcommand\altiso{\texorpdfstring{\ensuremath{\iso_{\textrm{alt}}}}{altiso}}
+
+\newcommand\zero{\ensuremath{\mathbold{0}}}
+\newcommand\valfn{\ensuremath{\mathbb{U}}}
+\newcommand\vals{\valfn}
+\newcommand\chgs[1]{\D{#1}}
+\newcommand\deriv[1]{\ensuremath{#1'}}
+\newcommand\upd{\mathbin{\oplus}}
+\newcommand\updfn{\ensuremath{{\upd}}}
+
+\newcommand\incdenfn{\mathcal{D}}
+\newcommand\incdens{\incdenfn} % s for "short"
+\newcommand\incden[1]{\incdenfn({#1})}
+
+%\renewcommand\valfn{\ensuremath{V}}
+\renewcommand\valfn{\ensuremath{\mathbb{V}}}
+
+%% % See
+%% % https://tex.stackexchange.com/questions/419860/how-to-declare-a-bracket-style-math-operator
+%% % https://tex.stackexchange.com/questions/252648/left-right-double-curly-brace-blackboard-bold-symbol
+%% \renewcommand\incden[1]{\langle\kern -.26em\langle{#1}\rangle\kern -.26em\rangle}
+%% %\renewcommand\incden[1]{\{\kern-.18em\{{#1}\}\kern -.18em\}}
+%% \renewcommand\incdens\incden
+%% \renewcommand\incdenfn{\ensuremath{\incden{-}}}
+
+%% \renewcommand\vals[1]{{#1}^v}
+%% \renewcommand\valfn{\ensuremath{\vals{-}}}
+
+%% Derivative variables!
+\newcommand\da{\mathvar{da}}
+\newcommand\db{\mathvar{db}}
+\newcommand\dx{\mathvar{dx}}
+\newcommand\dy{\mathvar{dy}}
+\newcommand\df{\mathvar{df}}
+%\renewcommand\df{d\kern-.1em f\kern-.1em} % fucking kerning.
+\newcommand\dg{\mathvar{dg}}
+\newcommand\ds{\mathvar{ds}}
+\newcommand\dgamma{d\gamma}
+
+
+%% ===== Logical relation notation =====
+\newcommand\impls\approx
+
+
+%% ===== Validity/update relation arrows =====
+%% Option A
+% \leadsto, \rightsquigarrow, \Rightarrow
+\newcommand\validarrow\to
+\newcommand\valid[1]{\mathrel{\overset{#1}{\validarrow}}}
+\newcommand\longvalid[1]{\mathrel{\xrightarrow{#1}}}
+\newcommand\vld[3]{{#2 \valid{#1} #3}}
+\newcommand\longvld[3]{{#2 \longvalid{#1} #3}}
+
+%% \renewcommand\longvld[3]{{#1} : {#2} \validarrow {#3}}
+%% \renewcommand\vld\longvld
+
+%% %% Option B
+%% \renewcommand\validarrow\leadsto
+%% \newcommand\longvalidarrow\validarrow
+%% \renewcommand\longvld[3]{{#2 \mathrel{\overset{#1}{\longvalidarrow}} #3}}
+
+%% %% Option C
+%% \renewcommand\vld[3]{{#2 \xrsquigarrow{#1} #3}}
+%% \renewcommand\longvld[3]{{#2 \xrsquigarrow{#1} #3}}
+
+%% %% Adapted from https://tex.stackexchange.com/questions/233676/leadsto-with-text
+%% \usepackage{tikz}
+%% \usetikzlibrary{decorations.pathmorphing,shapes}
+
+%% \usepackage{tikz-cd}
+%% \usetikzlibrary{decorations.pathmorphing}
+%% \newcommand\xrsquigarrow[1]{%
+%%     \mathrel{%
+%%         \begin{tikzpicture}[%
+%%             baseline={(current bounding box.south)}
+%%             ]
+%%         \node[%
+%%             ,inner sep=.44ex
+%%             ,align=center
+%%             ] (tmp) {$\scriptstyle #1$};
+%%         \path[%
+%%             ,draw,<-
+%%             ,decorate,decoration={%
+%%                 ,zigzag
+%%                 ,amplitude=0.7pt
+%%                 ,segment length=1.2mm,pre length=3.5pt
+%%                 }
+%%             ]
+%%         (tmp.south east) -- (tmp.south west);
+%%         \end{tikzpicture}
+%%         }
+%%     }
