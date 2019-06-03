@@ -2,6 +2,8 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{rntzthm}[2018/11/16]
 \RequirePackage{amsthm}
+% Avoid warnings from remreset package, used by thmtools.
+\RequirePackage{silence}\WarningFilter{remreset}{The remreset package is obsolete}
 \RequirePackage{thmtools,thm-restate} % for restatable theorems.
 
 % Everything is numbered sequentially with a single counter.
