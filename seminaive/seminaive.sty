@@ -5,9 +5,13 @@
 \usepackage{booktabs}               % \midrule
 \usepackage{latexsym}               % \rightsquigarrow
 \usepackage{mathpartir}             % \begin{mathpar}, \infer, etc.
-\usepackage{mathtools}              %\dblcolon
+\usepackage{mathtools}              % \dblcolon, \Coloneqq
 \usepackage{nccmath}                % fix align* (etc.) spacing
 \usepackage{stmaryrd}               % \shortrightarrow, \llbracket, etc.
+
+% Default to vertically centered colons. Doesn't quite work with euler, but
+% better than nothing.
+\mathtoolsset{centercolon}
 
 % Make section name references use \S.
 \makeatletter\crefname{section}{\S\@gobble}{\S\@gobble}\makeatother
@@ -23,7 +27,7 @@
 
 % Unfortunately, only pdftex supports most of the features of microtype.
 \usepackage{iftex}
-\ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=10}{microtype}\else\fi
+\ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=10,}{microtype}\else\fi
 \usepackage{microtype}\frenchspacing
 
 \hyphenation{eq-uip-ped}

@@ -34,16 +34,13 @@
 
 \newcommand\quantcolor\relax
 %\renewcommand\quantcolor{\color{green}}
-\newcommand\fa[1]{({\quantcolor\forall #1})~}
-\newcommand\ex[1]{({\quantcolor\exists #1})~}
-\newcommand\faex[2]{({\quantcolor\forall #1, \exists #2})~}
+\newcommand\quantifierspace{~\,}
+\newcommand\quantify[1]{({\quantcolor #1})\quantifierspace}
+\newcommand\fa[1]{\quantify{\forall #1}}
+\newcommand\ex[1]{\quantify{\exists #1}}
+\newcommand\faex[2]{\quantify{\forall #1, \exists #2}}
 
-%% \renewcommand\quantifierspace{~\,}
-%% \renewcommand\fa[1]{\forall #1.\quantifierspace}
-%% \renewcommand\ex[1]{\exists #1.\quantifierspace}
-%% \renewcommand\faex[2]{\forall {#1}.~ \exists {#2}.\quantifierspace}
-
-%% various marked equalities
+%% various marked equalities.
 \newcommand\stareq{\overset{\boldsymbol\star}{=}}
 \newcommand\daggereq{\overset{\dagger}{=}}
 \newcommand\stardaggereq{\overset{\boldsymbol\star\dagger}{=}}
@@ -170,8 +167,6 @@
 
 
 %% ===== Poset, ChangePoset, derivative & seminaive notation =====
-\newcommand\semiden[1]{\den{#1}_\phi}
-
 %% TODO: replace \fname with \morph or vice-versa?
 \newcommand\fname\morph
 \newcommand\dummy{\fname{dummy}}
@@ -183,19 +178,21 @@
 \newcommand\altiso{\texorpdfstring{\ensuremath{\iso_{\textrm{alt}}}}{altiso}}
 
 \newcommand\zero{\ensuremath{\mathbold{0}}}
-\newcommand\valfn{\ensuremath{\mathbb{U}}}
+\newcommand\valfn{\ensuremath{V}}
 \newcommand\vals{\valfn}
 \newcommand\chgs[1]{\D{#1}}
 \newcommand\deriv[1]{\ensuremath{#1'}}
 \newcommand\upd{\mathbin{\oplus}}
 \newcommand\updfn{\ensuremath{{\upd}}}
+\newcommand\compose\cdot
+\newcommand\composefn{\ensuremath{{\compose}}}
+%% TODO: want a jaggy arrow here
+\newcommand\changeto\rightsquigarrow
+\newcommand\changetofn{\ensuremath{{\changeto}}}
 
 \newcommand\incdenfn{\mathcal{D}}
 \newcommand\incdens{\incdenfn} % s for "short"
 \newcommand\incden[1]{\incdenfn({#1})}
-
-%\renewcommand\valfn{\ensuremath{V}}
-\renewcommand\valfn{\ensuremath{\mathbb{V}}}
 
 %% % See
 %% % https://tex.stackexchange.com/questions/419860/how-to-declare-a-bracket-style-math-operator
@@ -225,50 +222,9 @@
 
 
 %% ===== Validity/update relation arrows =====
-%% Option A
-% \leadsto, \rightsquigarrow, \Rightarrow
 \newcommand\validarrow\to
-\newcommand\valid[1]{\mathrel{\overset{#1}{\validarrow}}}
-\newcommand\longvalid[1]{\mathrel{\xrightarrow{#1}}}
-\newcommand\vld[3]{{#2 \valid{#1} #3}}
-\newcommand\longvld[3]{{#2 \longvalid{#1} #3}}
-
-%% \renewcommand\longvld[3]{{#1} : {#2} \validarrow {#3}}
-%% \renewcommand\vld\longvld
-
-%% %% Option B
-%% \renewcommand\validarrow\leadsto
-%% \newcommand\longvalidarrow\validarrow
-%% \renewcommand\longvld[3]{{#2 \mathrel{\overset{#1}{\longvalidarrow}} #3}}
-
-%% %% Option C
-%% \renewcommand\vld[3]{{#2 \xrsquigarrow{#1} #3}}
-%% \renewcommand\longvld[3]{{#2 \xrsquigarrow{#1} #3}}
-
-%% %% Adapted from https://tex.stackexchange.com/questions/233676/leadsto-with-text
-%% \usepackage{tikz}
-%% \usetikzlibrary{decorations.pathmorphing,shapes}
-
-%% \usepackage{tikz-cd}
-%% \usetikzlibrary{decorations.pathmorphing}
-%% \newcommand\xrsquigarrow[1]{%
-%%     \mathrel{%
-%%         \begin{tikzpicture}[%
-%%             baseline={(current bounding box.south)}
-%%             ]
-%%         \node[%
-%%             ,inner sep=.44ex
-%%             ,align=center
-%%             ] (tmp) {$\scriptstyle #1$};
-%%         \path[%
-%%             ,draw,<-
-%%             ,decorate,decoration={%
-%%                 ,zigzag
-%%                 ,amplitude=0.7pt
-%%                 ,segment length=1.2mm,pre length=3.5pt
-%%                 }
-%%             ]
-%%         (tmp.south east) -- (tmp.south west);
-%%         \end{tikzpicture}
-%%         }
-%%     }
+\newcommand\longvalidarrow[1]{\mathrel{\xrightarrow{#1}}}
+\newcommand\valid[3]{{#1 : #2 \validarrow #3}}
+\newcommand\vld[3]{{#2 \longvalidarrow{#1} #3}}
+%% Not used.
+\newcommand\shortvld[3]{{#2 \overset{#1}{\validarrow} #3}}

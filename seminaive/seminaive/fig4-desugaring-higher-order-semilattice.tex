@@ -1,0 +1,19 @@
+%% \begin{figure*}
+%%   \begin{tabular}{rll}
+%%     Surface term & expanded at $A \to L$ & expanded at $L \x M$\\\midrule
+%%     $\bot$
+%%     & \(\fnof{\freshvar\pwild} \bot\)
+%%     & \(\etuple{\bot,\bot}\)
+%%     \\
+%%     \(e \vee f\)
+%%     & \(\fnof{\freshvar x} e\<{\freshvar x} \vee f\<{\freshvar x}\)
+%%     & \(\etuple{\pi_1\<e \vee \pi_1\<f,\, \pi_2\<e\vee\pi_2\<f}\)
+%%     \\
+%%     \(\eford x e f\)
+%%     & \(\fnof{\freshvar y} \eford x e {f\<\freshvar y}\)
+%%     & \(\Etuple{\bigl(\eford x e {\pi_1\<f}\bigr), \bigl(\eford x e {\pi_2\<f}\bigr)}\)
+%%   \end{tabular}
+
+%%   \caption{Desugaring higher-order semilattice operations}
+%%   \label{fig:desugaring-higher-order-semilattice}
+%% \end{figure*}

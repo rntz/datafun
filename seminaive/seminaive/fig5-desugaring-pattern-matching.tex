@@ -1,0 +1,34 @@
+%% TODO: check that we have every rule we need.
+%% TODO: are any of these redundant/unnecessary?
+\begin{figure*}
+  \[\setlength\arraycolsep{.15em}\begin{array}{rcl}
+    \ecase{e} x \caseto f &\desugars& \elet{x = e} f\\[.33em]
+    \ecase{e} \eboxd x \caseto f &\desugars& \elet{\eboxd x = e} f
+    \\[.33em]
+    %% A * B
+    \ecase{e} (\etuple{p_i,q_i} \caseto f_i)_i
+    &\desugars& \elet{\freshvar x = e}\\
+    && \ecase{\pi_1\< {\freshvar x},\, \pi_2\< {\freshvar x}} (p_i,q_i \caseto f_i)_i
+    \\[.33em]
+    %% A + B
+    \ecase{e} (\inj i p_{i,j} \caseto f_{i,j})_{i,j}
+    &\desugars& \ecase{e} (\inj i {\freshvar x}
+    \caseto \ecase{\freshvar x} (p_{i,j} \caseto f_{i,j})_j)_i
+    \\[.33em]
+    %% [](A * B)
+    \ecase{e} (\eboxd{\etuple{p_i,q_i}} \caseto f_i)_i
+    &\desugars& \elet{\eboxd {\freshvar x} = e}\\
+    && \ecase{\eboxd{\pi_1\<\freshvar x}, \eboxd{\pi_2\<\freshvar x}}
+    (\eboxd{p_i}, \eboxd{q_i} \caseto f_i)
+    \\[.33em]
+    %% [](A + B)
+    \ecase{e} (\eboxd{\inj i p_i} \caseto f_i)_i
+    &\desugars& \ecase{\esplit e} (\inj i \eboxd{p_i} \caseto f_i)_i
+    \\[.33em]
+    %% multi-case -> nested case
+    \ecase{e,\vec f} (p_i, \vec q_{i,j} \caseto g_{i,j})_{i,j}
+    &\desugars& \ecase{e} (p_i \caseto \ecase{\vec f} (\vec q_{i,j} \caseto g_{i,j})_j)_i
+  \end{array}\]
+  \caption{Some pattern-matching elaboration rules}
+  \label{fig:desugaring-pattern-matching}
+\end{figure*}
