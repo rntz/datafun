@@ -10,7 +10,5 @@
   \usepackage{enumitem}
   \setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
 
-- define \mathvar for multi-letter variables in rntzfont.sty. For Euler,
-  \ensuremath. For newtxmath when text font and math font match exactly,
-  \mathit. Problem: what about when using newmath with a font other than the one
-  used? How does \mathit work, anyway?
+- rntzfont.sty: make \mathvar be \mathit (?) when using newmath or otherwise
+  appropriate. For charter, I'm not convinced this is better than \ensuremath.

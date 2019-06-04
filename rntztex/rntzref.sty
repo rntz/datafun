@@ -22,3 +22,5 @@
 % options: capitalise
 \RequirePackage[nameinlink,noabbrev]{cleveref}
 \newcommand\crefrangeconjunction{--} % use en-dashes for ranges.
+% No parentheses in equation labels.
+\creflabelformat{equation}{#2#1#3}

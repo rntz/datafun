@@ -189,15 +189,16 @@ Source Serif and newtxmath don't mix well. Consider eulervm or mathastext.}
   \RequirePackage{eulervm}
   \edef\zeu@Scale{\@scaled{\rntz@eulerscale}} % scale eulervm font.
   \PassOptionsToPackage{scaled=\zeu@Scale,bbscaled=\zeu@Scale,scrscaled=\zeu@Scale}{mathalfa}
-}
+}{}
 
 %% Adjust calligraphic alphabet.
 %% TODO: check scaling of \mathcal in example.tex!
 %% Other options: cal={cm,stix,pxtx,boondoxo}. scr=dutchcal.
 \RequirePackage[cal=cm]{mathalfa}
 
-%% Make sure \mathbold is defined.
-\ifdefined\mathbold\else\newcommand\mathbold{\boldsymbol}\fi
+%% Make sure \mathbold and \mathvar are defined.
+\providecommand\mathbold\boldsymbol
+\providecommand\mathvar\ensuremath
 
 %% undefine \@scaled
 \let\@scaled\relax
