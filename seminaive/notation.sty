@@ -16,7 +16,7 @@
 \newcommand\DP{\D\Phi}
 \newcommand\x\times
 \newcommand\pto\rightharpoonup
-\newcommand\fn\lambda
+\newcommand\fn{\texorpdfstring{\ensuremath{\lambda}}{lambda}}
 \newcommand\injc{\mathrm{in}}
 \newcommand\inj[1]{\injc_{#1}\,}
 \newcommand\bnfor{~~|~~}
@@ -78,6 +78,7 @@
 %\newcommand\Krof[1]{\left[{#1}\right]}
 \newcommand\initE{\krof{\kern .08em}}
 \newcommand\termI{\fork{}}
+\newcommand\eval{\morph{eval}}
 
 
 %% ===== Datafun model notation =====
@@ -180,7 +181,8 @@
 \newcommand\zero{\ensuremath{\mathbold{0}}}
 \newcommand\valfn{\ensuremath{V}}
 \newcommand\vals{\valfn}
-\newcommand\chgs[1]{\D{#1}}
+\newcommand\chgfn{\ensuremath{\D}}
+\newcommand\chgs[1]{\chgfn{#1}}
 \newcommand\deriv[1]{\ensuremath{#1'}}
 \newcommand\upd{\mathbin{\oplus}}
 \newcommand\updfn{\ensuremath{{\upd}}}

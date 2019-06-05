@@ -97,10 +97,10 @@ The specific surface features we add are:
 
 \item Pattern matching on tuples and boxes. \todo{TODO: explain $\prim{split}$.}
 
-\item In the core language, semilattice operations ($\bot$, $e \vee f$, and
-  \kwname{for}-loops) are permitted only at \emph{first-order} semilattice types
-  $\eqt L$. This limitation is lifted in the surface language using
-  $\eta$-expansion (\cref{fig:desugaring-higher-order-semilattice}).
+%% \item In the core language, semilattice operations ($\bot$, $e \vee f$, and
+%%   \kwname{for}-loops) are permitted only at \emph{first-order} semilattice types
+%%   $\eqt L$. This limitation is lifted in the surface language using
+%%   $\eta$-expansion (\cref{fig:desugaring-higher-order-semilattice}).
 
 \item In the core language, we express fixed point computations using what
   amounts to a higher-order operator $\prim{fix} : \isof{(\fixt L \to \fixt L)}
@@ -225,12 +225,12 @@ These must satisfy the following conditions:
   & \text{correctness of composition}
 \end{align*}
 
-\noindent Completeness for increases is equivalent (via choice) to the existence
-of an operator $x \changeto_A y$, defined for $x \le y : \vals A$, such that
+\noindent Completeness for increases is equivalent (via choice) to having an
+operator $x \changeto y : \chgs A$, defined for $x \le y : \vals A$, such that
 $\valid{x \changeto y} x y$.\footnote{Our $x \changeto y$ is effectively the
   incremental $\fn$-calculus' $y \ominus x$, but defined only when $x \le y$.}
-In particular, every $x$ has a \emph{zero change}, $\zero_x = x \changeto
-x$. However, changes (including zero changes) are not necessarily unique: for a
+In particular, every $x$ has a \emph{zero change}, $\zero_x = x \changeto x$.
+However, changes (including zero changes) are not necessarily unique: for a
 given $x,y$ there may be many $\dx$ such that $\valid\dx x y$.
 
 Morphisms $f : \CP(A, B)$ are differentiable maps $f : \Poset(\vals A, \vals
@@ -240,7 +240,7 @@ B)$. A map is differentiable if it has a derivative $\deriv f : \vals A \to
 \nopagebreak[2]
 \[ \vld{\dx} x y \implies \vld{\deriv f\<x\<\dx}{f\<x}{f\<y}\]
 
-\noindent Or, equivalently:
+\noindent Or, equivalently (when $x \upd \dx$ is defined):
 
 \nopagebreak[2]
 \[ f\<(x \upd \dx) = f\<x \upd \deriv f\<x\<\dx \]
@@ -262,20 +262,85 @@ need only exhibit their derivatives. These follow a variant of the chain rule:
 It's easy to see these functions are monotone in \dx\ as required.
 
 
-\subsection{The functor \valfn}
+\subsection{The forgetful functor \valfn}
 
-The forgetful functor $\valfn : \CP \to \Poset$ takes objects $A$ to $\vals A$
-and morphisms $f$ to themselves. The structures we will build in \CP{} will
-usually (but not always!) \emph{refine} those in \Poset, in the sense of
-commuting with \valfn. For example, for cartesian products, $\vals{(A \x B)} =
-\vals A \x \vals B$ and $\vals{\fork{f,g}} = \fork{\vals f, \vals g}$.
+The functor $\valfn : \CP \to \Poset$ takes objects $A$ to $\vals A$ and
+morphisms $f$ to themselves. This can be seen as a process of ``forgetting''. On
+objects, it forgets a poset's associated change-structure; on morphisms, it
+forgets their differentiability.
 %
-For brevity, we omit the ``value components'' of our constructions when they are
-inherited in this way from \Poset.
+Our ``first-order'' constructions in \CP{} --- products, sums, the finite
+powerset functor --- commute with \valfn, in a sense \emph{inheriting} from
+those in \Poset. For example, products have $\vals{(A \x B)} = \vals A \x \vals
+B$ and $\vals{\fork{f,g}} = \fork{\vals f, \vals g}$.
+%
+Where this applies, we omit for brevity this inherited structure.
+%
+However, exponentials will prove the necessary exception to this rule: since all
+maps in \CP{} are differentiable, so are the elements of $\vals{(\expO A B)}$.
+
+%% The structures we will build in \CP{} will
+%% usually \emph{refine} those in \Poset, in the sense of commuting with \valfn.
+%% For example, for cartesian products, $\vals{(A \x B)} = \vals A \x \vals B$ and
+%% $\vals{\fork{f,g}} = \fork{\vals f, \vals g}$.
+%% %
+%% For brevity, we omit the ``value components'' of our constructions when they are
+%% inherited in this way from \Poset.
+
+
+\subsection{Products}
+\label{sec:CP-products}
+
+\CP\ has all finite products. Both $\valfn$ and $\chgfn$ distribute across
+them:
+
+\nopagebreak[2]
+\begin{align*}
+  \vals{\prod_{i \in I} A_i} &= \prod_{i \in I} \vals A_i &
+  \chgs{\prod_{i \in I} A_i} &= \prod_{i \in I} \chgs A_i
+\end{align*}
+
+\noindent
+Updates are pointwise:
+
+\nopagebreak[2]
+\[ (x_i)_i \upd (\dx_i)_i = (x_i \upd \dx_i)_i
+\quad\text{if the RHS is defined}\]
+
+\noindent
+The projection and fork maps are inherited along \valfn, with their derivatives
+being:
+
+\nopagebreak[2]
+\begin{align*}
+  \deriv\pi_i\<x\<\dx &= \pi_i\<\dx &
+  \deriv{\fork{f_i}_i} &= \fork{\deriv f_i}_i
+\end{align*}
+
+\noindent
+\todo{TODO: show $\deriv\pi_i$ correct.}
+To see that $\deriv{\fork{f_i}_i}$ is correct:
+
+\nopagebreak[2]
+\begin{equation*}
+  \fork{f_i}_i \<(x \upd \dx)
+  = (f_i(x \upd \dx))_i
+  = (f_i\<x \upd \deriv f_i \<x \<\dx)_i
+  = \fork{f_i}_i \<x \upd \fork{\deriv f_i}_i \<x \<\dx
+\end{equation*}
+
+\noindent
+\todo{TODO: explain why fork is unique s.t. $\fork{f_i}_i \then \pi_j = f_j$ ---
+  is this inherited from \Poset, or does requiring differentiability make a
+  difference?}
 
 
 \subsection{Cartesian structure}
 \label{sec:CP-cartesian}
+
+\todo{TODO: Neel suggests splitting this into products \& sums. It's easier to
+  understand the quirks of sums on their own rather than while also trying to
+  understand products.}
 
 \CP\ has all finite products and sums. The value-level structure is inherited
 from \Poset\ along \valfn. The change-poset structure is also inherited from
@@ -290,6 +355,8 @@ changes:
   \\
   \deriv\pi_i\<x\<\dx &= \pi_i\<\dx & \deriv\injc_i\<x\<\dx &= \inj i \dx
 \end{align*}
+
+\noindent \todo{TODO: derivatives of fork \& split!}
 
 \noindent Updates are pointwise, noting that $(\inj i x \upd \inj j \dx)$ is
 undefined for $i \ne j$:
@@ -344,9 +411,9 @@ The values $\vals{(\expO A B)}$ of the exponential object are the
 require differentiability, \valfn\ does \emph{not} commute with exponentials:
 $\vals{(\expO A B)} \ne \expO{\vals A}{\vals B}$.
 %
-Meanwhile, the changes $\chgs{(\expO A B)}$ are maps $\vals A \to \Poset(\chgs
-A, \chgs B)$, ordered pointwise. The update relation and change composition must
-be very carefully defined, so we examine them at length below.
+Meanwhile, the changes $\chgs{(\expO A B)}$ are monotone maps $\isof{\vals A}
+\to \chgs A \to \chgs B$, ordered pointwise. The update relation and change
+composition must be very carefully defined, so we examine them at length below.
 
 \subsubsection{Updating functions}
 
@@ -397,10 +464,10 @@ f\<x \upd \df\<x\<\dx = (f \upd \df) \<(x \upd \dx)
 
 \subsubsection{Soundness and completeness}
 
-Soundness follows from completeness at $A$ and soundness at $B$ --- if
-$\valid\df f g$ then for any $x$ we have $\valid{\df\<x\<\zero_x}{f\<x}{g\<x}$
-(using completeness of $A$ to find $\zero_x$), and by soundness at $B$ we have
-$f\<x \le g\<x$, so $f \le g$.
+Soundness follows from completeness at $A$ and soundness at $B$: if $\valid\df f
+g$ then for any $x$ we have $\valid{\df\<x\<\zero_x}{f\<x}{g\<x}$ (using
+completeness of $A$ to find $\zero_x$), and by soundness at $B$ we have $f\<x
+\le g\<x$, so $f \le g$.
 
 We'll show completeness by constructing \changetofn\ explicitly:
 
@@ -436,6 +503,82 @@ this valid, suppose $\vld\df f g$, $\vld\dg g h$ and $\vld\dx x y$. Then
 
 \todo{TODO: discuss unavoidable asymmetry in definitions of \(\changetofn_{\expO
     A B}\) and \(\composefn_{\expO A B}\).}
+
+\subsubsection{\eval\ and \fn}
+
+To show that $\expO A B$ is an exponential object, we need evaluation and
+currying maps, \eval\ and $\fn f$. Modulo differentiability, these are
+inherited from \Poset{}, with the following derivatives:
+
+\begin{align*}
+  %% \eval &: (\expO A B) \x A \to B &
+  %% \fn (f : \G \x A \to B) &: \G \to \expO A B
+  %% \\
+  \vals{\eval} \<(f,x) &= f\<x &
+  \vals{(\fn f)} \<x &= y \mapsto f\<(x,y)\\
+  \deriv{\eval} \<(f,x) \<(\df,\dx) &= \df \<x \<\dx &
+  \deriv{(\fn f)} \<x \<\dx &= y\<\dy \mapsto \deriv f \<(x,y) \<(\dx,\dy)
+\end{align*}
+
+\noindent
+$\deriv{\eval}$ is correct by the definition of $\updfn_{\expO A B}$, for if
+$\valid\df f g$ and $\valid\dx x y$ then
+
+\nopagebreak[2]
+\[ \eval\<(f,x) = {f\<x} \longvalidarrow{\df\<x\<\dx} {g\<y} = \eval\<(g,y) \]
+
+\noindent
+Similarly, \(\deriv{(\fn f)}\) is correct, for suppose $\valid\dx {x_1}{x_2}$
+and $\valid\dy{y_1}{y_2}$. Then by differentiability of $f$ we have
+
+\nopagebreak[2]
+\[ \fn f \<x_1 \<y_1 =
+f\<(x_1,y_1) \longvalidarrow{\deriv f \<(x_1,y_1) \<(\dx,\dy)} f\<(x_2,y_2)
+= \fn f \<x_2 \<y_2
+\]
+
+\noindent
+Finally, $\fn f$ is unique such that $(\fn f \x \id) \then \eval = f$ by the
+same argument as in \Poset{} (or indeed \cat{Set}): supposing $\eval \<(\fn f
+\<x, y) = f\<(x,y) = \eval\<(g\<x,y)$ for all $x,y$, then we have $\fn f \<x \<
+y = g \<x \<y$ and so $\fn f = g$.
+
+
+\subsection{The pseudo-exponential}
+
+\newcommand\pseudoexp{\rightrightarrows}
+%\renewcommand\pseudoexp\rightarrowtriangle
+%\renewcommand\pseudoexp{\overset{?}{\Rightarrow}}
+
+You might have expected changes $\chgs{(\expO A B)}$ to be given pointwise, as
+maps $\isof{\vals A} \to \chgs B$. Intriguingly, this does yield a valid change
+poset, one rather simpler than $\expO A B$, but it does not satisfy the
+properties of an exponential. I call this the \emph{pseudo-exponential}, $A
+\pseudoexp B$. Pseudo-exponentials are irrelevant to Datafun, but are an
+interesting and surprising aspect of \CP, so I describe them here. They are
+constructed as follows:
+
+\vspace{-1.2ex}
+\begin{mathpar}
+  \vals{(A \pseudoexp B)} = \CP(A,B)
+
+  \chgs{(A \pseudoexp B)} = \isof{\vals A} \to \chgs B
+
+  \vld{\df} f g : A \pseudoexp B \iff \fa{x} \vld{\df\<x}{f\<x}{g\<x}
+
+  (\df \compose_{A \pseudoexp B} \dg) \<x = \df\<x \compose_B \dg\<x
+
+  (f \changeto g) \<x = f\<x \changeto g\<x
+\end{mathpar}
+
+\noindent
+I leave it as an exercise for the reader to verify soundness \& completeness and
+correctness of composition. \todo{TODO: explain why they aren't the exponential
+  object and aren't isomorphic to $\expO A B$.}
+
+%% Besides $\expO A B$, there is another, simpler, change poset which one might
+%% expect to be the exponential, but which is not, which I term the
+%% \emph{pseudo-exponential}, written $A \pseudoexp B$.
 
 
 \subsection{The lifted \pfin\ functor}

@@ -25,7 +25,7 @@
     & \den{x} &= \pi_x \quad \text{($x$ monotone)}
     \\
     \den{\fnof x e} &= \lambda\den{e}
-    & \den{e\<f} &= \fork{\den{e}, \den{f}} \then \morph{eval}
+    & \den{e\<f} &= \fork{\den{e}, \den{f}} \then \eval
     \\
     \den{\etuple{e_i}_i} &= \fork{\den{e_i}}_i
     & \den{\pi_i\<e} &= \den{e} \then \pi_i
@@ -70,7 +70,7 @@
     \morph{dist}^\x_+ &: A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)\\
     % this could be simpler if it distributed in the opposite direction.
     \morph{dist}^\x_+ &= \fork{\pi_2 \then \krof{\lambda (\fork{\pi_2,\pi_1} \then \injc_i)}_i, \pi_1}
-    \then \morph{eval}
+    \then \eval
     \\[1ex]
     \strip &: \den\G \to \discof{\den{\stripcxd\G}}\\
     \strip &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \discox
