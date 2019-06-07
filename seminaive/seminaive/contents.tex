@@ -263,6 +263,7 @@ It's easy to see these functions are monotone in \dx\ as required.
 
 
 \subsection{The forgetful functor \valfn}
+\label{sec:CP-vals}
 
 The functor $\valfn : \CP \to \Poset$ takes objects $A$ to $\vals A$ and
 morphisms $f$ to themselves. This can be seen as a process of ``forgetting''. On
@@ -288,38 +289,128 @@ maps in \CP{} are differentiable, so are the elements of $\vals{(\expO A B)}$.
 %% inherited in this way from \Poset.
 
 
-\subsection{Products}
-\label{sec:CP-products}
+%% \subsection{Products}
+%% \label{sec:CP-products}
 
-\CP\ has all finite products. Both $\valfn$ and $\chgfn$ distribute across
-them:
+%% \CP\ has all finite products. $\valfn$ and $\chgfn$ distribute across them:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   \vals{\prod_{i \in I} A_i} &= \prod_{i \in I} \vals A_i &
+%%   \chgs{\prod_{i \in I} A_i} &= \prod_{i \in I} \chgs A_i
+%% \end{align*}
+
+%% \noindent
+%% Updates are pointwise:
+
+%% \nopagebreak[2]
+%% \[ (x_i)_i \upd (\dx_i)_i = (x_i \upd \dx_i)_i
+%% \quad\text{when the RHS is defined}\]
+
+%% \noindent Soundness and completeness follow pointwise from soundness and
+%% completeness of $A_i$; in particular, $(x_i)_i \changeto (y_i)_i = (x_i
+%% \changeto y_i)_i$. Composition is also pointwise:
+
+%% \[ (\dx_i)_i \compose (\dy_i)_i = (\dx_i \compose \dy_i)_i \]
+
+%% It's easy to see
+
+%% \noindent \todo{TODO: soundness, completeness, composition, correctness of composition}
+
+%% The projection and fork maps are inherited along \valfn, with their derivatives
+%% being:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   \deriv\pi_i\<x\<\dx &= \pi_i\<\dx &
+%%   \deriv{\fork{f_i}_i} &= \fork{\deriv f_i}_i
+%% \end{align*}
+
+%% \noindent Correctness of $\deriv\pi_i$ is straightforward; if
+%% $\valid{(\dx_1,\dx_2)}{(x_1,x_2)}{(y_1,y_2)}$ then by definition
+%% $\valid{\dx_i}{x_i}{y_i}$. As for correctness of $\deriv{\fork{f_i}_i}$:
+
+%% \nopagebreak[2]
+%% \begin{equation*}
+%%   \fork{f_i}_i \<(x \upd \dx)
+%%   = (f_i(x \upd \dx))_i
+%%   = (f_i\<x \upd \deriv f_i \<x \<\dx)_i
+%%   = \fork{f_i}_i \<x \upd \fork{\deriv f_i}_i \<x \<\dx
+%% \end{equation*}
+
+%% \noindent
+%% Finally, the universal property of $\fork{f_i}_i$ follows from its universal
+%% property in \Poset\ --- requiring differentiability merely makes the property
+%% weaker.
+
+
+%% \subsection{Sums}
+%% \label{sec:CP-sums}
+
+%% \CP\ has all finite sums. \valfn\ and \chgfn\ distribute across them:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   \vals{\sum_{i \in I} A_i} &= \sum_{i \in I} \vals A_i &
+%%   \chgs{\sum_{i \in I} A_i} &= \sum_{i \in I} \chgs A_i
+%% \end{align*}
+
+%% \noindent
+%% Updates are pointwise but require that the tags match:
+
+%% \nopagebreak[2]
+%% \[ \inj i x \upd \inj j \dx =
+%% \begin{cases}
+%%   \inj i (x \upd \dx) & \text{if}~i=j\\
+%%   \text{undefined} & \text{otherwise}
+%% \end{cases}
+%% \]
+
+
+\subsection{Cartesian structure}
+\label{sec:CP-cartesian}
+\input{seminaive/fig-changeposet-cartesian}
+
+\CP\ has all finite products and sums (\cref{fig:CP-cartesian}). Their
+value-level structure (including $\pi_i$, $\injc_i$, $\fork{f_i}_i$, and
+$\krof{f_i}_i$) is inherited from \Poset; \valfn\ and \chgfn\ distribute across
+both products and sums. Soundness and completeness follow directly from the
+pointwise ordering of products and sums in \Poset{} and soundness \&
+completeness for each factor/summand $A_i$. In particular, \changetofn\ can be
+defined by:
 
 \nopagebreak[2]
 \begin{align*}
-  \vals{\prod_{i \in I} A_i} &= \prod_{i \in I} \vals A_i &
-  \chgs{\prod_{i \in I} A_i} &= \prod_{i \in I} \chgs A_i
+  (x_i)_i \changeto (y_i)_i &= (x_i \changeto y_i)_i &
+  \inj i x \changeto \inj i y &= \inj i (x \changeto y)
 \end{align*}
 
+\noindent The universal properties of $\fork{f_i}_i$ and $\krof{f_i}_i$ follow
+from the corresponding universal properties in \Poset\ --- requiring
+differentiability merely weakens them.
+%
+As for correctness of composition and the derivatives of $\pi_i$/$\injc_i$ and
+$\fork{f_i}_i$/$\krof{f_i}_i$, we will show these in turn for products and sums.
+
+\subsubsection{Products}
+
+Correctness of change composition is straightforward: if
+%
+\[ \vld{(\dx_i)_i}{(x_i)_i}{(y_i)_i}
+\quad\text{and}\quad
+\vld{(\dy_i)_i}{(y_i)_i}{(z_i)_i} \]
+%
+then for each $i$ we have $\valid{\dx_i \compose \dy_i}{x_i}{z_i}$ and therefore
+%
+\[\valid{(\dx_i)_i \compose (\dy_i)_i = (\dx_i \compose
+  \dy_i)_i}{(x_i)_i}{(z_i)_i}\]
+
 \noindent
-Updates are pointwise:
+Likewise for correctness of $\deriv\pi_i$; if $\valid{\dx_i}{x_i}{y_i}$ for each
+$i$ then by definition
+\[\valid{\pi_i\<(\dx_i)_i = \dx_i}{x_i}{y_i}\]
 
-\nopagebreak[2]
-\[ (x_i)_i \upd (\dx_i)_i = (x_i \upd \dx_i)_i
-\quad\text{if the RHS is defined}\]
-
-\noindent
-The projection and fork maps are inherited along \valfn, with their derivatives
-being:
-
-\nopagebreak[2]
-\begin{align*}
-  \deriv\pi_i\<x\<\dx &= \pi_i\<\dx &
-  \deriv{\fork{f_i}_i} &= \fork{\deriv f_i}_i
-\end{align*}
-
-\noindent
-\todo{TODO: show $\deriv\pi_i$ correct.}
-To see that $\deriv{\fork{f_i}_i}$ is correct:
+\noindent As for correctness of $\deriv{\fork{f_i}_i}$:
 
 \nopagebreak[2]
 \begin{equation*}
@@ -329,69 +420,10 @@ To see that $\deriv{\fork{f_i}_i}$ is correct:
   = \fork{f_i}_i \<x \upd \fork{\deriv f_i}_i \<x \<\dx
 \end{equation*}
 
-\noindent
-\todo{TODO: explain why fork is unique s.t. $\fork{f_i}_i \then \pi_j = f_j$ ---
-  is this inherited from \Poset, or does requiring differentiability make a
-  difference?}
+\subsubsection{Sums}
 
-
-\subsection{Cartesian structure}
-\label{sec:CP-cartesian}
-
-\todo{TODO: Neel suggests splitting this into products \& sums. It's easier to
-  understand the quirks of sums on their own rather than while also trying to
-  understand products.}
-
-\CP\ has all finite products and sums. The value-level structure is inherited
-from \Poset\ along \valfn. The change-poset structure is also inherited from
-\Poset, while the projection and injection's derivatives operate pointwise on
-changes:
-
-\nopagebreak[2]
-\begin{align*}
-  \chgs{\prod_{i \in I} A_i} &= \prod_{i \in I} \chgs A_i &
-  \chgs{\sum_{i \in I} A_i} &= \sum_{i \in I} \chgs A_i
-  %\label{eqn:delta-distributes-over-sums-and-products}
-  \\
-  \deriv\pi_i\<x\<\dx &= \pi_i\<\dx & \deriv\injc_i\<x\<\dx &= \inj i \dx
-\end{align*}
-
-\noindent \todo{TODO: derivatives of fork \& split!}
-
-\noindent Updates are pointwise, noting that $(\inj i x \upd \inj j \dx)$ is
-undefined for $i \ne j$:
-
-\nopagebreak[2]
-\begin{align*}
-  (x_i)_i \upd (\dx_i)_i &= (x_i \upd \dx_i)_i &
-  \inj i x \upd \inj i \dx &= \inj i (x \upd \dx)
-\end{align*}
-
-\noindent
-Soundness \& completeness for increases follow directly from the pointwise
-orderings of products \& coproducts in \Poset{}. In particular, the $\changetofn$
-operator is given by:
-
-\nopagebreak[2]
-\begin{align*}
-  (x_i)_i \changeto (y_i)_i &= (x_i \changeto y_i)_i &
-  \inj i x \changeto \inj i y &= \inj i (x \changeto y)
-\end{align*}
-
-\noindent Finally, change composition is also pointwise --- mostly:
-
-\nopagebreak[2]
-\begin{align*}
-  (\dx_i)_i \compose (\dy_i)_i &= (\dx_i \compose \dy_i)_i &
-  \inj i \dx \compose \inj j \dy &=
-  \begin{cases}
-    \inj i (\dx \compose \dy) &\text{if}~i=j\\
-    \inj i \dx &\text{otherwise}
-  \end{cases}
-\end{align*}
-
-\noindent
-However, for sums we must also handle changes with distinct tags. Recall that
+Change composition for sums is interesting, because it must handle changes
+$(\inj i \dx \compose \inj j \dy)$ with disjoint tags $i \ne j$. Recall that
 composition is correct if, when $\valid\dx x y$ and $\valid\dy y z$, we have
 $\valid{\dx\compose\dy} x z$. But if $i \ne j$, then
 %
@@ -400,7 +432,102 @@ there \emph{are} no $x,y,z$ such that $\valid{\inj i \dx} x y$ and $\valid{\inj 
 This case is \emph{dead code}; the only guarantee we need is monotonicity with
 respect to \dx\ and \dy, so it suffices to simply return the left argument.
 
-Correctness of the other cases follows directly from correctness of each $\composefn_{A_i}$.
+Correctness of the other case is straightforward: since $i = j$, from the
+definition of $\updfn_{\sum_i A_i}$ we know all the tags must agree and we have:
+
+\nopagebreak[2]
+\[ \inj i x \longvalidarrow{\inj i \dx} \inj i y
+\longvalidarrow{\inj i \dy} \inj i z \]
+
+\noindent From this it follows that \( {x} \longvalidarrow{\dx} {y}
+\longvalidarrow{\dy} {z} \) and therefore $\vld{\dx\compose\dy} x z$ and so
+finally
+
+\nopagebreak[2]
+\[ \valid{\inj i \dx \compose \inj i \dy = \inj i (\dx \compose \dy)}{\inj i x}{\inj i z} \]
+
+\noindent
+Correctness of $\deriv\injc_i$ is immediate: suppose $\vld\dx x x$. Then
+\(\vld{\inj i \dx}{\inj i x}{\inj i x}\). As for split, its derivative must obey
+
+\nopagebreak[2]
+\begin{equation*}
+  \krof{f_i}_i\<(\inj i x) \upd \deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj i \dx)
+  = \krof{f_i}_i\<(\inj i x \upd \inj i \dx)
+  = f_i \<(x \upd \dx)
+\end{equation*}
+
+\noindent It's easy to see that the $i = j$ case of the definition in
+\cref{fig:CP-cartesian} satisfies this property. As with $\composefn_{\sum_i
+  A_i}$, the $i \ne j$ case is dead code.
+
+
+%% \subsection{Cartesian structure}
+%% \label{sec:CP-cartesian}
+
+%% \todo{TODO: Neel suggests splitting this into products \& sums. It's easier to
+%%   understand the quirks of sums on their own rather than while also trying to
+%%   understand products.}
+
+%% \CP\ has all finite products and sums. The value-level structure is inherited
+%% from \Poset\ along \valfn. The change-poset structure is also inherited from
+%% \Poset, while the projection and injection's derivatives operate pointwise on
+%% changes:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   \chgs{\prod_{i \in I} A_i} &= \prod_{i \in I} \chgs A_i &
+%%   \chgs{\sum_{i \in I} A_i} &= \sum_{i \in I} \chgs A_i
+%%   %\label{eqn:delta-distributes-over-sums-and-products}
+%%   \\
+%%   \deriv\pi_i\<x\<\dx &= \pi_i\<\dx & \deriv\injc_i\<x\<\dx &= \inj i \dx
+%% \end{align*}
+
+%% \noindent \todo{TODO: derivatives of fork \& split!}
+
+%% \noindent Updates are pointwise, noting that $(\inj i x \upd \inj j \dx)$ is
+%% undefined for $i \ne j$:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   (x_i)_i \upd (\dx_i)_i &= (x_i \upd \dx_i)_i &
+%%   \inj i x \upd \inj i \dx &= \inj i (x \upd \dx)
+%% \end{align*}
+
+%% \noindent
+%% Soundness \& completeness for increases follow directly from the pointwise
+%% orderings of products \& coproducts in \Poset{}. In particular, the $\changetofn$
+%% operator is given by:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   (x_i)_i \changeto (y_i)_i &= (x_i \changeto y_i)_i &
+%%   \inj i x \changeto \inj i y &= \inj i (x \changeto y)
+%% \end{align*}
+
+%% \noindent Finally, change composition is also pointwise --- mostly:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   (\dx_i)_i \compose (\dy_i)_i &= (\dx_i \compose \dy_i)_i &
+%%   \inj i \dx \compose \inj j \dy &=
+%%   \begin{cases}
+%%     \inj i (\dx \compose \dy) &\text{if}~i=j\\
+%%     \inj i \dx &\text{otherwise}
+%%   \end{cases}
+%% \end{align*}
+
+%% \noindent
+%% However, for sums we must also handle changes with distinct tags. Recall that
+%% composition is correct if, when $\valid\dx x y$ and $\valid\dy y z$, we have
+%% $\valid{\dx\compose\dy} x z$. But if $i \ne j$, then
+%% %
+%% there \emph{are} no $x,y,z$ such that $\valid{\inj i \dx} x y$ and $\valid{\inj j \dy} y z$.
+%% %
+%% This case is \emph{dead code}; the only guarantee we need is monotonicity with
+%% respect to \dx\ and \dy, so it suffices to simply return the left argument.
+
+%% Correctness of the other cases follows directly from correctness of each $\composefn_{A_i}$.
 
 
 \subsection{Exponentials}
@@ -581,9 +708,116 @@ correctness of composition. \todo{TODO: explain why they aren't the exponential
 %% \emph{pseudo-exponential}, written $A \pseudoexp B$.
 
 
+\subsection{The lifted \iso\ comonad}
+\label{sec:CP-iso}
+
+Now we construct a comonad $\iso$ on \CP\ such that $\valfn\iso_\CP =
+\iso_\Poset\valfn$. This requirement defines the value-level structure, leaving
+only the change poset, update map, and composition. Since $\isof A$ is ordered
+discretely, values \emph{cannot} increase. So the simplest definition is:
+
+\nopagebreak[2]
+\begin{align*}
+  \chgs{\isof A} &= \termO &
+  x \upd_{\isof A} \tuple{} &= x &
+  \tuple{} \compose_{\isof A} \tuple{} &= \tuple{}
+\end{align*}
+
+\noindent
+This trivially satisfies soundness, completeness, and correctness of
+composition.
+%
+Functoriality, extraction, duplication, and product- and sum-distribution
+inherit from the corresponding properties of $\iso_\Poset$, and their
+derivatives are fairly straightforward:
+
+\nopagebreak[2]\vspace{-1ex}
+\begin{mathpar}
+  \deriv{\iso(f)} \<x \<\tuple{} = \tuple{}
+
+  \deriv\delta_A \<x \<\tuple{} = \tuple{}
+
+  \deriv\varepsilon_A \<x \<\tuple{} = \zero_x
+  \\
+  \deriv{{\discox}} \<x \<\dx = \tuple{}
+
+  \deriv{{\discosum}} \<(\inj i x) \<\tuple{} = \inj i {\tuple{}}
+\end{mathpar}
+
+
+\subsubsection{The alternative \altiso}
+
+Although we will not use it, there is another refinement of $\iso$ in \CP{},
+which I'll call $\altiso$ for clarity, defined like so:
+
+\nopagebreak[2]
+\begin{align*}
+  \chgs{\altiso A} &= \isof{\chgs A} &
+  %% x \upd_{\altiso A} \dx = y &\iff x = y \wedge x \upd_A \dx = y
+  \vld{\dx} x x : \altiso A &\iff \vld{\dx} x x : A
+  &
+  \composefn_{\altiso A} &= \composefn_A
+\end{align*}
+
+\noindent
+So $\altiso A$ inherits all of $A$'s changes, but ordered discretely and with
+\emph{only zero-changes still valid}. Soundness and completeness for increases
+and correctness of composition are all implied by the corresponding properties
+of $A$. The derivatives of functoriality, duplication, and extraction are
+different:
+
+\nopagebreak[2]
+\begin{align*}
+  \deriv{\altiso(f)} &= \deriv f
+  & \deriv\delta_A \<x\<\dx &= \dx
+  & \deriv\varepsilon_A \<x\<\dx &= \dx
+\end{align*}
+
+\noindent
+Observe that we no longer need the non-constructive $\zero_x$ to define comonad
+extraction $\varepsilon$! However, for our purposes this will not be an issue.
+Meanwhile, product- and sum-distribution become identity maps, because $\prod_i
+\altiso A_i = \altiso \prod_i A$ and $\sum_i \altiso A_i = \altiso \sum_i
+A_i$ (checking this is left as an exercise for the reader).
+
+
 \subsection{The lifted \pfin\ functor}
 \label{sec:CP-pfin}
 
+We lift the finite powerset functor \pfin\ to \CP\ as follows:
+
+\nopagebreak[2]
+\begin{align}
+  \vals{\pfinof A} &= \pfinof{\vals A} &
+  \chgs{\pfinof A} &= \pfinof{\vals A} &
+  (\updfn_{\pfinof A}) = (\composefn_{\pfinof A}) = ({\cup})
+  \label{eqn:CP-pfin}
+\end{align}
+
+\noindent Since $\updfn$ and \composefn\ are just $\cup$, soundness and
+completeness come from a standard property of union (or more generally of
+semilattice join):
+
+\nopagebreak[2]
+\[ x \le z \iff \ex{y} x \cup y = z \]
+
+\noindent Meanwhile, correctness of composition is simply associativity of
+$\cup$:
+
+\nopagebreak[2]
+\[ (x \cup \dx = y) \wedge (y \cup \dy = z) \implies (x \cup \dx \cup \dy = z) \]
+
+\noindent
+Since the arguments to \morph{singleton} and \morph{isEmpty} cannot change
+(having $\iso$ type), their derivatives always return zero-changes:
+
+\nopagebreak[2]
+\begin{align*}
+  \deriv{\morph{singleton}}_A \<x \<\tuple{} &= \emptyset &
+  \deriv{\morph{isEmpty}} \<x \<\tuple{} &= \morph{isEmpty} \< x
+\end{align*}
+
+
 \subsection{Equality objects}
 \label{sec:CP-eq}
 
@@ -602,11 +836,31 @@ correctness of composition. \todo{TODO: explain why they aren't the exponential
 
 The \emph{incremental semantics} for Datafun, notated $\incden{-}$, is given by
 the Datafun model in \CP{} constructed in \cref{sec:changeposets}, letting
-$\disco = \iso_\CP$ and $\pfin = \pfin_\CP$.
+$\disco = \iso_\CP$ and $\pfin = \pfin_\CP$. The obvious question is: how does
+this semantics relate to the standard \Poset\ semantics, $\den{-}$? Recalling
+\cref{sec:CP-vals}, since most of our constructions inherit along $\valfn$,
+restricted to the \Poset-level they are very nearly the same!
+%
+However, $\vals{\incden{A \to B}} = \den{A \to B}$ fails to hold because of the
+differentiability restriction on \CP's exponentials.
 
-\todo{TODO: explain/state/prove how this relates to the original semantics. use
-  disambiguating notation, $\den{-}_\Poset$ and $\den{-}_\CP$ but say that from
-  now on, $\den{-}$ means $\den{-}_\CP$ by default.}
+\todo{TODO: more explanation}
+
+\begin{restatable}[Semantic agreement at equality types]{theorem}{thmAgreeEquality}
+  \( \vals{\incdens{\eqt A}} = \den{\eqt A} \)
+\end{restatable}
+\begin{proof}
+  \todo{TODO, by induction on types}
+\end{proof}
+
+\begin{restatable}[Semantic agreement modulo differentiability]{theorem}{thmAgree}
+  \XXX
+\end{restatable}
+\begin{proof}
+  \todo{TODO by induction on typing derivations}
+\end{proof}
+
+\input{seminaive/fig-logical-approx}
 
 The change poset $\D\incdens A$ of a Datafun type $A$ is internally definable
 via a type translation given in \cref{fig:PhiDelta}, also named $\D$, despite

@@ -199,10 +199,12 @@
 %% % See
 %% % https://tex.stackexchange.com/questions/419860/how-to-declare-a-bracket-style-math-operator
 %% % https://tex.stackexchange.com/questions/252648/left-right-double-curly-brace-blackboard-bold-symbol
-%% \renewcommand\incden[1]{\langle\kern -.26em\langle{#1}\rangle\kern -.26em\rangle}
-%% %\renewcommand\incden[1]{\{\kern-.18em\{{#1}\}\kern -.18em\}}
-%% \renewcommand\incdens\incden
-%% \renewcommand\incdenfn{\ensuremath{\incden{-}}}
+\renewcommand\incden[1]{\langle\kern -.26em\langle{#1}\rangle\kern -.26em\rangle}
+\renewcommand\incden[1]{\{\kern-.18em\{\kern-.05em{#1}\kern-.05em\}\kern -.18em\}}
+%\renewcommand\incden[1]{\{\kern-.16em|{#1}|\kern -.16em\}}
+%\renewcommand\incden[1]{\llparenthesis{#1}\rrparenthesis}
+\renewcommand\incdens\incden
+\renewcommand\incdenfn{\ensuremath{\incden{-}}}
 
 %% \renewcommand\vals[1]{{#1}^v}
 %% \renewcommand\valfn{\ensuremath{\vals{-}}}
