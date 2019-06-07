@@ -3,7 +3,7 @@
 
 \RequirePackage{kvoptions}
 \RequirePackage{geometry}
-\RequirePackage[strict]{changepage} % TODO: what is this for?
+\RequirePackage[strict]{changepage} % for adjustwidth environment
 
 \DeclareStringOption[345pt]{width}
 \DeclareStringOption[\textwidth]{fullwidth}
@@ -31,5 +31,12 @@
 %% A hack, taken from https://stackoverflow.com/questions/1565988/making-a-small-modification-to-a-latex-environment
 \renewenvironment{figure*}[1][\fps@figure]
   {\edef\@tempa{\noexpand\@float{figure}[#1]}%
-   \@tempa\begin{fullwidth}\centering}
+\@tempa\begin{fullwidth}\centering}
   {\end{fullwidth}\end@float}
+
+%% TODO: Unfortunately, adjustwidth adds vertical space when I use it in
+%% figure*. I've tried various hacks to fix this[1][2] but none of them have
+%% worked so far.
+%
+%% [1] https://tex.stackexchange.com/questions/163100/correcting-removing-adjustwidths-vertical-spacing
+%% [2] https://tex.stackexchange.com/questions/289422/loosing-top-bottom-theorem-spacing-when-using-adjustwidth
