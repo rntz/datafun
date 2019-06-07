@@ -818,21 +818,118 @@ Since the arguments to \morph{singleton} and \morph{isEmpty} cannot change
 \end{align*}
 
 
+
 \subsection{Equality objects}
 \label{sec:CP-eq}
 
+Every object in \CP{} is an equality object, with \morph{eq} and its derivative
+defined by:
+
+\nopagebreak[2]
+\begin{align*}
+  \morph{eq}\<\tuple{x,y} &= 
+  \begin{cases}
+    \{\tuple{}\} & \text{if}~ x = y\\
+    \emptyset & \text{otherwise}
+  \end{cases}
+  &
+  \deriv{\morph{eq}} \<\pwild \<\pwild &= \emptyset
+\end{align*}
+
+\noindent Note that $\deriv{\morph{eq}}$ is correct because $\morph{eq}$'s
+arguments cannot change, having $\iso$ type.
+
+Since \emph{every} object is an equality object, every equality type
+is trivially interpreted into an equality object. \todo{TODO more explanation
+  --- why isn't every type an equality type, then?}
+
+
 \subsection{Semilattice objects and collecting morphisms}
 \label{sec:CP-semilattice}
 
+A semilattice object $L$ in \CP\ is one where $\vals L = \chgs L$ is a
+semilattice and $x \upd_L y = x \vee y$. \todo{(TODO: we might want to require
+  $\composefn_L = {\vee}$ as well, if we need it.)} This immediately justifies
+letting $\deriv{\morph{join}} \<x \<\dx = \morph{join}\<\dx$, because:
+
+\nopagebreak[2]
+\begin{align*}
+  \morph{join}\<(x \upd \dx) &= \bigvee_i \pi_i \<(x \vee \dx)\\
+  &= \left(\bigvee_i \pi_i\<x\right) \vee \left(\bigvee_i \pi_i\<\dx\right)\\
+  &= \morph{join}\<x \vee \morph{join}\<\dx\\
+  &= \morph{join}\<x \upd \deriv{\morph{join}}\<x\<\dx
+\end{align*}
+
+\begin{restatable}{lemma}{lemSemi}
+  \label{lem:semi} $\incdens L$ is a semilattice object.
+\end{restatable}
+\begin{proof}
+  By induction on $L$. See \cpageref{proof:semi}.
+\end{proof}
+
+
 \subsection{Collecting morphisms}
 \label{sec:CP-collect}
 
+Let $\G, A$ be objects, $L$ be a semilattice object, and $f : \G \x \isof A \to
+L$. Our derivative for $\pcollect f : \G \x \pfinof A \to L$ is:
+
+\nopagebreak[2]
+\begin{align*}
+  \deriv{\pcollect f} \<\tuple{\gamma,s} \<\tuple{\dgamma,\ds}
+  &= \bigvee_{x \in \ds} f\<\tuple{\gamma,x} \vee
+  \bigvee_{x \in s \cup \ds} \deriv f \<\tuple{\gamma,x} \<\tuple{\dgamma, \zero_x}
+\end{align*}
+
+\noindent To establish that this is correct, suppose
+$\vld{\dgamma}{\gamma}{\gamma'} : \G$. From this we have:
+
+\nopagebreak[2]
+\begin{align*}
+  &\phantom{{}={}}\pcollect{f} \<\tuple{\gamma', s \cup \ds}
+  \\
+  &= \bigvee_{x \in s \cup \ds} f \<\tuple{\gamma', x}
+  \\
+  &\overset{\footnotemark}{=} \bigvee_{x \in s \cup \ds} \bigl(f \<\tuple{\gamma,x}
+  \vee \deriv f \<\tuple{\gamma,x} \<\tuple{\dgamma,\zero_x}\bigr)
+  \\
+  &= \bigvee_{x \in s} f\<\tuple{\gamma,x}
+  \upd \bigvee_{x \in \ds} f\<\tuple{\gamma,x}
+  \vee \bigvee_{x \in s \cup \ds} \deriv f \<\tuple{\gamma,x} \<\tuple{\dgamma,\zero_x}
+  \\
+  &= \pcollect f \<\tuple{\gamma,s}
+  \upd \deriv{\pcollect f} \<\tuple{\gamma,s} \<\tuple{\dgamma,\ds}
+\end{align*}
+
+\nopagebreak% for footnote to be on same page as mark
+\noindent
+Which is what we wished to show.\footnotetext{This equality follows from the
+  correctness of $\deriv f$ applied to
+  \(\vld{\tuple{\dgamma,\zero_x}}{\tuple{\gamma,x}}{\tuple{\gamma',x}}\).}
+
+
 \subsection{Fixed point objects}
 \label{sec:CP-fix}
+
+A fixed point object $\fixt L$ in \CP\ is a semilattice object such that
+$\vals{\fixt L}$ satisfies the ascending chain condition. \todo{TODO more
+  explanation.} Since the argument to \morph{fix} is boxed and cannot change,
+$\deriv{\morph{fix}}$ needs to produce a zero change; and at any semilattice
+object, $\bot$ is a zero change, so \( \deriv{\morph{fix}} \<x \<\tuple{} = \bot
+\).
+
+\begin{lemma}\label{lem:fixobject}
+  \(\incdens{\fixt L}\) is a fixed point object.
+\end{lemma}
+\begin{proof}
+  By induction on $\fixt L$. \todo{TODO}
+\end{proof}
 
 
 \section{Incrementalization}
 \label{sec:incremental}
+
+\newcommand\agrees\approx
 
 The \emph{incremental semantics} for Datafun, notated $\incden{-}$, is given by
 the Datafun model in \CP{} constructed in \cref{sec:changeposets}, letting
@@ -841,30 +938,40 @@ this semantics relate to the standard \Poset\ semantics, $\den{-}$? Recalling
 \cref{sec:CP-vals}, since most of our constructions inherit along $\valfn$,
 restricted to the \Poset-level they are very nearly the same!
 %
-However, $\vals{\incden{A \to B}} = \den{A \to B}$ fails to hold because of the
+However, $\vals{\incden{A \to B}} \ne \den{A \to B}$ because of the
 differentiability restriction on \CP's exponentials.
-
+%
 \todo{TODO: more explanation}
 
-\begin{restatable}[Semantic agreement at equality types]{theorem}{thmAgreeEquality}
-  \( \vals{\incdens{\eqt A}} = \den{\eqt A} \)
+\begin{restatable}[First-order semantic agreement]{theorem}{thmAgreeFirstOrder}
+  \( \vals{\incdens{\eqt A}} = \den{\eqt A} \).
 \end{restatable}
 \begin{proof}
   \todo{TODO, by induction on types}
 \end{proof}
 
-\begin{restatable}[Semantic agreement modulo differentiability]{theorem}{thmAgree}
-  \XXX
+\input{seminaive/fig-agrees}
+
+\begin{restatable}[First-order agreement is equality]{theorem}{thmAgreeEqualsEquals}
+  \(x \agrees_{\eqt A} y \iff x = y\).
+\end{restatable}
+\begin{proof}
+  \todo{TODO, by induction on eqtypes.}
+\end{proof}
+
+\begin{restatable}[Semantic agreement]{theorem}{thmAgree}
+  If $\J e \G A$
+  %and $\g \agrees_\G \sigma$ then $\incdens{e}\<\g \agrees_A \den{e}\<\sigma$.
+  then $\incdens{e} \agrees_{\G \vdash A} \den{e}$.
 \end{restatable}
 \begin{proof}
   \todo{TODO by induction on typing derivations}
 \end{proof}
 
-\input{seminaive/fig-logical-approx}
-
+\noindent
 The change poset $\D\incdens A$ of a Datafun type $A$ is internally definable
 via a type translation given in \cref{fig:PhiDelta}, also named $\D$, despite
-the risk of confusion. \todo{FIXME}
+the risk of confusion. \todo{TODO: move this \P\ into \cref{sec:seminaive}.}
 
 \input{seminaive/fig7-PhiDelta}
 
@@ -875,3 +982,166 @@ the risk of confusion. \todo{FIXME}
 \begin{proof}
   \todo{TODO}
 \end{proof}
+
+
+\section{Semi\naive{} evaluation}
+\label{sec:seminaive}
+
+\todo{TODO: explain \prim{fast-fix}. explain $\Phi$ type transformation as
+  ``decorating'' $\isof A$ values with their zero changes so that \prim{fix}
+  gets its argument's derivative and can be implemented via \prim{fast-fix}.}
+
+\Cref{fig:seminaive-phi,fig:seminaive-delta} define two mutually recursive
+static transformations: $\phi e$, which computes $e$ \emph{semi\naive{}ly},
+speeding up fixed point computation by using derivatives; and $\delta e$, which
+computes the \emph{derivative} of $\phi e$.
+%
+To describe the types of $\phi e$ and $\delta e$, we'll need three new operators
+on contexts: $\isocx\G$, $\D\G$, and $\Phi\G$.
+%
+We define these by their pointwise action on hypotheses:
+
+\nopagebreak[2]
+\begin{align*}
+  \isocx{(\h x A)} &= \hd x A & \isocx{(\hd x A)} &= \hd x A\\
+  \D(\h x A) &= \h \dx {\D A} & \D(\hd x A) &= \emptycx\quad\text{(the empty context)}\\
+  \Phi(\h x A) &= \h x {\Phi A} & \Phi(\hd x A) &= \hd x {\Phi A}, \hd \dx {\DP A}
+\end{align*}
+
+\noindent For example,
+%
+\begin{mathpar}
+  \isocx{(\h x A, \hd y B)} = \hd x A, \hd y B
+
+  \D(\h x A, \hd y B) = \h \dx {\D A}
+
+  \Phi(\h x A, \hd y B) = \h x {\Phi A}, \hd y {\Phi B}, \hd \dy {\DP B}
+\end{mathpar}
+
+\noindent
+The idea is that $\isof\G$, $\D\G$, and $\Phi\G$ mirror the effect of $\iso$,
+$\D$, and $\Phi$ on the semantics of $\G$. In particular:
+
+\nopagebreak[2]
+\begin{align*}
+  \den{\isocx\G} &\cong \isof{\den\G}
+  &
+  \den{\Phi(\h x A)} &\cong \den{\Phi A}
+  \\
+  \den{\D\G} &\cong \D\incdens\G
+  &
+  \den{\Phi(\hd x A)} &\cong \den{\Phi \isof A}
+\end{align*}
+
+\noindent
+These defined, we can state the sense in which $\phi$ and $\delta$ are
+type-correct:
+
+\begin{restatable}[Type-correctness]{theorem}{thmTypeCorrect}
+  \label{thm:type-correct}
+  If $\J e \G A$, then
+  \[ \J {\phi e} {\Phi\G} {\Phi A}
+  \qquad\text{and}\qquad
+  \J {\delta e} {\isocx{\Phi\G}, \DP\G} {\DP A}
+  \]
+\end{restatable}
+\begin{proof}
+  By induction on typing derivations; see \cpageref{proof:typeCorrect}.
+\end{proof}
+
+\noindent To get the hang of these context and type transformations, let's
+suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
+
+\nopagebreak[2]
+\begin{align*}
+  \Jalign {\phi e} {\h x {\Phi A}, \hd y {\Phi B}, \hd \dy {\DP B}} {\Phi C}
+  \\
+  \Jalign {\delta e} {\hd x {\Phi A}, \h\dx{\DP A}, \hd y {\Phi B}, \hd \dy {\DP B}} {\DP C}
+\end{align*}
+
+
+\input{seminaive/fig-seminaive-phi}
+\input{seminaive/fig-seminaive-delta}
+
+
+\section{Logical relation}
+
+\begin{definition}\label{def:approx}\label{def:approx-contexts}
+  We define a type-indexed logical relation ${\impls_A} \subseteq
+  \vals{\incdens{\Phi A}} \x \vals{\incdens{A}}$ as follows:
+
+  \nopagebreak[2]
+  \begin{align*}
+    %% unit & products
+    \tuple{x_i}_i \impls \tuple{y_i}_i &\iff \fa{i} x_i \impls y_i
+    \\
+    %% sums
+    \inj i x \impls \inj j y &\iff i = j \wedge x \impls y
+    \\
+    %% functions
+    f \impls_{A \to B} g &\iff \fa{x \impls_A y} f\<x \impls_B g\<y
+    \\
+    %% boxes
+    \tuple{x,\dx} \impls_{\isof A} y
+    &\iff x \impls_A y \wedge \vld{\dx} x x
+    \\
+    %% sets
+    s \impls_{\tseteq A} t
+    %% &\iff (\forall x \in s, \exists y \in t)~x\approx_{\eqt A} y
+    %% \wedge (\forall y \in t, \exists x \in s)~x \approx_{\eqt A} y
+    &\iff \faex{x \in s}{y \in t} x\approx_{\eqt A} y
+    \wedge \faex{y \in t}{x \in s} x \approx_{\eqt A} y
+  \end{align*}
+
+  \noindent
+  This lifts to contexts, ${\impls_\G} \subseteq \den{\Phi\G} \x \den\G$, as
+  follows:
+
+  \nopagebreak[2]
+  \begin{align*}
+    \gamma \impls_\G \rho
+    &\iff \fa{\h x A \in \G} \gamma_x \impls \rho_x
+    \\ &\phantom{\iff}
+    \wedge \fa{\hd x A \in \G}
+    (\gamma_{\dvar x} \impls \rho_{\dvar x}
+    \wedge \vld{\gamma_{\dvar{\dx}}}{\gamma_{\dvar x}}{\gamma_{\dvar x}})
+  \end{align*}
+\end{definition}
+
+%% \noindent
+%% Which can be lifted to morphisms (and thus term denotations) as follows:
+
+%% \begin{align*}
+%%   \impls_{\G \vdash A} &\subseteq \den{\Phi\G \vdash \Phi A} \x \den{\G \vdash A}\\
+%%   f \impls_{\G \vdash A} g &\iff \fa{\gamma \impls_\G \gamma'} f\<\gamma \impls_A g\<\gamma'
+%% \end{align*}
+
+\begin{restatable}[Correctness]{theorem}{thmCorrect}\label{thm:correct}
+  If $\J e \G A$ and $\gamma \impls_\G \rho$ then
+
+  \begin{enumerate}
+  \item \(\den{\phi e} \<\gamma \impls_A \den{e} \<\rho\).
+  \item If $\vld{\dgamma}{\g}{\g'}$ then \(\vld{\den{\delta e}
+    \tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e} \<\gamma'}\).
+  \end{enumerate}
+
+  %% \nopagebreak[2]
+  %% \begin{gather*}
+  %% \text{(1)}~~ \den{\phi e}\<\gamma \impls_A \den{e}\<\rho
+  %% \qquad\text{and}\qquad
+  %% \text{(2)}~~
+  %% \vld{\den{\delta e} \tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e} \<\gamma'}
+  %% : \incdens{\Phi{A}}
+  %% \end{gather*}
+
+  \noindent
+  Note that $\tuple{\gamma,\dgamma}$ is a slight abuse of notation here;
+  \todo{TODO explain that \emph{monotone} variables in $\g$ when we use it as
+    $\den{\phi e}\<\g$ turn into \emph{discrete} variables in $\extend\g\dgamma$
+    when we use it in $\den{\delta e} \<\extend\g\dgamma$}.
+\end{restatable}
+\begin{proof}
+  By induction on the derivation of $\J e \G A$. See \cpageref{proof:correct}.
+\end{proof}
+
+

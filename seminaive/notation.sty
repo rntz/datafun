@@ -164,7 +164,7 @@
 \newcommand\stripcx[1]{\textit{strip}({#1})}
 \renewcommand\stripcx[1]{\lceil{#1}\rceil}
 \newcommand\stripcxd[1]{{\isocolor\stripcx{\isocolor #1}}}
-\newcommand\isocx[1]{{\color{ACMPurple}\lfloor{#1}\rfloor}}
+\newcommand\isocx\isof
 
 
 %% ===== Poset, ChangePoset, derivative & seminaive notation =====
@@ -221,8 +221,9 @@
 \newcommand\dgamma{d\gamma}
 
 
-%% ===== Logical relation notation =====
-\newcommand\impls\approx
+%% ===== Correctness relation notation =====
+\newcommand\impls\models
+\renewcommand\impls{\mathrel{\lightning}}
 
 
 %% ===== Validity/update relation arrows =====
