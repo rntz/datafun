@@ -1,0 +1,51 @@
+%% ----- Figure: Seminaive δ derivative -----
+\begin{figure*}
+  \[ \delta\bot = \delta\esetd{e_i}_i = \delta(\eeqd e f) = \delta(\efix e) = \bot \]
+
+  \begin{align*}
+    \delta x &= \dx &
+    \delta \dvar x &= \dvar\dx\\
+    \delta(\fnof{x} e) &= \fnof{\eboxd x} \fnof\dx \delta e
+    & \delta(e\<f) &= \delta e \<\eboxd{\color{Rhodamine}\phi e} \<\delta f\\
+    \delta\etuple{e_i}_i &= \etuple{\delta e_i}_i
+    & \delta(\pi_i\<e) &= \pi_i\<\delta e\\
+    \delta(\inj i e) &= \inj i {\delta e} &
+    \delta(e \vee f) &= \delta e \vee \delta f\\
+    \delta\eboxd{e} &= \etuple{} &
+    \delta(\elet{\eboxd x = e} f)
+    &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \delta f
+  \end{align*}
+
+  \begin{align*}
+    %% TODO: double-check this!
+    \delta(\ecase e (\inj i x \caseto f_i)_i)
+    &= \ecase{\esplit{\eboxd{\color{Rhodamine} \phi e}},\, \delta e}\\
+    &\qquad ({\inj i {\eboxd x},\, \inj i \dx} \caseto \delta f_i)_i\\
+    &\qquad ({\inj i {\eboxd x},\, \pwild}
+      \caseto \subst{\delta f_i}{\dx \substo \dummy\<x})_i
+    %% &= \ecase{\esplit{\eboxd{\phi e}}}\\
+    %% &\qquad (\inj i \eboxd x
+    %% \caseto \subst{\delta f_i}{\dx \substo \extract_i\<x\<\delta e})_i\\
+    %% \phi(\eif e f g) &= \eif{\phi e}{\phi f}{\phi g}\\
+    %% \delta(\eif e f g) &= \eif{\phi e}{\delta f}{\delta g}
+    \\
+    %% \delta(\ebigvee x e f)
+    %% &= (\ebigvee x {\delta e} {\color{Rhodamine}\phi f})
+    %% \vee
+    %% (\ebigvee x {{\color{Rhodamine}\phi e} \vee \delta e} {\delta f})
+    %% TODO: is weakening being used here?
+    \delta(\eford x e f)
+    &= (\eford x {\delta e} \substd{\phi f}{\dx \substo \zero\<x}) \\
+    &\vee (\eford x {{\phi e} \vee \delta e} %\elet{\eboxd\dx = \eboxd{\zero\<x}}
+    \substd{\delta f}{\dx \substo \zero\<x})
+    \\
+    \delta(\eisEmpty e) &= \eisEmpty {\color{Rhodamine} \phi e}
+    \\
+    \delta(\esplit e) &= \ecase{\phi e}
+    (\eboxd{\eboxd{\etuple{\inj i \pwild, \pwild}}}
+    \caseto \inj i {\etuple{}} )_i
+  \end{align*}
+
+  \caption{Semi\naive{} derivative translation, $\delta$}
+  \label{fig:seminaive-delta}
+\end{figure*}

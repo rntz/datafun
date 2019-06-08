@@ -1,0 +1,15 @@
+%% ----- Figure: Dummy function -----
+\begin{figure*}
+  \[\setlength\arraycolsep{.3em}\begin{array}{lcl}
+    \dummy &:& A \to \D A\\
+    \dummy \<(\pwild : \tbool) &=& \efalse\\
+    \dummy \<(\pwild : \tset{A}) &=& \eset{}\\
+    \dummy \<\eboxd{x} &=& \eboxd{\dummy\<x}\\
+    \dummy \<(f : A \to B) &=& \fnof{x} \dummy\<(f\<x)\\
+    \dummy \<\etuple{x,y} &=& \etuple{\dummy\<x, \dummy\<y}\\
+    %% \dummy \<\etuple{x_i}_i &=& \etuple{\dummy\<x_i}_i\\
+    \dummy \<(\inj i x) &=& \inj i (\dummy\<x)
+  \end{array}\]
+  \caption{The \dummy\ function}
+  \label{fig:dummy}
+\end{figure*}

@@ -1,0 +1,70 @@
+%% ---- Seminaive ("go faster") term translation ----
+\begin{figure*}
+  %% TODO: think about this translation and syntax sugar. for example, the
+  %% case-split I use in \phi(\esplit e) is only valid *because* \esplit exists.
+  %%
+  %% Would be nice to give the syntax sugar explicitly, but maybe more effor
+  %% than its worth? Might be clearer to mostly avoid syntax sugar? Not sure.
+  \figsectionname{Interesting cases}
+
+  \begin{align*}
+    \phi(\prim{fix}\<e) &= \prim{fast-fix}\<\phi e\\
+    \phi\eboxd{e} &= \eboxd{\etuple{\phi e, \delta e}}
+    \\
+    \phi(\elet{\eboxd x = e} f) &= \elet{\eboxd{\etuple{x,\dx}} = \phi e} \phi f
+    \\
+    \phi(\eford x e f)
+    &= \eford x {\phi e} {\phi \substd{f}{dx \substo \zero\<x}}
+    \\
+    %% TODO: check this lines up with \delta(if then else), because that's where
+    %% it comes up.
+    \phi(\esplit e) &= \ecase{\phi e}\\
+    &\phantom{{}={}}\quad
+    \left(\eboxd{\etuple{\inj i x, \inj i \dx}}
+    \caseto \inj i {\eboxd {\etuple{x,\dx}}}\right)_{i\in\{1,2\}}
+    \\
+    &\phantom{{}={}}\quad
+    \left(\eboxd{\etuple{\inj i x, \pwild}}
+    \caseto \inj i {\eboxd {\etuple{x, \dummy\<x}}} \right)_{i\in\{1,2\}}
+    %% \phi(\esplit e) &= \color{red} \elet{\eboxd{x} = \phi e}\\
+    %% &\phantom{{}={}} \esplit [\isocolor \ecase x\\
+    %% &\phantom{= \esplit}\quad\isocolor
+    %%   (\etuple{\inj i y, \inj i \dy} \caseto \inj i \etuple{y,\dy})_i\\
+    %% &\phantom{= \esplit}\quad
+    %%   {\isocolor(\etuple{\inj i y, \pwild}
+    %%     \caseto \inj i \etuple{y, \dummy\<y})_i}]
+  \end{align*}
+  \vspace{0pt} % <- yes, this matters.
+
+  \figsectionname{Distributive cases}
+
+  \begin{align*}
+    %% TODO: I should mark discrete vs. monotone variables in some
+    %% (colorblind/greyscale-printing)-safe way.
+    \phi x &= x & \phi \dvar x &= \dvar x\\
+    \phi(\fnof x e) &= \fnof x \phi e & \phi(e\<f) &= \phi e\<\phi f\\
+    \phi\etuple{e_i}_i &= \etuple{\phi e_i}_i &
+    \phi(\pi_i\<e) &= \pi_i\<\phi e\\
+    \phi(\inj i e) &= \inj i \phi e\\
+    \phi\bot &= \bot &
+    \phi(e \vee f) &= \phi e \vee \phi f\\
+    \phi(\esetd{e_i}_i) &= \esetd{\phi e_i}_i &
+    \phi(\eeqd e f) &= \eeqd {\phi e} {\phi f}
+  \end{align*}
+
+  \begin{align*}
+    \phi(\ecase e (\inj i x \caseto f_i)_i)
+    &= \ecase{\phi e} (\inj i x \caseto \phi f_i)_i
+    \\
+    \phi(\eisEmpty e) &= \eisEmpty {\phi e}
+  \end{align*}
+
+  \noindent
+  \todo{TODO: Explain the use of weakening in semi\naive{} $\delta(e\<f)$,
+  hilighted in {\color{Rhodamine}pink}.}
+
+  \todo{TODO: explain implementation of \zero{} via \dummy{}.}
+
+  \caption{Semi\naive{} speed-up translation, $\phi$}
+  \label{fig:seminaive-phi}
+\end{figure*}

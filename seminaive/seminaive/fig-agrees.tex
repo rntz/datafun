@@ -1,0 +1,17 @@
+\begin{figure*}
+  \begin{align*}
+    {\agrees_A} &\subseteq \vals{\incdens{A}} \x \den{A} &
+    x \agrees_{\tseteq A} y &\iff x = y\\
+    %% \tuple{x_1,x_2} \agrees_{A_1 \x A_2} \tuple{y_1,y_2} &\iff \fa{i} x_i \agrees_{A_i} y_i &
+    \tuple{x_i}_i \agrees \tuple{y_i} &\iff \fa{i} x_i \agrees y_i &
+    \inj i x \agrees \inj j y &\iff i = j \wedge x \agrees y\\
+    x \agrees_{\isof A} y &\iff x \agrees y &
+    f \agrees_{A \to B} g &\iff \fa{x \agrees_A y} f\<x \agrees_B g\<y
+  \end{align*}
+
+  \todo{TODO: Add explanation that $\agrees_{\tseteq A}$ makes sense because of
+    \cref{thm:agree-first-order}}
+
+  \caption{Agreement relation between $\incdenfn$ and $\den{-}$}
+  \label{fig:agrees}
+\end{figure*}

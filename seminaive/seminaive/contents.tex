@@ -944,6 +944,7 @@ differentiability restriction on \CP's exponentials.
 \todo{TODO: more explanation}
 
 \begin{restatable}[First-order semantic agreement]{theorem}{thmAgreeFirstOrder}
+  \label{thm:agree-first-order}
   \( \vals{\incdens{\eqt A}} = \den{\eqt A} \).
 \end{restatable}
 \begin{proof}
@@ -956,6 +957,7 @@ differentiability restriction on \CP's exponentials.
   \(x \agrees_{\eqt A} y \iff x = y\).
 \end{restatable}
 \begin{proof}
+  \label{thm:agree-equals-equals}
   \todo{TODO, by induction on eqtypes.}
 \end{proof}
 
@@ -977,10 +979,56 @@ the risk of confusion. \todo{TODO: move this \P\ into \cref{sec:seminaive}.}
 
 \begin{restatable}{theorem}{thmDeltaDen}
   \label{thm:delta-den}
-  \(\D\incdens A = \den{\D A}\).
+  \(\D\incdens A = \vals{\incdens{\D A}}\).
 \end{restatable}
+\nopagebreak[2]
 \begin{proof}
-  \todo{TODO}
+  \label{proof:delta-den}
+  By induction on types. A starred equality, $\stareq$, marks equalities given by
+  an inductive hypothesis; additionally, $\daggereq$ indicates an appeal to
+  \cref{thm:agree-first-order}.
+  \begin{description}
+    \item[Case $\isof A$:] \(\D\incdens{\isof A} = \D{\isof{\incdens A}} =
+      \termO_\Poset = \vals\termO_\CP = \vals{\incdens{\tunit}} \).
+
+    \item[Case $\tseteq A$:]
+      \(\D\incdens{\,{\tseteq A}\,} = \D\pfinof{\incdens{\eqt A}}
+      = \pfinof{\vals{\incdens{\eqt A}}}
+      = \vals{\pfinof{\incdens{\eqt A}}}
+      = \vals{\incdens{\,{\tseteq A}\,}}
+      = \vals{\incdens{\D{\tseteq A}}}
+      \).
+
+    \item[Case $A \x B$:]
+      \(\D\incden{A \x B} = \D(\incdens A \x \incdens B)
+      = \D\incdens A \x \D\incdens B
+      \stareq \vals{\incdens{\D A}} \x \vals{\incdens{\D B}}
+      = \vals{\incden{\D A \x \D B}}
+      = \vals{\incdens{\D(A \x B)}}
+      \).
+
+    \item[Case $A + B$:]
+      \(\D\incden{A + B} = \D(\incdens A + \incdens B)
+      = \D\incdens A + \D\incdens B
+      \stareq \vals{\incdens{\D A}} + \vals{\incdens{\D B}}
+      = \vals{\incden{\D A + \D B}}
+      = \vals{\incdens{\D(A + B)}}
+      \).
+
+    \item[Case $A \to B$:]
+      \begin{align*}\D\incden{A \to B}
+        &= \D(\expO{\incdens A}{\incdens B})\\
+        &= \expO{\isof{\vals{\incdens
+              A}}}{\expO{\D\incdens{A}}{\D\incdens{B}}}\\
+        &= ...\\
+        &= \CP(\isof{\incdens A},\ {\expO{\incdens{\D A}}{\incdens{\D B}}})\\
+        &= \vals{(\expO{\isof{\incdens{A}}}{\expO{\incdens{\D A}}{\incdens{\D B}}})}\\
+        &= \vals{\incden{\isof A \to \D A \to \D B}}\\
+        &= \vals{\incdens{\D(A \to B)}}
+      \end{align*}
+
+    \item[Case $\tunit$:]
+  \end{description}
 \end{proof}
 
 

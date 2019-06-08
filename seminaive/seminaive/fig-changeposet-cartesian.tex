@@ -1,0 +1,40 @@
+\begin{figure*}
+  \begin{align*}
+    \vals{\prod_{i} A_i} &= \prod_{i} \vals A_i &
+    (x_i)_i \upd (\dx_i)_i &= (x_i \upd \dx_i)_i
+    \quad\text{when defined}
+    \\[1ex]
+    \chgs{\prod_{i} A_i} &= \prod_{i} \chgs A_i &
+    %% (x_i)_i \changeto (y_i)_i = (x_i \changeto y_i)_i
+    (\dx_i)_i \compose (\dy_i)_i &= (\dx_i \compose \dy_i)_i
+    \\[1ex]
+    \vals{\sum_{i} A_i} &= \sum_{i} \vals A_i &
+    \inj i x \upd \inj i \dx &= \inj i (x \upd \dx) \quad\text{when defined}
+    \\
+    \chgs{\sum_{i} A_i} &= \sum_{i} \chgs A_i &
+    \inj i \dx \compose \inj j \dy &= 
+    \begin{cases}
+      \inj i (\dx \compose \dy) & \text{if}~i=j\\
+      \inj i \dx & \text{otherwise}
+    \end{cases}
+  \end{align*}
+
+  \begin{align*}
+    \deriv\pi_i \<x \<\dx &= \pi_i\<\dx &
+    \deriv{\fork{f_i}_i} &= \fork{\deriv f_i}_i &
+    \deriv\injc_i \<x \<\dx &= \inj i \dx
+  \end{align*}
+
+  \begin{equation*}
+    \deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj j \dx)
+    =
+    \begin{cases}
+      \deriv f_i \<x \<\dx & \text{if}~i = j\\
+      \deriv f_i \<x \<\zero_x & \text{otherwise}
+    \end{cases}
+  \end{equation*}
+  \vspace{-1em}
+
+  \caption{Products and sums in \CP}
+  \label{fig:CP-cartesian}
+\end{figure*}
