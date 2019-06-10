@@ -25,6 +25,10 @@
 \setlist{labelindent=.5em,labelsep=.75em,leftmargin=*}
 \setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
 
+% Make date formatted like "10^{th} June 2019".
+\usepackage[en-GB]{datetime2}
+\DTMlangsetup[en-GB]{ord=raise} % ord={level,raise,omit,sc}
+
 % Unfortunately, only pdftex supports most of the features of microtype.
 \usepackage{iftex}
 \ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=10,}{microtype}\else\fi
@@ -32,8 +36,5 @@
 
 \hyphenation{eq-uip-ped}
 \hyphenation{inv-olv-ing}
-\usepackage{notation}
 
-\title{Change Semantics for Semi\naive{} Datafun}
-\author{\scshape Michael Arntzenius}
-\usepackage[en-GB]{datetime2}\DTMlangsetup[en-GB]{ord=omit}\date{\today}
+\usepackage{notation}
