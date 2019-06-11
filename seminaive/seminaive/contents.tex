@@ -84,11 +84,11 @@ using logical relations (\cref{sec:logical-relations}).
 \end{enumerate}
 
 
-\input{seminaive/fig1-core-datafun}
-\input{seminaive/fig2-surface-syntax}
-\input{seminaive/fig3-desugaring}
-%\input{seminaive/fig4-desugaring-higher-order-semilattice}
-\input{seminaive/fig5-desugaring-pattern-matching}
+\input{seminaive/fig01-core-datafun}
+\input{seminaive/fig02-surface-syntax}
+\input{seminaive/fig03-desugaring}
+%\input{seminaive/fig04-desugaring-higher-order-semilattice}
+\input{seminaive/fig05-desugaring-pattern-matching}
 
 
 \section{Surface syntax and its desugaring}
@@ -194,7 +194,7 @@ bicartesian closed category \catC{} equipped with the following structures:
 
 \end{enumerate}
 
-\input{seminaive/fig6-semantics}
+\input{seminaive/fig06-semantics}
 
 \noindent
 \Cref{fig:semantics} shows how to interpret Datafun into any Datafun
@@ -216,9 +216,10 @@ the standard model and use \emph{its} equational theory.
 \section{Semi\naive{} evaluation}
 \label{sec:seminaive}
 
-\input{seminaive/fig7-PhiDelta}
-\input{seminaive/fig-seminaive-phi}
-\input{seminaive/fig-seminaive-delta}
+\input{seminaive/fig09-PhiDelta}
+\input{seminaive/fig10-seminaive-phi}
+\input{seminaive/fig11-seminaive-delta}
+\input{seminaive/fig12-dummy}
 
 \todo{TODO: explain \prim{fast-fix}. explain $\Phi$ type transformation as
   ``decorating'' $\isof A$ values with their zero changes so that \prim{fix}
@@ -298,6 +299,7 @@ e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
 \section{Correctness via logical relations}
 \label{sec:logical-relations}
 
+%% TODO: put these in files so we can include them in figures.tex!
 \begin{definition} \label{def:changes}
   Inductively on types $A$, we define $(\changesat{A}{\dx}{x}{y})$ for $\dx :
   \den{\D A}$ and $x,y : \den{A}$, glossed as ``$\dx$ changes $x$ into $y$'', as
