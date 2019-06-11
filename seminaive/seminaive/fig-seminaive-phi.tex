@@ -24,8 +24,8 @@
     \caseto \inj i {\eboxd {\etuple{x,\dx}}}\right)_{i\in\{1,2\}}
     \\
     &\phantom{{}={}}\quad
-    \left(\eboxd{\etuple{\inj i x, \pwild}}
-    \caseto \inj i {\eboxd {\etuple{x, \dummy\<x}}} \right)_{i\in\{1,2\}}
+    \left(\eboxd{\etuple{\inj i x, \inj j \pwild}}
+    \caseto \inj i {\eboxd {\etuple{x, \dummy\<x}}} \right)_{i\ne j\in\{1,2\}}
     %% \phi(\esplit e) &= \color{red} \elet{\eboxd{x} = \phi e}\\
     %% &\phantom{{}={}} \esplit [\isocolor \ecase x\\
     %% &\phantom{= \esplit}\quad\isocolor
@@ -34,7 +34,7 @@
     %%   {\isocolor(\etuple{\inj i y, \pwild}
     %%     \caseto \inj i \etuple{y, \dummy\<y})_i}]
   \end{align*}
-  \vspace{0pt} % <- yes, this matters.
+  \vspace{0pt} % yes, this matters
 
   \figsectionname{Distributive cases}
 
