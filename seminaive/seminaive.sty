@@ -1,6 +1,6 @@
 %\usepackage{array}                  % >{blah}, <{blah} in array formats.
-\usepackage{accents}                %\underaccent
 \usepackage{amssymb,amsmath,amsthm} % \square etc.
+\usepackage{accents}                %\underaccent
 \usepackage{anyfontsize}
 \usepackage{booktabs}               % \midrule
 \usepackage{latexsym}               % \rightsquigarrow
@@ -25,16 +25,18 @@
 \setlist{labelindent=.5em,labelsep=.75em,leftmargin=*}
 \setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
 
-% Make date formatted like "10^{th} June 2019".
-\usepackage[en-GB]{datetime2}
-\DTMlangsetup[en-GB]{ord=raise} % ord={level,raise,omit,sc}
-
 % Unfortunately, only pdftex supports most of the features of microtype.
 \usepackage{iftex}
 \ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=10,}{microtype}\else\fi
 \usepackage{microtype}\frenchspacing
 
-\hyphenation{eq-uip-ped}
-\hyphenation{inv-olv-ing}
+%% Controls hyphenation and date formatting defaults, among other things.
+\usepackage[british]{babel}
+\hyphenation{data-fun}
+
+% Make date formatted like "10^{th} June 2019".
+% TODO: can babel do this?
+\usepackage[en-GB]{datetime2}
+\DTMlangsetup[en-GB]{ord=raise} % ord={level,raise,omit,sc}
 
 \usepackage{notation}

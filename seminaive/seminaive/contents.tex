@@ -1,4 +1,4 @@
-\title{Change Semantics for Semi\naive{} Datafun}
+\title{Notes on Semi\naive{} Datafun}
 \author{\scshape Michael Arntzenius}
 \date{\today}
 
@@ -9,18 +9,31 @@
   correct.
 \end{abstract}
 
-\section{Strategy}
+\section{Outline}
 
-We first generalize Datafun's \Poset{} semantics to any category with
+The key insight behind \emph{semi\naive{} evaluation} is to find fixed points
+faster by computing only what changes between iterations
+(\todo{\cref{sec:faster-fix}}). To apply this in Datafun, we first need to
+understand what \emph{change} means.
+%
+To this end, we generalize Datafun's \Poset{} semantics to any category with
 appropriate structures (\cref{sec:datafun-models}). We construct such a
 category, \CP{}, whose objects are posets equipped with a notion of increasing
 changes, and whose morphisms are monotone maps possessing \emph{derivatives}
-relating input and output changes (\cref{sec:changeposets}). We show this
-``incremental'' semantics agrees with Datafun's standard semantics
-(\cref{sec:incremental}). We give a static transformation on Datafun that
+relating input and output changes (\cref{sec:changeposets}).
+
+This yields an incremental semantics for Datafun (\cref{sec:incremental}).
+%
+\todo{Unfortunately, the relationship between the incremental and standard semantics
+is unwieldy, and \CP\ on its own is not rich enough to account for semi\naive{}
+evaluation. We spec\-u\-late that specialising from \emph{once-differentiable}
+to \emph{smooth} functions might yield a rich enough structure.}
+
+Nonetheless, we use \CP\ as a rough guide when constructing a semi\naive{}
+evaluation static transformation (\cref{sec:seminaive}). This transformation
 reinterprets the discreteness comonad to compute derivatives, and uses these to
-speed up fixed point computations. Finally, we prove this semi\naive{}
-evaluation transform correct.
+speed up fixed point computations. Finally, we prove this transformation correct
+using logical relations (\cref{sec:logical-relations}).
 
 % TODO: more section links once I finish them.
 
@@ -865,10 +878,11 @@ letting $\deriv{\morph{join}} \<x \<\dx = \morph{join}\<\dx$, because:
 \end{align*}
 
 \begin{restatable}{lemma}{lemSemi}
-  \label{lem:semi} $\incdens L$ is a semilattice object.
+  \label{lem:semi} $\incdens L$ is a semilattice object. \todo{FIXME: I haven't
+  introduced $\incdenfn$ notation yet!}
 \end{restatable}
 \begin{proof}
-  By induction on $L$. See \cpageref{proof:semi}.
+  By induction on $L$. \todo{See \cpageref{proof:semi}.}
 \end{proof}
 
 
@@ -933,21 +947,43 @@ object, $\bot$ is a zero change, so \( \deriv{\morph{fix}} \<x \<\tuple{} = \bot
 \section{Incrementalization}
 \label{sec:incremental}
 
+%% The \emph{incremental semantics} for Datafun, notated $\incden{-}$, is given by
+%% the Datafun model in \CP{} constructed in \cref{sec:changeposets}, letting
+%% $\disco = \iso_\CP$ and $\pfin = \pfin_\CP$. The obvious question is: how does
+%% this semantics relate to the standard \Poset\ semantics, $\den{-}$? \todo{TODO:
+%% Explain how they are mostly the same if you apply \valfn, but exponentials
+%% crucially aren't. So we tried to use a logical relation, like that
+%% in \cref{fig:agrees}.}
+
+%% Recalling
+%% \cref{sec:CP-vals}, since most of our constructions inherit along $\valfn$,
+%% restricted to the \Poset-level they are very nearly the same!
+%% %
+%% However, $\vals{\incden{A \to B}} \ne \den{A \to B}$ because of the
+%% differentiability restriction on \CP's exponentials.
+%% %
+%% \todo{TODO: more explanation}
+
+\todo{TODO: Explain that \CP\ gives as incremental semantics for Datafun. We
+suspect (but haven't yet proven; back-burner) that you can connect this to the
+regular semantics for Datafun using a logical relation (\cref{fig:agrees}).
+
+However, ultimately the motivation for \CP\ was to give a semantic foundation
+for semi\naive{} evaluation. But it's not clear how to do this, because
+the \emph{morphisms} and \emph{values} in \CP\ are ``hereditarily
+differentiable'', but the \emph{changes} (eg. of the exponential) are \emph{not}
+necessarily differentiable, and this causes no end of pain.
+%
+In particular, there seems to be no way to re-use the validity relations from
+objects in \CP\ to prove correctness of the semi\naive{} transform. Because
+$\chgs(\expO A B) = \isof{\vals A} \to \chgs A \to \chgs B$ mixes differentiable
+and non-differentiable things, we can't use it either on values we get out of
+the \Poset{}-semantics or out of the the \CP-semantics.}
+
 \newcommand\agrees\approx
+\input{seminaive/fig-agrees}
 
-The \emph{incremental semantics} for Datafun, notated $\incden{-}$, is given by
-the Datafun model in \CP{} constructed in \cref{sec:changeposets}, letting
-$\disco = \iso_\CP$ and $\pfin = \pfin_\CP$. The obvious question is: how does
-this semantics relate to the standard \Poset\ semantics, $\den{-}$? Recalling
-\cref{sec:CP-vals}, since most of our constructions inherit along $\valfn$,
-restricted to the \Poset-level they are very nearly the same!
-%
-However, $\vals{\incden{A \to B}} \ne \den{A \to B}$ because of the
-differentiability restriction on \CP's exponentials.
-%
-\todo{TODO: more explanation}
-
-\begin{restatable}[First-order semantic agreement]{theorem}{thmAgreeFirstOrder}
+\begin{restatable}[First-order semantic agreement]{conjecture}{thmAgreeFirstOrder}
   \label{thm:agree-first-order}
   \( \vals{\incdens{\eqt A}} = \den{\eqt A} \).
 \end{restatable}
@@ -955,9 +991,7 @@ differentiability restriction on \CP's exponentials.
   \todo{TODO, by induction on types}
 \end{proof}
 
-\input{seminaive/fig-agrees}
-
-\begin{restatable}[First-order agreement is equality]{theorem}{thmAgreeEqualsEquals}
+\begin{restatable}[First-order agreement is equality]{conjecture}{thmAgreeEqualsEquals}
   \(x \agrees_{\eqt A} y \iff x = y\).
 \end{restatable}
 \begin{proof}
@@ -965,7 +999,7 @@ differentiability restriction on \CP's exponentials.
   \todo{TODO, by induction on eqtypes.}
 \end{proof}
 
-\begin{restatable}[Semantic agreement]{theorem}{thmAgree}
+\begin{restatable}[Semantic agreement]{conjecture}{thmAgree}
   If $\J e \G A$
   %and $\g \agrees_\G \sigma$ then $\incdens{e}\<\g \agrees_A \den{e}\<\sigma$.
   then $\incdens{e} \agrees_{\G \vdash A} \den{e}$.
@@ -974,74 +1008,87 @@ differentiability restriction on \CP's exponentials.
   \todo{TODO by induction on typing derivations}
 \end{proof}
 
-\noindent
-The change poset $\D\incdens A$ of a Datafun type $A$ is internally definable
-via a type translation given in \cref{fig:PhiDelta}, also named $\D$, despite
-the risk of confusion. \todo{TODO: move this \P\ into \cref{sec:seminaive}.}
+%% \noindent
+%% The change poset $\D\incdens A$ of a Datafun type $A$ is internally definable
+%% via a type translation given in \cref{fig:PhiDelta}, also named $\D$, despite
+%% the risk of confusion. \todo{TODO: move this \P\ into \cref{sec:seminaive}.}
 
-\input{seminaive/fig7-PhiDelta}
+%% \begin{restatable}{theorem}{thmDeltaDen}
+%%   \label{thm:delta-den}
+%%   \(\D\incdens A = \vals{\incdens{\D A}}\).
+%% \end{restatable}
+%% \nopagebreak[2]
+%% \begin{proof}
+%%   \label{proof:delta-den}
+%%   By induction on types. A starred equality, $\stareq$, marks equalities given by
+%%   an inductive hypothesis; additionally, $\daggereq$ indicates an appeal to
+%%   \cref{thm:agree-first-order}.
+%%   \begin{description}
+%%     \item[Case $\isof A$:] \(\D\incdens{\isof A} = \D{\isof{\incdens A}} =
+%%       \termO_\Poset = \vals\termO_\CP = \vals{\incdens{\tunit}} \).
 
-\begin{restatable}{theorem}{thmDeltaDen}
-  \label{thm:delta-den}
-  \(\D\incdens A = \vals{\incdens{\D A}}\).
-\end{restatable}
-\nopagebreak[2]
-\begin{proof}
-  \label{proof:delta-den}
-  By induction on types. A starred equality, $\stareq$, marks equalities given by
-  an inductive hypothesis; additionally, $\daggereq$ indicates an appeal to
-  \cref{thm:agree-first-order}.
-  \begin{description}
-    \item[Case $\isof A$:] \(\D\incdens{\isof A} = \D{\isof{\incdens A}} =
-      \termO_\Poset = \vals\termO_\CP = \vals{\incdens{\tunit}} \).
+%%     \item[Case $\tseteq A$:]
+%%       \(\D\incdens{\,{\tseteq A}\,} = \D\pfinof{\incdens{\eqt A}}
+%%       = \pfinof{\vals{\incdens{\eqt A}}}
+%%       = \vals{\pfinof{\incdens{\eqt A}}}
+%%       = \vals{\incdens{\,{\tseteq A}\,}}
+%%       = \vals{\incdens{\D{\tseteq A}}}
+%%       \).
 
-    \item[Case $\tseteq A$:]
-      \(\D\incdens{\,{\tseteq A}\,} = \D\pfinof{\incdens{\eqt A}}
-      = \pfinof{\vals{\incdens{\eqt A}}}
-      = \vals{\pfinof{\incdens{\eqt A}}}
-      = \vals{\incdens{\,{\tseteq A}\,}}
-      = \vals{\incdens{\D{\tseteq A}}}
-      \).
+%%     \item[Case $A \x B$:]
+%%       \(\D\incden{A \x B} = \D(\incdens A \x \incdens B)
+%%       = \D\incdens A \x \D\incdens B
+%%       \stareq \vals{\incdens{\D A}} \x \vals{\incdens{\D B}}
+%%       = \vals{\incden{\D A \x \D B}}
+%%       = \vals{\incdens{\D(A \x B)}}
+%%       \).
 
-    \item[Case $A \x B$:]
-      \(\D\incden{A \x B} = \D(\incdens A \x \incdens B)
-      = \D\incdens A \x \D\incdens B
-      \stareq \vals{\incdens{\D A}} \x \vals{\incdens{\D B}}
-      = \vals{\incden{\D A \x \D B}}
-      = \vals{\incdens{\D(A \x B)}}
-      \).
+%%     \item[Case $A + B$:]
+%%       \(\D\incden{A + B} = \D(\incdens A + \incdens B)
+%%       = \D\incdens A + \D\incdens B
+%%       \stareq \vals{\incdens{\D A}} + \vals{\incdens{\D B}}
+%%       = \vals{\incden{\D A + \D B}}
+%%       = \vals{\incdens{\D(A + B)}}
+%%       \).
 
-    \item[Case $A + B$:]
-      \(\D\incden{A + B} = \D(\incdens A + \incdens B)
-      = \D\incdens A + \D\incdens B
-      \stareq \vals{\incdens{\D A}} + \vals{\incdens{\D B}}
-      = \vals{\incden{\D A + \D B}}
-      = \vals{\incdens{\D(A + B)}}
-      \).
+%%     \item[Case $A \to B$:]
+%%       \begin{align*}\D\incden{A \to B}
+%%         &= \D(\expO{\incdens A}{\incdens B})\\
+%%         &= \expO{\isof{\vals{\incdens
+%%               A}}}{\expO{\D\incdens{A}}{\D\incdens{B}}}\\
+%%         &= ...\\
+%%         &= \CP(\isof{\incdens A},\ {\expO{\incdens{\D A}}{\incdens{\D B}}})\\
+%%         &= \vals{(\expO{\isof{\incdens{A}}}{\expO{\incdens{\D A}}{\incdens{\D B}}})}\\
+%%         &= \vals{\incden{\isof A \to \D A \to \D B}}\\
+%%         &= \vals{\incdens{\D(A \to B)}}
+%%       \end{align*}
 
-    \item[Case $A \to B$:]
-      \begin{align*}\D\incden{A \to B}
-        &= \D(\expO{\incdens A}{\incdens B})\\
-        &= \expO{\isof{\vals{\incdens
-              A}}}{\expO{\D\incdens{A}}{\D\incdens{B}}}\\
-        &= ...\\
-        &= \CP(\isof{\incdens A},\ {\expO{\incdens{\D A}}{\incdens{\D B}}})\\
-        &= \vals{(\expO{\isof{\incdens{A}}}{\expO{\incdens{\D A}}{\incdens{\D B}}})}\\
-        &= \vals{\incden{\isof A \to \D A \to \D B}}\\
-        &= \vals{\incdens{\D(A \to B)}}
-      \end{align*}
-
-    \item[Case $\tunit$:]
-  \end{description}
-\end{proof}
+%%     \item[Case $\tunit$:]
+%%   \end{description}
+%% \end{proof}
 
 
 \section{Semi\naive{} evaluation}
 \label{sec:seminaive}
 
+\input{seminaive/fig7-PhiDelta}
+\input{seminaive/fig-seminaive-phi}
+\input{seminaive/fig-seminaive-delta}
+
 \todo{TODO: explain \prim{fast-fix}. explain $\Phi$ type transformation as
   ``decorating'' $\isof A$ values with their zero changes so that \prim{fix}
-  gets its argument's derivative and can be implemented via \prim{fast-fix}.}
+  gets its argument's derivative and can be implemented via \prim{fast-fix}.
+  Explain that we need $\Phi{\eqt A}$ to be an eqtype for $\Phi{\tseteq{A}} =
+  \tset{\Phi{\eqt A}}$ to be well-formed, and in fact we can be more specific,
+  as in \cref{thm:phi-eqtype}.}
+
+\begin{restatable}[First-order coincidence]{theorem}{thmPhiEqtype}
+  \label{thm:phi-eqtype}
+  $\Phi{\eqt A} = \eqt A$.
+\end{restatable}
+\begin{proof}
+  \XXX
+\end{proof}
 
 \Cref{fig:seminaive-phi,fig:seminaive-delta} define two mutually recursive
 static transformations: $\phi e$, which computes $e$ \emph{semi\naive{}ly},
@@ -1072,15 +1119,16 @@ We define these by their pointwise action on hypotheses:
 
 \noindent
 The idea is that $\isof\G$, $\D\G$, and $\Phi\G$ mirror the effect of $\iso$,
-$\D$, and $\Phi$ on the semantics of $\G$. In particular:
+$\D$, and $\Phi$ on the semantics of $\G$. In particular, $\den{\isocx\G} =
+\isof{\den\G}$, and:
 
 \nopagebreak[2]
 \begin{align*}
-  \den{\isocx\G} &\cong \isof{\den\G}
+  \den{\D(\h x A)} &\cong \den{\D A}
   &
   \den{\Phi(\h x A)} &\cong \den{\Phi A}
   \\
-  \den{\D\G} &\cong \D\incdens\G
+  \den{\D(\hd x A)} &\cong \den{\D \isof A}
   &
   \den{\Phi(\hd x A)} &\cong \den{\Phi \isof A}
 \end{align*}
@@ -1112,38 +1160,74 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
 \end{align*}
 
 
-\input{seminaive/fig-seminaive-phi}
-\input{seminaive/fig-seminaive-delta}
+\section{Correctness via logical relations}
+\label{sec:logical-relations}
 
-
-\section{Logical relation}
+\begin{definition} \label{def:changes}
+  Inductively on types $A$, we define $(\changesat{A}{\dx}{x}{y})$ for $\dx :
+  \den{\D A}$ and $x,y : \den{A}$, glossed as ``$\dx$ changes $x$ into $y$'', as
+  the least relation such that:
 
-\begin{definition}\label{def:approx}\label{def:approx-contexts}
-  We define a type-indexed logical relation ${\impls_A} \subseteq
-  \vals{\incdens{\Phi A}} \x \vals{\incdens{A}}$ as follows:
-
-  \nopagebreak[2]
   \begin{align*}
-    %% unit & products
-    \tuple{x_i}_i \impls \tuple{y_i}_i &\iff \fa{i} x_i \impls y_i
+    \changes{(\dx_i)_i}{(x_i)_i}{(y_i)_i}
+    &\impliedby \fa{i} \changes{\dx_i}{x_i}{y_i}
     \\
-    %% sums
-    \inj i x \impls \inj j y &\iff i = j \wedge x \impls y
+    \changes{\inj i \dx}{\inj i x}{\inj i y}
+    &\impliedby \changes{\dx}{x}{y}
     \\
-    %% functions
-    f \impls_{A \to B} g &\iff \fa{x \impls_A y} f\<x \impls_B g\<y
+    \changesat{A \to B}{\df}{f}{g}
+    &\impliedby \fa{\changes\dx x y} \changes{\df\<x\<\dx}{f\<x}{g\<y}
     \\
-    %% boxes
-    \tuple{x,\dx} \impls_{\isof A} y
-    &\iff x \impls_A y \wedge \vld{\dx} x x
-    \\
-    %% sets
-    s \impls_{\tseteq A} t
-    %% &\iff (\forall x \in s, \exists y \in t)~x\approx_{\eqt A} y
-    %% \wedge (\forall y \in t, \exists x \in s)~x \approx_{\eqt A} y
-    &\iff \faex{x \in s}{y \in t} x\approx_{\eqt A} y
-    \wedge \faex{y \in t}{x \in s} x \approx_{\eqt A} y
+    \changesat{\isof A}{\tuple{}}{x}{x}\\
+    \changesat{\tseteq A}{\dx}{x}{(x \cup \dx)}
   \end{align*}
+
+  \noindent This extends to contexts $\G$, letting $\dgamma : \den{\D\G}$ and
+  $\g,\g' : \den{\G}$, as follows:
+
+  \begin{align*}
+    \changesat{\G}{\dgamma}{\g}{\g'}
+    &\iff \fa{\h x A \in \G} \changesat{A}{\dgamma_x}{\g_x}{\g'_x}
+    \\
+    &\hspace*{1.8em}\wedge
+    %\wedge
+    \fa{\hd x A \in \G}
+    \changesat{\isof A}{\tuple{}}{\g_{\dvar x}}{\g'_{\dvar x}}
+  \end{align*}
+
+  \noindent Observe that the condition $\changesat{\isof A}{\tuple{}}{\g_{\dvar
+      x}}{\g'_{\dvar x}}$ is equivalent to $\g_{\dvar x} = \g'_{\dvar x}$.
+
+  %% Finally, this extends to \Poset-morphisms $f,g : \den{\G} \to \den{A}$ and
+  %% $\df : \den{\isocx \G \x \D\G} \to \den{\D A}$:
+  %% \begin{align*}
+  %%   \changesat{\G \vdash A}{\df}{f}{g} \impliedby&
+  %%   \fa{\changesat{\G}{\dgamma}{\g}{\g'}}
+  %%   \changesat{A}{\df\<\tuple{\g,\dgamma}}{f\<\g}{g\<\g'}
+  %% \end{align*}
+\end{definition}
+
+\begin{definition}\label{def:impls}
+  Inductively on types $A$, we define ${\impls_A} \subseteq \den{\Phi A} \x
+  \den{A}$ as the least relation such that:
+
+  \par\nopagebreak[2]\vspace{-1ex}
+  \begin{mathpar}
+    %% \impls
+    \infer{}{a \impls_{\tseteq A} a}
+
+    \infer{x \impls_A a \\ \changesat{\Phi A}\dx x x}{
+      (x,\dx) \impls_{\isof A} a}
+
+    \tuple{} \impls_\tunit \tuple{}
+
+    \infer{x \impls_A a \\ y \impls_B b}{
+      (x,y) \impls_{A \x B} (a,b)}
+
+    \infer{x \impls_{A_i} a}{\inj i x \impls_{A_1 + A_2} \inj i a}
+
+    \infer{\fa{x \impls_A a} f\<x \impls_B g\<a}{f \impls_{A \to B} g}
+  \end{mathpar}
 
   \noindent
   This lifts to contexts, ${\impls_\G} \subseteq \den{\Phi\G} \x \den\G$, as
@@ -1153,11 +1237,15 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
   \begin{align*}
     \gamma \impls_\G \rho
     &\iff \fa{\h x A \in \G} \gamma_x \impls \rho_x
-    \\ &\phantom{\iff}
-    \wedge \fa{\hd x A \in \G}
-    (\gamma_{\dvar x} \impls \rho_{\dvar x}
-    \wedge \vld{\gamma_{\dvar{\dx}}}{\gamma_{\dvar x}}{\gamma_{\dvar x}})
+    %\wedge
+    \\&\hspace*{1.8em}\wedge
+    \fa{\hd x A \in \G}
+    (\gamma_{\dvar x}, \gamma_{\dvar \dx}) \impls_{\isof A} \rho_{\dvar x}
   \end{align*}
+
+  \noindent Observe that the last condition is equivalent to \( (\gamma_{\dvar
+    x} \impls_A \rho_{\dvar x}) \wedge (\changesat{A}{\gamma_{\dvar
+      \dx}}{\gamma_{\dvar x}}{\gamma_{\dvar x}}) \).
 \end{definition}
 
 %% \noindent
@@ -1169,12 +1257,14 @@ suppose that $\J e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
 %% \end{align*}
 
 \begin{restatable}[Correctness]{theorem}{thmCorrect}\label{thm:correct}
-  If $\J e \G A$ and $\gamma \impls_\G \rho$ then
+  If $\J e \G A$ then
 
   \begin{enumerate}
-  \item \(\den{\phi e} \<\gamma \impls_A \den{e} \<\rho\).
-  \item If $\vld{\dgamma}{\g}{\g'}$ then \(\vld{\den{\delta e}
-    \tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e} \<\gamma'}\).
+  \item If $\gamma \impls_\G \rho$ then \(\den{\phi e} \<\gamma \impls_A \den{e}
+    \<\rho\).
+  \item If $\changesat{\G}{\dgamma}{\g}{\g'}$ then \(\changesat{A}{\den{\delta
+      e} \<\tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e}
+    \<\gamma'}\).
   \end{enumerate}
 
   %% \nopagebreak[2]
