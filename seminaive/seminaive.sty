@@ -9,6 +9,11 @@
 \usepackage{nccmath}                % fix align* (etc.) spacing
 \usepackage{stmaryrd}               % \shortrightarrow, \llbracket, etc.
 
+% Use the normal font for bold stmry symbols to avoid warnings about the bold
+% font not existing.
+% https://tex.stackexchange.com/questions/106714/stmaryrd-and-boldsymbol-avoid-warnings
+\SetSymbolFont{stmry}{bold}{U}{stmry}{m}{n}
+
 % Default to vertically centered colons. Doesn't quite work with euler, but
 % better than nothing.
 \mathtoolsset{centercolon}
