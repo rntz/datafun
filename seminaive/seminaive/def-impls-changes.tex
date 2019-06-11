@@ -1,0 +1,94 @@
+%% ---------- Definitions of logical relations for correctness proof ----------
+
+%% TODO: put these in files so we can include them in figures.tex!
+\begin{definition} \label{def:changes}
+  Inductively on types $A$, we define $(\changesat{A}{\dx}{x}{y})$ for $\dx :
+  \den{\D A}$ and $x,y : \den{A}$, glossed as ``$\dx$ changes $x$ into $y$'', as
+  the least relation such that:
+
+  \begin{align*}
+    \changes{(\dx_i)_i}{(x_i)_i}{(y_i)_i}
+    &\impliedby \fa{i} \changes{\dx_i}{x_i}{y_i}
+    \\
+    \changes{\inj i \dx}{\inj i x}{\inj i y}
+    &\impliedby \changes{\dx}{x}{y}
+    \\
+    \changesat{A \to B}{\df}{f}{g}
+    &\impliedby \fa{\changes\dx x y} \changes{\df\<x\<\dx}{f\<x}{g\<y}
+    \\
+    \changesat{\isof A}{\tuple{}}{x}{x}\\
+    \changesat{\tseteq A}{\dx}{x}{(x \cup \dx)}
+  \end{align*}
+
+  \noindent This extends to contexts $\G$, letting $\dgamma : \den{\D\G}$ and
+  $\g,\g' : \den{\G}$, as follows:
+
+  \begin{align*}
+    \changesat{\G}{\dgamma}{\g}{\g'}
+    &\iff \fa{\h x A \in \G} \changesat{A}{\dgamma_x}{\g_x}{\g'_x}
+    \\
+    &\hspace*{1.8em}\wedge
+    %\wedge
+    \fa{\hd x A \in \G}
+    \changesat{\isof A}{\tuple{}}{\g_{\dvar x}}{\g'_{\dvar x}}
+  \end{align*}
+
+  \noindent Observe that the condition $\changesat{\isof A}{\tuple{}}{\g_{\dvar
+      x}}{\g'_{\dvar x}}$ is equivalent to $\g_{\dvar x} = \g'_{\dvar x}$.
+
+  %% Finally, this extends to \Poset-morphisms $f,g : \den{\G} \to \den{A}$ and
+  %% $\df : \den{\isocx \G \x \D\G} \to \den{\D A}$:
+  %% \begin{align*}
+  %%   \changesat{\G \vdash A}{\df}{f}{g} \impliedby&
+  %%   \fa{\changesat{\G}{\dgamma}{\g}{\g'}}
+  %%   \changesat{A}{\df\<\tuple{\g,\dgamma}}{f\<\g}{g\<\g'}
+  %% \end{align*}
+\end{definition}
+
+\begin{definition}\label{def:impls}
+  Inductively on types $A$, we define ${\impls_A} \subseteq \den{\Phi A} \x
+  \den{A}$ as the least relation such that:
+  %\par\nopagebreak[2]\vspace{-1ex}
+  \begin{mathpar}
+    %% \impls
+    \infer{}{a \impls_{\tseteq A} a}
+
+    \infer{x \impls_A a \\ \changesat{\Phi A}\dx x x}{
+      (x,\dx) \impls_{\isof A} a}
+
+    \tuple{} \impls_\tunit \tuple{}
+
+    \infer{x \impls_A a \\ y \impls_B b}{
+      (x,y) \impls_{A \x B} (a,b)}
+
+    \infer{x \impls_{A_i} a}{\inj i x \impls_{A_1 + A_2} \inj i a}
+
+    \infer{\fa{x \impls_A a} f\<x \impls_B g\<a}{f \impls_{A \to B} g}
+  \end{mathpar}
+
+  \noindent
+  This lifts to contexts, ${\impls_\G} \subseteq \den{\Phi\G} \x \den\G$, as
+  follows:
+
+  \nopagebreak[2]
+  \begin{align*}
+    \gamma \impls_\G \rho
+    &\iff \fa{\h x A \in \G} \gamma_x \impls \rho_x
+    %\wedge
+    \\&\hspace*{1.8em}\wedge
+    \fa{\hd x A \in \G}
+    (\gamma_{\dvar x}, \gamma_{\dvar \dx}) \impls_{\isof A} \rho_{\dvar x}
+  \end{align*}
+
+  \noindent Observe that the last condition is equivalent to \( (\gamma_{\dvar
+    x} \impls_A \rho_{\dvar x}) \wedge (\changesat{A}{\gamma_{\dvar
+      \dx}}{\gamma_{\dvar x}}{\gamma_{\dvar x}}) \).
+\end{definition}
+
+%% \noindent
+%% Which can be lifted to morphisms (and thus term denotations) as follows:
+
+%% \begin{align*}
+%%   \impls_{\G \vdash A} &\subseteq \den{\Phi\G \vdash \Phi A} \x \den{\G \vdash A}\\
+%%   f \impls_{\G \vdash A} g &\iff \fa{\gamma \impls_\G \gamma'} f\<\gamma \impls_A g\<\gamma'
+%% \end{align*}
