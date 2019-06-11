@@ -15,7 +15,7 @@ TEXS  := $(wildcard *.tex)
 PDFS  := $(addsuffix .pdf,$(basename $(TEXS)))
 
 .PHONY: all clean watch watch\:% FORCE
-all: $(PDFS) seminaive-a5-2up.pdf
+all: $(PDFS)
 
 # If you have inotify-tools, `make watch` will automatically recompile your pdfs
 # "live". You can also specify a target to recompile, eg. `make watch:foo.pdf`.
@@ -24,7 +24,6 @@ watch: watch\:all
 watch\:%: %
 	@while inotifywait -e modify -r . >/dev/null 2>&1; do \
 		echo; \
-		make --no-print-directory -j $^; \
 		make --no-print-directory -j $^; \
 	done
 
@@ -50,7 +49,6 @@ watch\:%: %
 
 clean:
 	$(LATEXRUN) --clean-all
-	rm -f seminaive-a5-2up.pdf
 	rm -r latex.out
 
 # debugging: `make print-FOO` will print the value of $(FOO)
