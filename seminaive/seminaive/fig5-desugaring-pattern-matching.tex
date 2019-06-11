@@ -1,24 +1,24 @@
 %% TODO: check that we have every rule we need.
 %% TODO: are any of these redundant/unnecessary?
-\begin{figure*}
+\begin{figure}\centering
   \[\setlength\arraycolsep{.15em}\begin{array}{rcl}
     \ecase{e} x \caseto f &\desugars& \elet{x = e} f\\[.33em]
     \ecase{e} \eboxd x \caseto f &\desugars& \elet{\eboxd x = e} f
     \\[.33em]
     %% A * B
     \ecase{e} (\etuple{p_i,q_i} \caseto f_i)_i
-    &\desugars& \elet{\freshvar x = e}\\
-    && \ecase{\pi_1\< {\freshvar x},\, \pi_2\< {\freshvar x}} (p_i,q_i \caseto f_i)_i
+    &\desugars& \elet{\freshvar y = e}\\
+    && \ecase{\pi_1\< {\freshvar y},\, \pi_2\< {\freshvar y}} (p_i,q_i \caseto f_i)_i
     \\[.33em]
     %% A + B
     \ecase{e} (\inj i p_{i,j} \caseto f_{i,j})_{i,j}
-    &\desugars& \ecase{e} (\inj i {\freshvar x}
-    \caseto \ecase{\freshvar x} (p_{i,j} \caseto f_{i,j})_j)_i
+    &\desugars& \ecase{e} (\inj i {\freshvar y}
+    \caseto \ecase{\freshvar y} (p_{i,j} \caseto f_{i,j})_j)_i
     \\[.33em]
     %% [](A * B)
     \ecase{e} (\eboxd{\etuple{p_i,q_i}} \caseto f_i)_i
-    &\desugars& \elet{\eboxd {\freshvar x} = e}\\
-    && \ecase{\eboxd{\pi_1\<\freshvar x}, \eboxd{\pi_2\<\freshvar x}}
+    &\desugars& \elet{\eboxd {\freshvar y} = e}\\
+    && \ecase{\eboxd{\pi_1\<\freshvar y}, \eboxd{\pi_2\<\freshvar y}}
     (\eboxd{p_i}, \eboxd{q_i} \caseto f_i)
     \\[.33em]
     %% [](A + B)
@@ -29,6 +29,9 @@
     \ecase{e,\vec f} (p_i, \vec q_{i,j} \caseto g_{i,j})_{i,j}
     &\desugars& \ecase{e} (p_i \caseto \ecase{\vec f} (\vec q_{i,j} \caseto g_{i,j})_j)_i
   \end{array}\]
+
+  {\small Fresh variables are named $\freshvar y$ and are \freshvar{pink}.}
+
   \caption{Some pattern-matching elaboration rules}
   \label{fig:desugaring-pattern-matching}
-\end{figure*}
+\end{figure}

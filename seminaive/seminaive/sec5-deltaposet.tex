@@ -1,0 +1,859 @@
+%% ---------- Incremental semantics via change posets ----------
+\section{The category \CP}
+\label{sec:changeposets}
+
+Objects $A$ of \CP{} are tuples $\tuple{\vals A, \chgs A, \updfn_A,
+  \composefn_A}$, where:
+
+\begin{itemize}
+\item $\vals A$ is a poset of values.
+
+\item $\chgs A$ is a poset of changes.
+
+\item $\updfn_A : \vals A \x \chgs A \pto \vals A$ is a \emph{partial} map
+  taking a value and a change to an updated value. When $x \upd \dx$ is defined,
+  we say \dx\ is a \emph{valid} change to $x$. It is often convenient to notate
+  $x \upd \dx = y$ relationally, as $\valid\dx x y$ (``\dx\ sends $x$ to $y$''),
+  or more briefly as $\vld\dx x y$.
+
+\item $\composefn_A : \chgs A \x \chgs A \to \chgs A : \Poset$ is a monotone
+  change composition operator.
+\end{itemize}
+
+\noindent
+These must satisfy the following conditions:
+
+\nopagebreak[2]
+\begin{align*}
+  x \le y &\impliedby \ex{\dx} \vld{\dx} x y
+  & \text{sound for increases}\\
+  x \le y &\implies \ex{\dx} \vld{\dx} x y
+  & \text{complete for increases}\\
+  \vld\dx x y \wedge \vld\dy y z &\implies \vld{\dx\compose\dy} x z
+  & \text{correctness of composition}
+\end{align*}
+
+\noindent Completeness for increases is equivalent (via choice) to having an
+operator $x \changeto y : \chgs A$, defined for $x \le y : \vals A$, such that
+$\valid{x \changeto y} x y$.\footnote{Our $x \changeto y$ is effectively the
+  incremental $\fn$-calculus' $y \ominus x$, but defined only when $x \le y$.}
+In particular, every $x$ has a \emph{zero change}, $\zero_x = x \changeto x$.
+However, changes (including zero changes) are not necessarily unique: for a
+given $x,y$ there may be many $\dx$ such that $\valid\dx x y$.
+
+Morphisms $f : \CP(A, B)$ are differentiable maps $f : \Poset(\vals A, \vals
+B)$. A map is differentiable if it has a derivative $\deriv f : \vals A \to
+\Poset(\chgs A, \chgs B)$ such that:
+
+\nopagebreak[2]
+\[ \vld{\dx} x y \implies \vld{\deriv f\<x\<\dx}{f\<x}{f\<y}\]
+
+\noindent Or, equivalently (when $x \upd \dx$ is defined):
+
+\nopagebreak[2]
+\[ f\<(x \upd \dx) = f\<x \upd \deriv f\<x\<\dx \]
+
+\noindent
+The same morphism may have many different derivatives; all that matters is that
+one exist.
+
+Identity and composition morphisms in \CP{} are inherited from \Poset{}, so we
+need only exhibit their derivatives. These follow a variant of the chain rule:
+
+\nopagebreak[2]
+\begin{align*}
+  \deriv\id \<x\<\dx &= \dx
+  & \deriv{(g \circ f)} \<x\<\dx &= \deriv g \<(f\<x) \<(\deriv f\<x\<\dx)
+\end{align*}
+
+\noindent
+It's easy to see these functions are monotone in \dx\ as required.
+
+
+\subsection{The forgetful functor \valfn}
+\label{sec:CP-vals}
+
+The functor $\valfn : \CP \to \Poset$ takes objects $A$ to $\vals A$ and
+morphisms $f$ to themselves. This can be seen as a process of ``forgetting''. On
+objects, it forgets a poset's associated change-structure; on morphisms, it
+forgets their differentiability.
+%
+Our ``first-order'' constructions in \CP{} --- products, sums, the finite
+powerset functor --- commute with \valfn, in a sense \emph{inheriting} from
+those in \Poset. For example, products have $\vals{(A \x B)} = \vals A \x \vals
+B$ and $\vals{\fork{f,g}} = \fork{\vals f, \vals g}$.
+%
+Where this applies, we omit for brevity this inherited structure.
+%
+However, exponentials will prove the necessary exception to this rule: since all
+maps in \CP{} are differentiable, so are the elements of $\vals{(\expO A B)}$.
+
+%% The structures we will build in \CP{} will
+%% usually \emph{refine} those in \Poset, in the sense of commuting with \valfn.
+%% For example, for cartesian products, $\vals{(A \x B)} = \vals A \x \vals B$ and
+%% $\vals{\fork{f,g}} = \fork{\vals f, \vals g}$.
+%% %
+%% For brevity, we omit the ``value components'' of our constructions when they are
+%% inherited in this way from \Poset.
+
+
+%% \subsection{Products}
+%% \label{sec:CP-products}
+
+%% \CP\ has all finite products. $\valfn$ and $\chgfn$ distribute across them:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   \vals{\prod_{i \in I} A_i} &= \prod_{i \in I} \vals A_i &
+%%   \chgs{\prod_{i \in I} A_i} &= \prod_{i \in I} \chgs A_i
+%% \end{align*}
+
+%% \noindent
+%% Updates are pointwise:
+
+%% \nopagebreak[2]
+%% \[ (x_i)_i \upd (\dx_i)_i = (x_i \upd \dx_i)_i
+%% \quad\text{when the RHS is defined}\]
+
+%% \noindent Soundness and completeness follow pointwise from soundness and
+%% completeness of $A_i$; in particular, $(x_i)_i \changeto (y_i)_i = (x_i
+%% \changeto y_i)_i$. Composition is also pointwise:
+
+%% \[ (\dx_i)_i \compose (\dy_i)_i = (\dx_i \compose \dy_i)_i \]
+
+%% It's easy to see
+
+%% \noindent \todo{TODO: soundness, completeness, composition, correctness of composition}
+
+%% The projection and fork maps are inherited along \valfn, with their derivatives
+%% being:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   \deriv\pi_i\<x\<\dx &= \pi_i\<\dx &
+%%   \deriv{\fork{f_i}_i} &= \fork{\deriv f_i}_i
+%% \end{align*}
+
+%% \noindent Correctness of $\deriv\pi_i$ is straightforward; if
+%% $\valid{(\dx_1,\dx_2)}{(x_1,x_2)}{(y_1,y_2)}$ then by definition
+%% $\valid{\dx_i}{x_i}{y_i}$. As for correctness of $\deriv{\fork{f_i}_i}$:
+
+%% \nopagebreak[2]
+%% \begin{equation*}
+%%   \fork{f_i}_i \<(x \upd \dx)
+%%   = (f_i(x \upd \dx))_i
+%%   = (f_i\<x \upd \deriv f_i \<x \<\dx)_i
+%%   = \fork{f_i}_i \<x \upd \fork{\deriv f_i}_i \<x \<\dx
+%% \end{equation*}
+
+%% \noindent
+%% Finally, the universal property of $\fork{f_i}_i$ follows from its universal
+%% property in \Poset\ --- requiring differentiability merely makes the property
+%% weaker.
+
+
+%% \subsection{Sums}
+%% \label{sec:CP-sums}
+
+%% \CP\ has all finite sums. \valfn\ and \chgfn\ distribute across them:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   \vals{\sum_{i \in I} A_i} &= \sum_{i \in I} \vals A_i &
+%%   \chgs{\sum_{i \in I} A_i} &= \sum_{i \in I} \chgs A_i
+%% \end{align*}
+
+%% \noindent
+%% Updates are pointwise but require that the tags match:
+
+%% \nopagebreak[2]
+%% \[ \inj i x \upd \inj j \dx =
+%% \begin{cases}
+%%   \inj i (x \upd \dx) & \text{if}~i=j\\
+%%   \text{undefined} & \text{otherwise}
+%% \end{cases}
+%% \]
+
+
+\subsection{Cartesian structure}
+\label{sec:CP-cartesian}
+\input{seminaive/fig-changeposet-cartesian}
+
+\CP\ has all finite products and sums (\cref{fig:CP-cartesian}). Their
+value-level structure (including $\pi_i$, $\injc_i$, $\fork{f_i}_i$, and
+$\krof{f_i}_i$) is inherited from \Poset; \valfn\ and \chgfn\ distribute across
+both products and sums. Soundness and completeness follow directly from the
+pointwise ordering of products and sums in \Poset{} and soundness \&
+completeness for each factor/summand $A_i$. In particular, \changetofn\ can be
+defined by:
+
+\nopagebreak[2]
+\begin{align*}
+  (x_i)_i \changeto (y_i)_i &= (x_i \changeto y_i)_i &
+  \inj i x \changeto \inj i y &= \inj i (x \changeto y)
+\end{align*}
+
+\noindent The universal properties of $\fork{f_i}_i$ and $\krof{f_i}_i$ follow
+from the corresponding universal properties in \Poset\ --- requiring
+differentiability merely weakens them.
+%
+As for correctness of composition and the derivatives of $\pi_i$/$\injc_i$ and
+$\fork{f_i}_i$/$\krof{f_i}_i$, we will show these in turn for products and sums.
+
+\subsubsection{Products}
+
+Correctness of change composition is straightforward: if
+%
+\[ \vld{(\dx_i)_i}{(x_i)_i}{(y_i)_i}
+\quad\text{and}\quad
+\vld{(\dy_i)_i}{(y_i)_i}{(z_i)_i} \]
+%
+then for each $i$ we have $\valid{\dx_i \compose \dy_i}{x_i}{z_i}$ and therefore
+%
+\[\valid{(\dx_i)_i \compose (\dy_i)_i = (\dx_i \compose
+  \dy_i)_i}{(x_i)_i}{(z_i)_i}\]
+
+\noindent
+Likewise for correctness of $\deriv\pi_i$; if $\valid{\dx_i}{x_i}{y_i}$ for each
+$i$ then by definition
+\[\valid{\pi_i\<(\dx_i)_i = \dx_i}{x_i}{y_i}\]
+
+\noindent As for correctness of $\deriv{\fork{f_i}_i}$:
+
+\nopagebreak[2]
+\begin{equation*}
+  \fork{f_i}_i \<(x \upd \dx)
+  = (f_i(x \upd \dx))_i
+  = (f_i\<x \upd \deriv f_i \<x \<\dx)_i
+  = \fork{f_i}_i \<x \upd \fork{\deriv f_i}_i \<x \<\dx
+\end{equation*}
+
+\subsubsection{Sums}
+
+Change composition for sums is interesting, because it must handle changes
+$(\inj i \dx \compose \inj j \dy)$ with disjoint tags $i \ne j$. Recall that
+composition is correct if, when $\valid\dx x y$ and $\valid\dy y z$, we have
+$\valid{\dx\compose\dy} x z$. But if $i \ne j$, then
+%
+there \emph{are} no $x,y,z$ such that $\valid{\inj i \dx} x y$ and $\valid{\inj j \dy} y z$.
+%
+This case is \emph{dead code}; the only guarantee we need is monotonicity with
+respect to \dx\ and \dy, so it suffices to simply return the left argument.
+
+Correctness of the other case is straightforward: since $i = j$, from the
+definition of $\updfn_{\sum_i A_i}$ we know all the tags must agree and we have:
+
+\nopagebreak[2]
+\[ \inj i x \longvalidarrow{\inj i \dx} \inj i y
+\longvalidarrow{\inj i \dy} \inj i z \]
+
+\noindent From this it follows that \( {x} \longvalidarrow{\dx} {y}
+\longvalidarrow{\dy} {z} \) and therefore $\vld{\dx\compose\dy} x z$ and so
+finally
+
+\nopagebreak[2]
+\[ \valid{\inj i \dx \compose \inj i \dy = \inj i (\dx \compose \dy)}{\inj i x}{\inj i z} \]
+
+\noindent
+Correctness of $\deriv\injc_i$ is immediate: suppose $\vld\dx x x$. Then
+\(\vld{\inj i \dx}{\inj i x}{\inj i x}\). As for split, its derivative must obey
+
+\nopagebreak[2]
+\begin{equation*}
+  \krof{f_i}_i\<(\inj i x) \upd \deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj i \dx)
+  = \krof{f_i}_i\<(\inj i x \upd \inj i \dx)
+  = f_i \<(x \upd \dx)
+\end{equation*}
+
+\noindent It's easy to see that the $i = j$ case of the definition in
+\cref{fig:CP-cartesian} satisfies this property. As with $\composefn_{\sum_i
+  A_i}$, the $i \ne j$ case is dead code.
+
+
+%% \subsection{Cartesian structure}
+%% \label{sec:CP-cartesian}
+
+%% \todo{TODO: Neel suggests splitting this into products \& sums. It's easier to
+%%   understand the quirks of sums on their own rather than while also trying to
+%%   understand products.}
+
+%% \CP\ has all finite products and sums. The value-level structure is inherited
+%% from \Poset\ along \valfn. The change-poset structure is also inherited from
+%% \Poset, while the projection and injection's derivatives operate pointwise on
+%% changes:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   \chgs{\prod_{i \in I} A_i} &= \prod_{i \in I} \chgs A_i &
+%%   \chgs{\sum_{i \in I} A_i} &= \sum_{i \in I} \chgs A_i
+%%   %\label{eqn:delta-distributes-over-sums-and-products}
+%%   \\
+%%   \deriv\pi_i\<x\<\dx &= \pi_i\<\dx & \deriv\injc_i\<x\<\dx &= \inj i \dx
+%% \end{align*}
+
+%% \noindent \todo{TODO: derivatives of fork \& split!}
+
+%% \noindent Updates are pointwise, noting that $(\inj i x \upd \inj j \dx)$ is
+%% undefined for $i \ne j$:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   (x_i)_i \upd (\dx_i)_i &= (x_i \upd \dx_i)_i &
+%%   \inj i x \upd \inj i \dx &= \inj i (x \upd \dx)
+%% \end{align*}
+
+%% \noindent
+%% Soundness \& completeness for increases follow directly from the pointwise
+%% orderings of products \& coproducts in \Poset{}. In particular, the $\changetofn$
+%% operator is given by:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   (x_i)_i \changeto (y_i)_i &= (x_i \changeto y_i)_i &
+%%   \inj i x \changeto \inj i y &= \inj i (x \changeto y)
+%% \end{align*}
+
+%% \noindent Finally, change composition is also pointwise --- mostly:
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   (\dx_i)_i \compose (\dy_i)_i &= (\dx_i \compose \dy_i)_i &
+%%   \inj i \dx \compose \inj j \dy &=
+%%   \begin{cases}
+%%     \inj i (\dx \compose \dy) &\text{if}~i=j\\
+%%     \inj i \dx &\text{otherwise}
+%%   \end{cases}
+%% \end{align*}
+
+%% \noindent
+%% However, for sums we must also handle changes with distinct tags. Recall that
+%% composition is correct if, when $\valid\dx x y$ and $\valid\dy y z$, we have
+%% $\valid{\dx\compose\dy} x z$. But if $i \ne j$, then
+%% %
+%% there \emph{are} no $x,y,z$ such that $\valid{\inj i \dx} x y$ and $\valid{\inj j \dy} y z$.
+%% %
+%% This case is \emph{dead code}; the only guarantee we need is monotonicity with
+%% respect to \dx\ and \dy, so it suffices to simply return the left argument.
+
+%% Correctness of the other cases follows directly from correctness of each $\composefn_{A_i}$.
+
+
+\subsection{Exponentials}
+\label{sec:CP-exponentials}
+
+The values $\vals{(\expO A B)}$ of the exponential object are the
+\emph{differentiable} monotone maps $\CP(A, B)$, ordered pointwise. Because we
+require differentiability, \valfn\ does \emph{not} commute with exponentials:
+$\vals{(\expO A B)} \ne \expO{\vals A}{\vals B}$.
+%
+Meanwhile, the changes $\chgs{(\expO A B)}$ are monotone maps $\isof{\vals A}
+\to \chgs A \to \chgs B$, ordered pointwise. The update relation and change
+composition must be very carefully defined, so we examine them at length below.
+
+\subsubsection{Updating functions}
+
+The update relation is:
+
+\nopagebreak[2]
+\begin{equation}\label{eqn:function-update}
+  \vld{\df}{f}{g} : \expO A B
+  \iff \fa{\vld\dx x y} \vld{\df\<x\<\dx} {f\<x} {g\<y}
+\end{equation}
+
+\noindent However, recall that $\upd$ must be a partial function: supposing
+$\valid\df f g$ and $\valid\df f h$, we must show $g = h$. So consider any $x :
+A$. \Cref{eqn:function-update} applied to $\valid{\zero_x} x x$ yields
+
+\nopagebreak[2]
+\[ \vld{\df \<x \<\zero_x}{f \<x}{g\<x}
+\quad\text{and}\quad \vld{\df \<x \<\zero_x}{f \<x}{h\<x} \]
+
+\noindent
+Then by functionality of $\updfn_B$ we have $g\<x = h\<x$, and thus $g = h$.
+
+Although this shows that \cref{eqn:function-update} defines a partial function,
+one may wonder what it actually \emph{does} (when it is defined). So let's
+rewrite \cref{eqn:function-update} in terms of $\upd_{\expO A B}$:
+
+\nopagebreak[2]
+\[ f \upd \df = g \iff \fa{x \upd \dx = y} f\<x \upd \df\<x\<\dx = g\<y \]
+
+\noindent Substituting away $g$ and $y$, this implies that for all valid
+\dx, \df:
+
+\nopagebreak[2]
+\[
+f\<x \upd \df\<x\<\dx = (f \upd \df) \<(x \upd \dx)
+\]
+
+\noindent In particular, letting $\dx = \zero_x$ and swapping sides, we get:
+
+\nopagebreak[2]
+\[ (f \upd \df) \<x = f\<x \upd \df\<x\<\zero_x \]
+
+\noindent
+\todo{TODO: explain why this does not suffice as a \emph{definition} of
+  $\updfn_{\expO A B}$ --- in particular, they don't explain when $f \upd \df$
+  is defined! It's \emph{not} simply when $x \mapsto f\<x \upd \df\<x\<\dx$ is
+  monotone, for example. Can I find a counterexample?}
+
+\subsubsection{Soundness and completeness}
+
+Soundness follows from completeness at $A$ and soundness at $B$: if $\valid\df f
+g$ then for any $x$ we have $\valid{\df\<x\<\zero_x}{f\<x}{g\<x}$ (using
+completeness of $A$ to find $\zero_x$), and by soundness at $B$ we have $f\<x
+\le g\<x$, so $f \le g$.
+
+We'll show completeness by constructing \changetofn\ explicitly:
+
+\nopagebreak[2]
+\[ (f \changeto_{\expO A B} g) \<x \<\dx = (f\<x \changeto_B g\<x) \compose_B \deriv g\<x\<\dx\]
+
+\noindent Observe that $f\<x \changeto_B g\<x$ is defined because $f \le g$
+implies $f\<x \le g\<x$, and the RHS is monotone in \dx\ by monotonicity of
+$\deriv g \<x$ and of $\composefn_B$.
+%
+To prove completeness, assuming $\valid\dx x y$, we need to show \( \valid{(f
+  \changeto g) \<x \<\dx}{f\<x}{g\<y} \). This follows from correctness of
+$\composefn_B$, since \( \valid{f\<x \changeto g\<x}{f\<x}{g\<x} \) and
+\(\valid{\deriv g \<x \<\dx}{g\<x}{g\<y}\) by definition.
+
+\subsubsection{Function change composition}
+
+Change composition is defined by:
+
+\nopagebreak[2]
+\[ (\df \compose_{\expO A B} \dg) \<x \<\dx = \df \<x \<\zero_x \compose_B \dg \<x \<\dx\]
+
+\noindent
+This is monotone in \dx\ by monotonicity of $\dg\<x$ and $\composefn_B$. To show
+this valid, suppose $\vld\df f g$, $\vld\dg g h$ and $\vld\dx x y$. Then
+%
+\(\vld{\df\<x\<\zero_x}{f\<x}{g\<x}\)
+\text{and}
+\(\vld{\dg\<x\<\dx}{g\<x}{h\<y} \).
+%
+\noindent So by correctness of $\composefn_B$ we have \(\valid{(\df\<x\<\zero_x
+  \compose \dg\<x\<\dx)}{f\<x}{h\<y}\) as desired.
+
+\todo{TODO: discuss unavoidable asymmetry in definitions of \(\changetofn_{\expO
+    A B}\) and \(\composefn_{\expO A B}\).}
+
+\subsubsection{\eval\ and \fn}
+
+To show that $\expO A B$ is an exponential object, we need evaluation and
+currying maps, \eval\ and $\fn f$. Modulo differentiability, these are
+inherited from \Poset{}, with the following derivatives:
+
+\begin{align*}
+  %% \eval &: (\expO A B) \x A \to B &
+  %% \fn (f : \G \x A \to B) &: \G \to \expO A B
+  %% \\
+  \vals{\eval} \<(f,x) &= f\<x &
+  \vals{(\fn f)} \<x &= y \mapsto f\<(x,y)\\
+  \deriv{\eval} \<(f,x) \<(\df,\dx) &= \df \<x \<\dx &
+  \deriv{(\fn f)} \<x \<\dx &= y\<\dy \mapsto \deriv f \<(x,y) \<(\dx,\dy)
+\end{align*}
+
+\noindent
+$\deriv{\eval}$ is correct by the definition of $\updfn_{\expO A B}$, for if
+$\valid\df f g$ and $\valid\dx x y$ then
+
+\nopagebreak[2]
+\[ \eval\<(f,x) = {f\<x} \longvalidarrow{\df\<x\<\dx} {g\<y} = \eval\<(g,y) \]
+
+\noindent
+Similarly, \(\deriv{(\fn f)}\) is correct, for suppose $\valid\dx {x_1}{x_2}$
+and $\valid\dy{y_1}{y_2}$. Then by differentiability of $f$ we have
+
+\nopagebreak[2]
+\[ \fn f \<x_1 \<y_1 =
+f\<(x_1,y_1) \longvalidarrow{\deriv f \<(x_1,y_1) \<(\dx,\dy)} f\<(x_2,y_2)
+= \fn f \<x_2 \<y_2
+\]
+
+\noindent
+Finally, $\fn f$ is unique such that $(\fn f \x \id) \then \eval = f$ by the
+same argument as in \Poset{} (or indeed \cat{Set}): supposing $\eval \<(\fn f
+\<x, y) = f\<(x,y) = \eval\<(g\<x,y)$ for all $x,y$, then we have $\fn f \<x \<
+y = g \<x \<y$ and so $\fn f = g$.
+
+
+\subsection{The pseudo-exponential}
+
+\newcommand\pseudoexp{\rightrightarrows}
+%\renewcommand\pseudoexp\rightarrowtriangle
+%\renewcommand\pseudoexp{\overset{?}{\Rightarrow}}
+
+You might have expected changes $\chgs{(\expO A B)}$ to be given pointwise, as
+maps $\isof{\vals A} \to \chgs B$. Intriguingly, this does yield a valid change
+poset, one rather simpler than $\expO A B$, but it does not satisfy the
+properties of an exponential. I call this the \emph{pseudo-exponential}, $A
+\pseudoexp B$. Pseudo-exponentials are irrelevant to Datafun, but are an
+interesting and surprising aspect of \CP, so I describe them here. They are
+constructed as follows:
+
+\vspace{-1.2ex}
+\begin{mathpar}
+  \vals{(A \pseudoexp B)} = \CP(A,B)
+
+  \chgs{(A \pseudoexp B)} = \isof{\vals A} \to \chgs B
+
+  \vld{\df} f g : A \pseudoexp B \iff \fa{x} \vld{\df\<x}{f\<x}{g\<x}
+
+  (\df \compose_{A \pseudoexp B} \dg) \<x = \df\<x \compose_B \dg\<x
+
+  (f \changeto g) \<x = f\<x \changeto g\<x
+\end{mathpar}
+
+\noindent
+I leave it as an exercise for the reader to verify soundness \& completeness and
+correctness of composition. \todo{TODO: explain why they aren't the exponential
+  object and aren't isomorphic to $\expO A B$.}
+
+%% Besides $\expO A B$, there is another, simpler, change poset which one might
+%% expect to be the exponential, but which is not, which I term the
+%% \emph{pseudo-exponential}, written $A \pseudoexp B$.
+
+
+\subsection{The lifted \iso\ comonad}
+\label{sec:CP-iso}
+
+Now we construct a comonad $\iso$ on \CP\ such that $\valfn\iso_\CP =
+\iso_\Poset\valfn$. This requirement defines the value-level structure, leaving
+only the change poset, update map, and composition. Since $\isof A$ is ordered
+discretely, values \emph{cannot} increase. So the simplest definition is:
+
+\nopagebreak[2]
+\begin{align*}
+  \chgs{\isof A} &= \termO &
+  x \upd_{\isof A} \tuple{} &= x &
+  \tuple{} \compose_{\isof A} \tuple{} &= \tuple{}
+\end{align*}
+
+\noindent
+This trivially satisfies soundness, completeness, and correctness of
+composition.
+%
+Functoriality, extraction, duplication, and product- and sum-distribution
+inherit from the corresponding properties of $\iso_\Poset$, and their
+derivatives are fairly straightforward:
+
+\nopagebreak[2]\vspace{-1ex}
+\begin{mathpar}
+  \deriv{\iso(f)} \<x \<\tuple{} = \tuple{}
+
+  \deriv\delta_A \<x \<\tuple{} = \tuple{}
+
+  \deriv\varepsilon_A \<x \<\tuple{} = \zero_x
+  \\
+  \deriv{{\discox}} \<x \<\dx = \tuple{}
+
+  \deriv{{\discosum}} \<(\inj i x) \<\tuple{} = \inj i {\tuple{}}
+\end{mathpar}
+
+
+\subsubsection{The alternative \altiso}
+
+Although we will not use it, there is another refinement of $\iso$ in \CP{},
+which I'll call $\altiso$ for clarity, defined like so:
+
+\nopagebreak[2]
+\begin{align*}
+  \chgs{\altiso A} &= \isof{\chgs A} &
+  %% x \upd_{\altiso A} \dx = y &\iff x = y \wedge x \upd_A \dx = y
+  \vld{\dx} x x : \altiso A &\iff \vld{\dx} x x : A
+  &
+  \composefn_{\altiso A} &= \composefn_A
+\end{align*}
+
+\noindent
+So $\altiso A$ inherits all of $A$'s changes, but ordered discretely and with
+\emph{only zero-changes still valid}. Soundness and completeness for increases
+and correctness of composition are all implied by the corresponding properties
+of $A$. The derivatives of functoriality, duplication, and extraction are
+different:
+
+\nopagebreak[2]
+\begin{align*}
+  \deriv{\altiso(f)} &= \deriv f
+  & \deriv\delta_A \<x\<\dx &= \dx
+  & \deriv\varepsilon_A \<x\<\dx &= \dx
+\end{align*}
+
+\noindent
+Observe that we no longer need the non-constructive $\zero_x$ to define comonad
+extraction $\varepsilon$! However, for our purposes this will not be an issue.
+Meanwhile, product- and sum-distribution become identity maps, because $\prod_i
+\altiso A_i = \altiso \prod_i A$ and $\sum_i \altiso A_i = \altiso \sum_i
+A_i$ (checking this is left as an exercise for the reader).
+
+
+\subsection{The lifted \pfin\ functor}
+\label{sec:CP-pfin}
+
+We lift the finite powerset functor \pfin\ to \CP\ as follows:
+
+\nopagebreak[2]
+\begin{align}
+  \vals{\pfinof A} &= \pfinof{\vals A} &
+  \chgs{\pfinof A} &= \pfinof{\vals A} &
+  (\updfn_{\pfinof A}) = (\composefn_{\pfinof A}) = ({\cup})
+  \label{eqn:CP-pfin}
+\end{align}
+
+\noindent Since $\updfn$ and \composefn\ are just $\cup$, soundness and
+completeness come from a standard property of union (or more generally of
+semilattice join):
+
+\nopagebreak[2]
+\[ x \le z \iff \ex{y} x \cup y = z \]
+
+\noindent Meanwhile, correctness of composition is simply associativity of
+$\cup$:
+
+\nopagebreak[2]
+\[ (x \cup \dx = y) \wedge (y \cup \dy = z) \implies (x \cup \dx \cup \dy = z) \]
+
+\noindent
+Since the arguments to \morph{singleton} and \morph{isEmpty} cannot change
+(having $\iso$ type), their derivatives always return zero-changes:
+
+\nopagebreak[2]
+\begin{align*}
+  \deriv{\morph{singleton}}_A \<x \<\tuple{} &= \emptyset &
+  \deriv{\morph{isEmpty}} \<x \<\tuple{} &= \morph{isEmpty} \< x
+\end{align*}
+
+
+
+\subsection{Equality objects}
+\label{sec:CP-eq}
+
+Every object in \CP{} is an equality object, with \morph{eq} and its derivative
+defined by:
+
+\nopagebreak[2]
+\begin{align*}
+  \morph{eq}\<\tuple{x,y} &= 
+  \begin{cases}
+    \{\tuple{}\} & \text{if}~ x = y\\
+    \emptyset & \text{otherwise}
+  \end{cases}
+  &
+  \deriv{\morph{eq}} \<\pwild \<\pwild &= \emptyset
+\end{align*}
+
+\noindent Note that $\deriv{\morph{eq}}$ is correct because $\morph{eq}$'s
+arguments cannot change, having $\iso$ type.
+
+Since \emph{every} object is an equality object, every equality type
+is trivially interpreted into an equality object. \todo{TODO more explanation
+  --- why isn't every type an equality type, then?}
+
+
+\subsection{Semilattice objects and collecting morphisms}
+\label{sec:CP-semilattice}
+
+A semilattice object $L$ in \CP\ is one where $\vals L = \chgs L$ is a
+semilattice and $x \upd_L y = x \vee y$. \todo{(TODO: we might want to require
+  $\composefn_L = {\vee}$ as well, if we need it.)} This immediately justifies
+letting $\deriv{\morph{join}} \<x \<\dx = \morph{join}\<\dx$, because:
+
+\nopagebreak[2]
+\begin{align*}
+  \morph{join}\<(x \upd \dx) &= \bigvee_i \pi_i \<(x \vee \dx)\\
+  &= \left(\bigvee_i \pi_i\<x\right) \vee \left(\bigvee_i \pi_i\<\dx\right)\\
+  &= \morph{join}\<x \vee \morph{join}\<\dx\\
+  &= \morph{join}\<x \upd \deriv{\morph{join}}\<x\<\dx
+\end{align*}
+
+\begin{restatable}{lemma}{lemSemi}
+  \label{lem:semi} $\incdens L$ is a semilattice object. \todo{FIXME: I haven't
+  introduced $\incdenfn$ notation yet!}
+\end{restatable}
+\begin{proof}
+  By induction on $L$. \todo{See \cpageref{proof:semi}.}
+\end{proof}
+
+
+\subsection{Collecting morphisms}
+\label{sec:CP-collect}
+
+Let $\G, A$ be objects, $L$ be a semilattice object, and $f : \G \x \isof A \to
+L$. Our derivative for $\pcollect f : \G \x \pfinof A \to L$ is:
+
+\nopagebreak[2]
+\begin{align*}
+  \deriv{\pcollect f} \<\tuple{\gamma,s} \<\tuple{\dgamma,\ds}
+  &= \bigvee_{x \in \ds} f\<\tuple{\gamma,x} \vee
+  \bigvee_{x \in s \cup \ds} \deriv f \<\tuple{\gamma,x} \<\tuple{\dgamma, \zero_x}
+\end{align*}
+
+\noindent To establish that this is correct, suppose
+$\vld{\dgamma}{\gamma}{\gamma'} : \G$. From this we have:
+
+\nopagebreak[2]
+\begin{align*}
+  &\phantom{{}={}}\pcollect{f} \<\tuple{\gamma', s \cup \ds}
+  \\
+  &= \bigvee_{x \in s \cup \ds} f \<\tuple{\gamma', x}
+  \\
+  &\overset{\footnotemark}{=} \bigvee_{x \in s \cup \ds} \bigl(f \<\tuple{\gamma,x}
+  \vee \deriv f \<\tuple{\gamma,x} \<\tuple{\dgamma,\zero_x}\bigr)
+  \\
+  &= \bigvee_{x \in s} f\<\tuple{\gamma,x}
+  \upd \bigvee_{x \in \ds} f\<\tuple{\gamma,x}
+  \vee \bigvee_{x \in s \cup \ds} \deriv f \<\tuple{\gamma,x} \<\tuple{\dgamma,\zero_x}
+  \\
+  &= \pcollect f \<\tuple{\gamma,s}
+  \upd \deriv{\pcollect f} \<\tuple{\gamma,s} \<\tuple{\dgamma,\ds}
+\end{align*}
+
+\nopagebreak% for footnote to be on same page as mark
+\noindent
+Which is what we wished to show.\footnotetext{This equality follows from the
+  correctness of $\deriv f$ applied to
+  \(\vld{\tuple{\dgamma,\zero_x}}{\tuple{\gamma,x}}{\tuple{\gamma',x}}\).}
+
+
+\subsection{Fixed point objects}
+\label{sec:CP-fix}
+
+A fixed point object $\fixt L$ in \CP\ is a semilattice object such that
+$\vals{\fixt L}$ satisfies the ascending chain condition. \todo{TODO more
+  explanation.} Since the argument to \morph{fix} is boxed and cannot change,
+$\deriv{\morph{fix}}$ needs to produce a zero change; and at any semilattice
+object, $\bot$ is a zero change, so \( \deriv{\morph{fix}} \<x \<\tuple{} = \bot
+\).
+
+\begin{lemma}\label{lem:fixobject}
+  \(\incdens{\fixt L}\) is a fixed point object.
+\end{lemma}
+\begin{proof}
+  By induction on $\fixt L$. \todo{TODO}
+\end{proof}
+
+
+\section{Incrementalization}
+\label{sec:incremental}
+
+%% The \emph{incremental semantics} for Datafun, notated $\incden{-}$, is given by
+%% the Datafun model in \CP{} constructed in \cref{sec:changeposets}, letting
+%% $\disco = \iso_\CP$ and $\pfin = \pfin_\CP$. The obvious question is: how does
+%% this semantics relate to the standard \Poset\ semantics, $\den{-}$? \todo{TODO:
+%% Explain how they are mostly the same if you apply \valfn, but exponentials
+%% crucially aren't. So we tried to use a logical relation, like that
+%% in \cref{fig:agrees}.}
+
+%% Recalling
+%% \cref{sec:CP-vals}, since most of our constructions inherit along $\valfn$,
+%% restricted to the \Poset-level they are very nearly the same!
+%% %
+%% However, $\vals{\incden{A \to B}} \ne \den{A \to B}$ because of the
+%% differentiability restriction on \CP's exponentials.
+%% %
+%% \todo{TODO: more explanation}
+
+\todo{TODO: Explain that \CP\ gives as incremental semantics for Datafun. We
+suspect (but haven't yet proven; back-burner) that you can connect this to the
+regular semantics for Datafun using a logical relation (\cref{fig:agrees}).
+
+However, ultimately the motivation for \CP\ was to give a semantic foundation
+for semi\naive{} evaluation. But it's not clear how to do this, because
+the \emph{morphisms} and \emph{values} in \CP\ are ``hereditarily
+differentiable'', but the \emph{changes} (eg. of the exponential) are \emph{not}
+necessarily differentiable, and this causes no end of pain.
+%
+In particular, there seems to be no way to re-use the validity relations from
+objects in \CP\ to prove correctness of the semi\naive{} transform. Because
+$\chgs(\expO A B) = \isof{\vals A} \to \chgs A \to \chgs B$ mixes differentiable
+and non-differentiable things, we can't use it either on values we get out of
+the \Poset{}-semantics or out of the the \CP-semantics.}
+
+\newcommand\agrees\approx
+\input{seminaive/fig-agrees}
+
+\begin{restatable}[First-order semantic agreement]{conjecture}{thmAgreeFirstOrder}
+  \label{thm:agree-first-order}
+  \( \vals{\incdens{\eqt A}} = \den{\eqt A} \).
+\end{restatable}
+\begin{proof}
+  \todo{TODO, by induction on types}
+\end{proof}
+
+\begin{restatable}[First-order agreement is equality]{conjecture}{thmAgreeEqualsEquals}
+  \(x \agrees_{\eqt A} y \iff x = y\).
+\end{restatable}
+\begin{proof}
+  \label{thm:agree-equals-equals}
+  \todo{TODO, by induction on eqtypes.}
+\end{proof}
+
+\begin{restatable}[Semantic agreement]{conjecture}{thmAgree}
+  If $\J e \G A$
+  %and $\g \agrees_\G \sigma$ then $\incdens{e}\<\g \agrees_A \den{e}\<\sigma$.
+  then $\incdens{e} \agrees_{\G \vdash A} \den{e}$.
+\end{restatable}
+\begin{proof}
+  \todo{TODO by induction on typing derivations}
+\end{proof}
+
+%% \noindent
+%% The change poset $\D\incdens A$ of a Datafun type $A$ is internally definable
+%% via a type translation given in \cref{fig:PhiDelta}, also named $\D$, despite
+%% the risk of confusion. \todo{TODO: move this \P\ into \cref{sec:seminaive}.}
+
+%% \begin{restatable}{theorem}{thmDeltaDen}
+%%   \label{thm:delta-den}
+%%   \(\D\incdens A = \vals{\incdens{\D A}}\).
+%% \end{restatable}
+%% \nopagebreak[2]
+%% \begin{proof}
+%%   \label{proof:delta-den}
+%%   By induction on types. A starred equality, $\stareq$, marks equalities given by
+%%   an inductive hypothesis; additionally, $\daggereq$ indicates an appeal to
+%%   \cref{thm:agree-first-order}.
+%%   \begin{description}
+%%     \item[Case $\isof A$:] \(\D\incdens{\isof A} = \D{\isof{\incdens A}} =
+%%       \termO_\Poset = \vals\termO_\CP = \vals{\incdens{\tunit}} \).
+
+%%     \item[Case $\tseteq A$:]
+%%       \(\D\incdens{\,{\tseteq A}\,} = \D\pfinof{\incdens{\eqt A}}
+%%       = \pfinof{\vals{\incdens{\eqt A}}}
+%%       = \vals{\pfinof{\incdens{\eqt A}}}
+%%       = \vals{\incdens{\,{\tseteq A}\,}}
+%%       = \vals{\incdens{\D{\tseteq A}}}
+%%       \).
+
+%%     \item[Case $A \x B$:]
+%%       \(\D\incden{A \x B} = \D(\incdens A \x \incdens B)
+%%       = \D\incdens A \x \D\incdens B
+%%       \stareq \vals{\incdens{\D A}} \x \vals{\incdens{\D B}}
+%%       = \vals{\incden{\D A \x \D B}}
+%%       = \vals{\incdens{\D(A \x B)}}
+%%       \).
+
+%%     \item[Case $A + B$:]
+%%       \(\D\incden{A + B} = \D(\incdens A + \incdens B)
+%%       = \D\incdens A + \D\incdens B
+%%       \stareq \vals{\incdens{\D A}} + \vals{\incdens{\D B}}
+%%       = \vals{\incden{\D A + \D B}}
+%%       = \vals{\incdens{\D(A + B)}}
+%%       \).
+
+%%     \item[Case $A \to B$:]
+%%       \begin{align*}\D\incden{A \to B}
+%%         &= \D(\expO{\incdens A}{\incdens B})\\
+%%         &= \expO{\isof{\vals{\incdens
+%%               A}}}{\expO{\D\incdens{A}}{\D\incdens{B}}}\\
+%%         &= ...\\
+%%         &= \CP(\isof{\incdens A},\ {\expO{\incdens{\D A}}{\incdens{\D B}}})\\
+%%         &= \vals{(\expO{\isof{\incdens{A}}}{\expO{\incdens{\D A}}{\incdens{\D B}}})}\\
+%%         &= \vals{\incden{\isof A \to \D A \to \D B}}\\
+%%         &= \vals{\incdens{\D(A \to B)}}
+%%       \end{align*}
+
+%%     \item[Case $\tunit$:]
+%%   \end{description}
+%% \end{proof}
