@@ -5,18 +5,14 @@
 
 %\PassOptionsToPackage{scaled=1.04}{rntzfont}
 
-\usepackage[source,]{rntzfont}
-%\usepackage[newmath,]{rntzfont}
-%\usepackage[palatino,newmath,]{rntzfont}
-%\usepackage[librebaskerville,newmath,]{rntzfont}\newcommand\EMPH\textbf
-%\usepackage[libertine,newmath,]{rntzfont}
-%\usepackage{mathpazo}
+\usepackage[alegreya,charter,source,]{rntzfont}
+%\usepackage[charter,newmath,]{rntzfont}
 
 \providecommand\EMPH\textsc
 
 \usepackage{booktabs}
 \usepackage{stmaryrd}
-\usepackage{nccmath}
+\usepackage{nccmath} % \begin{ceqn}
 \usepackage{anyfontsize} % suppress warnings about stmaryrd sizes
 
 \setlength{\mathindent}{1em}
@@ -33,8 +29,13 @@
 \newcommand\esetfor[2]{\eset{{#1} \mathrel{|} {#2}}}
 \newcommand\efor[1]{\kw{for}\;{#1}\;\kw{do}\;}
 \newcommand\ewhen[1]{\kw{when}\;{#1}\;\kw{do}\;}
+\newcommand\efix[1]{\kw{fix}~{#1}~\kw{is}\;}
+\newcommand\efixh[1]{\efix{\hilit #1}}
 
 \newcommand\shaded{\color{gray}}
+\newcommand\hilit{\color{Rhodamine}}
+\newcommand\todo[1]{{\color{red}#1}}
+\newcommand\XXX{\todo{XXX}}
 
 
 \title{Datafun}
@@ -71,9 +72,10 @@
      \shaded recursive definitions & \shaded fixed points
      \\[.5ex]
      \shaded stratification & \shaded monotonicity types
-     \\[.5ex]
-     \shaded declarative
-     & \shaded pure \& terminating
+     %% %% TODO
+     %% \\[.5ex]
+     %% \shaded declarative
+     %% & \shaded pure \& terminating
   \end{tabular}
 \end{frame}
 }
@@ -114,10 +116,7 @@
 %% Recursive definitions / fixed points
 \whereami{1}
 
-\newcommand\efix[1]{\kw{fix}\;{#1}\;\kw{is}\;}
-\newcommand\hilit{\color{Rhodamine}}
-
-\begin{frame}
+\begin{frame}{}
   \EMPH{Datalog}
   \[
   \begin{array}{l}
@@ -136,12 +135,85 @@
     %% \esetfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{path}}
     %% \\\pause
     %% \phantom{\name{path}} =
-    \efix{\hilit p}\\
+    \efixh{p}\\
     \phantom{\name{path} ={}}
     \name{edge} \cup \esetfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \hilit p}
   \end{array}
   \]
-  
+\end{frame}
+
+
+%% Stratification / monotonicity
+\whereami{2}
+\newcommand\tbool{\text{Bool}}
+\newcommand\dto\to
+\newcommand\mto{\overset{+}{\to}}
+
+\begin{frame}
+  \EMPH{Datalog}
+  \[ \name{p}(0) \gets {\color{red}\neg}\name{p}(0).\]
+
+  \EMPH{Datafun}
+  \[
+  \efix{p} \esetfor{0}{\mathop{\color{red}\neg}(0 \in p)}
+  \]
+
+  \begin{ceqn}
+    \begin{align*}
+    {\neg} &: \tbool \mathrel{\color{red}\dto} \tbool\\
+    {\cup} &: \tset{A} \x \tset{A} \mathrel{\color{ForestGreen}\mto} \tset{A}
+    \end{align*}
+  \end{ceqn}
+\end{frame}
+
+%% TODO: purity & termination
+
+
+%% Part II: higher-order programming
+
+\begin{frame}
+  \centering \huge
+  {II}\\[1ex] \huge
+  \emph{Higher-order programming}
+\end{frame}
+
+\begin{frame}{Generic transitive closure}
+  \[
+  \begin{array}{l}
+    \uncover<2->{\name{trans} : \tset{A \x A} \dto \tset{A \x A}}
+    \\
+    \uncover<2->{\name{trans} \;e =} \efixh{p}\\
+    \phantom{\name{trans} \;e ={}}
+    e \cup
+    \esetfor{(x,z)}{(x,y) \in e, (y,z) \in \hilit p}
+    \\[1em]\pause
+    \name{foo} = \name{trans}\;\name{edges}\\
+    \name{bar} = \name{trans}\;(\name{redEdges} \cap \name{greenEdges})\\
+    \phantom{\name{bar}\hspace{.56em}} \vdots
+  \end{array}
+  \]
+  \vfill
+\end{frame}
+
+\newcommand\regexor{\mathbin{|}}
+\newcommand\regexthen{\mathbin{;}}
+
+\begin{frame}{Regular expressions}
+  \[
+  \begin{array}{l}
+    \kw{type}~ \name{String} = \tset{\N \x \name{Char}}\\
+    \kw{type}~ \name{Regex} = \name{String} \dto \tset{\N \x \N}
+    \\[1em]
+    (\regexor), (\regexthen) : \name{Regex} \x \name{Regex} \to \name{Regex}
+    \\
+    (r_1 \regexor r_2) \:s = r_1\:s \mathrel{\cup} r_2\:s\\
+    (r_1 \regexthen r_2) \:s = \esetfor{(i,k)}{(i,j) \in r_1\:s,\, (j,k) \in r_2\:s}
+    \\[1em]
+    (-)^+ : \name{Regex} \to \name{Regex}\\
+    r^+ \:s = \name{trans} \:(r\:s)
+  \end{array}
+  \]
+  \vfill
 \end{frame}
 
 \end{document}
