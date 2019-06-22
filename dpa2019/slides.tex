@@ -15,7 +15,7 @@
 \usepackage{nccmath} % \begin{ceqn}
 \usepackage{anyfontsize} % suppress warnings about stmaryrd sizes
 
-\setlength{\mathindent}{1em}
+\setlength{\mathindent}{0pt}
 
 % Give \cup more spacing
 \let\oldcup\cup
@@ -90,6 +90,7 @@
 \whereami{0}
 
 \begin{frame}
+  \setlength\mathindent{1em}%just for this frame
   \EMPH{Datalog}
   \[
   \begin{array}{l}
@@ -122,6 +123,7 @@
 \whereami{1}
 
 \begin{frame}{}
+  \setlength\mathindent{1em}%just for this frame
   \EMPH{Datalog}
   \[
   \begin{array}{l}
@@ -155,6 +157,7 @@
 \newcommand\mto{\overset{+}{\to}}
 
 \begin{frame}
+  \setlength\mathindent{1em}%just for this frame
   \EMPH{Datalog}
   \[ \name{p}(0) \gets {\color{red}\neg}\name{p}(0).\]
 
