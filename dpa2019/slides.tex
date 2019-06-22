@@ -3,9 +3,38 @@
 \usefonttheme{professionalfonts} % using non-standard fonts
 \usefonttheme{serif} % Make serif default.
 
-%\usepackage[source,]{rntzfont}
-\usepackage[librebaskerville,newmath,]{rntzfont}
+\PassOptionsToPackage{scaled=1.04}{rntzfont}
 
+%\usepackage[source,]{rntzfont}
+\usepackage[newmath,]{rntzfont}
+%\usepackage[palatino,newmath,]{rntzfont}
+%\usepackage[librebaskerville,newmath,]{rntzfont}\newcommand\EMPH\textbf
+%\usepackage[libertine,newmath,]{rntzfont}
+%\usepackage{mathpazo}
+
+\providecommand\EMPH\textsc
+
+\usepackage{booktabs}
+\usepackage{stmaryrd}
+\usepackage{nccmath}
+\usepackage{anyfontsize} % suppress warnings about stmaryrd sizes
+
+
+\newcommand\shaded{\color{gray}}
+
+\newcommand\kw\textbf
+%\renewcommand\gets\shortleftarrow
+%\renewcommand\gets{:\mathrel{-}}
+\newcommand\name\text
+\newcommand\tset[1]{\{{#1}\}}
+\newcommand\x\times
+\newcommand\N{\mathbb{N}}
+\newcommand\eset[1]{\{{#1}\}}
+\newcommand\esetfor[2]{\eset{{#1} \mathrel{|} {#2}}}
+\newcommand\efor[1]{\kw{for}\;{#1}\;\kw{do}\;}
+\newcommand\ewhen[1]{\kw{when}\;{#1}\;\kw{do}\;}
+
+
 \title{Datafun}
 \subtitle{A higher-order functional Datalog}
 \author{Michael Arntzenius}
@@ -14,21 +43,63 @@
 
 \begin{document}
 \maketitle
-\large
+
+\Large
 
 \begin{frame}{}
-  The quick brown fox jumps over the lazy dog.
+  \centering \huge
+  \EMPH{A Caveat}
+  \\[1ex]
+  \emph{{\color{ForestGreen}theory} vs. {\color{DarkOrchid}implementation}}
+\end{frame}
 
-  \textit{The quick brown fox jumps over the lazy dog.}
+\begin{frame}
+  \centering
+  \begin{tabular}%
+%{@{}r@{$\;\;\sim\;\;$}l@{}}
+{@{}r@{\hskip 1em}l@{}}
+%{@{}l@{\hskip 1em}l@{}}
+    \EMPH{Datalog} & \EMPH{Datafun}
+    \\\midrule
+     predicates & finite sets
+     \\[.5ex]
+     conjunctive queries & set comprehensions
+     \\[.5ex]
+     \shaded recursive definitions & \shaded fixed points
+     \\[.5ex]
+     \shaded stratification & \shaded monotonicity types
+     \\[.5ex]
+     \shaded declarative
+     & \shaded pure \& terminating
+  \end{tabular}
+\end{frame}
 
-  \textbf{The quick brown fox jumps over the lazy dog.}
+\begin{frame}
+  \EMPH{Datalog}
+  \[
+  \begin{array}{l}
+    \name{edges}(1,2).\\\name{edges}(2,3).\\
+    \name{p}(X,Z) \gets \name{edges}(X,Y),\, \name{edges}(Y,Z).
+  \end{array}
+  \]
+  \vspace{0pt} % yes, makes a difference
 
-  
-  \textsf{Sans-serif...}
-
-  \[ \int_{x=0}^{100} \sin e^x \]
-
-  \[ \{ (x,z) \mathrel{|} (x,y) \in \text{edge}, (y,z) \in \text{path} \} \]
+  \EMPH{Datafun}
+  \[
+  \begin{array}{l}
+    \name{edges}, \name{p} : \tset{\N \x \N}\\
+    \name{edges} = \eset{(1,2), (2,3)}\\
+    \name{p} =
+    \esetfor{(x,z)}{(x,y) \in \name{edges},\, (y,z) \in \name{edges}}
+    %% \\\pause
+    %% \phantom{\name{p}} = \efor{(x,y_1) \in \name{edges}}
+    %% \\
+    %% \phantom{\name{p} ={}}\quad\efor{(y_2,z) \in \name{edges}}
+    %% \\
+    %% \phantom{\name{p} ={}}\quad\quad\ewhen{y_1 = y_2} \eset{(x,z)}
+  \end{array}
+  \]
+  \vspace{1em}
 \end{frame}
 
 \end{document}
