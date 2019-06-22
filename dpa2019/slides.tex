@@ -5,7 +5,7 @@
 
 %\PassOptionsToPackage{scaled=1.04}{rntzfont}
 
-\usepackage[alegreya,charter,source,]{rntzfont}
+\usepackage[charter,source,]{rntzfont}
 %\usepackage[charter,newmath,]{rntzfont}
 
 \providecommand\EMPH\textsc
@@ -17,11 +17,16 @@
 
 \setlength{\mathindent}{1em}
 
+% Give \cup more spacing
+\let\oldcup\cup
+\renewcommand\cup{\mathrel{\oldcup}}
+
 
 \newcommand\kw\textbf
 %\renewcommand\gets\shortleftarrow
 %\renewcommand\gets{:\mathrel{-}}
 \newcommand\name\text
+%\renewcommand\name[1]{\ensuremath{\mathrm{#1}}}
 \newcommand\tset[1]{\{{#1}\}}
 \newcommand\x\times
 \newcommand\N{\mathbb{N}}
@@ -51,9 +56,9 @@
 
 \begin{frame}{}
   \centering \huge
-  \EMPH{A Caveat}
+  \EMPH{caveat}
   \\[1ex]
-  \emph{{\color{ForestGreen}theory} vs. {\color{DarkOrchid}implementation}}
+  \emph{{\color{ForestGreen}theory} \& {\color{DarkOrchid}implementation}}
 \end{frame}
 
 \newcommand\whereami[1]{
@@ -172,9 +177,9 @@
 %% Part II: higher-order programming
 
 \begin{frame}
-  \centering \huge
-  {II}\\[1ex] \huge
-  \emph{Higher-order programming}
+  \centering\huge
+  {II}\\[1ex]
+  \emph{Higher-order examples}
 \end{frame}
 
 \begin{frame}{Generic transitive closure}
@@ -198,7 +203,7 @@
 \newcommand\regexor{\mathbin{|}}
 \newcommand\regexthen{\mathbin{;}}
 
-\begin{frame}{Regular expressions}
+\begin{frame}{Regular expressions as functions}
   \[
   \begin{array}{l}
     \kw{type}~ \name{String} = \tset{\N \x \name{Char}}\\
@@ -206,14 +211,60 @@
     \\[1em]
     (\regexor), (\regexthen) : \name{Regex} \x \name{Regex} \to \name{Regex}
     \\
-    (r_1 \regexor r_2) \:s = r_1\:s \mathrel{\cup} r_2\:s\\
-    (r_1 \regexthen r_2) \:s = \esetfor{(i,k)}{(i,j) \in r_1\:s,\, (j,k) \in r_2\:s}
+    (r_1 \regexor r_2) \;s = r_1\;s \cup r_2\;s\\
+    (r_1 \regexthen r_2) \;s = \esetfor{(i,k)}{(i,j) \in r_1\;s,\, (j,k) \in r_2\;s}
     \\[1em]
     (-)^+ : \name{Regex} \to \name{Regex}\\
-    r^+ \:s = \name{trans} \:(r\:s)
+    r^+ \;s = \name{trans} \;(r\;s)
   \end{array}
   \]
   \vfill
+\end{frame}
+
+
+%% Part III. Semilattices
+\begin{frame}
+  \centering\huge
+  {III}\\[1ex]
+  \begin{tabular}{@{}r@{\;}l@{}}
+    &\emph{fixed points}
+    \\
+    {of} &\emph{monotone maps}
+    \\
+    {on} &\emph{\alt<2>{\hilit semilattices}{%
+        finite sets}}
+  \end{tabular}
+\end{frame}
+
+\newcommand\tmap[2]{\{{#1} \mapsto {#2}\}}
+\newcommand\emap[1]{\eset{#1}}
+\newcommand\comment[1]{\text{\shaded #1}}
+
+\begin{frame}
+  \[ 
+  \begin{array}{l}
+    \kw{type}\ \name{Distance} = \infty < ... < 3 < 2 < 1 < 0
+    \\[1ex]\pause
+    \name{edges} : \tmap{\N \x \N}{\name{Distance}}\\
+    \name{edges} = \emap{(0,1 \mapsto 3),\, (1,2 \mapsto 2)}
+    \\
+    \comment{-{}- Otherwise \name{edges} takes $(x,y \mapsto \infty)$.}
+    \\[1ex]\pause
+    \name{shortest} : \tmap{\N \x \N}{\name{Distance}}\\
+    \name{shortest} = \\
+    \quad\efixh{s} \name{edges} \vee {}\\
+    \quad\phantom{\efixh{s}} \{\,(i,k \mapsto d_1 + d_2)\\
+    \quad\phantom{\efixh{s}} \!\mathrel{|} (i,j \mapsto d_1) \in {\hilit s},
+    %\\\phantom{\name{shortest} =}\phantom{{}\mathrel{|}{}}
+    (j,k \mapsto d_2) \in {\hilit s}\}
+  \end{array}
+  \]
+  %% \[
+  %% \begin{array}{l}
+  %%   \name{edges} : \tmap{\N \x \N}{\name{Distance}}\\
+  %%   \name{edges} = \emap{(0,1) \mapsto 2, (1,2) \mapsto 3}
+  %% \end{array}
+  %% \]
 \end{frame}
 
 \end{document}
