@@ -16,6 +16,7 @@
 \usepackage{anyfontsize} % suppress warnings about stmaryrd sizes
 \usepackage{tikz}        % for Hasse diagrams
 
+\frenchspacing
 \setlength{\mathindent}{0pt}
 
 % Give \cup more spacing
@@ -71,12 +72,13 @@
   \\[1ex]
   \itshape
   {theory}
-  \&
-  {implementation}
+  \&/or
+  {practice}
 \end{frame}
 
-\newcommand\whereami[1]{
-\begin{frame}
+
+%% Sets & set comprehensions
+\frame<1>[label=wut]{
   \centering
   \begin{tabular}%
 %{@{}r@{$\;\;\sim\;\;$}l@{}}
@@ -84,27 +86,26 @@
 %{@{}l@{\hskip 1em}l@{}}
     \DATALOG & \DATAFUN
     \\\midrule
-     predicates & finite sets
+     \only<2->{\shaded} predicates
+     & \only<2->{\shaded} finite sets
      \\[.5ex]
-     conjunctive queries & set comprehensions
+     \only<2->{\shaded} conjunctive queries
+     & \only<2->{\shaded} set comprehensions
      \\[.5ex]
-     \shaded recursive definitions & \shaded fixed points
+     \only<1,3->{\shaded} recursive definitions
+     & \only<1,3->{\shaded} fixed points
      \\[.5ex]
-     \shaded stratification & \shaded monotonicity types
+     \only<1-2,4->{\shaded} stratification
+     & \only<1-2,4->{\shaded} monotonicity types
      %% %% TODO
      %% \\[.5ex]
      %% \shaded declarative
      %% & \shaded pure \& terminating
   \end{tabular}
-\end{frame}
 }
 
-
-%% Sets & set comprehensions
-\whereami{0}
-
 \begin{frame}\setlength\mathindent{.67em}
-  \DATALOG\vspace{-.5ex}
+  \DATALOG%\vspace{-.5ex}
   \[
   \begin{array}{l}
     \name{edge}(1,2).\\\name{edge}(2,3).\\
@@ -113,7 +114,7 @@
   \]
   \vspace{0pt} % yes, makes a difference
 
-  \DATAFUN\vspace{-.5ex}
+  \DATAFUN%\vspace{-.5ex}
   \[
   \begin{array}{l}
     \name{edge}, \name{p} : \tset{\N \x \N}\\
@@ -133,7 +134,7 @@
 
 
 %% Recursive definitions / fixed points
-\whereami{1}
+\againframe<2>{wut}
 
 \begin{frame}{}\setlength\mathindent{.67em}
   \DATALOG
@@ -143,7 +144,7 @@
     \name{path}(X,Z) \gets \name{edge}(X,Y),\, \name{path}(Y,Z).
   \end{array}
   \]
-  \vspace{1ex}
+  \vspace{0pt}
 
   \DATAFUN
   \[
@@ -164,7 +165,7 @@
 
 
 %% Stratification / monotonicity
-\whereami{2}
+\againframe<3>{wut}
 
 \begin{frame}{}\setlength\mathindent{1em}
   \DATALOG
@@ -315,9 +316,47 @@
     \\[.5ex]
     \textit{\& so on...}
   \end{array}\]
+\end{frame}
 
-  %% \centering
-  %% Call this \((\name{Flat}\;\N)\).
+
+%% IV: Performance
+\begin{frame}
+  \centering\huge
+  {IV}\\[1ex]
+  \itshape But can it go fast?
+\end{frame}
+
+\begin{frame}{Reasons for hope}
+
+  \begin{enumerate}\setlength\itemsep{1ex}
+  \item Semina\"ive evaluation is possible!\\[.5ex]
+
+    {\normalsize Work in progress, based on the \emph{incremental
+        $\lambda$-calculus} [Cai et al, PLDI 2014].\par}
+
+  \item We can \emph{normalize away} higher-order functions.\\[.5ex]
+
+    {\normalsize [Cheney, Lindley, \& Wadler, ICFP 2013]\par}
+  \end{enumerate}
+  \vfill
+\end{frame}
+
+
+\begin{frame}{\scshape Summary}
+  \begin{itemize}\setlength\itemsep{1ex}
+  \item Datalog is a \emph{functional language}\\with \emph{Datalog semantics}.
+
+  \item Higher-order programming for\\
+    \emph{less boilerplate} and
+    \emph{increased expressivity}.
+
+  \item Natural extensions to other semilattices.\\
+    Useful for program analysis?
+
+  \item Reasons to hope it can be implemented efficiently.
+
+  \end{itemize}
+  \vfill
 \end{frame}
 
 \end{document}
