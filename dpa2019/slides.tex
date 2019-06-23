@@ -104,7 +104,7 @@
 
 
 %% Sets & set comprehensions
-\begin{frame}{Sets}\setlength\mathindent{.67em}
+\begin{frame}{Predicates}\setlength\mathindent{.67em}
   \DATALOG%\vspace{-.5ex}
   \[
   \begin{array}{l}
@@ -136,7 +136,7 @@
 %% Recursive definitions / fixed points
 %% \againframe<2>{wut}
 
-\begin{frame}{Fixed points}\setlength\mathindent{.67em}
+\begin{frame}{Recursion}\setlength\mathindent{.67em}
   \DATALOG
   \[
   \begin{array}{l}
@@ -167,7 +167,7 @@
 %% Stratification / monotonicity
 %% \againframe<3>{wut}
 
-\begin{frame}{Monotonicity}\setlength\mathindent{1em}
+\begin{frame}{Stratification}\setlength\mathindent{1em}
   \DATALOG
   \[ \name{p}(0) \gets {\color{red}\neg}\name{p}(0).
   \]\vspace{0pt}
@@ -189,7 +189,7 @@
 \end{frame}
 
 
-\begin{frame}{Order of evaluation doesn't matter}
+\begin{frame}{Order doesn't matter}
   \begin{ceqn}
     \DATALOG
     \[\name{p}(X),\, \name{q}(Y) \iff \name{q}(Y),\, \name{p}(X)
