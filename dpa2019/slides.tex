@@ -3,7 +3,7 @@
 \usefonttheme{professionalfonts} % using non-standard fonts
 \usefonttheme{serif} % Make serif default.
 
-%\PassOptionsToPackage{scaled=1.04}{rntzfont}
+%\PassOptionsToPackage{scaled=1.11}{rntzfont}
 
 \usepackage[charter,source,]{rntzfont}
 %\usepackage[charter,newmath,]{rntzfont}
@@ -14,10 +14,10 @@
 \usepackage{stmaryrd}
 \usepackage{nccmath} % \begin{ceqn}
 \usepackage{anyfontsize} % suppress warnings about stmaryrd sizes
-\usepackage{tikz}        % for Hasse diagrams
+\usepackage{tikz}        % for Hasse diagram
 
 \frenchspacing
-\setlength{\mathindent}{0pt}
+\setlength\mathindent{0pt}
 
 % Give \cup more spacing
 \let\oldcup\cup
@@ -43,7 +43,7 @@
 \newcommand\efix[1]{\kw{fix}~{#1}~\kw{is}\;}
 \newcommand\efixh[1]{\efix{\hilit #1}}
 
-\newcommand\shaded{\color{gray}}
+\newcommand\shaded{\color{Gray}}
 \newcommand\hilit{\color{Rhodamine}}
 \newcommand\todo[1]{{\color{red}#1}}
 \newcommand\XXX{\todo{XXX}}
@@ -328,7 +328,7 @@
 
 \begin{frame}{Reasons for hope}
 
-  \begin{enumerate}\setlength\itemsep{1ex}
+  \begin{enumerate}\setlength\itemsep{1.5ex}
   \item Semina\"ive evaluation is possible!\\[.5ex]
 
     {\normalsize Work in progress, based on the \emph{incremental
@@ -343,14 +343,14 @@
 
 
 \begin{frame}{\scshape Summary}
-  \begin{itemize}\setlength\itemsep{1ex}
+  \begin{itemize}\setlength\itemsep{1.5ex}
   \item Datalog is a \emph{functional language}\\with \emph{Datalog semantics}.
 
-  \item Higher-order programming for\\
-    \emph{less boilerplate} and
-    \emph{increased expressivity}.
+  \item Higher-order code for
+    \emph{less boilerplate}\\ and
+    \emph{more expressivity}.
 
-  \item Natural extensions to other semilattices.\\
+  \item Natural extensions to semilattices.\\
     Useful for program analysis?
 
   \item Reasons to hope it can be implemented efficiently.
