@@ -1,4 +1,4 @@
-\documentclass[dvipsnames,fleqn]{beamer}
+\documentclass[aspectratio=2013,dvipsnames,fleqn]{beamer}
 
 \usefonttheme{professionalfonts} % using non-standard fonts
 \usefonttheme{serif} % Make serif default.
@@ -189,6 +189,24 @@
 \end{frame}
 
 
+\begin{frame}{Order of evaluation doesn't matter}
+  \begin{ceqn}
+    \DATALOG
+    \[\name{p}(X),\, \name{q}(Y) \iff \name{q}(Y),\, \name{p}(X)
+    \]\vspace{0pt}
+
+    \DATAFUN
+    \begin{equation*}
+      \esetfor{...}{x \in E,\, y \in F}
+      ~=~ \esetfor{...}{y \in F,\, x \in E}
+    \end{equation*}
+  \end{ceqn}\vspace{0pt}
+
+  No side effects, no\textsuperscript{\textdagger} infinite loops.
+  \vfill
+\end{frame}
+
+
 %% Summary
 \frame<1>[label=guide]{
   \centering
@@ -209,6 +227,9 @@
      \\[.5ex]
      stratification
      & monotonicity
+     \\[.5ex]
+     declarative
+     & pure \& total
      %% %% TODO
      %% \\[.5ex]
      %% \shaded declarative
