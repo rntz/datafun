@@ -104,32 +104,6 @@
 
 
 %% Sets & set comprehensions
-\frame<1>[label=guide]{
-  \centering
-  \begin{tabular}%
-%{@{}r@{$\;\;\sim\;\;$}l@{}}
-{@{}r@{\hskip 1em}l@{}}
-%{@{}l@{\hskip 1em}l@{}}
-    \DATALOG & \DATAFUN
-    \\\midrule
-     predicates
-     & finite sets
-     \\[.5ex]
-     %% queries
-     %% & set comprehensions
-     %% \\[.5ex]
-     recursion
-     & fixed points
-     \\[.5ex]
-     stratification
-     & monotonicity
-     %% %% TODO
-     %% \\[.5ex]
-     %% \shaded declarative
-     %% & \shaded pure \& terminating
-  \end{tabular}
-}
-
 \begin{frame}{Sets}\setlength\mathindent{.67em}
   \DATALOG%\vspace{-.5ex}
   \[
@@ -214,9 +188,33 @@
   \vfill
 \end{frame}
 
-%% TODO: purity & termination
-
-%% \againframe<2>{guide}
+
+%% Summary
+\frame<1>[label=guide]{
+  \centering
+  \begin{tabular}%
+%{@{}r@{$\;\;\sim\;\;$}l@{}}
+{@{}r@{\hskip 1em}l@{}}
+%{@{}l@{\hskip 1em}l@{}}
+    \DATALOG & \DATAFUN
+    \\\midrule
+     predicates
+     & finite sets
+     \\[.5ex]
+     %% queries
+     %% & set comprehensions
+     %% \\[.5ex]
+     recursion
+     & fixed points
+     \\[.5ex]
+     stratification
+     & monotonicity
+     %% %% TODO
+     %% \\[.5ex]
+     %% \shaded declarative
+     %% & \shaded pure \& terminating
+  \end{tabular}
+}
 
 
 %% Part II: higher-order programming
