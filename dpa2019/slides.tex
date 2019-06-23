@@ -200,7 +200,7 @@
 
   \DATAFUN
   \[
-  \efix{p} \esetfor{0}{\mathop{\color{red}\neg}(0 \in p)}
+  \efixh{p} \esetfor{0}{\mathop{\color{red}\neg}(0 \in {\hilit p})}
   \]
 
   %% \pause
@@ -286,7 +286,7 @@
 \newcommand\comment[1]{\text{\shaded #1}}
 
 %% Dictionaries, distances, & shortest paths
-\begin{frame}
+\begin{frame}{Shortest paths}
   \[ 
   \begin{array}{l}
     \kw{type}\ \name{Distance} = \infty < ... < 3 < 2 < 1 < 0
@@ -304,7 +304,7 @@
     %\\\phantom{\name{shortest} =}\phantom{{}\mathrel{|}{}}
     (j,k \mapsto d_2) \in {\hilit s}\}
   \end{array}
-  \]
+  \]\vfill
   %% \[
   %% \begin{array}{l}
   %%   \name{edges} : \tmap{\N \x \N}{\name{Distance}}\\
@@ -316,7 +316,7 @@
 \newcommand\tflat[1]{\ensuremath{\name{Flat}\;{#1}}}
 
 %% The flat lattice \& constant analysis
-\begin{frame}{}\large
+\begin{frame}{Constant analysis}\large
   \[
   \begin{array}{l}
     \kw{type}~\tflat{\N} =
@@ -343,7 +343,8 @@
     \name{join} : \tflat{(\tflat{A})} \mto \tflat{A}
     \\[.5ex]
     \textit{\& so on...}
-  \end{array}\]
+  \end{array}
+  \]\vfill
 \end{frame}
 
 
