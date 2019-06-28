@@ -1,17 +1,16 @@
 \documentclass{rntz}
 
-%% %% Laptop-oriented 4:5 fantasy paper. Other options: tablet, phone.
-%% \usepackage[phone]{fantasy}
-%% \usepackage{rntzfont}
-%% %\linespread{1.15}
+%% Laptop-oriented 4:5 fantasy paper. Other options: tablet, phone.
+\usepackage{fantasy}
+\usepackage{rntzfont}
 
-\usepackage[b5]{rntzgeometry}
-\usepackage[width=365pt,fullwidth=16cm,width=13cm,fullwidth=150mm]{narrow}
-\usepackage[linespread=1.16667]{rntzfont}
+%% \usepackage[b5]{rntzgeometry}
+%% \usepackage[fullwidth=15cm,width=345pt,width=365pt]{narrow}
+%% \usepackage[scaled=1.0625]{rntzfont}
 
 %% \usepackage[a5]{rntzgeometry}
-%% \usepackage[fullwidth=13cm,width=115mm]{narrow}
-%% \usepackage[linespread=1.12,scaled=.9804]{rntzfont}
+%% \usepackage[fullwidth=140mm,width=115mm]{narrow}
+%% \usepackage[scaled=1.01]{rntzfont}
 
 %% \documentclass{article}
 %% \usepackage[b5paper]{geometry}
@@ -53,7 +52,8 @@
 %% vectors with subscripts. \vv* doesn't look quite right.
 \newcommand{\vvsub}[2]{\vv*{#1}{\!#2}}
 
-\usepackage[skip=.5\baselineskip,labelfont=sc,labelsep=period,format=hang]{caption}
+\usepackage[skip=.5\baselineskip,labelfont=it,textfont=it,labelsep=period,format=hang]{caption}
+%\usepackage[skip=.5\baselineskip,labelfont=sc,labelsep=period,format=hang]{caption}
 
 % List styling: No extra separation between items (aside from \parsep). Indent
 % lists to match paragraph indentation.
@@ -173,10 +173,8 @@
 \begin{document}
 
 %% \makeatletter \noindent
-%% before section: \rntz@secbefore\\
-%% after section: \rntz@secafter\\
 %% baseline skip: \the\baselineskip\\
-%% em: \the\fontdimen6\font\\
+%% ex/em: \the\fontdimen5\font{} / \the\fontdimen6\font\\
 %% \makeatother
 
 \maketitle
