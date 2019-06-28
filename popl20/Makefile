@@ -3,7 +3,7 @@ LATEXRUN := ../rntztex/latexrun/latexrun
 
 # By default, try to build every tex file in this directory.
 # Customize $(TEXS) to change this.
-TEXS  := $(wildcard *.tex)
+TEXS  := seminaive.tex # $(wildcard *.tex)
 PDFS  := $(addsuffix .pdf,$(basename $(TEXS)))
 
 .PHONY: all watch clean FORCE
