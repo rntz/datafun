@@ -90,7 +90,7 @@ module _ (A B : ΔProset) where
   Δproset+ .Δ = Δ A ∨ Δ B
   Δproset+ .ok = Δproset+ok
   Δproset+ .complete (inj₁ x) = Data.Product.map inj₁ inj₁ (complete A x)
-  Δproset+ .complete (inj₂ x) = Data.Product.map inj₂ inj₂ (complete B x) 
+  Δproset+ .complete (inj₂ x) = Data.Product.map inj₂ inj₂ (complete B x)
   Δproset+ .sound (inj₁ x) = inj₁ (sound A x)
   Δproset+ .sound (inj₂ x) = inj₂ (sound B x)
   Δproset+ .compo = casesₗ (casesᵣ (inl (compo A)) (inl π₁))

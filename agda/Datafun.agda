@@ -46,4 +46,3 @@ data Fix! : Type -> Set where
 
 -- Modes and contexts
 data Mode : Set where Id □ : Mode
-

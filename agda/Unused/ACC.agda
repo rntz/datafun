@@ -50,7 +50,7 @@ module DefnWf where
   module _ {A : Proset} where
     private instance aa = A
 
-    -- _<_ : 
+    -- _<_ :
 
     ≤∙< : ∀{a b c} -> a ≤ b -> Hom< A b c -> Hom< A a c
     ≤∙< a≤b b<c = a≤b ∙ proj₁ b<c , λ c≤a → proj₂ b<c (c≤a ∙ a≤b)
