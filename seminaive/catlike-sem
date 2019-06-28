@@ -1,0 +1,68 @@
+A change poset is:
+
+- A : Set
+- ΔA : Poset
+- (dx : x → y), a relation for (dx : ΔA) and (x,y : A).
+- An operator (id : A → ΔA) such that (id x : x → x).
+- For every a,b,c and (da : a → b) and (db : b → c), a composition (db ∘ da : a → c).
+
+Note that (da : a₁ → b₁) and (da : a₂ → b₂) does _not_ imply a₁ = a₂ or b₁ = b₂. Moreover, the composition (db ∘ da : a → c) may depend on a,b,c as well as db and da.
+
+Satisfying:
+- da = id ∘ da = da ∘ id
+- (da ∘ db) ∘ dc = da ∘ (db ∘ dc)
+- For any (da : x → y) and (db : x → z), (da ≤ db ⇔ y ≤ z).
+
+Alternatively, it is a tuple (C,≤) of a category C and a partial ordering on ALL
+C's arrows (NOT an ordering on each hom-set), such that:
+
+- ∀(da: x → y, db : x → z). y ≤ z ⇔ da ≤ db
+
+Morphisms between change posets are maps (f,f') where
+
+    f : A → B
+    f' : A → Poset(ΔA, ΔB)
+
+such that
+
+    if dx : x → y
+    then f' x dx : f x → f y
+
+The identity is (id, λa da. da). Composition is:
+
+    (f,f') ∘ (g,g') = (f ∘ g, λx dx. f' (g x) (g' x dx))
+
+----------
+
+There is a forgetful functor U : ChangePoset → Cat.
+
+    U(A,≤) = A
+    U(f, f')(x) = f x
+    U(f, f')(dx : x → y) = f' x dx : f x → f y
+
+Need to show: U(id) = id; U(f ∘ g) = U(f) ∘ U(g).
+
+    U(id)(x) = id x = x
+    U(id)(dx : x → y) = dx : x → y = id(dx)
+
+    (U(f) ∘ U(g))(dx : x → y)
+      = U(f) (U(g)(dx : x → y))
+      = U(f) (g' x dx : g x → g y)
+      = f' (g x) (g' x dx)
+      = (f ∘ g)' x dx
+      = U(f ∘ g)(dx : x → y)
+
+The structure we will construct will be a refinement of Cat over this functor, in the sense that it will commute with it. For example, for products:
+
+    U(A × B) = UA × UB
+    U⟨f,g⟩ = ⟨Uf, Ug⟩
+
+----------
+
+How do we interpret FiniteSet(A), □A, and ℕ into ChangePoset?
+
+Can we interpret DownSet? What is DownSet? It's the free semilattice. But, argh!
+
+----------
+
+The category ChangePoset has products, weak coproducts, and (weak?) exponentials.
