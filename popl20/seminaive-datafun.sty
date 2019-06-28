@@ -1,0 +1,88 @@
+\usepackage{booktabs}          % for formal tables, \midrule
+\usepackage{subcaption}        % for complex figures with subfigures/subcaptions
+
+\usepackage{mathpartir}         % \begin{mathpar}, \infer, etc.
+\usepackage{stmaryrd}           % \shortrightarrow, \llbracket, etc.
+\usepackage{anyfontsize}        % suppress warnings about stmaryrd font size
+\usepackage{mathtools}          % vertical centered colon, \dblcolon, \Coloneqq
+%\usepackage{nccmath}    % fix spacing issues after AMS math environments like align*
+
+% Use stmry medium as bold since there is no stmry bold.
+\SetSymbolFont{stmry}{bold}{U}{stmry}{m}{n}
+
+
+%% ---------- Fonts ----------
+
+%% Unscaled x-heights:
+% Euler     XCharter    SourceSerif     SourceSans
+% 4.59      4.81        4.75            4.86
+
+%% Scalings tuned to roughly match libertine, leaning larger.
+%\usepackage[scaled=0.92]{sourceserifpro}\usepackage{eulervm}\edef\zeu@Scale{0.9520697167755992}
+%\usepackage[scaled=.93,largesc,]{newpxtext}%\usepackage[scaled=.93]{newpxmath}
+%\usepackage[scaled=.81]{librebaskerville}
+\usepackage[scaled=.94]{XCharter}\usepackage{eulervm}\edef\zeu@Scale{0.9850544662309367}
+
+%\usepackage{biolinum}
+%\usepackage[defaultsans,scale=0.8926752221125368,lining,tabular,]{lato}
+%\usepackage[scaled=0.9303292181069958,semibold]{sourcesanspro}
+%\usepackage[tabular,lining,book,semibold,scaled=0.8579506641366224,]{FiraSans} %letterspace=15-20
+\usepackage[scaled=0.9872074235807861,lf,tabular,]{AlegreyaSans} % letterspace=12
+
+% Source Sans, Alegreya don't look great in all-caps.
+% Lato wants \fontseries{eb}\selectfont
+
+\renewcommand\@secfont{\sffamily\bfseries\section@raggedright\lsstyle\MakeTextUppercase}
+%\renewcommand\@secfont{\sffamily\bfseries\large\scshape\section@raggedright}
+
+\newcommand\ebseries\bfseries
+%\renewcommand\ebseries{\fontseries{eb}\selectfont}
+\renewcommand\@secfont{\sffamily\ebseries\large\section@raggedright}
+\renewcommand\@subsecfont{\sffamily\bfseries\section@raggedright}
+
+% Make author formatting less shouty.
+\renewcommand\MakeTextUppercase\scshape % awful hack
+\def\@authorfont{\large\sffamily}
+\def\@affiliationfont{\small\normalfont\sffamily}
+
+% Put section numbers in left margin. I think I don't like this.
+%\renewcommand\@seccntformat[1]{\llap{\parbox[t]{100in}{\hfill\csname the#1\endcsname\hspace*{\dimexpr\f@size pt\relax}}}}
+
+
+%% ---------- Other typography ----------
+
+% spacing: allow interword spacing adjustment.
+% stretch: maximum allowed font expansion; default is 20.
+% tracking: use letterspacing on small caps.
+% letterspace: amount of added letter-spacing in \lsstyle, \scshape, &c.
+\microtypesetup{spacing=true,stretch=15,tracking=true,letterspace=5,}
+
+% Default to vertically centered colons. Doesn't quite work with euler, but
+% better than nothing.
+\mathtoolsset{centercolon}
+
+
+%% ---------- Formatting & style ----------
+
+% cleveref must be loaded AFTER hyperref, amsmath, & amsthm.
+\usepackage[nameinlink,noabbrev]{cleveref}% other options: capitalise
+\newcommand\crefrangeconjunction{--} % use en-dashes for ranges.
+\creflabelformat{equation}{#2#1#3} % No parentheses in equation labels.
+\crefname{section}{\S\@gobble}{\S\@gobble}
+
+%% \usepackage{enumitem}\setlist{labelindent=1em,labelsep=.75em,leftmargin=*}
+%% \setlist{labelindent=.5em,labelsep=.75em,leftmargin=*}
+%% \setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
+
+
+%% ---------- Commands and notation ----------
+\newcommand\naive{na\"ive}
+\newcommand\Naive{Na\"ive}
+
+\newcommand\ensuretext[1]{\ifmmode\text{#1}\else{#1}\fi}
+\newcommand\todo[1]{\ensuretext{\color{Rhodamine}\textbf{TODO:} #1}}
+
+\newcommand\XXX{\textbf{\color{Rhodamine}XXX}}
+
+\newcommand\fn{\texorpdfstring{\ensuremath{\lambda}}{lambda}}
+\newcommand\boldfn{\texorpdfstring{\ensuremath{\boldsymbol\lambda}}{lambda}}
