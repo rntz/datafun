@@ -84,6 +84,47 @@ using logical relations (\cref{sec:logical-relations}).
 \end{enumerate}
 
 
+\section{Fixed points and \fastfix}
+
+\todo{TODO: more explanation.} Let $L$ be a semilattice satisfying the ascending
+chain condition. Fix monotone maps $f : L \to L$ and $\deriv f : L \to L \to L$,
+and consider the sequences $x_i$, $\dx_i$ defined by:
+
+\nopagebreak[2]
+\begin{align*}
+  x_0 &= \bot
+  &
+  x_{i+1} &= x_i \vee \dx_i\\
+  \dx_0 &= f\< x
+  &
+  \dx_{i+1} &= \deriv f \<x_i \<\dx_i
+\end{align*}
+
+\noindent
+Let $\fastfix\<(f,\deriv f) = \bigvee_i x_i$. The existence of this least upper
+bound is guaranteed by the ascending chain condition, since $x_i \le x_i \vee
+\dx_i = x_{i+1}$.
+
+\begin{restatable}[\prim{fix} and \fastfix]{theorem}{thmFastFix}\label{thm:fast-fix}
+  If $\fa{x,\dx} f \<x \vee \deriv f \<x \<\dx = f \<(x \vee \dx)$,
+  then \(\efix f = \fastfix\<(f,\deriv f)\).
+\end{restatable}
+\begin{proof}
+  Assume $\fa{x,\dx} f\<x \vee \deriv f \<x \<\dx = f\<(x \vee \dx)$. It suffices
+  to show $\fa{i} x_{i+1} = f \<x_i$, which we do by induction on $i$. The base
+  case is $x_1 = x_0 \vee \dx_0 = \bot \vee f\<\bot = f\<x_0$. Inductively,
+  assuming $x_{i+1} = f\<x_i$, we have:
+
+  \nopagebreak[2]
+  \begin{align*}
+    x_{i+2} &= x_{i+1} \vee \dx_{i+1} && \text{definition of $x_{i+2}$}\\
+    &= f\<x_i \vee \deriv f\<x_i\<\dx_i && \text{inductive hypothesis, definition of $\dx_{i+1}$}\\
+    &= f\<(x_i \vee \dx_i) && \text{assumption}\\
+    &= f\<x_{i+1} && \text{definition of $x_{i+1}$}
+  \end{align*}
+\end{proof}
+
+
 \input{seminaive/fig01-core-datafun}
 \input{seminaive/fig02-surface-syntax}
 \input{seminaive/fig03-desugaring}
@@ -221,12 +262,12 @@ the standard model and use \emph{its} equational theory.
 \input{seminaive/fig11-seminaive-delta}
 \input{seminaive/fig12-dummy}
 
-\todo{TODO: explain \prim{fast-fix}. explain $\Phi$ type transformation as
+\todo{TODO: explain \fastfix. explain $\Phi$ type transformation as
   ``decorating'' $\isof A$ values with their zero changes so that \prim{fix}
-  gets its argument's derivative and can be implemented via \prim{fast-fix}.
-  Explain that we need $\Phi{\eqt A}$ to be an eqtype for $\Phi{\tseteq{A}} =
-  \tset{\Phi{\eqt A}}$ to be well-formed, and in fact we can be more specific,
-  as in \cref{thm:phi-eqtype}.}
+  gets its argument's derivative and can be implemented via \fastfix.
+  Give semantics for \fastfix. Explain that we need $\Phi{\eqt A}$ to be
+  an eqtype for $\Phi{\tseteq{A}} = \tset{\Phi{\eqt A}}$ to be well-formed, and
+  in fact we can be more specific, as in \cref{thm:phi-eqtype}.}
 
 \input{seminaive/thm-phi-eqtype}
 \begin{proof}
@@ -296,37 +337,39 @@ e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
 \section{Correctness via logical relations}
 \label{sec:logical-relations}
 
-\input{seminaive/def-impls-changes}
+\input{seminaive/def-weird}
 
-\begin{restatable}[Correctness]{theorem}{thmCorrect}\label{thm:correct}
-  If $\J e \G A$ then
+%\input{seminaive/def-impls-changes}
 
-  \begin{enumerate}
-  \item If $\gamma \impls_\G \rho$ then \(\den{\phi e} \<\gamma \impls_A \den{e}
-    \<\rho\).
-  \item If $\changesat{\G}{\dgamma}{\g}{\g'}$ then \(\changesat{A}{\den{\delta
-      e} \<\tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e}
-    \<\gamma'}\).
-  \end{enumerate}
+%% \begin{restatable}[Correctness]{theorem}{thmCorrect}\label{thm:correct}
+%%   If $\J e \G A$ then
 
-  %% \nopagebreak[2]
-  %% \begin{gather*}
-  %% \text{(1)}~~ \den{\phi e}\<\gamma \impls_A \den{e}\<\rho
-  %% \qquad\text{and}\qquad
-  %% \text{(2)}~~
-  %% \vld{\den{\delta e} \tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e} \<\gamma'}
-  %% : \incdens{\Phi{A}}
-  %% \end{gather*}
+%%   \begin{enumerate}
+%%   \item If $\gamma \impls_\G \rho$ then \(\den{\phi e} \<\gamma \impls_A \den{e}
+%%     \<\rho\).
+%%   \item If $\changesat{\G}{\dgamma}{\g}{\g'}$ then \(\changesat{A}{\den{\delta
+%%       e} \<\tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e}
+%%     \<\gamma'}\).
+%%   \end{enumerate}
 
-  \noindent
-  Note that $\tuple{\gamma,\dgamma}$ is a slight abuse of notation here;
-  \todo{TODO explain that \emph{monotone} variables in $\g$ when we use it as
-    $\den{\phi e}\<\g$ turn into \emph{discrete} variables in $\extend\g\dgamma$
-    when we use it in $\den{\delta e} \<\extend\g\dgamma$}.
-\end{restatable}
-\begin{proof}
-  By induction on the derivation of $\J e \G A$. See \XXX.
-  %\cpageref{proof:correct}.
-\end{proof}
+%%   %% \nopagebreak[2]
+%%   %% \begin{gather*}
+%%   %% \text{(1)}~~ \den{\phi e}\<\gamma \impls_A \den{e}\<\rho
+%%   %% \qquad\text{and}\qquad
+%%   %% \text{(2)}~~
+%%   %% \vld{\den{\delta e} \tuple{\gamma,\dgamma}}{\den{\phi e} \<\gamma}{\den{\phi e} \<\gamma'}
+%%   %% : \incdens{\Phi{A}}
+%%   %% \end{gather*}
+
+%%   \noindent
+%%   Note that $\tuple{\gamma,\dgamma}$ is a slight abuse of notation here;
+%%   \todo{TODO explain that \emph{monotone} variables in $\g$ when we use it as
+%%     $\den{\phi e}\<\g$ turn into \emph{discrete} variables in $\extend\g\dgamma$
+%%     when we use it in $\den{\delta e} \<\extend\g\dgamma$}.
+%% \end{restatable}
+%% \begin{proof}
+%%   By induction on the derivation of $\J e \G A$. See \XXX.
+%%   %\cpageref{proof:correct}.
+%% \end{proof}
 
 

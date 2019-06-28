@@ -34,11 +34,15 @@
 
 \newcommand\quantcolor\relax
 %\renewcommand\quantcolor{\color{green}}
-\newcommand\quantifierspace{~\,}
+\newcommand\quantifierspace{\ }
+%\renewcommand\quantifierspace{\ \,}
 \newcommand\quantify[1]{({\quantcolor #1})\quantifierspace}
 \newcommand\fa[1]{\quantify{\forall #1}}
 \newcommand\ex[1]{\quantify{\exists #1}}
 \newcommand\faex[2]{\quantify{\forall #1, \exists #2}}
+
+%% \renewcommand\fa[1]{\forall({\quantcolor #1})\quantifierspace}
+%% \renewcommand\ex[1]{\exists({\quantcolor #1})\quantifierspace}
 
 %% various marked equalities.
 \newcommand\stareq{\overset{\boldsymbol\star}{=}}
@@ -103,7 +107,8 @@
 
 %% ===== Datafun syntax =====
 \newcommand\kwname\textbf
-\newcommand\prim[1]{\textmd{\itshape #1}}
+%\newcommand\prim[1]{\textmd{\itshape #1}}
+\newcommand\prim[1]{\text{\itshape #1}}
 \newcommand\caseto\shortrightarrow
 \newcommand\pwild{\underline{\phantom{a}}}
 \newcommand\desugars{~\leadsto~}
@@ -152,6 +157,8 @@
 \newcommand\eifd[2]{\eif{\isocolor #1}{#2}}
 \newcommand\efixisd[2]{\efixis{#1}{\isocolor #2}}
 \newcommand\eeqd[2]{\eeq{\isocolor #1}{\isocolor #2}}
+
+\newcommand\fastfix{\prim{fast-fix}}
 
 %\newcommand\J[3]{{#1} \mathrel{\,:\,} {#2} \vdash {#3}}
 \newcommand\J[3]{{#2} \vdash {#1} \mathrel{:} {#3}}
@@ -236,12 +243,19 @@
 \newcommand\impls{\mathrel{\lightning}}
 
 \newcommand\changesto\shortrightarrow
-%\renewcommand\changesto\leadsto
 \newcommand\changescolon{:}
 \newcommand\changes[3]{{#1} \changescolon #2 \changesto #3}
 \newcommand\changesat[4]{{#2} \changescolon_{#1} {#3} \changesto {#4}}
 
-%% \renewcommand\changescolon\dblcolon
-%% \renewcommand\changesat[4]{\changes{#2}{#3}{#4} : {#1}}
+%\renewcommand\impls{\mathop{\lightning}}
+\newcommand\weird[5]{{#1} \changescolon #2 \impls #3 \changesto #4 \impls #4}
+\newcommand\weirdat[6]{{#2} \changescolon_{#1} #3 \impls #4 \changesto #5 \impls #6}
+
+\renewcommand\changescolon\dblcolon
+%\renewcommand\changesat[4]{\changes{#2}{#3}{#4} : {#1}}
+\renewcommand\weirdat[6]{\weird{#2}{#3}{#4}{#5}{#6} : #1}
+
+%\renewcommand\changesto\leadsto
+%\renewcommand\changesto\to
 
 

@@ -1,6 +1,6 @@
 %% TODO: check that we have every rule we need.
 %% TODO: are any of these redundant/unnecessary?
-\begin{figure}\centering
+\begin{figure*}\centering
   \[\setlength\arraycolsep{.15em}\begin{array}{rcl}
     \ecase{e} x \caseto f &\desugars& \elet{x = e} f\\[.33em]
     \ecase{e} \eboxd x \caseto f &\desugars& \elet{\eboxd x = e} f
@@ -34,4 +34,4 @@
 
   \caption{Some pattern-matching elaboration rules}
   \label{fig:desugaring-pattern-matching}
-\end{figure}
+\end{figure*}
