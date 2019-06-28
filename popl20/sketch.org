@@ -74,9 +74,9 @@ What we really want is to compute the difference between steps, as in:
     x_0  = ⊥        x_{i+1}  = x_i ∪ dx_i
     dx_0 = f ⊥      dx_{i+1} = f' x_i dx_i
 
-This computes same sequence as long as f x ∪ f' x dx = f (x ∪ dx). This
-(swapping ∪ for ⊕) is the defining property of a derivative in the incremental
-λ-calculus!
+Call this fast-fix (f,f'). This computes same sequence as (fix f) as long as f x
+∪ f' x dx = f (x ∪ dx). This (swapping ∪ for ⊕) is the defining property of a
+derivative in the incremental λ-calculus!
 
 Explain inc λ-calculus as we apply it. Every A gets a ΔA and an ⊕.
 
@@ -85,6 +85,15 @@ Explain inc λ-calculus as we apply it. Every A gets a ΔA and an ⊕.
     Δ(A → B) = □A → ΔA → ΔB   (f ⊕ df) (x ⊕ dx) = f x ⊕ df x dx
 
 intuition for Δ(A → B): derivative takes as input a "tangent at a point", □A × ΔA.
+
+-- MISSING CONNECTION --
+
+Show what our transformation does (after optimizations) to transitive closure, &
+how it corresponds with Datalog version.
+
+** Further examples of seminaive evaluation
+- generic transitive closure
+- regular expressions
 
 * 4. Type theory & semantics of Datafun
 explain type theory & semantics in Poset
