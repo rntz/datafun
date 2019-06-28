@@ -1,0 +1,53 @@
+* 1. Introduction
+- Datalog is good (cite its many uses, databases, program analysis, etc.)
+  
+- but in practice it always needs extensions
+  and it can involve boilerplate
+
+- Datafun generalizes Datalog to a functional language
+  to support further extension (eg. semilattices)
+  and avoid boilerplate via higher-order programming
+
+- State of the art eval strategy for Datalog is seminaive evaluation
+
+- Folklore and recent work (cite: Picallo) says seminaive evaluation exploits
+  *derivatives*.
+
+- The Incremental Lambda Calculus shows how to take derivatives of functional
+  programs.
+
+- We adapt this work to Datafun and define a seminaive program transformation.
+  As in Datalog, this can produce asymptotic speedups (eg. on transitive
+  closure).
+
+** Contributions
+- phi/delta transformation
+
+Compared to:
+1. Datalog: we're higher-order
+
+2. Incremental lambda calculus:
+   - handle sum types
+   - adapt for poset semantics & increasing changes
+   - □ lets us be more specific about what is _allowed_ to change.
+   - goal is not incremental computation /per se/ but faster fixed points
+
+3. Picallo papers:
+
+   Fixing incremental computation gives _some_ cases where function changes exist,
+   but not in general. We have a different notion of function changes (closer to
+   the Inc. λ-calculus') and so for us they always exist.
+
+   Later work (the FOSSACS stuff) constructs a *closed* category but does not
+   show how to apply this as a program transform / speedup. Possible future
+   work!
+
+4. Automatic differentiation:
+   - we use □ to avoid need for higher-order derivatives
+
+* 2. Datalog & Datafun
+* 3. Seminaive evaluation
+* 4. Type theory & semantics of Datafun
+* 5. The seminaive transformation
+* 6. Implementation & results
+* 7. Related (& future) work
