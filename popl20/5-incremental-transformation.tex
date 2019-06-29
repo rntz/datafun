@@ -1,2 +1,21 @@
 \section{The Incremental Transformation}
 \label{sec:incremental-transformation}
+
+\input{fig-DeltaPhi}
+
+
+\todo{Explain \cref{fig:DeltaPhi}. Then explain corresponding context transformations:}
+\begin{align*}
+  \D(\h x A) &= \h \dx {\D A} & \D(\hd x A) &= \emptycx\quad\text{(the empty context)}
+  \\
+  \Phi(\h x A) &= \h x {\Phi A} & \Phi(\hd x A) &= \hd x {\Phi A}, \hd \dx {\DP A}
+  \\
+  \iso{(\h x A)} &= \hd x A & \iso{(\hd x A)} &= \hd x A
+\end{align*}
+
+\todo{Explain how uses of $\phi$ in $\delta e$ involve weakening, and how this
+  justifies their use in discrete contexts (hilighted in {\color{Rhodamine}pink}), eg. in $\delta(e\<f) = \delta e \<\eboxraw{\phi f} \<\delta f$.}
+
+\todo{explain implementation of \zero{} via \dummy{}.}
+
+\input{fig-phi-delta}

@@ -1,0 +1,75 @@
+% spacing: allow interword spacing adjustment.
+% stretch: maximum allowed font expansion; default is 20.
+% tracking: use letterspacing on small caps.
+% letterspace: amount of added letter-spacing in \lsstyle, \scshape, &c.
+\microtypesetup{spacing=true,stretch=15,letterspace=0,}
+
+%% \usepackage{enumitem}\setlist{labelindent=1em,labelsep=.75em,leftmargin=*}
+%% \setlist{labelindent=.5em,labelsep=.75em,leftmargin=*}
+%% \setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
+
+\captionsetup[figure]{name=Figure}
+\captionsetup{labelfont={sf,sc},textfont={sf},labelsep=period}
+%\captionsetup{labelfont=it,textfont=it,labelsep=period}
+
+% Letter-space uppercase text.
+\let\@mtu\MakeTextUppercase
+\renewcommand\MakeTextUppercase{\lsstyle\@mtu}
+
+% Make author lines all sans-serif.
+\def\@affiliationfont{\small\normalfont\sffamily}
+
+% Put section numbers in left margin. Not sure if I like this.
+%\renewcommand\@seccntformat[1]{\llap{\parbox[t]{100in}{\hfill\csname the#1\endcsname\hspace*{\dimexpr\f@size pt\relax}}}}
+
+
+%% ---------- Fonts ----------
+%% Unscaled x-heights:
+% Euler     XCharter    SourceSerif     SourceSans
+% 4.59      4.81        4.75            4.86
+
+%% Scalings tuned to roughly match libertine, leaning larger.
+%\usepackage[scaled=0.92]{sourceserifpro}\usepackage{eulervm}\edef\zeu@Scale{0.9520697167755992}
+%\usepackage[scaled=.93,largesc,]{newpxtext}\usepackage[scaled=.93]{newpxmath}
+\usepackage[scaled=.94]{XCharter}\usepackage{eulervm}\edef\zeu@Scale{0.9850544662309367}
+
+\renewcommand\mathvar\ensuremath % for Euler (b/c it's upright)
+
+%% %% ----- Biolinum -----
+%% \usepackage{biolinum}
+%% \microtypesetup{tracking=true,letterspace=25}
+%% \renewcommand\MakeTextUppercase\@mtu
+
+%% %% ----- #1: Source Sans Pro, all-caps OR large OR large small-caps -----
+%% \usepackage[scaled=0.94]{sourcesanspro}
+%% \microtypesetup{tracking=false,letterspace=5,} %0-25
+%% \renewcommand\@secfont{\large\sffamily\bfseries\section@raggedright}
+%% %\renewcommand\@secfont{\large\sffamily\bfseries\scshape\section@raggedright}
+
+%% %% ----- #2: Lato, all caps OR large section titles -----
+%% %% No small caps.
+%% \usepackage[defaultsans,scale=0.8926752221125368,lining,tabular,]{lato}
+%% \microtypesetup{letterspace=20,} % 10-25
+%% \newcommand\@secweight\bfseries
+%% \renewcommand\@secweight{\fontseries{eb}\selectfont}
+%% \renewcommand\@secfont{\large\sffamily\@secweight\section@raggedright}
+%% \renewcommand\@subsecfont{\sffamily\@secweight\section@raggedright}
+
+%% ----- #3: Alegreya, large section titles -----
+\usepackage[scaled=1.031,scaled=0.9872074235807861,scaled=1,lf,tabular,]{AlegreyaSans}
+\microtypesetup{tracking=false,letterspace=5,}  % 5-12
+\renewcommand\MakeTextUppercase\scshape % hack
+\renewcommand\@secfont{\large\sffamily\bfseries\section@raggedright}
+%\renewcommand\@subsecfont{\AlegreyaSansMedium\section@raggedright}
+
+%% %% ----- #4: Open or Noto Sans, all-caps OR large section titles -----
+%% % Open sans regular weight is too light & its small caps are terrible.
+%% % But it looks nicer in all-caps.
+%% %\usepackage[defaultsans,scale=0.8451214953271028,]{opensans}
+%% \usepackage[scale=0.8435447761194028,lf,tf,]{noto-sans}
+%% \microtypesetup{tracking=false,letterspace=10,} % 0-15
+%% \renewcommand\@secfont{\large\sffamily\bfseries\section@raggedright}
+
+%% %% ----- #0: Charter section titles -----
+%% \renewcommand\@secfont{\large\bfseries}
+%% \renewcommand\@subsecfont{\bfseries}
