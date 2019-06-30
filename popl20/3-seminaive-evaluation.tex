@@ -5,13 +5,66 @@
 
 \subsection{Finding Fixed Points Faster via Derivatives}
 
-Now let's move from Datalog to Datafun. The transitive closure of \name{edge} is the fixed point of the function $f$ defined by:
+
+%% Now let's move from Datalog to Datafun. The transitive closure of \name{edge} is
+%% the fixed point of the monotone function $f$ defined by:
 
-\newcommand\hilitebox[1]{{%
-  \setlength\fboxsep{1pt}%
-  \colorbox{Goldenrod}{\hspace{-1pt}{#1}\hspace{-1pt}}%
-}}
-%\renewcommand\hilitebox\relax
+%% \nopagebreak[2]
+%% \[\begin{array}{l}
+%%   f \<\name{path} = \name{edge} \cup
+%%   \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{path}}
+%% \end{array}\]
+
+%% \noindent
+%% The \naive{} way to find a fixed point is to iterate $f$, computing the
+%% recurrence
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   x_0 &= \emptyset & x_{i+1} &= f\<x
+%% \end{align*}
+
+%% \noindent
+%% However, since inductively $x_i \subseteq f\<x_i$, each iteration re-computes
+%% every value found in the previous iteration.
+%% %
+%% Following Datalog, we'd prefer to compute only the \emph{change} between
+%% iterations.
+%% %
+%% Since $x_i \subseteq x_{i+1}$, iterations change only by gaining elements. So
+%% given a set $x$, and a set $\dx$ of added elements, let's imagine a function
+%% $f'\<x\<\dx$ that tells us \emph{how $f\<x$ changes}, such that:
+
+%% \begin{equation} f \<(x \cup \dx) = f\<x \cup f'\<x\<\dx
+%%   \label{eqn:f-derivative}
+%% \end{equation}
+
+%% \noindent
+%% Given such an $f'$ we can set up an equivalent recurrence:
+
+%% \begin{align*}
+%%   x_0 &= \emptyset & x_{i+1} &= x_i \cup \dx_i
+%%   \\
+%%   \dx_0 &= f\<\emptyset & \dx_{i+1} &= f' \<x_i \<\dx_i
+%% \end{align*}
+
+%% \noindent
+%% From \cref{eqn:f-derivative} it follows inductively that $x_i = f^i\<\emptyset$.
+
+%% So, how do we find such an $f'$? One trivial answer is to let $f'\<x\<\dx =
+%% f\<(x \cup \dx)$. Unfortunately, this solution is worse than the problem:
+%% re-computing $f$ is exactly what we wish to avoid!
+%% %
+%% For our \emph{specific} $f$, there is a better answer:
+
+%% \nopagebreak[2]
+%% \[\begin{array}{l}
+%%   f' \<\name{path} \<\name{dpath} =
+%%   \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
+%% \end{array}\]
+
+
+Now let's move from Datalog to Datafun. The transitive closure of \name{edge} is the fixed point of the function $f$ defined by:
 
 \nopagebreak[2]
 \[\begin{array}{l}
@@ -20,17 +73,10 @@ Now let's move from Datalog to Datafun. The transitive closure of \name{edge} is
 \end{array}\]
 
 \noindent
-The \naive{} way to compute $\efix f$ is to iterate $f$:
-%computing the sequence
-start with \(\name{path}_0 = \emptyset\) and compute \(\name{path}_{i+1} =
+The \naive{} way to compute $\efix f$ is to iterate $f$: start with
+\(\name{path}_0 = \emptyset\) and compute \(\name{path}_{i+1} =
 f\<\name{path}_i\) until \(\name{path}_i = \name{path}_{i+1}\).
 %
-%% \nopagebreak[2]
-%% \begin{align*}
-%%   \name{path}_0 &= \emptyset & \name{path}_{i+1} &= f\<\name{path}_i
-%% \end{align*}
-%
-\noindent
 This is \naive\ because $\name{path}_i \subseteq f\<\name{path}_i$, so each
 iteration re-computes every path found by the previous iteration.
 %
@@ -47,8 +93,11 @@ So consider $f'$ defined by:
 
 \noindent
 Observe that $f \<(\name{path} \cup \name{dpath}) = f\<\name{path} \cup
-f'\<\name{dpath}$. That is, $f'$ tells us how $f$ \emph{changes} when its input
-grows! Using this property, we can directly compute the changes $\name{dpath}_i$
+f'\<\name{dpath}$.
+%
+That is, $f'$ tells us how $f$ \emph{changes} when its input grows!
+%
+Using this property, we can directly compute the changes $\name{dpath}_i$
 between our iterations $\name{path}_i$:
 
 \begin{align*}
@@ -59,7 +108,9 @@ between our iterations $\name{path}_i$:
 
 \todo{Explain why computing $f'\<\name{dpath}_i$ isn't \naive/ever-increasing.}
 %
-This is the analogue of semi\naive{} evaluation in a functional setting: \todo{foo}. But how can we find functions like $f'$ in general?
+This is the analogue of semi\naive{} evaluation in a functional setting: \todo{foo}.
+%
+But how can we find functions like $f'$ in general?
 %
 \todo{explain how $f'$ looks like a derivative of $f$ in the sense of
   \citet{incremental}.}
