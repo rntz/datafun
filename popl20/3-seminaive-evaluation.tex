@@ -1,2 +1,65 @@
 \section{From Semi\naive{} Evaluation to the Incremental \boldfn-Calculus}
 \label{sec:seminaive-and-ilc}
+
+\todo{explain semi\naive{} evaluation on transitive closure in Datalog. Borrow from \emph{Fixing Incremental Computation} (with citation).}
+
+\subsection{Finding Fixed Points Faster via Derivatives}
+
+Now let's move from Datalog to Datafun. The transitive closure of \name{edge} is the fixed point of the function $f$ defined by:
+
+\newcommand\hilitebox[1]{{%
+  \setlength\fboxsep{1pt}%
+  \colorbox{Goldenrod}{\hspace{-1pt}{#1}\hspace{-1pt}}%
+}}
+%\renewcommand\hilitebox\relax
+
+\nopagebreak[2]
+\[\begin{array}{l}
+  f \<\name{path} = \name{edge} \cup
+  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{path}}
+\end{array}\]
+
+\noindent
+The \naive{} way to compute $\efix f$ is to iterate $f$:
+%computing the sequence
+start with \(\name{path}_0 = \emptyset\) and compute \(\name{path}_{i+1} =
+f\<\name{path}_i\) until \(\name{path}_i = \name{path}_{i+1}\).
+%
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   \name{path}_0 &= \emptyset & \name{path}_{i+1} &= f\<\name{path}_i
+%% \end{align*}
+%
+\noindent
+This is \naive\ because $\name{path}_i \subseteq f\<\name{path}_i$, so each
+iteration re-computes every path found by the previous iteration.
+%
+Following Datalog, we'd prefer to compute only the \emph{change} between
+iterations.
+%
+So consider $f'$ defined by:
+
+\nopagebreak[2]
+\[\begin{array}{l}
+  f' \<\name{dpath} =
+  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
+\end{array}\]
+
+\noindent
+Observe that $f \<(\name{path} \cup \name{dpath}) = f\<\name{path} \cup
+f'\<\name{dpath}$. That is, $f'$ tells us how $f$ \emph{changes} when its input
+grows! Using this property, we can directly compute the changes $\name{dpath}_i$
+between our iterations $\name{path}_i$:
+
+\begin{align*}
+  \name{dpath}_0 &= f\<\emptyset
+  & \name{dpath}_{i+1} &= f'\<\name{dpath}_i
+  & \name{path}_{i+1} &= \name{path}_i \cup \name{dpath}_i
+\end{align*}
+
+\todo{Explain why computing $f'\<\name{dpath}_i$ isn't \naive/ever-increasing.}
+%
+This is the analogue of semi\naive{} evaluation in a functional setting: \todo{foo}. But how can we find functions like $f'$ in general?
+%
+\todo{explain how $f'$ looks like a derivative of $f$ in the sense of
+  \citet{incremental}.}

@@ -122,7 +122,8 @@ could have, in no particular order:
    derivatives; could lazily compute them? Apply Paolo Giarrusso's thesis work?
    We didn't do this because it seems hard and Datalog can't do it.
 
-4. Included the derivative transform, not just the seminaive transform.
+4. Included a normal incrementalization/derivative transform, not just the
+   seminaive incrementalization/derivative transform.
 
 5. Augmented our target language with dependent types (to specify "zero change
    for a value") and quotients to try to make Φ□A more closely model the
@@ -163,6 +164,11 @@ could have, in no particular order:
    Although it's possible there is some way to make this work, in my experience
    trying to separate {-} into F□ turned out to be a messy maze of dead-ends.
 
+10. Make □A an eqtype. The problem with this is showing that φ(e ∨ f : {□A})
+    respects the logical relation, since Φ will add zero-change information to
+    each element of the set, but a given value may have more than one valid
+    zero-change. Various possible approaches here.
+
    OLD UN-UPDATED REASONS:
 
 8. We have finite set types {-} in our syntax, but separate {A} into F□A in our
@@ -189,7 +195,6 @@ could have, in no particular order:
      becomes an additional optimization, rather than a consequence of our translation.
 
    Neither of these are deal-breakers, but they are annoying.
-
 
 * Syntax sugar / conveniences
 

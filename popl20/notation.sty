@@ -1,12 +1,11 @@
-\usepackage{booktabs}          % for formal tables, \midrule
-\usepackage{subcaption}        % for complex figures with subfigures/subcaptions
-
-\usepackage{mathpartir}         % \begin{mathpar}, \infer, etc.
-\usepackage{stmaryrd}           % \shortrightarrow, \llbracket, etc.
-\usepackage{anyfontsize}        % suppress warnings about stmaryrd font size
-\usepackage{mathtools}          % vertical centered colon, \dblcolon, \Coloneqq
 \usepackage{accents}            % for \underaccent
-%\usepackage{nccmath}      % fix spacing around AMS math environments like align*
+\usepackage{anyfontsize}        % suppress warnings about stmaryrd font size
+\usepackage{booktabs}          % for formal tables, \midrule
+\usepackage{mathpartir}         % \begin{mathpar}, \infer, etc.
+\usepackage{mathtools}          % vertical centered colon, \dblcolon, \Coloneqq
+\usepackage{stmaryrd}           % \shortrightarrow, \llbracket, etc.
+\usepackage{subcaption}        % for complex figures with subfigures/subcaptions
+\usepackage{nccmath}      % fix spacing around AMS math environments like align*
 
 % cleveref must be loaded AFTER hyperref, amsmath, & amsthm.
 \usepackage[nameinlink,noabbrev]{cleveref}% other options: capitalise
@@ -21,6 +20,12 @@
 % better than nothing.
 \mathtoolsset{centercolon}
 
+%% More space around \cup and \vee.
+\let\bincup\cup
+\let\binvee\vee
+\renewcommand\cup{\mathrel{\bincup}}
+\renewcommand\vee{\mathrel{\binvee}}
+
 
 %% ---------- Commands ----------
 \newcommand\ensuretext[1]{\ifmmode\text{#1}\else{#1}\fi}
@@ -33,7 +38,7 @@
 \newcommand\isocolor{\color{ForestGreen}}
 
 % used for names of functions, primitives, etc. in math mode
-\newcommand\func[1]{\text{\itshape #1}}
+\newcommand\name[1]{\text{\itshape #1}}
 
 % derivative variables
 \newcommand\da{\mathvar{da}}
@@ -57,7 +62,7 @@
 \newcommand\pto\rightharpoonup
 \newcommand\injc{\mathrm{in}}
 \newcommand\inj[1]{\injc_{#1}\,}
-\newcommand\bnfor{~~|~~}
+\newcommand\bnfor{\mathrel{\,|\,}}
 \newcommand\bnfeq\Coloneqq
 \newcommand\N{\mathbb{N}}
 \newcommand\tuple[1]{\langle{#1}\rangle}
@@ -67,7 +72,7 @@
 %\renewcommand\<\;
 \newcommand\fnspace{\;}
 \newcommand\fnof[1]{\fn{#1}.\fnspace}
-%\newcommand\setfor[2]{\ensuremath{\{#1 \mathrel{|} #2\}}}
+\newcommand\setfor[2]{\ensuremath{\{#1 \mathrel{|} #2\}}}
 
 \newcommand\quantcolor\relax
 %\renewcommand\quantcolor{\color{green}}
@@ -101,7 +106,7 @@
 \newcommand\expto\Rightarrow
 \newcommand\then\cdot
 \newcommand\catC{\ensuremath{\mathcal{C}}}
-\newcommand\id{\func{id}}
+\newcommand\id{\name{id}}
 
 
 %% ===== Datafun syntax =====
@@ -111,7 +116,7 @@
 \newcommand\tseteq[1]{\tset{\eqt{#1}}}
 
 \newcommand\kw\textbf
-\newcommand\prim\func
+\newcommand\prim\name
 \newcommand\caseto\shortrightarrow
 \newcommand\pwild{\underline{\phantom{a}}}
 
@@ -172,5 +177,5 @@
 
 
 %% ===== Change theory & seminaive translation stuff =====
-\newcommand\dummy{\func{dummy}}
+\newcommand\dummy{\name{dummy}}
 \newcommand\zero{\ensuremath{\boldsymbol 0}}

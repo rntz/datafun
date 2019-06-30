@@ -92,6 +92,7 @@ Show what our transformation does (after optimizations) to transitive closure, &
 how it corresponds with Datalog version.
 
 ** Further examples of seminaive evaluation
+- generic relational composition?
 - generic transitive closure
 - regular expressions
 

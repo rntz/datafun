@@ -1,7 +1,52 @@
 \section{The Incremental Transformation}
-\label{sec:incremental-transformation}
+\label{sec:transformations}
 
 \input{fig-DeltaPhi}
+
+\todo{Write intro here once we've written \cref{sec:seminaive-and-ilc}. The
+  fundamental ideas are:
+  \begin{itemize}
+  \item Make $\prim{fix}$ take a boxed argument, $\iso(\fixt L \to \fixt L)$.
+  \item Annotate values of type $\iso A$ with their zero-changes.
+  \item Use the zero-change to \prim{fix}'s argument (a \emph{derivative}) to
+    compute it faster using \fastfix.
+  \end{itemize}}
+%
+\Cref{fig:phi,fig:delta} define two mutually recursive static transformations:
+the speed-up $\phi e$, which computes fixed points faster by using derivatives;
+and $\delta e$, which computes the derivative of $\phi e$. To explain these
+transformations, we must first explain what they do to types.
+
+Following the approach of the incremental \fn-calculus, for each type $A$ we
+define a type of changes $\D A$:
+
+\begin{align*}
+  \D\tunit &= \tunit
+  &
+  \D(A \x B) &= \D A \x \D B
+  \\
+  \D \iso A &= \tunit
+  &
+  \D(A + B) &= \D A + \D B
+  \\
+  \D\tseteq A &= \tseteq A
+  &
+  \D(A \to B) &= \iso A \to \D A \to \D B
+\end{align*}
+
+%% \begin{align*}
+%%   \D \tunit &= \tunit
+%%   &
+%%   \D \iso A &= \tunit
+%%   &
+%%   \D\tseteq A &= \tseteq A
+%%   \\
+%%   \D(A \x B) &= \D A \x \D B
+%%   &
+%%   \D(A + B) &= \D A + \D B
+%%   &
+%%   \D(A \to B) &= \iso A \to \D A \to \D B
+%% \end{align*}
 
 
 \todo{Explain \cref{fig:DeltaPhi}. Then explain corresponding context transformations:}
