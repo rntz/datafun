@@ -615,22 +615,21 @@ module Seminaive(Imp: SIMPLE): MODAL
   let forIn (a: tp) (b: tp semilat) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term) =
     let fa,da = phiDelta a and fb = phiFirstOrderLat b in
     (* φ(for (x in M) N) = for (x in φM) φN {dx ↦ 0 x} *)
-    Imp.forIn fa fb x fExpr
-    (* TODO: omit let-binding here because it will be inlined (see discvar). *)
-      (Imp.letIn da (fb :> rawtp) (Sym.d x) (zero a (Imp.var fa x)) fBody),
+    (* we omit binding dx ↦ 0 x; it will be inlined by discvar. *)
+    Imp.forIn fa fb x fExpr fBody,
     (* Assuming φB = ΔB and ⊕ = ∨ (see phiFirstOrderLat),
      *
      * δ(for (x in φM) φN)
-     * =  (for (x in δM) let dx = 0 x in φN)
-     *   ∨ for (x in φM ∪ δM) let dx = 0 x in δN *)
-    let loopBody body =
-      (* TODO: omit let-binding here because it will be inlined (see discvar). *)
-      Imp.letIn da (fb :> rawtp) (Sym.d x) (zero a (Imp.var fa x)) body in
+     * =  (for (x in δM)      φN {dx ↦ 0 x})
+     *   ∨ for (x in φM ∪ δM) δN {dx ↦ 0 x}
+     *
+     * However, we omit binding dx ↦ 0 x; it will be inlined by discvar.
+     *)
     Imp.union fb
-      (* for (x in δM) φN {dx ↦ 0 x} *)
-      [ Imp.forIn fa fb x dExpr (loopBody fBody)
-      (* for (x in M ∪ δM) δN {dx ↦ 0 x} *)
-      ; Imp.forIn fa fb x (Imp.union (`Set fa) [fExpr;dExpr]) (loopBody dBody) ]
+      (* for (x in δM) φN *)
+      [ Imp.forIn fa fb x dExpr fBody
+      (* for (x in M ∪ δM) δN *)
+      ; Imp.forIn fa fb x (Imp.union (`Set fa) [fExpr;dExpr]) dBody ]
 
   (* φ(fix M) = fastfix φM
    * δ(fix M) = zero ⊥ = ⊥ *)
@@ -924,63 +923,16 @@ let runTest (i: int) (x,y: Debug.test) =
     i (StringBuilder.finish (Simplified.finish y))
 let runTests () = List.iteri runTest Debug.tests
 
-(* Faster version of transitive closure:
+(* 2019-07-01 Faster version of transitive closure:
 
 fastfix
-(\path. edge ∪ for (a in edge) for (b in path) when (snd a == fst b) set [((fst a), (snd b))]),
-(\path dpath. for (a in edge) for (b in dpath) when (snd a == fst b) set [(fst a, snd b)])
+(\path.
+  edge ∪
+  for (a in edge) for (b in path) when (snd a == fst b)
+    {(fst a, snd b)}),
+(\path dpath.
+  for (a in edge) for (b in dpath) when (snd a == fst b)
+    {(fst a, snd b)})
 
 Which is what we wanted!
-*)
-
-(* Results of t7, tidied up, without Simplify:
-
-7: (forIn a_2 (\x_0 ->
-     let dx_0 = ((), ()) in
-     forIn b_3 (\y_1 ->
-      let dy_1 = ((), ()) in
-      guard (snd x_0 == fst y_1)
-        (set [((fst x_0), (snd y_1))]))))
-7: union
-    (forIn da_2 (\x_0 ->
-      let dx_0 = ((), ()) in
-      forIn b_3 (\y_1 ->
-        let dy_1 = ((), ()) in
-        guard (snd x_0 == fst y_1)
-          (set [(fst x_0, snd y_1)]))))
-    (forIn (union a_2 da_2) (\x_0 ->
-      let dx_0 = ((), ()) in
-      union
-        (forIn db_3 (\y_1 ->
-          let dy_1 = ((), ()) in
-          guard (snd x_0 == fst y_1)
-            (set [((fst x_0), (snd y_1))])))
-        (forIn (union b_3 db_3) (\y_1 ->
-          let dy_1 = ((), ()) in
-          if (snd x_0 == fst y_1)
-          then (set [])
-          else (guard False (union (set [(fst x_0, snd y_1)]) (set [])))))))
-
-Results of t7, tidied up, with Simplify:
-
-7: forIn a_2 (\x_0 ->
-     let dx_0 = empty in
-     forIn b_3 (\y_1 ->
-       let dy_1 = empty in
-       guard ((snd x_0) == (fst y_1))
-         (set [((fst x_0), (snd y_1))])))
-7: union
-     (forIn da_2 (\x_0 ->
-       let dx_0 = empty in
-       forIn b_3 (\y_1 ->
-         let dy_1 = empty in
-         guard (snd x_0 == fst y_1)
-           (set [((fst x_0), (snd y_1))]))))
-     (forIn (union a_2 da_2) (\x_0 ->
-       let dx_0 = empty in
-       forIn db_3 (\y_1 ->
-         let dy_1 = empty in
-         guard ((snd x_0) == (fst y_1))
-           (set [((fst x_0), (snd y_1))]))))
-
 *)
