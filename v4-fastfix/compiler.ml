@@ -182,38 +182,59 @@ module Cx = struct
 end
 type 'a cx = 'a Cx.t
 
+(* Oh god types. *)
+type ('a,'b) weird = [ `Bool | `String | `Set of 'a | `Tuple of 'b list ]
+type eqtp = (eqtp, eqtp) weird
+type firstorder = [ `Bool | `String | `Set of eqtp ]
+type 'a maketypes = [ (eqtp, 'a) weird | `Fn of 'a * 'a ]
+
 (* Frontend, modal types. *)
-type modaltp = [ `Bool | `String | `Set of modaltp | `Box of modaltp
-               | `Tuple of modaltp list | `Fn of modaltp * modaltp ]
+type modaltp = [ modaltp maketypes | `Box of modaltp ]
 (* Backend, non-modal types. *)
-type rawtp = [ `Bool | `String | `Set of rawtp
-             | `Tuple of rawtp list | `Fn of rawtp * rawtp ]
+type rawtp = rawtp maketypes
 (* Semilattices, parameterized by underlying types *)
-type 'a semilat = [ `Bool | `Set of 'a | `Tuple of 'a semilat list | `Fn of 'a * 'a semilat ]
+type 'a semilat =
+  [ `Bool
+  | `Set of eqtp
+  | `Tuple of 'a semilat list
+  | `Fn of 'a * 'a semilat ]
 
-let rec firstOrder: modaltp -> bool = function
-  | `Fn _ -> false
-  | `Bool | `String -> true
-  | `Box a | `Set a -> firstOrder a
-  | `Tuple tps -> List.for_all firstOrder tps
+let rec firstOrder: modaltp -> eqtp option = function
+  | #firstorder as a -> Some a
+  | `Fn _ | `Box _ -> None
+  | `Tuple tps ->
+     Option.(List.map firstOrder tps |> all |> map (fun x -> `Tuple x))
 
-let rec phiDelta: modaltp -> rawtp * rawtp = function
-  | `Bool -> `Bool, `Bool
-  | `String -> `String, `Tuple [] (* strings don't change *)
-  | `Set a -> let fa = phi a in `Set fa, `Set fa
-  | `Box a -> let fa, da = phiDelta a in `Tuple [fa;da], da
-  | `Tuple tps -> let ftps, dtps = List.(map phiDelta tps |> split) in
-                  `Tuple ftps, `Tuple dtps
-  | `Fn (a,b) -> let fa,da = phiDelta a and fb,db = phiDelta b in
-                 `Fn (fa, fb), `Fn (fa, `Fn (da, db))
-and phi a = fst (phiDelta a)
-and delta a = snd (phiDelta a)
+let rec debox: modaltp -> rawtp = function
+  | #firstorder as a -> a
+  | `Box a -> debox a
+  | `Fn (a,b) -> `Fn (debox a , debox b)
+  | `Tuple tps -> `Tuple List.(map debox tps)
 
-(* phiDelta of a semilattice type produces a semilattice type; Obj.magic convinces
- * OCaml that this is so. *)
-let phiDeltaLat: modaltp semilat -> rawtp semilat * rawtp semilat = Obj.magic phiDelta
+(* phi corresponds to Φ, except it drops □. *)
+let rec phi: modaltp -> rawtp = function
+  | #firstorder as a -> a
+  | `Tuple tps -> `Tuple (List.map phi tps)
+  | `Box a -> (`Tuple [phi a; delta a])
+  | `Fn (a,b) -> `Fn (phi a, phi b)
+
+(* delta corresponds to ΔΦ (_not_ to Δ alone), except it drops □. *)
+and delta: modaltp -> rawtp = function
+  | (`Bool | `Set _) as a -> a
+  | `String | `Box _ -> `Tuple []        (* discrete types don't change *)
+  | `Tuple tps -> `Tuple List.(map delta tps)
+  | `Fn (a,b) -> `Fn(phi a, `Fn(delta a, delta b))
+
+let phiDelta x = phi x, delta x
+
+(* Convince OCaml's type system of various refinement properties. *)
+let firstOrderLat: modaltp semilat -> eqtp semilat option = Obj.magic firstOrder
+let deboxLat: modaltp semilat -> rawtp semilat = Obj.magic debox
+let deltaEq: eqtp -> eqtp = Obj.magic delta
 let phiLat: modaltp semilat -> rawtp semilat = Obj.magic phi
 let deltaLat: modaltp semilat -> rawtp semilat = Obj.magic delta
+let phiDeltaLat: modaltp semilat -> rawtp semilat * rawtp semilat =
+  Obj.magic phiDelta
 
 
 (* ===== THE LANGUAGE, more or less =====
@@ -242,13 +263,13 @@ module type BASE = sig
   val ifThenElse: tp -> term -> term -> term -> term
   val guard: tp semilat -> term -> term -> term
   (* set A [M0;...;Mn] = {M0,...,Mn} : {A} *)
-  val set: tp -> term list -> term
+  val set: eqtp -> term list -> term
   (* union A [M0;...;Mn] = M0 ∨ ... ∨ Mn : A *)
   val union: tp semilat -> term list -> term
   (* forIn A B x M N = for (x : A in M) do N : B *)
-  val forIn: tp -> tp semilat -> sym -> term -> term -> term
-  val fix: tp semilat -> term -> term
-  val equals: tp -> term -> term -> term
+  val forIn: eqtp -> tp semilat -> sym -> term -> term -> term
+  val fix: eqtp semilat -> term -> term
+  val equals: eqtp -> term -> term -> term
 end
 
 module type MODAL = sig
@@ -261,7 +282,7 @@ end
 
 module type SIMPLE = sig
   include BASE with type tp = rawtp
-  val fastfix: tp semilat -> term -> term
+  val semifix: eqtp semilat -> term -> term
 end
 
 module type BIDIR = sig
@@ -314,7 +335,7 @@ module Typecheck(Imp: MODAL): BIDIR
     Cx.map (function Box, tp -> Box, tp
                    | (Id|Hidden), tp -> Hidden, tp)
 
-  let rec asLat: tp -> tp semilat = function
+  let rec asLat: 'a -> 'a semilat = function
     | `Bool -> `Bool
     | `Set a -> `Set a
     | `Fn (a,b) -> `Fn (a, asLat b)
@@ -370,7 +391,7 @@ module Typecheck(Imp: MODAL): BIDIR
 
   let set (terms: term list) (cx: cx): tp -> Imp.term = function
     | `Set eltp -> terms
-                   |> List.map (fun term -> term cx eltp)
+                   |> List.map (fun term -> term cx (eltp :> tp))
                    |> Imp.set eltp
     | _ -> typeError "set must have set type"
 
@@ -384,7 +405,7 @@ module Typecheck(Imp: MODAL): BIDIR
       | `Set eltype, setX -> eltype, setX
       | _ -> typeError "cannot comprehend over non-set" in
     Imp.forIn eltype (asLat tp) x setX
-      (body (Cx.add x (Box,eltype) cx) tp)
+      (body (Cx.add x (Box, (eltype :> tp)) cx) tp)
 
   let box (term: term) (cx: cx): tp -> Imp.term = function
     | `Box a -> Imp.box a (term (scrub cx) a)
@@ -398,14 +419,15 @@ module Typecheck(Imp: MODAL): BIDIR
   let fix (x: sym) (body: term) (cx: cx) (tp: tp): Imp.term =
     (* Needs to be a semilattice type and also first order.
      * We're not doing termination checking for now. *)
-    if not (firstOrder tp)
-    then typeError "fixed point at higher-order type" else
+    match firstOrder tp with
+    | None -> typeError "fixed point at higher-order type"
+    | Some eqtp ->
       (* We scrub the context then add a monotone variable; de facto,
        * fix: □(A → A) → A *)
-      body (scrub cx |> Cx.add x (Id,tp)) tp
+      body (scrub cx |> Cx.add x (Id, tp)) tp
       |> Imp.lam tp tp x
       |> Imp.box (`Fn (tp, tp))
-      |> Imp.fix (asLat tp)
+      |> Imp.fix (asLat eqtp)
 
   (* inferring exprs *)
   let asc (tp: tp) (term: term) (cx: cx): tp * Imp.term = tp, term cx tp
@@ -428,7 +450,9 @@ module Typecheck(Imp: MODAL): BIDIR
 
   let equals (m: expr) (n: expr) (cx: cx): tp * Imp.term =
     let tp, mX = m (scrub cx) in
-    `Bool, Imp.equals tp mX (expr n (scrub cx) tp)
+    match firstOrder tp with
+    | None -> typeError "comparing at non-equality type"
+    | Some eqtp -> `Bool, Imp.equals eqtp mX (expr n (scrub cx) tp)
 end
 
 
@@ -437,13 +461,6 @@ module DropBoxes(Imp: SIMPLE): MODAL with type term = Imp.term
 = struct
   type tp = modaltp
   type term = Imp.term
-  let rec debox: modaltp -> rawtp = function
-    | `Box a -> debox a
-    | (`Bool|`String) as a -> a
-    | `Set a -> `Set (debox a)
-    | `Fn (a,b) -> `Fn(debox a, debox b)
-    | `Tuple tps -> `Tuple List.(map debox tps)
-  let deboxLat: modaltp semilat -> rawtp semilat = Obj.magic debox
   let var a = Imp.var (debox a)
   let discvar = var
   let letIn a b = Imp.letIn (debox a) (debox b)
@@ -456,11 +473,11 @@ module DropBoxes(Imp: SIMPLE): MODAL with type term = Imp.term
   let bool = Imp.bool
   let ifThenElse a = Imp.ifThenElse (debox a)
   let guard a = Imp.guard (deboxLat a)
-  let set a = Imp.set (debox a)
+  let set a = Imp.set a
   let union a = Imp.union (deboxLat a)
-  let forIn a b = Imp.forIn (debox a) (deboxLat b)
-  let fix a = Imp.fix (deboxLat a)
-  let equals a = Imp.equals (debox a)
+  let forIn a b = Imp.forIn a (deboxLat b)
+  let fix = Imp.fix
+  let equals = Imp.equals
   let box a m = m
   let letBox a b = Imp.letIn (debox a) (debox b)
 end
@@ -473,40 +490,19 @@ module Seminaive(Imp: SIMPLE): MODAL
   type tp = modaltp
   type term = Imp.term * Imp.term (* φM, δM *)
 
-  (* This should only ever be used at base types. It almost ignores its
-   * argument; however, at sum types, it does depend on the tag. If sum types
-   * are not involved, `zero` produces a constant expression. In particular, at
+  (* This may only be used at base types. It almost ignores its argument;
+   * however, at sum types, it does depend on the tag. If sum types are not
+   * involved, `zero` produces a constant expression. In particular, at
    * first-order semilattice types, it produces a bottom expression, which the
    * simplifier will recognize. This aids optimization. *)
-  let rec zero (tp: tp) (term: Imp.term): Imp.term = match tp with
-    | `Box a -> zero a term
+  let rec zero (tp: eqtp) (term: Imp.term): Imp.term = match tp with
     | `Bool -> Imp.bool false
     | `String -> Imp.tuple []
-    | `Set a -> Imp.set (phi a) []
+    | `Set a -> Imp.set a []
     | `Tuple tps ->
-       let dtps = List.map delta tps in
-       List.mapi (fun i a -> delta a, zero a (Imp.proj dtps i term)) tps
+       let dtps = List.map delta (tps :> modaltp list) in
+       List.mapi (fun i a -> List.nth dtps i, zero a (Imp.proj dtps i term)) tps
        |> Imp.tuple
-    (* This case _should_ be dead code. *)
-    | `Fn (a,b) -> impossible "cannot compute zero change at function type"
-
-  (* Most semilattice operations (except fix) are implementable at higher-order
-   * types. However, their φ/δ translations are different. For first-order
-   * semilattice types A, φA = ΔA and ⊕ = ∨. At higher-order types, this is not
-   * true, and the correct approach is to eta-expand until it is true. However,
-   * I don't expect to be using semilattice operations at functional types in
-   * any example programs, so to simplify the implementation I error on higher-
-   * order semilattice types.
-   *
-   * For more info, See seminaive/seminaive.pdf.
-   *)
-  let phiFirstOrderLat (a: tp semilat) =
-    let fA, dA = phiDeltaLat a in
-    if not (firstOrder (a :> modaltp))
-    then todo "semilattice operations only implemented for first-order data"
-    else if not (fA = dA)
-    then impossible "this shouldn't happen"
-    else fA
 
   (* φx = x                 δx = dx *)
   let var (a: tp) (x: sym) = Imp.var (phi a) x, Imp.var (delta a) (Sym.d x)
@@ -514,9 +510,10 @@ module Seminaive(Imp: SIMPLE): MODAL
   (* If the variable is discrete, we know its derivative is a zero change; so if
    * it's first-order, we can inline zero applied to it. *)
   let discvar (a: tp) (x: sym) =
-    if not (firstOrder a)
-    then var a x
-    else let phix = Imp.var (phi a) x in phix, zero a phix
+    match firstOrder a with
+    | None -> var a x
+    | Some eqa -> let phix = Imp.var (phi a) x in
+                  phix, zero eqa phix
 
   (* φ(box M) = φM, δM      δ(box M) = δM *)
   let box (a: tp) (fTerm, dTerm: term): term =
@@ -528,19 +525,8 @@ module Seminaive(Imp: SIMPLE): MODAL
   let letBox (a: tp) (b: tp) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term): term =
     let fa,da = phiDelta a and fb,db = phiDelta b and dx = Sym.d x in
     (* let (x,dx) = φM in ... *)
-    let binder bodyTp body =
-      Imp.letTuple [fa,x;da,dx] bodyTp fExpr
-        (* dx just needs to be a zero-change to x. If A is first-order, we can
-         * calculate a zero-change to x using x. Except for sum types, we can
-         * even do so statically! And if we bind dx to an explicit zero-change,
-         * the optimizer can do more magic. Schematically,
-         *
-         * instead of:  φ(let [x] = M in N) = let [x,dx] = φM in φN
-         * we produce:  φ(let [x] = M in N) = let [x,_] = φM in let dx = 0 x in φN
-         *)
-        (if not (firstOrder a) then body
-         else Imp.letIn da bodyTp dx (zero a (Imp.var fa x)) body) in
-    binder fb fBody, binder db dBody
+    let binder bodyTp body = Imp.letTuple [fa,x;da,dx] bodyTp fExpr body
+    in binder fb fBody, binder db dBody
 
   (* φ(let x = M in N) = let x = φM in φN
    * δ(let x = M in N) = let x = φM and dx = δM in δN *)
@@ -593,53 +579,65 @@ module Seminaive(Imp: SIMPLE): MODAL
     let fA,dA = phiDelta a in
     Imp.ifThenElse fA fCond fThn fEls, Imp.ifThenElse dA fCond dThn dEls
 
+  (* Most semilattice operations (except fix) are implementable at higher-order
+   * types. However, their φ/δ translations are different. For first-order
+   * semilattice types A, φA = ΔA and ⊕ = ∨. At higher-order types, this is not
+   * true, and the correct approach is to eta-expand until it is true. However,
+   * I don't expect to be using semilattice operations at functional types in
+   * any example programs, so to simplify the implementation I error on higher-
+   * order semilattice types.
+   *
+   * For more info, See seminaive/seminaive.pdf.
+   *)
+  let phiEqLat (a: tp semilat): Imp.tp semilat =
+    match firstOrderLat a with
+    | Some eqa -> (eqa :> Imp.tp semilat)
+    | None -> todo "semilattice operations only implemented for first-order data"
+
   (* φ(when (M) N) = when (φM) φN
    * δ(when (M) N) = if φM then δN else when (δM) φN ∨ δN
    *
    * The latter assumes φA = ΔA and ⊕ = ∨. (See phiFirstOrderLat.) *)
   let guard (a: tp semilat) (fCond,dCond: term) (fBody,dBody: term): term =
-    let fA = phiFirstOrderLat a in
+    let fA = phiEqLat a in
     Imp.guard fA fCond fBody,
     Imp.ifThenElse (fA :> rawtp) fCond dBody
       (Imp.guard fA dCond (Imp.union fA [fBody; dBody]))
 
   (* φ({M}) = {φM}          δ({M}) = ∅ *)
-  let set (a: tp) (elts: term list) =
-    Imp.set (phi a) (List.map fst elts), Imp.set (phi a) []
+  let set (a: eqtp) (elts: term list) =
+    Imp.set a (List.map fst elts), Imp.set a []
 
   (* φ(M ∨ N) = φM ∨ φN     δ(M ∨ N) = δM ∨ δN *)
   let union (a: tp semilat) (terms: term list) =
     Imp.union (phiLat a) (List.map fst terms),
     Imp.union (deltaLat a) (List.map snd terms)
 
-  let forIn (a: tp) (b: tp semilat) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term) =
-    let fa,da = phiDelta a and fb = phiFirstOrderLat b in
-    (* φ(for (x in M) N) = for (x in φM) φN {dx ↦ 0 x} *)
-    (* we omit binding dx ↦ 0 x; it will be inlined by discvar. *)
-    Imp.forIn fa fb x fExpr fBody,
+  let forIn (a: eqtp) (b: tp semilat) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term) =
+    let fb = phiEqLat b in
+    (* φ(for (x in M) N) = for (x in φM) φN {dx ↦ 0 x}
+     * dx ↦ 0 x will be inlined by discvar. *)
+    Imp.forIn a fb x fExpr fBody,
     (* Assuming φB = ΔB and ⊕ = ∨ (see phiFirstOrderLat),
      *
      * δ(for (x in φM) φN)
      * =  (for (x in δM)      φN {dx ↦ 0 x})
      *   ∨ for (x in φM ∪ δM) δN {dx ↦ 0 x}
      *
-     * However, we omit binding dx ↦ 0 x; it will be inlined by discvar.
+     * dx ↦ 0 x will be inlined by discvar.
      *)
     Imp.union fb
-      (* for (x in δM) φN *)
-      [ Imp.forIn fa fb x dExpr fBody
-      (* for (x in M ∪ δM) δN *)
-      ; Imp.forIn fa fb x (Imp.union (`Set fa) [fExpr;dExpr]) dBody ]
+      [ Imp.forIn a fb x dExpr fBody
+      ; Imp.forIn a fb x (Imp.union (`Set a) [fExpr;dExpr]) dBody ]
 
-  (* φ(fix M) = fastfix φM
+  (* φ(fix M) = semifix φM
    * δ(fix M) = zero ⊥ = ⊥ *)
-  let fix (a: tp semilat) (fFunc, dFunc: term) =
-    let fa = phiFirstOrderLat a in
-    Imp.fastfix fa fFunc, Imp.union fa []
+  let fix (a: eqtp semilat) (fFunc, dFunc: term) =
+    Imp.semifix a fFunc, Imp.union (a :> Imp.tp semilat) []
 
   (* φ(M == N) = φM == φN       δ(M == N) = false *)
-  let equals (a: tp) (fM, dM: term) (fN, dN: term): term =
-    Imp.equals (phi a) fM fN, Imp.bool false
+  let equals (a: eqtp) (fM, dM: term) (fN, dN: term): term =
+    Imp.equals a fM fN, Imp.bool false
 end
 
 
@@ -665,7 +663,7 @@ end
  *   let forIn a b x m n = (??)
  *   let fix a m = (??)
  *   let equals a m n = (??)
- *   let fastfix a m = (??)
+ *   let semifix a m = (??)
  * end
  *
  * module Fuzz(Imp: SIMPLE) = struct
@@ -765,10 +763,12 @@ end = struct
     match set cx, body cx with
     | (setX, None), (bodyX, None) -> full (Imp.forIn a b x setX bodyX)
     | _ -> empty b
-  let fix a fnc cx = match fnc cx with
-    | _, Some _ -> empty a | fncX, None -> full (Imp.fix a fncX)
-  let fastfix a fncderiv cx = match fncderiv cx with
-    | _, Some _ -> empty a | fdX, None -> full (Imp.fastfix a fdX)
+  let fix (a: eqtp semilat) fnc cx = match fnc cx with
+    | _, Some _ -> empty (a :> tp semilat)
+    | fncX, None -> full (Imp.fix a fncX)
+  let semifix (a: eqtp semilat) fncderiv cx = match fncderiv cx with
+    | _, Some _ -> empty (a :> tp semilat)
+    | fdX, None -> full (Imp.semifix a fdX)
   let equals a tm1 tm2 cx = full (Imp.equals a (fst (tm1 cx)) (fst (tm2 cx)))
 end
 
@@ -830,7 +830,7 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
 
   let forIn a b x set body = call "forIn" [set; lam a b x body]
   let fix tp term = call "fix" [term]
-  let fastfix tp term = call "fastfix" [term]
+  let semifix tp term = call "semifix" [term]
 
   (* This has to come at the end because we use string to mean
      StringBuilder.string earlier. *)
@@ -923,12 +923,18 @@ let runTest (i: int) (x,y: Debug.test) =
     i (StringBuilder.finish (Simplified.finish y))
 let runTests () = List.iteri runTest Debug.tests
 
+module Naive = Examples(DropBoxes(ToHaskell))
+
+let runNaiveTest (i: int) (x: Naive.test) =
+  Printf.printf "%d: %s\n" i (StringBuilder.finish x)
+let runNaiveTests () = List.iteri runNaiveTest Naive.tests
+
 (* 2019-07-01 Faster version of transitive closure:
 
-fastfix
+semifix
 (\path.
   edge ∪
-  for (a in edge) for (b in path) when (snd a == fst b)
+  forIn (a in edge) for (b in path) when (snd a == fst b)
     {(fst a, snd b)}),
 (\path dpath.
   for (a in edge) for (b in dpath) when (snd a == fst b)
