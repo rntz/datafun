@@ -1,9 +1,9 @@
 (*
 ===== TODO =====
 
+- Asymptotic speedup benchmarks!
 - More tests!
 - A pass-through transform from MODAL to SIMPLE, to compare against Seminaive.
-- Asymptotic speedup benchmarks?
 
 POST DEADLINE:
 - A parser.
@@ -12,20 +12,7 @@ POST DEADLINE:
   OR
 - A pretty-printer.
 
-===== OPTIMIZATION =====
-
-The simplifier performs the following optimizations:
-
-- Eliminating/propagating bottoms (eg. empty sets and false).
-- Eliminating "if"s & "when"s whose conditions are constantly false.
-
-Is that all I need? TODO: Consider the derivatives of the following:
-
-- relation intersection
-- relation composition (see icfp19/examples.org)
-- transitive closure
-
-===== NEW DESIGN as of February 2019 =====
+===== DESIGN as of February 2019 =====
 
 All tagless-final. Compiler flowchart:
 
@@ -48,26 +35,30 @@ All tagless-final. Compiler flowchart:
       V
     Haskell code
 
-===== PREVIOUS DESIGN as of January 2019 =====
+===== OPTIMIZATION =====
 
-It would be handy to have a pass-through transformation to compare the seminaive
-φ/δ transform to. Also, originally I was hoping to implement full normalization
-rather than just simplification --- this would make it easier to target first-order
-languages (... WebAssembly?).
+The simplifier performs the following optimizations:
 
-    MODAL: Explicit modal Datafun
-      |              |
-      | φ/δ          | forget □
-      V              V
-    SIMPLE: Non-monotone λ-calculus with fix & fast-fix
-      |
-      | normalize
-      V
-    NORMAL: Normal non-monotone λ-calculus with fix & fast-fix
-      |
-      | compile
-      V
-    First-order target language
+- Eliminating/propagating bottoms (eg. empty sets and false).
+- Eliminating "if"s & "when"s whose conditions are constantly false.
+
+Is that all I need? TODO: Consider the derivatives of the following:
+
+- relation intersection
+- relation composition (see icfp19/examples.org)
+- transitive closure
+
+TODO: I'd also like to avoid binding unused discrete zero-change variables, eg.
+in φ and δ for "for". Approaches:
+
+1. Ignore it.
+
+2. Substitute in the zero-change where needed. This lets the simplifier
+   eliminate it if possible. This is also what we do in the paper. This is more or
+   less what we currently do, a bit hackishly.
+
+3. Analyse whether the variable is used when φ/δing the interior expression and
+   use this to decide whether to bind it.
 
 ===== KNOWN BUGS/DESIGN FLAWS =====
 
@@ -475,7 +466,7 @@ module DropBoxes(Imp: SIMPLE): MODAL with type term = Imp.term
 end
 
 
-(* Implementation of the go-faster transformation. *)
+(* The speedup φ and derivative δ transformations. *)
 module Seminaive(Imp: SIMPLE): MODAL
        with type term = Imp.term * Imp.term
 = struct
@@ -483,11 +474,10 @@ module Seminaive(Imp: SIMPLE): MODAL
   type term = Imp.term * Imp.term (* φM, δM *)
 
   (* This should only ever be used at base types. It almost ignores its
-   * argument; however, at sum types, it does depend on the tag. `zero` is
-   * carefully defined such that if sum types are not involved, it produces
-   * a constant expression. In particular, at first-order semilattice types,
-   * it produces a bottom expression, which the simplifier will recognize.
-   * This aids optimization. *)
+   * argument; however, at sum types, it does depend on the tag. If sum types
+   * are not involved, `zero` produces a constant expression. In particular, at
+   * first-order semilattice types, it produces a bottom expression, which the
+   * simplifier will recognize. This aids optimization. *)
   let rec zero (tp: tp) (term: Imp.term): Imp.term = match tp with
     | `Box a -> zero a term
     | `Bool -> Imp.bool false
@@ -508,13 +498,14 @@ module Seminaive(Imp: SIMPLE): MODAL
    * any example programs, so to simplify the implementation I error on higher-
    * order semilattice types.
    *
-   * For more info, See seminaive/seminaive.pdf and seminaive/semantics.pdf.
+   * For more info, See seminaive/seminaive.pdf.
    *)
   let phiFirstOrderLat (a: tp semilat) =
     let fA, dA = phiDeltaLat a in
     if not (firstOrder (a :> modaltp))
     then todo "semilattice operations only implemented for first-order data"
-    else if not (fA = dA) then impossible "this shouldn't happen"
+    else if not (fA = dA)
+    then impossible "this shouldn't happen"
     else fA
 
   (* φx = x                 δx = dx *)
@@ -523,8 +514,9 @@ module Seminaive(Imp: SIMPLE): MODAL
   (* If the variable is discrete, we know its derivative is a zero change; so if
    * it's first-order, we can inline zero applied to it. *)
   let discvar (a: tp) (x: sym) =
-    if not (firstOrder a) then var a x else
-    let phix = Imp.var (phi a) x in phix, zero a phix
+    if not (firstOrder a)
+    then var a x
+    else let phix = Imp.var (phi a) x in phix, zero a phix
 
   (* φ(box M) = φM, δM      δ(box M) = δM *)
   let box (a: tp) (fTerm, dTerm: term): term =
@@ -622,8 +614,9 @@ module Seminaive(Imp: SIMPLE): MODAL
 
   let forIn (a: tp) (b: tp semilat) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term) =
     let fa,da = phiDelta a and fb = phiFirstOrderLat b in
-    (* φ(for (x in M) N) = for (x in φM) let dx = 0 x in φN *)
+    (* φ(for (x in M) N) = for (x in φM) φN {dx ↦ 0 x} *)
     Imp.forIn fa fb x fExpr
+    (* TODO: omit let-binding here because it will be inlined (see discvar). *)
       (Imp.letIn da (fb :> rawtp) (Sym.d x) (zero a (Imp.var fa x)) fBody),
     (* Assuming φB = ΔB and ⊕ = ∨ (see phiFirstOrderLat),
      *
@@ -631,11 +624,12 @@ module Seminaive(Imp: SIMPLE): MODAL
      * =  (for (x in δM) let dx = 0 x in φN)
      *   ∨ for (x in φM ∪ δM) let dx = 0 x in δN *)
     let loopBody body =
+      (* TODO: omit let-binding here because it will be inlined (see discvar). *)
       Imp.letIn da (fb :> rawtp) (Sym.d x) (zero a (Imp.var fa x)) body in
     Imp.union fb
-      (* for (x in δM) let dx = 0 x in φN *)
+      (* for (x in δM) φN {dx ↦ 0 x} *)
       [ Imp.forIn fa fb x dExpr (loopBody fBody)
-      (* for (x in M ∪ δM) let dx = 0 x in δN *)
+      (* for (x in M ∪ δM) δN {dx ↦ 0 x} *)
       ; Imp.forIn fa fb x (Imp.union (`Set fa) [fExpr;dExpr]) (loopBody dBody) ]
 
   (* φ(fix M) = fastfix φM
@@ -674,7 +668,7 @@ end
  *   let equals a m n = (??)
  *   let fastfix a m = (??)
  * end
- * 
+ *
  * module Fuzz(Imp: SIMPLE) = struct
  *   type tp = rawtp
  *   type isEmpty = rawtp semilat
@@ -699,21 +693,23 @@ end = struct
   type isEmpty = tp semilat
   (* Invariant: in any value of the form (x, Some a), x = Imp.union a []. *)
   type value = Imp.term * isEmpty option
+  (* TODO: Is this (isEmpty cx) parameter doing any useful work?
+   * Find some test cases that exercise it, or else remove it. *)
   type term = isEmpty cx -> value
 
   let finish (term: term): Imp.term = fst (term Cx.empty)
 
   let empty (a: tp semilat): value = Imp.union a [], Some a
   let full (term: Imp.term): value = term, None
-  let wat (term: Imp.term): isEmpty option -> value =
+  let propagate (term: Imp.term): isEmpty option -> value =
     function None -> full term | Some a -> empty a
 
-  let var a x cx = wat (Imp.var a x) (Cx.find_opt x cx)
+  let var a x cx = propagate (Imp.var a x) (Cx.find_opt x cx)
 
   let letIn a b x (expr:term) (body:term) (cx: isEmpty cx): value =
     let exprX, exprE = expr cx in
     let bodyX, bodyE = body (Cx.add_opt x exprE cx) in
-    wat (Imp.letIn a b x exprX bodyX) bodyE
+    propagate (Imp.letIn a b x exprX bodyX) bodyE
 
   let lam a b x body cx = match body cx with
     | _, Some b -> empty (`Fn(a,b))
@@ -726,7 +722,7 @@ end = struct
   let tuple (tpterms: (tp * term) list) cx: value =
     let f (a,m) = let mX,mE = m cx in (a,mX), mE in
     let tptms, empties = List.(map f tpterms |> split) in
-    wat (Imp.tuple tptms) Option.(all empties |> map (fun x -> `Tuple x))
+    propagate (Imp.tuple tptms) Option.(all empties |> map (fun x -> `Tuple x))
 
   let proj tps i (term: term) cx: value = match term cx with
     | termX, Some `Tuple lats -> empty (List.nth lats i)
@@ -738,7 +734,7 @@ end = struct
       | Some `Tuple lats -> List.map2 (fun (_,x) lat -> x,lat) tpxs lats
       | _ -> [] in
     let bodyX, bodyE = body (Cx.add_list knowns cx) in
-    wat (Imp.letTuple tpxs bodyTp exprX bodyX) bodyE
+    propagate (Imp.letTuple tpxs bodyTp exprX bodyX) bodyE
 
   let string s cx = Imp.string s, None
   let bool x cx = Imp.bool x, if x then None else Some `Bool
