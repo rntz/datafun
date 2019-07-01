@@ -1,7 +1,8 @@
 -- The Datafun runtime.
-module Runtime (Set, Preord (..), Semilat (..), set, guard, forIn, fix, fastfix)
+module Runtime (Set, Preord (..), Semilat (..), set, guard, forIn, fix, semifix)
 where
 
+import Debug.Trace
 import qualified Data.Set as Set
 import Data.Set (Set)
 
@@ -41,13 +42,20 @@ guard False x = empty
 forIn :: Semilat b => Set a -> (a -> b) -> b
 forIn set f = unions [f x | x <- Set.toList set]
 
+tracer name i =
+  if True || i `mod` 13 /= 0 then id
+  else trace (name ++ " " ++ show i)
+
 fix :: Semilat a => (a -> a) -> a
-fix f = loop empty
-  where loop x = if x <: x' then x else loop x'
+fix f = loop 0 empty
+  where loop i x = tracer "fix" i $
+                   if x' <: x then x else loop (i+1) x'
           where x' = f x
 
 -- Relies on the fact that the delta type of a semilattice type is itself.
-fastfix :: Semilat a => ((a -> a), (a -> a -> a)) -> a
-fastfix (f, df) = loop empty (f empty)
-  where loop x dx = if dx <: x then x
-                    else loop (union x dx) (df x dx)
+semifix :: Semilat a => ((a -> a), (a -> a -> a)) -> a
+semifix (f, df) = loop 0 empty (f empty)
+  where loop i x dx =
+          tracer "semifix" i $
+          if dx <: x then x
+          else loop (i+1) (union x dx) (df x dx)
