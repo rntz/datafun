@@ -120,7 +120,17 @@
 \newcommand\caseto\shortrightarrow
 \newcommand\pwild{\underline{\phantom{a}}}
 
-% TODO: why \textmd?
+\newcommand\dvar[1]{{\isocolor #1}}
+% I need to mark discrete vs. monotone variables in some
+% colorblind/greyscale-printing-safe way. For example:
+\renewcommand\dvar[1]{{\isocolor\mathit{#1}}}
+%\renewcommand\dvar[1]{{\isocolor\underline{#1}}}
+%\renewcommand\dvar[1]{{\isocolor\boldsymbol{#1}}}
+
+% FIXME TODO: However, now I need to go through every place I bind discrete
+% variables and make sure it uses \dvar. Every use of \efor, \elet{\ebox...},
+% some uses of \ecase, etc.
+
 \newcommand\eqt[1]{\underaccent{\textmd{eq}}{#1}}
 \providecommand\fint{}
 \renewcommand\fint[1]{\underaccent{\textmd{fin}}{#1}}
@@ -136,6 +146,8 @@
 \newcommand\isempty{\prim{empty?}}
 \newcommand\eisempty[1]{\isempty\<{\isocolor #1}}
 \newcommand\fastfix{\prim{semifix}}
+\newcommand\eboxvar[1]{\ebox{\dvar{#1}}}
+\newcommand\eletbox[2]{\elet{\eboxvar{#1} = {#2}}}
 
 % discrete operators with & without \isocolor
 \newcommand\esetraw[1]{\{{#1}\}}
@@ -146,7 +158,7 @@
 \newcommand\eifraw[2]{\kw{if}\;{#1}\;\kw{then}\;{#2}\;\kw{else}\;}
 \newcommand\eset[1]{\esetraw{\isocolor #1}}
 \newcommand\ebox[1]{\eboxraw{\isocolor #1}}
-\newcommand\efor[2]{\eforraw{{\isocolor #1} \in #2}}
+\newcommand\efor[2]{\eforraw{\dvar{#1} \in #2}}
 \newcommand\efixis[2]{\efixisraw{#1}{\isocolor #2}}
 \newcommand\eeq[2]{\eeqraw{\isocolor #1}{\isocolor #2}}
 \newcommand\eif[2]{\eifraw{\isocolor #1}{#2}}
@@ -163,17 +175,8 @@
 \newcommand\J[3]{{#2} \vdash {#1} \mathrel{:} {#3}}
 \newcommand\Jalign[3]{{#2} &\vdash {#1} \mathrel{:} {#3}}
 \newcommand\h[2]{{#1} : {#2}}
-\newcommand\dvar[1]{{\isocolor #1}}
 \newcommand\freshvar[1]{{\color{Rhodamine}#1}}
 \newcommand\hd[2]{\dvar{#1} \dblcolon {#2}}
-
-% FIXME TODO: I must mark discrete vs. monotone variables in some
-% (colorblind/greyscale-printing)-safe way. For example:
-\renewcommand\dvar[1]{{\isocolor\underline{#1}}}
-
-% However, then I need to go through every place I bind discrete variables and
-% make sure it uses \dvar. Every use of \efor, \elet{\ebox...}, some uses of
-% \ecase, etc.
 
 
 %% ===== Change theory & seminaive translation stuff =====

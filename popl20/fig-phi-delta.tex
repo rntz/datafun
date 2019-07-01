@@ -14,28 +14,30 @@
     \phi(e \vee f) &= \phi e \vee \phi f\\
     \phi(\eset{e_i}_i) &= \eset{\phi e_i}_i
     &
-    \phi(\efor x e f) &= \efor x {\phi e} {\phi \substd{f}{dx \substo \zero\<x}}
+    \phi(\efor x e f) &= \efor x {\phi e}
+        {\phi \substd{f}{\dvar\dx \substo \zero\<\dvar x}}
     \\
     \phi\ebox{e} &= \ebox{\etuple{\phi e, \delta e}}
     &
-    \phi(\elet{\ebox x = e} f) &= \elet{\ebox{\etuple{x,\dx}} = \phi e} \phi f
+    \phi(\eletbox x e f)
+    &= \elet{\ebox{\etuple{\dvar x,\dvar\dx}} = \phi e} \phi f
     \\
-    \phi(\eisempty e) &= \eisempty {\phi e}
-    &
     \phi(\eeq e f) &= (\eeq {\phi e} {\phi f})
+    &
+    \phi(\eisempty e) &= \eisempty {\phi e}
     \\
-    \phi(\prim{fix}\<e) &= \fastfix\<\phi e
+    \phi(\efix e) &= \fastfix\<\phi e
     &
     %% split
     \phi(\esplit e) &= \ecase{\phi e}
     \\
-    &&&\quad
-    \left(\ebox{\etuple{\inj i x, \inj i \dx}}
-    \caseto \inj i {\ebox {\etuple{x,\dx}}}\right)_{i}
+    &&&\phantom{{}={}}\
+    \left(\ebox{\etuple{\inj i \dvar x, \inj i \dvar \dx}}
+    \caseto \inj i {\ebox {\etuple{\dvar x,\dvar\dx}}}\right)_{i}
     \\
-    &&&\quad
-    \left(\ebox{\etuple{\inj i x, \inj j \pwild}}
-    \caseto \inj i {\ebox {\etuple{x, \dummy\<x}}} \right)_{i\ne j}
+    &&&\phantom{{}={}}\
+    \left(\ebox{\etuple{\inj i \dvar x, \inj j \pwild}}
+    \caseto \inj i {\ebox {\etuple{\dvar x, \dummy\<\dvar x}}} \right)_{i\ne j}
   \end{align*}
 
   \caption{Semi\naive{} speed-up translation, $\phi$}
@@ -57,27 +59,27 @@
     \delta(\inj i e) &= \inj i {\delta e} &
     \delta(e \vee f) &= \delta e \vee \delta f\\
     \delta\ebox{e} &= \etuple{} &
-    \delta(\elet{\ebox x = e} f)
-    &= \elet{\ebox{\etuple{x,\dx}} = \phi e} \delta f
+    \delta(\eletbox x e f)
+    &= \elet{\ebox{\etuple{\dvar x,\dvar\dx}} = \phi e} \delta f
     \\
     \delta(\eisempty e) &= \eisempty {\phi e}
     &
     \delta(\esplit e) &= \ecase{\phi e}
-    (\ebox{\ebox{\etuple{\inj i \pwild, \pwild}}}
+    (\ebox{\etuple{\inj i \pwild, \pwild}}
     \caseto \inj i {\etuple{}} )_i
   \end{align*}
   %
   \begin{align*}
     \delta(\ecase e (\inj i x \caseto f_i)_i)
     &= \ecase{\esplit{\ebox{\color{Rhodamine} \phi e}},\, \delta e}\\
-    &\qquad ({\inj i {\ebox x},\, \inj i \dx} \caseto \delta f_i)_{i}\\
-    &\qquad ({\inj i {\ebox x},\, \inj j \pwild}
-    \caseto \subst{\delta f_i}{\dx \substo \dummy\<x})_{i\ne j}
+    &\qquad ({\inj i {\eboxvar x},\, \inj i \dx} \caseto \delta f_i)_{i}\\
+    &\qquad ({\inj i {\eboxvar x},\, \inj j \pwild}
+    \caseto \subst{\delta f_i}{\dx \substo \dummy\<\dvar x})_{i\ne j}
     \\
     \delta(\efor x e f)
-    &= (\efor x {\delta e} \substd{\phi f}{\dx \substo \zero\<x}) \\
+    &= (\efor x {\delta e} \substd{\phi f}{\dvar\dx \substo \zero\<\dvar x}) \\
     &\vee (\efor x {{\phi e} \vee \delta e}
-    \substd{\delta f}{\dx \substo \zero\<x})
+    \substd{\delta f}{\dvar\dx \substo \zero\<\dvar x})
   \end{align*}
 
   \caption{Semi\naive{} derivative translation, $\delta$}
