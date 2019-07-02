@@ -1,9 +1,121 @@
 \section{From Semi\naive{} Evaluation to the Incremental \boldfn-Calculus}
 \label{sec:seminaive-and-ilc}
 
-\todo{explain semi\naive{} evaluation on transitive closure in Datalog. Borrow from \emph{Fixing Incremental Computation} (with citation).}
+%\subsection{Semi\naive\ evaluation}
 
+%% \todo{explain semi\naive{} evaluation on transitive closure in Datalog. Borrow from \emph{Fixing Incremental Computation} (with citation).}
+
+We borrow the explanation of semi\naive\ evaluation from
+\citet{DBLP:conf/esop/Alvarez-Picallo19}. Consider the following Datalog
+program:
+
+%% TODO: not enough vertical white space around this. also, maybe syntax highlighting?
+\begin{verbatim}
+    path(X,Y) :- edge(X,Y).
+    path(X,Z) :- edge(X,Y), path(Y,Z).
+\end{verbatim}
+
+\noindent
+The denotation of \texttt{path} is the least fixed point of the rules defining
+it.
+% mention Kleene fixed point theorem?
+We can compute this by repeatedly applying these rules until the collection
+of known paths (initially empty) stops growing.
+%
+For example, if the \texttt{edge} relation is \{(1,\,2), (2,\,3), (3,\,4)\}, we
+get the following evaluation trace:
+
+%% TODO: not enough vertical space around this
+\begin{center}
+  \setlength\tabcolsep{1em}
+  \def\arraystretch{1.1}
+  \begin{tabular}{@{}rll@{}}
+    Step
+    & Previously known paths
+    & Paths deduced at this step
+    \\\midrule
+    1
+    & none
+    & (1,\,2) (2,\,3) (3,\,4)
+    \\
+    2
+    & (1,\,2) (2,\,3) (3,\,4)
+    & (1,\,2) (2,\,3) (3,\,4) (1,\,3) (2,\,4)
+    \\
+    %% why the duplication?
+    3
+    & (1,\,2) (2,\,3) (3,\,4) (1,\,3) (2,\,4)
+    & (1,\,2) (2,\,3) (3,\,4) (1,\,3) (2,\,4) (1,\,4)
+    \\
+    4
+    & (1,\,2) (2,\,3) (3,\,4) (1,\,3) (2,\,4) (1,\,4)
+    & as above
+  \end{tabular}
+\end{center}
+
+\noindent We have now reached the desired fixed point. However, this process is
+quite wasteful: we deduced the path (1,\,2) at \emph{every} iteration; ideally
+we'd only deduce it once. On a chain of $n$ edges, we deduce $\Theta(n^3)$
+facts, even though there are only $\Theta(n^2)$ paths!
+
+The standard improvement to this strategy is known as
+\emph{semi\naive\ evaluation}~\cite{seminaive}. \todo{finish}
+
+
 \subsection{Finding Fixed Points Faster via Derivatives}
+
+Now let's move from Datalog to Datafun. The transitive closure of \name{edge} is
+the fixed point of the monotone function \name{step} defined by:
+
+\nopagebreak[2]
+\[\begin{array}{l}
+  \name{step} \<\name{path} = \name{edge} \cup
+  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{path}}
+\end{array}\]
+
+\noindent
+The \naive\ way to compute \name{step}'s fixed point is to iterate it: start
+with \(\name{path}_0 = \emptyset\) and compute \(\name{path}_{i+1} =
+\name{step}\<\name{path}_i\) until \(\name{path}_i = \name{path}_{i+1}\).
+%
+But since $\name{path}_i \subseteq \name{step}\<\name{path}_i$, each iteration
+re-computes every path found by the previous iteration.
+%
+Following Datalog, we'd prefer to compute only the \emph{change} between
+iterations.
+%
+So consider $\name{step}'$ defined by:
+
+\nopagebreak[2]
+\[\begin{array}{l}
+  \name{step}' \<\name{dpath} =
+  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
+\end{array}\]
+
+\noindent
+Observe that $\name{step} \<(\name{path} \cup \name{dpath}) =
+\name{step}\<\name{path} \cup \name{step}'\<\name{dpath}$.
+%
+That is, $\name{step}'$ tells us how \name{step} changes as its input grows.
+%
+Using this property, we can directly compute the changes $\name{dpath}_i$
+between our iterations $\name{path}_i$:
+
+\begin{align*}
+  \name{dpath}_0 &= \name{step}\<\emptyset
+  & \name{dpath}_{i+1} &= \name{step}'\<\name{dpath}_i
+  & \name{path}_{i+1} &= \name{path}_i \cup \name{dpath}_i
+\end{align*}
+%
+\todo{Explain why computing $\name{step}'\<\name{dpath}_i$ isn't
+  \naive/ever-increasing.}
+%
+This is the analogue of semi\naive{} evaluation in a functional setting.
+
+How do we find functions like $\name{step}'$?
+%
+\todo{explain how $\name{step}'$ looks like a derivative of $\name{step}$ in the
+  sense of \citet{incremental}.}
 
 
 %% Now let's move from Datalog to Datafun. The transitive closure of \name{edge} is
@@ -63,56 +175,3 @@
 %%   \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
 %% \end{array}\]
 
-
-Now let's move from Datalog to Datafun. The transitive closure of \name{edge} is
-the fixed point of the monotone function \name{step} defined by:
-
-\nopagebreak[2]
-\[\begin{array}{l}
-  \name{step} \<\name{path} = \name{edge} \cup
-  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{path}}
-\end{array}\]
-
-\noindent
-The \naive{} way to compute $\efix \name{step}$ is to iterate it: start with
-\(\name{path}_0 = \emptyset\) and compute \(\name{path}_{i+1} =
-\name{step}\<\name{path}_i\) until \(\name{path}_i = \name{path}_{i+1}\).
-%
-But since $\name{path}_i \subseteq \name{step}\<\name{path}_i$, each iteration
-re-computes every path found by the previous iteration.
-%
-Following Datalog, we'd prefer to compute only the \emph{change} between
-iterations.
-%
-So consider $\name{step}'$ defined by:
-
-\nopagebreak[2]
-\[\begin{array}{l}
-  \name{step}' \<\name{dpath} =
-  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
-\end{array}\]
-
-\noindent
-Observe that $\name{step} \<(\name{path} \cup \name{dpath}) =
-\name{step}\<\name{path} \cup \name{step}'\<\name{dpath}$.
-%
-That is, $\name{step}'$ tells us how \name{step} changes as its input grows.
-%
-Using this property, we can directly compute the changes $\name{dpath}_i$
-between our iterations $\name{path}_i$:
-
-\begin{align*}
-  \name{dpath}_0 &= \name{step}\<\emptyset
-  & \name{dpath}_{i+1} &= \name{step}'\<\name{dpath}_i
-  & \name{path}_{i+1} &= \name{path}_i \cup \name{dpath}_i
-\end{align*}
-%
-\todo{Explain why computing $\name{step}'\<\name{dpath}_i$ isn't
-  \naive/ever-increasing.}
-%
-This is the analogue of semi\naive{} evaluation in a functional setting.
-
-How do we find functions like $\name{step}'$?
-%
-\todo{explain how $\name{step}'$ looks like a derivative of $\name{step}$ in the
-  sense of \citet{incremental}.}
