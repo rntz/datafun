@@ -6,6 +6,7 @@
 \usepackage{stmaryrd}           % \shortrightarrow, \llbracket, etc.
 \usepackage{subcaption}        % for complex figures with subfigures/subcaptions
 \usepackage{nccmath}      % fix spacing around AMS math environments like align*
+\usepackage{lipsum}       % TODO remove
 
 % cleveref must be loaded AFTER hyperref, amsmath, & amsthm.
 \usepackage[nameinlink,noabbrev]{cleveref}% other options: capitalise
@@ -23,8 +24,10 @@
 %% More space around \cup and \vee.
 \let\bincup\cup
 \let\binvee\vee
+\let\binwedge\wedge
 \renewcommand\cup{\mathrel{\bincup}}
 \renewcommand\vee{\mathrel{\binvee}}
+\renewcommand\wedge{\mathrel{\binwedge}}
 
 
 %% ---------- Commands ----------

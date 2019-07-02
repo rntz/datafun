@@ -1,28 +1,24 @@
 \section{From Semi\naive{} Evaluation to the Incremental \boldfn-Calculus}
 \label{sec:seminaive-and-ilc}
 
-%\subsection{Semi\naive\ evaluation}
+Consider the following Datalog fragment:\footnote{This example and explanation
+  of semi\naive\ evaluation is borrowed almost entirely from
+  \citet{DBLP:conf/esop/Alvarez-Picallo19}.}
 
-%% \todo{explain semi\naive{} evaluation on transitive closure in Datalog. Borrow from \emph{Fixing Incremental Computation} (with citation).}
-
-We borrow the explanation of semi\naive\ evaluation from
-\citet{DBLP:conf/esop/Alvarez-Picallo19}. Consider the following Datalog
-program:
-
-%% TODO: not enough vertical white space around this. also, maybe syntax highlighting?
-\begin{verbatim}
-    path(X,Y) :- edge(X,Y).
-    path(X,Z) :- edge(X,Y), path(Y,Z).
-\end{verbatim}
+\begin{align*}
+  \name{path}(x,y) &\gets \name{edge}(x,y)
+  &
+  \name{path}(x,y) &\gets \name{edge}(x,y) \wedge \name{path}(y,z)
+\end{align*}
 
 \noindent
-The denotation of \texttt{path} is the least fixed point of the rules defining
+The denotation of \name{path} is the least fixed point of the rules defining
 it.
 % mention Kleene fixed point theorem?
 We can compute this by repeatedly applying these rules until the collection
 of known paths (initially empty) stops growing.
 %
-For example, if the \texttt{edge} relation is \{(1,\,2), (2,\,3), (3,\,4)\}, we
+For example, if the \name{edge} relation is \{(1,\,2), (2,\,3), (3,\,4)\}, we
 get the following evaluation trace:
 
 %% TODO: not enough vertical space around this
@@ -34,20 +30,19 @@ get the following evaluation trace:
     & Previously known paths
     & Paths deduced at this step
     \\\midrule
-    1
+    0
     & none
     & (1,\,2) (2,\,3) (3,\,4)
     \\
-    2
+    1
     & (1,\,2) (2,\,3) (3,\,4)
     & (1,\,2) (2,\,3) (3,\,4) (1,\,3) (2,\,4)
     \\
-    %% why the duplication?
-    3
+    2
     & (1,\,2) (2,\,3) (3,\,4) (1,\,3) (2,\,4)
     & (1,\,2) (2,\,3) (3,\,4) (1,\,3) (2,\,4) (1,\,4)
     \\
-    4
+    3
     & (1,\,2) (2,\,3) (3,\,4) (1,\,3) (2,\,4) (1,\,4)
     & as above
   \end{tabular}
@@ -59,7 +54,58 @@ we'd only deduce it once. On a chain of $n$ edges, we deduce $\Theta(n^3)$
 facts, even though there are only $\Theta(n^2)$ paths!
 
 The standard improvement to this strategy is known as
-\emph{semi\naive\ evaluation}~\cite{seminaive}. \todo{finish}
+\emph{semi\naive\ evaluation}~\cite{seminaive}, which transforms recursive rules
+into explicitly iterative time-indexed rules of two varieties:
+
+\begin{itemize}
+\item \emph{Delta} rules, which compute the \emph{new} facts at each iteration.
+\item \emph{Accumulator} rules, which accumulate these to compute the final result.
+\end{itemize}
+
+\noindent In this case, the delta rule is simple: we only discover new paths at
+iteration $i+1$ by appending edges to paths which were new at iteration $i$.
+
+\begin{align*}
+  \name{path}_{i+1}(x,y) &\gets \name{path}_i(x,y)
+  &
+  \D\name{path}_0(x,y) &\gets \name{edge}(x,y)
+  \\
+  \name{path}_{i+1}(x,y) &\gets \D\name{path}_i(x,y)
+  &
+  \D\name{path}_{i+1}(x,z) &\gets \name{edge}(x,y) \wedge \D\name{path}_i(y,z)
+\end{align*}
+
+\noindent This yields the execution trace:
+
+\begin{center}
+  \setlength\tabcolsep{1em}
+  \def\arraystretch{1.1}
+  \begin{tabular}{@{}rll@{}}
+    Step & $\name{path}_i$ & $\D\name{path}_i$
+    \\\midrule
+    0 & empty & (1,\,2) (2,\,3) (3,\,4)
+    \\
+    1 & (1,\,2) (2,\,3) (3,\,4) & (1,\,3) (2,\,4)
+    \\
+    2 & (1,\,2) (2,\,3) (3,\,4) (1,\,3) (2,\,4) & (1,\,4)
+    \\
+    3 & (1,\,2) (2,\,3) (3,\,4) (1,\,3) (2,\,4) (1,\,4) & empty
+  \end{tabular}
+\end{center}
+
+%% TODO: email Alvarez-Picallo, Michael P-J, etc; they say "a quadratic
+%% computation into a linear one" but AFAICT this is not so! Unless the claim is
+%% that the naive version is quadratic in the _output_?!
+%%
+%% Perhaps we should say, "--- our computation is now linear in the size of its
+%% output". But is this really justified?
+This is much better --- we have turned a cubic computation into a quadratic one.
+%
+The semi\naive\ transformation is a kind of \emph{incremental computation}: at
+each stage we compute the changes in the rule given the previous changes to its
+inputs.
+%
+\todo{more?}
 
 
 \subsection{Finding Fixed Points Faster via Derivatives}
@@ -110,7 +156,7 @@ between our iterations $\name{path}_i$:
 \todo{Explain why computing $\name{step}'\<\name{dpath}_i$ isn't
   \naive/ever-increasing.}
 %
-This is the analogue of semi\naive{} evaluation in a functional setting.
+This is the analogue of semi\naive\ evaluation in a functional setting.
 
 How do we find functions like $\name{step}'$?
 %
