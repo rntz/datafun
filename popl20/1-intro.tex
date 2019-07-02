@@ -1,6 +1,107 @@
 \section{Introduction}
 \label{sec:intro}
 
+Datalog, along with the pi-calculus and the lambda-calculus, is one of
+the jewel languages of theoretical computer science, connecting
+programming languages theory, database theory and complexity theory.
+In terms of programming languages, Datalog can be understood as a
+fully declarative subset of Prolog~\cite{datalog-from-prolog} which is
+guaranteed to terminate and so can be evaluated in both top-down and
+bottom-up fashion. In terms of database theory~\cite{datalog-relalg},
+it is equivalent to the extension of relational algebra with a fixed
+point operator, and in terms of complexity theory, it does not just
+terminate, but also (when full Datalog with stratified negation is
+interpreted over ordered structures) characterizes polytime
+computation~\cite{datalog-polytime}.
+
+In addition to its theoretical elegance, over the past twenty years
+Datalog has seen a surprisingly wide surge of use across a variety of
+practical domains, both in research and in industry. Whaley and Lam
+\cite{whaley-lam,whaley-phd} implemented pointer analysis algorithms
+in Datalog, and found that they could reduce their analyses from
+thousands of lines of C code to \emph{tens} of lines of Datalog code,
+while retaining competitive performance. Semmle has developed the .QL
+language~\cite{semmlecode,ql-inference} based on Datalog for analysing
+source code (which was used to analyze the code for NASA's Curiosity
+Mars rover), and LogicBlox has developed the LogiQL~\cite{logicblox}
+language for business analytics and retail prediction. The Boom
+project at Berkeley has developed the Bloom language for distributed
+programming~\cite{bloom}, and the Datomic cloud
+database~\cite{datomic} uses Datalog (embedded in Clojure) as its
+query language. Microsoft's SecPAL language~\cite{secpal} uses Datalog
+as the foundation of its decentralised authorization specification
+language. In each case, when the problem formulated in Datalog, the
+specification became directly implementable, while remaining
+dramatically shorter and clearer than alternatives implemented in more
+conventional languages.
+
+\todo{We should cite DOOP (which used to use LogicBlox and now uses Souffle)}
+
+\todo{We should cite Yannis's
+  recent SNAPL paper ``Next-Paradigm Programming Languages: What Will They
+  Look Like and What Changes Will They Bring?''}
+
+However, there are two flies in the ointment. First, even though each
+of these applications is supported by the skeleton of Datalog, they
+all had to extend it significantly beyond the theoretical core
+calculus.  For example, core Datalog does not even support arithmetic,
+since its semantics only speaks of finite sets supporting equality of
+their elements. Moreover, arithmetic is not a trivial extension, since
+it can greatly complicates the semantics (for example, proving that
+termination continues to hold). So despite the fact that kernel
+Datalog has a very clean semantics, its metatheory seemingly needs to
+be laboriously re-established once again for each extension.
+
+A natural approach to solving this problem is to find a language in
+which to write the extensions, which preserves the semantic guarantees
+that Datalog offers. Two such proposals are the Flix
+language~\cite{flix} and the Datafun language~\cite{datafun}.  Very
+conveniently for our exposition, these two languages embody two
+alternative design strategies.
+
+Flix adopts the route of treating Datalog as an embedded
+domain-specific language. That is, Flix is a fairly conventional
+albeit well-designed functional programming language roughly
+comparable to ML or Haskell, extended with types representing Datalog
+predicates and program. The evaluation of a Flix program builds a
+Datalog program, which is then handed off to a custom Datalog engine.
+This stratification means that (a) standard Datalog implementation
+techniques can be used off-the-shelf, but that (b) its functional
+programming side is essentially just a very powerful macro system for
+Datalog.
+
+Datafun takes a somewhat different approach. Like Flix, it is a
+functional programming language, but unlike Flix, its type discipline
+has been extended to support tracking whether functions are monotone
+or not. Then, Datalog-style recursively defined relations are just
+ordinary recursive defininitions on set-valued functions, with
+monotoncity typing ensuring that every definable function continues to
+make sense in the model-theoretic semantics of Datalog. Tracking
+monotonicity information in types permits a much tighter integration
+between the functional and logic programming styles, but it comes at
+the cost that many of Datalog's standard implementation techniques,
+which were originally developed in the context of a first-order logic
+language, are no longer obviously applicable in the higher-order
+functional setting.
+
+
+Second, even though the semantics of Datalog is simple, actually
+making it perform well enough to use in practice calls for very
+sophisticated program analysis and compiler engineering. (This is a
+familiar issue from databases, where query planners embody a startling
+amount of optimization knowledge to optimize relatively simple SQL
+queries.) A wide variety of techniques for optimizing Datalog programs
+have been studied in the literature, such as using binary decision
+diagrams to represent relations~\cite{whaley-phd}, exploiting the
+structure of well-behaved subsets (e.g., CFL-reachability problems
+correspond to the ``chain program'' fragment of
+Datalog~\cite{chain-programs}), and combining top-down and bottom-up
+evaluation via the ``magic sets'' algorithm~\cite{magic-sets}.
+
+Today, one of the workhorse technqiues for implementing Datalog
+engines is \emph{semi-naive evaluation}~\cite{semi-naive}. 
+
+
 \paragraph{Contributions} Our main contribution is
 extending Datalog's semi\naive\ evaluation into a program transformation which
 works on higher-order programs.
@@ -19,3 +120,8 @@ works on higher-order programs.
 %%   Haskell programs with the expected operational behaviour.
 
 \end{itemize}
+
+
+%%% Local Variables:
+%%% TeX-master: "seminaive-datafun"
+%%% End:
