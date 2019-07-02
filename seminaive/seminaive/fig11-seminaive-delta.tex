@@ -22,7 +22,7 @@
     &= \ecase{\esplit{\eboxd{\color{Rhodamine} \phi e}},\, \delta e}\\
     &\qquad ({\inj i {\eboxd x},\, \inj i \dx} \caseto \delta f_i)_{i\in\{1,2\}}\\
     &\qquad ({\inj i {\eboxd x},\, \inj j \pwild}
-      \caseto \subst{\delta f_i}{\dx \substo \dummy\<x})_{i\ne j \in\{1,2\}}
+      \caseto \subst{\delta f_i}{\dx \substo \dummy\<\dvar x})_{i\ne j \in\{1,2\}}
     %% &= \ecase{\esplit{\eboxd{\phi e}}}\\
     %% &\qquad (\inj i \eboxd x
     %% \caseto \subst{\delta f_i}{\dx \substo \extract_i\<x\<\delta e})_i\\
@@ -42,7 +42,7 @@
     \delta(\eisEmpty e) &= \eisEmpty {\color{Rhodamine} \phi e}
     \\
     \delta(\esplit e) &= \ecase{\phi e}
-    (\eboxd{\eboxd{\etuple{\inj i \pwild, \pwild}}}
+    (\eboxd{\etuple{\inj i \pwild, \pwild}}
     \caseto \inj i {\etuple{}} )_i
   \end{align*}
   %\vskip -.5\baselineskip
