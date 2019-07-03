@@ -96,20 +96,58 @@ correspond to the ``chain program'' fragment of
 Datalog~\cite{chain-programs}), and combining top-down and bottom-up
 evaluation via the ``magic sets'' algorithm~\cite{magic-sets}.
 
-Today, one of the workhorse techniques for implementing bottom-up Datalog
-engines is \emph{semi\naive\ evaluation}~\cite{seminaive}. This optimization
-improves the performance of Datalog's most distinctive feature: recursively
-defined predicates. Such a predicate can be understood as the fixed point of a
-set-valued function $f$; a \naive\ fixed point computation will directly compute
-the limit of the sequence $\emptyset, f(\emptyset), f^2(\emptyset), \dots$. At
-each iteration, many values are unnecessarily re-computed;
-semi\naive\ evaluation computes a safe approximation of the \emph{new} values
-generated at each step. This optimization is critical, as it can
+Today, one of the workhorse techniques for implementing bottom-up
+Datalog engines is \emph{semi\naive\
+  evaluation}~\cite{seminaive}. This optimization improves the
+performance of Datalog's most distinctive feature: recursively defined
+predicates. Such a predicate can be understood as the fixed point of a
+set-valued function $f$; a \naive\ fixed point computation will
+directly compute the limit of the sequence
+$\emptyset, f(\emptyset), f^2(\emptyset), \dots$. At each iteration,
+many values are unnecessarily re-computed; semi\naive\ evaluation
+computes a safe approximation of the \emph{new} values generated at
+each step. This optimization is critical, as it can
 \emph{asymptotically} improve the performance of Datalog queries.
 
-\paragraph{Contributions} Our main contribution is
-extending Datalog's semi\naive\ evaluation into a program transformation which
-works on higher-order programs. \XXX
+
+\paragraph{Contributions} The semi\naive\ evaluation algorithm is
+defined partly as a program transformation on sets of Datalog rules,
+and partly as a modification of the fixed point computation algorithm.
+The central contribution of this paper is to give an extended version
+of this transformation which works on higher-order programs written
+in the Datafun language. 
+
+\begin{itemize}
+\item We reformulate Datafun in terms of a kernel calculus based on
+  the modal logic S4. Instead of giving a calculus with distinct
+  monotonic and discrete function types, as in the original Datafun
+  paper, we make discreteness into a comonad. In addition to
+  regularizing the calculus and slightly improving its expressiveness,
+  the explicit comonadic structure lets us impose a modal constraint
+  on recursion reminiscent of Hoffman's work on safe
+  recursion~\cite{hoffman-safe-recursion}. This brings the semantics
+  of Datafun more closely in line with Datalog's, and substantially
+  simplifies the program transformation we present.
+  
+\item We define a program transformation to statically convert
+  well-typed Datafun programs into an incrementalized version. The
+  translation is a compositional type-and-syntax-directed
+  transformation, which works uniformly at all types including
+  function types. Our approach builds upon the static program
+  incrementalization introduced by \citet{ostermann}, extending it to
+  support for sum types, set types, comonads, and (well-founded)
+  recursion.
+
+\item We establish the correctness of our transformation using a novel
+  logical relation which simultaneously defines the changes connecting
+  old and updated programs, as well as the optimized version of both.
+  The fundamental lemma then lets us show that our transformation
+  is semantics-preserving, in the sense that any closed program term
+  of predicate type has the same meaning after optimization. 
+  
+\item We then discuss our implementation of the  
+\end{itemize}
+
 
 %% \begin{itemize}
 
