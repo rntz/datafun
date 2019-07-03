@@ -133,10 +133,10 @@ in the Datafun language.
   well-typed Datafun programs into an incrementalized version. The
   translation is a compositional type-and-syntax-directed
   transformation, which works uniformly at all types including
-  function types. Our approach builds upon the static program
-  incrementalization introduced by \citet{ostermann}, extending it to
-  support for sum types, set types, comonads, and (well-founded)
-  recursion.
+  function types. Our approach builds upon the \emph{change structure}
+  methodology for static program incrementalization introduced by
+  \citet{ostermann}, extending it to support for sum types, set types,
+  comonads, and (well-founded) fixed points.
 
 \item We establish the correctness of our transformation using a novel
   logical relation which simultaneously defines the changes connecting
@@ -145,7 +145,14 @@ in the Datafun language.
   is semantics-preserving, in the sense that any closed program term
   of predicate type has the same meaning after optimization. 
   
-\item We then discuss our implementation of the  
+\item We then discuss an implementation of semi\naive\ Datafun, which
+  works by compiling Datafun to Haskell, in both \naive\ and
+  semi\naive\ form. This lets us both give examples of the translation
+  on nontrivial terms, and empirically demonstrate the asymptotic
+  speedups predicted by the theory. We additionally discuss the
+  (surprisingly modest) set of program optimizations we found
+  helpful for putting the 
+  optimization into  practice. 
 \end{itemize}
 
 
