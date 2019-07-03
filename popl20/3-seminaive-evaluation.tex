@@ -68,12 +68,10 @@ collect these facts into a final result.
 iteration $i+1$ by appending edges to paths which were new at iteration $i$:
 
 \begin{align*}
-  \name{path}_{i+1}(x,y) &\gets \name{path}_i(x,y)
-  &
+  \name{path}_{i+1}(x,y) &\gets \name{path}_i(x,y) \vee \D\name{path}_i(x,y)
+  \\
   \D\name{path}_0(x,y) &\gets \name{edge}(x,y)
   \\
-  \name{path}_{i+1}(x,y) &\gets \D\name{path}_i(x,y)
-  &
   \D\name{path}_{i+1}(x,z) &\gets \name{edge}(x,y) \wedge \D\name{path}_i(y,z)
 \end{align*}
 
