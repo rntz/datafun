@@ -8,7 +8,7 @@ Consider the following Datalog fragment:\footnote{This example and explanation
 \begin{align*}
   \name{path}(x,y) &\gets \name{edge}(x,y)
   &
-  \name{path}(x,y) &\gets \name{edge}(x,y) \wedge \name{path}(y,z)
+  \name{path}(x,z) &\gets \name{edge}(x,y) \wedge \name{path}(y,z)
 \end{align*}
 
 \noindent
@@ -158,8 +158,11 @@ between our iterations $\name{path}_i$:
 \todo{Explain why computing $\name{step}'\<\name{dpath}_i$ isn't
   \naive/ever-increasing.}
 %
-This is the analogue of semi\naive\ evaluation in a functional setting.
+This is the analogue of semi\naive\ evaluation in a functional setting;
+$\name{step}'$ is the analogue of the rule for $\D\name{path}_{i+1}$.
+%% TODO: introduce this parallel between step' and Δpath_{i+1} sooner?
 
+\label{sec:derivatives-via-incremental}
 How do we find functions like $\name{step}'$?
 %
 \todo{explain how $\name{step}'$ looks like a derivative of $\name{step}$ in the

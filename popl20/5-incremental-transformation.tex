@@ -1,6 +1,19 @@
 \section{The Incremental Transformation}
 \label{sec:transformations}
 
+%% Now that we have our typing rules and semantics, we can get down to the
+%% nitty-gritty.
+
+Recall that our aim is to speed up $\efix e$ expressions using the derivative of
+the function $e$ computes.
+%
+So you might expect us to use $\delta e$, the derivative of $e$.
+%
+However, $e$ is not a function~\citep{magritte}: it is an \emph{expression} that
+computes a function, and $\delta e$ is the derivative of this \emph{expression}
+--- it computes how $e$ changes. A derivative of a \emph{function}, on the other
+hand, is \emph{a zero-change to that function}.
+
 \input{fig-DeltaPhi}
 
 \todo{Write intro here once we've written \cref{sec:seminaive-and-ilc}. The
@@ -14,11 +27,11 @@
 %
 \Cref{fig:phi,fig:delta} define two mutually recursive static transformations:
 the speed-up $\phi e$, which computes fixed points faster by using derivatives;
-and $\delta e$, which computes the derivative of $\phi e$. To explain these
-transformations, we must first explain what they do to types.
-
-Following the approach of the incremental \fn-calculus, for each type $A$ we
-define a type of changes $\D A$:
+and $\delta e$, which computes the derivative of $\phi e$. To explain $\phi$ and
+$\delta$, we must first explain what they do to types.
+%
+Following the incremental \fn-calculus, for each type $A$ we define a type of
+changes $\D A$:
 
 \begin{align*}
   \D\tunit &= \tunit
@@ -33,6 +46,12 @@ define a type of changes $\D A$:
   &
   \D(A \to B) &= \iso A \to \D A \to \D B
 \end{align*}
+
+\noindent
+\todo{We discussed $\D(A \x B)$, $\D(A \to B)$, $\D\tseteq A$, and $\D\iso A$ in
+  \cref{sec:derivatives-via-incremental}.} $\D\tunit = 1$ because there is only
+one empty tuple. Finally, a change at $A + B$ is either a $\D A$ change to an
+$A$-value or a $\D B$ change to a $B$-value; hence $\D(A + B) = \D A + \D B$.
 
 %% \begin{align*}
 %%   \D \tunit &= \tunit
