@@ -96,8 +96,16 @@ correspond to the ``chain program'' fragment of
 Datalog~\cite{chain-programs}), and combining top-down and bottom-up
 evaluation via the ``magic sets'' algorithm~\cite{magic-sets}.
 
-Today, one of the workhorse techniques for implementing Datalog
-engines is \emph{semi-\naive\ evaluation}~\cite{semi-naive}.
+Today, one of the workhorse techniques for implementing bottom-up Datalog
+engines is \emph{semi\naive\ evaluation}~\cite{seminaive}. This optimization
+improves the performance of Datalog's most distinctive feature: recursively
+defined predicates. Such a predicate can be understood as the fixed point of a
+set-valued function $f$; a \naive\ fixed point computation will directly compute
+the limit of the sequence $\emptyset, f(\emptyset), f^2(\emptyset), \dots$. At
+each iteration, many values are unnecessarily re-computed;
+semi\naive\ evaluation computes a safe approximation of the \emph{new} values
+generated at each step. This optimization is critical, as it can
+\emph{asymptotically} improve the performance of Datalog queries.
 
 \paragraph{Contributions} Our main contribution is
 extending Datalog's semi\naive\ evaluation into a program transformation which
