@@ -55,24 +55,19 @@ facts, even though there are only $\Theta(n^2)$ paths!
 
 The standard improvement to this strategy is known as
 \emph{semi\naive\ evaluation}~\cite{seminaive}, which transforms recursive rules
-into explicitly iterative time-indexed rules of two kinds: \emph{delta} rules,
-to compute the new facts at each iteration; and \emph{accumulator} rules, to
-collect these facts into a final result.
+into explicitly iterative time-indexed rules of two kinds: \emph{derivative}
+rules, to compute the new facts at each iteration; and \emph{accumulator} rules,
+to collect these facts into a final result.
 %
-%% \begin{itemize}
-%% \item \emph{Delta} rules, which compute the \emph{new} facts at each iteration.
-%% \item \emph{Accumulator} rules, which accumulate these to compute the final result.
-%% \end{itemize}
-%
-\noindent In this case, the delta rule is simple: we only discover new paths at
+In this case, the derivative rule is simple: we only discover new paths at
 iteration $i+1$ by appending edges to paths which were new at iteration $i$:
 
 \begin{align*}
-  \name{path}_{i+1}(x,y) &\gets \name{path}_i(x,y) \vee \D\name{path}_i(x,y)
+  \name{dpath}_0(x,y) &\gets \name{edge}(x,y)
   \\
-  \D\name{path}_0(x,y) &\gets \name{edge}(x,y)
+  \name{dpath}_{i+1}(x,z) &\gets \name{edge}(x,y) \wedge \name{dpath}_i(y,z)
   \\
-  \D\name{path}_{i+1}(x,z) &\gets \name{edge}(x,y) \wedge \D\name{path}_i(y,z)
+  \name{path}_{i+1}(x,y) &\gets \name{path}_i(x,y) \vee \name{dpath}_i(x,y)
 \end{align*}
 
 \noindent This yields the execution trace:
@@ -81,7 +76,7 @@ iteration $i+1$ by appending edges to paths which were new at iteration $i$:
   \setlength\tabcolsep{1em}
   \def\arraystretch{1.1}
   \begin{tabular}{@{}rll@{}}
-    Step & $\name{path}_i$ & $\D\name{path}_i$
+    Step & $\name{path}_i$ & $\name{dpath}_i$
     \\\midrule
     0 & empty & (1,\,2) (2,\,3) (3,\,4)
     \\
