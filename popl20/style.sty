@@ -52,6 +52,16 @@
 %\usepackage[scaled=.93,largesc,]{newpxtext}\usepackage{eulervm}\def\zeu@Scale{.93}%\usepackage[scaled=.93]{newpxmath}
 \usepackage[scaled=.94]{XCharter}\usepackage{eulervm}\edef\zeu@Scale{0.9850544662309367}
 
+%\PassOptionsToPackage{scaled=\zeu@Scale,bbscaled=\zeu@Scale,scrscaled=\zeu@Scale}{mathalfa}
+%\usepackage[cal=cm]{mathalfa}
+
+% Use Zapf Chancery as \mathscr font. Passing scr=zapfc to mathalfa doesn't
+% handle lowercase letters for some reason. Scaled by eye-matching x-heights
+% with Euler/XCharter at scaled=.94.
+\DeclareFontFamily{OT1}{pzc}{}
+\DeclareFontShape{OT1}{pzc}{m}{it}{<-> s * [1.12] pzcmi7t}{}
+\DeclareMathAlphabet{\mathscr}{OT1}{pzc}{m}{it}
+
 \renewcommand\mathvar\ensuremath % for Euler (b/c it's upright)
 
 %% %% ----- Biolinum -----

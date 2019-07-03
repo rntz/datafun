@@ -4,14 +4,15 @@
 %% Now that we have our typing rules and semantics, we can get down to the
 %% nitty-gritty.
 
-Recall that our aim is to speed up $\efix e$ expressions using the derivative of
-the function $e$ computes.
+Recall that our aim is to speed up $\efix f$ expressions using the derivative of
+the function $f$ computes.
 %
-So you might expect us to use $\delta e$, the derivative of $e$.
+So you might expect us to use $\Deriv f$.
+%%, the derivative of $f$.
 %
-However, $e$ is not a function~\citep{magritte}: it is an \emph{expression} that
-computes a function, and $\delta e$ is the derivative of this \emph{expression}
---- it computes how $e$ changes. A derivative of a \emph{function}, on the other
+However, $f$ is not a function~\citep{magritte}: it is an \emph{expression} that
+computes a function, and $\Deriv f$ is the derivative of this \emph{expression}
+--- it computes how $f$ changes. A derivative of a \emph{function}, on the other
 hand, is \emph{a zero-change to that function}.
 
 \input{fig-DeltaPhi}

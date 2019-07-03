@@ -156,17 +156,16 @@
 \newcommand\esetraw[1]{\{{#1}\}}
 \newcommand\eboxraw[1]{[{#1}]}
 \newcommand\eforraw[1]{\kw{for}\:({#1})\fnspace}
-\newcommand\efixisraw[1]{\kw{fix}~#1~\kw{is}\fnspace}
 \newcommand\eeqraw[2]{{#1} = {#2}}
 \newcommand\eifraw[2]{\kw{if}\;{#1}\;\kw{then}\;{#2}\;\kw{else}\;}
 \newcommand\eset[1]{\esetraw{\isocolor #1}}
 \newcommand\ebox[1]{\eboxraw{\isocolor #1}}
 \newcommand\efor[2]{\eforraw{\dvar{#1} \in #2}}
-\newcommand\efixis[2]{\efixisraw{#1}{\isocolor #2}}
 \newcommand\eeq[2]{\eeqraw{\isocolor #1}{\isocolor #2}}
 \newcommand\eif[2]{\eifraw{\isocolor #1}{#2}}
 
 %% more surface syntax
+\newcommand\efixis[1]{\kw{fix}~#1~\kw{is}\fnspace}
 \newcommand\ewhen[1]{\kw{when}\:({#1})\fnspace}
 \newcommand\etrue{\prim{true}}
 \newcommand\efalse{\prim{false}}
@@ -185,3 +184,8 @@
 %% ===== Change theory & seminaive translation stuff =====
 \newcommand\dummy{\name{dummy}}
 \newcommand\zero{\ensuremath{\boldsymbol 0}}
+
+\newcommand\Deriv{\mathscr{D}}
+%\DeclareMathOperator\Deriv{\mathscr{D}}
+%\DeclareMathOperator\Deriv{\mathscr{Derive}}
+%\renewcommand\Deriv{\mathscr{Derive}\:}
