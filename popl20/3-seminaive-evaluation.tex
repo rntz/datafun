@@ -167,70 +167,11 @@ This is the problem of \emph{incremental computation}, and since Datafun is a
 functional language, we turn to recent work by \citet{incremental} on the
 \emph{incremental \fn-calculus}.
 
-%% \todo{explain how $\name{step}'$ looks like a derivative of $\name{step}$ in the
-%%   sense of \citet{incremental}.}
-
 
 \subsection{The incremental \boldfn-calculus}
 \label{sec:seminaive-via-incremental}
 
+%% \todo{explain how $\name{step}'$ looks like a derivative of $\name{step}$ in the
+%%   sense of \citet{incremental}.}
+
 \XXX
-
-
-%% Now let's move from Datalog to Datafun. The transitive closure of \name{edge} is
-%% the fixed point of the monotone function $f$ defined by:
-
-%% \nopagebreak[2]
-%% \[\begin{array}{l}
-%%   f \<\name{path} = \name{edge} \cup
-%%   \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{path}}
-%% \end{array}\]
-
-%% \noindent
-%% The \naive{} way to find a fixed point is to iterate $f$, computing the
-%% recurrence
-
-%% \nopagebreak[2]
-%% \begin{align*}
-%%   x_0 &= \emptyset & x_{i+1} &= f\<x
-%% \end{align*}
-
-%% \noindent
-%% However, since inductively $x_i \subseteq f\<x_i$, each iteration re-computes
-%% every value found in the previous iteration.
-%% %
-%% Following Datalog, we'd prefer to compute only the \emph{change} between
-%% iterations.
-%% %
-%% Since $x_i \subseteq x_{i+1}$, iterations change only by gaining elements. So
-%% given a set $x$, and a set $\dx$ of added elements, let's imagine a function
-%% $f'\<x\<\dx$ that tells us \emph{how $f\<x$ changes}, such that:
-
-%% \begin{equation} f \<(x \cup \dx) = f\<x \cup f'\<x\<\dx
-%%   \label{eqn:f-derivative}
-%% \end{equation}
-
-%% \noindent
-%% Given such an $f'$ we can set up an equivalent recurrence:
-
-%% \begin{align*}
-%%   x_0 &= \emptyset & x_{i+1} &= x_i \cup \dx_i
-%%   \\
-%%   \dx_0 &= f\<\emptyset & \dx_{i+1} &= f' \<x_i \<\dx_i
-%% \end{align*}
-
-%% \noindent
-%% From \cref{eqn:f-derivative} it follows inductively that $x_i = f^i\<\emptyset$.
-
-%% So, how do we find such an $f'$? One trivial answer is to let $f'\<x\<\dx =
-%% f\<(x \cup \dx)$. Unfortunately, this solution is worse than the problem:
-%% re-computing $f$ is exactly what we wish to avoid!
-%% %
-%% For our \emph{specific} $f$, there is a better answer:
-
-%% \nopagebreak[2]
-%% \[\begin{array}{l}
-%%   f' \<\name{path} \<\name{dpath} =
-%%   \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
-%% \end{array}\]
-
