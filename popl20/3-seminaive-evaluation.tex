@@ -11,6 +11,7 @@ Consider the following Datalog fragment:\footnote{This example and explanation
   \name{path}(x,z) &\gets \name{edge}(x,y) \wedge \name{path}(y,z)
 \end{align*}
 
+
 \noindent
 The denotation of \name{path} is the least fixed point of the rules defining
 it.
@@ -21,10 +22,10 @@ of known paths (initially empty) stops growing.
 For example, if the \name{edge} relation is \{(1,\,2), (2,\,3), (3,\,4)\}, we
 get the following evaluation trace:
 
-%% TODO: not enough vertical space around this
+%% TODO: make sure there's enough vertical space around this.
+\nopagebreak[2]
 \begin{center}
   \setlength\tabcolsep{1em}
-  \def\arraystretch{1.1}
   \begin{tabular}{@{}rll@{}}
     Step
     & Previously known paths
@@ -53,14 +54,14 @@ quite wasteful: we deduced the path (1,\,2) at \emph{every} iteration; ideally
 we'd only deduce it once. On a chain of $n$ edges, we deduce $\Theta(n^3)$
 facts, even though there are only $\Theta(n^2)$ paths!
 
-The standard improvement to this strategy is known as
+The standard improvement to this strategy is
 \emph{semi\naive\ evaluation}~\cite{seminaive}, which transforms recursive rules
 into explicitly iterative time-indexed rules of two kinds: \emph{derivative}
 rules, to compute the new facts at each iteration; and \emph{accumulator} rules,
 to collect these facts into a final result.
 %
-In this case, the derivative rule is simple: we only discover new paths at
-iteration $i+1$ by appending edges to paths which were new at iteration $i$:
+In this case, the derivative rule is simple: we discover new paths at iteration
+$i+1$ by appending edges to paths which were new at iteration $i$:
 
 \begin{align*}
   \name{dpath}_0(x,y) &\gets \name{edge}(x,y)
@@ -74,7 +75,6 @@ iteration $i+1$ by appending edges to paths which were new at iteration $i$:
 
 \begin{center}
   \setlength\tabcolsep{1em}
-  \def\arraystretch{1.1}
   \begin{tabular}{@{}rll@{}}
     Step & $\name{path}_i$ & $\name{dpath}_i$
     \\\midrule
@@ -94,25 +94,19 @@ iteration $i+1$ by appending edges to paths which were new at iteration $i$:
 %%
 %% Perhaps we should say, "--- our computation is now linear in the size of its
 %% output". But is this really justified?
-This is much better --- we have turned a cubic computation into a quadratic one.
-%
-The semi\naive\ transformation is a kind of \emph{incremental computation}: at
-each stage we compute the changes in the rule given the previous changes to its
-inputs.
-%
-\todo{more?}
+This is much better --- we have turned a cubic computation into a quadratic one!
 
 
-\subsection{Finding Fixed Points Faster via Derivatives}
+\subsection{Semi\naive\ evaluation as incremental computation}
 
 Now let's move from Datalog to Datafun. The transitive closure of \name{edge} is
 the fixed point of the monotone function \name{step} defined by:
 
 \nopagebreak[2]
-\[\begin{array}{l}
-  \name{step} \<\name{path} = \name{edge} \cup
-  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{path}}
-\end{array}\]
+\[
+\name{step} \<\name{path} = \name{edge} \cup
+\setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{path}}
+\]
 
 \noindent
 The \naive\ way to compute \name{step}'s fixed point is to iterate it: start
@@ -128,10 +122,10 @@ iterations.
 So consider $\name{step}'$ defined by:
 
 \nopagebreak[2]
-\[\begin{array}{l}
-  \name{step}' \<\name{dpath} =
-  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
-\end{array}\]
+\[
+\name{step}' \<\name{dpath} =
+\setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
+\]
 
 \noindent
 Observe that $\name{step} \<(\name{path} \cup \name{dpath}) =
@@ -142,81 +136,42 @@ That is, $\name{step}'$ tells us how \name{step} changes as its input grows.
 Using this property, we can directly compute the changes $\name{dpath}_i$
 between our iterations $\name{path}_i$:
 
-\begin{align*}
-  \name{dpath}_0 &= \name{step}\<\emptyset
-  & \name{dpath}_{i+1} &= \name{step}'\<\name{dpath}_i
-  & \name{path}_{i+1} &= \name{path}_i \cup \name{dpath}_i
-\end{align*}
-%
-\todo{Explain why computing $\name{step}'\<\name{dpath}_i$ isn't
-  \naive/ever-increasing. Explain how this lets us compute $\name{path}_i$ more
-  efficiently and wait until it quiesces as before.}
-%
-This is the analogue of semi\naive\ evaluation in a functional setting;
-$\name{step}'$ is the analogue of the rule for $\D\name{path}_{i+1}$.
-%% TODO: introduce this parallel between step' and Δpath_{i+1} sooner?
+%% \begin{align*}
+%%   \name{dpath}_0 &= \name{step}\<\emptyset
+%%   & \name{dpath}_{i+1} &= \name{step}'\<\name{dpath}_i
+%%   & \name{path}_{i+1} &= \name{path}_i \cup \name{dpath}_i
+%% \end{align*}
 
-\label{sec:derivatives-via-incremental}
-How do we find functions like $\name{step}'$?
+\[\def\arraystretch{1.2}
+\begin{array}{rclcl}
+  \name{dpath}_0 &=& \name{step}\<\emptyset
+  &=& \name{edge}
+  \\
+  \name{dpath}_{i+1} &=& \name{step}'\<\name{dpath}_i
+  &=& \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}_i}
+  \\
+  \name{path}_{i+1} &=& \name{path}_i \cup \name{dpath}_i
+\end{array}\]
+
+\noindent These exactly mirror the derivative and accumulator rules for
+\(\name{path}_i\) and \(\name{dpath}_i\) we gave earlier.
 %
-\todo{explain how $\name{step}'$ looks like a derivative of $\name{step}$ in the
-  sense of \citet{incremental}.}
+\todo{Explain how this lets us compute $\name{path}_i$ more
+  efficiently and wait until it quiesces as before.}
+
+The problem of semi\naive\ evaluation for Datafun, then, reduces to the problem
+of finding functions like $\name{step}'$, which compute the change in a
+function's output given a change to its input.
+%
+This is the problem of \emph{incremental computation}, and since Datafun is a
+functional language, we turn to recent work by \citet{incremental} on the
+\emph{incremental \fn-calculus}.
 
 
-%% Now let's move from Datalog to Datafun. The transitive closure of \name{edge} is
-%% the fixed point of the monotone function $f$ defined by:
+\subsection{The incremental \boldfn-calculus}
+\label{sec:seminaive-via-incremental}
 
-%% \nopagebreak[2]
-%% \[\begin{array}{l}
-%%   f \<\name{path} = \name{edge} \cup
-%%   \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{path}}
-%% \end{array}\]
+%% \todo{explain how $\name{step}'$ looks like a derivative of $\name{step}$ in the
+%%   sense of \citet{incremental}.}
 
-%% \noindent
-%% The \naive{} way to find a fixed point is to iterate $f$, computing the
-%% recurrence
-
-%% \nopagebreak[2]
-%% \begin{align*}
-%%   x_0 &= \emptyset & x_{i+1} &= f\<x
-%% \end{align*}
-
-%% \noindent
-%% However, since inductively $x_i \subseteq f\<x_i$, each iteration re-computes
-%% every value found in the previous iteration.
-%% %
-%% Following Datalog, we'd prefer to compute only the \emph{change} between
-%% iterations.
-%% %
-%% Since $x_i \subseteq x_{i+1}$, iterations change only by gaining elements. So
-%% given a set $x$, and a set $\dx$ of added elements, let's imagine a function
-%% $f'\<x\<\dx$ that tells us \emph{how $f\<x$ changes}, such that:
-
-%% \begin{equation} f \<(x \cup \dx) = f\<x \cup f'\<x\<\dx
-%%   \label{eqn:f-derivative}
-%% \end{equation}
-
-%% \noindent
-%% Given such an $f'$ we can set up an equivalent recurrence:
-
-%% \begin{align*}
-%%   x_0 &= \emptyset & x_{i+1} &= x_i \cup \dx_i
-%%   \\
-%%   \dx_0 &= f\<\emptyset & \dx_{i+1} &= f' \<x_i \<\dx_i
-%% \end{align*}
-
-%% \noindent
-%% From \cref{eqn:f-derivative} it follows inductively that $x_i = f^i\<\emptyset$.
-
-%% So, how do we find such an $f'$? One trivial answer is to let $f'\<x\<\dx =
-%% f\<(x \cup \dx)$. Unfortunately, this solution is worse than the problem:
-%% re-computing $f$ is exactly what we wish to avoid!
-%% %
-%% For our \emph{specific} $f$, there is a better answer:
-
-%% \nopagebreak[2]
-%% \[\begin{array}{l}
-%%   f' \<\name{path} \<\name{dpath} =
-%%   \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
-%% \end{array}\]
-
+\XXX
