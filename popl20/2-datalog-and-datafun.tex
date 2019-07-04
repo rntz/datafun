@@ -54,20 +54,35 @@ inference rule form, this program could be rendered as:
              { \mathsf{ancestor}(x, z) }
 \end{mathpar}
 
-Semantically, what is going on is that 
+Semantically, each predicate can be interpeted as the set of tuples
+which satisfy the predicate. Recursive definitions can be interpreted
+by seeing the whole program as a function from relations to relations,
+and then taking the least fixed point of that function. The syntax of
+Datalog is such that the relation transformer the rules define is
+always a monotone function on sets, and so this least fixed point
+always exists.
 
 \subsection{Datafun}
 
 Datalog makes it very easy to define relations recursively, but
 because it is such a small and restricted language, it is not possible
-to build abstractions over these rules. To 
+to build abstractions over these rules.  The mathematical observation
+that led to the generalization of Datafun is that the semantics of a
+Datalog program is the fixed point of a monotone function on
+relations, and the category Poset of partial orders and monotone maps
+is cartesian closed. So we can build a language in the following
+sequence of steps:
 
 \begin{enumerate}
 \item We begin with the simply-typed lambda calculus including sums
   and products.
-\item We add a type of finite sets \tset{\eqt A}.
-\item We add a type 
+\item We add a type of finite sets $\tset{\eqt A}$.
+\item Next, we add a comonadic type $\iso A$, denoting the same elements
+  as $A$, but whose partial order is just the equality.
+\item Finally, we add a fixed-point operator $\mathit{fix} : \Box(L \to L) \to L$. 
 \end{enumerate}
+
+
 
 
 
