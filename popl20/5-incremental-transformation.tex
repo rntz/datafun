@@ -100,19 +100,42 @@ Intuitively, $\iso\G$, $\D\G$, and $\Phi\G$ mirror the effect of
 $\iso$, $\D$, and $\Phi$ on the semantics of $\G$:
 
 \nopagebreak[2]
-%% TODO: needs more vertical space?
-\begin{align*}
-  \multirow{2}{*}{\den{\iso \G} = \iso\den\G}
-  &&
-  \den{\D(\h x A)} &\cong \den{\D A}
-  &
-  \den{\Phi(\h x A)} &\cong \den{\Phi A}
-  \\
-  &&
-  \den{\D(\hd x A)} &\cong \den{\D \iso A}
-  &
-  \den{\Phi(\hd x A)} &\cong \den{\Phi \iso A}
-\end{align*}
+%% This is a hack to make up for not having a \multirow that works inside align*
+%% & co without producing warnings.
+\begin{center}
+  \(\displaystyle \den{\iso\G} = \iso\den\G \)
+  %
+  \hfil
+  %
+  %% TODO: needs more vertical space?
+  \(\displaystyle\begin{aligned}
+    \den{\D(\h x A)} &\cong \den{\D A}
+    \\
+    \den{\D(\hd x A)} &\cong \den{\D \iso A}
+  \end{aligned}\)
+  %
+  \hfil
+  %
+  \(\displaystyle\begin{aligned}
+    \den{\Phi(\h x A)} &\cong \den{\Phi A}
+    \\
+    \den{\Phi(\hd x A)} &\cong \den{\Phi \iso A}
+  \end{aligned}\)
+\end{center}
+
+%% \nopagebreak[2]
+%% \begin{align*}
+%%   \multirow{2}{*}{\den{\iso \G} = \iso\den\G}
+%%   &&
+%%   \den{\D(\h x A)} &\cong \den{\D A}
+%%   &
+%%   \den{\Phi(\h x A)} &\cong \den{\Phi A}
+%%   \\
+%%   &&
+%%   \den{\D(\hd x A)} &\cong \den{\D \iso A}
+%%   &
+%%   \den{\Phi(\hd x A)} &\cong \den{\Phi \iso A}
+%% \end{align*}
 
 \noindent
 These defined, we can state the sense in which $\phi$ and $\delta$ are
