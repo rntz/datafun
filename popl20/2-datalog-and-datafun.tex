@@ -1,4 +1,18 @@
 \section{Datalog and Datafun}
 \label{sec:datalog-and-datafun}
 
+n this section, we explain how Datalog works by example, and then explain
+how Datafun works by porting and then generalising these examples. 
+
+\subsection{Datalog}
+
+\begin{minted}{prolog}
+parent(earendil, elrond).
+parent(elrond, arwen).
+ancestor(X, Y) :- parent(X, Y).
+ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).
+\end{minted}
+
+\subsection{Datafun}
+
 \input{fig-syntax}
