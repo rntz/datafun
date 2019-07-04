@@ -55,6 +55,10 @@
 \usepackage{style}
 \usepackage{notation}
 
+% Suppress citation warnings until we do a final citation pass.
+\usepackage{silence}\WarningFilter*{natbib}{Citation}
+\WarningFilter*{latex}{Reference `thm:phi-eqtype'}
+
 \begin{document}
 
 %% Title information: \title[Short Title]{Full Title}

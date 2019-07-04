@@ -4,26 +4,43 @@
 %% Now that we have our typing rules and semantics, we can get down to the
 %% nitty-gritty.
 
-Recall that our aim is to speed up $\efix f$ expressions using the derivative of
-the function $f$ computes.
+Our aim is to speed up $\efix e$ expressions using the derivative of the
+function $e$ computes, so you might expect us to use $\Deriv e$%
+%.
+, the derivative of $e$.
 %
-So you might expect us to use $\Deriv f$.
-%%, the derivative of $f$.
+However, $e$ is not a function~\citep{magritte}: it is an expression computing a
+function, and $\Deriv e$ is the derivative of this \emph{expression} --- it
+computes how $e$ changes.
 %
-However, $f$ is not a function~\citep{magritte}: it is an \emph{expression} that
-computes a function, and $\Deriv f$ is the derivative of this \emph{expression}
---- it computes how $f$ changes. A derivative of a \emph{function}, on the other
-hand, is \emph{a zero-change to that function}.
+Recall from \cref{sec:seminaive-via-incremental} that a function's derivative is
+\emph{a zero-change to that function}. So the change $\Deriv e$ and the
+derivative of the function $e$ computes will coincide if \emph{$e$ does not
+  change}.
+%
+This is why the typing rule for $\efix e$ requires that $e :
+\iso(\fixt L \to \fixt L)$; the use of $\iso$ prevents $e$ from changing.
+
+This provides the first clue to constructing our speed-up transformation.
+%
+\todo{Ask Neel how best to explain why ``decorate all boxed/discrete values with their zero-changes'' is our strategy.}
+
+%% \todo{Do we need to explain why computing zero-changes cannot be done at
+%%   runtime? Well, because constructing function derivatives at runtime is
+%%   impossible.}
 
 \input{fig-DeltaPhi}
 
-\todo{Write intro here once we've written \cref{sec:seminaive-and-ilc}. The
-  fundamental ideas are:
+\todo{Key ideas not yet covered:
   \begin{itemize}
-  \item Make $\prim{fix}$ take a boxed argument, $\iso(\fixt L \to \fixt L)$.
   \item Annotate values of type $\iso A$ with their zero-changes.
+  \item We're using derivatives of a sped-up program so we use $\DP$ everywhere
+    not $\D$.
   \item Use the zero-change to \prim{fix}'s argument (a \emph{derivative}) to
     compute it faster using \fastfix.
+%
+    Give typing rules \& semantics for \fastfix. Semantics does not depend on
+    \fastfix\ being given a derivative; it's well-defined regardless.
   \end{itemize}}
 %
 \Cref{fig:phi,fig:delta} define two mutually recursive static transformations:
@@ -76,6 +93,51 @@ $A$-value or a $\D B$ change to a $B$-value; hence $\D(A + B) = \D A + \D B$.
   \Phi(\h x A) &= \h x {\Phi A} & \Phi(\hd x A) &= \hd x {\Phi A}, \hd \dx {\DP A}
   \\
   \iso{(\h x A)} &= \hd x A & \iso{(\hd x A)} &= \hd x A
+\end{align*}
+
+\noindent
+Intuitively, $\iso\G$, $\D\G$, and $\Phi\G$ mirror the effect of
+$\iso$, $\D$, and $\Phi$ on the semantics of $\G$:
+
+\nopagebreak[2]
+%% TODO: needs more vertical space?
+\begin{align*}
+  \multirow{2}{*}{\den{\iso \G} = \iso\den\G}
+  &&
+  \den{\D(\h x A)} &\cong \den{\D A}
+  &
+  \den{\Phi(\h x A)} &\cong \den{\Phi A}
+  \\
+  &&
+  \den{\D(\hd x A)} &\cong \den{\D \iso A}
+  &
+  \den{\Phi(\hd x A)} &\cong \den{\Phi \iso A}
+\end{align*}
+
+\noindent
+These defined, we can state the sense in which $\phi$ and $\delta$ are
+type-correct:
+
+\begin{theorem}[Type-correctness]
+  \label{thm:type-correct}
+  If $\J e \G A$, then
+  \[ \J {\phi e} {\Phi\G} {\Phi A}
+  \qquad\text{and}\qquad
+  \J {\delta e} {\iso{\Phi\G}, \DP\G} {\DP A}
+  \]
+\end{theorem}
+\begin{proof}
+  By induction on typing derivations; see appendix. \XXX
+\end{proof}
+
+\noindent To get the hang of these context and type transformations, suppose $\J
+e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
+
+\nopagebreak[2]
+\begin{align*}
+  \Jalign {\phi e} {\h x {\Phi A}, \hd y {\Phi B}, \hd \dy {\DP B}} {\Phi C}
+  \\
+  \Jalign {\delta e} {\hd x {\Phi A}, \h\dx{\DP A}, \hd y {\Phi B}, \hd \dy {\DP B}} {\DP C}
 \end{align*}
 
 \todo{Explain how uses of $\phi$ in $\delta e$ involve weakening, and how this

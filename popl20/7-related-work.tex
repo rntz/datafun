@@ -1,9 +1,12 @@
 \section{Discussion and Related Work}
 \label{sec:related-work}
+\label{sec:differences-from-incremental}
 
 \newcommand\mvar[1]{\mathvar{\color{black}#1}}
 
-\paragraph{Nested fixed points} The typing rule for $\efix e$ requires $e : \iso(\fixt L \to \fixt L)$.
+\paragraph{Nested fixed points}
+%
+The typing rule for $\efix e$ requires $e : \iso(\fixt L \to \fixt L)$.
 %
 The $\phi$ translation takes advantage of this $\iso$, decorating expressions of
 type $\iso A$ with their zero-changes.

@@ -94,6 +94,7 @@ $i+1$ by appending edges to paths which were new at iteration $i$:
 %%
 %% Perhaps we should say, "--- our computation is now linear in the size of its
 %% output". But is this really justified?
+\noindent
 This is much better --- we have turned a cubic computation into a quadratic one!
 
 
@@ -111,7 +112,8 @@ the fixed point of the monotone function \name{step} defined by:
 \noindent
 The \naive\ way to compute \name{step}'s fixed point is to iterate it: start
 with \(\name{path}_0 = \emptyset\) and compute \(\name{path}_{i+1} =
-\name{step}\<\name{path}_i\) until \(\name{path}_i = \name{path}_{i+1}\).
+\name{step}\<\name{path}_i\) for increasing $i$ until \(\name{path}_i =
+\name{path}_{i+1}\).
 %
 But since $\name{path}_i \subseteq \name{step}\<\name{path}_i$, each iteration
 re-computes every path found by the previous iteration.
@@ -142,16 +144,29 @@ between our iterations $\name{path}_i$:
 %%   & \name{path}_{i+1} &= \name{path}_i \cup \name{dpath}_i
 %% \end{align*}
 
-\[\def\arraystretch{1.2}
-\begin{array}{rclcl}
-  \name{dpath}_0 &=& \name{step}\<\emptyset
-  &=& \name{edge}
+%% \[\def\arraystretch{1.2}
+%% \begin{array}{rclcl}
+%%   \name{dpath}_0 &=& \name{step}\<\emptyset
+%%   &=& \name{edge}
+%%   \\
+%%   \name{dpath}_{i+1} &=& \name{step}'\<\name{dpath}_i
+%%   &=& \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}_i}
+%%   \\
+%%   \name{path}_{i+1} &=& \name{path}_i \cup \name{dpath}_i
+%% \end{array}\]
+
+\begin{align*}
+  \name{dpath}_0
+  &= \name{step}\<\emptyset
+  = \name{edge}
   \\
-  \name{dpath}_{i+1} &=& \name{step}'\<\name{dpath}_i
-  &=& \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}_i}
+  \name{dpath}_{i+1}
+  &= \name{step}'\<\name{dpath}_i
+  = \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}_i}
   \\
-  \name{path}_{i+1} &=& \name{path}_i \cup \name{dpath}_i
-\end{array}\]
+  \name{path}_{i+1}
+  &= \name{path}_i \cup \name{dpath}_i
+\end{align*}
 
 \noindent These exactly mirror the derivative and accumulator rules for
 \(\name{path}_i\) and \(\name{dpath}_i\) we gave earlier.
@@ -163,13 +178,28 @@ The problem of semi\naive\ evaluation for Datafun, then, reduces to the problem
 of finding functions like $\name{step}'$, which compute the change in a
 function's output given a change to its input.
 %
-This is the problem of \emph{incremental computation}, and since Datafun is a
-functional language, we turn to recent work by \citet{incremental} on the
-\emph{incremental \fn-calculus}.
+This is a problem of \emph{incremental computation}, and since Datafun is a
+functional language, we turn to the
+\emph{incremental \fn-calculus}~\citep{incremental}.
 
 
 \subsection{The incremental \boldfn-calculus}
 \label{sec:seminaive-via-incremental}
+
+In this section we explain the incremental \fn-calculus as we have applied it to
+Datafun; we discuss our differences from its formulation in
+\citeauthor{incremental} in \cref{sec:differences-from-incremental}.
+
+\todo{Explain:
+  \begin{itemize}
+  \item $\D(A \to B) = \iso A \to \D A \to \D B$. In particular, (a) why not
+    just $\iso A \to \D B$; and (b) why the \iso?
+  \item Function derivatives are zero-changes.
+  \item Since we're tracking changes during fixed point iteration, and these
+    increase monotonically, we only allow increasing changes. So $\iso A$
+    (discussed in \cref{sec:datalog-and-datafun}) prevents things from changing!
+  \end{itemize}
+  }
 
 %% what do we need here?
 

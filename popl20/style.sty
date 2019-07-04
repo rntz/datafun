@@ -1,6 +1,10 @@
-% TODO: default arraystretch?
+%% \renewcommand\@acmplainbodyfont{}
+%% \renewcommand\@acmplainheadfont{\bfseries}
+%% \renewcommand\@acmplainnotefont{\normalfont\mdseries\itshape}
+%% \renewcommand\@proofnamefont{\bfseries}
+
 \def\arraystretch{1.08} % a little more space by default
-\setlength\arraycolsep{1.667pt}
+\setlength\arraycolsep{2pt} % 1.667pt?
 
 %\setlength\abovecaptionskip{10pt plus 2pt minus 2pt}
 %\setlength\belowcaptionskip{12pt plus 6pt minus 4pt}\setlength\textfloatsep{0pt}
@@ -21,7 +25,9 @@
 % stretch: maximum allowed font expansion; default is 20.
 % tracking: use letterspacing on small caps.
 % letterspace: amount of added letter-spacing in \lsstyle, \scshape, &c.
-\microtypesetup{spacing=true,stretch=15,letterspace=0,}
+\microtypesetup{letterspace=0,
+  %spacing=true, stretch=20, shrink=15,
+}
 
 %% \usepackage{enumitem}\setlist{labelindent=1em,labelsep=.75em,leftmargin=*}
 %% \setlist{labelindent=.5em,labelsep=.75em,leftmargin=*}
@@ -102,3 +108,8 @@
 %% %% ----- #0: Charter section titles -----
 %% \renewcommand\@secfont{\large\bfseries}
 %% \renewcommand\@subsecfont{\bfseries}
+
+
+%% This works nicely for Charter's small-caps. TODO: figure out how to only
+%% apply this to Charter small-caps & not to sans-serif {small,all}-caps.
+\microtypesetup{tracking=true,letterspace=25,}

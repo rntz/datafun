@@ -6,7 +6,11 @@
 \usepackage{stmaryrd}           % \shortrightarrow, \llbracket, etc.
 \usepackage{subcaption}        % for complex figures with subfigures/subcaptions
 \usepackage{nccmath}      % fix spacing around AMS math environments like align*
+\usepackage{multirow}
+
 \usepackage{lipsum}       % TODO remove
+
+\hyphenation{semi-na\"ive}
 
 % cleveref must be loaded AFTER hyperref, amsmath, & amsthm.
 \usepackage[nameinlink,noabbrev]{cleveref}% other options: capitalise
@@ -185,7 +189,8 @@
 \newcommand\dummy{\name{dummy}}
 \newcommand\zero{\ensuremath{\boldsymbol 0}}
 
-\newcommand\Deriv{\mathscr{D}}
+\newcommand\Deriv\delta
+%\newcommand\Deriv{\mathscr{D}}
 %\DeclareMathOperator\Deriv{\mathscr{D}}
 %\DeclareMathOperator\Deriv{\mathscr{Derive}}
 %\renewcommand\Deriv{\mathscr{Derive}\:}
