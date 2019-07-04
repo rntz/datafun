@@ -149,11 +149,16 @@ type-correct:
 \begin{theorem}[Type-correctness]
   \label{thm:type-correct}
   If $\J e \G A$, then
-  \[ \J {\phi e} {\Phi\G} {\Phi A}
-  \qquad\text{and}\qquad
-  \J {\delta e} {\iso{\Phi\G}, \DP\G} {\DP A}
-  \]
+  %% \[ \J {\phi e} {\Phi\G} {\Phi A}
+  %% \quad\text{and}\quad
+  %% \J {\delta e} {\iso{\Phi\G}, \DP\G} {\DP A}
+  %% \]
+  \begin{align*}
+    \Jalign {\phi e} {\Phi\G} {\Phi A}\\
+    \Jalign {\delta e} {\iso{\Phi\G}, \DP\G} {\DP A}
+  \end{align*}
 \end{theorem}
+
 \begin{proof}
   By induction on typing derivations; see appendix. \XXX
 \end{proof}

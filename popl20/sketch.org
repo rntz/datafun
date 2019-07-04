@@ -1,3 +1,6 @@
+regexes:
+https://photos.google.com/photo/AF1QipPbslFHWOLCdAtSA5wMl6Yn1QXm1mMRHb2g7Emf
+
 * 1. Introduction
 - Datalog is good (cite its many uses, databases, program analysis, etc.)
   
