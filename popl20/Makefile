@@ -7,7 +7,7 @@ RNTZTEXDIR := ../rntztex/
 export TEXINPUTS := $(RNTZTEXDIR):
 
 # Path to latexrun.
-LATEXRUN := $(RNTZTEXDIR)/latexrun/latexrun --verbose-cmds --latex-args='-shell-escape'
+LATEXRUN := $(RNTZTEXDIR)/latexrun/latexrun
 
 # By default, try to build every tex file in this directory.
 # Customize $(TEXS) to change this.
@@ -27,8 +27,9 @@ watch\:%: %
 		make --no-print-directory -j $^; \
 	done
 
+# For debugging, add --verbose-cmds.
 %.pdf: %.tex FORCE
-	$(LATEXRUN) $<
+	$(LATEXRUN) --latex-args='-shell-escape' $<
 
 # pdfbook (it's in texlive-extra-utils on Ubuntu) combines pages to make a
 # zine-style booklet. For example, if foo.pdf is formatted for A5 paper,
