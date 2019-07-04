@@ -173,7 +173,7 @@ between our iterations $\name{path}_i$:
   efficiently and wait until it quiesces as before.}
 
 The problem of semi\naive\ evaluation for Datafun, then, reduces to the problem
-of finding functions like $\name{step}'$, which compute the change in a
+of finding functions, like $\name{step}'$, which compute the change in a
 function's output given a change to its input.
 %
 This is a problem of \emph{incremental computation}, and since Datafun is a
@@ -367,22 +367,19 @@ In other words, $\df$ yields the change in the output of $f$ given a change to
 its \emph{input}.
 %
 This is exactly the property of $\name{step}'$ that made it useful for
-semi\naive\ evaluation: indeed, modulo not needing the base point $x$,
-$\name{step}'$ is a zero-change to \name{step}:
+semi\naive\ evaluation --- indeed, $\name{step}'$ is a zero-change to
+\name{step}, modulo not taking the base point $x$ as an argument:
 
 \[ \changesat{\tseteq A} \dx x y \implies
 \changesat{\tseteq A}{\name{step}'\<\dx}{\name{step}\<x}{\name{step}\<y}
 \]
 
+\noindent
 Function zero-changes are so important we give them a special name:
 \emph{derivatives}.
 \todo{more}
 
-\todo{Explain:
-  \begin{itemize}
-  \item How $\name{step}'$ looks like a derivative of $\name{step}$ in the
-  sense of \citet{incremental}.
-  \end{itemize}
+\todo{Explain: done?
 
   Do \textbf{not} explain:
   \begin{itemize}
