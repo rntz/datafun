@@ -14,31 +14,34 @@ interpreted over ordered structures) characterizes polytime
 computation~\cite{datalog-polytime}.
 
 In addition to its theoretical elegance, over the past twenty years
-Datalog has seen a surprisingly wide surge of use across a variety of
-practical domains, both in research and in industry. Whaley and Lam
-\cite{whaley-lam,whaley-phd} implemented pointer analysis algorithms
-in Datalog, and found that they could reduce their analyses from
-thousands of lines of C code to \emph{tens} of lines of Datalog code,
-while retaining competitive performance. Semmle has developed the .QL
-language~\cite{semmlecode,ql-inference} based on Datalog for analysing
-source code (which was used to analyze the code for NASA's Curiosity
-Mars rover), and LogicBlox has developed the LogiQL~\cite{logicblox}
-language for business analytics and retail prediction. The Boom
-project at Berkeley has developed the Bloom language for distributed
-programming~\cite{bloom}, and the Datomic cloud
-database~\cite{datomic} uses Datalog (embedded in Clojure) as its
-query language. Microsoft's SecPAL language~\cite{secpal} uses Datalog
-as the foundation of its decentralised authorization specification
-language. In each case, when the problem formulated in Datalog, the
-specification became directly implementable, while remaining
-dramatically shorter and clearer than alternatives implemented in more
-conventional languages.
+Datalog has seen a surprisingly wide array of uses across a variety of
+practical domains, both in research and in industry.
 
-\todo{We should cite DOOP (which used to use LogicBlox and now uses Souffle)}
+Whaley and Lam \cite{whaley-lam,whaley-phd} implemented pointer
+analysis algorithms in Datalog, and found that they could reduce their
+analyses from thousands of lines of C code to \emph{tens} of lines of
+Datalog code, while retaining competitive performance. The DOOP
+pointer analysis framework~\cite{doop}, built using the Souffl\'{e}
+Datalog engine~\cite{souffle}, shows that this approach can handle
+almost all of industrial languages like Java, even analysing features
+like reflection~\cite{doop-java-reflection}. Semmle has developed the
+.QL language~\cite{semmlecode,ql-inference} based on Datalog for
+analysing source code (which was used to analyze the code for NASA's
+Curiosity Mars rover), and LogicBlox has developed the
+LogiQL~\cite{logicblox} language for business analytics and retail
+prediction. The Boom project at Berkeley has developed the Bloom
+language for distributed programming~\cite{bloom}, and the Datomic
+cloud database~\cite{datomic} uses Datalog (embedded in Clojure) as
+its query language. Microsoft's SecPAL language~\cite{secpal} uses
+Datalog as the foundation of its decentralised authorization
+specification language. In each case, when the problem formulated in
+Datalog, the specification became directly implementable, while
+remaining dramatically shorter and clearer than alternatives
+implemented in more conventional languages.
 
-\todo{We should cite Yannis's
-  recent SNAPL paper ``Next-Paradigm Programming Languages: What Will They
-  Look Like and What Changes Will They Bring?''}
+% \todo{We should cite Yannis's
+%   recent SNAPL paper ``Next-Paradigm Programming Languages: What Will They
+%   Look Like and What Changes Will They Bring?''}
 
 However, there are two flies in the ointment. First, even though each
 of these applications is supported by the skeleton of Datalog, they
@@ -60,7 +63,7 @@ alternative design strategies.
 
 Flix adopts the route of treating Datalog as an embedded
 domain-specific language. That is, Flix is a fairly conventional
-albeit well-designed functional programming language roughly
+(albeit well-designed) functional programming language roughly
 comparable to ML or Haskell, extended with types representing Datalog
 predicates and program. The evaluation of a Flix program builds a
 Datalog program, which is then handed off to a custom Datalog engine.
@@ -74,27 +77,28 @@ functional programming language, but unlike Flix, its type discipline
 has been extended to support tracking whether functions are monotone
 or not. Then, Datalog-style recursively defined relations are just
 ordinary recursive defininitions on set-valued functions, with
-monotonicity typing ensuring that every definable function continues to
-make sense in the model-theoretic semantics of Datalog. Tracking
-monotonicity information in types permits a much tighter integration
-between the functional and logic programming styles, but it comes at
-the cost that many of Datalog's standard implementation techniques,
-which were originally developed in the context of a first-order logic
-language, are no longer obviously applicable in the higher-order
-functional setting.
+monotonicity typing ensuring that every definable function on
+relations continues to make sense in the model-theoretic semantics of
+Datalog. Tracking monotonicity information in types permits a much
+tighter integration between the functional and logic programming
+styles, but it comes at the cost that many of Datalog's standard
+implementation techniques, which were originally developed in the
+context of a first-order logic language, are no longer obviously
+applicable in the higher-order functional setting.
 
 Second, even though the semantics of Datalog is simple, actually
 making it perform well enough to use in practice calls for very
 sophisticated program analysis and compiler engineering. (This is a
-familiar issue from databases, where query planners embody a startling
-amount of optimization knowledge to optimize relatively simple SQL
-queries.) A wide variety of techniques for optimizing Datalog programs
-have been studied in the literature, such as using binary decision
-diagrams to represent relations~\cite{whaley-phd}, exploiting the
-structure of well-behaved subsets (e.g., CFL-reachability problems
-correspond to the ``chain program'' fragment of
-Datalog~\cite{chain-programs}), and combining top-down and bottom-up
-evaluation via the ``magic sets'' algorithm~\cite{magic-sets}.
+familiar experience from the database community, where query planners
+must encode a startling amount of knowledge to optimize relatively
+simple SQL queries.) A wide variety of techniques for optimizing
+Datalog programs have been studied in the literature, such as using
+binary decision diagrams to represent relations~\cite{whaley-phd},
+exploiting the structure of well-behaved subsets (e.g.,
+CFL-reachability problems correspond to the ``chain program'' fragment
+of Datalog~\cite{chain-programs}), and combining top-down and
+bottom-up evaluation via the ``magic sets''
+algorithm~\cite{magic-sets}.
 
 Today, one of the workhorse techniques for implementing bottom-up
 Datalog engines is \emph{semi\naive\
