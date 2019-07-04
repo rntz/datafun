@@ -6,13 +6,69 @@ how Datafun works by porting and then generalising these examples.
 
 \subsection{Datalog}
 
-\begin{minted}{prolog}
+The syntax of Datalog is a subset of Prolog's syntax. Programs
+consist of collections of predicate declarations, as follows:
+\begin{minted}[]{prolog}
 parent(earendil, elrond).
 parent(elrond, arwen).
-ancestor(X, Y) :- parent(X, Y).
-ancestor(X, Z) :- ancestor(X, Y), ancestor(Y, Z).
+parent(arwen, eldarion).
+
+ancestor(X, Z) ← parent(X, Z).
+ancestor(X, Z) ← ancestor(X, Y), parent(Y, Z).
 \end{minted}
 
+In this example, we define two binary relations, \datalog{parent(_,_)}
+and \datalog{ancestor(_,_)}. Lowercase terms like \datalog{elrond} and
+\datalog{arwen} are symbols \emph{a la} Lisp, and uppercase terms like
+\datalog{X} and \datalog{Y} are variables.
+
+The \datalog{parent(_, _)} relation declares a relation as a set of
+ground \emph{facts}; we explicitly assert that \datalog{earendil} is
+the parent of \datalog{elrond}, and \datalog{elrond} the parent of
+\datalog{arwen}, and so on. Then, the ancestor relation is declared as
+a pair of potentially recursive \emph{rules}, the first asserting that
+$X$ is an ancestor of $Z$ if $X$ is $Z$'s parent, and the second
+asserting that $X$ is an ancestor of $Z$ if there is a third person
+$Y$, such that $X$ is $Y$'s ancestor and $Y$ is $Z$'s parent. In
+inference rule form, this program could be rendered as:
+
+\begin{mathpar}
+  \inferrule*[]
+             { }
+             { \mathsf{parent(earendil, elrond)} }
+  \and
+  \inferrule*[]
+             { }
+             { \mathsf{parent(elrond, arwen)} }
+  \and
+  \inferrule*[]
+             { }
+             { \mathsf{parent(arwen, eldarion)} }
+  \\\vspace{1em}
+  \inferrule*[]
+             { \mathsf{parent}(x, y) }
+             { \mathsf{ancestor}(x, y) }
+  \and
+  \inferrule*[]
+             { \mathsf{ancestor}(x, y) \\ \mathsf{parent}(y, z) }
+             { \mathsf{ancestor}(x, z) }
+\end{mathpar}
+
+Semantically, what is going on is that 
+
 \subsection{Datafun}
+
+Datalog makes it very easy to define relations recursively, but
+because it is such a small and restricted language, it is not possible
+to build abstractions over these rules. To 
+
+\begin{enumerate}
+\item We begin with the simply-typed lambda calculus including sums
+  and products.
+\item We add a type of finite sets \tset{\eqt A}.
+\item We add a type 
+\end{enumerate}
+
+
 
 \input{fig-syntax}
