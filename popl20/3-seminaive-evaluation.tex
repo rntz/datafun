@@ -186,9 +186,17 @@ functional language, we turn to the
 \subsection{The incremental \boldfn-calculus}
 \label{sec:seminaive-via-incremental}
 
-In this section we explain the incremental \fn-calculus as we have applied it to
-Datafun; we discuss our differences from its formulation in
-\citeauthor{incremental} in \cref{sec:differences-from-incremental}.
+An incremental \fn-calculus associates every type $A$ with a type $\D A$
+representing the possible changes to values of type $A$.%
+%
+\footnote{In this section we explain the incremental \fn-calculus as we have
+  applied it to Datafun; we discuss our differences from its formulation in
+  \citeauthor{incremental} in \cref{sec:differences-from-incremental}.}
+%
+Now, our goal is to capture the change between iterations of a fixed point;
+these iterations increase monotonically, so for us the only possible changes are
+\emph{increases}. Most importantly, we let $\D\tseteq{A} = \tseteq{A}$: a change
+to a set is a set of new elements.
 
 \todo{Explain:
   \begin{itemize}
@@ -199,7 +207,13 @@ Datafun; we discuss our differences from its formulation in
     increase monotonically, we only allow increasing changes. So $\iso A$
     (discussed in \cref{sec:datalog-and-datafun}) prevents things from changing!
   \end{itemize}
-  }
+
+  Do \textbf{not} explain:
+  \begin{itemize}
+  \item what it does to contexts or variables
+  \item derivatives of expressions
+  \end{itemize}
+}
 
 %% what do we need here?
 

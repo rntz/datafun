@@ -19,9 +19,14 @@ derivative of the function $e$ computes will coincide if \emph{$e$ does not
   change}.
 %
 This is why the typing rule for $\efix e$ requires that $e :
-\iso(\fixt L \to \fixt L)$; the use of $\iso$ prevents $e$ from changing.
+\iso(\fixt L \to \fixt L)$; the use of $\iso$ prevents $e$ from changing!
 
-This provides the first clue to constructing our speed-up transformation.
+This leads to the key strategy of our speed-up transformation: to augment
+expressions of type $\iso A$ with their zero-changes. This, of course, involves
+changing the types of things.
+
+This provides the first clue to constructing our speed-up transformation: we
+will need to pass around zero-changes.
 %
 \todo{Ask Neel how best to explain why ``decorate all boxed/discrete values with their zero-changes'' is our strategy.}
 
