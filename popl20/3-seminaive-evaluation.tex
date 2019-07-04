@@ -23,7 +23,6 @@ For example, if the \name{edge} relation is \{(1,\,2), (2,\,3), (3,\,4)\}, we
 get the following evaluation trace:
 
 %% TODO: make sure there's enough vertical space around this.
-\nopagebreak[2]
 \begin{center}
   \setlength\tabcolsep{1em}
   \begin{tabular}{@{}rll@{}}
@@ -103,7 +102,6 @@ This is much better --- we have turned a cubic computation into a quadratic one!
 Now let's move from Datalog to Datafun. The transitive closure of \name{edge} is
 the fixed point of the monotone function \name{step} defined by:
 
-\nopagebreak[2]
 \[
 \name{step} \<\name{path} = \name{edge} \cup
 \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{path}}
@@ -123,7 +121,6 @@ iterations.
 %
 So consider $\name{step}'$ defined by:
 
-\nopagebreak[2]
 \[
 \name{step}' \<\name{dpath} =
 \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
@@ -186,26 +183,170 @@ functional language, we turn to the
 \subsection{The incremental \boldfn-calculus}
 \label{sec:seminaive-via-incremental}
 
-An incremental \fn-calculus associates every type $A$ with a type $\D A$
-representing the possible changes to values of type $A$.%
+To formalize the notion of change, an incremental \fn-calculus associates every
+type $A$ with a \emph{change structure}, consisting of:\footnote{Our notion of
+  change structure differs significantly from that of \citeauthor{incremental};
+  we discuss the divergence in \cref{sec:differences-from-incremental}. As we do
+  not use change structures \emph{per se} in our proofs, we treat them
+  informally, as a source of intuition rather than rigor.}
+
+\begin{enumerate}
+\item A type $\D A$ of possible changes to values of type $A$.
+\item A relation $\changesat{A}{\dx}{x}{y}$ for $\dx : \D A$ and $x,y : A$,
+  glossed as ``$\dx$ changes $x$ into $y$''.
+\end{enumerate}
+
+\noindent
+Since the iterations of a fixed point grow monotonically, in Datafun we only
+need \emph{increasing} changes.
 %
-\footnote{In this section we explain the incremental \fn-calculus as we have
-  applied it to Datafun; we discuss our differences from its formulation in
-  \citeauthor{incremental} in \cref{sec:differences-from-incremental}.}
+For example, sets change by gaining new elements:
+
+\begin{align*}
+  \D\tseteq{A} &= \tseteq{A}
+  &
+  \changesat{\tseteq{A}}{\dx}{x}{x \cup \dx}
+\end{align*}
+
+\noindent Set changes may be the most significant for fixed point purposes, but
+to handle all of Datafun we need a change structure for every type. For products
+and sums, for example, the change structure is pointwise:
+
+\begin{align*}
+  \D\tunit &= \tunit
+  &
+  \D(A \x B) &= \D A \x \D B
+  &
+  \D(A + B) &= \D A + \D B
+\end{align*}
+
+\begin{align*}
+  \infer{
+    \fa{i} \changesat{A_i}{\dx_i}{x_i}{y_i}
+  }{\textstyle\changesat{\prod_i A_i}
+    {\tuple{\vec\dx}}
+    {\tuple{\vec x}}{\tuple{\vec y}}
+  }
+  &&
+  \infer{
+    \changesat{A_i}{\dx_i}{x_i}{y_i}
+  }{
+    \textstyle\changesat{A_1 + A_2}{\inj i \dx}{\inj i x}{\inj i y}
+  }
+\end{align*}
+\vspace{0pt} % FIXME. yes, this makes a difference, believe it or not
+
+%% \begin{align*}
+%%   \D\tunit &= \tunit
+%%   &
+%%   \D(A \x B) &= \D A \x \D B
+%%   &
+%%   %% \infer{
+%%   %%   %\fa{i} \changesat{A_i}{\dx_i}{x_i}{y_i}
+%%   %%   \changesat{A_1}{\dx_1}{x_1}{y_1}
+%%   %%   \\
+%%   %%   \changesat{A_2}{\dx_2}{x_2}{y_2}
+%%   %% }{\changesat{A_1 \x A_2}
+%%   %%   {\tuple{\dx_1,\dx_2}}
+%%   %%   {\tuple{x_1,x_2}}{\tuple{y_1,y_2}}
+%%   %% }
+%%   %
+%%   %% \infer{
+%%   %%   \fa{i} \changesat{A_i}{\dx_i}{x_i}{y_i}
+%%   %% }{\changesat{A_1 \x A_2}
+%%   %%   {\tuple{\dx_1,\dx_2}}
+%%   %%   {\tuple{x_1,x_2}}{\tuple{y_1,y_2}}
+%%   %% }
+%%   %
+%%   \infer{
+%%     \fa{i} \changesat{A_i}{\dx_i}{x_i}{y_i}
+%%   }{\textstyle\changesat{\prod_i A_i}
+%%     {\tuple{\vec\dx}}
+%%     {\tuple{\vec x}}{\tuple{\vec y}}
+%%   }
+%% \end{align*}
+
+%% %\noindent For sums, the change structure is disjoint:
+
+%% \begin{align*}
+%%   \D(A + B) &= \D A + \D B
+%%   &
+%%   \infer{
+%%     \changesat{A_i}{\dx_i}{x_i}{y_i}
+%%   }{
+%%     \textstyle\changesat{A_1 + A_2}{\inj i \dx}{\inj i x}{\inj i y}
+%%   }
+%% \end{align*}
+
+\noindent
+Since only \emph{increasing} changes are necessary, and $\iso A$ is ordered
+discretely, it permits no change at all:
+
+\begin{align*}
+  \D\iso A &= \tunit
+  &&
+  \changesat{\iso A}{\tuple{}}{x}{x}
+\end{align*}
+
+\noindent
+Finally we come to the most interesting case: functions.
+
+\begin{align*}
+  \D(A \to B) &= \iso A \to \D A \to \D B
+  &
+  \infer[FnChange]{
+    \fa{\changesat A \dx x y}
+    \changesat B {\df\<x\<\dx} {f\<x} {g\<y}
+  }{
+    \changesat{A \to B}{\df}{f}{g}
+  }
+\end{align*}
+
+\noindent
+Observe that a function change $\df : \iso A \to \D A \to \D B$ takes two
+arguments: a base point $x$ and a change $\dx$.
 %
-Now, our goal is to capture the change between iterations of a fixed point;
-these iterations increase monotonically, so for us the only possible changes are
-\emph{increases}. Most importantly, we let $\D\tseteq{A} = \tseteq{A}$: a change
-to a set is a set of new elements.
+Why not simply give changes pointwise, $\iso A \to \D B$? Consider
+incrementalizing function application: we wish to know how $(f\<x)$ changes as
+both $f$ and $x$ change. So fix $\changes{\df}{f}{g}$ and $\changes{\dx}{x}{y}$.
+How do we find the change $f\<x \changesto g\<y$ that updates both function and
+argument? If changes were given pointwise, taking only a base point, we'd
+stipulate that $\changes{\df}{f} g$ iff $\fa{x} \changes{\df\<x}{f\<x}{g\<x}$.
+But this only gets us to $g\<x$, not $g\<y$: we've accounted for the change in
+the function, but not the argument.
+%
+The simplest solution is to give $\df$ an additional parameter: the change $\dx$
+to $f$'s argument $x$. Then by inverting \textsc{FnChange} we have
+$\changes{\df\<x\<\dx}{f\<x}{g\<y}$ as desired.
+
+%% This makes it easy to incrementalize function application, $f\<x$; given
+%% changes $\changes \df f g$ and $\changes \dx x y$ to the function and its
+%% argument, we want to compute the change that takes us to the updated
+%% application $g\<y$. By inverting \textsc{FnChange} we know that
+%% $\changes{\df\<x\<\dx}{f\<x}{g\<y}$, so $\df\<x\<\dx$ gives us the desired
+%% change.
+
+%% If instead changes were given pointwise, letting $\D(A \to B)= \iso A \to \D B$,
+%% then it'd be natural to let $\changes{\df}{f}{g} \iff \fa{x}
+%% \changes{\df\<x}{f\<x}{g\<x}$.
+
+Second, note the mixture of monotonicity and non-monotonicity in $\df : \iso A
+\to \D A \to \D B$. Since our functions are monotone --- increasing inputs yield
+increasing outputs --- function \emph{changes} are also monotone on input
+changes $\D A$ --- a larger increase in the input yields a larger increase in
+the output. However, there's no particular reason to expect the change in the
+output to increase as the \emph{base point} increases --- hence the $\iso A$.
 
 \todo{Explain:
   \begin{itemize}
-  \item $\D(A \to B) = \iso A \to \D A \to \D B$. In particular, (a) why not
-    just $\iso A \to \D B$; and (b) why the \iso?
   \item Function derivatives are zero-changes.
+
   \item Since we're tracking changes during fixed point iteration, and these
     increase monotonically, we only allow increasing changes. So $\iso A$
     (discussed in \cref{sec:datalog-and-datafun}) prevents things from changing!
+
+  \item How $\name{step}'$ looks like a derivative of $\name{step}$ in the
+  sense of \citet{incremental}.
   \end{itemize}
 
   Do \textbf{not} explain:
@@ -215,10 +356,17 @@ to a set is a set of new elements.
   \end{itemize}
 }
 
-%% what do we need here?
+%% Revisiting our running example, the crucial property of $\name{step}'$ now
+%% becomes:
 
-%% \todo{explain how $\name{step}'$ looks like a derivative of $\name{step}$ in the
-%%   sense of \citet{incremental}.}
+%% \[ \changesat{\tseteq{A}}{\name{step}' \<\dx}{\name{step}\<x}{\name{step}\<(x
+%%   \cup \dx)} \]
+
+%% or, more suggestively:
+
+%% \[ \changesat{\tseteq A}{\dx}{x}{y} \implies
+%% \changesat{\tseteq A}{\name{step}' \<\dx}{\name{step}\<x}{\name{step}\<y}
+%% \]
 
 
 \subsection{Examples of semi\naive\ Datafun programs}
