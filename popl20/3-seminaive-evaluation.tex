@@ -221,12 +221,33 @@ and sums, for example, the change structure is pointwise:
 \end{align*}
 
 \begin{align*}
+  \changesat{\tunit}{\tuple{}}{\tuple{}}{\tuple{}}
+  &&
   \infer{
     \fa{i} \changesat{A_i}{\dx_i}{x_i}{y_i}
-  }{\textstyle\changesat{\prod_i A_i}
+  }{\textstyle\changesat{A_1 \x A_2}
     {\tuple{\vec\dx}}
-    {\tuple{\vec x}}{\tuple{\vec y}}
+    {\tuple{\vec x}}
+    {\tuple{\vec y}}
   }
+  %
+  %% \infer{
+  %%   \fa{i} \changesat{A_i}{\dx_i}{x_i}{y_i}
+  %% }{\textstyle\changesat{A_1 \x A_2}
+  %%   {\tuple{\dx_1,\dx_2}}
+  %%   {\tuple{x_1,x_2}}
+  %%   {\tuple{y_1,y_2}}
+  %% }
+  %
+  %% \infer{
+  %%   \changesat{A}{\da}{a_1}{a_2}
+  %%   \\
+  %%   \changesat{B}{\db}{b_1}{b_2}
+  %% }{\textstyle\changesat{A \x B}
+  %%   {\tuple{\da,\db}}
+  %%   {\tuple{a_1,b_1}}
+  %%   {\tuple{a_2,b_2}}
+  %% }
   &&
   \infer{
     \changesat{A_i}{\dx_i}{x_i}{y_i}
@@ -280,10 +301,12 @@ and sums, for example, the change structure is pointwise:
 
 \noindent
 Since only \emph{increasing} changes are necessary, and $\iso A$ is ordered
-discretely, it permits no change at all:
+discretely, it permits no change at all: \todo{more explanation of why it's unit
+  --- since things can't change, the only valid change is from $x$ to $x$, and
+  there's no information necessary to tell us how to change}
 
 \begin{align*}
-  \D\iso A &= \tunit
+  \D(\iso A) &= \tunit
   &&
   \changesat{\iso A}{\tuple{}}{x}{x}
 \end{align*}
@@ -306,18 +329,17 @@ Finally we come to the most interesting case: functions.
 Observe that a function change $\df : \iso A \to \D A \to \D B$ takes two
 arguments: a base point $x$ and a change $\dx$.
 %
-Why not simply give changes pointwise, $\iso A \to \D B$? Consider
-incrementalizing function application: we wish to know how $(f\<x)$ changes as
-both $f$ and $x$ change. So fix $\changes{\df}{f}{g}$ and $\changes{\dx}{x}{y}$.
-How do we find the change $f\<x \changesto g\<y$ that updates both function and
-argument? If changes were given pointwise, taking only a base point, we'd
-stipulate that $\changes{\df}{f} g$ iff $\fa{x} \changes{\df\<x}{f\<x}{g\<x}$.
-But this only gets us to $g\<x$, not $g\<y$: we've accounted for the change in
-the function, but not the argument.
+To understand why we need both, consider incrementalizing function application:
+we wish to know how $(f\<x)$ changes as both $f$ and $x$ change. So fix
+$\changes{\df}{f}{g}$ and $\changes{\dx}{x}{y}$. How do we find the change $f\<x
+\changesto g\<y$ that updates both function and argument? If changes were given
+pointwise, taking only a base point, we'd stipulate that $\changes{\df}{f} g$
+iff $\fa{x} \changes{\df\<x}{f\<x}{g\<x}$. But this only gets us to $g\<x$, not
+$g\<y$: we've accounted for the change in the function, but not the argument.
 %
-The simplest solution is to give $\df$ an additional parameter: the change $\dx$
-to $f$'s argument $x$. Then by inverting \textsc{FnChange} we have
-$\changes{\df\<x\<\dx}{f\<x}{g\<y}$ as desired.
+We can account for both by giving $\df$ an additional parameter: not just the
+base point $x$ but also the change $\dx$ to it. Then by inverting
+\textsc{FnChange} we have $\changes{\df\<x\<\dx}{f\<x}{g\<y}$ as desired.
 
 %% This makes it easy to incrementalize function application, $f\<x$; given
 %% changes $\changes \df f g$ and $\changes \dx x y$ to the function and its
