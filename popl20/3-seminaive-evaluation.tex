@@ -98,6 +98,7 @@ This is much better --- we have turned a cubic computation into a quadratic one!
 
 
 \subsection{Semi\naive\ evaluation as incremental computation}
+\label{sec:seminaive-tc-in-datafun}
 
 Now let's move from Datalog to Datafun. The transitive closure of \name{edge} is
 the fixed point of the monotone function \name{step} defined by:
@@ -180,8 +181,8 @@ functional language, we turn to the
 \emph{incremental \fn-calculus}~\citep{incremental}.
 
 
-\subsection{Change structures and the incremental \boldfn-calculus}
-\label{sec:seminaive-via-incremental}
+\subsection{Change structures}
+\label{sec:change-structures}
 
 To formalize the notion of change, an incremental \fn-calculus associates every
 type $A$ with a \emph{change structure}, consisting of:\footnote{Our notion of
@@ -208,9 +209,38 @@ For example, sets change by gaining new elements:
   \changesat{\tseteq{A}}{\dx}{x}{x \cup \dx}
 \end{align*}
 
-\noindent Set changes may be the most significant for fixed point purposes, but
-to handle all of Datafun we need a change structure for every type. For products
-and sums, for example, the change structure is pointwise:
+Set changes may be the most significant for fixed point purposes, but to handle
+all of Datafun we need a change structure for every type. For products and sums,
+for example, the change structure is pointwise:
+
+%% \begin{center}
+%%   \setlength\tabcolsep{10pt}
+%%   \begin{tabular}{@{}ccc@{}}
+%%     $\D\tunit = \tunit$
+%%     &
+%%     \(\D(A \x B) = \D A \x \D B\)
+%%     &
+%%     \(\D(A + B) = \D A + \D B\)
+%%     \\[8pt]
+%%     \(\changesat{\tunit}{\tuple{}}{\tuple{}}{\tuple{}}\)
+%%     &
+%%     \(\infer{
+%%       \changesat{A}{\da}{a_1}{a_2}
+%%       \\
+%%       \changesat{B}{\db}{b_1}{b_2}
+%%     }{\changesat{A \x B}
+%%       {\tuple{\da,\db}}
+%%       {\tuple{a_1,b_1}}
+%%       {\tuple{a_2,b_2}}
+%%     }\)
+%%     &
+%%     \(\infer{
+%%       \changesat{A_i}{\dx_i}{x_i}{y_i}
+%%     }{
+%%       \changesat{A_1 + A_2}{\inj i \dx}{\inj i x}{\inj i y}
+%%     }\)
+%%   \end{tabular}
+%% \end{center}
 
 \begin{align*}
   \D\tunit &= \tunit
@@ -223,83 +253,40 @@ and sums, for example, the change structure is pointwise:
 \begin{align*}
   \changesat{\tunit}{\tuple{}}{\tuple{}}{\tuple{}}
   &&
-  \infer{
-    \fa{i} \changesat{A_i}{\dx_i}{x_i}{y_i}
-  }{\textstyle\changesat{A_1 \x A_2}
-    {\tuple{\vec\dx}}
-    {\tuple{\vec x}}
-    {\tuple{\vec y}}
-  }
+  %% \infer{
+  %%   \fa{i} \changesat{A_i}{\dx_i}{x_i}{y_i}
+  %% }{\changesat{A_1 \x A_2}
+  %%   {\tuple{\vec\dx}}
+  %%   {\tuple{\vec x}}
+  %%   {\tuple{\vec y}}
+  %% }
   %
   %% \infer{
   %%   \fa{i} \changesat{A_i}{\dx_i}{x_i}{y_i}
-  %% }{\textstyle\changesat{A_1 \x A_2}
+  %% }{\changesat{A_1 \x A_2}
   %%   {\tuple{\dx_1,\dx_2}}
   %%   {\tuple{x_1,x_2}}
   %%   {\tuple{y_1,y_2}}
   %% }
   %
-  %% \infer{
-  %%   \changesat{A}{\da}{a_1}{a_2}
-  %%   \\
-  %%   \changesat{B}{\db}{b_1}{b_2}
-  %% }{\textstyle\changesat{A \x B}
-  %%   {\tuple{\da,\db}}
-  %%   {\tuple{a_1,b_1}}
-  %%   {\tuple{a_2,b_2}}
-  %% }
+  \infer{
+    \changesat{A}{\da}{a_1}{a_2}
+    \\
+    \changesat{B}{\db}{b_1}{b_2}
+  }{\changesat{A \x B}
+    {\tuple{\da,\db}}
+    {\tuple{a_1,b_1}}
+    {\tuple{a_2,b_2}}
+  }
   &&
   \infer{
     \changesat{A_i}{\dx_i}{x_i}{y_i}
   }{
-    \textstyle\changesat{A_1 + A_2}{\inj i \dx}{\inj i x}{\inj i y}
+    \changesat{A_1 + A_2}{\inj i \dx}{\inj i x}{\inj i y}
   }
 \end{align*}
-\vspace{0pt} % FIXME. yes, this makes a difference, believe it or not
+%\vspace{0pt} %FIXME. yes, this makes a difference, believe it or not
 
-%% \begin{align*}
-%%   \D\tunit &= \tunit
-%%   &
-%%   \D(A \x B) &= \D A \x \D B
-%%   &
-%%   %% \infer{
-%%   %%   %\fa{i} \changesat{A_i}{\dx_i}{x_i}{y_i}
-%%   %%   \changesat{A_1}{\dx_1}{x_1}{y_1}
-%%   %%   \\
-%%   %%   \changesat{A_2}{\dx_2}{x_2}{y_2}
-%%   %% }{\changesat{A_1 \x A_2}
-%%   %%   {\tuple{\dx_1,\dx_2}}
-%%   %%   {\tuple{x_1,x_2}}{\tuple{y_1,y_2}}
-%%   %% }
-%%   %
-%%   %% \infer{
-%%   %%   \fa{i} \changesat{A_i}{\dx_i}{x_i}{y_i}
-%%   %% }{\changesat{A_1 \x A_2}
-%%   %%   {\tuple{\dx_1,\dx_2}}
-%%   %%   {\tuple{x_1,x_2}}{\tuple{y_1,y_2}}
-%%   %% }
-%%   %
-%%   \infer{
-%%     \fa{i} \changesat{A_i}{\dx_i}{x_i}{y_i}
-%%   }{\textstyle\changesat{\prod_i A_i}
-%%     {\tuple{\vec\dx}}
-%%     {\tuple{\vec x}}{\tuple{\vec y}}
-%%   }
-%% \end{align*}
-
-%% %\noindent For sums, the change structure is disjoint:
-
-%% \begin{align*}
-%%   \D(A + B) &= \D A + \D B
-%%   &
-%%   \infer{
-%%     \changesat{A_i}{\dx_i}{x_i}{y_i}
-%%   }{
-%%     \textstyle\changesat{A_1 + A_2}{\inj i \dx}{\inj i x}{\inj i y}
-%%   }
-%% \end{align*}
-
-\noindent
 Since we only consider increasing changes, and $\iso A$ is ordered discretely,
 the only ``change'' permitted is to stay the same. Consequently, no information
 is necessary to indicate what changed:
@@ -310,7 +297,6 @@ is necessary to indicate what changed:
   \changesat{\iso A}{\tuple{}}{x}{x}
 \end{align*}
 
-\noindent
 Finally we come to the most interesting case: functions.
 
 \begin{align*}
@@ -325,13 +311,15 @@ Finally we come to the most interesting case: functions.
 \end{align*}
 
 \noindent
-Observe that a function change $\df : \iso A \to \D A \to \D B$ takes two
-arguments: a base point $x$ and a change $\dx$.
+Observe that a function change $\df$ takes two
+arguments: a base point $x : \iso A$ and a change $\dx : \D A$.
 %
 To understand why we need both, consider incrementalizing function application:
-we wish to know how $(f\<x)$ changes as both $f$ and $x$ change. So fix
+we wish to know how $f\<x$ changes as both $f$ and $x$ change. So fix
 $\changes{\df}{f}{g}$ and $\changes{\dx}{x}{y}$. How do we find the change $f\<x
-\changesto g\<y$ that updates both function and argument? If changes were given
+\changesto g\<y$ that updates both function and argument?
+
+If changes were given
 pointwise, taking only a base point, we'd stipulate that $\changes{\df}{f} g$
 iff $\fa{x} \changes{\df\<x}{f\<x}{g\<x}$. But this only gets us to $g\<x$, not
 $g\<y$: we've accounted for the change in the function, but not the argument.
@@ -351,21 +339,47 @@ base point $x$ but also the change $\dx$ to it. Then by inverting
 %% then it'd be natural to let $\changes{\df}{f}{g} \iff \fa{x}
 %% \changes{\df\<x}{f\<x}{g\<x}$.
 
-Second, note the mixture of monotonicity and non-monotonicity in $\df : \iso A
+Note also the mixture of monotonicity and non-monotonicity in the type $\iso A
 \to \D A \to \D B$. Since our functions are monotone --- increasing inputs yield
 increasing outputs --- function \emph{changes} are also monotone on input
 changes $\D A$ --- a larger increase in the input yields a larger increase in
-the output. However, there's no particular reason to expect the change in the
-output to increase as the \emph{base point} increases --- hence the $\iso A$.
+the output. However, there's no reason to expect the change in the output to
+grow as the \emph{base point} increases --- hence the $\iso$ on the base point.
+
+
+\subsection{Zero-changes, derivatives, and faster fixed points}
+\label{sec:derivatives}
+
+If $\changesat A \dx x x$, we call \dx\ a \emph{zero-change} to $x$. Usually
+zero-changes are rather boring --- for example, a zero change to a set $x :
+\tseteq{A}$ is any $\dx \subseteq x$, and so $\emptyset$ is always a zero
+change.
+%
+However, there is one very interesting exception: function zero changes. Suppose
+$\changesat{A \to B}{\df}{f}{f}$. This implies that
+
+\begin{equation}\label{eqn:derivative}
+  \changesat A \dx x y \implies \changesat B{\df\<x\<\dx}{f\<x}{f\<y}
+\end{equation}
+
+\noindent
+In other words, $\df$ yields the change in the output of $f$ given a change to
+its \emph{input}.
+%
+This is exactly the property of $\name{step}'$ that made it useful for
+semi\naive\ evaluation: indeed, modulo not needing the base point $x$,
+$\name{step}'$ is a zero-change to \name{step}:
+
+\[ \changesat{\tseteq A} \dx x y \implies
+\changesat{\tseteq A}{\name{step}'\<\dx}{\name{step}\<x}{\name{step}\<y}
+\]
+
+Function zero-changes are so important we give them a special name:
+\emph{derivatives}.
+\todo{more}
 
 \todo{Explain:
   \begin{itemize}
-  \item Function derivatives are zero-changes.
-
-  \item Since we're tracking changes during fixed point iteration, and these
-    increase monotonically, we only allow increasing changes. So $\iso A$
-    (discussed in \cref{sec:datalog-and-datafun}) prevents things from changing!
-
   \item How $\name{step}'$ looks like a derivative of $\name{step}$ in the
   sense of \citet{incremental}.
   \end{itemize}
