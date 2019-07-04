@@ -180,7 +180,7 @@ functional language, we turn to the
 \emph{incremental \fn-calculus}~\citep{incremental}.
 
 
-\subsection{The incremental \boldfn-calculus}
+\subsection{Change structures and the incremental \boldfn-calculus}
 \label{sec:seminaive-via-incremental}
 
 To formalize the notion of change, an incremental \fn-calculus associates every
@@ -300,10 +300,9 @@ and sums, for example, the change structure is pointwise:
 %% \end{align*}
 
 \noindent
-Since only \emph{increasing} changes are necessary, and $\iso A$ is ordered
-discretely, it permits no change at all: \todo{more explanation of why it's unit
-  --- since things can't change, the only valid change is from $x$ to $x$, and
-  there's no information necessary to tell us how to change}
+Since we only consider increasing changes, and $\iso A$ is ordered discretely,
+the only ``change'' permitted is to stay the same. Consequently, no information
+is necessary to indicate what changed:
 
 \begin{align*}
   \D(\iso A) &= \tunit
