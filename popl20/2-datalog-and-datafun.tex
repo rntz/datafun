@@ -66,17 +66,29 @@ always exists.
 
 Datalog makes it very easy to define relations recursively, but
 because it is such a small and restricted language, it is not possible
-to build abstractions over these rules.  The mathematical observation
-that led to the generalization of Datafun is that the semantics of a
-Datalog program is the fixed point of a monotone function on
-relations, and the category Poset of partial orders and monotone maps
-is cartesian closed. So we can build a language in the following
-sequence of steps:
+to build abstractions over these rules. However, its semantics, given
+in terms of least fixed points of monotone functions on relations,
+is extremely elegant, and Datafun arose as an attempt to generalize
+this semantics.
+
+The key idea behind Datafun is that if the semantics of a Datalog
+program is a montone set-valued operator, then the natural home for
+that semantics is in the category Poset, of partial orders and
+monotone functions. Since this category is cartesian closed, then it
+can interpret the simply-typed lambda calculus, which gives us a
+notation for writing monotone functions.
+
+So Datafun begins as the simply-typed lambda calculus with sums
+and products. To this, we add a type of finite sets $\tset{\eqt A}$,
+which are introduced with set literals $\eset{e_0, \ldots e_n}$, and
+and can be eliminated using (a slight generalization of) monad
+comprehension syntax $\efor{x}{e}{e'}$. 
+
 
 \begin{enumerate}
 \item We begin with the simply-typed lambda calculus including sums
-  and products.
-\item We add a type of finite sets $\tset{\eqt A}$.
+  and products. Syntactically, this 
+\item We add a type of finite sets 
 \item Next, we add a comonadic type $\iso A$, denoting the same elements
   as $A$, but whose partial order is just the equality.
 \item Finally, we add a fixed-point operator $\mathit{fix} : \Box(L \to L) \to L$. 
