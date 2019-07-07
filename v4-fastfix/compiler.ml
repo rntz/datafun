@@ -35,6 +35,28 @@ All tagless-final. Compiler flowchart:
       V
     Haskell code
 
+===== NEW BACKEND as of July 2019 =====
+
+MODAL
+ | φ/δ
+ V
+SEMINAIVE  with explicit "this is a zero-change"
+ |
+ | ZeroChange: propagates zero-changes,
+ |  turns zero-changes at lattice type into empty
+ V
+ZERO
+ |
+ | Simplify: propagates bottoms
+ V
+SIMPLE
+ |
+ | ToHaskell
+ V
+Haskell
+
+
+
 ===== OPTIMIZATION =====
 
 The simplifier performs the following optimizations:
@@ -236,6 +258,16 @@ let deltaLat: modaltp semilat -> rawtp semilat = Obj.magic delta
 let phiDeltaLat: modaltp semilat -> rawtp semilat * rawtp semilat =
   Obj.magic phiDelta
 
+let rec asLat: 'a -> 'a semilat = function
+  | `Bool -> `Bool
+  | `Set a -> `Set a
+  | `Fn (a,b) -> `Fn (a, asLat b)
+  | `Tuple tps -> `Tuple (List.map asLat tps)
+  | `String | `Box _ -> typeError "not a semilattice type"
+
+let rec isLat (x: 'a): 'a semilat option =
+  try Some (asLat x) with TypeError _ -> None
+
 
 (* ===== THE LANGUAGE, more or less =====
  *
@@ -283,6 +315,20 @@ end
 module type SIMPLE = sig
   include BASE with type tp = rawtp
   val semifix: eqtp semilat -> term -> term
+end
+
+(* With the ability to explicitly flag certain terms as zero changes. *)
+module type ZERO = sig
+  include SIMPLE
+  val zero: tp -> term -> term
+end
+
+(* A simple pass-through that ignores zero annotations. *)
+module DummyZero(S: SIMPLE)
+       : ZERO with type tp = S.tp and type term = S.term
+= struct
+  include S
+  let zero _ term = term
 end
 
 module type BIDIR = sig
@@ -334,13 +380,6 @@ module Typecheck(Imp: MODAL): BIDIR
   let scrub: cx -> cx =
     Cx.map (function Box, tp -> Box, tp
                    | (Id|Hidden), tp -> Hidden, tp)
-
-  let rec asLat: 'a -> 'a semilat = function
-    | `Bool -> `Bool
-    | `Set a -> `Set a
-    | `Fn (a,b) -> `Fn (a, asLat b)
-    | `Tuple tps -> `Tuple (List.map asLat tps)
-    | `String | `Box _ -> typeError "not a semilattice type"
 
   (* checking terms *)
   let expr (expr: expr) (cx: cx) (tp: tp): Imp.term =
@@ -484,7 +523,7 @@ end
 
 
 (* The speedup φ and derivative δ transformations. *)
-module Seminaive(Imp: SIMPLE): MODAL
+module Seminaive(Imp: ZERO): MODAL
        with type term = Imp.term * Imp.term
 = struct
   type tp = modaltp
@@ -492,33 +531,45 @@ module Seminaive(Imp: SIMPLE): MODAL
 
   (* This may only be used at base types. It almost ignores its argument;
    * however, at sum types, it does depend on the tag. If sum types are not
-   * involved, `zero` produces a constant expression. In particular, at
+   * involved, `makeZero` produces a constant expression. In particular, at
    * first-order semilattice types, it produces a bottom expression, which the
-   * simplifier will recognize. This aids optimization. *)
-  let rec zero (tp: eqtp) (term: Imp.term): Imp.term = match tp with
+   * simplifier will recognize. This aids optimization.
+   *)
+  let rec makeZero (tp: eqtp) (term: Imp.term): Imp.term = match tp with
     | `Bool -> Imp.bool false
     | `String -> Imp.tuple []
     | `Set a -> Imp.set a []
     | `Tuple tps ->
        let dtps = List.map delta (tps :> modaltp list) in
-       List.mapi (fun i a -> List.nth dtps i, zero a (Imp.proj dtps i term)) tps
+       List.mapi (fun i a -> List.nth dtps i, makeZero a (Imp.proj dtps i term)) tps
        |> Imp.tuple
 
+  (* Wraps makeZero to let the optimizer know we've generated a zero change.
+   *
+   * TODO: there's redundant work going on here. The zero-change analysis will
+   * notice if this is at first-order lattice type and turn it into "empty", which
+   * means the effort of makeZero is wasted.
+   *)
+  let zero (tp: eqtp) (term: Imp.term): Imp.term =
+    Imp.zero (tp :> rawtp) (makeZero tp term)
+
   (* φx = x                 δx = dx *)
-  let var (a: tp) (x: sym) = Imp.var (phi a) x, Imp.var (delta a) (Sym.d x)
+  let var (a: tp) (x: sym): term = Imp.var (phi a) x, Imp.var (delta a) (Sym.d x)
 
   (* If the variable is discrete, we know its derivative is a zero change; so if
    * it's first-order, we can inline zero applied to it. *)
-  let discvar (a: tp) (x: sym) =
-    match firstOrder a with
-    | None -> var a x
-    | Some eqa -> let phix = Imp.var (phi a) x in
-                  phix, zero eqa phix
+  let discvar (a: tp) (x: sym): term =
+    let phix = Imp.var (phi a) x in
+    phix, match firstOrder a with
+          | Some eqa -> zero eqa phix
+          | None -> let da = delta a in
+                    Imp.zero da (Imp.var da (Sym.d x))
 
-  (* φ(box M) = φM, δM      δ(box M) = δM *)
+  (* φ(box M) = φM, δM      δ(box M) = ⟨⟩ *)
   let box (a: tp) (fTerm, dTerm: term): term =
     let fa, da = phiDelta a in
-    Imp.tuple [fa, fTerm; da, dTerm], dTerm
+    Imp.tuple [fa, fTerm; da, dTerm],
+    Imp.zero (`Tuple []) (Imp.tuple [])
 
   (* φ(let box x = M in N) = let x,dx = φM in φN
    * δ(let box x = M in N) = let x,dx = φM in δN *)
@@ -568,10 +619,10 @@ module Seminaive(Imp: SIMPLE): MODAL
     Imp.letTuple ftpxs dBodyTp fTuple (Imp.letTuple dtpxs dBodyTp dTuple dBody)
 
   (* φ(s: string) = s   δ(s: string) = () *)
-  let string (s: string): term = Imp.string s, Imp.tuple []
+  let string (s: string): term = Imp.string s, Imp.zero (`Tuple []) (Imp.tuple [])
 
   (* φ(b: bool) = b     δ(b: bool) = false *)
-  let bool (b: bool): term = Imp.bool b, Imp.bool false
+  let bool (b: bool): term = Imp.bool b, Imp.zero `Bool (Imp.bool false)
 
   (* φ(if M then N else O) = if φM then φN else φO
    * δ(if M then N else O) = if φM then δN else δO  -- condition can't change! *)
@@ -606,7 +657,8 @@ module Seminaive(Imp: SIMPLE): MODAL
 
   (* φ({M}) = {φM}          δ({M}) = ∅ *)
   let set (a: eqtp) (elts: term list) =
-    Imp.set a (List.map fst elts), Imp.set a []
+    Imp.set a (List.map fst elts),
+    Imp.zero (`Set a) (Imp.set a [])
 
   (* φ(M ∨ N) = φM ∨ φN     δ(M ∨ N) = δM ∨ δN *)
   let union (a: tp semilat) (terms: term list) =
@@ -633,54 +685,123 @@ module Seminaive(Imp: SIMPLE): MODAL
   (* φ(fix M) = semifix φM
    * δ(fix M) = zero ⊥ = ⊥ *)
   let fix (a: eqtp semilat) (fFunc, dFunc: term) =
-    Imp.semifix a fFunc, Imp.union (a :> Imp.tp semilat) []
+    Imp.semifix a fFunc,
+    Imp.zero (a :> rawtp) (Imp.union (a :> rawtp semilat) [])
 
   (* φ(M == N) = φM == φN       δ(M == N) = false *)
   let equals (a: eqtp) (fM, dM: term) (fN, dN: term): term =
-    Imp.equals a fM fN, Imp.bool false
+    Imp.equals a fM fN,
+    Imp.zero `Bool (Imp.bool false)
+end
+
+
+(* Zero-change analysis.
+ *
+ * TODO: This could be smarter. Currently, it recognizes:
+ *
+ * - zero changes indicated by the previous layer, which should be all
+ *   derivatives of "obviously discrete" things like discrete variables,
+ *   set literals, boolean literals, ⊥, box, etc. FIXME implement this.
+ *
+ * - zero changes applied to other zero changes, like (dr x dx) when r & x were
+ *   both discrete variables in the source program.
+ *
+ * - letIn bindings where the body is a zero-change.
+ *
+ * - variables bound by letIn to zero-changes it recognizes.
+ *
+ * and that's it! it does not recognize:
+ *
+ * - letTuple bindings where the body is a zero-change.
+ * - Variables bound by letTuple to zero-changes it recognizes.
+ * - Tupling zero-changes.
+ * - Projecting from zero-changes.
+ * - Unions of zero-changes.
+ * - if-then-elses or guards which always return zero changes.
+ *
+ * or anything else. I should figure out if there are reasonable examples where
+ * this matters, add those as tests, and implement them; or else comment that I
+ * could find no reasonable examples.
+ *)
+type state = Zero | AppliedZero
+module ZeroChange(Imp: SIMPLE): sig
+  include ZERO with type term = state cx -> state option * Imp.term
+  val finish: term -> Imp.term
+end = struct
+  type tp = rawtp
+  type value = state option * Imp.term
+  type term = state cx -> value
+
+  let finish (term: term): Imp.term = snd (term Cx.empty)
+  let roll (a: tp) (ann, term: value): value =
+    (* NB. we can only turn FIRST-ORDER zero changes into bottom.
+     * higher-order changes have more structure. *)
+    ann, (match ann, isLat a, firstOrder (a :> modaltp) with
+          | Some Zero, Some sl, Some _ -> Imp.union sl []
+          | _ -> term)
+
+  let notZero (term: Imp.term): value = None, term
+  let is (a: tp) (s: state) (term: Imp.term): value = roll a (Some s, term)
+
+  let zero a term cx = is a Zero (term cx |> snd)
+
+  let var a x cx = roll a (Cx.find_opt x cx, Imp.var a x)
+
+  let letIn a b x (expr: term) (body: term) (cx: state cx) =
+    let (exprAnn, exprTerm) = expr cx in
+    let (bodyAnn, bodyTerm) = body (Cx.add_opt x exprAnn cx) in
+    roll b (bodyAnn, Imp.letIn a b x exprTerm bodyTerm)
+
+  let lam a b x (body: term) (cx: state cx): value =
+    notZero (Imp.lam a b x (snd (body cx)))
+
+  let app a b (fnc: term) (arg: term) (cx: state cx): value =
+    let fncS, fncT = fnc cx and argS, argT = arg cx in
+    roll b
+      ((match fncS, argS with Some AppliedZero, Some Zero -> Some Zero
+                            | Some Zero, _ -> Some AppliedZero
+                            | _ -> None),
+       Imp.app a b fncT argT)
+
+  let tuple (tpterms: (tp * term) list) cx =
+    tpterms
+    |> List.map (fun (tp,term) -> tp, snd (term cx))
+    |> Imp.tuple |> notZero
+
+  let proj tps i (term: term) cx =
+    notZero (Imp.proj tps i (snd (term cx)))
+
+  let letTuple tpxs bodyTp expr body cx =
+    Imp.letTuple tpxs bodyTp (expr cx |> snd) (body cx |> snd)
+    |> notZero
+
+  let string s cx = notZero (Imp.string s)
+  let bool x cx = notZero (Imp.bool x)
+
+  let ifThenElse a cnd thn els cx =
+    notZero (Imp.ifThenElse a (snd (cnd cx)) (snd (thn cx)) (snd (els cx)))
+
+  let guard a cnd body cx =
+    notZero (Imp.guard a (cnd cx |> snd) (body cx |> snd))
+
+  let set a terms cx =
+    notZero (Imp.set a (List.map (fun term -> snd (term cx)) terms))
+
+  let union a terms cx =
+    notZero (Imp.union a (List.map (fun term -> snd (term cx)) terms))
+
+  let forIn a b x set body cx =
+    Imp.forIn a b x (snd (set cx)) (snd (body cx)) |> notZero
+
+  let fix (a: eqtp semilat) fnc cx = Imp.fix a (fnc cx |> snd) |> notZero
+  let semifix (a: eqtp semilat) fncderiv cx =
+    Imp.semifix a (fncderiv cx |> snd) |> notZero
+  let equals a tm1 tm2 cx =
+    notZero (Imp.equals a (tm1 cx |> snd) (tm2 cx |> snd))
 end
 
 
 (* Optimization/simplification. This is ugly and hackish, but works. *)
-(* module IsEmpty: SIMPLE with type term = rawtp semilat cx -> rawtp semilat option
- * = struct
- *   type tp = rawtp
- *   type isEmpty = rawtp semilat
- *   type term = isEmpty cx -> isEmpty option
- *   let var a x = (??)
- *   let letIn a b x m n = (??)
- *   let lam a b x m = (??)
- *   let app a b m n = (??)
- *   let tuple tpterms = (??)
- *   let proj tps i m = (??)
- *   let letTuple tpxs b m n = (??)
- *   let string x = (??)
- *   let bool x = (??)
- *   let ifThenElse a cnd thn els = (??)
- *   let guard a cnd body = (??)
- *   let set eltp elems = (??)
- *   let union a terms = (??)
- *   let forIn a b x m n = (??)
- *   let fix a m = (??)
- *   let equals a m n = (??)
- *   let semifix a m = (??)
- * end
- *
- * module Fuzz(Imp: SIMPLE) = struct
- *   type tp = rawtp
- *   type isEmpty = rawtp semilat
- *   type value = isEmpty option * Imp.term
- *   type term = isEmpty cx -> value
- *   let wat (isEmpty: IsEmpty.term) (imp: Imp.term): term =
- *     fun cx -> match isEmpty cx with
- *               | None -> None, imp
- *               | Some a -> Some a, Imp.union a []
- *   let var a x = wat (IsEmpty.var a x) (Imp.var a x)
- *   let app (a:tp) (b:tp) (m:term) (n:term) (cx:isEmpty cx): value =
- *     let mE,mX = m cx and nE,nX = n cx in
- *     wat (IsEmpty.app a b mE nE) (Imp.app a b mX nX) cx
- * end *)
-
 module Simplify(Imp: SIMPLE): sig
   include SIMPLE
           with type term = rawtp semilat cx -> Imp.term * rawtp semilat option
@@ -729,7 +850,8 @@ end = struct
     let exprX, exprE = expr cx in
     let knowns = match exprE with
       | Some `Tuple lats -> List.map2 (fun (_,x) lat -> x,lat) tpxs lats
-      | _ -> [] in
+      | Some _ -> impossible "invalid let-tuple"
+      | None -> [] in
     let bodyX, bodyE = body (Cx.add_list knowns cx) in
     propagate (Imp.letTuple tpxs bodyTp exprX bodyX) bodyE
 
@@ -771,6 +893,46 @@ end = struct
     | fdX, None -> full (Imp.semifix a fdX)
   let equals a tm1 tm2 cx = full (Imp.equals a (fst (tm1 cx)) (fst (tm2 cx)))
 end
+
+
+(* module IsEmpty: SIMPLE with type term = rawtp semilat cx -> rawtp semilat option
+ * = struct
+ *   type tp = rawtp
+ *   type isEmpty = rawtp semilat
+ *   type term = isEmpty cx -> isEmpty option
+ *   let var a x = (??)
+ *   let letIn a b x m n = (??)
+ *   let lam a b x m = (??)
+ *   let app a b m n = (??)
+ *   let tuple tpterms = (??)
+ *   let proj tps i m = (??)
+ *   let letTuple tpxs b m n = (??)
+ *   let string x = (??)
+ *   let bool x = (??)
+ *   let ifThenElse a cnd thn els = (??)
+ *   let guard a cnd body = (??)
+ *   let set eltp elems = (??)
+ *   let union a terms = (??)
+ *   let forIn a b x m n = (??)
+ *   let fix a m = (??)
+ *   let equals a m n = (??)
+ *   let semifix a m = (??)
+ * end
+ *
+ * module Fuzz(Imp: SIMPLE) = struct
+ *   type tp = rawtp
+ *   type isEmpty = rawtp semilat
+ *   type value = isEmpty option * Imp.term
+ *   type term = isEmpty cx -> value
+ *   let wat (isEmpty: IsEmpty.term) (imp: Imp.term): term =
+ *     fun cx -> match isEmpty cx with
+ *               | None -> None, imp
+ *               | Some a -> Some a, Imp.union a []
+ *   let var a x = wat (IsEmpty.var a x) (Imp.var a x)
+ *   let app (a:tp) (b:tp) (m:term) (n:term) (cx:isEmpty cx): value =
+ *     let mE,mX = m cx and nE,nX = n cx in
+ *     wat (IsEmpty.app a b mE nE) (Imp.app a b mX nX) cx
+ * end *)
 
 
 (* Compiling to Haskell. *)
@@ -819,6 +981,8 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
     | `Bool -> string "False"
     | `Set _ -> string "Set.empty"
     | `Tuple tps -> tuple (List.map (fun tp -> tp, empty tp) tps)
+    (* NB. Even if we don't treat functions as semilattice types in source code,
+     * Simplify can generate them by rewriting (λx.⊥) → ⊥. *)
     | `Fn(a,b) -> lam a b (Sym.gen "_") (empty b)
 
   let set a terms = call "set" [listOf terms]
@@ -839,16 +1003,19 @@ end
 
 
 (* Putting it all together. *)
+let x = Sym.gen "x" let y = Sym.gen "y"
+let a = Sym.gen "a" let b = Sym.gen "b"
+let x1 = Sym.gen "x1" let x2 = Sym.gen "x2"
+let y1 = Sym.gen "y1" let y2 = Sym.gen "y2"
+let path = Sym.gen "path"
+let edge = Sym.gen "edge"
+let trans = Sym.gen "trans"
+let r = Sym.gen "r" and r1 = Sym.gen "r1" and r2 = Sym.gen "r2"
+let s = Sym.gen "s"
+
 module Examples(Modal: MODAL) = struct
   module Lang = Typecheck(Modal)
   open Lang
-
-  let x = Sym.gen "x" let y = Sym.gen "y"
-  let a = Sym.gen "a" let b = Sym.gen "b"
-  let x1 = Sym.gen "x1" let x2 = Sym.gen "x2"
-  let y1 = Sym.gen "y1" let y2 = Sym.gen "y2"
-  let path = Sym.gen "path"
-  let edge = Sym.gen "edge"
 
   type test = Modal.term
   let testIn (tp: tp) cx (ex: term): Modal.term =
@@ -910,21 +1077,69 @@ module Examples(Modal: MODAL) = struct
                                     (set [tuple [expr (proj 0 (var a));
                                                  expr (proj 1 (var b))]])))]))
 
-  let tests = [t0;t1;t2;t3;t4;t5;t6;t7;t8;t9;t10]
+  (* TODO: regular expressions.
+   * I'll eventually need arithmetic for this! *)
+  let lamBox x e = let xtmp = Sym.gen x.name in
+                   lam xtmp (letBox x (var xtmp) e)
+  let tnat = `String
+  let tchar = `String
+  let tstring =  `Set (`Tuple [tnat; tchar])
+  let natrel = `Set (`Tuple [tnat; tnat])
+  let tregex = `Fn (`Box tstring, natrel)
+
+  let t11rplus =
+    testIn
+      (`Fn (`Box tregex, tregex))
+      [trans, Box, `Fn(`Box natrel, natrel)]
+      (* λ[r] [s]. trans [r [s]] *)
+      (lamBox r (lamBox s (expr (app (var trans)
+                                   (box (expr (app (var r) (box (expr (var s))))))))))
+
+  let tests = [t0;t1;t2;t3;t4;t5;t6;t7;t8;t9;t10;t11rplus]
 end
 
 module Simplified = Simplify(ToHaskell)
-module Seminaived = Seminaive(Simplified)
-module Debug = Examples(Seminaived)
+module Zeroed = ZeroChange(Simplified)
 
+(* fully optimized *)
+module Debug = Examples(Seminaive(Zeroed))
 let runTest (i: int) (x,y: Debug.test) =
+  Printf.printf "%d: %s\n%d: %s\n"
+    i (StringBuilder.finish (Simplified.finish (Zeroed.finish x)))
+    i (StringBuilder.finish (Simplified.finish (Zeroed.finish y)))
+let runTests () = List.iteri runTest Debug.tests
+
+(*
+OPTIMIZED t11rplus:
+
+  \r. let (r, dr) = r in
+  \s. let (s, ds) = s in
+  trans (r (s, Set.empty), Set.empty)
+
+BOTTOM-PROP ONLY t11rplus:
+
+  \r. let (r, dr) = r in
+  \s. let (s, ds) = s in
+  trans (r (s, Set.empty), (dr (s, Set.empty) ()))
+
+the zero-change optimization saves us a call to dr!
+
+NAIVE/PASS-THROUGH t11rplus:
+
+  \r. let r = r in \s. let s = s in trans (r s)
+
+*)
+
+(* only bottom prop, no zero-change analysis *)
+module Debug2 = Examples(Seminaive(DummyZero(Simplified)))
+let runTest2 (i: int) (x,y: Debug2.test) =
   Printf.printf "%d: %s\n%d: %s\n"
     i (StringBuilder.finish (Simplified.finish x))
     i (StringBuilder.finish (Simplified.finish y))
-let runTests () = List.iteri runTest Debug.tests
+let runTests2 () = List.iteri runTest2 Debug2.tests
 
+(* naive version *)
 module Naive = Examples(DropBoxes(ToHaskell))
-
 let runNaiveTest (i: int) (x: Naive.test) =
   Printf.printf "%d: %s\n" i (StringBuilder.finish x)
 let runNaiveTests () = List.iteri runNaiveTest Naive.tests
