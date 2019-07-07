@@ -49,9 +49,9 @@ test i = do
   let numNodes = size $ set $ do (x,y) <- toList edges; [x,y]
   printf "testing %i nodes %i edges\n" numNodes numEdges
   naiveT <- time (trans edges)
-  semiT <- time (semiTrans edges)
   printf "  naive: %6.2fs\n" naiveT
+  semiT <- time (semiTrans edges)
   printf "  semi:  %6.2fs\n" semiT
 
 main :: IO ()
-main = mapM_ test [2..16]
+main = mapM_ test [2..]
