@@ -78,21 +78,55 @@ monotone functions. Since this category is cartesian closed, then it
 can interpret the simply-typed lambda calculus, which gives us a
 notation for writing monotone functions.
 
-So Datafun begins as the simply-typed lambda calculus with sums
-and products. To this, we add a type of finite sets $\tset{\eqt A}$,
-which are introduced with set literals $\eset{e_0, \ldots e_n}$, and
-and can be eliminated using (a slight generalization of) monad
-comprehension syntax $\efor{x}{e}{e'}$. 
+So Datafun begins as the simply-typed lambda calculus with functions ($\fnof{x}{e}$
+$f\<e$), sums ($\inj i e$ and $\ecase{e} (\inj i x_i \caseto f_i)_{i\in\{1,2\}}$)
+and products ($(\etuple{e_1, e_2}$ and $\pi_i e$). To this, we add a type of finite
+sets\footnote{To ensure implementability, set elements must be \emph{equality types}
+  which support decidable equality. In our core calculus, we use a subgraamar of
+  eqtypes, and in our implementation (which compiles to Haskell) we use typeclass
+  constraints to pick out such types.}
+$\tset{\eqt A}$, which are introduced with set literals $\eset{e_0, \ldots e_n}$, 
+and can be eliminated using (a slight generalization of) Moggi's monadic
+bind syntax $\efor{x}{e}{e'}$.
+
+As long as all the primitives of the calculus, every definable
+function is also monotone, which is a property essential for taking
+fixed points, but it is also very restrictive. There are many
+essential oeprations which are naturally non-monotone, such as
+equality tests $\dvar e = \dvar f$. For example, the test
+$\eset{2, 3} = \eset{1, 2, 3}$ is false, but if the first argument is
+increased to $\eset{1, 2, 3}$ then the test \emph{non-monotonically}
+changes to true -- the boolean type $1 + 1$ is discretely ordered, so
+a monotonic operation returning a boolean must always return the
+same result if its argument is increased or decreased. 
+
+So we need to define operations which are non-monotonic, without
+destroying the property that types enforce monotonicity checking.  We
+square this circle by introducing the \emph{discreteness} type
+constructor $\iso A$. The idea is that the elements of $\iso A$ are
+\emph{exactly the same} as the elements of $A$, except that the
+partial order relation on $\iso A$ is simply the equality on $A$ --
+that is, this is a \emph{discrete} partial order. So the monotonicity
+condition for a function of type $\iso A \to B$ becomes vacuous: it
+just says that given equal inputs the equal outputs must lie in the
+order relation of $B$, which is automatically satisfied (since partial
+orders are reflexive). This lets us encode ordinary functions in terms
+of monotone ones. Semantically, discreteness forms a comonad, and
+accordingly the syntax we use for this is a variant of \citet{jrml}'s
+syntax for constructive S4 modal logic. We make discrete terms with
+the introduction form $\ebox{e}$ and eliminate them with a pattern
+matching eliminator $\eletbox x e f$. The variables are coloured
+$\dvar x$ to indicate that they are discrete, and uncolored $x$ to
+indicate they are monotonic, and discrete terms $\dvar e$ are restricted
+to only refer to discrete variables. 
 
 
-\begin{enumerate}
-\item We begin with the simply-typed lambda calculus including sums
-  and products. Syntactically, this 
-\item We add a type of finite sets 
-\item Next, we add a comonadic type $\iso A$, denoting the same elements
-  as $A$, but whose partial order is just the equality.
-\item Finally, we add a fixed-point operator $\mathit{fix} : \Box(L \to L) \to L$. 
-\end{enumerate}
+\subsection{Examples of Datafun Programs}
+
+\subsubsection{Syntactic\, Sugar}
+
+In our examples, we freely use set comprehensions, noting that they
+elaborate easily into
 
 
 
