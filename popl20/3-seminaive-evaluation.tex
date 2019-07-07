@@ -270,22 +270,22 @@ for example, the change structure is pointwise:
   %% }
   %
   \infer{
-    \changesat{A}{\da}{a_1}{a_2}
+    \changesat{A}{\da}{a}{a'}
     \\
-    \changesat{B}{\db}{b_1}{b_2}
+    \changesat{B}{\db}{b}{b'}
   }{\changesat{A \x B}
     {\tuple{\da,\db}}
-    {\tuple{a_1,b_1}}
-    {\tuple{a_2,b_2}}
+    {\tuple{a,b}}
+    {\tuple{a',b'}}
   }
   &&
   \infer{
-    \changesat{A_i}{\dx_i}{x_i}{y_i}
+    \changesat{A_i}{\dx}{x}{y}
   }{
     \changesat{A_1 + A_2}{\inj i \dx}{\inj i x}{\inj i y}
   }
 \end{align*}
-%\vspace{0pt} %FIXME. yes, this makes a difference, believe it or not
+%\vspace{0pt} % TODO: double-check if this is better.
 
 Since we only consider increasing changes, and $\iso A$ is ordered discretely,
 the only ``change'' permitted is to stay the same. Consequently, no information
@@ -344,7 +344,7 @@ Note also the mixture of monotonicity and non-monotonicity in the type $\iso A
 increasing outputs --- function \emph{changes} are also monotone on input
 changes $\D A$ --- a larger increase in the input yields a larger increase in
 the output. However, there's no reason to expect the change in the output to
-grow as the \emph{base point} increases --- hence the $\iso$ on the base point.
+grow as the \emph{base point} increases --- hence the use of $\iso$.
 
 
 \subsection{Zero-changes, derivatives, and faster fixed points}
@@ -364,7 +364,7 @@ $\changesat{A \to B}{\df}{f}{f}$. This implies that
 
 \noindent
 In other words, $\df$ yields the change in the output of $f$ given a change to
-its \emph{input}.
+its input.
 %
 This is exactly the property of $\name{step}'$ that made it useful for
 semi\naive\ evaluation --- indeed, $\name{step}'$ is a zero-change to
