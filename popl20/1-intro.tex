@@ -61,6 +61,39 @@ language~\cite{flix} and the Datafun language~\cite{datafun}.  Very
 conveniently for our exposition, these two languages embody two
 alternative design strategies.
 
+%% FIXME: this is not up-to-date with Flix's current design. I think
+%% it's even not up-to-date with Flix's old design. Old Flix wasn't a
+%% functional program building a Datalog program, it's the reverse: a
+%% Datalog program that can run functional code in certain places to
+%% eg. compute lattice aggregations.
+%
+%% New Flix has both functional code generating Datalog code, and
+%% Datalog code being able to run functional code in certain places.
+%% So it seems like it should be _very_ close to Datafun in
+%% expressivity. I think Madsen has either a draft or a
+%% soon-to-be-published paper on this new design.
+%
+%% Differences between Flix & Datafun as I see them:
+%%
+%% - Flix doesn't have monotonicity types.
+%
+%% - Instead Flix integrates with SMT solvers for lightweight
+%%   verification of properties including monotonicity,
+%%   distributivity, soundness, completeness, etc. However, mostly
+%%   only works for 1st-order stuff.
+%
+%% - Flix makes it easy to extend language with new semilattice types:
+%%   you just write the code for the join operation.
+%
+%% - In Datafun, Datalog is just a mode of use of functional language.
+%%   Flix separates the relational/Datalog and functional
+%%   sublanguages.
+%
+%% - In Flix, the semantics of passing around Datalog code in the
+%%   functional language are unclear; talking with Madsen, he seemed
+%%   unsure what design choice was best.
+%
+%% But a summary this^ long belongs in related work, not here.
 Flix adopts the route of treating Datalog as an embedded
 domain-specific language. That is, Flix is a fairly conventional
 (albeit well-designed) functional programming language roughly
