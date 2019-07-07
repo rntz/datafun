@@ -27,7 +27,7 @@
 % stretch: maximum allowed font expansion; default is 20.
 % tracking: use letterspacing on small caps.
 % letterspace: amount of added letter-spacing in \lsstyle, \scshape, &c.
-\microtypesetup{letterspace=0,
+\microtypesetup{tracking=true,letterspace=0,
   %spacing=true, stretch=20, shrink=15,
 }
 
@@ -55,7 +55,7 @@
 
 %% ----- #1: Alegreya, large section titles -----
 \usepackage[scaled=1.031,scaled=0.9872074235807861,scaled=1,lf,tabular,]{AlegreyaSans}
-\microtypesetup{tracking=false,letterspace=5,}  % 5-12
+\microtypesetup{letterspace=8,}  % 5-12
 \renewcommand\MakeTextUppercase\scshape % hack
 \renewcommand\@secfont{\large\sffamily\bfseries\section@raggedright}
 %\renewcommand\@subsecfont{\AlegreyaSansMedium\section@raggedright}
@@ -108,6 +108,9 @@
 \DeclareFontShape{OT1}{pzc}{m}{it}{<-> s * [1.12] pzcmi7t}{}
 \DeclareMathAlphabet{\mathscr}{OT1}{pzc}{m}{it}
 
-%% This works nicely for Charter's small-caps. TODO: figure out how to only
-%% apply this to Charter small-caps & not to sans-serif {small,all}-caps.
-\microtypesetup{tracking=true,letterspace=25,} % 20-40
+%% Set tracking just for Charter's small caps.
+\SetTracking{
+  encoding={T1,LY1,T2A},
+  family={XCharter-TLF,XCharter-TOsF},
+  shape={sc*,si,scit},
+}{30} %% 30. 20-50
