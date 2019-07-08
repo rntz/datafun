@@ -22,6 +22,13 @@
 % Use stmry medium as bold since there is no stmry bold.
 \SetSymbolFont{stmry}{bold}{U}{stmry}{m}{n}
 
+% Use Zapf Chancery as \mathscr font. Passing scr=zapfc to mathalfa doesn't
+% handle lowercase letters for some reason. Scaled by eye-matching x-heights
+% with Euler/XCharter at scaled=.94.
+\DeclareFontFamily{OT1}{pzc}{}
+\DeclareFontShape{OT1}{pzc}{m}{it}{<-> s * [1.13] pzcmi7t}{}
+\DeclareMathAlphabet{\mathscr}{OT1}{pzc}{m}{it}
+
 % Default to vertically centered colons. Doesn't quite work with euler, but
 % better than nothing.
 \mathtoolsset{centercolon}
