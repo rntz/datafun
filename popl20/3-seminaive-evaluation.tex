@@ -129,7 +129,8 @@ So consider $\name{step}'$ defined by:
 
 \noindent
 Observe that $\name{step} \<(\name{path} \cup \name{dpath}) =
-\name{step}\<\name{path} \cup \name{step}'\<\name{dpath}$.
+\name{step}\<\name{path} \cup \name{step}'\<\name{dpath}$. \todo{give an
+  equational proof of this!}
 %
 That is, $\name{step}'$ tells us how \name{step} changes as its input grows.
 %
@@ -177,19 +178,21 @@ of finding functions, like $\name{step}'$, which compute the change in a
 function's output given a change to its input.
 %
 This is a problem of \emph{incremental computation}, and since Datafun is a
-functional language, we turn to the
-\emph{incremental \fn-calculus}~\citep{incremental}.
+functional language, we turn to the \emph{incremental
+  \fn-calculus}~\citep{incremental,DBLP:conf/esop/GiarrussoRS19}.
 
 
 \subsection{Change structures}
 \label{sec:change-structures}
 
-To formalize the notion of change, an incremental \fn-calculus associates every
-type $A$ with a \emph{change structure}, consisting of:\footnote{Our notion of
-  change structure differs significantly from that of \citeauthor{incremental};
-  we discuss the divergence in \cref{sec:differences-from-incremental}. As we do
-  not use change structures \emph{per se} in our proofs, we treat them
-  informally, as a source of intuition rather than rigor.}
+To make precise the notion of change, an incremental \fn-calculus associates
+every type $A$ with a \emph{change structure}, consisting of:\footnote{Our
+  notion of change structure differs significantly from that of
+  \citet{incremental}, although it is similar to the logical relation given in
+  \citet{DBLP:conf/esop/GiarrussoRS19}; we discuss this in
+  \cref{sec:differences-from-incremental}. As we do not use change structures
+  \emph{per se} in our proofs, we treat them informally, as a source of
+  intuition rather than rigor.}
 
 \begin{enumerate}
 \item A type $\D A$ of possible changes to values of type $A$.
@@ -381,7 +384,7 @@ Function zero-changes are so important we give them a special name:
 
 \begin{lemma}\label{lem:DeltaL}
   At every semilattice type $L$, we have $\D L = L$ and
-  $\changesat{L}{\dx}{x}{y} \iff x \vee \dx = y$.
+  $\changesat{L}{\dx}{x}{y} \iff (x \binvee \dx) = y$.
 \end{lemma}
 \begin{proof}
   By induction on semilattice types $L$. \todo{See appendix.}
@@ -389,8 +392,8 @@ Function zero-changes are so important we give them a special name:
 
 \noindent
 Now, given a monotone map $f : L \to L$ and its derivative $f' : \iso L \to L
-\to L$, we can find $f$'s fixed-point semi\naive{}ly as the limit of the
-sequence $x_i$ defined:
+\to L$, we can find $f$'s fixed-point as the limit of the sequence $x_i$
+defined:
 
 \begin{align*}
   x_0 &= \bot & x_{i+1} &= x_i \vee \dx_i\\
@@ -405,11 +408,10 @@ f^i\<x$, and therefore $\fastfix\<(f,f') = \efix f$. \todo{Moreover, if $L$
 
 \label{sec:seminaive-strategy}
 
-This leads directly to our strategy for semi\naive\ Datafun.
-\Citeauthor{incremental}'s incremental \fn-calculus defines a static
-transformation $\Deriv e$ which computes the change in $e$ given the change in
-its free variables; it \emph{incrementalizes} $e$. Our goal is not to
-incrementalize Datafun \emph{per se}, but to find fixed points faster.
+This leads directly to our strategy for semi\naive\ Datafun. \Citet{incremental}
+defines a static transformation $\Deriv e$ which computes the change in $e$
+given the change in its free variables; it \emph{incrementalizes} $e$. Our goal
+is not to incrementalize Datafun \emph{per se}, but to find fixed points faster.
 Consequently, we define two mutually recursive transformations: $\phi e$, which
 computes $e$ faster by replacing fixed points with calls to \fastfix; and
 $\delta e$, which incrementalizes $\phi e$ so that we can compute the derivative
