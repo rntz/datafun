@@ -139,11 +139,12 @@
 % and make sure it uses \dvar. Every use of \efor, \elet{\ebox...}, some uses of
 % \ecase, etc.
 
-\newcommand\eqt[1]{\underaccent{\textmd{eq}}{#1}}
+\newcommand\undertype[2]{\underaccent{\textrm{\upshape #1}}{#2}}
+\newcommand\eqt[1]{\undertype{eq}{#1}}
 \providecommand\fint{}
-\renewcommand\fint[1]{\underaccent{\textmd{fin}}{#1}}
-\newcommand\acct[1]{\underaccent{\textmd{acc}}{#1}}
-\newcommand\fixt[1]{\underaccent{\textmd{fix}}{#1}}
+\renewcommand\fint[1]{\undertype{fin}{#1}}
+\newcommand\acct[1]{\undertype{acc}{#1}}
+\newcommand\fixt[1]{\undertype{fix}{#1}}
 
 \newcommand\elet[1]{\kw{let}\;{#1}\;\kw{in}\;}
 \newcommand\etuple[1]{\langle{#1}\rangle}
