@@ -137,22 +137,26 @@ So consider $\name{step}'$ defined by:
 
 \newcommand\colorpath{{\color{BlindVermilion}\name{path}}}
 \newcommand\colordpath{{\color{BlindBlue}\name{dpath}}}
+\newcommand\colorA{\color{BlindVermilion}}
+\newcommand\colorB{\color{BlindBlue}}
 \renewcommand\colorpath{\name{path}}
 \renewcommand\colordpath{\name{dpath}}
+%% \renewcommand\colorA\relax
+%% \renewcommand\colorB\relax
 
 \noindent
 Observe that
 %
 \begin{align*}
-  &\mathrel{\hphantom{=}} {\color{BlindVermilion}\name{step}\<\colorpath}
+  &\mathrel{\hphantom{=}} {\colorA\name{step}\<\colorpath}
   \cup
-  {\color{BlindBlue}\name{step}'\<\colordpath}
+  {\colorB\name{step}'\<\colordpath}
   \\
   &=
-  {\color{BlindVermilion}
+  {\colorA
   \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath}}
   \cup
-  {\color{BlindBlue}
+  {\colorB
   \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colordpath}}
   \\
   &=
