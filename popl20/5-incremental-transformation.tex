@@ -1,73 +1,76 @@
-\section{The \texorpdfstring{$\boldsymbol\phi$}{\textphi} and \texorpdfstring{$\boldsymbol\delta$}{\textdelta} Transformations}
+\newcommand\boldphi{\texorpdfstring{$\boldsymbol\phi$}{\textphi}}
+\newcommand\bolddelta{\texorpdfstring{$\boldsymbol\delta$}{\textdelta}}
+
+\section{The \boldphi\ and \bolddelta\ Transformations}
 \label{sec:transformations}
 
-Recall our strategy from \cref{sec:seminaive-strategy}: we aim to define two
-static transformations.
-%
-First, a speed-up transform $\phi e$, which will replace $\efix f$ by
-$\fastfix\<(f,f')$ to compute fixed points semi\naive{}ly.
+We use two static transformations, $\phi$ and $\delta$. Their definitions are
+given in \cref{fig:phi,fig:delta} respectively, but rather than diving straight
+in, we \XXX.
+
+The speed-up transform $\phi e$ computes fixed points semi\naive{}ly by
+replacing $\efix f$ by $\fastfix\<({f,f'})$.
 %
 But to find the derivative $f'$ of $f$ we'll need a second transform, called
 $\delta e$.
 %
-Since a derivative is a zero-change, can $\delta e$ simply find the
-\emph{zero-change} to $e$? Unfortunately, this is not strong enough. For
-example, the derivative of $\fnof x e$ depends on how $e$ changes as its free
-variable $x$ changes --- which is not necessarily a zero-change.
+Since a derivative is a zero-change, can $\delta e$ simply find a zero-change to
+$e$?
+%
+Unfortunately, this is not strong enough.
+%
+For example, the derivative of $\fnof x e$ depends on how $e$ changes as its
+free variable $x$ changes --- which is not necessarily a zero-change.
 %
 To compute derivatives (zero-changes), we need to solve the general problem of
 computing \emph{changes}.
 %
-Therefore we model $\delta e$ on the incremental \fn-calculus' $\Deriv$
-transform \citep{incremental}: $\delta e$ will determine how $\phi e$ changes as
-its free variables change.\footnote{In order to make their mutual recursion
-  work, $\delta e$ incrementalizes $\phi e$, not $e$. We'll see why this is
-  necessary later. \todo{insert forward ref.}}
+So, modelled on the incremental \fn-calculus' $\Deriv$ \citep{incremental},
+$\delta e$ will compute how $\phi e$ changes as its free variables
+change.%
+%% \footnote{In order to make their mutual recursion work, $\delta e$
+%%   incrementalizes $\phi e$, not $e$. We'll see why this is necessary later.
+%%   \todo{insert forward ref.}}
 
-In fact, viewing expressions $e$ as functions of their free variables, $\delta
-e$ will denote the \emph{derivative} of the function $\phi e$ denotes.
-%
-And just as the derivative of a unary function $f\<x$ has \emph{two} arguments,
-$\df\<x\<\dx$, the derivative of an expression $e$ with $n$ variables $x_1,
-\dots, x_n$ will have $2n$ variables: the original $x_1, \dots, x_n$ and their
-changes $\dx_1, \dots, \dx_n$.\footnote{We assume throughout the paper as a
-  matter of notational convenience that source programs contain no variables
-  starting with the letter \emph{d}.} This already suggests part of $\delta$'s
-definition: $\delta x = \dx$ and $\delta\dvar x = \dvar\dx$.
-
-%% \newcommand\mvar[1]{{\color{black}#1}}
-%% $\phi(\efixis x e) = \fastfix\<\ebox{\etuple{\fnof{\mvar x}\phi e,\ \fnof{\eboxvar x} \fnof{\mvar\dx} \delta e}}$
-
-\input{fig-DeltaPhi}
-
-But before defining the rest of $\delta$, let's return to our primary purpose:
-what is $\phi(\efix e)$? Clearly it involves \fastfix.
-%
-We also need the derivative of the function $e$ computes, but as we've just
-discussed, $\delta e$ yields how $e$ changes.
+However, to speed up $\efix e$ we don't want the change to $e$; we want its
+derivative.
 %
 Since derivatives are zero-changes, function changes and derivatives coincide if
 \emph{the function cannot change}.
 %
 This is why the typing rule for $\efix e$ (\todo{xref}) requires that $e : \iso(\fixt L
-\to \fixt L)$: the use of $\iso$ prevents $e$ from changing.
+\to \fixt L)$: the use of $\iso$ prevents $e$ from changing!
 %
 So the key strategy of our speed-up transformation is to {\bfseries\boldmath
-  augment expressions of type ${\iso A}$ with their zero-changes.}
+  decorate expressions of type ${\iso A}$ with their zero-changes.}
 %
-To do this we need a type translation corresponding to $\phi$; let's call it
-$\Phi$. Source expressions $e : A$ become sped-up expressions $\phi e : \Phi A$.
-In particular, if $e : \iso A$ then $\phi e$ has type $\Phi(\iso A) = \iso(\Phi
-A \x \DP A)$.
-%
-Evaluating $\phi e$ should produce a pair $\ebox{\etuple{x,\dx}}$ where $x :
-\Phi A$ is the sped-up result and $\dx : \DP A$ is a zero-change to $x$.
+This makes derivatives available exactly where we need them: at \prim{fix}
+expressions.
 
-We define $\Phi A$ and recapitulate $\D A$ in \cref{fig:DeltaPhi}.
+
+\subsection{Typing \boldphi\ and \bolddelta}
+
+\input{fig-DeltaPhi}
+
+In order to decorate expressions with extra information, $\phi$ also needs to
+decorate their types. In \cref{fig:DeltaPhi} we give a type translation $\Phi A$
+capturing this.
 %
-On types other than $\iso A$, $\Phi$ simply distributes.
+In particular, if $e : \iso A$ then $\phi e$ will have type $\Phi(\iso A) =
+\iso(\Phi A \x \DP A)$.
 %
-It's worth noting that:
+The idea is that evaluating $\phi e$ will produce a pair
+$\eboxraw{\etuple{x,\dx}}$ where $x : \Phi A$ is the sped-up result and $\dx :
+\DP A$ is a zero-change to $x$.
+%
+Thus, if $e : \iso(\fixt L \to \fixt L)$, then $\phi e$ will compute
+$\eboxraw{\etuple{f,f'}}$, where $f'$ is the derivative of $f$.
+
+On types other than $\iso A$, there is no information we need to add, so $\Phi$
+simply distributes.
+%
+In particular, source programs and sped-up programs agree on the shape of
+first-order data:
 
 \begin{lemma}\label{thm:phi-eqt}
   $\Phi\eqt A = \eqt A$.
@@ -76,30 +79,47 @@ It's worth noting that:
   Induct on $\eqt A$.
 \end{proof}
 
-\noindent This means that sped-up programs do nothing to first-order data.
+For reasons that we will discuss in \todo{insert fwd ref}, $\phi$ and $\delta$
+are mutually recursive. Thus $\delta e$ finds the change to $\phi e$ rather than
+$e$. So if $e : A$ then $\phi e : \Phi A$ and $\delta e : \DP A$.
+%
+However, so far we have neglected to say what $\phi$ and $\delta$ do to typing
+contexts.
+%
+To understand this, it's helpful to look at what $\Phi$ and $\DP$ do to
+functions and to $\iso$.
+%
+This is because expressions denote functions of their free variables.
+%
+Moreover, in Datafun free variables come in two flavors, monotone and discrete, and discrete variables are semantically $\iso$-ed.
 
-\todo{Key ideas not yet covered:
-  \begin{itemize}
-  \item We're using derivatives of a sped-up program so we use $\DP$ everywhere
-    not $\D$.
+If we view expressions as functions of their free variables, $\delta e$ will
+denote the \emph{derivative} of the function $\phi e$ denotes.
+%
+And just as the derivative of a unary function $f\<x$ has \emph{two} arguments,
+$\df\<x\<\dx$, the derivative of an expression $e$ with $n$ variables $x_1,
+\dots, x_n$ will have $2n$ variables: the original $x_1, \dots, x_n$ and their
+changes $\dx_1, \dots, \dx_n$.%
+%
+\footnote{We assume throughout the paper as a matter of notational convenience
+  that source programs contain no variables starting with the letter \emph{d}.}
+%
+However, this says nothing yet about monotonicity or discreteness.
+%
+To make this precise, we'll use three context transformations, named according
+to the analogous type operators, $\iso$, $\Phi$, $\Delta$:
 
-  \item Give typing rules \& semantics for \fastfix. Semantics does not depend on
-    \fastfix\ being given a derivative; it's well-defined regardless.
-  \end{itemize}}
-
-
-\todo{Explain \cref{fig:DeltaPhi}. Then explain corresponding context transformations:}
 \begin{align*}
-  \D(\h x A) &= \h \dx {\D A} & \D(\hd x A) &= \emptycx\quad\text{(the empty context)}
+  \iso{(\h x A)} &= \hd x A & \iso{(\hd x A)} &= \hd x A
   \\
   \Phi(\h x A) &= \h x {\Phi A} & \Phi(\hd x A) &= \hd x {\Phi A}, \hd \dx {\DP A}
   \\
-  \iso{(\h x A)} &= \hd x A & \iso{(\hd x A)} &= \hd x A
+  \D(\h x A) &= \h \dx {\D A} & \D(\hd x A) &= \emptycx\quad\text{(the empty context)}
 \end{align*}
 
 \noindent
-Intuitively, $\iso\G$, $\D\G$, and $\Phi\G$ mirror the effect of
-$\iso$, $\D$, and $\Phi$ on the semantics of $\G$:
+Intuitively, $\iso\G$, $\Phi\G$, and $\D\G$ mirror the effect of
+$\iso$, $\Phi$, and $\D$ on the semantics of $\G$:
 
 \nopagebreak[2]
 %% This is a hack to make up for not having a \multirow that works inside align*
@@ -109,19 +129,19 @@ $\iso$, $\D$, and $\Phi$ on the semantics of $\G$:
   %
   \hfil
   %
+  \(\displaystyle\begin{aligned}
+    \den{\Phi(\h x A)} &\cong \den{\Phi A}
+    \\
+    \den{\Phi(\hd x A)} &\cong \den{\Phi \iso A}
+  \end{aligned}\)
+  %
+  \hfil
+  %
   %% TODO: needs more vertical space?
   \(\displaystyle\begin{aligned}
     \den{\D(\h x A)} &\cong \den{\D A}
     \\
     \den{\D(\hd x A)} &\cong \den{\D \iso A}
-  \end{aligned}\)
-  %
-  \hfil
-  %
-  \(\displaystyle\begin{aligned}
-    \den{\Phi(\h x A)} &\cong \den{\Phi A}
-    \\
-    \den{\Phi(\hd x A)} &\cong \den{\Phi \iso A}
   \end{aligned}\)
 \end{center}
 
@@ -170,9 +190,19 @@ e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
   \Jalign {\delta e} {\hd x {\Phi A}, \h\dx{\DP A}, \hd y {\Phi B}, \hd \dy {\DP B}} {\DP C}
 \end{align*}
 
-\todo{Explain how uses of $\phi$ in $\delta e$ involve weakening, and how this
-  justifies their use in discrete contexts (hilighted in {\color{Rhodamine}pink}), eg. in $\delta(e\<f) = \delta e \<\eboxraw{\phi f} \<\delta f$.}
+\todo{Ideas not yet covered:
+  \begin{itemize}
+  \item Give typing rules \& semantics for \fastfix. Semantics does not depend on
+    \fastfix\ being given a derivative; it's well-defined regardless.
 
-\todo{explain implementation of \zero{} via \dummy{}.}
+
+  \item Explain how uses of $\phi$ in $\delta e$ involve weakening, and how this
+    justifies their use in discrete contexts (hilighted in
+    {\color{Rhodamine}pink}), eg. in $\delta(e\<f) = \delta e \<\eboxraw{\phi f}
+    \<\delta f$.
+
+  \item explain implementation of \zero{} via \dummy{}.
+\end{itemize}}
+
 
 \input{fig-phi-delta}
