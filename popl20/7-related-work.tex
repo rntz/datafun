@@ -23,11 +23,13 @@ just discrete ones) with zero-changes.
 %
 However, this also invalidates $\delta(\efix f) = \bot$: now that $f$ can
 change, so can $\efix f$.
-%
-Luckily, there is a simple and correct solution: $\Deriv(\efix f) = \efix \ebox{\Deriv f \<\ebox{\efix f}}$~\cite{delta-fix}.
+% TODO: argh, using \delta here is technically wrong. because \delta should be
+% incrementalizing \phi. this is more like \Deriv. But if we use \Deriv people
+% will be confused, and this is a very technical point.
+Luckily, there is a simple and correct solution: $\delta(\efix f) = \efix \ebox{\delta f \<\ebox{\efix f}}$~\cite{delta-fix}.
 %
 However, to compute this new fixed point semi\naive{}ly, we need a \emph{second
-  derivative}: the zero-change to $\Deriv f \<\ebox{\efix f}$. Indeed, for a
+  derivative}: the zero-change to $\delta f \<\ebox{\efix f}$. Indeed, for a
 program with fixed points nested $n$ deep, we need $n$\textsuperscript{th}
 derivatives. We leave this to future work.
 
