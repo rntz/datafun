@@ -127,12 +127,45 @@ So consider $\name{step}'$ defined by:
 \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
 \]
 
+%% according to http://mkweb.bcgsc.ca/colorblind/ and Figure 2 in
+%% https://www.nature.com/articles/nmeth.1618?WT.ec_id=NMETH-201106, Vermilion
+%% and Blue make a reasonable contrasting color combo. However, both are a
+%% little light for use as text on a white background so we add some black (K in
+%% CMYK).
+\definecolor{BlindVermilion}{cmyk}{0,0.8,1,0.1}
+\definecolor{BlindBlue}{cmyk}{1,0.5,0,0.1}
+
+\newcommand\colorpath{{\color{BlindVermilion}\name{path}}}
+\newcommand\colordpath{{\color{BlindBlue}\name{dpath}}}
+\renewcommand\colorpath{\name{path}}
+\renewcommand\colordpath{\name{dpath}}
+
 \noindent
-Observe that $\name{step} \<(\name{path} \cup \name{dpath}) =
-\name{step}\<\name{path} \cup \name{step}'\<\name{dpath}$. \todo{give an
-  equational proof of this!}
+Observe that
 %
-That is, $\name{step}'$ tells us how \name{step} changes as its input grows.
+\begin{align*}
+  &\mathrel{\hphantom{=}} {\color{BlindVermilion}\name{step}\<\colorpath}
+  \cup
+  {\color{BlindBlue}\name{step}'\<\colordpath}
+  \\
+  &=
+  {\color{BlindVermilion}
+  \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath}}
+  \cup
+  {\color{BlindBlue}
+  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colordpath}}
+  \\
+  &=
+  \name{edge} \cup
+  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath \cup \colordpath}
+  \\
+  &=
+  \name{step} \<(\colorpath \cup \colordpath)
+\end{align*}
+
+\noindent
+In other words, $\name{step}'$ tells us how \name{step} changes as its input
+grows.
 %
 Using this property, we can directly compute the changes $\name{dpath}_i$
 between our iterations $\name{path}_i$:
@@ -190,9 +223,9 @@ every type $A$ with a \emph{change structure}, consisting of:\footnote{Our
   notion of change structure differs significantly from that of
   \citet{incremental}, although it is similar to the logical relation given in
   \citet{DBLP:conf/esop/GiarrussoRS19}; we discuss this in
-  \cref{sec:differences-from-incremental}. As we do not use change structures
-  \emph{per se} in our proofs, we treat them informally, as a source of
-  intuition rather than rigor.}
+  \cref{sec:differences-from-incremental}. Although we do not use change
+  structures \emph{per se} in our proofs, they are an important source of
+  intuition.}
 
 \begin{enumerate}
 \item A type $\D A$ of possible changes to values of type $A$.
