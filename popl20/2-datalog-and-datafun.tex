@@ -120,7 +120,25 @@ italicised $\dvar x$ to indicate that they are discrete, and uncolored
 and upright $x$ to indicate they are monotonic, and discrete terms
 $\isocolor e$ are restricted to only refer to discrete variables.
 
-Finally, Datafun include a fixed point operator $\efixis{x}{e}$. 
+Finally, Datafun include a fixed point operator $\efix{e}$. The $\efix$
+combinator takes a function argument of type $\iso (L \to L)$ and
+returns the least fixed point of that function. We impose two
+restrictions on the fixed point operator to ensure well-definedness
+and termination.  First, we require that recursion occur at
+\emph{semilattice types}.  A join-semilattice is a partial order with
+a least element and a join operation for calculating least upper
+bounds. Sets (with the empty set as least element, and union as join)
+are an example, as are tuples of semilattices. As long as the lattice
+has no infinite ascending chains, recursion from the bottom element
+is guaranteed to find the least fixed point.
+
+Furthermore, we require that the recursive function be supplied at box
+type. Since boxed expressions can only refer to discrete values, this
+means that the only monotone variable the fixed point can refer to is
+its fixed point. This ends up blocking (semantically) nested fixed points,
+and leaves the semantics of Datafun close to that of Datalog, where all
+recursion happens once, at the level of the whole program. 
+
 
 \subsection{Examples of Datafun Programs}
 
@@ -130,8 +148,7 @@ equal).
 
 \subsubsection{Syntactic\, Sugar}
 
-In our examples, we freely use set comprehensions, noting that they
-elaborate easily into
+In the following examples, we make 
 
 \subsubsection{Relational Composition}
 
@@ -154,16 +171,42 @@ elaborate easily into
   $\name{tc}\;\ebox{\mathit{xs}}$ \> $=$ \> $\efixis{\name{self}}{\name{xs} \vee \name{xs} \bullet\name{self}}$ 
 \end{tabbing}
 
-\subsubsection{Regular Expression Combinators}
+\subsubsection{Combinators for Regular Expression Matching}
 
+Datafun is designed to permit tightly integrate the higher-order
+functional and bottom-up logic programming styles. In this section, we
+illustrate the benefits of doing so by showing how to implement a
+regular expression matching library in combinator parsing style.  Like
+combinator parsers in functional languages, the code is very concise.
+Unlike typical functional parser combinators, though, support for the
+relational style ensures we can write \naive code \emph{without} the
+exponential backtracking cliffs typical of parser combinator libraries
+in functional languages.
 
+Below, we assume the existence of a function
+$\name{pos} : \kw{string} \to \tset{\kw{int}}$ which takes a string
+$s$ and returns the set of valid indices in that string, and assume
+that the character at position $n$ can be extracted from the string
+$s$ with the expression $s[n]$, as in Java or C. Having done this, we define
+the type of regular expression matchers.
 \begin{tabbing} 
-  $\kw{type}\;re\;=\iso \kw{string} \to \tset{\kw{int} \times \kw{int}}$  \\[1em]
-  
-  $\name{sym} : \iso \kw{char} \to \kw{re}$ \\
-  $\name{sym}\;\ebox{c}\;\ebox{s} = $\= $\efor{n}{\name{pos}\;s}{}$ \\
-                                     \> $\eif{s[n] = c}{\eset{(n, n+1)}}{\bot}$ \\[1em]
+  $\kw{type}\;re\;=\iso \kw{string} \to \tset{\kw{int} \times \kw{int}}$  
+\end{tabbing}
+This type takes a string (at boxed type, so that it can be used inside
+fixed point expressions), and then returns a set of pairs of integers. The
+idea is that if the regular expression matcher is passed the string
+argument $s$, then if $(i, n)$ is one of the returned values, then the
+substring $s_i, s_{i+1}, \ldots, s_{n-1}$ is matched by the regular expression. 
 
+\begin{tabbing}
+$\name{sym} : \iso \kw{char} \to \kw{re}$ \\
+  $\name{sym}\;\ebox{c}\;\ebox{s} =\; $\= $\efor{n}{\name{pos}\;s}{\eif{s[n] = c}{\eset{(n, n+1)}}{\bot}}$ 
+\end{tabbing}
+
+The $\name{sym}$ combinator takes a character and returns a set of substrings
+by returning the positions
+
+\begin{tabbing}
   $\name{nil} : \kw{re}$ \\
   $\name{nil}\;\ebox{s} = \efor{n}{\name{pos}\;s}{\eset{(n,n)}}$ \\[1em]
 
@@ -177,5 +220,24 @@ elaborate easily into
   $\name{alt}\;r_1\;r_2\;s = r_1\;s \vee r_2\;s$ \\[1em]
 
   $\name{star} : \iso\kw{re} \to \kw{re}$ \\
-  $\name{star}\;\ebox{r}\;\ebox{s} = \name{tc}\;\ebox{r\;\ebox{s}}$ \\
+  $\name{star}\;\ebox{r}\;\ebox{s} = \name{nil}\;\ebox{s} \vee \name{tc}\;\ebox{r\;\ebox{s}}$ \\
+\end{tabbing}
+
+
+\subsubsection{Regular Expression Combinators, 2}
+\begin{tabbing} 
+  $\kw{type}\;re\;=\iso (\kw{string} \times \kw{int}) \to \tset{\kw{int}}$  \\[1em]
+  
+  $\name{sym} : \iso \kw{char} \to \kw{re}$ \\
+  $\name{sym}\;\ebox{c}\;\ebox{s,n} = \eif{s[n] = c}{\eset{n+1}}{\bot}$ \\[1em]
+
+  $\name{nil} : \kw{re}$ \\
+  $\name{nil}\;\ebox{s, n} = \eset{n}$ \\[1em]
+
+  $\name{seq} : \kw{re} \to \kw{re} \to \kw{re}$ \\
+  $\name{seq}\;r_1\;r_2\;\ebox{s,n} =\ x = r_1\;x \vee r_2\;x$ \\[1em]
+
+  $\name{star} : \iso\kw{re} \to \kw{re}$ \\
+  $\name{star}\;\ebox{r}\;\ebox{s, n} = \efixis{\name{self}}{\eset{n} \vee 
+                                                \efor{m}{\name{self}}{r\;\ebox{s,m}}}$ \\
 \end{tabbing}
