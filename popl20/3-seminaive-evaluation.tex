@@ -376,34 +376,46 @@ semi\naive\ evaluation --- indeed, $\name{step}'$ is a zero-change to
 
 \noindent
 Function zero-changes are so important we give them a special name:
-\emph{derivatives}.
-\todo{more}
+\emph{derivatives}. We now have enough machinery to prove correct a general
+\emph{semi\naive\ fixed point strategy}. First, observe that:
 
-\todo{Explain: done?
+\begin{lemma}\label{lem:DeltaL}
+  At every semilattice type $L$, we have $\D L = L$ and
+  $\changesat{L}{\dx}{x}{y} \iff x \vee \dx = y$.
+\end{lemma}
+\begin{proof}
+  By induction on semilattice types $L$. \todo{See appendix.}
+\end{proof}
 
-  Do \textbf{not} explain:
-  \begin{itemize}
-  \item what it does to contexts or variables
-  \item derivatives of expressions
-  \end{itemize}
-}
+\noindent
+Now, given a monotone map $f : L \to L$ and its derivative $f' : \iso L \to L
+\to L$, we can find $f$'s fixed-point semi\naive{}ly as the limit of the
+sequence $x_i$ defined:
 
-%% Revisiting our running example, the crucial property of $\name{step}'$ now
-%% becomes:
+\begin{align*}
+  x_0 &= \bot & x_{i+1} &= x_i \vee \dx_i\\
+  \dx_0 &= f\<\bot & \dx_{i+1} &= f'\<x_i\<\dx_i
+\end{align*}
 
-%% \[ \changesat{\tseteq{A}}{\name{step}' \<\dx}{\name{step}\<x}{\name{step}\<(x
-%%   \cup \dx)} \]
+\noindent Let $\fastfix\<(f,f') = \bigvee_i x_i$. By induction and the
+derivative property, we have $\changes{\dx_{i+1}}{x_i}{f\<x_i}$ and so $x_i =
+f^i\<x$, and therefore $\fastfix\<(f,f') = \efix f$. \todo{Moreover, if $L$
+  satisfies the ascending chain property, we will reach our fixed point $x_i =
+  x_{i+1}$ in a finite number of iterations.}
 
-%% or, more suggestively:
-
-%% \[ \changesat{\tseteq A}{\dx}{x}{y} \implies
-%% \changesat{\tseteq A}{\name{step}' \<\dx}{\name{step}\<x}{\name{step}\<y}
-%% \]
+This leads directly to our strategy for semi\naive\ Datafun.
+\Citeauthor{incremental}'s incremental \fn-calculus defines a static
+transformation $\Deriv e$ which computes the change in $e$ given the change in
+its free variables; it \emph{incrementalizes} $e$. Our goal is not to
+incrementalize Datafun \emph{per se}, but to find fixed points faster.
+Consequently, we define two mutually recursive transformations: $\phi e$, which
+computes $e$ faster by replacing fixed points with calls to \fastfix; and
+$\delta e$, which incrementalizes $\phi e$ so that we can compute the derivative
+of fixed point functions.
+%
+In order to define $\phi$ and $\delta$ and show them correct, however, we first
+need a fuller account of Datafun's type system and semantics.
 
 
-\subsection{Examples of semi\naive\ Datafun programs}
-\XXX
-
-In order to explain in detail how our static transformation operates and why it
-is correct, however, we first need a fuller account of Datafun's type system and
-semantics.
+%% \subsection{Examples of semi\naive\ Datafun programs}
+%% \XXX
