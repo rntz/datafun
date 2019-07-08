@@ -157,3 +157,25 @@ elaborate easily into
 \subsubsection{Regular Expression Combinators}
 
 
+\begin{tabbing} 
+  $\kw{type}\;re\;=\iso \kw{string} \to \tset{\kw{int} \times \kw{int}}$  \\[1em]
+  
+  $\name{sym} : \iso \kw{char} \to \kw{re}$ \\
+  $\name{sym}\;\ebox{c}\;\ebox{s} = $\= $\efor{n}{\name{pos}\;s}{}$ \\
+                                     \> $\eif{s[n] = c}{\eset{(n, n+1)}}{\bot}$ \\[1em]
+
+  $\name{nil} : \kw{re}$ \\
+  $\name{nil}\;\ebox{s} = \efor{n}{\name{pos}\;s}{\eset{(n,n)}}$ \\[1em]
+
+  $\name{seq} : \kw{re} \to \kw{re} \to \kw{re}$ \\
+  $\name{seq}\;r_1\;r_2\;s = r_1\;s \bullet r_2\;s$ \\[1em]
+  
+  $\name{bot} : \kw{re}$ \\
+  $\name{bot}\;\_ = \bot$ \\[1em]
+
+  $\name{alt} : \kw{re} \to \kw{re} \to \kw{re}$ \\
+  $\name{alt}\;r_1\;r_2\;s = r_1\;s \vee r_2\;s$ \\[1em]
+
+  $\name{star} : \iso\kw{re} \to \kw{re}$ \\
+  $\name{star}\;\ebox{r}\;\ebox{s} = \name{tc}\;\ebox{r\;\ebox{s}}$ \\
+\end{tabbing}
