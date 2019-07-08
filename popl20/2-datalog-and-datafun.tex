@@ -83,8 +83,8 @@ notation for writing monotone functions.
 So Datafun begins as the simply-typed lambda calculus with functions ($\fnof{x}{e}$
 and $f\<e$), sums ($\inj i e$ and $\ecase{e} (\inj i x_i \caseto f_i)_{i\in\{1,2\}}$)
 and products ($(\etuple{e_1, e_2}$ and $\pi_i e$). To this, we add a type of finite
-sets\footnote{To ensure implementability, set elements must be \emph{equality types}
-  which support decidable equality. In our core calculus, we use a subgrammar of
+sets\footnote{To implement set types, their elements must support decidable equality.
+  In our core calculus, we use a subgrammar of
   ``eqtypes'', and in our implementation (which compiles to Haskell) we use typeclass
   constraints to pick out such types.}
 $\tset{\eqt A}$, which are introduced with set literals $\eset{e_0, \ldots e_n}$, 
@@ -98,6 +98,7 @@ essential oeprations which are naturally non-monotone, such as
 equality tests $\eeq e f$. For example, $\eset{} = \eset{}$ is true,
 but if the first argument is increased to $\esetraw{1}$ then it
 becomes false, a \emph{decrease} (in Datafun, $\efalse < \etrue$).
+\todo{Talk about this with Michael\ldots}
 
 So we need to define operations which are non-monotonic, without
 destroying the property that types enforce monotonicity checking. We
@@ -119,9 +120,40 @@ italicised $\dvar x$ to indicate that they are discrete, and uncolored
 and upright $x$ to indicate they are monotonic, and discrete terms
 $\isocolor e$ are restricted to only refer to discrete variables.
 
+Finally, Datafun include a fixed point operator $\efixis{x}{e}$. 
+
 \subsection{Examples of Datafun Programs}
+
+In the examples, we make free use of strings and integers, ordered
+with the trivial discrete order ($x \leq y$ if and only if they are
+equal).
 
 \subsubsection{Syntactic\, Sugar}
 
 In our examples, we freely use set comprehensions, noting that they
 elaborate easily into
+
+\subsubsection{Relational Composition}
+
+\begin{tabbing}
+  $\_ \bullet \_$ \;\;\;\= $\,:$\;\; \=
+  $ \tset{A \times B} \to \tset{B \times C} \to \tset{A \times C}$ \\
+
+  $\mathit{xs} \bullet \mathit{ys}$ \> $=$ \> $\efor{(a,b)}{\mathit{xs}}{}$ \\
+                                    \>     \> $\efor{(b',c)}{\mathit{ys}}{}$ \\
+                                    \>     \> $\eif{b = b'}{\eset{(a,c)}}{\bot}$
+\end{tabbing}
+
+\todo{Check use of equality with Michael\ldots}
+
+\subsubsection{Generic Transitive Closure}
+
+
+\begin{tabbing}
+  $\name{tc}$ \qquad \= $\,:$ \;\;\= $\iso{\tset{A \times A}} \to \tset{A \times A}$ \\
+  $\name{tc}\;\ebox{\mathit{xs}}$ \> $=$ \> $\efixis{\name{self}}{\name{xs} \vee \name{xs} \bullet\name{self}}$ 
+\end{tabbing}
+
+\subsubsection{Regular Expression Combinators}
+
+
