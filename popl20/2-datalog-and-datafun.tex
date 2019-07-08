@@ -179,7 +179,7 @@ illustrate the benefits of doing so by showing how to implement a
 regular expression matching library in combinator parsing style.  Like
 combinator parsers in functional languages, the code is very concise.
 Unlike typical functional parser combinators, though, support for the
-relational style ensures we can write \naive code \emph{without} the
+relational style ensures we can write \naive\ code \emph{without} the
 exponential backtracking cliffs typical of parser combinator libraries
 in functional languages.
 
@@ -204,7 +204,7 @@ $\name{sym} : \iso \kw{char} \to \kw{re}$ \\
 \end{tabbing}
 
 The $\name{sym}$ combinator takes a character and returns a set of substrings
-by returning the positions
+by returning the positions $n$ where the 
 
 \begin{tabbing}
   $\name{nil} : \kw{re}$ \\
