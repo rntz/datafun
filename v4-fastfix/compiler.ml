@@ -38,14 +38,15 @@ All tagless-final. Compiler flowchart:
 ===== NEW BACKEND as of July 2019 =====
 
 MODAL
+ |
  | φ/δ
  V
-SEMINAIVE  with explicit "this is a zero-change"
+ZERO  with explicit "this is a zero-change"
  |
  | ZeroChange: propagates zero-changes,
  |  turns zero-changes at lattice type into empty
  V
-ZERO
+SIMPLE
  |
  | Simplify: propagates bottoms
  V
@@ -1012,6 +1013,8 @@ let edge = Sym.gen "edge"
 let trans = Sym.gen "trans"
 let r = Sym.gen "r" and r1 = Sym.gen "r1" and r2 = Sym.gen "r2"
 let s = Sym.gen "s"
+let i = Sym.gen "i" and j = Sym.gen "j" and k = Sym.gen "k"
+let self = Sym.gen "self"
 
 module Examples(Modal: MODAL) = struct
   module Lang = Typecheck(Modal)
@@ -1095,7 +1098,64 @@ module Examples(Modal: MODAL) = struct
       (lamBox r (lamBox s (expr (app (var trans)
                                    (box (expr (app (var r) (box (expr (var s))))))))))
 
-  let tests = [t0;t1;t2;t3;t4;t5;t6;t7;t8;t9;t10;t11rplus]
+  let mkTrans (edge: sym) =
+    (fix path (union [expr (var edge);
+                      forIn a (var edge)
+                        (forIn b (var path)
+                           (guard (expr (equals (proj 1 (var a)) (proj 0 (var b))))
+                              (set [tuple [expr (proj 0 (var a));
+                                           expr (proj 1 (var b))]])))]))
+
+  (* Explicitly inlining transitive closure into regex star. *)
+  let t12rplus =
+    testIn (`Fn (`Box tregex, tregex))
+      []
+      (* λ[r] [s]. let edges = [r [s]] in trans edges *)
+      (lamBox r
+         (lamBox s
+            (letBox edge (asc (`Box natrel) (box (expr (app (var r) (box (expr (var s)))))))
+               (mkTrans edge))))
+
+(* 12 generates:
+
+\r_18. let (r_11, dr_11) = r_18 in
+\s_17. let (s_14, ds_14) = s_17 in
+let (edge_9, dedge_9) = ((r_11 (s_14, Set.empty)), Set.empty) in
+semifix
+ ((\path_8. (union edge_9 (forIn edge_9 (\a_2. (forIn path_8 (\b_3. (guard ((snd a_2) == (fst b_3)) (set [((fst a_2), (snd b_3))])))))))),
+  \path. \dpath.
+    for (a in edge_9, b in dpath, snd a == fst b)
+       {(fst a, snd b)})
+
+ *)
+
+  let tregex2 = `Fn(`Box tstring, `Fn (`Box tnat, `Set tnat))
+  let t13rstar =
+    testIn (`Fn (`Box tregex2, tregex2))
+      []
+      (* λ[r] [s] [i]. fix self is {i} ∪ for (j ∈ self) r [s] [j] *)
+      (lamBox r
+         (lamBox s
+            (lamBox i
+               (fix self
+                  (union [ set [expr (var i)]
+                         ; forIn j (var self)
+                             (expr (app (app (var r) (box (expr (var s)))) (box (expr (var j)))))
+         ])))))
+
+(* 13 generates:
+
+\r_25. let (r_11, dr_11) = r_25 in
+\s_24. (let (s_14, ds_14) = s_24 in
+\i_23. (let (i_15, di_15) = i_23 in
+semifix
+((\self_18. (union (set [i_15]) (forIn self_18 (\j_16. ((r_11 (s_14, Set.empty)) (j_16, ())))))),
+ \self. \dself.
+   for (j ∈ dself) r_11 (s_14, Set.empty) (j, ()))))
+
+ *)
+
+  let tests = [t0;t1;t2;t3;t4;t5;t6;t7;t8;t9;t10;t11rplus;t12rplus;t13rstar]
 end
 
 module Simplified = Simplify(ToHaskell)
