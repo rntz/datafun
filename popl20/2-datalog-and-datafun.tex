@@ -73,12 +73,14 @@ in terms of least fixed points of monotone functions on relations,
 is extremely elegant, and Datafun arose as an attempt to generalize
 this semantics.
 
-The key idea behind Datafun is that if the semantics of a Datalog
+The idea undergirding Datafun is that if the semantics of a Datalog
 program is a montone set-valued operator, then the natural home for
 that semantics is in the category Poset, of partial orders and
 monotone functions. Since this category is cartesian closed, then it
 can interpret the simply-typed lambda calculus, which gives us a
-notation for writing monotone functions.
+notation for writing monotone functions. We can now give a
+reconstruction of Datafun hewing very closely to this semantic
+intuition.
 
 So Datafun begins as the simply-typed lambda calculus with functions ($\fnof{x}{e}$
 and $f\<e$), sums ($\inj i e$ and $\ecase{e} (\inj i x_i \caseto f_i)_{i\in\{1,2\}}$)
