@@ -208,6 +208,54 @@ examine the most interesting and important parts of these definitions in detail.
 \input{fig-phi-delta}
 
 
+\subsection{Fixed points}
+
+The whole purpose of $\phi$ and $\delta$ is to speed up fixed points, so let's
+start there. In a fixed point expression $\efix e$, we know $e : \iso(\fixt L
+\to \fixt L)$. Consequently the type of $\phi e$ is
+
+\begin{align*}
+  \Phi(\iso(\fixt L \to \fixt L))
+  &= \iso(\Phi(\fixt L \to \fixt L) \x \DP(\fixt L \to \fixt L))\\
+  &= \iso((\Phi\fixt L \to \Phi\fixt L)
+  \x (\iso\Phi \fixt L \to \DP \fixt L \to \DP \fixt L))
+  \\
+  &= \iso((\fixt L \to \fixt L) \x (\iso\fixt L \to \D \fixt L \to \D\fixt L)
+  & \text{by \cref{thm:phi-eqt}, }\Phi\fixt L = \fixt L
+  \\
+  &= \iso((\fixt L \to \fixt L) \x (\iso\fixt L \to \fixt L \to \fixt L)
+  & \text{by \cref{lem:DeltaL}, }\Delta \fixt L = \fixt L
+\end{align*}
+
+\noindent
+The behavior of $\phi e$ is to compute a boxed pair $\eboxraw{\etuple{f,f'}}$,
+where $f : \fixt L \to \fixt L$ is a sped-up function and $f' : \iso\fixt L \to
+\fixt L \to \fixt L$ is its derivative. This is exactly what we need to call
+\fastfix. Therefore $\phi(\efix e) = \fastfix\<\phi e$.
+%
+However, if we're going to use $\fastfix$ in the output of $\phi$, we ought to
+give it a typing rule and semantics:
+
+\begin{align*}
+  \infer{
+    \J{e}{\G}{\iso((\fixt L \to \fixt L) \x (\iso\fixt L \to \fixt L \to \fixt L)}
+  }{\J{\fastfix\<e}{\G}{\fixt L}}
+  &&
+  \begin{aligned}
+    \den{\fastfix\<e}\<\g &= \fastfix \<(f, f')
+    \\
+    \text{where}~ & (f,f') = \den{e}\<\g
+  \end{aligned}
+\end{align*}
+
+As for $\delta(\efix e)$, since $e$ can't change (having $\iso$ type), neither
+can $\efix e$ (or $\fastfix\<\phi e$). All we need is a zero change at type
+$\fixt L$; by \cref{lem:DeltaL}, $\bot$ suffices.
+
+%% \todo{Give typing rules and semantics for \fastfix. Semantics does not depend on
+%%   \fastfix\ being given a derivative; it's well-defined regardless.}
+
+
 \subsection{Variables, \boldfn, and application}
 
 At the core of a functional language are variables, \fn, and application. The
@@ -253,12 +301,6 @@ The same argument applies (all the more easily) when $\phi e$ is used in a
 monotone rather than a discrete position.
 
 \todo{Discuss self-maintainable functions, citing \citet{incremental}.}
-
-
-\subsection{Fixed points}
-
-\todo{Give typing rules and semantics for \fastfix. Semantics does not depend on
-  \fastfix\ being given a derivative; it's well-defined regardless.}
 
 
 \subsection{The discreteness comonad, \iso}
