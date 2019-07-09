@@ -76,9 +76,11 @@ first-order data:
   Induct on $\eqt A$.
 \end{proof}
 
-For reasons that we will discuss in \todo{insert fwd ref}, $\phi$ and $\delta$
-are mutually recursive. Thus $\delta e$ finds the change to $\phi e$ rather than
-$e$. So if $e : A$ then $\phi e : \Phi A$ and $\delta e : \DP A$.
+For reasons that we'll discuss later \todo{fwdref}, $\phi$ and $\delta$ are
+mutually recursive; to make this work, $\delta e$ must find the change to $\phi
+e$ rather than $e$.
+%
+So if $e : A$ then $\phi e : \Phi A$ and $\delta e : \DP A$.
 %
 However, so far we have neglected to say what $\phi$ and $\delta$ do to typing
 contexts.
@@ -213,7 +215,52 @@ examine the most interesting and important parts of these definitions in detail.
 \input{fig-phi-delta}
 
 
-\subsection{Variables, functions, and application}
+\subsection{Variables, \boldfn, and application}
+
+At the core of a functional language are variables, \fn, and application. The
+$\phi$ translation leaves these alone, simply distributing over subexpressions.
+On variables, $\delta$ yields the corresponding change variables. On functions
+and application, $\delta$ is more interesting:
+
+\begin{align*}
+  \DP(A \to B) &= \iso\Phi A \to \DP A \to \DP B
+  &
+  \delta(\fnof x e) &= \fnof{\eboxvar x} \fnof\dx \delta e
+  &
+  \delta(e\<f) &= \delta e \<\ebox{\color{Rhodamine}\phi f} \<\delta f
+\end{align*}
+
+The intuition behind $\delta(\fnof x e) = \fnof{\eboxvar x} \fnof\dx \delta e$
+is that a function change takes two arguments, a base point $\dvar x$ and a
+change $\dx$, and yields the change in the result of the function, $\delta e$.
+However, we are given an argument of type $\iso \Phi A$, but consulting
+\cref{thm:type-correct} for the type of $\delta e$, we need a discrete variable
+$\hd x {\Phi A}$, so we use pattern-matching to unbox our argument.
+
+The intuition behind $\delta(e\<f) = \delta e \<\ebox{\phi f} \<\delta f$ is
+much the same: $\delta e$ needs two arguments, the original input $\phi f$ and
+its change $\delta f$, to return the change in the function's output. Moreover,
+it's discrete in its first argument, so we need to box it, $\ebox{\phi f}$.
+
+One might wonder whether this type-checks, since $\phi e$ and $\delta e$ don't
+use the same typing context.
+%
+We're even boxing $\phi f$, hiding all monotone variables;
+%
+consequently, it gets the context $\stripcxraw{\iso\Phi\G, \DP\G}$.
+%
+However, $\iso$ makes every variable discrete, and $\stripcxraw{-}$ leaves
+discrete variables alone, so this includes \emph{at least} $\iso\Phi\G$. The
+context $\phi f$ needs is $\Phi\G$. Since $\iso$ only makes a context stronger,
+we're safe.
+%
+To emphasize this, we've marked all \emph{discrete} uses of $\phi e$ inside
+$\delta e$ in \hilite{pink}.
+%
+The same argument applies (all the more easily) when $\phi e$ is used in a
+monotone rather than a discrete position.
+
+\todo{Discuss self-maintainable functions.}
 
 \todo{Explain how uses of $\phi$ in $\delta e$ involve weakening, and how this
   justifies their use in discrete contexts (hilighted in
