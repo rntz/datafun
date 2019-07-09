@@ -144,13 +144,37 @@ recursion happens once, at the level of the whole program.
 
 \subsection{Examples of Datafun Programs}
 
+\input{fig-sugar}
+
 In the examples, we make free use of strings and integers, ordered
 with the trivial discrete order ($x \leq y$ if and only if they are
-equal).
+equal). We also make use of a certain amount of syntax sugar in the
+definitions.
 
-\subsubsection{Syntactic\, Sugar}
+\begin{enumerate}
+\item First, we make free use of curried functions and pattern
+  matching. Desugaring these is relatively standard, and so we will
+  say little about it, with one exception. Namely, the box-elimination
+  form $\eletbox x e e'$ is a pattern matching form, and so we allow
+  it to occur inside of patterns. The effect of a box pattern
+  $\ebox{p}$ is to ensure that all of the variables bound in the
+  pattern $p$ are treated as discrete variables.
 
-In the following examples, we make 
+\item We mentioned earlier that Datafun's boolean type
+  $\kw{bool}$ is ordered, with $\efalse \leq \etrue$.  This is because
+  we do not use the usual encoding $1+1$ for booleans. Instead, we use the encoding $\tset 1$
+  with $\efalse$ defined as the empty set $\eset{}$ and $\etrue$ defined as the
+  singleton set $\eset{\etuple{}}$. We also make use of a ``one-sided''
+  conditional test form $\ewhen{b}{e}$. This test must must be taken at a lattice
+  type, and if the boolean $b$ is true, it returns $e$, and returns the bottom
+  element of the lattice otherwise. 
+  
+\item Finally, we make use of set comprehension notation. The
+  desugaring we use is the standard one -- essentially the same as
+  in~\citet{wadler-monad-comprehensions}. 
+\end{enumerate}
+We summarize (except for pattern matching) the sugaring rules we use in
+Figure~\ref{fig:sugar}. 
 
 \subsubsection{Relational Composition}
 
