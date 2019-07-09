@@ -1,16 +1,15 @@
+\usepackage[outputdir=latex.out]{minted}\newcommand\datalog[1]{\mintinline{prolog}{#1}}
 \usepackage{accents}            % for \underaccent
-\usepackage{anyfontsize}        % suppress warnings about stmaryrd font size
-\usepackage{booktabs}          % for formal tables, \midrule
+%\usepackage{amssymb}           %\triangleq?
+%\usepackage{anyfontsize}        % suppress warnings about stmaryrd font size
+\usepackage{booktabs}           % \midrule
 \usepackage{mathpartir}         % \begin{mathpar}, \infer, etc.
 \usepackage{mathtools}          % vertical centered colon, \dblcolon, \Coloneqq
-\usepackage{stmaryrd}           % \shortrightarrow, \llbracket, etc.
-\usepackage{subcaption}        % for complex figures with subfigures/subcaptions
+%\usepackage{multirow}           % \begin{multirow}
 \usepackage{nccmath}      % fix spacing around AMS math environments like align*
-\usepackage{multirow}
-\usepackage{amssymb}
-\usepackage[outputdir=latex.out]{minted}\newcommand\datalog[1]{\mintinline{prolog}{#1}}
-
-\usepackage{lipsum}       % TODO remove
+%\usepackage{placeins}           %\FloatBarrier
+\usepackage{stmaryrd}           % \shortrightarrow, \llbracket, etc.
+%\usepackage{subcaption}   % for complex figures with subfigures/subcaptions
 
 \hyphenation{semi-na\"ive}
 
@@ -34,7 +33,7 @@
 % better than nothing.
 \mathtoolsset{centercolon}
 
-%% More space around \cup and \vee.
+%% More space around \cup, \vee, \wedge.
 \let\bincup\cup
 \let\binvee\vee
 \let\binwedge\wedge
