@@ -1,0 +1,68 @@
+\begin{figure}
+  \begin{mathpar}
+    \setlength\arraycolsep{.33em}\begin{array}{r@{\hskip 1em}ccl}
+      \text{contexts} & \G &\bnfeq& (H_i)_i\\
+      \text{hypotheses} & H &\bnfeq& \h x A \bnfor \hd x A
+    \end{array}
+    \\
+    \stripcx\G = (\hd x A)_{\hd x A \in \G}
+    \\
+    \infer{\h x A \in \G}{\J x \G A}
+
+    \infer{\hd x A \in \G}{\J {\dvar x} \G A}
+
+    \infer{\J e {\G,\h x A} B}{\J {\fnof x e} \G {A \to B}}
+
+    \infer{\J e \G {A \to B} \\ \J f \G A}{\J {e\<f} \G B}
+
+    \infer{\quad}{\J {\etuple{}} \G \tunit}
+
+    \infer{(\J{e_i}\G{A_i})_i}{\J{\etuple{e_1,e_2}} \G {A_1 \x A_2}}
+
+    \infer{\J e \G {A_1 \x A_2}}{\J{\pi_i\<e}\G{A_i}}
+
+    \infer{\J e \G A_i}{\J{\inj i e}\G{A_1 + A_2}}
+
+    \infer{\J e \G {A_1 + A_2} \\
+      (\J {f_i} {\G,\h {x_i} {A_i}} {B})_i
+    }{
+      \J {\ecase{e} (\inj i {x_i} \caseto f_i)_i} \G B
+    }
+
+    \infer{\J {\isocolor e} {\stripcx\G} A}{\J{\ebox e} \G {\iso A}}
+
+    \infer{\J e \G {\iso A} \\ \J f {\G,\hd x A} B}{
+      \J {\elet{\ebox x = e} f} \G B}
+
+    \infer{\quad}{\J\bot\G {\eqt L}}
+
+    \infer{(\J{e_i} \G {\eqt L})_i}{\J{e_1 \vee e_2}\G {\eqt L}}
+
+    %% \infer{\J e \G {\eqt A}}{\J {\edown e} \G {\tdown {\eqt A}}}
+    \infer{(\J {\isocolor e_i} {\stripcx\G} {\eqt A})_i}{
+      \J {\eset{e_i}_i} \G {\tset{\eqt A}}}
+
+    %% \infer{\J e \G {\tdown {\eqt A}} \\
+    %%   \J f {\G,\h x {\eqt A}} L
+    %% }{\J {\ebigvee x e f} \G L}
+    %%
+    \infer{
+      \J e \G {\tset A} \\
+      \J f {\G,\hd x A} {\eqt L}
+    }{\J {\efor x e f} \G {\eqt L}}
+
+    %%\infer{\J e \G {\iso{(\eqt A \x \eqt A)}}}{\J{\prim{eq}\<e} \G {\tdown\tunit}}
+    \infer{(\J {\isocolor e_i} {\stripcx\G} {\eqt A})_i}
+          {\J {\eeq{e_1}{e_2}} \G \tbool}
+
+    \infer{\J {\isocolor e} {\stripcx\G} {\tset\tunit}}{
+      \J {\eisempty e} \G {\tunit + \tunit}}
+
+    \infer{\J e \G {\iso{(A + B)}}}{\J{\esplit e} \G {\iso A + \iso B}}
+
+    \infer{\J e \G {\iso{(\fixt L \to \fixt L)}}}{\J{\prim{fix}\< e} \G {\fixt L}}
+  \end{mathpar}
+
+  \caption{Datafun core syntax and typing rules}
+  \label{fig:core-datafun}
+\end{figure}
