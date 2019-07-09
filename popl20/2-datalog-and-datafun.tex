@@ -104,7 +104,7 @@ becomes false, a \emph{decrease} (in Datafun, $\efalse < \etrue$).
 
 So we need to define operations which are non-monotonic, without
 destroying the property that types enforce monotonicity checking. We
-square this circle by introducing the \emph{discreteness} type
+quare this circle by introducing the \emph{discreteness} type
 constructor $\iso A$. The idea is that the elements of $\iso A$ are
 \emph{exactly the same} as the elements of $A$, except that the
 partial order relation on $\iso A$ is simply the equality on $A$ --
@@ -160,7 +160,7 @@ In the following examples, we make
 
   $\mathit{xs} \bullet \mathit{ys}$ \> $=$ \> $\efor{(a,b)}{\mathit{xs}}{}$ \\
                                     \>     \> $\efor{(b',c)}{\mathit{ys}}{}$ \\
-                                    \>     \> $\eif{b = b'}{\eset{(a,c)}}{\bot}$
+                                    \>     \> $\ewhen{b = b'}{\eset{(a,c)}}$
 \end{tabbing}
 
 \todo{Check use of equality with Michael\ldots}
@@ -175,15 +175,15 @@ In the following examples, we make
 
 \subsubsection{Combinators for Regular Expression Matching}
 
-Datafun is designed to permit tightly integrate the higher-order
-functional and bottom-up logic programming styles. In this section, we
-illustrate the benefits of doing so by showing how to implement a
-regular expression matching library in combinator parsing style.  Like
-combinator parsers in functional languages, the code is very concise.
-Unlike typical functional parser combinators, though, support for the
-relational style ensures we can write \naive\ code \emph{without} the
-exponential backtracking cliffs typical of parser combinator libraries
-in functional languages.
+Datafun permits tightly integrating the higher-order functional and
+bottom-up logic programming styles. In this section, we illustrate the
+benefits of doing so by showing how to implement a regular expression
+matching library in combinator parsing style.  Like combinator parsers
+in functional languages, the code is very concise.  Unlike typical
+functional parser combinators, though, support for the relational
+style ensures we can write \naive\ code \emph{without} the exponential
+backtracking cliffs typical of parser combinator libraries in
+functional languages.
 
 Below, we assume the existence of a function
 $\name{pos} : \kw{string} \to \tset{\kw{int}}$ which takes a string
@@ -192,38 +192,63 @@ that the character at position $n$ can be extracted from the string
 $s$ with the expression $s[n]$, as in Java or C. Having done this, we define
 the type of regular expression matchers.
 \begin{tabbing} 
-  $\kw{type}\;re\;=\iso \kw{string} \to \tset{\kw{int} \times \kw{int}}$  
+\qquad  $\kw{type}\;re\;=\iso \kw{string} \to \tset{\kw{int} \times \kw{int}}$  
 \end{tabbing}
 This type takes a string (at boxed type, so that it can be used inside
 fixed point expressions), and then returns a set of pairs of integers. The
 idea is that if the regular expression matcher is passed the string
 argument $s$, then if $(i, n)$ is one of the returned values, then the
-substring $s_i, s_{i+1}, \ldots, s_{n-1}$ is matched by the regular expression. 
+substring $s_i, s_{i+1}, \ldots, s_{n-1}$ is matched by the regular expression.
+That is, it is inclusive on the left and exclusive on the right. 
 
 \begin{tabbing}
-$\name{sym} : \iso \kw{char} \to \kw{re}$ \\
-  $\name{sym}\;\ebox{c}\;\ebox{s} =\; $\= $\efor{n}{\name{pos}\;s}{\eif{s[n] = c}{\eset{(n, n+1)}}{\bot}}$ 
+\qquad \= $\name{sym} : \kw{char} \to \kw{re}$ \+\\
+$\name{sym}\;c\;\ebox{s} =\; $\= $\efor{n}{\name{pos}\;s}{\ewhen{s[n] = c}{\eset{(n, n+1)}}}$ 
 \end{tabbing}
-
-The $\name{sym}$ combinator takes a character and returns a set of substrings
-by returning the positions $n$ where the 
-
+The $\name{sym}$ combinator takes a character and returns a set of
+substrings by returning the set $(n, n+1)$ where the $n$-th element of
+the string $s$ is the character $c$.
+%
 \begin{tabbing}
-  $\name{nil} : \kw{re}$ \\
-  $\name{nil}\;\ebox{s} = \efor{n}{\name{pos}\;s}{\eset{(n,n)}}$ \\[1em]
-
-  $\name{seq} : \kw{re} \to \kw{re} \to \kw{re}$ \\
-  $\name{seq}\;r_1\;r_2\;s = r_1\;s \bullet r_2\;s$ \\[1em]
-  
-  $\name{bot} : \kw{re}$ \\
+\qquad \=   $\name{nil} : \kw{re}$ \+\\
+  $\name{nil}\;\ebox{s} = \efor{n}{\name{pos}\;s}{\eset{(n,n)}}$
+\end{tabbing}
+%
+The $\name{nil}$ combinator reports the set $(n,n)$ for every position
+$n$ in the string, because an empty string can start at every position in
+the string. 
+%
+\begin{tabbing}
+\qquad \=   $\name{seq} : \kw{re} \to \kw{re} \to \kw{re}$ \+\\
+  $\name{seq}\;r_1\;r_2\;s = r_1\;s \bullet r_2\;s$
+\end{tabbing}
+% 
+The $\name{seq}$ combinator takes two regular expressions $r_1$ and $r_2$
+as arguments, applies the string $s$ to both, and then takes the relational
+composition of the results. This means that if the range $(i,j)$ was in the
+recognized set of $r_1$, and $(j,k)$ was in the recognized set of $r_2$, then
+we will return $(i,k)$, just as desired. 
+%
+\begin{tabbing}
+\qquad \=   $\name{bot} : \kw{re}$ \+\\
   $\name{bot}\;\_ = \bot$ \\[1em]
 
   $\name{alt} : \kw{re} \to \kw{re} \to \kw{re}$ \\
-  $\name{alt}\;r_1\;r_2\;s = r_1\;s \vee r_2\;s$ \\[1em]
-
-  $\name{star} : \iso\kw{re} \to \kw{re}$ \\
-  $\name{star}\;\ebox{r}\;\ebox{s} = \name{nil}\;\ebox{s} \vee \name{tc}\;\ebox{r\;\ebox{s}}$ \\
+  $\name{alt}\;r_1\;r_2\;s = r_1\;s \vee r_2\;s$
 \end{tabbing}
+%
+The $\name{bot}$ combinator just returns the empty set of matches, and the
+$\name{alt}$ combinator takes the union of the matches of its two arguments. 
+%
+\begin{tabbing}
+\qquad \=   $\name{star} : \iso\kw{re} \to \kw{re}$ \+\\
+  $\name{star}\;\ebox{r}\;\ebox{s} = \name{nil}\;\ebox{s} \vee \name{tc}\;\ebox{r\;\ebox{s}}$ 
+\end{tabbing}
+The most interesting regular expression combinator is the Kleene star operation $\name{star}$.
+This just uses $\name{nil}$ to get the reflexive relation on positions, and then takes the
+transitive closure of the regular expression it received as an argument using the $\name{tc}$
+operation. This forces its argument to be boxed, since $\name{tc}$ calculates a fixed point,
+and only discrete arguments can occur inside of 
 
 
 \subsubsection{Regular Expression Combinators, 2}
@@ -231,7 +256,7 @@ by returning the positions $n$ where the
   $\kw{type}\;re\;=\iso (\kw{string} \times \kw{int}) \to \tset{\kw{int}}$  \\[1em]
   
   $\name{sym} : \iso \kw{char} \to \kw{re}$ \\
-  $\name{sym}\;\ebox{c}\;\ebox{s,n} = \eif{s[n] = c}{\eset{n+1}}{\bot}$ \\[1em]
+  $\name{sym}\;\ebox{c}\;\ebox{s,n} = \ewhen{s[n] = c}{\eset{n+1}}$ \\[1em]
 
   $\name{nil} : \kw{re}$ \\
   $\name{nil}\;\ebox{s, n} = \eset{n}$ \\[1em]
