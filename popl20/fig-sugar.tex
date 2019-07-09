@@ -1,0 +1,20 @@
+\begin{figure}
+  \begin{displaymath}
+    \begin{array}{cc}
+    \begin{array}{ccc}
+      \kw{bool} & \triangleq & \tset 1 \\
+      \efalse   & \triangleq & \eset{} \\
+      \etrue    & \triangleq & \eset{\etuple{}} \\
+      \ewhen{b}{e} & \triangleq & \efor{ \etuple }{b}{e} \\
+    \end{array}
+    \qquad &
+    \begin{array}{ccc}
+      \setfor{e}{\cdot} & \triangleq & \eset{e} \\
+      \setfor{e}{p \in e', \ldots} & \triangleq & \efor{p}{e'} {\setfor{e}{\ldots}} \\
+      \setfor{e}{b, \ldots} & \triangleq & \ewhen{b} {\setfor{e}{\ldots}} \\
+    \end{array}
+    \end{array}
+\end{displaymath}
+  \caption{Syntactic Sugar}
+  \label{fig:sugar}
+\end{figure}
