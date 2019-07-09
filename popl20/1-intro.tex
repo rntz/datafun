@@ -58,8 +58,8 @@ be laboriously re-established once again for each extension.
 A natural approach to solving this problem is to find a language in
 which to write the extensions, which preserves the semantic guarantees
 that Datalog offers. Two such proposals are the Flix
-language~\cite{flix} and the Datafun language~\cite{datafun}.  Very
-conveniently for our exposition, these two languages embody two
+language~\cite{flix} and the Datafun language~\cite{datafun}. 
+Conveniently for our exposition, these two languages embody two
 alternative design strategies.
 
 %% FIXME: this is not up-to-date with Flix's current design. I think
@@ -96,7 +96,7 @@ alternative design strategies.
 %
 %% But a summary this^ long belongs in related work, not here.
 Flix adopts the route of treating Datalog as an embedded
-domain-specific language. That is, Flix is a fairly conventional
+domain-specific language~\cite{edsl}. That is, Flix is a fairly conventional
 (albeit well-designed) functional programming language roughly
 comparable to ML or Haskell, extended with types representing Datalog
 predicates and program. The evaluation of a Flix program builds a
