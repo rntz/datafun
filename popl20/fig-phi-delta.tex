@@ -14,10 +14,12 @@
     \phi(e \vee f) &= \phi e \vee \phi f\\
     \phi(\eset{e_i}_i) &= \eset{\phi e_i}_i
     &
+    %% replaced substitution by let-binding
     \phi(\efor x e f) &= \efor x {\phi e}
-        {\phi \substd{f}{\dvar\dx \substo \zero\<\dvar x}}
+        %{\substd{\phi f}{\dvar\dx \substo \zero\<\dvar x}}
+        {\eletbox{\dx}{\ebox{\zero\<\dvar x}} \phi f}
     \\
-    \phi\ebox{e} &= \ebox{\etuple{\phi e, \delta e}}
+    \phi\ebox{e} &= \ebox{\etuple{\phi e, \color{Rhodamine} \delta e}}
     &
     \phi(\eletbox x e f)
     &= \elet{\ebox{\etuple{\dvar x,\dvar\dx}} = \phi e} \phi f
@@ -62,7 +64,7 @@
     \delta(\eletbox x e f)
     &= \elet{\ebox{\etuple{\dvar x,\dvar\dx}} = \phi e} \delta f
     \\
-    \delta(\eisempty e) &= \eisempty {\phi e}
+    \delta(\eisempty e) &= \eisempty {\color{Rhodamine} \phi e}
     &
     \delta(\esplit e) &= \ecase{\phi e}
     (\ebox{\etuple{\inj i \pwild, \pwild}}
@@ -74,12 +76,16 @@
     &= \ecase{\esplit{\ebox{\color{Rhodamine} \phi e}},\, \delta e}\\
     &\qquad ({\inj i {\eboxvar x},\, \inj i \dx} \caseto \delta f_i)_{i}\\
     &\qquad ({\inj i {\eboxvar x},\, \inj j \pwild}
-    \caseto \subst{\delta f_i}{\dx \substo \dummy\<\dvar x})_{i\ne j}
+    %\caseto \subst{\delta f_i}{\dx \substo \dummy\<\dvar x})_{i\ne j}
+    \caseto \elet{\dx = \dummy\<\dvar x} \delta f_i)_{i\ne j}
     \\
     \delta(\efor x e f)
-    &= (\efor x {\delta e} \substd{\phi f}{\dvar\dx \substo \zero\<\dvar x}) \\
+    &= (\efor x {\delta e}
+    %\substd{\phi f}{\dvar\dx \substo \zero\<\dvar x}) \\
+    \eletbox \dx {\zero\<\dvar x} \phi f) \\
     &\vee (\efor x {{\phi e} \vee \delta e}
-    \substd{\delta f}{\dvar\dx \substo \zero\<\dvar x})
+    %\substd{\delta f}{\dvar\dx \substo \zero\<\dvar x})
+    \eletbox{\dx}{\zero\<\dvar x} \delta f)
   \end{align*}
 
   \caption{Semi\naive{} derivative translation, $\delta$}

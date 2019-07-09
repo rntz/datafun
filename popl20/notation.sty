@@ -194,8 +194,13 @@
 \newcommand\freshvar[1]{{\color{Rhodamine}#1}}
 \newcommand\hd[2]{\dvar{#1} \dblcolon {#2}}
 
+\newcommand\stripcxraw[1]{\lceil{#1}\rceil}
+\newcommand\stripcx[1]{{\isocolor\stripcxraw{#1}}}
+
 
 %% ===== Change theory & seminaive translation stuff =====
+\newcommand\boldphi{\texorpdfstring{$\boldsymbol\phi$}{\textphi}}
+\newcommand\bolddelta{\texorpdfstring{$\boldsymbol\delta$}{\textdelta}}
 \newcommand\dummy{\name{dummy}}
 \newcommand\zero{\ensuremath{\boldsymbol 0}}
 

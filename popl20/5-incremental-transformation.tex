@@ -1,6 +1,3 @@
-\newcommand\boldphi{\texorpdfstring{$\boldsymbol\phi$}{\textphi}}
-\newcommand\bolddelta{\texorpdfstring{$\boldsymbol\delta$}{\textdelta}}
-
 \section{The \boldphi\ and \bolddelta\ Transformations}
 \label{sec:transformations}
 
@@ -14,16 +11,16 @@ replacing $\efix f$ by $\fastfix\<({f,f'})$.
 But to find the derivative $f'$ of $f$ we'll need a second transform, called
 $\delta e$.
 %
-Since a derivative is a zero-change, can $\delta e$ simply find a zero-change to
+Since a derivative is a zero change, can $\delta e$ simply find a zero change to
 $e$?
 %
 Unfortunately, this is not strong enough.
 %
 For example, the derivative of $\fnof x e$ depends on how $e$ changes as its
-free variable $x$ changes --- which is not necessarily a zero-change.
+free variable $x$ changes --- which is not necessarily a zero change.
 %
-To compute derivatives (zero-changes), we need to solve the general problem of
-computing \emph{changes}.
+To compute derivatives, we need to solve the general problem of computing
+\emph{changes}.
 %
 So, modelled on the incremental \fn-calculus' $\Deriv$ \citep{incremental},
 $\delta e$ will compute how $\phi e$ changes as its free variables
@@ -107,25 +104,41 @@ changes $\dx_1, \dots, \dx_n$.%
 However, this says nothing yet about monotonicity or discreteness.
 %
 To make this precise, we'll use three context transformations, named according
-to the analogous type operators, $\iso$, $\Phi$, $\Delta$:
+to the analogous type operators $\iso$, $\Phi$, and $\Delta$:
+%% %
+%% We define these pointwise by their action on singleton contexts (they all
+%% preserve empty contexts and distribute across context union):
 
 \begin{align*}
   \iso{(\h x A)} &= \hd x A & \iso{(\hd x A)} &= \hd x A
   \\
   \Phi(\h x A) &= \h x {\Phi A} & \Phi(\hd x A) &= \hd x {\Phi A}, \hd \dx {\DP A}
   \\
-  \D(\h x A) &= \h \dx {\D A} & \D(\hd x A) &= \emptycx\quad\text{(the empty context)}
+  \D(\h x A) &= \h \dx {\D A}
+  & \D(\hd x A) &= \emptycx \quad\text{\small(the empty context)}
 \end{align*}
 
+%% \begin{align*}
+%%   \iso{(\h x A)} &= \hd x A & \iso{(\hd x A)} &= \hd x A
+%%   \\
+%%   \Phi(\h x A) &= \h x {\Phi A} & \Phi(\hd x A) &= \hd x {\Phi A}, \hd \dx {\DP A}
+%%   \\
+%%   \D(\h x A) &= \h \dx {\D A} & \D(\hd x A) &= \emptycx\quad\text{(the empty context)}
+%% \end{align*}
+
 \noindent
+%% (All three preserve empty contexts and distribute over union; e.g. $\Phi\emptycx
+%% = \emptycx$ and $\Phi(\G_1,\G_2) = \Phi\G_1, \Phi\G_2$.)
+(Otherwise all three operators distribute; e.g.\ $\iso\emptycx = \emptycx$ and
+$\iso(\G_1,\G_2) = \iso\G_1, \iso\G_2$.)
+
 Intuitively, $\iso\G$, $\Phi\G$, and $\D\G$ mirror the effect of
 $\iso$, $\Phi$, and $\D$ on the semantics of $\G$:
 
-\nopagebreak[2]
 %% This is a hack to make up for not having a \multirow that works inside align*
 %% & co without producing warnings.
 \begin{center}
-  \(\displaystyle \den{\iso\G} = \iso\den\G \)
+  \(\displaystyle \den{\iso\G} \cong \iso\den\G \)
   %
   \hfil
   %
@@ -145,7 +158,6 @@ $\iso$, $\Phi$, and $\D$ on the semantics of $\G$:
   \end{aligned}\)
 \end{center}
 
-%% \nopagebreak[2]
 %% \begin{align*}
 %%   \multirow{2}{*}{\den{\iso \G} = \iso\den\G}
 %%   &&
@@ -160,16 +172,11 @@ $\iso$, $\Phi$, and $\D$ on the semantics of $\G$:
 %% \end{align*}
 
 \noindent
-These defined, we can state the sense in which $\phi$ and $\delta$ are
-type-correct:
+These defined, we can state the types of $\phi e$ and $\delta e$:
 
-\begin{theorem}[Type-correctness]
+\begin{theorem}[Well-typedness]
   \label{thm:type-correct}
   If $\J e \G A$, then
-  %% \[ \J {\phi e} {\Phi\G} {\Phi A}
-  %% \quad\text{and}\quad
-  %% \J {\delta e} {\iso{\Phi\G}, \DP\G} {\DP A}
-  %% \]
   \begin{align*}
     \Jalign {\phi e} {\Phi\G} {\Phi A}\\
     \Jalign {\delta e} {\iso{\Phi\G}, \DP\G} {\DP A}
@@ -180,29 +187,92 @@ type-correct:
   By induction on typing derivations; see appendix. \XXX
 \end{proof}
 
-\noindent To get the hang of these context and type transformations, suppose $\J
-e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
+\noindent As expected if we view expressions as functions of their free
+variables, if we pretend $\G$ is a type, these correspond to $\Phi(\G \to A)$
+and $\DP(\G \to A)$ respectively:
 
-\nopagebreak[2]
 \begin{align*}
-  \Jalign {\phi e} {\h x {\Phi A}, \hd y {\Phi B}, \hd \dy {\DP B}} {\Phi C}
-  \\
-  \Jalign {\delta e} {\hd x {\Phi A}, \h\dx{\DP A}, \hd y {\Phi B}, \hd \dy {\DP B}} {\DP C}
+  \Phi(\G \to A) &= \Phi\G \to \Phi A
+  & \DP(\G \to A) &= \iso\Phi\G \to \DP\G \to \DP A
 \end{align*}
+
+\noindent
+To get the hang of these context and type transformations, suppose $\J
+e {\hd x A, \h y B} C$. Then \cref{thm:type-correct} tells us:
+
+\begin{align*}
+  \Jalign{\phi e} {\hd x{\Phi A},\, \hd \dx {\DP A},\, \h y {\Phi B}} {\Phi C}
+  \\
+  \Jalign{\delta e} {\hd x{\Phi A},\, \hd\dx{\DP A},\, \hd y{\Phi B}, \h\dy{\DP B}} {\DP C}
+\end{align*}
+
+We now have enough information to tackle the definitions of $\phi$ and $\delta$
+given in \cref{fig:phi,fig:delta}. In the remainder of this section, we'll
+examine the most interesting and important parts of these definitions in detail.
+
+\input{fig-phi-delta}
+
+
+\subsection{Variables, functions, and application}
+
+\todo{Explain how uses of $\phi$ in $\delta e$ involve weakening, and how this
+  justifies their use in discrete contexts (hilighted in
+  {\color{Rhodamine}pink}), eg. in $\delta(e\<f) = \delta e \<\eboxraw{\phi f}
+  \<\delta f$.}
+
+%% Finally, it's worth noting that the context $\Phi\G$ that $\phi e$ requires is a
+%% \emph{weakening} of the context $\iso\Phi\G, \DP\G$ of $\delta e$. Indeed, it's
+%% even a weakening of $\stripcx{\iso\Phi\G,\DP\G}$.
+
+
+\subsection{Fixed points}
+
+\todo{Give typing rules and semantics for \fastfix. Semantics does not depend on
+  \fastfix\ being given a derivative; it's well-defined regardless.}
+
+
+\subsection{The discreteness comonad, \iso}
+
+\todo{Discuss $\ebox{e}$ and $\eletbox x e f$. Explain why $\delta e$ can be
+  used inside $\phi e$ in discrete position, highlighted in
+  {\color{Rhodamine}pink}.}
+
+
+\subsection{Case analysis, \prim{split}, and \name{dummy}}
+
+\todo{explain \name{dummy}}
+
+
+\subsection{Semilattices and comprehensions}
+
+\todo{explain use of \name{dummy} to implement \zero.}
+
+%% %% TODO: should we include this? I think the point is pretty well-made already.
+%% \noindent
+%% These correspond respectively to $\Phi$ and $\DP$ applied to $\iso A \to B \to
+%% C$:
+%%
+%% \begin{align*}
+%%   \Phi(\iso A \to B \to C)
+%%   &= \iso (\Phi A \x \DP A) \to \Phi B \to \Phi C
+%%   \\
+%%   \DP(\iso A \to B \to C)
+%%   &= \D(\iso (\Phi A \x \DP A) \to \Phi B \to \Phi C)\\
+%%   &= \iso (\iso (\Phi A \x \DP A))
+%%   \to \D(\iso (\Phi A \x \DP A))
+%%   \to \D(\Phi B \to \Phi C)\\
+%%   &\cong \iso (\Phi A \x \DP A)
+%%   \to \tunit
+%%   \to \iso\Phi B \to \DP B \to \DP C\\
+%%   &\cong \iso \Phi A \to \iso \DP A \to \iso\Phi B \to \DP B \to \DP C
+%% \end{align*}
+
+
+\subsection{Leftovers}
 
 \todo{Ideas not yet covered:
   \begin{itemize}
-  \item Give typing rules \& semantics for \fastfix. Semantics does not depend on
-    \fastfix\ being given a derivative; it's well-defined regardless.
-
-
-  \item Explain how uses of $\phi$ in $\delta e$ involve weakening, and how this
-    justifies their use in discrete contexts (hilighted in
-    {\color{Rhodamine}pink}), eg. in $\delta(e\<f) = \delta e \<\eboxraw{\phi f}
-    \<\delta f$.
-
-  \item explain implementation of \zero{} via \dummy{}.
+  \item things that can't change because they're discrete, like $\delta(\efix
+    e)$, $\delta(\eeq e f)$, $\delta{\eset{e_i}_i}$ --- or maybe leave those for
+    later?
 \end{itemize}}
-
-
-\input{fig-phi-delta}
