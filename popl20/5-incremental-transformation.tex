@@ -315,9 +315,60 @@ monotone rather than a discrete position.
 
 \subsection{The discreteness comonad, \iso}
 
-\todo{Discuss $\ebox{e}$ and $\eletbox x e f$. Explain why $\delta e$ can be
-  used inside $\phi e$ in discrete position, highlighted in
-  {\color{Rhodamine}pink}.}
+Our strategy hinges on decorating expressions of type $\iso A$ with their
+zero-changes, so the translations of $\ebox e$ and $(\eletbox x e f)$ are of
+particular interest.
+%
+The most trivial of these is $\delta\ebox{e} = \etuple{}$; this follows from
+$\DP\iso A = \tunit$, since boxed values cannot change.
+
+Next, consider \(\phi\ebox e = \ebox{\etuple{\phi e, \delta e}}\).
+%
+The intuition here is straightforward: $\phi$ needs to decorate $\isocolor e$
+with its zero change; since $\isocolor e$ is discrete and cannot change, we use
+$\delta \isocolor e$.
+%
+However! In general, one cannot use $\delta$ inside the $\phi$ translation and
+expect the result to be well-typed; $\phi$ and $\delta$ require different typing
+contexts. To see this, let's apply \cref{thm:type-correct} to singleton
+contexts:
+
+\begin{center}
+  \setlength\tabcolsep{10pt}
+  \begin{tabular}{@{}lll@{}}
+    $\G$ & $\Phi\G$ & $\iso\Phi\G,\DP\G$
+    \\
+    %% $e$'s context & $\phi e$'s context & $\delta e$'s context
+    %% \\
+    \midrule
+    $\h x A$ & $\h x {\Phi A}$ & $\hd x {\Phi A}, \h\dx{\DP A}$
+    \\
+    $\hd x A$
+    & $\hd x {\Phi A}, \hd\dx{\DP A}$
+    & $\hd x {\Phi A}, \hd\dx{\DP A}$
+  \end{tabular}
+\end{center}
+
+\noindent
+Luckily, although $\Phi\G$ and $\iso\Phi\G,\DP\G$ differ on monotone variables,
+they agree on discrete variables. And since $\isocolor e$ is discrete, there
+\emph{are} no monotone variables in $\isocolor e$, justifying the use of
+$\delta\isocolor e$ in $\phi\ebox{e} = \ebox{\etuple{\phi e, \delta e}}$.
+
+Next we come to $(\eletbox x e f)$, whose $\phi$ and $\delta$ translations are
+very similar:
+
+\begin{align*}
+  \elet{\ebox{\etuple{\dvar x,\dvar\dx}} = \phi e} \phi f
+  &&
+  \elet{\ebox{\etuple{\dvar x,\dvar\dx}} = \phi e} \delta f
+\end{align*}
+
+\noindent
+Since $\dvar x$ is a discrete variable, both $\phi f$ and $\delta f$ need access
+to its zero change $\dvar\dx$. Luckily, $\phi e : \iso(\Phi A \x \DP A)$
+provides it, so we simply unpack it. We don't use $\delta e$, but this is
+unsurprising when you consider that its type is $\tunit$.
 
 
 \subsection{Case analysis, \prim{split}, and \name{dummy}}
