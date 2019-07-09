@@ -127,14 +127,6 @@ So consider $\name{step}'$ defined by:
 \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
 \]
 
-%% according to http://mkweb.bcgsc.ca/colorblind/ and Figure 2 in
-%% https://www.nature.com/articles/nmeth.1618?WT.ec_id=NMETH-201106, Vermilion
-%% and Blue make a reasonable contrasting color combo. However, both are a
-%% little light for use as text on a white background so we add some black (K in
-%% CMYK).
-\definecolor{BlindVermilion}{cmyk}{0,0.8,1,0.1}
-\definecolor{BlindBlue}{cmyk}{1,0.5,0,0.1}
-
 \newcommand\colorpath{{\color{BlindVermilion}\name{path}}}
 \newcommand\colordpath{{\color{BlindBlue}\name{dpath}}}
 \newcommand\colorA{\color{BlindVermilion}}

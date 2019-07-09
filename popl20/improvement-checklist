@@ -10,3 +10,7 @@ relation.
 
 5. Use two case rules (discrete/monotone) instead of a split axiom?
    Might be easier to understand.
+
+6. Improve the flow of §5.1, in particular, the explanation of which variables
+φe and δe have in context. The explanation of φe having zero change variables
+doesn't come until too late.

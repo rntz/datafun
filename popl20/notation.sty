@@ -49,8 +49,19 @@
 \newcommand\naive{na\"ive}
 \newcommand\Naive{Na\"ive}
 
+%% according to http://mkweb.bcgsc.ca/colorblind/ and Figure 2 in
+%% https://www.nature.com/articles/nmeth.1618?WT.ec_id=NMETH-201106, Vermilion
+%% and Blue make a reasonable contrasting color combo. However, both are a
+%% little light for use as text on a white background so we add some black (K in
+%% CMYK).
+\definecolor{BlindVermilion}{cmyk}{0, 0.8, 1, 0.1}
+\definecolor{BlindBlue}{cmyk}{1, 0.5, 0, 0.1}
+%\definecolor{BlindGreen}{cmyk}{.97, 0, .75, 0.1}
+%\definecolor{BlindOrange}{cmyk}{0, 0.5, 1, 0.15}
+
 % used to distinguish discrely bound variables, etc.
-\newcommand\isocolor{\color{ForestGreen}}
+\definecolor{IsoGreen}{cmyk}{.95, 0, .9, .2}
+\newcommand\isocolor{\color{IsoGreen}}
 
 % used for names of functions, primitives, etc. in math mode
 \newcommand\name[1]{\text{\itshape #1}}
