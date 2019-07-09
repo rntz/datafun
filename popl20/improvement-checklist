@@ -1,0 +1,12 @@
+1. TeX up the proof of correctness. (Also weakening & type-correctness.)
+
+2. Try other formulations for logical relation, eg. a speeds-up and a changes
+relation.
+
+3. Instead of fastfix(f,f'), use fastfix(dx_0, f') where dx_0 = f ⊥. This does
+   more work/optimisation at compile-time. Change the compiler first.
+
+4. Prove substitution lemma.
+
+5. Use two case rules (discrete/monotone) instead of a split axiom?
+   Might be easier to understand.
