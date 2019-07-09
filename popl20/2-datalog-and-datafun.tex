@@ -251,20 +251,68 @@ operation. This forces its argument to be boxed, since $\name{tc}$ calculates a 
 and only discrete arguments can occur inside of 
 
 
-\subsubsection{Regular Expression Combinators, 2}
-\begin{tabbing} 
-  $\kw{type}\;re\;=\iso (\kw{string} \times \kw{int}) \to \tset{\kw{int}}$  \\[1em]
-  
-  $\name{sym} : \iso \kw{char} \to \kw{re}$ \\
-  $\name{sym}\;\ebox{c}\;\ebox{s,n} = \ewhen{s[n] = c}{\eset{n+1}}$ \\[1em]
+\subsubsection{Combinators for Regular Expression Matching, Take 2}
 
-  $\name{nil} : \kw{re}$ \\
+The combinators in the previous section found \emph{all} matches
+within a given substring, but often we are not interested in all
+matches: we only want to know if a string can match starting at a
+particular location. We can easily refactor the combinators above to
+work in this style, which illustrates the benefits of tightly
+integrating functional and relational styles of programming -- we can
+use functions to manage strict input/output divisions, and relations
+to manage nondeterminism and search.
+%
+\begin{tabbing}
+\qquad \=  $\kw{type}\;re\;=\iso (\kw{string} \times \kw{int}) \to \tset{\kw{int}}$ \+ 
+\end{tabbing}
+%
+The refactored type of combinators takes a pair of arguments, a string and a starting
+position, and returns a set of ending positions. This contrasts with the earlier type,
+which took a string and returned a set of start/end pairs. 
+%
+\begin{tabbing}
+\qquad \=  $\name{sym} : \kw{char} \to \kw{re}$\+ \\
+  $\name{sym}\;c\;\ebox{s,n} = \ewhen{s[n] = c}{\eset{n+1}}$ 
+\end{tabbing}
+%
+The $\name{sym}$ function checks to see if the character $c$ occurs at position
+$n$ in the string, and returns the singleton $n+1$ if it does, and the empty
+set otherwise. 
+%
+\begin{tabbing}
+\qquad \=  $\name{nil} : \kw{re}$\+ \\
   $\name{nil}\;\ebox{s, n} = \eset{n}$ \\[1em]
 
   $\name{seq} : \kw{re} \to \kw{re} \to \kw{re}$ \\
-  $\name{seq}\;r_1\;r_2\;\ebox{s,n} =\ x = r_1\;x \vee r_2\;x$ \\[1em]
-
-  $\name{star} : \iso\kw{re} \to \kw{re}$ \\
-  $\name{star}\;\ebox{r}\;\ebox{s, n} = \efixis{\name{self}}{\eset{n} \vee 
-                                                \efor{m}{\name{self}}{r\;\ebox{s,m}}}$ \\
+  $\name{seq}\;r_1\;r_2\;\ebox{s,n} = \efor{m}{r_1\;\ebox{s,n}}{r_2\;[s,m]}$
 \end{tabbing}
+%
+The $\name{nil}$ function simply returns the same index $n$ it received as an
+argument, since an empty string matches starting from any position. Sequencing
+via $\name{seq}\;r_1\;r_2$ checks first to see the possible ending positions from
+matching $r_1$, and carries on with $r_2$ from there. 
+%
+\begin{tabbing}
+  \qquad \=
+  $\name{bot} : \kw{re}$ \+\\
+  $\name{bot}\;\_ = \bot$ \\[1em]
+  
+  $\name{alt} : \kw{re} \to \kw{re} \to \kw{re}$ \\
+  $\name{alt}\;r_1\;r_2\;\ebox{s,n} =\ x = r_1\;x \vee r_2\;x$ 
+\end{tabbing}
+%
+The $\name{bot}$ combinator still returns the empty set, and the $\name{alt}$ combinator
+still takes the union of the two sets of end positions. 
+%
+\begin{tabbing}
+\qquad \=  $\name{star} : \iso\kw{re} \to \kw{re}$\+ \\
+  $\name{star}\;\ebox{r}\;\ebox{s, n} = \efixis{\name{self}}{\eset{n} \vee 
+                                                \efor{m}{\name{self}}{r\;\ebox{s,m}}}$ 
+\end{tabbing}
+%
+As before, the $\name{star}$ combinator takes a boxed regular expression as an argument,
+and for the same reason -- we are implementing sequencing with a fixed point. One thing
+worth noting about this definition is that it is \emph{left-recursive} -- the definition
+takes the endpoints from the fixed point $\name{self}$, and then continues matching using
+the argument $\name{r}$. This should make clear that this is not just plain old functional
+programming -- we are genuinely relying upon the fixed point semantics of Datafun. 
