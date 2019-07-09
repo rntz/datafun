@@ -1,20 +1,41 @@
 \begin{figure}
-  \begin{displaymath}
-    \begin{array}{cc}
-    \begin{array}{ccc}
-      \kw{bool} & \triangleq & \tset 1 \\
-      \efalse   & \triangleq & \eset{} \\
-      \etrue    & \triangleq & \eset{\etuple{}} \\
-      \ewhen{b}{e} & \triangleq & \efor{ \etuple }{b}{e} \\
-    \end{array}
-    \qquad &
-    \begin{array}{ccc}
-      \setfor{e}{\cdot} & \triangleq & \eset{e} \\
-      \setfor{e}{p \in e', \ldots} & \triangleq & \efor{p}{e'} {\setfor{e}{\ldots}} \\
-      \setfor{e}{b, \ldots} & \triangleq & \ewhen{b} {\setfor{e}{\ldots}} \\
-    \end{array}
-    \end{array}
-\end{displaymath}
-  \caption{Syntactic Sugar}
+  \begin{align*}
+    \begin{aligned}
+      \tbool &\desugars \tset \tunit
+      \\
+      \efalse &\desugars \eset{}
+      \\
+      \etrue &\desugars \esetraw{\etuple{}}
+      \\
+      \ewhen e f &\desugars \eforraw{\etuple{} \in e} f
+    \end{aligned}
+    &&
+    \begin{aligned}
+      \esetfor{e}{\emptycx} &\desugars \eset{e}
+      \\
+      \esetfor{e}{p \in f,\, \dots} &\desugars \efor{p}{f} \esetfor{e}{\dots}
+      \\
+      \esetfor{e}{f,\, \dots} &\desugars \ewhen{f} \esetfor{e}{\dots}
+    \end{aligned}
+  \end{align*}
+
+  %% \begin{displaymath}
+  %%   \begin{array}{cc}
+  %%     \begin{array}{ccc}
+  %%       \kw{bool} & \desugars & \tset 1 \\
+  %%       \efalse   & \desugars & \eset{} \\
+  %%       \etrue    & \desugars & \eset{\etuple{}} \\
+  %%       \ewhen{b}{e} & \desugars & \efor{ \etuple }{b}{e} \\
+  %%     \end{array}
+  %%     \qquad &
+  %%     \begin{array}{ccc}
+  %%       \setfor{e}{\cdot} & \desugars & \eset{e} \\
+  %%       \setfor{e}{p \in e', \ldots} & \desugars & \efor{p}{e'} {\setfor{e}{\ldots}} \\
+  %%       \setfor{e}{b, \ldots} & \desugars & \ewhen{b} {\setfor{e}{\ldots}} \\
+  %%     \end{array}
+  %%   \end{array}
+  %% \end{displaymath}
+
+  \caption{Syntactic sugar}
   \label{fig:sugar}
 \end{figure}

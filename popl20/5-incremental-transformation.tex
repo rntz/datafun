@@ -137,28 +137,21 @@ $\iso(\G_1,\G_2) = \iso\G_1, \iso\G_2$.)
 Intuitively, $\iso\G$, $\Phi\G$, and $\D\G$ mirror the effect of
 $\iso$, $\Phi$, and $\D$ on the semantics of $\G$:
 
-%% This is a hack to make up for not having a \multirow that works inside align*
-%% & co without producing warnings.
-\begin{center}
-  \(\displaystyle \den{\iso\G} \cong \iso\den\G \)
-  %
-  \hfil
-  %
-  \(\displaystyle\begin{aligned}
+\begin{align*}
+  \den{\iso\G} &\cong \iso\den\G
+  &
+  \begin{aligned}
     \den{\Phi(\h x A)} &\cong \den{\Phi A}
     \\
     \den{\Phi(\hd x A)} &\cong \den{\Phi \iso A}
-  \end{aligned}\)
-  %
-  \hfil
-  %
-  %% TODO: needs more vertical space?
-  \(\displaystyle\begin{aligned}
+  \end{aligned}
+  &&
+  \begin{aligned}
     \den{\D(\h x A)} &\cong \den{\D A}
     \\
     \den{\D(\hd x A)} &\cong \den{\D \iso A}
-  \end{aligned}\)
-\end{center}
+  \end{aligned}
+\end{align*}
 
 %% \begin{align*}
 %%   \multirow{2}{*}{\den{\iso \G} = \iso\den\G}
