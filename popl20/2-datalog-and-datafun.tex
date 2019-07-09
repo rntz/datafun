@@ -100,7 +100,7 @@ essential oeprations which are naturally non-monotone, such as
 equality tests $\eeq e f$. For example, $\eset{} = \eset{}$ is true,
 but if the first argument is increased to $\esetraw{1}$ then it
 becomes false, a \emph{decrease} (in Datafun, $\efalse < \etrue$).
-\todo{Talk about this with Michael\ldots}
+
 
 So we need to define operations which are non-monotonic, without
 destroying the property that types enforce monotonicity checking. We
@@ -120,7 +120,9 @@ the introduction form $\ebox{e}$ and eliminate them with a pattern
 matching eliminator $\eletbox x e f$. Variables are colored and
 italicised $\dvar x$ to indicate that they are discrete, and uncolored
 and upright $x$ to indicate they are monotonic, and discrete terms
-$\isocolor e$ are restricted to only refer to discrete variables.
+$\isocolor e$ are restricted to only refer to discrete variables. So
+in the equality test $\eeq e f$, the terms $e$ and $f$ are restricted
+to be discrete. 
 
 Finally, Datafun include a fixed point operator $\efix{e}$. The $\efix$
 combinator takes a function argument of type $\iso (L \to L)$ and
@@ -176,9 +178,48 @@ definitions.
 We summarize (except for pattern matching) the sugaring rules we use in
 Figure~\ref{fig:sugar}. 
 
-\subsubsection{Relational Composition}
+\subsubsection{Set\, Operations}
+
+Even before higher-order functions, one of the main benefits of
+Datafun relative to is that it offers the ability to manipulate relations
+as first class values. In this subsection we will show how a variety
+of standard operations on sets can be represented in Datafun. 
+
+\paragraph{Membership Tests} The first operation we consider is the
+membership test operation. 
+\begin{tabbing}
+  \qquad\=\+ \kill
+  $\name{mem} : \iso A \to \tset A \to \kw{bool}$ \\
+  $\name{mem}\;\ebox{x} \; \name{ys} = \efor{y}{\name{ys}}\ewhen{x = y}{\etrue}$ 
+\end{tabbing}
+
+This can be represented by code which checks to see if the input argument $x$
+is equal to any $y$ in the test set $\name{ys}$. We require the argument $x$ to
+$\name{mem}$ to be discrete, because an element is in a set or not -- the test
+is not monotone in $x$. 
+
+\paragraph{Set Intersection}
+Using $\name{mem}$, it is possible to define set intersection, by taking the union of
+all the singleton sets $\eset{x}$ sets where $x$ is an element of $xs$ also in the set $ys$.
 
 \begin{tabbing}
+  \qquad\=\+ \kill
+  $\_ \wedge \_ : \tset A \to \tset A \to \tset A$ \\
+  $\name{xs} \wedge \name{ys} = \efor{x}{xs} \ewhen{\name{mem}\;\ebox{x}\;\name{ys}}{\eset{x}}$ 
+\end{tabbing}
+Using comprehensions, this could alternately be written as:
+\begin{tabbing}
+  \qquad\=\+ \kill
+  $\_ \wedge \_ : \tset A \to \tset A \to \tset A$ \\
+  $\name{xs} \wedge \name{ys} = \setfor{x}{x \in xs, \name{mem}\;\ebox{x}\;\name{ys}}$
+\end{tabbing}
+This looks more like a definition one might see in
+an introductory mathematics course.
+
+\paragraph{Relational Composition}
+We can also define the composition of two relations in Datafun. 
+\begin{tabbing}
+  \qquad\=\+ \kill
   $\_ \bullet \_$ \;\;\;\= $\,:$\;\; \=
   $ \tset{A \times B} \to \tset{B \times C} \to \tset{A \times C}$ \\
 
@@ -186,16 +227,34 @@ Figure~\ref{fig:sugar}.
                                     \>     \> $\efor{(b',c)}{\mathit{ys}}{}$ \\
                                     \>     \> $\ewhen{b = b'}{\eset{(a,c)}}$
 \end{tabbing}
-
-\todo{Check use of equality with Michael\ldots}
-
-\subsubsection{Generic Transitive Closure}
-
-
+This is basically a transcription of the mathematical definition, where we build
+those pairs which agree on their $B$-typed components. It can also be written using
+set comprehrension as:
 \begin{tabbing}
+  \qquad\=\+ \kill
+  $\_ \bullet \_$ \;\;\;\= $\,:$\;\; \=
+  $ \tset{A \times B} \to \tset{B \times C} \to \tset{A \times C}$ \\
+
+  $\mathit{xs} \bullet \mathit{ys} = \setfor{(a,c)}{(a,b) \in \name{xs}, (b', c) \in \name{ys}, b = b'}$
+\end{tabbing}
+
+
+\paragraph{Transitive Closure}
+Now, we define the transitive closure of a relation. 
+\begin{tabbing}
+  \qquad\=\+ \kill
   $\name{tc}$ \qquad \= $\,:$ \;\;\= $\iso{\tset{A \times A}} \to \tset{A \times A}$ \\
   $\name{tc}\;\ebox{\mathit{xs}}$ \> $=$ \> $\efixis{\name{self}}{\name{xs} \vee \name{xs} \bullet\name{self}}$ 
 \end{tabbing}
+
+This definition uses recursion, and the body of the definition is quite standard --
+a transitive closure is the smallest relation which contains the original relation $\name{xs}$
+and the relational composition of $\name{xs}$ with the transitive closure. However, one
+feature of this definition peculiar to core Datafun is that the argument type
+is $\iso \tset{A \times A}$ -- the transitive closure takes a \emph{discrete} relation.
+This is because we must use the relation within the fixed point, and so its parameter needs
+to be discrete to occur within. 
+
 
 \subsubsection{Combinators for Regular Expression Matching}
 
