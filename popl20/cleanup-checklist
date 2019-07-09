@@ -9,7 +9,9 @@
 4. Check formatting code examples in section 2. Avoid use of \isocolor in code
    examples - but what about for discrete variables?
 
-5. Check spacing around align* environments and other things. Can I increase it?
+5. Check spacing around align* environments, lists, figures, etc.
+   Try adjusting \listisep.
+   Check inter-figure and figure-text spacing.
 
 6. Check for awkward line breaks, eg. before align* environments etc.
 
