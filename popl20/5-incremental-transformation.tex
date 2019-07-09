@@ -235,12 +235,11 @@ much the same: $\delta e$ needs two arguments, the original input $\phi f$ and
 its change $\delta f$, to return the change in the function's output. Moreover,
 it's discrete in its first argument, so we need to box it, $\ebox{\phi f}$.
 
-One might wonder whether this type-checks, since $\phi e$ and $\delta e$ don't
-use the same typing context.
+One might wonder why this type-checks, since $\phi e$ and $\delta e$ don't use
+the same typing context.
 %
-We're even boxing $\phi f$, hiding all monotone variables;
-%
-consequently, it gets the context $\stripcxraw{\iso\Phi\G, \DP\G}$.
+We're even boxing $\phi f$, hiding all monotone variables; consequently, it gets
+the context $\stripcxraw{\iso\Phi\G, \DP\G}$.
 %
 However, $\iso$ makes every variable discrete, and $\stripcxraw{-}$ leaves
 discrete variables alone, so this includes \emph{at least} $\iso\Phi\G$. The
@@ -253,16 +252,7 @@ $\delta e$ in \hilite{pink}.
 The same argument applies (all the more easily) when $\phi e$ is used in a
 monotone rather than a discrete position.
 
-\todo{Discuss self-maintainable functions.}
-
-\todo{Explain how uses of $\phi$ in $\delta e$ involve weakening, and how this
-  justifies their use in discrete contexts (hilighted in
-  {\color{Rhodamine}pink}), eg. in $\delta(e\<f) = \delta e \<\eboxraw{\phi f}
-  \<\delta f$.}
-
-%% Finally, it's worth noting that the context $\Phi\G$ that $\phi e$ requires is a
-%% \emph{weakening} of the context $\iso\Phi\G, \DP\G$ of $\delta e$. Indeed, it's
-%% even a weakening of $\stripcx{\iso\Phi\G,\DP\G}$.
+\todo{Discuss self-maintainable functions, citing \citet{incremental}.}
 
 
 \subsection{Fixed points}
