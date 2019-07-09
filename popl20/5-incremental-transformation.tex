@@ -195,11 +195,19 @@ and $\DP(\G \to A)$ respectively:
 To get the hang of these context and type transformations, suppose $\J
 e {\hd x A, \h y B} C$. Then \cref{thm:type-correct} tells us:
 
+\nopagebreak[1]
 \begin{align*}
   \Jalign{\phi e} {\hd x{\Phi A},\, \hd \dx {\DP A},\, \h y {\Phi B}} {\Phi C}
   \\
   \Jalign{\delta e} {\hd x{\Phi A},\, \hd\dx{\DP A},\, \hd y{\Phi B}, \h\dy{\DP B}} {\DP C}
 \end{align*}
+
+\noindent
+Along with the original program's variables, $\phi e$ requires zero change
+variables $\dvar\dx$ for every discrete source variable $\dvar x$. Meanwhile,
+$\delta e$ requires changes for \emph{every} source program variable (for
+discrete variables these will be zero changes), and moreover is \emph{discrete}
+with respect to the source program variables (the ``base points'').
 
 We now have enough information to tackle the definitions of $\phi$ and $\delta$
 given in \cref{fig:phi,fig:delta}. In the remainder of this section, we'll
@@ -211,7 +219,9 @@ examine the most interesting and important parts of these definitions in detail.
 \subsection{Fixed points}
 
 The whole purpose of $\phi$ and $\delta$ is to speed up fixed points, so let's
-start there. In a fixed point expression $\efix e$, we know $e : \iso(\fixt L
+start there.
+%
+In a fixed point expression $\efix e$, we know $e : \iso(\fixt L
 \to \fixt L)$. Consequently the type of $\phi e$ is
 
 \begin{align*}
