@@ -95,6 +95,18 @@ ensuring that the recursion will terminate.
 
 \subsection{Semantics }
 
+The syntax of core Datafun can be interpreted in $\Poset$, the
+category of partially ordered sets and monotone functions between
+them. That is, an object $A$ of $\Poset$ is a pair $(|A|, \leq_A)$
+consisting of a set $|A|$ of elements, and a partial order relation
+$\leq_A \subseteq |A| \times |A|$ which is reflexive, transitive, and
+antisymmetric. A morphism $f : A \to B$ in $\Poset$ is a function
+$f : |A| \to |B|$ on the underlying sets which is monotone.  That is,
+for all $a$ and $a'$ such that $a \leq_A a'$ we have
+$f(a) \leq_B f(a')$.
+
+
+
 \input{fig-semantics}
 
 \subsection{Metatheory}
