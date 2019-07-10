@@ -464,8 +464,31 @@ semi\naive\ translations of these rules do not include negated premises to
 compute a more precise difference.
 
 Now let's consider $\efor x e f$.
+%
+Its $\phi$-translation is straightforward, with one hitch: because $\dvar x$ is
+a discrete variable, the inner loop $\phi f$ needs access to its zero change
+$\dvar\dx$.
+%
+If $\dvar x$ were a function we'd be stuck: it's not possible to efficiently
+compute function derivatives at runtime --- otherwise we wouldn't need $\delta$.
+%
+But $\dvar x$ is not a function: the elements of a set have first-order type!
+%
+And at eqtypes, somewhat marvelously, the \dummy\ function computes zero
+changes:
 
-\todo{explain use of \name{dummy} to implement \zero.}
+\begin{lemma}
+  $\changesat{\eqt A}{\dummy\<x}{x}{x}$ for any $x : \eqt A$.
+\end{lemma}
+
+\noindent For clarity, we write \zero\ rather than \dummy\ when we use it to
+produce zero changes; we only call it \dummy\ in dead code.
+
+Finally, we come to $\delta(\efor x e f)$, the computational heart of the
+semi\naive\ transformation, as \kw{for} is what enables embedding relational
+algebra (the right-hand-sides of Datalog clauses) into Datafun. Here we have two
+things to consider: (1) what if the set $\phi e$ we're looping over changes; (2)
+what if the inner loop $\phi f$'s results change.
 
 %% %% TODO: should we include this? I think the point is pretty well-made already.
 %% \noindent
