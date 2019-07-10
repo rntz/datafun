@@ -1,0 +1,46 @@
+\begin{figure}
+  \begin{tikzpicture}[baseline=(current bounding box.center)]
+    \begin{axis}[
+        xlabel={Number of nodes},
+        ylabel={Seconds},
+        height=140pt, width=220pt,
+        % If we include the explicit table, we can make it this large without
+        % enlarging the figure.
+        height=195pt, width=280pt,
+        legend entries={\naive,semi\naive},
+        legend cell align=left,
+        legend pos = north west,
+        legend style={
+          draw=none,
+          nodes={inner sep=3pt,}
+        },
+      ]
+      \addplot table {naive.dat};
+      \addplot table {seminaive.dat};
+    \end{axis}
+  \end{tikzpicture}
+  \hfil
+  {\small
+  \begin{tabular}{@{}rrr@{}}
+    \parbox[b]{24pt}{\raggedleft Graph size} & \Naive &
+    \parbox[b]{24pt}{\raggedleft Semi-\naive}
+    \\\midrule
+60 & 0.23s & 0.01s\\
+70 & 0.43s & 0.01s\\
+80 & 0.74s & 0.01s\\
+90 & 1.14s & 0.02s\\
+100 & 1.72s & 0.03s\\
+110 & 2.50s & 0.04s\\
+120 & 4.49s & 0.05s\\
+130 & 7.13s & 0.07s\\
+140 & 8.38s & 0.08s\\
+150 & 10.05s & 0.09s\\
+160 & 15.98s & 0.11s\\
+170 & 21.42s & 0.14s\\
+180 & 28.98s & 0.16s
+  \end{tabular}
+  }
+
+  \caption{\Naive\ vs semi\naive\ transitive closure on a linear graph}
+  \label{fig:seminaive-vs-naive-graph}
+\end{figure}

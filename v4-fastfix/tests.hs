@@ -52,6 +52,7 @@ test i = do
   printf "  naive: %6.2fs\n" naiveT
   semiT <- time (semiTrans edges)
   printf "  semi:  %6.2fs\n" semiT
+  hFlush stdout
 
 main :: IO ()
 main = mapM_ test [2..]
