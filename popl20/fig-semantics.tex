@@ -1,0 +1,88 @@
+%% ---- Semantics in a Datafun Model ----
+\begin{figure*}
+  \textsc{Types and Contexts}
+
+  \begin{align*}
+    \den{\tunit} &= \termO & \den{A \to B} &= \expO{\den{A}}{\den{B}}
+    \\
+    \den{\tseteq A} &= \pfinof{\den{\eqt A}}
+    & \den{A \x B} &= \den{A} \x \den{B}
+    \\
+    \den{\iso A} &= \discof{\den{A}} & \den{A + B} &= \den{A} + \den{B}
+  \end{align*}
+
+  \begin{align*}
+    \den{\G} &= \prod_{H \in \G} \den{H} &
+    \den{\h x A} &= \den{A} & \den{\hd x A} &= \discof{\den{A}} &
+    \den{\G \vdash A} &= \catC(\den\G, \den A)
+  \end{align*}
+  \vspace{0pt} % yes, this matters.
+
+  \textsc{Terms}
+
+  \begin{align*}
+    \den{\dvar x} &= \pi_{\dvar x} \then \varepsilon \quad \text{($\dvar x$ discrete)}
+    & \den{x} &= \pi_x \quad \text{($x$ monotone)}
+    \\
+    \den{\fnof x e} &= \lambda\den{e}
+    & \den{e\<f} &= \fork{\den{e}, \den{f}} \then \eval
+    \\
+    \den{\etuple{e_i}_i} &= \fork{\den{e_i}}_i
+    & \den{\pi_i\<e} &= \den{e} \then \pi_i
+    \\
+    \bigden{\ebox e} &= \strip \then \discof{\den e}
+    & \bigden{\elet{\ebox x = e} f} &=
+    \fork{\id, \den{e}} \then \den{f}
+    \\
+    \den{\bot} &= \termI \then \morph{join}_0
+    &
+    \den{e \vee f} &= \fork{\den{e}, \den{f}} \then \morph{join}_2
+    \\
+    %\den{\color{red}\prim{isEmpty}\<e} &= \den{e} \then \morph{isEmpty}
+    \den{\eisempty e} &= \den{\ebox e} \then \morph{isEmpty}
+    & \den{\esplit e} &= \den{e}\then \discosum
+    \\
+    %\den{\color{red}\prim{eq}\<e} &= \den{e} \then \morph{eq}
+    \den{\eeq{e_1}{e_2}} &= \fork{\den{\ebox{e_i}}}_i \then \morph{eq}
+    & \den{\efix e} &= \den{e} \then \morph{fix}
+    \\
+    %\den{\edown e} &= \den{e} \then \morph{gen} % <- THIS IS WRONG
+    \den{\eset{e_i}_i} &= \fork{\den{\ebox{e_i}} \then \morph{singleton}}_i \then \morph{join}
+    &
+    \den{\efor x e f} &=
+    \fork{\id,\den{e}} \then \pcollect{\den{f}}
+    %\den{\ebigvee x e f} &=
+    %\fork{\id,\den{e}} \then \morph{strong} \then \downof{\den{f}} \then \morph{collect}
+  \end{align*}
+
+  \begin{align*}
+    \den{\inj i e} &= \den{e} \then \injc_i
+    \\
+    \den{\ecase{e} (\inj i{x_i} \caseto f_i)_i} &=
+    \fork{\id, \den{e}} \then \morph{dist}^\x_+ \then \bigkrof{\den{f_i}}_i
+    %\bigkrof{\den{f_i}}_i \circ \morph{dist}^\x_+ \circ \fork{\id, \den{e}}
+  \end{align*}
+  \vspace{0pt} % yes, this matters
+
+  \textsc{Lemmas}
+
+  \begin{align*}
+    \morph{dist}^\x_+ &: A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)\\
+    % this could be simpler if it distributed in the opposite direction.
+    \morph{dist}^\x_+ &= \fork{\pi_2 \then \krof{\lambda (\fork{\pi_2,\pi_1} \then \injc_i)}_i, \pi_1}
+    \then \eval
+    \\[1ex]
+    \strip &: \den\G \to \discof{\den{\stripcx\G}}\\
+    \strip &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \discox
+  \end{align*}
+
+  \todo{TODO: add a function $\morph{box}(f) = \strip \then \iso f$, so
+    $\den{\ebox e} = \morph{box}(\den{e})$?}
+
+  %% \raggedright\footnotesize Strictly speaking, the cases for
+  %% $\den{\eset{e_i}_i}$, $\den{\eisempty e}$, and $\den{\eeq e f}$ are not
+  %% structurally inductive; nonetheless $\den{e}$ is well-defined.
+
+  \caption{Semantics of Core Datafun}
+  \label{fig:semantics}\label{def:strip}
+\end{figure*}
