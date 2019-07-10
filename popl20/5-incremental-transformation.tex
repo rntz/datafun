@@ -395,27 +395,75 @@ B)$; to pattern-match on this, we need \emph{split} to distribute the $\iso$.
 
 This handles the first two cases, $(\inj i {\eboxvar x},\, \inj i \dx \caseto
 \delta f_i)_i$. Since we know the tags on $\phi e$ and $\delta e$ agree, these
-are the only possible cases. However, to appease our non-dependent type-checker
-we must handle the \emph{impossible} case that $i \ne j$. This case is dead
-code: it needs to typecheck, but is otherwise irrelevant. In order to
-type-check, we need to generate a dummy change $\dx : \DP A_i$ given a base
-point $\dvar x : \Phi A_i$. We do this using a simple function $\dummy_A : A \to
-\D A$ (\cref{fig:dummy}).
+are the only possible cases. However, to appease our type-checker we must handle
+the \emph{impossible} case that $i \ne j$. This case is dead code: it needs to
+typecheck, but is otherwise irrelevant. It suffices to generate a dummy change
+$\dx : \DP A_i$ from our base point $\dvar x : \Phi A_i$. We do this using a
+simple function $\dummy_A : A \to \D A$ (\cref{fig:dummy}).
 
 \input{fig-dummy}
 
-%% \begin{align*}
-%%   \delta(\ecase e (\inj i x \caseto f_i)_i)
-%%   &= \ecase{\esplit{\ebox{\hilite{\phi e}}},\, \delta e}\\
-%%   &\qquad ({\inj i {\eboxvar x},\, \inj i \dx} \caseto \delta f_i)_{i}\\
-%%   &\qquad ({\inj i {\eboxvar x},\, \inj j \pwild}
-%%   \caseto \elet{\dx = \dummy\<\dvar x} \delta f_i)_{i\ne j}
-%% \end{align*}
+%% TODO: explain that \phi,\delta(\esplit e) are effectively book-keeping the
+%% decorations that the \phi translation adds to \iso.
 
-\todo{explain $\phi(\esplit e)$ and $\delta(\esplit e)$}
+We also need \dummy\ in the definition of $\phi(\esplit e)$. Recall that in
+effect $\prim{split} : \iso(A + B) \to \iso A + \iso B$, and observe that
+
+\begin{align*}
+  \Phi(\iso (A + B)) &= \iso((\Phi A + \Phi B) \x (\DP A + \DP B))
+  \\
+  \Phi(\iso A + \iso B) &= \iso(\Phi A \x \DP A) + \iso(\Phi B \x \DP B)
+\end{align*}
+
+\noindent
+So while $\phi e$ yields a boxed pair of tagged values, $\eboxraw{\etuple{\inj i
+    x, \inj j \dx}}$, we need $\phi(\esplit e)$ to yield a tagged boxed pair,
+$\inj i {\eboxraw{\etuple{x,\dx}}}$. Again we use \dummy\ to handle the
+impossible case $i \ne j$.
+
+Finally, observe that $\delta(\esplit e)$ has the boring type $\tunit + \tunit$:
+
+\[
+  \DP(\iso A + \iso B)
+  = \DP\iso A + \DP\iso B
+  = \tunit + \tunit
+\]
+
+\noindent
+All $\delta(\esplit e)$ needs to do is produce $\inj i \etuple{}$ with the same
+tag $i$ as $\phi(\esplit e)$ and therefore as $\phi e$; simply
+\kw{case}-analysing $\phi e$ suffices.
 
 
 \subsection{Semilattices and comprehensions}
+
+The translation $\phi(e \vee f) = \phi e \vee \phi f$ is as simple as it seems.
+However, $\delta(e \vee f) = \delta e \vee \delta f$ is slightly cleverer. In
+particular, let's restrict to sets, and suppose that $\dx$ changes $x$ into $x'$
+and $\dy$ changes $y$ to $y'$. In particular, let's suppose these changes are
+\emph{precise}: that $\dx = x' \setminus x$ and $\dy = y' \setminus y$. Then
+the precise change from $x \cup y$ into $x' \cup y'$ is:
+
+\[ (x' \cup y') \setminus (x \cup y)
+= (x' \setminus x \setminus y) \cup (y' \setminus y \setminus x)
+= (\dx \setminus y) \cup (\dy \setminus x)
+\]
+
+\noindent
+This suggests letting $\delta(e \cup f) = (\delta e \setminus \phi f) \cup
+(\delta f \setminus \phi e)$. And (modulo a generalization of set difference to
+other semilattices) this is a valid derivative for $e \vee f$! However, it
+involves recomputing $\phi e$ and $\phi f$, and our goal is to avoid
+recomputation. So instead, we \emph{overapproximate} the derivative: $\delta e
+\cup \delta f$ might contain some unnecessary elements, but we expect it to be
+cheaper to include these than to recompute $\phi e$ and $\phi f$. This
+overapproximation agrees with semi\naive\ evaluation in Datalog: Datalog
+implicitly unions the results of different rules for the same predicate (e.g.
+those for \name{path} in \cref{sec:seminaive-and-ilc}), and the
+semi\naive\ translations of these rules do not include negated premises to
+compute a more precise difference.
+
+Now let's consider $\efor x e f$.
 
 \todo{explain use of \name{dummy} to implement \zero.}
 
