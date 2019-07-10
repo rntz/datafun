@@ -136,9 +136,9 @@ With a bit of rewriting, this is equivalent to $(\ds \bullet t) \cup (s \bullet
 \dt) \cup (\ds \bullet \dt)$, which is perhaps the derivative a human would
 give.
 
-Let's use this to figure out $\phi(\name{tc}\<\eboxvar{e})$. Working from the
-inside out, we start with the derivative of the loop body, $\delta(\dvar e \cup
-(\dvar e \bullet p))$:
+Let's use this to figure out $\phi(\name{tc}\<\eboxvar{e})$. Working inside out,
+we start with the derivative of the loop body, $\delta(\dvar e \cup (\dvar e
+\bullet p))$:
 
 \begin{align*}
   \delta({\dvar e \cup (\dvar e \bullet p)})
@@ -155,10 +155,10 @@ inside out, we start with the derivative of the loop body, $\delta(\dvar e \cup
 \end{align*}
 
 \noindent
-Observe that this requires a new optimization: by definition, $\delta\dvar e =
-\dvar{de}$. However, since $\dvar e$ is discrete we know it's not changing, and
-since it's of set type, $\dvar{de}$ may as well be the empty set. So we replace
-$\delta e$ with $\bot$ instead.
+This requires a new optimization: by definition, $\delta\dvar e = \dvar{de}$.
+However, since $\dvar e$ is discrete we know it's not changing, and since it's
+of set type, $\dvar{de}$ may as well be the empty set. So we replace $\delta e$
+with $\bot$ instead.
 %
 Finally, putting everything together:
 
