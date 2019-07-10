@@ -43,7 +43,7 @@
       \den{\J {\pi_i\<e} \G {A_i}} &=& \den{\J e \G {A_1 \times A_2}} \then \pi_i \\
       \den{\J {\ebox e} \G {\iso A}} &=& \mkbox_\Gamma(\den {\J e {\stripcx \G} A}) \\
       \den{\J {\elet{\ebox x = e} f} \G B} &=&  \fork{\id_\Gamma, \den{\J e \G {\iso A}}} \then \den{\J f {\G, \hd x A} B}  \\
-      \den{\J \bot \G L} &=& \termI \then \morph{join}^L_0 \\
+      \den{\J \bot \G L} &=& \termI \then !_\Gamma \then \morph{join}^L_0 \\
       \den{\J {e \vee f} \G L} &=& \fork{\den{\J e \G L}, \den{\J f \G L}} \then \morph{join}^L_2 \\
       \den{\J {\eisempty e} \G {1+1}}&=& \mkbox_\Gamma(\den{\J e {\stripcx \G} {\tset A}}) \then \morph{isEmpty} \\
       \den{\J {\esplit e} \G {\iso A + \iso B}} &=& \den{\J e \G {\iso(A + B)}}\then \isosum \\
