@@ -113,22 +113,21 @@
 %% Note: \begin{abstract}...\end{abstract} environment must come
 %% before \maketitle command
 \begin{abstract}
-One of the workhorse techniques for implementing bottom-up
-Datalog engines is \emph{semi\naive\ evaluation}~\cite{seminaive}. This optimization
-improves the performance of Datalog's most distinctive feature: recursively defined
-predicates. Under a \naive\ evaluation strategy, many values are unnecessarily
-re-computed; semi\naive\ evaluation computes (a safe approximation of) just the
-\emph{new} values generated at each step. This optimization is critical, as it can
-\emph{asymptotically} improve the performance of Datalog queries.
+One of the workhorse techniques for implementing bottom-up Datalog engines is
+semi\naive\ evaluation~\cite{seminaive}. This optimization improves the
+performance of Datalog's most distinctive feature: recursively defined
+predicates. These are computed iteratively, and under a \naive\ evaluation
+strategy, each iteration recomputes all previous values. Semi\naive\ evaluation
+computes a safe approximation of the \emph{difference} between iterations. This
+can \emph{asymptotically} improve the performance of Datalog queries.
 
-Semi\naive\ evaluation is defined partly as a program transformation
-on sets of Datalog rules, and partly as a modification of the fixed
-point computation algorithm, and takes heady advantage of the fact
-that Datalog is fundamentally a first-order programming language.
-This paper gives an extended version of this transformation which
-works on \emph{higher-order} programs written in the Datafun language,
-which extends Datalog with features like first-class relations,
-higher-order functions, and datatypes like sum types.
+Semi\naive\ evaluation is defined partly as a program transformation and partly
+as a modified iteration strategy, and takes advantage of the first-order nature
+of Datalog code.
+%
+This paper extends the semi\naive\ transformation to higher-order programs
+written in the Datafun language, which extends Datalog with features like
+first-class relations, higher-order functions, and datatypes like sum types.
 \end{abstract}
 
 
