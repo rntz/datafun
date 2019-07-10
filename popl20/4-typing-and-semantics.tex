@@ -264,7 +264,7 @@ powersets do not quite form a monad in $\Poset$.
 \subsubsection{Fixed Points} Given a finite-height semilattice $L$, we can define a fixed
 point operation $\efix{} : \iso (L \to L) \to L$ as follows:
 \begin{displaymath}
-  \efix{} = f \mapsto \bigcup_{n \in \mathbb{N}} f^n(\bot)
+  \efix{} = f \mapsto \bigvee_{n \in \mathbb{N}} f^n(\bot)
 \end{displaymath}
 A routine inductive argument shows this must yield a least fixed point. 
 
