@@ -380,8 +380,11 @@ Next we come to $(\eletbox x e f)$, whose $\phi$ and $\delta$ translations are
 very similar:
 
 \begin{align*}
+  \phi(\eletbox x e f)
+  &=
   \elet{\ebox{\etuple{\dvar x,\dvar\dx}} = \phi e} \phi f
-  &&
+  \\
+  \delta(\eletbox x e f) &=
   \elet{\ebox{\etuple{\dvar x,\dvar\dx}} = \phi e} \delta f
 \end{align*}
 
@@ -470,31 +473,26 @@ the precise change from $x \cup y$ into $x' \cup y'$ is:
 
 \noindent
 This suggests letting $\delta(e \cup f) = (\delta e \setminus \phi f) \cup
-(\delta f \setminus \phi e)$. And (modulo a generalization of set difference to
-other semilattices) this is a valid derivative for $e \vee f$! However, it
-involves recomputing $\phi e$ and $\phi f$, and our goal is to avoid
-recomputation. So instead, we \emph{overapproximate} the derivative: $\delta e
-\cup \delta f$ might contain some unnecessary elements, but we expect it to be
-cheaper to include these than to recompute $\phi e$ and $\phi f$. This
-overapproximation agrees with semi\naive\ evaluation in Datalog: Datalog
-implicitly unions the results of different rules for the same predicate (e.g.
-those for \name{path} in \cref{sec:seminaive-and-ilc}), and the
-semi\naive\ translations of these rules do not include negated premises to
-compute a more precise difference.
+(\delta f \setminus \phi e)$. This is a valid derivative, but it involves
+recomputing $\phi e$ and $\phi f$, and our goal is to avoid recomputation. So
+instead, we \emph{overapproximate} the derivative: $\delta e \cup \delta f$
+might contain some unnecessary elements, but we expect it to be cheaper to
+include these than to recompute $\phi e$ and $\phi f$. This overapproximation
+agrees with semi\naive\ evaluation in Datalog: Datalog implicitly unions the
+results of different rules for the same predicate (e.g. those for \name{path} in
+\cref{sec:seminaive-and-ilc}), and the semi\naive\ translations of these rules
+do not include negated premises to compute a more precise difference.
 
 Now let's consider $\efor x e f$.
 %
-Its $\phi$-translation is straightforward, with one hitch: because $\dvar x$ is
-a discrete variable, the inner loop $\phi f$ needs access to its zero change
-$\dvar\dx$.
+Its $\phi$-translation is straightforward, with one hitch: because $\hd x {\eqt
+  A}$ is a discrete variable, the inner loop $\phi f$ needs access to its zero
+change $\hd \dx {\D\eqt A}$.
 %
-If $\dvar x$ were a function we'd be stuck: it's not possible to efficiently
-compute function derivatives at runtime --- otherwise we wouldn't need $\delta$.
-%
-But $\dvar x$ is not a function: the elements of a set have first-order type!
-%
-And at eqtypes, somewhat marvelously, the \dummy\ function computes zero
+And at eqtypes (although not in general), the \dummy\ function computes zero
 changes:
+%% TODO: explain why this can't work at function types, which is one reason we
+%% restrict sets to containing first-order data?
 
 \begin{lemma}
   $\changesat{\eqt A}{\dummy\<x}{x}{x}$ for any $x : \eqt A$.
