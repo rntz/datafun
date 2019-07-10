@@ -288,5 +288,20 @@ equational theory. However, that is not our goal in this paper. We
 want to prove the correctness of the semi\naive\ translation, which we
 will do with a logical relations argument. Since we can harvest almost
 all the properties we need from the logical relation, only a small
-residue of metatheoretic need to be established at this -- indeed, the
+residue of metatheory needs to be established manually -- indeed, the
 only thing we need to estabish is the type-correctness of weakening.
+
+We define the weakening relation $\Gamma \sqsubseteq \Delta$ in
+Figure~\ref{fig:weakening}.  This says that $\Delta$ is a weakening of
+$\Gamma$, either because (as usual) it has extra hypotheses (in rule
+\rn{Drop}), or (additionally!) because a hypothesis in $\Gamma$
+becomes discrete in $\Delta$ (rule \rn{Disc}). The idea is that making
+a hypothesis discrete only increases the number of places it can be used.
+
+\begin{lemma}\label{thm:weaken}
+  If $\J e \G A$ and $\G \sqsubseteq \D$ then $\J e \D A$. 
+\end{lemma}
+
+This follows by the usual induction on typing derivations. 
+
+\input{fig-weakening}
