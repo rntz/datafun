@@ -1,13 +1,12 @@
 \section{Datalog and Datafun}
 \label{sec:datalog-and-datafun}
 
-In this section, we explain how Datalog works by example, and then explain how
-Datafun works by porting and then generalising these examples.
+In this section, we explain both Datalog and Datafun by example.
 
 \subsection{Datalog}
 
-The syntax of Datalog is a subset of Prolog's syntax. Programs
-consist of collections of predicate declarations, as follows:
+Datalog's syntax is a subset of Prolog's. Programs
+are collections of predicate declarations:
 \begin{minted}[]{prolog}
 parent(earendil, elrond).
 parent(elrond, arwen).
@@ -22,44 +21,45 @@ and \datalog{ancestor(_,_)}. Lowercase terms like \datalog{elrond} and
 \datalog{arwen} are symbols \emph{a la} Lisp, and uppercase terms like
 \datalog{X} and \datalog{Y} are variables.
 
-The \datalog{parent(_, _)} relation declares a relation as a set of
+The \datalog{parent(_, _)} relation declares a set of
 ground \emph{facts}; we explicitly assert that \datalog{earendil} is
 the parent of \datalog{elrond}, and \datalog{elrond} the parent of
-\datalog{arwen}, and so on. Then, the ancestor relation is declared as
-a pair of potentially recursive \emph{rules}, the first asserting that
+\datalog{arwen}, and so on. The ancestor relation is declared as
+a pair of \emph{rules}, the first saying
 $X$ is an ancestor of $Z$ if $X$ is $Z$'s parent, and the second
-asserting that $X$ is an ancestor of $Z$ if there is a third person
-$Y$, such that $X$ is $Y$'s ancestor and $Y$ is $Z$'s parent. In
-inference rule form, this program could be rendered as:
+saying $X$ is an ancestor of $Z$ if there is a third person
+$Y$, such that $X$ is $Y$'s ancestor and $Y$ is $Z$'s parent.
 
-\begin{mathpar}
-  \inferrule*[]
-             { }
-             { \mathsf{parent(earendil, elrond)} }
-  \and
-  \inferrule*[]
-             { }
-             { \mathsf{parent(elrond, arwen)} }
-  \and
-  \inferrule*[]
-             { }
-             { \mathsf{parent(arwen, eldarion)} }
-  \\\vspace{1em}
-  \inferrule*[]
-             { \mathsf{parent}(x, y) }
-             { \mathsf{ancestor}(x, y) }
-  \and
-  \inferrule*[]
-             { \mathsf{ancestor}(x, y) \\ \mathsf{parent}(y, z) }
-             { \mathsf{ancestor}(x, z) }
-\end{mathpar}
+% In inference rule form, this program could be rendered as:
+% 
+% \begin{mathpar}
+%   \inferrule*[]
+%              { }
+%              { \mathsf{parent(earendil, elrond)} }
+%   \and
+%   \inferrule*[]
+%              { }
+%              { \mathsf{parent(elrond, arwen)} }
+%   \and
+%   \inferrule*[]
+%              { }
+%              { \mathsf{parent(arwen, eldarion)} }
+%   \\\vspace{1em}
+%   \inferrule*[]
+%              { \mathsf{parent}(x, y) }
+%              { \mathsf{ancestor}(x, y) }
+%   \and
+%   \inferrule*[]
+%              { \mathsf{ancestor}(x, y) \\ \mathsf{parent}(y, z) }
+%              { \mathsf{ancestor}(x, z) }
+% \end{mathpar}
 
 Semantically, each predicate can be interpeted as the set of tuples
 which satisfy the predicate. Recursive definitions can be interpreted
-by seeing the whole program as a function from relations to relations,
-and then taking the least fixed point of that function. The syntax of
-Datalog is such that the relation transformer the rules define is
-always a monotone function on sets, and so this least fixed point
+by viewing the whole program as a relation transformer,
+and taking the least fixed point of that function. 
+Datalog's syntax is set up sp the relation transformer the rules define is
+always a monotone function on sets, ensuring the least fixed point
 always exists.
 
 \subsection{Datafun}
@@ -93,8 +93,8 @@ $\tset{\eqt A}$, which are introduced with set literals $\eset{e_0, \ldots e_n}$
 and can be eliminated using (a slight generalization of) Moggi's monadic
 bind syntax $\efor{x}{e}{e'}$.
 
-As long as all the primitives of the calculus, every definable
-function is also monotone, which is a property essential for taking
+As long as all the primitives are monotone, every definable
+function is also monotone. This is essential for taking
 fixed points, but it is also very restrictive. There are many
 essential oeprations which are naturally non-monotone, such as
 equality tests $\eeq e f$. For example, $\eset{} = \eset{}$ is true,
@@ -121,8 +121,7 @@ matching eliminator $\eletbox x e f$. Variables are colored and
 italicised $\dvar x$ to indicate that they are discrete, and uncolored
 and upright $x$ to indicate they are monotonic, and discrete terms
 $\isocolor e$ are restricted to only refer to discrete variables. So
-in the equality test $\eeq e f$, the terms $e$ and $f$ are restricted
-to be discrete. 
+in the equality test $\eeq e f$, the terms $e$ and $f$ must be discrete. 
 
 Finally, Datafun include a fixed point operator $\efix{e}$. The $\efix$
 combinator takes a function argument of type $\iso (L \to L)$ and
@@ -136,12 +135,12 @@ are an example, as are tuples of semilattices. As long as the lattice
 has no infinite ascending chains, recursion from the bottom element
 is guaranteed to find the least fixed point.
 
-Furthermore, we require that the recursive function be supplied at box
-type. Since boxed expressions can only refer to discrete values, this
-means that the only monotone variable the fixed point can refer to is
-its fixed point. This ends up blocking (semantically) nested fixed points,
-and leaves the semantics of Datafun close to that of Datalog, where all
-recursion happens once, at the level of the whole program. 
+We also require that the recursive function be at box type. Since
+boxed expressions can only refer to discrete values, the only monotone
+variable the fixed point can refer to is the fixed point itself. This
+blocks (semantically) nested fixed points, and leaves the semantics
+of Datafun close to that of Datalog, where all recursion happens once,
+at the level of the whole program.
 
 
 \subsection{Examples of Datafun Programs}
@@ -150,8 +149,8 @@ recursion happens once, at the level of the whole program.
 
 In the examples, we make free use of strings and integers, ordered
 with the trivial discrete order ($x \leq y$ if and only if they are
-equal). We also make use of a certain amount of syntax sugar in the
-definitions.
+equal). We also make use of some syntax sugar in the
+definitions:
 
 \begin{enumerate}
 \item First, we make free use of curried functions and pattern
@@ -167,8 +166,8 @@ definitions.
   we do not use the usual encoding $1+1$ for booleans. Instead, we use the encoding $\tset 1$
   with $\efalse$ defined as the empty set $\eset{}$ and $\etrue$ defined as the
   singleton set $\eset{\etuple{}}$. We also make use of a ``one-sided''
-  conditional test form $\ewhen{b}{e}$. This test must must be taken at a lattice
-  type, and if the boolean $b$ is true, it returns $e$, and returns the bottom
+  conditional test form $\ewhen{b}{e}$. This test must must be at lattice
+  type, and if $b$ is true, it returns $e$, and returns the bottom
   element of the lattice otherwise. 
   
 \item Finally, we make use of set comprehension notation. The
@@ -193,7 +192,7 @@ membership test operation.
   $\name{mem}\;\ebox{x} \; \name{ys} = \efor{y}{\name{ys}}\ewhen{x = y}{\etrue}$ 
 \end{tabbing}
 
-This can be represented by code which checks to see if the input argument $x$
+This code checks if the input $x$
 is equal to any $y$ in the test set $\name{ys}$. We require the argument $x$ to
 $\name{mem}$ to be discrete, because an element is in a set or not -- the test
 is not monotone in $x$. 
@@ -213,8 +212,7 @@ Using comprehensions, this could alternately be written as:
   $\_ \wedge \_ : \tset A \to \tset A \to \tset A$ \\
   $\name{xs} \wedge \name{ys} = \setfor{x}{x \in xs, \name{mem}\;\ebox{x}\;\name{ys}}$
 \end{tabbing}
-This looks more like a definition one might see in
-an introductory mathematics course.
+% This looks more like a definition one might see in an introductory mathematics course.
 
 \paragraph{Relational Composition}
 We can also define the composition of two relations in Datafun. 
@@ -247,9 +245,9 @@ Now, we define the transitive closure of a relation.
   $\name{tc}\;\ebox{\mathit{xs}}$ \> $=$ \> $\efixis{\name{self}}{\name{xs} \vee \name{xs} \bullet\name{self}}$ 
 \end{tabbing}
 
-This definition uses recursion, and the body of the definition is quite standard --
-a transitive closure is the smallest relation which contains the original relation $\name{xs}$
-and the relational composition of $\name{xs}$ with the transitive closure. However, one
+This definition uses recursion, just like the mathematical definition --
+a transitive closure is the least relation containing the original relation $\name{xs}$
+and the composition of $\name{xs}$ with the transitive closure. However, one
 feature of this definition peculiar to core Datafun is that the argument type
 is $\iso \tset{A \times A}$ -- the transitive closure takes a \emph{discrete} relation.
 This is because we must use the relation within the fixed point, and so its parameter needs
@@ -262,17 +260,15 @@ Datafun permits tightly integrating the higher-order functional and
 bottom-up logic programming styles. In this section, we illustrate the
 benefits of doing so by showing how to implement a regular expression
 matching library in combinator parsing style.  Like combinator parsers
-in functional languages, the code is very concise.  Unlike typical
-functional parser combinators, though, support for the relational
-style ensures we can write \naive\ code \emph{without} the exponential
-backtracking cliffs typical of parser combinator libraries in
-functional languages.
+in functional languages, the code is very concise.  However, support
+for the relational style ensures we can write \naive\ code
+\emph{without} the exponential backtracking cliffs typical of parser
+combinators in functional languages.
 
-Below, we assume the existence of a function
+We assume the existence of a function
 $\name{pos} : \kw{string} \to \tset{\kw{int}}$ which takes a string
-$s$ and returns the set of valid indices in that string, and assume
-that the character at position $n$ can be extracted from the string
-$s$ with the expression $s[n]$, as in Java or C. Having done this, we define
+and returns the set of valid indices in that string, and assume
+that string indexing is written $s[n]$, as in Java or C. Having done this, we define
 the type of regular expression matchers.
 \begin{tabbing} 
 \qquad  $\kw{type}\;re\;=\iso \kw{string} \to \tset{\kw{int} \times \kw{int}}$  
@@ -297,9 +293,8 @@ the string $s$ is the character $c$.
   $\name{nil}\;\ebox{s} = \efor{n}{\name{pos}\;s}{\eset{(n,n)}}$
 \end{tabbing}
 %
-The $\name{nil}$ combinator reports the set $(n,n)$ for every position
-$n$ in the string, because an empty string can start at every position in
-the string. 
+The call $\name{nil}\;\ebox{s}$ yields $(n,n)$ for each position
+$n$ in $s$, since an empty substring can start anywhere.
 %
 \begin{tabbing}
 \qquad \=   $\name{seq} : \kw{re} \to \kw{re} \to \kw{re}$ \+\\
@@ -307,9 +302,9 @@ the string.
 \end{tabbing}
 % 
 The $\name{seq}$ combinator takes two regular expressions $r_1$ and $r_2$
-as arguments, applies the string $s$ to both, and then takes the relational
-composition of the results. This means that if the range $(i,j)$ was in the
-recognized set of $r_1$, and $(j,k)$ was in the recognized set of $r_2$, then
+as arguments, applies its argument to both, and takes the relational
+composition of the results. Therefore, if the range $(i,j)$ was in the
+result of $r_1$, and $(j,k)$ was in the result of $r_2$, then
 we will return $(i,k)$, just as desired. 
 %
 \begin{tabbing}
@@ -320,15 +315,15 @@ we will return $(i,k)$, just as desired.
   $\name{alt}\;r_1\;r_2\;s = r_1\;s \vee r_2\;s$
 \end{tabbing}
 %
-The $\name{bot}$ combinator just returns the empty set of matches, and the
-$\name{alt}$ combinator takes the union of the matches of its two arguments. 
+We get the empty set of matches from $\name{bot}$, and 
+$\name{alt}$ unions the matches of its two arguments. 
 %
 \begin{tabbing}
 \qquad \=   $\name{star} : \iso\kw{re} \to \kw{re}$ \+\\
   $\name{star}\;\ebox{r}\;\ebox{s} = \name{nil}\;\ebox{s} \vee \name{tc}\;\ebox{r\;\ebox{s}}$ 
 \end{tabbing}
 The most interesting regular expression combinator is the Kleene star
-operation $\name{star}$.  This just uses $\name{nil}$ to get the
+operation $\name{star}$.  It uses $\name{nil}$ to get the
 reflexive relation on positions, and then takes the transitive closure
 of the regular expression it received as an argument using the
 $\name{tc}$ operation. This forces its argument to be boxed, since
@@ -358,16 +353,16 @@ to manage nondeterminism and search.
 \qquad \=  $\kw{type}\;re\;=\iso (\kw{string} \times \kw{int}) \to \tset{\kw{int}}$ \+ 
 \end{tabbing}
 %
-The refactored type of combinators takes a pair of arguments, a string and a starting
-position, and returns a set of ending positions. This contrasts with the earlier type,
-which took a string and returned a set of start/end pairs. 
+Our new type of combinators takes a string and a starting
+position, and returns a set of ending positions. In contrast, the earlier type
+took a string and returned a set of start/end pairs. 
 %
 \begin{tabbing}
 \qquad \=  $\name{sym} : \kw{char} \to \kw{re}$\+ \\
   $\name{sym}\;c\;\ebox{s,n} = \ewhen{s[n] = c}{\eset{n+1}}$ 
 \end{tabbing}
 %
-The $\name{sym}$ function checks to see if the character $c$ occurs at position
+The call $\name{sym}\;c$ checks if $c$ occurs at position
 $n$ in the string, and returns the singleton $n+1$ if it does, and the empty
 set otherwise. 
 %
@@ -393,8 +388,8 @@ matching $r_1$, and carries on with $r_2$ from there.
   $\name{alt}\;r_1\;r_2\;\ebox{s,n} =\ x = r_1\;x \vee r_2\;x$ 
 \end{tabbing}
 %
-The $\name{bot}$ combinator still returns the empty set, and the $\name{alt}$ combinator
-still takes the union of the two sets of end positions. 
+We still get the empty set from $\name{bot}$, and $\name{alt}$ 
+still unions the two sets of end positions. 
 %
 \begin{tabbing}
 \qquad \=  $\name{star} : \iso\kw{re} \to \kw{re}$\+ \\

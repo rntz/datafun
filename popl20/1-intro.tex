@@ -96,15 +96,20 @@ alternative design strategies.
 %
 %% But a summary this^ long belongs in related work, not here.
 Flix adopts the route of treating Datalog as an embedded
-domain-specific language~\cite{edsl}. That is, Flix is a fairly conventional
-(albeit well-designed) functional programming language roughly
-comparable to ML or Haskell, extended with types representing Datalog
-predicates and program. The evaluation of a Flix program builds a
-Datalog program, which is then handed off to a custom Datalog engine.
-This stratification means that (a) standard Datalog implementation
-techniques can be used off-the-shelf, but that (b) its functional
-programming side is essentially just a very powerful macro system for
-Datalog.
+domain-specific language~\cite{edsl}. That is, Flix is a fairly
+conventional (albeit well-designed) functional programming language
+roughly comparable to ML or Haskell, extended with types representing
+Datalog predicates and program. The evaluation of a Flix program
+builds a Datalog program, which is then handed off to a custom Datalog
+engine (albeit extended to support arbitrary semilattices).  This
+stratification means that (a) standard Datalog implementation
+techniques can be used mostly off-the-shelf, but that (b) its
+functional programming side is mostly a very powerful macro system for
+Datalog.  The only way Flix code runs at Datalog execution time is via
+the definition of new semilattices (which are regular functional
+language code implementing a semilattice interface), and for this Flix
+offers program-verification style correctness checking (including
+SMT-based tooling).
 
 Datafun takes a somewhat different approach. Like Flix, it is a
 functional programming language, but unlike Flix, its type discipline
@@ -120,8 +125,8 @@ implementation techniques, which were originally developed in the
 context of a first-order logic language, are no longer obviously
 applicable in the higher-order functional setting.
 
-Second, even though the semantics of Datalog is simple, actually
-making it perform well enough to use in practice calls for very
+Second, actually
+making Datalog perform well enough to use in practice calls for very
 sophisticated program analysis and compiler engineering. (This is a
 familiar experience from the database community, where query planners
 must encode a startling amount of knowledge to optimize relatively
