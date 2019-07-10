@@ -1,0 +1,17 @@
+\begin{figure}
+  \begin{align*}
+    \dummy_{\tseteq A} \<\pwild &= \eset{}
+    &
+    \dummy_{A \x B} \<\etuple{x,y} &= \etuple{\dummy\<x, \dummy\<y}
+    \\
+    \dummy_\tunit \<\etuple{} &= \etuple{}
+    &
+    \dummy_{A + B} \<(\inj i x) &= \inj i (\dummy\<x)
+    \\
+    \dummy_{\iso A} \<\ebox{x} &= \ebox{\dummy\<x}
+    &
+    \dummy_{A \to B} \<f &= \fnof{x} \dummy\<(f\<x)
+  \end{align*}
+  \caption{The function $\dummy_A : A \to \D A$}
+  \label{fig:dummy}
+\end{figure}

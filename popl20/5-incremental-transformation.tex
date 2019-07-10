@@ -267,6 +267,7 @@ $\fixt L$; by \cref{lem:DeltaL}, $\bot$ suffices.
 
 
 \subsection{Variables, \boldfn, and application}
+\label{sec:var-fn-app}
 
 At the core of a functional language are variables, \fn, and application. The
 $\phi$ translation leaves these alone, simply distributing over subexpressions.
@@ -367,13 +368,51 @@ very similar:
 \noindent
 Since $\dvar x$ is a discrete variable, both $\phi f$ and $\delta f$ need access
 to its zero change $\dvar\dx$. Luckily, $\phi e : \iso(\Phi A \x \DP A)$
-provides it, so we simply unpack it. We don't use $\delta e$, but this is
-unsurprising when you consider that its type is $\tunit$.
+provides it, so we simply unpack it. We don't use $\delta e$ in $\delta f$, but
+this is unsurprising when you consider that its type is $\DP\iso A = \tunit$.
 
 
 \subsection{Case analysis, \prim{split}, and \name{dummy}}
 
-\todo{explain \name{dummy}}
+\newcommand\evalsto\mapsto
+
+The derivative of case-analysis, $\delta(\ecase{e}{(\inj i x_i \caseto
+  f_i)_i})$, is complex.
+%
+Suppose $\phi e$ evaluates to $\inj i x$ and its change $\delta e$ evaluates to
+$\inj j \dx$.
+%
+Since $\delta e$ is a change to $\phi e$, the change structure on sums tells us
+that $i = j$! (This is because sums are ordered disjointly; the value $x$ can
+increase, but the tag $\injc_i$ must remain the same.)
+%
+So the desired change $\delta(\ecase{e}{\dots})$ is given by $\delta f_i$ in a
+context supplying a discrete base point $\dvar x$ (the value $x$) and the change
+$\dx$.
+%
+To bind $\dvar x$ discretely, we need to use $\ebox{\phi e} : \iso(\Phi A + \Phi
+B)$; to pattern-match on this, we need \emph{split} to distribute the $\iso$.
+
+This handles the first two cases, $(\inj i {\eboxvar x},\, \inj i \dx \caseto
+\delta f_i)_i$. Since we know the tags on $\phi e$ and $\delta e$ agree, these
+are the only possible cases. However, to appease our non-dependent type-checker
+we must handle the \emph{impossible} case that $i \ne j$. This case is dead
+code: it needs to typecheck, but is otherwise irrelevant. In order to
+type-check, we need to generate a dummy change $\dx : \DP A_i$ given a base
+point $\dvar x : \Phi A_i$. We do this using a simple function $\dummy_A : A \to
+\D A$ (\cref{fig:dummy}).
+
+\input{fig-dummy}
+
+%% \begin{align*}
+%%   \delta(\ecase e (\inj i x \caseto f_i)_i)
+%%   &= \ecase{\esplit{\ebox{\hilite{\phi e}}},\, \delta e}\\
+%%   &\qquad ({\inj i {\eboxvar x},\, \inj i \dx} \caseto \delta f_i)_{i}\\
+%%   &\qquad ({\inj i {\eboxvar x},\, \inj j \pwild}
+%%   \caseto \elet{\dx = \dummy\<\dvar x} \delta f_i)_{i\ne j}
+%% \end{align*}
+
+\todo{explain $\phi(\esplit e)$ and $\delta(\esplit e)$}
 
 
 \subsection{Semilattices and comprehensions}
