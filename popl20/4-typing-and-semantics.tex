@@ -141,7 +141,7 @@ of products is witnessed by $\fork{f,g} : A \to B \times C$, where
   \fork{f, g} \triangleq a \mapsto \etuple{f(a), g(a)}
 \end{displaymath}
 %
-Again, the verification that all these maps are monotone and that the relevant
+The verification that these maps are monotone and that the relevant
 diagrams commute is routine.  
 
 \paragraph{Exponentials} Given partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
@@ -223,12 +223,61 @@ cases the isomorphism is witnessed in both directions by identity on the underly
 We will write $\morph{dist}^\Box_\times$  to name the map witnessing distributivity of $\iso$ over
 products, and $\morph{dist}^\Box_+$  to name the map witnessing distributivity of $\iso$ over coproducts.
 
+\subsubsection{Sets and Lattices} Given a poset $(A, \leq_A)$ we
+define the finite powerset poset $\pfinof(A, \leq_A)$ as
+$(\pfinof A, \subseteq)$, with subsets of $A$ as elements ordered by
+subset inclusion. This is obviously a semilattice, with the least
+element $\morph{join}_0$ given by the empty set, and binary join
+$\morph{join}_2$ given by union. If $A$ itself is finite, then this is
+also a \emph{complete} semilattice.  We can define the following
+collection of useful morphisms on sets:
+\begin{displaymath}
+  \begin{array}{lclclcl}
+    \morph{join}_0& : & 1 \to \pfinof(A) & \qquad & \morph{join}_2 & : & \pfinof(A) \times \pfinof(A) \to \pfinof(A) \\
+    \morph{join}_0& = & \etuple{} \mapsto \emptyset  &  & \morph{join}_2 & : & \etuple{X, Y} \mapsto X \cup Y \\[1em]
+    \morph{singleton} & : & \iso A \to \pfinof{A} & & \morph{isEmpty} & : & \iso \pfinof{A} \to 1 + 1 \\
+    \morph{singleton} & = & a \mapsto \esetraw{a} 
+    & & 
+    \morph{isEmpty} & = & X \mapsto \left\{ \begin{array}{ll}
+                                              \inj 1 {\etuple{}} & \mbox{when}\;X = \emptyset \\
+                                              \inj 2 {\etuple{}} & \mbox{otherwise}
+                                            \end{array}
+                                    \right.
+  \end{array}
+\end{displaymath}
+The $\morph{singleton}$ function takes a value and makes a singleton set out of it. The
+domain must be discrete, as otherwise the map will not be monotone (sets are ordered by
+inclusion, and set membership relies on equality, not the partial order). Similarly,
+the emptiness test $\morph{isEmpty}$ also takes a discrete set-valued argument, because
+otherwise the boolean test would not be monotone.
 
-\subsubsection{Sets and Lattices}
+Finally, if $L$ is a complete lattice, and $f : A \times \iso B \to L$, then we can define
+we can also define the morphism $\morph{collect}(f) : A \times \pfinof{A} \to L$ as follows:
+\begin{displaymath}
+ \morph{collect}(f)  = (a, X) \mapsto \bigvee_{b \in X} f(a, b)   
+\end{displaymath}
+We will use this to interpret for-comprehensions, since all the definable lattice
+types (sets, and products of lattices) in core Datafun are complete lattices. However,
+it is worth noting that the discreteness restrictions on $\morph{singleton}$ mean that
+powersets do not quite form a monad in $\Poset$. 
 
-\subsubsection{Fixed Points}
+\subsubsection{Fixed Points} Given a finite-height semilattice $L$, we can define a fixed
+point operation $\efix{} : \iso (L \to L) \to L$ as follows:
+\begin{displaymath}
+  \efix{} = f \mapsto \bigvee_{n \in \mathbb{N}} f^n(\bot)
+\end{displaymath}
+A routine inductive argument shows this must yield a least fixed point. 
 
-\subsubsection{Interpretation}
+\subsubsection{Interpretation} The semantic interpetation (defined
+over typing derivations) is given in Figure~\ref{fig:semantics}. We
+give the interpretation in combinatory style, and to increase
+readability, we freely use $n$-ary products to elide the book-keeping
+associated with reassociating binary products. The interpretation
+itself mostly follows the usual interpretation for constructive
+S4~\cite{depaiva-s4}, with what novelty there is occuring in the
+interpretation of sets and fixed points. Even there, the semantics is
+straightforward, making fairly direct use of the combinators defined
+above. 
 
 \subsection{Metatheory}
 
@@ -239,5 +288,20 @@ equational theory. However, that is not our goal in this paper. We
 want to prove the correctness of the semi\naive\ translation, which we
 will do with a logical relations argument. Since we can harvest almost
 all the properties we need from the logical relation, only a small
-residue of metatheoretic need to be established at this -- indeed, the
-only thing we need to estabish is the type-correctness of weakening.
+residue of metatheory needs to be established manually -- indeed, the
+only thing we need to prove at this stage is the type-correctness of weakening.
+
+We define the weakening relation $\Gamma \sqsubseteq \Delta$ in
+Figure~\ref{fig:weakening}.  This says that $\Delta$ is a weakening of
+$\Gamma$, either because (as usual) it has extra hypotheses (in rule
+\rn{Drop}), or (additionally!) because a hypothesis in $\Gamma$
+becomes discrete in $\Delta$ (rule \rn{Disc}). The idea is that making
+a hypothesis discrete only increases the number of places it can be used.
+
+\begin{lemma}\label{thm:weaken}
+  If $\J e \G A$ and $\G \sqsubseteq \D$ then $\J e \D A$. 
+\end{lemma}
+
+\noindent This follows by the usual induction on typing derivations. 
+
+\input{fig-weakening}
