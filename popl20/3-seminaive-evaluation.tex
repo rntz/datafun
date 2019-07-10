@@ -1,9 +1,13 @@
 \section{From Semi\naive{} Evaluation to the Incremental \boldfn-Calculus}
 \label{sec:seminaive-and-ilc}
 
-Consider the following Datalog fragment:\footnote{This example and explanation
-  of semi\naive\ evaluation is borrowed almost entirely from
-  \citet{DBLP:conf/esop/Alvarez-Picallo19}.}
+\todo{I believe the way I've paraphrased this violates
+  \href{https://www.acm.org/publications/policies/plagiarism-overview}{the ACM's
+    plagiarism policy}, even with the citation. Argh.}
+%
+Consider the following Datalog fragment:\footnote{The explanation of
+  semi\naive\ evaluation from here until \cref{sec:seminaive-tc-in-datafun} is
+  paraphrased from \citet{DBLP:conf/esop/Alvarez-Picallo19}.}
 
 \begin{align*}
   \name{path}(x,y) &\gets \name{edge}(x,y)
