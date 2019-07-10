@@ -97,6 +97,46 @@ ensuring that the recursion will terminate.
 
 \input{fig-semantics}
 
+
+
+
+\subsubsection{Cartesian Closed Structure}
+
+The cartesian closed structure of $\Poset$ is largely the
+same as in $\kw{Set}$.
+
+\paragraph{Products} Given two partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
+we define the product $(A , \leq_A) \times (B, \leq_B)$ to be $(A \times B, \leq_{A \times B})$ with the order defined as:
+
+\begin{displaymath}
+  (a,b) \leq_{A \times B} (a', b') \iff a \leq_A a' \;\mbox{and}\; b \leq_B b'
+\end{displaymath}
+
+\paragraph{Exponentials} Given two partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
+we define the exponential $(A , \leq_A) \to (B, \leq_B)$ to be $(A \to B, \leq_{A \to B})$ with the order defined as:
+
+\begin{displaymath}
+  f \leq_{A \to B} g \iff \forall a \in A. f(a) \leq_B g(a)
+\end{displaymath}
+
+\paragraph{Coproducts} Given two partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
+we define the coproduct $(A , \leq_A) + (B, \leq_B)$ to be $(A + B, \leq_{A + B})$ with the order defined as:
+
+\begin{eqnarray*}
+  \inj 1 a \leq_{A+B} \inj 1 a' & \iff & a \leq_A a' \\
+  \inj 2 b \leq_{A+B} \inj 2 b' & \iff & b \leq_B b' 
+\end{eqnarray*}
+
+
+
+\subsubsection{The Discreteness Comonad}
+
+\subsection{Sets and Lattices}
+
+\subsection{Fixed Points}
+
+\subsection{Interpretation}
+
 \subsection{Metatheory}
 
 If we were presenting core Datafun in isolation, the usual thing to do
