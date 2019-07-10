@@ -1,44 +1,39 @@
 \section{Introduction}
 \label{sec:intro}
 
-Datalog~\cite{datalog}, along with the $\pi$-calculus and
-\fn-calculus, is one of the jewel languages of theoretical computer
-science, connecting programming language theory, database theory, and
-complexity theory. In terms of programming languages, Datalog can be
-understood as a fully declarative subset of Prolog which is guaranteed
-to terminate and so can be evaluated in both top-down and bottom-up
-fashion. In terms of database theory, it is equivalent to the
-extension of relational algebra with a fixed point operator, and in
-terms of complexity theory, it does not just terminate, but also (when
-full Datalog with stratified negation is interpreted over ordered
-structures) characterizes polytime
-computation~\cite{datalog-polytime}.
+Datalog~\cite{datalog}, along with the $\pi$-calculus and \fn-calculus, is one
+of the jewel languages of theoretical computer science, connecting programming
+language theory, database theory, and complexity theory. In terms of programming
+languages, Datalog can be understood as a fully declarative subset of Prolog
+which is guaranteed to terminate and so can be evaluated in both top-down and
+bottom-up fashion. In terms of database theory, it is equivalent to the
+extension of relational algebra with a fixed point operator. In terms of
+complexity theory, stratified Datalog over ordered databases characterizes
+polytime computation~\cite{datalog-polytime}.
 
 In addition to its theoretical elegance, over the past twenty years
 Datalog has seen a surprisingly wide array of uses across a variety of
 practical domains, both in research and in industry.
-
-Whaley and Lam \cite{whaley-lam,whaley-phd} implemented pointer
-analysis algorithms in Datalog, and found that they could reduce their
-analyses from thousands of lines of C code to \emph{tens} of lines of
-Datalog code, while retaining competitive performance. The DOOP
-pointer analysis framework~\cite{doop}, built using the Souffl\'{e}
-Datalog engine~\cite{souffle}, shows that this approach can handle
-almost all of industrial languages like Java, even analysing features
-like reflection~\cite{doop-java-reflection}. Semmle has developed the
-.QL language~\cite{semmlecode,ql-inference} based on Datalog for
-analysing source code (which was used to analyze the code for NASA's
-Curiosity Mars rover), and LogicBlox has developed the
-LogiQL~\cite{logicblox} language for business analytics and retail
-prediction. The Boom project at Berkeley has developed the Bloom
-language for distributed programming~\cite{bloom}, and the Datomic
-cloud database~\cite{datomic} uses Datalog (embedded in Clojure) as
-its query language. Microsoft's SecPAL language~\cite{secpal} uses
-Datalog as the foundation of its decentralised authorization
-specification language. In each case, when the problem formulated in
-Datalog, the specification became directly implementable, while
-remaining dramatically shorter and clearer than alternatives
-implemented in more conventional languages.
+%
+Whaley and Lam \cite{whaley-lam,whaley-phd} implemented pointer analysis
+algorithms in Datalog, and found that they could reduce their analyses from
+thousands of lines of C code to \emph{tens} of lines of Datalog code, while
+retaining competitive performance. The DOOP pointer analysis
+framework~\cite{doop}, built using the Souffl\'{e} Datalog
+engine~\cite{souffle}, shows that this approach can handle almost all of
+industrial languages like Java, even analysing features like
+reflection~\cite{doop-java-reflection}. Semmle has developed the Datalog-based
+.QL language~\cite{semmlecode,ql-inference} for analysing source code (which was
+used to analyze the code for NASA's Curiosity Mars rover), and LogicBlox has
+developed the LogiQL~\cite{logicblox} language for business analytics and retail
+prediction. The Boom project at Berkeley has developed the Bloom language for
+distributed programming~\cite{bloom}, and the Datomic cloud
+database~\cite{datomic} uses Datalog (embedded in Clojure) as its query
+language. Microsoft's SecPAL language~\cite{secpal} uses Datalog as the
+foundation of its decentralised authorization specification language. In each
+case, when the problem formulated in Datalog, the specification became directly
+implementable, while remaining dramatically shorter and clearer than
+alternatives implemented in more conventional languages.
 
 % \todo{We should cite Yannis's
 %   recent SNAPL paper ``Next-Paradigm Programming Languages: What Will They
@@ -95,6 +90,7 @@ alternative design strategies.
 %%   unsure what design choice was best.
 %
 %% But a summary this^ long belongs in related work, not here.
+
 Flix adopts the route of treating Datalog as an embedded
 domain-specific language~\cite{edsl}. That is, Flix is a fairly
 conventional (albeit well-designed) functional programming language
