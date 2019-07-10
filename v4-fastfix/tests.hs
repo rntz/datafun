@@ -55,4 +55,4 @@ test i = do
   hFlush stdout
 
 main :: IO ()
-main = mapM_ test [2..]
+main = mapM_ test [2,4..]
