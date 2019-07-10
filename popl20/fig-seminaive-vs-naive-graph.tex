@@ -6,7 +6,7 @@
         height=140pt, width=220pt,
         % If we include the explicit table, we can make it this large without
         % enlarging the figure.
-        height=195pt, width=280pt,
+        height=172pt, width=280pt,
         legend entries={\naive,semi\naive},
         legend cell align=left,
         legend pos = north west,
@@ -15,8 +15,8 @@
           nodes={inner sep=3pt,}
         },
       ]
-      \addplot table {naive.dat};
-      \addplot table {seminaive.dat};
+      \addplot table {naive2.dat};
+      \addplot table {seminaive2.dat};
     \end{axis}
   \end{tikzpicture}
   \hfil
@@ -25,22 +25,20 @@
     \parbox[b]{24pt}{\raggedleft Graph size} & \Naive &
     \parbox[b]{24pt}{\raggedleft Semi-\naive}
     \\\midrule
-60 & 0.23s & 0.01s\\
-70 & 0.43s & 0.01s\\
-80 & 0.74s & 0.01s\\
-90 & 1.14s & 0.02s\\
-100 & 1.72s & 0.03s\\
-110 & 2.50s & 0.04s\\
-120 & 4.49s & 0.05s\\
-130 & 7.13s & 0.07s\\
-140 & 8.38s & 0.08s\\
-150 & 10.05s & 0.09s\\
-160 & 15.98s & 0.11s\\
-170 & 21.42s & 0.14s\\
-180 & 28.98s & 0.16s
+60 & 0.23 & 0.01\\
+80 & 0.70 & 0.01\\
+100 & 1.74 & 0.03\\
+120 & 3.53 & 0.05\\
+140 & 7.12 & 0.08\\
+160 & 13.09 & 0.11\\
+180 & 21.85 & 0.16\\
+200 & 36.44 & 0.22\\
+220 & 52.57 & 0.29\\
+240 & 80.43 & 0.37\\
+260 & 110.49 & 0.59
   \end{tabular}
   }
 
-  \caption{\Naive\ vs semi\naive\ transitive closure on a linear graph}
+  \caption{\Naive\ and semi\naive\ transitive closure on a linear graph}
   \label{fig:seminaive-vs-naive-graph}
 \end{figure}

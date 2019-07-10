@@ -1,0 +1,39 @@
+testing 20 nodes 19 edges
+  naive:   0.01s
+  semi:    0.00s
+testing 40 nodes 39 edges
+  naive:   0.05s
+  semi:    0.00s
+testing 60 nodes 59 edges
+  naive:   0.23s
+  semi:    0.01s
+testing 80 nodes 79 edges
+  naive:   0.70s
+  semi:    0.01s
+testing 100 nodes 99 edges
+  naive:   1.74s
+  semi:    0.03s
+testing 120 nodes 119 edges
+  naive:   3.53s
+  semi:    0.05s
+testing 140 nodes 139 edges
+  naive:   7.12s
+  semi:    0.08s
+testing 160 nodes 159 edges
+  naive:  13.09s
+  semi:    0.11s
+testing 180 nodes 179 edges
+  naive:  21.85s
+  semi:    0.16s
+testing 200 nodes 199 edges
+  naive:  36.44s
+  semi:    0.22s
+testing 220 nodes 219 edges
+  naive:  52.57s
+  semi:    0.29s
+testing 240 nodes 239 edges
+  naive:  80.43s
+  semi:    0.37s
+testing 260 nodes 259 edges
+  naive: 110.49s
+  semi:    0.59s
