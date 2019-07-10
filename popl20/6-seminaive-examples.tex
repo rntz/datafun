@@ -35,12 +35,15 @@ $(\dvar e \bullet p)$, and at the core of relation composition is a
 
 \begin{align*}
   \phi(\ewhen {\eeqraw \yone \ytwo} \esetraw{\etuple{\dvar x, \dvar z}})
-  &= \phi(\eforraw {\etuple{} \in \eeqraw \yone \ytwo} \esetraw{\etuple{\dvar x, \dvar z}})
+  &= \phi(\eforraw {\etuple{} \in \eeqraw \yone \ytwo} \esetraw{\etuple{\dvar x,
+      \dvar z}})
+  && \text{desugaring}
   \\
   &= \eforraw{\etuple{} \in \eeqraw \yone \ytwo}
   \phi{\esetraw{\etuple{\dvar x, \dvar z}}}
   && \text{omitting a needless \kw{let}-binding}\\
   &= \ewhen{\eeqraw \yone \ytwo} \esetraw{\etuple{\dvar x, \dvar z}}
+  && \text{resugaring}
 \end{align*}
 
 \noindent
