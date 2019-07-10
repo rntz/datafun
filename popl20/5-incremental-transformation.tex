@@ -426,8 +426,8 @@ simple function $\dummy_A : A \to \D A$ (\cref{fig:dummy}).
 %% TODO: explain that \phi,\delta(\esplit e) are effectively book-keeping the
 %% decorations that the \phi translation adds to \iso.
 
-We also need \dummy\ in the definition of $\phi(\esplit e)$. Recall that in
-effect $\prim{split} : \iso(A + B) \to \iso A + \iso B$, and observe that
+We also need \dummy\ in the definition of $\phi(\esplit e)$. In effect
+$\prim{split} : \iso(A + B) \to \iso A + \iso B$. Observe that
 
 \begin{align*}
   \Phi(\iso (A + B)) &= \iso((\Phi A + \Phi B) \x (\DP A + \DP B))
@@ -441,18 +441,17 @@ So while $\phi e$ yields a boxed pair of tagged values, $\eboxraw{\etuple{\inj i
 $\inj i {\eboxraw{\etuple{x,\dx}}}$. Again we use \dummy\ to handle the
 impossible case $i \ne j$.
 
-Finally, observe that $\delta(\esplit e)$ has the boring type $\tunit + \tunit$:
-
-\[
+Finally, observe that $\delta(\esplit e)$ has type
+%
+\(
   \DP(\iso A + \iso B)
   = \DP\iso A + \DP\iso B
   = \tunit + \tunit
-\]
-
+\).
+%
 \noindent
-All $\delta(\esplit e)$ needs to do is produce $\inj i \etuple{}$ with the same
-tag $i$ as $\phi(\esplit e)$ and therefore as $\phi e$; simply
-\kw{case}-analysing $\phi e$ suffices.
+All it must do is return $(\inj i \etuple{})$ with a tag that matches
+$\phi(\esplit e)$ and $\phi e$; \kw{case}-analysing $\phi e$ suffices.
 
 
 \subsection{Semilattices and comprehensions}
@@ -514,14 +513,17 @@ $\delta(\efor x e f)$ generates.
 First, if the set $\phi e$ we're looping over gains new elements $\dvar x \in
 \delta e$, we need to compute $\phi f$ over these new elements. Second, if the
 inner loop $\phi f$ changes, we need to add in its changes $\delta f$ for every
-element, new or old, in the looped-over set, $\phi e \vee \delta e$.
+element, new or old, in the looped-over set, $\phi e \vee \delta e$. Just as in
+the $\phi$-translation, we use \zero/\dummy\ to calculate zero-changes to set
+elements.
 
 
 \subsection{Leftovers}
 
-\todo{Ideas not yet covered:
-  \begin{itemize}
-  \item things that can't change because they're discrete, like $\delta(\efix
-    e)$, $\delta(\eeq e f)$, $\delta{\eset{e_i}_i}$ --- or maybe leave those for
-    later?
-\end{itemize}}
+The $\phi$ rules we haven't yet discussed simply distribute $\phi$ over
+subexpressions. The remaining $\delta$ rules mostly do the same, with a few
+exceptions. In the case of $\delta(\eset{e_i}_i) = \delta(\eeq e f) = \bot$, the
+sub-expressions are discrete and cannot change, so we produce a zero-change
+$\bot$. This is also the case for $\delta(\eisempty e) = \eisempty{\phi e}$, but
+as with $\delta(\esplit e)$, the zero-change here is at type $\tunit + \tunit$,
+so to get the tag right we use $\phi e$.
