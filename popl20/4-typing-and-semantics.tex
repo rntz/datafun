@@ -2,6 +2,7 @@
 \label{sec:typing-and-semantics}
 
 In this section, we give the typing and semantics of core Datafun. 
+\input{fig-typing}
 
 \subsection{Syntax}
 
@@ -47,16 +48,24 @@ the term $\elet{\ebox x = e}f$ the type $B$, when $e$ has type $\iso A$,
 and $f$ typechecks at $B$ in a context extended with a \emph{discrete}
 hypothesis $\hd x A$.
 
-At this point, the typing rules correspond to standard constructive S4 modal
-logic. We can get to Datafun by adding a handful of domain-specific types
-and operations. The first specialized rule is the \rn{Split} rule, which
-says that $\esplit e$ has the type $\iso A + \iso B$ when $e$ has the type
-$\iso (A + B)$. This is syntax for the distributive law of box through sum
-types. The other direction (getting $\iso (A + B)$ from $\iso A + \iso B$)
-is already derivable, as is the isomorphism between $\iso A \times \iso B$
-and $\iso (A \times B)$. (An alternative syntax, pursued in \citet{datafun},
-would be to give two rules for $\kw{case}$, depending on whether or not the
-scrutinee could be typechecked in a stripped context.)
+At this point, the typing rules correspond to standard constructive S4
+modal logic. We can get to Datafun by adding a handful of
+domain-specific types and operations. The first specialized rule is
+the \rn{Split} rule, which says that $\esplit e$ has the type
+$\iso A + \iso B$ when $e$ has the type $\iso (A + B)$. This is
+syntax\footnote{An alternative syntax, pursued in \citet{datafun},
+  would be to give two rules for $\kw{case}$, depending on whether or
+  not the scrutinee could be typechecked in a stripped context.} for
+the distributive law of box through sum types. The other direction
+(getting $\iso (A + B)$ from $\iso A + \iso B$) is already derivable,
+as is the isomorphism between $\iso A \times \iso B$ and
+$\iso (A \times B)$. We have used all these operation implicitly, to
+propagate discretenes into the variables of a pattern inside a box
+pattern -- in the pattern $\ebox{\etuple{\inj 1 x, \inj 2 y}}$, we
+expect both the variables $x$ and $y$ to be discrete, which is
+information we propagate using these coercions. Semantically, all
+of these operations are the identity, as we will see in the following
+subsection. 
 
 This leaves only the rules for manipulating sets and other
 semilattices. Recall that sets form a semilattice in the inclusion order,
@@ -84,6 +93,17 @@ $e$ of type $\iso (L \to L)$ and yields an expression of type $L$. In addition
 to being of semilattice type, we also demand here that $L$ is of finite height,
 ensuring that the recursion will terminate. 
 
-\input{fig-typing}
 
 \subsection{Semantics }
+
+\subsection{Metatheory}
+
+If we were presenting core Datafun in isolation, the usual thing to do
+would be to prove the soundness of syntactic substitution, show that
+syntactic and semantic substitution agree, and then establish the
+equational theory. However, that is not our goal in this paper. We
+want to prove the correctness of the semi\naive\ translation, which we
+will do with a logical relations argument. Since we can harvest almost
+all the properties we need from the logical relation, only a small
+residue of metatheoretic need to be established at this -- indeed, the
+only thing we need to estabish is the type-correctness of weakening.
