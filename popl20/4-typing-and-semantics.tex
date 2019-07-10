@@ -97,13 +97,17 @@ ensuring that the recursion will terminate.
 
 The syntax of core Datafun can be interpreted in $\Poset$, the
 category of partially ordered sets and monotone functions between
-them. That is, an object $A$ of $\Poset$ is a pair $(|A|, \leq_A)$
-consisting of a set $|A|$ of elements, and a partial order relation
-$\leq_A \subseteq |A| \times |A|$ which is reflexive, transitive, and
-antisymmetric. A morphism $f : A \to B$ in $\Poset$ is a function
-$f : |A| \to |B|$ on the underlying sets which is monotone.  That is,
-for all $a$ and $a'$ such that $a \leq_A a'$ we have
-$f(a) \leq_B f(a')$.
+them. That is, an object $A$ of $\Poset$ is a pair $(A, \leq_A)$
+consisting of a set $A$ of elements, and a partial order relation
+$\leq_A \subseteq A \times A$ which is reflexive, transitive, and
+antisymmetric. A morphism $f : A \to B$ in $\Poset$ is a function on
+sets $f : A \to B$ which is monotone.  That is, for all $a$ and $a'$
+such that $a \leq_A a'$ we have $f(a) \leq_B f(a')$. The identity
+morphism is the identity function on the underlying sets, and
+composition of morphisms is just ordinary function composition.
+We will typically write composition in diagramamtic
+or ``pipeline'' order: given $f : A \to B$ and $g : B \to C$ we
+write $(f \then g) : A \to C$. 
 
 
 
@@ -117,37 +121,114 @@ $f(a) \leq_B f(a')$.
 The cartesian closed structure of $\Poset$ is largely the
 same as in $\kw{Set}$.
 
-\paragraph{Products} Given two partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
-we define the product $(A , \leq_A) \times (B, \leq_B)$ to be $(A \times B, \leq_{A \times B})$ with the order defined as:
+\paragraph{Products} Given  partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
+we define the poset $(A , \leq_A) \times (B, \leq_B)$ to be
+$(A \times B, \leq_{A \times B})$ with the order defined as:
 
 \begin{displaymath}
   (a,b) \leq_{A \times B} (a', b') \iff a \leq_A a' \;\mbox{and}\; b \leq_B b'
 \end{displaymath}
 
-\paragraph{Exponentials} Given two partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
-we define the exponential $(A , \leq_A) \to (B, \leq_B)$ to be $(A \to B, \leq_{A \to B})$ with the order defined as:
-
+The verification that this forms a partial order is routine. To
+form the product object, we equip $A \times B$ with the projection
+maps $\pi_1 : A \times B \to A$ and $\pi_2 : A \times B \to B$, which are
+defined by the first and second projection on the underlying sets
+respectively.
+%
+Given two maps $f : A \to B$ and $g : A \to C$, the universal property
+of products is witnessed by $\fork{f,g} : A \to B \times C$, where
 \begin{displaymath}
-  f \leq_{A \to B} g \iff \forall a \in A. f(a) \leq_B g(a)
+  \fork{f, g} \triangleq a \mapsto \etuple{f(a), g(a)}
 \end{displaymath}
+%
+Again, the verification that all these maps are monotone and that the relevant
+diagrams commute is routine.  
 
-\paragraph{Coproducts} Given two partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
-we define the coproduct $(A , \leq_A) + (B, \leq_B)$ to be $(A + B, \leq_{A + B})$ with the order defined as:
+\paragraph{Exponentials} Given partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
+we define the poset $(A , \leq_A) \to (B, \leq_B)$ to be $(A \to B, \leq_{A \to B})$
+with the order defined as:
+%
+\begin{displaymath}
+  f \leq_{A \to B} g \iff \forall a \in A.\; f(a) \leq_B g(a)
+\end{displaymath}
+That this gives a partial order is immediate. We form the exponential object by
+equipping it with the evaluation map $\eval_{A,B} \in \Poset((A \to B) \times A, B)$,
+defined via evaluation on sets:
+\begin{displaymath}
+  \eval \triangleq (f,x) \mapsto f(x)
+\end{displaymath}
+%
+Given $f : C \times A \to B$, the ``exponential transpose'' (i.e., currying
+operation) is defined as:
+\begin{eqnarray*}
+  \lambda(f) & : & C \to (A \to B) \\
+  \lambda(f) & \triangleq & c \mapsto (\fnof{a} f(c,a)) 
+\end{eqnarray*}
+Verifying that these maps are monotone and that the relevant
+diagrams commute is straightforward.
 
+\paragraph{Coproducts} Given partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
+we define the poset $(A , \leq_A) + (B, \leq_B)$ to be $(A + B, \leq_{A + B})$ with
+the order defined by (with the understanding that if no clause matches there is
+no order relationship):
+%
 \begin{eqnarray*}
   \inj 1 a \leq_{A+B} \inj 1 a' & \iff & a \leq_A a' \\
   \inj 2 b \leq_{A+B} \inj 2 b' & \iff & b \leq_B b' 
 \end{eqnarray*}
-
-
-
+%
+It is easy to check this yields a partial order. We can construct the coproduct
+object by equipping this poset with the injections $\inj 1 {} : A \to A + B$
+and $\inj 2 {} : B \to A + B$, which are given by the injections on the underlying
+sets. 
+%
+Given two maps $f : A \to C$ and $g : B \to C$, the universal property
+of coproducts is witnessed by $\krof{f,g} : A + B \to C$, where
+\begin{displaymath}
+  \krof{f, g} \triangleq x \mapsto \left\{\begin{array}{ll}
+                                            f(a) & \mbox{when}\;x = \inj 1 a \\
+                                            g(b) & \mbox{when}\;x = \inj 2 b
+                                          \end{array}
+                                        \right.
+\end{displaymath}
+It is easy to check the defined maps are monotone and that the relevant diagrams commute.                                      
 \subsubsection{The Discreteness Comonad}
+Given a poset $(A, \leq_A)$ we define the discreteness operator $\Box(A, \leq_A)$
+as $(A, \leq_{\iso A})$, where
+\begin{displaymath}
+  a \leq_{\iso A} a' \iff a = a'
+\end{displaymath}
+That is, the discrete order preserves the underlying elements, but reduces the partial order
+to mere equality. Given a morphism $f : A \to B$, the functorial
+action is defined as:
+\begin{displaymath}
+  \iso(f) \triangleq f 
+\end{displaymath}
+That is, the action on morphisms just gives back the same underlying function on sets. Checking
+that this preserves monotonicity is trivial, as is the preservation of identities and
+composition. This functor forms a comonad, with the extraction $\varepsilon_A : \iso A \to A$
+and duplication $\delta_A : \iso A \to \iso \iso A$ given by identities on the underlying
+sets:
+\begin{displaymath}
+  \begin{array}{llcll}
+  \varepsilon_A & : \iso A \to A & \hspace{2cm} & \delta_A & : \iso A \to \iso \iso A \\
+  \varepsilon_A & = a \mapsto a & & \delta_A & = a \mapsto a 
+  \end{array}
+\end{displaymath}
+Once we check that the monotonicity requirements are satisfied, this
+makes checking the comonad diagrams easy. It is also immediate that $\iso$ is a comonad
+monoidal with respect to \emph{both} products and coproducts. That is, $\iso (A \times B)
+\simeq \iso A \times \iso B$, and also $\iso (A + B) \simeq \iso A + \iso B$. In both
+cases the isomorphism is witnessed in both directions by identity on the underlying elements.
+We will write $\morph{dist}^\Box_\times$  to name the map witnessing distributivity of $\iso$ over
+products, and $\morph{dist}^\Box_+$  to name the map witnessing distributivity of $\iso$ over coproducts.
 
-\subsection{Sets and Lattices}
 
-\subsection{Fixed Points}
+\subsubsection{Sets and Lattices}
 
-\subsection{Interpretation}
+\subsubsection{Fixed Points}
+
+\subsubsection{Interpretation}
 
 \subsection{Metatheory}
 
