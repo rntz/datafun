@@ -130,7 +130,8 @@
 \newcommand\initobj{0}
 \newcommand\termobj{1}
 \newcommand\expto\Rightarrow
-\newcommand\then\cdot
+% \newcommand\then\cdot
+\newcommand\then{\mathbin{;}}
 \newcommand\catC{\ensuremath{\mathcal{C}}}
 \newcommand\id{\name{id}}
 
@@ -231,3 +232,45 @@
 %\renewcommand\Deriv{\mathscr{Derive}\:}
 
 \newcommand{\rn}[1]{\textsc{#1}}
+
+%% ===== Categorical notation =====
+% \newcommand\cat\textbf
+\ifdefined\textsb\renewcommand\cat\textsb\else\fi
+\providecommand\strong\textbf
+\newcommand\BD{{\texorpdfstring{\ensuremath{\boldsymbol\Delta}}{Delta}}}
+\newcommand\CP{\cat{\BD{}Poset}}
+% \newcommand\Poset{\cat{Poset}}
+\newcommand\initO{0}
+\newcommand\termO{1}
+\newcommand\expO[2]{#1 \Rightarrow #2}
+%\renewcommand\then{\mathbin{;}}
+%\renewcommand\then{\,{;}\,}
+% \newcommand\catC{\ensuremath{\mathcal{C}}}
+\newcommand\morph\textit
+% \newcommand\id{\morph{id}}
+\newcommand\idfunctor{\morph{Id}} % not used yet
+
+\newcommand\fork[1]{\langle{#1}\rangle}
+\newcommand\krof[1]{[{#1}]}
+\newcommand\bigkrof[1]{\bigl[{#1}\bigr]}
+%\newcommand\Fork[1]{\left\langle{#1}\right\rangle}
+%\newcommand\Krof[1]{\left[{#1}\right]}
+\newcommand\initE{\krof{\kern .08em}}
+\newcommand\termI{\fork{}}
+\newcommand\eval{\morph{eval}}
+
+\newcommand\disco{\iso}
+\newcommand\discof[1]{\ensuremath{\disco #1}}
+\newcommand\discox{\ensuremath{\morph{dist}^\x_\disco}}
+\newcommand\discosum{\ensuremath{\morph{dist}^\disco_+}}
+
+\newcommand\pfin{\ensuremath{\mathcal{P}}}
+%\renewcommand\pfin{\texorpdfstring{\ensuremath{P_{\text{fin}}}}{Pfin}}
+\renewcommand\pfin{\ensuremath{P}}
+\newcommand\pfinof[1]{\pfin #1}
+\newcommand\pcollect[1]{\morph{collect}(#1)}
+%\newcommand\pcollect[1]{{#1}^\pfin}
+
+\newcommand\strip{\morph{strip}}
+\newcommand\mkbox{\morph{box}}
+\newcommand\bigden[1]{\ensuremath{\bigl\llbracket{#1}\bigr\rrbracket}}
