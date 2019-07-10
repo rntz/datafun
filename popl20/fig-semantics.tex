@@ -1,6 +1,6 @@
 %% ---- Semantics in a Datafun Model ----
 \begin{figure*}
-  \textsc{Types and Contexts}
+  \textsc{Type and Context Interpretations}
 
   \begin{align*}
     \den{\tunit} &= \termO & \den{A \to B} &= \expO{\den{A}}{\den{B}}
@@ -18,7 +18,7 @@
   \end{align*}
   \vspace{0pt} % yes, this matters.
 
-  \textsc{Terms}
+  \textsc{Term Interpretation}
   \begin{displaymath}
     \begin{array}{lcl}
       \den{\J {\dvar x} \G A} &=& \pi_{\dvar x} \then \varepsilon \quad \text{($\hd x A \in \G$)} \\
@@ -58,7 +58,7 @@
   \end{displaymath}
   \vspace{0pt} % yes, this matters
 
-  \textsc{Lemmas}
+  \textsc{Auxilliary Operations}
 
   \begin{align*}
     \morph{dist}^\x_+ &: A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)\\
