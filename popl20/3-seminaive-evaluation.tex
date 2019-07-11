@@ -19,14 +19,13 @@ Consider the following Datalog fragment:\footnote{The explanation of
 \noindent
 The denotation of \name{path} is the least fixed point of the rules defining
 it.
-% mention Kleene fixed point theorem?
+% TODO: mention Kleene fixed point theorem?
 We can compute this by repeatedly applying these rules until the collection
 of known paths (initially empty) stops growing.
 %
 For example, if the \name{edge} relation is \{(1,\,2), (2,\,3), (3,\,4)\}, we
 get the following evaluation trace:
 
-%% TODO: make sure there's enough vertical space around this.
 \begin{center}
   \setlength\tabcolsep{1em}
   \begin{tabular}{@{}rll@{}}
@@ -452,7 +451,3 @@ of fixed point functions.
 %
 In order to define $\phi$ and $\delta$ and show them correct, however, we first
 need a fuller account of Datafun's type system and semantics.
-
-
-%% \subsection{Examples of semi\naive\ Datafun programs}
-%% \XXX

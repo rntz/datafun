@@ -23,10 +23,12 @@ just discrete ones) with zero-changes.
 %
 However, this also invalidates $\delta(\efix f) = \bot$: now that $f$ can
 change, so can $\efix f$.
-% TODO: argh, using \delta here is technically wrong. because \delta should be
-% incrementalizing \phi. this is more like \Deriv. But if we use \Deriv people
-% will be confused, and this is a very technical point.
-Luckily, there is a simple and correct solution: $\delta(\efix f) = \efix \ebox{\delta f \<\ebox{\efix f}}$~\cite{delta-fix}.
+% TODO: Argh, using \delta here is technically wrong. because \delta
+% should be incrementalizing \phi. this is more like \Deriv. But if we
+% use \Deriv people will be confused, and this is a very technical
+% point.
+Luckily, there is a simple and correct solution: $\delta(\efix f) =
+\efix \ebox{\delta f \<\ebox{\efix f}}$~\cite{delta-fix}.
 %
 However, to compute this new fixed point semi\naive{}ly, we need a \emph{second
   derivative}: the zero-change to $\delta f \<\ebox{\efix f}$. Indeed, for a
@@ -35,14 +37,6 @@ derivatives. We leave this to future work.
 
 %% Can't we just have \delta produce two expressions: the derivative, and the
 %% zero-change to the derivative?
-
-%% \todo{Discuss possibility of allowing nested fixed points by removing the $\iso$
-%%   from $\prim{fix}$'s argument. The problem here is $\delta(\efix f)$. I've
-%%   previously worked out what this should be (cite that 3-page proof on my
-%%   website): $\delta(\efix f) = \efix(\delta f \<(\efix f))$. But if we want to
-%%   compute \emph{this} fixed point faster, we need a \emph{second derivative}. So
-%%   if your program has $n$ nested fixed points, you probably need
-%%   $n$\textsuperscript{th} derivatives. Future work!}
 
 \paragraph{Related Work}
 The incremental lambda calculus was introduced by \citet{incremental},

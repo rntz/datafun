@@ -55,12 +55,6 @@
 \usepackage{style}
 \usepackage{notation}
 
-% Suppress citation warnings until we do a final citation pass.
-% TODO FIXME: do a final citation pass.
-\usepackage{silence}
-\WarningFilter*{natbib}{}
-\WarningFilter*{latex}{Reference `thm:phi-eqtype'}
-
 %% Uncomment this to show all the bibliographic keys
 % \usepackage{showkeys}
 
@@ -133,8 +127,7 @@ first-class relations, higher-order functions, and datatypes like sum types.
 
 %% ---------- Classification and keywords nonsense ----------
 %% 2012 ACM Computing Classification System (CSS) concepts
-%% TODO
-%% Generate at 'http://dl.acm.org/ccs/ccs.cfm'.
+%% XXX: Generate at 'http://dl.acm.org/ccs/ccs.cfm'.
 \begin{CCSXML}
 <ccs2012>
 <concept>
@@ -154,7 +147,7 @@ first-class relations, higher-order functions, and datatypes like sum types.
 \ccsdesc[300]{Social and professional topics~History of programming languages}
 %% End of generated code
 
-% comma separated list of keywords. TODO.
+% XXX. comma separated list of keywords.
 \keywords{keyword1, keyword2, keyword3}  %% \keywords are mandatory in final camera-ready submission
 
 
@@ -176,34 +169,34 @@ first-class relations, higher-order functions, and datatypes like sum types.
   
 
 %% ---------- Acknowledgments ----------
-\begin{acks}                            %% acks environment is optional
-% TODO: acknowledge
-% - Paolo Giarrusso, for discussion on incremental lambda calc.
+%% \begin{acks}                            %% acks environment is optional
+%% % TODO: acknowledge
+%% % - Paolo Giarrusso, for discussion on incremental lambda calc.
 
-% - Michael Peyton-Jones and possibly other Semmle folk, for discussion of
-%   seminaive evaluation.
+%% % - Michael Peyton-Jones and possibly other Semmle folk, for discussion of
+%% %   seminaive evaluation.
 
-% - Max S New for help with the question "how do I prove my semantics are
-%   naturally isomorphic without inducting on typing derivations"?
+%% % - Max S New for help with the question "how do I prove my semantics are
+%% %   naturally isomorphic without inducting on typing derivations"?
 
-% - Achim Jung, for pointing out that to prevent nesting fixed points we'd need
-%   a modal type system, which eventually led to the realization about
-%   reinterpreting \iso.
+%% % - Achim Jung, for pointing out that to prevent nesting fixed points we'd need
+%% %   a modal type system, which eventually led to the realization about
+%% %   reinterpreting \iso.
 
-  %%                                       %% contents suppressed with 'anonymous'
-  %% %% Commands \grantsponsor{<sponsorID>}{<name>}{<url>} and
-  %% %% \grantnum[<url>]{<sponsorID>}{<number>} should be used to
-  %% %% acknowledge financial support and will be used by metadata
-  %% %% extraction tools.
-  %% This material is based upon work supported by the
-  %% \grantsponsor{GS100000001}{National Science
-  %%   Foundation}{http://dx.doi.org/10.13039/100000001} under Grant
-  %% No.~\grantnum{GS100000001}{nnnnnnn} and Grant
-  %% No.~\grantnum{GS100000001}{mmmmmmm}.  Any opinions, findings, and
-  %% conclusions or recommendations expressed in this material are those
-  %% of the author and do not necessarily reflect the views of the
-  %% National Science Foundation.
-\end{acks}
+%%   %%                                       %% contents suppressed with 'anonymous'
+%%   %% %% Commands \grantsponsor{<sponsorID>}{<name>}{<url>} and
+%%   %% %% \grantnum[<url>]{<sponsorID>}{<number>} should be used to
+%%   %% %% acknowledge financial support and will be used by metadata
+%%   %% %% extraction tools.
+%%   %% This material is based upon work supported by the
+%%   %% \grantsponsor{GS100000001}{National Science
+%%   %%   Foundation}{http://dx.doi.org/10.13039/100000001} under Grant
+%%   %% No.~\grantnum{GS100000001}{nnnnnnn} and Grant
+%%   %% No.~\grantnum{GS100000001}{mmmmmmm}.  Any opinions, findings, and
+%%   %% conclusions or recommendations expressed in this material are those
+%%   %% of the author and do not necessarily reflect the views of the
+%%   %% National Science Foundation.
+%% \end{acks}
 
 
 %% ---------- Bibliography ----------
