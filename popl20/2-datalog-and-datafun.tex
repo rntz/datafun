@@ -15,19 +15,16 @@ are collections of predicate declarations:
   ancestor(X, Z) ← ancestor(X, Y), parent(Y, Z).
 \end{minted}
 
-In this example, we define two binary relations, \datalog{parent(_,_)}
-and \datalog{ancestor(_,_)}. Lowercase terms like \datalog{elrond} and
-\datalog{arwen} are symbols \emph{a la} Lisp, and uppercase terms like
-\datalog{X} and \datalog{Y} are variables.
+This defines two binary relations, \rel{parent} and \rel{ancestor}. Lowercase
+terms like \datalog{elrond} and \datalog{arwen} are symbols \emph{a la} Lisp,
+and uppercase terms like \datalog{X} and \datalog{Y} are variables.
 
-The \datalog{parent(_, _)} relation declares a set of
-ground \emph{facts}; we explicitly assert that \datalog{earendil} is
-the parent of \datalog{elrond}, and \datalog{elrond} the parent of
-\datalog{arwen}, and so on. The ancestor relation is declared as
-a pair of \emph{rules}, the first saying
-$X$ is an ancestor of $Z$ if $X$ is $Z$'s parent, and the second
-saying $X$ is an ancestor of $Z$ if there is a third person
-$Y$, such that $X$ is $Y$'s ancestor and $Y$ is $Z$'s parent.
+The \rel{parent} relation declares a set of ground \emph{facts}; we assert that
+\datalog{earendil} is the parent of \datalog{elrond}, \datalog{elrond} the
+parent of \datalog{arwen}, and so on. The \rel{ancestor} relation is declared as
+a pair of \emph{rules}, the first saying $X$ is an ancestor of $Z$ if $X$ is
+$Z$'s parent, and the second saying $X$ is an ancestor of $Z$ if there is a
+intermediate person $Y$ such that $X$ is $Y$'s ancestor and $Y$ is $Z$'s parent.
 
 % In inference rule form, this program could be rendered as:
 % 
@@ -53,12 +50,11 @@ $Y$, such that $X$ is $Y$'s ancestor and $Y$ is $Z$'s parent.
 %              { \mathsf{ancestor}(x, z) }
 % \end{mathpar}
 
-Semantically, each predicate can be interpeted as the set of tuples
-which satisfy the predicate. Recursive definitions can be interpreted
-by viewing the whole program as a relation transformer, and taking the
-least fixed point of that function. Datalog's syntax is set up sp the
-relation transformer the rules define is always a monotone function on
-sets, ensuring the least fixed point always exists.
+Semantically, a predicate denotes the set of tuples that satisfy it. Recursive
+definitions can be interpreted by viewing the whole program as a relation
+transformer, and taking the least fixed point of that function. Datalog imposes
+syntactic restrictions which ensure the relation transformer the rules define is
+monotone, guaranteeing a unique least fixed point.
 
 \subsection{Datafun}
 
@@ -96,54 +92,55 @@ $\tset{\eqt A}$, introduced with set literals $\eset{e_0, \ldots
 $\efor{x}{e_1}{e_2}$, signifying the union over all $\dvar x \in e_1$
 of $e_2$.
 
-As long as all the primitives are monotone, every definable function
-is also monotone. This is essential for taking fixed points, but it is
-also very restrictive. There are many essential operations which are
-naturally non-monotone, such as equality tests $\eeq e f$. For
-example, $\eset{} = \eset{}$ is true, but if the first argument is
-increased to $\esetraw{1}$ then it becomes false, a \emph{decrease}
+As long as all primitives are monotone, every definable function is also
+monotone. This is necessary for taking fixed points, but may seem too
+restrictive. There are many essential non-monotone operations, such as equality
+tests $\eeq e f$. For example, $\eset{} = \eset{}$ is true, but if the first
+argument is increased to $\esetraw{1}$ then it becomes false, a \emph{decrease}
 (in Datafun, $\efalse < \etrue$).
 
-So we need to allow non-monotone functions, while preserving the
-property that all functions are monotone. We square this circle by
-introducing the \emph{discreteness} type constructor $\iso A$. The
-elements of $\iso A$ are \emph{exactly the same} as the elements of
-$A$, but the order on $\iso A$ is discrete, $x \le y : \iso A \iff x =
-y$. Monotonicity of a function $\iso A \to B$ is vacuous: $x = y
-\implies f(x) \le f(y)$! This lets us encode ordinary, possibly
-non-monotone, functions $A \to B$ as monotone functions $\iso A \to
-B$. Semantically, $\iso$ is a comonad, and accordingly the syntax we
-use for this is a variant of \citet{jrml}'s syntax for constructive S4
-modal logic. We make discrete terms with the introduction form
-$\ebox{e}$ and eliminate them with a pattern matching eliminator
-$\eletbox x e f$. Discrete variables are colored and italicised $\dvar
-x$, while monotone variables are uncolored and upright $x$. Discrete
-terms $\isocolor e$ are restricted to only refer to discrete
-variables. So in the equality test $\eeq e f$, the terms $e$ and $f$
+How can we express non-monotone operations while preserving the property that
+all functions are monotone? We square this circle by introducing the
+\emph{discreteness} type constructor $\iso A$. The elements of $\iso A$ are
+\emph{exactly the same} as the elements of $A$, but the order on $\iso A$ is
+discrete, $x \le y : \iso A$ iff $x = y$. Monotonicity of a function $\iso A \to
+B$ is vacuous: $x = y$ always implies $f(x) \le f(y)$! This lets us encode
+ordinary, possibly non-monotone, functions $A \to B$ as monotone functions $\iso
+A \to B$. Semantically, $\iso$ is a comonad, and accordingly the syntax we use
+for this is a variant of \citet{jrml}'s syntax for constructive S4 modal logic.
+We make discrete terms with the introduction form $\ebox{e}$ and eliminate them
+with a pattern matching eliminator $\eletbox x e f$. Discrete variables are
+colored and italicised $\dvar x$, while monotone variables are uncolored and
+upright $x$. Colored terms $\isocolor e$ are restricted to only refer to
+discrete variables. So in the equality test $\eeq e f$, the terms $e$ and $f$
 must be discrete.
 
 %% TODO: should we note that we really definitely mean □(L → L) and
 %% not (□L → L)? Reader may be confused.
-Finally, Datafun includes a fixed point operator $\efix{e}$. The
-$\prim{fix}$ combinator takes a function of type $\iso (\fixt L \to
-\fixt L)$ and returns its least fixed point. We impose two
-restrictions on the fixed point operator to ensure well-definedness
-and termination. First, we require that recursion occur at
-\emph{semilattice types}, $L$. A join-semilattice is a partial order
-with a least element $\bot$ and a least-upper-bound (``join'')
-operation $\vee$. Finite sets (with the empty set as least element,
-and union as join) are an example, as are tuples of semilattices. As
-long as the lattice has no infinite ascending chains, recursion from
-the bottom element is guaranteed to find the least fixed point.
+Finally, Datafun includes fixed points, $\efix{e}$. The $\prim{fix}$ combinator
+takes a function $\iso (\fixt L \to \fixt L)$ and returns its least fixed point.
+We impose two restrictions on the fixed point operator to ensure
+well-definedness and termination. First, we require that recursion occur at
+\emph{semilattice types}, $L$. A join-semilattice is a partial order with a
+least element $\bot$ and a least-upper-bound (``join'') operation $\vee$. Finite
+sets (with the empty set as least element, and union as join) are an example, as
+are tuples of semilattices. As long as the lattice has no infinite ascending
+chains, recursion from the bottom element is guaranteed to find the least fixed
+point.
 
 %% TODO: ``at box type'' is ambiguous. makes me think of (□A → B)
 %% rather than □(A → B).
-We also require that the recursive function be at box type. Since
-boxed expressions can only refer to discrete values, the only monotone
-variable the fixed point can refer to is the fixed point itself. This
-blocks (semantically) nested fixed points, and leaves the semantics
-of Datafun close to that of Datalog, where all recursion happens once,
-at the level of the whole program.
+Second, we require that the recursive function be boxed,
+${\color{Rhodamine}\iso}(\fixt L \to \fixt L)$. Since boxed expressions can only
+refer to discrete values, and fixed point functions themselves must be monotone,
+this has the effect of preventing semantically nested fixed points. We discuss
+this in more detail in \cref{sec:nested-fixed-points}. Note that this does
+\emph{not} prevent mutual recursion, which can be expressed by taking a fixed
+point at product type, nor stratified fixed points \emph{\`a la} Datalog.
+
+%% This blocks (semantically) nested fixed points,
+%% and leaves the semantics of Datafun close to that of Datalog, where all
+%% recursion happens once, at the level of the whole program.
 
 
 \subsection{Examples of Datafun Programs}
