@@ -65,76 +65,80 @@ sets, ensuring the least fixed point always exists.
 
 \input{fig-syntax}
 
-Datalog makes it very easy to define relations recursively, but
-because it is such a small and restricted language, it is not possible
-to build abstractions over these rules. However, its semantics, given
-in terms of least fixed points of monotone functions on relations,
-is extremely elegant, and Datafun arose as an attempt to generalize
-this semantics.
+%% Datalog makes it very easy to define relations recursively, but
+%% because it is such a small and restricted language, it is not possible
+%% to build abstractions over these rules. However, its semantics, given
+%% in terms of least fixed points of monotone functions on relations,
+%% is extremely elegant, and Datafun arose as an attempt to generalize
+%% this semantics.
 
-The idea undergirding Datafun is that if the semantics of a Datalog
-program is a monotone set-valued operator, then the natural home for
-that semantics is in the category \Poset{} of partial orders and
-monotone functions. Since this category is cartesian closed, then it
-can interpret the simply-typed lambda calculus, which gives us a
-notation for writing monotone functions. We can now give a
-reconstruction of Datafun hewing very closely to this semantic
-intuition.
+The idea behind Datafun is that, if the semantics of a Datalog program
+is a monotone set-valued operator, its natural home is the category
+\Poset{} of partial orders and monotone functions. Since \Poset{} is
+bicartesian closed, it can interpret the simply-typed \fn-calculus,
+which gives us a notation for writing monotone and \emph{higher-order}
+functions.
+%
+This lets us \emph{abstract} over Datalog rules, something not
+possible in Datalog itself!
+%
+In the remainder of this section we reconstruct Datafun hewing closely
+to this semantic intuition.
 
-So Datafun begins as the simply-typed lambda calculus with functions
-($\fnof{x}{e}$ and $f\<e$), sums ($\inj i e$ and $\ecase{e} (\inj i
-x_i \caseto f_i)_{i\in\{1,2\}}$) and products ($(\etuple{e_1, e_2}$
-and $\pi_i e$). To this, we add a type of finite sets\footnote{To
-  implement set types, their elements must support decidable equality.
-  In our core calculus, we use a subgrammar of ``eqtypes'', and in our
-  implementation (which compiles to Haskell) we use typeclass
-  constraints to pick out such types.} $\tset{\eqt A}$, which are
-introduced with set literals $\eset{e_0, \ldots e_n}$, and can be
-eliminated using (a slight generalization of) Moggi's monadic bind
-syntax $\efor{x}{e}{e'}$.
+Datafun begins as the simply-typed \fn-calculus with functions ($\fnof
+x e$ and $e\<f$), sums ($\inj i e$ and $\ecase{e}{\dots}$), and
+products ($\etuple{e,f}$ and $\pi_i\<e$). To this, we add a type of
+finite sets\footnote{To implement set types, their elements must
+  support decidable equality. In our core calculus, we use a
+  subgrammar of ``eqtypes'', and in our implementation (which compiles
+  to Haskell) we use typeclass constraints to pick out such types.}
+$\tset{\eqt A}$, introduced with set literals $\eset{e_0, \ldots
+  e_n}$, and eliminated using Moggi's monadic bind syntax,
+$\efor{x}{e_1}{e_2}$, signifying the union over all $\dvar x \in e_1$
+of $e_2$.
 
-As long as all the primitives are monotone, every definable
-function is also monotone. This is essential for taking
-fixed points, but it is also very restrictive. There are many
-essential oeprations which are naturally non-monotone, such as
-equality tests $\eeq e f$. For example, $\eset{} = \eset{}$ is true,
-but if the first argument is increased to $\esetraw{1}$ then it
-becomes false, a \emph{decrease} (in Datafun, $\efalse < \etrue$).
+As long as all the primitives are monotone, every definable function
+is also monotone. This is essential for taking fixed points, but it is
+also very restrictive. There are many essential operations which are
+naturally non-monotone, such as equality tests $\eeq e f$. For
+example, $\eset{} = \eset{}$ is true, but if the first argument is
+increased to $\esetraw{1}$ then it becomes false, a \emph{decrease}
+(in Datafun, $\efalse < \etrue$).
 
+So we need to allow non-monotone functions, while preserving the
+property that all functions are monotone. We square this circle by
+introducing the \emph{discreteness} type constructor $\iso A$. The
+elements of $\iso A$ are \emph{exactly the same} as the elements of
+$A$, but the order on $\iso A$ is discrete, $x \le y : \iso A \iff x =
+y$. Monotonicity of a function $\iso A \to B$ is vacuous: $x = y
+\implies f(x) \le f(y)$! This lets us encode ordinary, possibly
+non-monotone, functions $A \to B$ as monotone functions $\iso A \to
+B$. Semantically, $\iso$ is a comonad, and accordingly the syntax we
+use for this is a variant of \citet{jrml}'s syntax for constructive S4
+modal logic. We make discrete terms with the introduction form
+$\ebox{e}$ and eliminate them with a pattern matching eliminator
+$\eletbox x e f$. Discrete variables are colored and italicised $\dvar
+x$, while monotone variables are uncolored and upright $x$. Discrete
+terms $\isocolor e$ are restricted to only refer to discrete
+variables. So in the equality test $\eeq e f$, the terms $e$ and $f$
+must be discrete.
 
-So we need to define operations which are non-monotonic, without
-destroying the property that types enforce monotonicity checking. We
-quare this circle by introducing the \emph{discreteness} type
-constructor $\iso A$. The idea is that the elements of $\iso A$ are
-\emph{exactly the same} as the elements of $A$, except that the
-partial order relation on $\iso A$ is simply the equality on $A$ --
-that is, this is a \emph{discrete} partial order. So the monotonicity
-condition for a function of type $\iso A \to B$ becomes vacuous: it
-just says that given equal inputs the equal outputs must lie in the
-order relation of $B$, which is automatically satisfied (since partial
-orders are reflexive). This lets us encode ordinary functions in terms
-of monotone ones. Semantically, discreteness forms a comonad, and
-accordingly the syntax we use for this is a variant of \citet{jrml}'s
-syntax for constructive S4 modal logic. We make discrete terms with
-the introduction form $\ebox{e}$ and eliminate them with a pattern
-matching eliminator $\eletbox x e f$. Variables are colored and
-italicised $\dvar x$ to indicate that they are discrete, and uncolored
-and upright $x$ to indicate they are monotonic, and discrete terms
-$\isocolor e$ are restricted to only refer to discrete variables. So
-in the equality test $\eeq e f$, the terms $e$ and $f$ must be discrete. 
-
-Finally, Datafun include a fixed point operator $\efix{e}$. The $\efix$
-combinator takes a function argument of type $\iso (L \to L)$ and
-returns the least fixed point of that function. We impose two
+%% TODO: should we note that we really definitely mean □(L → L) and
+%% not (□L → L)? Reader may be confused.
+Finally, Datafun includes a fixed point operator $\efix{e}$. The
+$\prim{fix}$ combinator takes a function of type $\iso (\fixt L \to
+\fixt L)$ and returns its least fixed point. We impose two
 restrictions on the fixed point operator to ensure well-definedness
-and termination.  First, we require that recursion occur at
-\emph{semilattice types}.  A join-semilattice is a partial order with
-a least element and a join operation for calculating least upper
-bounds. Sets (with the empty set as least element, and union as join)
-are an example, as are tuples of semilattices. As long as the lattice
-has no infinite ascending chains, recursion from the bottom element
-is guaranteed to find the least fixed point.
+and termination. First, we require that recursion occur at
+\emph{semilattice types}, $L$. A join-semilattice is a partial order
+with a least element $\bot$ and a least-upper-bound (``join'')
+operation $\vee$. Finite sets (with the empty set as least element,
+and union as join) are an example, as are tuples of semilattices. As
+long as the lattice has no infinite ascending chains, recursion from
+the bottom element is guaranteed to find the least fixed point.
 
+%% TODO: ``at box type'' is ambiguous. makes me think of (□A → B)
+%% rather than □(A → B).
 We also require that the recursive function be at box type. Since
 boxed expressions can only refer to discrete values, the only monotone
 variable the fixed point can refer to is the fixed point itself. This
@@ -142,7 +146,7 @@ blocks (semantically) nested fixed points, and leaves the semantics
 of Datafun close to that of Datalog, where all recursion happens once,
 at the level of the whole program.
 
-
+
 \subsection{Examples of Datafun Programs}
 
 \input{fig-sugar}
