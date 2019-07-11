@@ -5,13 +5,14 @@
 
 Datalog's syntax is a subset of Prolog's. Programs
 are collections of predicate declarations:
-\begin{minted}[]{prolog}
-parent(earendil, elrond).
-parent(elrond, arwen).
-parent(arwen, eldarion).
 
-ancestor(X, Z) ← parent(X, Z).
-ancestor(X, Z) ← ancestor(X, Y), parent(Y, Z).
+\begin{minted}[]{prolog}
+  parent(earendil, elrond).
+  parent(elrond, arwen).
+  parent(arwen, eldarion).
+
+  ancestor(X, Z) ← parent(X, Z).
+  ancestor(X, Z) ← ancestor(X, Y), parent(Y, Z).
 \end{minted}
 
 In this example, we define two binary relations, \datalog{parent(_,_)}

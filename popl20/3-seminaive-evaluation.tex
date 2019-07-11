@@ -1,7 +1,67 @@
 \section{From Semi\naive{} Evaluation to the Incremental \boldfn-Calculus}
 \label{sec:seminaive-and-ilc}
 
-\XXX
+Let's return to our example Datalog program, modified to consider graphs rather
+than ancestry:
+
+\begin{minted}{prolog}
+  path(X, Z) ← edge(X, Z).
+  path(X, Z) ← edge(X,Y), path(Y, Z).
+\end{minted}
+
+\newcommand\rel[1]{\texttt{\color{blue}#1}}
+
+\noindent
+Let's suppose that \rel{edge} denotes a linear graph, $\{(a_1, a_2),\, (a_2,
+a_3),\, \dots,\, (a_{n-1}, a_n)\}$. Then \rel{path} should denote its
+reachability relation, $\setfor{(a_i, a_j)}{1 \le i < j \le n}$. How can we
+compute this relation? The \naive\ approach is to begin with nothing in the
+\rel{path} relation and repeatedly apply its rules until nothing more is
+deducible. We can make this precise by explicitly time-indexing our rules:
+
+\begin{align*}
+  \name{path}_{i+1}(X,Z) &\gets \name{edge}(X,Z)
+  &
+  \name{path}_{i+1}(X,Z) &\gets \name{path}_i(X,Y) \wedge \name{edge}(Y,Z)
+\end{align*}
+
+By omission $\name{path}_0 = \emptyset$. From this it's easy to see that
+inductively $\name{path}_i \subseteq \name{path}_{i+1}$.
+%
+Consequently, at step $i+1$ we re-deduce every fact known at step $i$.
+%
+For example, suppose $\name{path}_i(a_j, a_k)$. Then at step $i+1$ we apply the
+second rule to $\name{edge}(a_{j-1}, a_j)$ and deduce
+$\name{path}_{i+1}(a_{j-1}, a_k)$.
+%
+But since we also have $\name{path}_{i+1}(a_j, a_k)$, at time $i+2$ we deduce
+the very same thing again, and again at $i+3$, $i+4$, and so on.
+
+Because we append edges one at a time, $\name{path}_i$ contains exactly paths of
+$i$ or fewer edges. Therefore it takes $n$ steps until we reach our fixed point
+$\name{path}_{n-1} = \name{path}_n$. Since step $i$ involves $|\name{path}_i|
+\in \Theta(i^2)$ deductions, we make $\Theta(n^3)$ deductions in total. This
+seems wasteful, since there are only $\Theta(n^2)$ paths in the final result.
+
+Semi\naive\ evaluation avoids this waste by transforming the rules for
+\rel{path} to find the newly deducible paths, $\name{dpath}_i$, at iteration
+$i$, and accumulating these changes to produce a final result:
+
+\begin{align*}
+  \name{dpath}_0(X,Y) &\gets \name{edge}(X,Y)
+  \\
+  \name{dpath}_{i+1}(X,Z) &\gets \name{edge}(X,Y) \wedge \name{dpath}_i(Y,Z)
+  \\
+  \name{path}_{i+1}(X,Y) &\gets \name{path}_i(X,Y) \vee\name{dpath}_i(X,Y)
+\end{align*}
+
+\noindent
+It's easy to show inductively that $\name{dpath}_{i}$ contains only paths
+\emph{exactly} $i+1$ edges long. Consequently $|\name{dpath}_i| \in \Theta(n-i)$
+and we make $\Theta(n^2)$ deductions overall.\footnote{Here we must assume the
+  accumulation rule $\name{path}_{i+1}(X,Y) \gets \name{path}_i(X,Y) \vee
+  \name{dpath}_i(X,Y)$ is implemented using an union operator that is efficient
+  when the sets being unioned are of greatly differing sizes.}
 
 
 \subsection{Semi\naive\ evaluation as incremental computation}
