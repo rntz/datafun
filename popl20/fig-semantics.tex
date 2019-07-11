@@ -3,24 +3,24 @@
   \textsc{Type and Context Denotations}
 
   %% TODO: revert to this more readable version if space allows.
-  %% \begin{align*}
-  %%   \den{\tunit} &= \termO & \den{A \to B} &= \expO{\den{A}}{\den{B}}
-  %%   \\
-  %%   \den{\tseteq A} &= \pfinof{\den{\eqt A}}
-  %%   & \den{A \x B} &= \den{A} \x \den{B}
-  %%   \\
-  %%   \den{\iso A} &= \iso{\den{A}} & \den{A + B} &= \den{A} + \den{B}
-  %% \end{align*}
-
   \begin{align*}
-    \den{\tunit} &= \termO
-    & \den{\tseteq A} &= \pfinof{\den{\eqt A}}
-    & \den{\iso A} &= \iso{\den{A}}
+    \den{\tunit} &= \termO & \den{A \to B} &= \expO{\den{A}}{\den{B}}
     \\
-    \den{A \to B} &= \expO{\den{A}}{\den{B}}
+    \den{\tseteq A} &= \pfinof{\den{\eqt A}}
     & \den{A \x B} &= \den{A} \x \den{B}
-    & \den{A + B} &= \den{A} + \den{B}
+    \\
+    \den{\iso A} &= \iso{\den{A}} & \den{A + B} &= \den{A} + \den{B}
   \end{align*}
+
+  %% \begin{align*}
+  %%   \den{\tunit} &= \termO
+  %%   & \den{\tseteq A} &= \pfinof{\den{\eqt A}}
+  %%   & \den{\iso A} &= \iso{\den{A}}
+  %%   \\
+  %%   \den{A \to B} &= \expO{\den{A}}{\den{B}}
+  %%   & \den{A \x B} &= \den{A} \x \den{B}
+  %%   & \den{A + B} &= \den{A} + \den{B}
+  %% \end{align*}
 
   \begin{align*}
     \den{\G} &= \prod_{H \in \G} \den{H} &
