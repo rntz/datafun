@@ -1,17 +1,17 @@
 \section{Typing and Semantics of Core Datafun}
 \label{sec:typing-and-semantics}
 
-%In this section, we give the typing and semantics of core Datafun. 
+%In this section, we give the typing and semantics of core Datafun.
 \input{fig-typing}
 
 \subsection{Syntax}
 
-The typing rules of core Datafun are given in Figure~\ref{fig:core-datafun}.
-Contexts are lists of hypotheses, and hypotheses are either monotone variables
-associated with a type $\h x A$, or they are discrete variables associated
-with a type $\hd x A$. Given a context $\G$, we define the \emph{stripping}
-operation $\stripcx\G$ which returns a new context which agrees with $\G$
-on discrete hypotheses, but drops all the monotone hypotheses.
+The typing rules of core Datafun are given in \cref{fig:core-datafun}. Contexts
+are lists of hypotheses, and hypotheses are either monotone variables associated
+with a type $\h x A$, or they are discrete variables associated with a type $\hd
+x A$. Given a context $\G$, we define the \emph{stripping} operation
+$\stripcx\G$ which returns a new context which agrees with $\G$ on discrete
+hypotheses, but drops all the monotone hypotheses.
 
 We now give a judgement $\J{e}{\G}{A}$, which is glossed as ``under
 hypotheses $\G$, the term $e$ has the type $A$.'' The \rn{Var} and \rn{DVar}
@@ -65,7 +65,7 @@ pattern -- in the pattern $\ebox{\etuple{\inj 1 x, \inj 2 y}}$, we
 expect both the variables $x$ and $y$ to be discrete, which is
 information we propagate using these coercions. Semantically, all
 of these operations are the identity, as we will see in the following
-subsection. 
+subsection.
 
 This leaves only the rules for manipulating sets and other
 semilattices. Recall that sets form a semilattice in the inclusion order,
@@ -91,7 +91,7 @@ $\eeq e f$ only when they are discrete, checking in stripped contexts.
 Finally, the rule \rn{Fix} for fixed points $\efix e$, takes an endofunction
 $e$ of type $\iso (L \to L)$ and yields an expression of type $L$. In addition
 to being of semilattice type, we also demand here that $L$ is of finite height,
-ensuring that the recursion will terminate. 
+ensuring that the recursion will terminate.
 
 \subsection{Semantics }
 
@@ -107,7 +107,7 @@ morphism is the identity function on the underlying sets, and
 composition of morphisms is just ordinary function composition.
 We will typically write composition in diagramamtic
 or ``pipeline'' order: given $f : A \to B$ and $g : B \to C$ we
-write $(f \then g) : A \to C$. 
+write $(f \then g) : A \to C$.
 
 
 
@@ -142,7 +142,7 @@ of products is witnessed by $\fork{f,g} : A \to B \times C$, where
 \end{displaymath}
 %
 The verification that these maps are monotone and that the relevant
-diagrams commute is routine.  
+diagrams commute is routine.
 
 \paragraph{Exponentials} Given partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
 we define the poset $(A , \leq_A) \to (B, \leq_B)$ to be $(A \to B, \leq_{A \to B})$
@@ -162,7 +162,7 @@ Given $f : C \times A \to B$, the ``exponential transpose'' (i.e., currying
 operation) is defined as:
 \begin{eqnarray*}
   \lambda(f) & : & C \to (A \to B) \\
-  \lambda(f) & \triangleq & c \mapsto (\fnof{a} f(c,a)) 
+  \lambda(f) & \triangleq & c \mapsto (\fnof{a} f(c,a))
 \end{eqnarray*}
 Verifying that these maps are monotone and that the relevant
 diagrams commute is straightforward.
@@ -174,13 +174,13 @@ no order relationship):
 %
 \begin{eqnarray*}
   \inj 1 a \leq_{A+B} \inj 1 a' & \iff & a \leq_A a' \\
-  \inj 2 b \leq_{A+B} \inj 2 b' & \iff & b \leq_B b' 
+  \inj 2 b \leq_{A+B} \inj 2 b' & \iff & b \leq_B b'
 \end{eqnarray*}
 %
 It is easy to check this yields a partial order. We can construct the coproduct
 object by equipping this poset with the injections $\inj 1 {} : A \to A + B$
 and $\inj 2 {} : B \to A + B$, which are given by the injections on the underlying
-sets. 
+sets.
 %
 Given two maps $f : A \to C$ and $g : B \to C$, the universal property
 of coproducts is witnessed by $\krof{f,g} : A + B \to C$, where
@@ -191,7 +191,7 @@ of coproducts is witnessed by $\krof{f,g} : A + B \to C$, where
                                           \end{array}
                                         \right.
 \end{displaymath}
-It is easy to check the defined maps are monotone and that the relevant diagrams commute.                                      
+It is easy to check the defined maps are monotone and that the relevant diagrams commute.
 \subsubsection{The Discreteness Comonad}
 Given a poset $(A, \leq_A)$ we define the discreteness operator $\Box(A, \leq_A)$
 as $(A, \leq_{\iso A})$, where
@@ -202,7 +202,7 @@ That is, the discrete order preserves the underlying elements, but reduces the p
 to mere equality. Given a morphism $f : A \to B$, the functorial
 action is defined as:
 \begin{displaymath}
-  \iso(f) \triangleq f 
+  \iso(f) \triangleq f
 \end{displaymath}
 That is, the action on morphisms just gives back the same underlying function on sets. Checking
 that this preserves monotonicity is trivial, as is the preservation of identities and
@@ -212,7 +212,7 @@ sets:
 \begin{displaymath}
   \begin{array}{llcll}
   \varepsilon_A & : \iso A \to A & \hspace{2cm} & \delta_A & : \iso A \to \iso \iso A \\
-  \varepsilon_A & = a \mapsto a & & \delta_A & = a \mapsto a 
+  \varepsilon_A & = a \mapsto a & & \delta_A & = a \mapsto a
   \end{array}
 \end{displaymath}
 Once we check that the monotonicity requirements are satisfied, this
@@ -236,8 +236,8 @@ collection of useful morphisms on sets:
     \morph{join}_0& : & 1 \to \pfinof(A) & \qquad & \morph{join}_2 & : & \pfinof(A) \times \pfinof(A) \to \pfinof(A) \\
     \morph{join}_0& = & \etuple{} \mapsto \emptyset  &  & \morph{join}_2 & : & \etuple{X, Y} \mapsto X \cup Y \\[1em]
     \morph{singleton} & : & \iso A \to \pfinof{A} & & \morph{isEmpty} & : & \iso \pfinof{A} \to 1 + 1 \\
-    \morph{singleton} & = & a \mapsto \esetraw{a} 
-    & & 
+    \morph{singleton} & = & a \mapsto \esetraw{a}
+    & &
     \morph{isEmpty} & = & X \mapsto \left\{ \begin{array}{ll}
                                               \inj 1 {\etuple{}} & \mbox{when}\;X = \emptyset \\
                                               \inj 2 {\etuple{}} & \mbox{otherwise}
@@ -254,30 +254,28 @@ otherwise the boolean test would not be monotone.
 Finally, if $L$ is a complete lattice, and $f : A \times \iso B \to L$, then we can define
 we can also define the morphism $\morph{collect}(f) : A \times \pfinof{A} \to L$ as follows:
 \begin{displaymath}
- \morph{collect}(f)  = (a, X) \mapsto \bigvee_{b \in X} f(a, b)   
+ \morph{collect}(f)  = (a, X) \mapsto \bigvee_{b \in X} f(a, b)
 \end{displaymath}
 We will use this to interpret for-comprehensions, since all the definable lattice
 types (sets, and products of lattices) in core Datafun are complete lattices. However,
 it is worth noting that the discreteness restrictions on $\morph{singleton}$ mean that
-powersets do not quite form a monad in $\Poset$. 
+powersets do not quite form a monad in $\Poset$.
 
 \subsubsection{Fixed Points} Given a finite-height semilattice $L$, we can define a fixed
 point operation $\efix{} : \iso (L \to L) \to L$ as follows:
 \begin{displaymath}
   \efix{} = f \mapsto \bigvee_{n \in \mathbb{N}} f^n(\bot)
 \end{displaymath}
-A routine inductive argument shows this must yield a least fixed point. 
+A routine inductive argument shows this must yield a least fixed point.
 
 \subsubsection{Interpretation} The semantic interpetation (defined
-over typing derivations) is given in Figure~\ref{fig:semantics}. We
-give the interpretation in combinatory style, and to increase
-readability, we freely use $n$-ary products to elide the book-keeping
-associated with reassociating binary products. The interpretation
-itself mostly follows the usual interpretation for constructive
-S4~\cite{depaiva-s4}, with what novelty there is occuring in the
+over typing derivations) is given in \cref{fig:semantics}. We give the
+interpretation in combinatory style, and to increase readability, we freely use
+$n$-ary products to elide the book-keeping associated with reassociating binary
+products. The interpretation itself mostly follows the usual interpretation for
+constructive S4~\cite{depaiva-s4}, with what novelty there is occuring in the
 interpretation of sets and fixed points. Even there, the semantics is
-straightforward, making fairly direct use of the combinators defined
-above. 
+straightforward, making fairly direct use of the combinators defined above.
 
 \subsection{Metatheory}
 
@@ -292,16 +290,16 @@ residue of metatheory needs to be established manually -- indeed, the
 only thing we need to prove at this stage is the type-correctness of weakening.
 
 We define the weakening relation $\Gamma \sqsubseteq \Delta$ in
-Figure~\ref{fig:weakening}.  This says that $\Delta$ is a weakening of
-$\Gamma$, either because (as usual) it has extra hypotheses (in rule
-\rn{Drop}), or (additionally!) because a hypothesis in $\Gamma$
-becomes discrete in $\Delta$ (rule \rn{Disc}). The idea is that making
-a hypothesis discrete only increases the number of places it can be used.
+\cref{fig:weakening}. This says that $\Delta$ is a weakening of $\Gamma$, either
+because (as usual) it has extra hypotheses (in rule \rn{Drop}), or
+(additionally!) because a hypothesis in $\Gamma$ becomes discrete in $\Delta$
+(rule \rn{Disc}). The idea is that making a hypothesis discrete only increases
+the number of places it can be used.
 
 \begin{lemma}\label{thm:weaken}
-  If $\J e \G A$ and $\G \sqsubseteq \D$ then $\J e \D A$. 
+  If $\J e \G A$ and $\G \sqsubseteq \D$ then $\J e \D A$.
 \end{lemma}
 
-\noindent This follows by the usual induction on typing derivations. 
+\noindent This follows by the usual induction on typing derivations.
 
 \input{fig-weakening}
