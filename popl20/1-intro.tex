@@ -95,17 +95,17 @@ Flix adopts the route of treating Datalog as an embedded
 domain-specific language~\cite{edsl}. That is, Flix is a fairly
 conventional (albeit well-designed) functional programming language
 roughly comparable to ML or Haskell, extended with types representing
-Datalog predicates and program. The evaluation of a Flix program
+Datalog predicates and programs. The evaluation of a Flix program
 builds a Datalog program, which is then handed off to a custom Datalog
 engine (albeit extended to support arbitrary semilattices).  This
 stratification means that (a) standard Datalog implementation
 techniques can be used mostly off-the-shelf, but that (b) its
 functional programming side is mostly a very powerful macro system for
 Datalog.  The only way Flix code runs at Datalog execution time is via
-the definition of new semilattices (which are regular functional
-language code implementing a semilattice interface), and for this Flix
-offers program-verification style correctness checking (including
-SMT-based tooling).
+the definition of new semilattices (which is functional Flix code
+implementing a semilattice interface), and for this Flix offers
+program-verification style correctness checking (including SMT-based
+tooling).
 
 Like Flix, Datafun is a functional programming language, but unlike
 Flix, its type discipline supports tracking \emph{monotonicity} of
