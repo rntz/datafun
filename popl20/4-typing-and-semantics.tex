@@ -4,68 +4,48 @@
 %In this section, we give the typing and semantics of core Datafun.
 \input{fig-typing}
 
-\subsection{Syntax}
+The syntax of core Datafun is given in \cref{fig:syntax} and its typing rules in
+\cref{fig:core-datafun}. Contexts are lists of hypotheses $H$; a hypothesis
+gives the type of either a monotone variable $\h x A$ or a discrete variable
+$\hd x A$. The stripping operation $\stripcx\G$ drops all monotone hypotheses
+from the context $\G$, leaving only the discrete ones.
+%
+The typing judgement $\J{e}{\G}{A}$ may be glossed as ``under hypotheses $\G$,
+the term $e$ has the type $A$''.
 
-The typing rules of core Datafun are given in \cref{fig:core-datafun}. Contexts
-are lists of hypotheses $H$; a hypothesis gives the type of either a monotone
-variable $\h x A$ or a discrete variable $\hd x A$. Given a context $\G$, we
-define the \emph{stripping} operation $\stripcx\G$ which returns a new context
-which agrees with $\G$ on discrete hypotheses, but drops all the monotone
-hypotheses.
+The \rn{Var} and \rn{DVar} rules say that both monotone hypotheses $\h x A$ and
+discrete hypotheses $\hd x A$ justify ascribing the variable $x$ the type $A$.
+%
+The \rn{Lam} rule is the familiar rule for $\fn$-abstraction. However, note that
+we introduce the argument variable $\h x A$ as a \emph{monotone} hypothesis, not
+a discrete one. (This is the ``right'' choice because in \Poset\ the exponential
+object is the poset of monotone functions.)
+%
+The application rule \rn{App} is standard, as are the rules \rn{Unit},
+\rn{Pair}, \rn{Prj}, \rn{Inj}, and \rn{Case}. As with \rn{Lam}, the variables
+$\h {x_i}{A_i}$ bound in the case branches $f_i$ are monotone.
 
-We now give a judgement $\J{e}{\G}{A}$, which is glossed as ``under
-hypotheses $\G$, the term $e$ has the type $A$.'' The \rn{Var} and \rn{DVar}
-rules say that both monotone hypotheses $\h x A$ and discrete hypotheses
-$\hd x A$ justify ascribing the variable $x$ the type $A$. At first glance,
-the \rn{Lam} rule is the familiar rule for lambda-abstraction, which
-typechecks a lambda-expression $\fnof x e$ a the function type $A \to B$
-when the body $e$ typechecks at $B$ in a context extended with $\h x
-A$. However, note the subtlety that we assume $x$ is a \emph{monotone}
-variable, not a discrete one. (This is the ``right'' choice since in the
-category of posets and monotone maps, the exponential object are posets of
-monotone functions.) The application rule \rn{App} is standard, though: a
-term $e\>e'$ typechecks at $B$ if the function expression $e$ has type
-$A \to B$, and the argument expression $e'$ has the type $B$.
+\rn{BoxI} says that $\ebox{e}$ has type $\iso A$ when $e$ has type $A$ in the
+stripped context $\stripcx\G$. This restricts $e$ to refer only to discrete
+variables, ensuring we don't smuggle any information we must treat monotonically
+into a discretely-ordered $\iso$ expression. The elimination rule \rn{BoxE} for
+$(\eletbox x e f)$ allows us to ``cash in'' a boxed expression $e : \iso A$ by
+binding its result to a discrete variable $\hd x A$ in the body $f$.
 
-The unit rule \rn{Unit} is standard, with the unit value $\etuple{}$ having
-the type $1$ in all contexts. Similarly, the rules for pairs, \rn{Pair} and
-\rn{Prj} are also standard. A pair $\etuple{e_1, e_2}$ has the type
-$A_1 \times A_2$ when $e_1$ has type $A_1$, and $e_2$ has type $A_2$, and
-symmetrically a projection $\pi_i(e)$ has type $A_i$ when $e$ has a pair
-type. Similarly, the rules for sums, \rn{Inj} and \rn{Case} are standard.
-An injection $\inj i e$ has type $A_1 + A_2$ when $e$ has type $A_i$, and
-the typing rule for case expressions \rn{Case} says that a case
-expression $\ecase{e} (\inj i {x_i} \caseto f_i)_i$ has type $B$, when
-$e$ is of sum type $A_1 + A_2$, and each branch $f_1$ and $f_2$ has type $B$
-in a context augmented with $\h {x_1} {A_1}$ and $\h {x_2} {A_2}$ respectively.
-Note that both of these are once again monotone variables.
-
-The rule \rn{BoxI} says that $\ebox{e}$ has type $\iso A$ when
-$e$ has type $A$ in the stripped context $\stripcx\G$. By deleting
-all the monotone variables, the rule ensures that $e$ can only
-refer to discrete variables. The elimination rule \rn{BoxE} ascribes
-the term $\elet{\ebox x = e}f$ the type $B$, when $e$ has type $\iso A$,
-and $f$ typechecks at $B$ in a context extended with a \emph{discrete}
-hypothesis $\hd x A$.
-
-At this point, the typing rules correspond to standard constructive S4
-modal logic. We can get to Datafun by adding a handful of
-domain-specific types and operations. The first specialized rule is
-the \rn{Split} rule, which says that $\esplit e$ has the type
-$\iso A + \iso B$ when $e$ has the type $\iso (A + B)$. This is
-syntax\footnote{An alternative syntax, pursued in \citet{datafun},
-  would be to give two rules for $\kw{case}$, depending on whether or
-  not the scrutinee could be typechecked in a stripped context.} for
-the distributive law of box through sum types. The other direction
-(getting $\iso (A + B)$ from $\iso A + \iso B$) is already derivable,
-as is the isomorphism between $\iso A \times \iso B$ and
-$\iso (A \times B)$. We have used all these operation implicitly, to
-propagate discretenes into the variables of a pattern inside a box
-pattern -- in the pattern $\ebox{\etuple{\inj 1 x, \inj 2 y}}$, we
-expect both the variables $x$ and $y$ to be discrete, which is
-information we propagate using these coercions. Semantically, all
-of these operations are the identity, as we will see in the following
-subsection.
+At this point, our typing rules correspond to standard constructive S4 modal
+logic~\cite{jrml}. We get to Datafun by adding a handful of domain-specific
+types and operations. First, \rn{Split} rule says that $\esplit e : \iso A +
+\iso B$ whenever $e : \iso (A + B)$, distributing box across sum
+types.\footnote{An alternative syntax, pursued in \citet{datafun}, would be to
+  give two rules for $\kw{case}$, depending on whether or not the scrutinee
+  could be typechecked in a stripped context.} The other direction, $\iso A +
+\iso B \to \iso (A + B)$, is already derivable, as is the isomorphism $\iso A
+\times \iso B \cong \iso (A \times B)$. In the examples we give, we use all
+these operations implicitly, to propagate discreteness onto the variables bound
+by a box pattern -- in the pattern $\ebox{\etuple{\inj 1 x, \inj 2 y}}$, we
+expect both the variables $\dvar x$ and $\dvar y$ to be discrete, which is
+information we propagate using these coercions. Semantically, all of these
+operations are the identity, as we will see in the following subsection.
 
 This leaves only the rules for manipulating sets and other
 semilattices. Recall that sets form a semilattice in the inclusion order,
