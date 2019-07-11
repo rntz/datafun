@@ -73,9 +73,8 @@ first-order data:
   Induct on $\eqt A$.
 \end{proof}
 
-%% XXX
-For reasons that we'll discuss later \todo{fwdref}, $\phi$ and $\delta$ are
-mutually recursive; to make this work, $\delta e$ must find the change to $\phi
+As we'll see in \cref{sec:var-fn-app,sec:phi-delta-box}, $\phi$ and $\delta$ are
+mutually recursive. To make this work, $\delta e$ must find the change to $\phi
 e$ rather than $e$.
 %
 So if $e : A$ then $\phi e : \Phi A$ and $\delta e : \DP A$.
@@ -331,6 +330,7 @@ monotone rather than a discrete position.
 
 
 \subsection{The discreteness comonad, \iso}
+\label{sec:phi-delta-box}
 
 Our strategy hinges on decorating expressions of type $\iso A$ with their
 zero-changes, so the translations of $\ebox e$ and $(\eletbox x e f)$ are of
