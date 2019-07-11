@@ -68,6 +68,7 @@
 
 % used for names of functions, primitives, etc. in math mode
 \newcommand\name[1]{\text{\itshape #1}}
+\newcommand\var[1]{\mathvar{#1}} % for long local variable/parameter names
 
 % derivative variables
 \newcommand\da{\mathvar{da}}
@@ -173,6 +174,8 @@
 \newcommand\tseteq[1]{\tset{\eqt{#1}}}
 \newcommand\typename\textbf     % TODO: reconsider use of boldface.
 \newcommand\tbool{\typename{bool}}
+\newcommand\tstring{\typename{string}}
+\newcommand\tint{\typename{int}}
 
 \newcommand\dvar[1]{{\isocolor #1}}
 % I need to mark discrete vs. monotone variables in some

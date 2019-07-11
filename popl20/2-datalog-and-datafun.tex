@@ -27,7 +27,7 @@ $Z$'s parent, and the second saying $X$ is an ancestor of $Z$ if there is a
 intermediate person $Y$ such that $X$ is $Y$'s ancestor and $Y$ is $Z$'s parent.
 
 % In inference rule form, this program could be rendered as:
-% 
+%
 % \begin{mathpar}
 %   \inferrule*[]
 %              { }
@@ -160,14 +160,14 @@ definitions:
   $\ebox{p}$ is to ensure that all of the variables bound in the
   pattern $p$ are treated as discrete variables.
 
-\item We mentioned earlier that Datafun's boolean type $\typename{bool}$ is
-  ordered $\efalse < \etrue$. This is because we do not use the usual encoding
-  $1+1$ for booleans. Instead, we encode booleans as sets of empty tuples,
-  $\tset 1$, with $\efalse$ being the empty set $\eset{}$ and $\etrue$ being the
-  singleton $\eset{\etuple{}}$. We also make use of a ``one-sided'' conditional
-  test, $\ewhen{b}{e}$. This test must must be at lattice type, and if $b$ is
-  true, it returns $e$, and returns the bottom element of the lattice otherwise.
-  
+\item We mentioned earlier that Datafun's boolean type $\tbool$ is ordered
+  $\efalse < \etrue$. This is because we encode booleans as sets of empty
+  tuples, $\tset 1$, with $\efalse$ being the empty set $\eset{}$ and $\etrue$
+  being the singleton $\esetraw{\etuple{}}$. At semilattice type we also permit
+  a ``one-sided'' conditional test, $\ewhen{b}{e}$, which yields $e$ if $b$ is
+  \etrue\ and $\bot$ otherwise. Encoding booleans as sets has the advantage that
+  $\ewhen{b}{e}$ is monotone in the condition $b$.
+
 \item Finally, we make use of set comprehension notation. The
   desugaring we use is based on the translation of comprehensions to
   the monadic operators~\cite{wadler-monad-comprehensions}.
@@ -180,20 +180,20 @@ We summarize (except for pattern matching) the sugaring rules we use in
 Even before higher-order functions, one of the main benefits of
 Datafun relative to Datalog is that it offers the ability to manipulate relations
 as first class values. In this subsection we will show how a variety
-of standard operations on sets can be represented in Datafun. 
+of standard operations on sets can be represented in Datafun.
 
 \paragraph{Membership Tests} The first operation we consider is the
-membership test operation. 
+membership test operation.
 \begin{tabbing}
   \qquad\=\+ \kill
-  $\name{mem} : \iso A \to \tset A \to \kw{bool}$ \\
-  $\name{mem}\;\ebox{x} \; \name{ys} = \efor{y}{\name{ys}}\ewhen{x = y}{\etrue}$ 
+  $\name{mem} : \iso A \to \tset A \to \tbool$ \\
+  $\name{mem}\;\ebox{x} \; \mathvar{ys} = \efor{y}{\mathvar{ys}} \dvar x = \dvar y$
 \end{tabbing}
 
-This code checks if the input $x$
-is equal to any $y$ in the test set $\name{ys}$. We require the argument $x$ to
-$\name{mem}$ to be discrete, because an element is in a set or not -- the test
-is not monotone in $x$. 
+\noindent
+This checks if the input $\dvar x$ is equal to any $\dvar y \in \mathvar{ys}$.
+The argument $x$ to $\name{mem}$ is discrete, because an element is in a set or
+not -- the test is not monotone in $x$.
 
 \paragraph{Set Intersection}
 Using $\name{mem}$, it is possible to define set intersection, by taking the union of
@@ -202,45 +202,54 @@ all the singleton sets $\eset{x}$ sets where $x$ is an element of $xs$ also in t
 \begin{tabbing}
   \qquad\=\+ \kill
   $\_ \wedge \_ : \tset A \to \tset A \to \tset A$ \\
-  $\name{xs} \wedge \name{ys} = \efor{x}{xs} \ewhen{\name{mem}\;\ebox{x}\;\name{ys}}{\eset{x}}$ 
+  $\var{xs} \wedge \var{ys} = \efor{x}{xs}
+  \ewhen{\name{mem}\;\eboxvar{x}\;\var{ys}}{\eset{\dvar x}}$
 \end{tabbing}
+
+\noindent
 Using comprehensions, this could alternately be written as:
 \begin{tabbing}
   \qquad\=\+ \kill
-  $\_ \wedge \_ : \tset A \to \tset A \to \tset A$ \\
-  $\name{xs} \wedge \name{ys} = \setfor{x}{x \in xs, \name{mem}\;\ebox{x}\;\name{ys}}$
+  $\var{xs} \wedge \var{ys} = \esetfor{x}{\dvar x \in \var{xs},\, \name{mem}\;\eboxvar{x}\;\var{ys}}$
 \end{tabbing}
-% This looks more like a definition one might see in an introductory mathematics course.
 
 \paragraph{Relational Composition}
-We can also define the composition of two relations in Datafun. 
+We can also define the composition of two relations in Datafun.
 \begin{tabbing}
   \qquad\=\+ \kill
-  $\_ \bullet \_$ \;\;\;\= $\,:$\;\; \=
+  $\_ \bullet \_$ \quad\:\= $\,:$\;\; \=
   $ \tset{A \times B} \to \tset{B \times C} \to \tset{A \times C}$ \\
 
-  $\mathit{xs} \bullet \mathit{ys}$ \> $=$ \> $\efor{(a,b)}{\mathit{xs}}{}$ \\
-                                    \>     \> $\efor{(b',c)}{\mathit{ys}}{}$ \\
-                                    \>     \> $\ewhen{b = b'}{\eset{(a,c)}}$
+  $\mathvar{xs} \bullet \mathvar{ys}$
+  \> $=$ \> $\eforraw{\etuple{\dvar a,\dvar b} \in \mathvar{xs}}
+  \eforraw{\etuple{\dvar{b'}, \dvar c} \in \mathvar{ys}}
+  \ewhen{\dvar b = \dvar{b'}} \esetraw{\etuple{\dvar a,\dvar c}}
+  $
+  %% \\
+  %% \>     \> $\efor{(b',c)}{\mathit{ys}}{}$ \\
+  %% \>     \> $\ewhen{b = b'}{\eset{(a,c)}}$
 \end{tabbing}
 This is basically a transcription of the mathematical definition, where we build
 those pairs which agree on their $B$-typed components. It can also be written using
-set comprehrension as:
+set comprehension as:
 \begin{tabbing}
   \qquad\=\+ \kill
   $\_ \bullet \_$ \;\;\;\= $\,:$\;\; \=
   $ \tset{A \times B} \to \tset{B \times C} \to \tset{A \times C}$ \\
 
-  $\mathit{xs} \bullet \mathit{ys} = \setfor{(a,c)}{(a,b) \in \name{xs}, (b', c) \in \name{ys}, b = b'}$
+  $\var{xs} \bullet \var{ys} =
+  \setfor{\etuple{\dvar a, \dvar c}}{
+    \etuple{\dvar a, \dvar b} \in \var{xs},
+    \etuple{\dvar{b'}, \dvar c} \in \var{ys}, \dvar b = \dvar{b'}}$
 \end{tabbing}
 
-
 \paragraph{Transitive Closure}\label{sec:generic-transitive-closure}
-Now, we define the transitive closure of a relation. 
+Now, we define the transitive closure of a relation.
 \begin{tabbing}
   \qquad\=\+ \kill
-  $\name{tc}$ \qquad \= $\,:$ \;\;\= $\iso{\tset{A \times A}} \to \tset{A \times A}$ \\
-  $\name{tc}\;\ebox{\mathit{xs}}$ \> $=$ \> $\efixis{\name{self}}{\name{xs} \vee \name{xs} \bullet\name{self}}$ 
+  $\name{tc}$ \quad\: \= $\,:$ \;\;\= $\iso{\tset{A \times A}} \to \tset{A \times A}$ \\
+  $\name{tc}\;\eboxvar{e}$ \> $=$ \>
+  $\efixis{\var{s}}{\dvar{e} \vee (\dvar{e} \bullet \var{s})}$
 \end{tabbing}
 
 This definition uses recursion, just like the mathematical definition --
@@ -249,10 +258,12 @@ and the composition of $\name{xs}$ with the transitive closure. However, one
 feature of this definition peculiar to core Datafun is that the argument type
 is $\iso \tset{A \times A}$ -- the transitive closure takes a \emph{discrete} relation.
 This is because we must use the relation within the fixed point, and so its parameter needs
-to be discrete to occur within. 
+to be discrete to occur within.
 
 
 \subsubsection{Combinators for Regular Expression Matching}
+
+\newcommand\tre{\typename{re}}
 
 Datafun permits tightly integrating the higher-order functional and
 bottom-up logic programming styles. In this section, we illustrate the
@@ -263,31 +274,32 @@ for the relational style ensures we can write \naive\ code
 \emph{without} the exponential backtracking cliffs typical of parser
 combinators in functional languages.
 
-We assume the existence of a function
-$\name{pos} : \kw{string} \to \tset{\kw{int}}$ which takes a string
-and returns the set of valid indices in that string, and assume
-that string indexing is written $s[n]$, as in Java or C. Having done this, we define
-the type of regular expression matchers.
-\begin{tabbing} 
-\qquad  $\kw{type}\;re\;=\iso \kw{string} \to \tset{\kw{int} \times \kw{int}}$  
-\end{tabbing}
-This type takes a string (at boxed type, so that it can be used inside
-fixed point expressions), and then returns a set of pairs of integers. The
-idea is that if the regular expression matcher is passed the string
-argument $s$, then if $(i, n)$ is one of the returned values, then the
-substring $s_i, s_{i+1}, \ldots, s_{n-1}$ is matched by the regular expression.
-That is, it is inclusive on the left and exclusive on the right. 
+We assume the existence of a function $\name{pos} : \tstring \to \tset{\tint}$
+which takes a string and returns the set of valid indices in that string, and
+assume that string indexing is written $s[n]$, as in Java or C. Having done
+this, we define the type of regular expression matchers.
 
 \begin{tabbing}
-\qquad \= $\name{sym} : \kw{char} \to \kw{re}$ \+\\
-$\name{sym}\;c\;\ebox{s} =\; $\= $\efor{n}{\name{pos}\;s}{\ewhen{s[n] = c}{\eset{(n, n+1)}}}$ 
+\qquad  $\kw{type}\;\tre\;=\iso \tstring \to \tset{\tint \times \tint}$
+\end{tabbing}
+
+A regular expression takes a string (boxed so that it can be used inside fixed
+point expressions), and returns a set of pairs of integers. The idea is that if
+the regular expression matcher is passed the string argument $s$, then if $(i,
+n)$ is one of the returned values, the substring $s_i, s_{i+1}, \ldots, s_{n-1}$
+is matched by the regular expression. That is, it is inclusive on the left and
+exclusive on the right.
+
+\begin{tabbing}
+\qquad \= $\name{sym} : \typename{char} \to \tre$ \+\\
+$\name{sym}\;c\;\ebox{s} =\; $\= $\efor{n}{\name{pos}\;s}{\ewhen{s[n] = c}{\eset{(n, n+1)}}}$
 \end{tabbing}
 The $\name{sym}$ combinator takes a character and returns a set of
 substrings by returning the set $(n, n+1)$ where the $n$-th element of
 the string $s$ is the character $c$.
 %
 \begin{tabbing}
-\qquad \=   $\name{nil} : \kw{re}$ \+\\
+\qquad \=   $\name{nil} : \tre$ \+\\
   $\name{nil}\;\ebox{s} = \efor{n}{\name{pos}\;s}{\eset{(n,n)}}$
 \end{tabbing}
 %
@@ -295,30 +307,30 @@ The call $\name{nil}\;\ebox{s}$ yields $(n,n)$ for each position
 $n$ in $s$, since an empty substring can start anywhere.
 %
 \begin{tabbing}
-\qquad \=   $\name{seq} : \kw{re} \to \kw{re} \to \kw{re}$ \+\\
+\qquad \=   $\name{seq} : \tre \to \tre \to \tre$ \+\\
   $\name{seq}\;r_1\;r_2\;s = r_1\;s \bullet r_2\;s$
 \end{tabbing}
-% 
+%
 The $\name{seq}$ combinator takes two regular expressions $r_1$ and $r_2$
 as arguments, applies its argument to both, and takes the relational
 composition of the results. Therefore, if the range $(i,j)$ was in the
 result of $r_1$, and $(j,k)$ was in the result of $r_2$, then
-we will return $(i,k)$, just as desired. 
+we will return $(i,k)$, just as desired.
 %
 \begin{tabbing}
-\qquad \=   $\name{bot} : \kw{re}$ \+\\
+\qquad \=   $\name{bot} : \tre$ \+\\
   $\name{bot}\;\_ = \bot$ \\[1em]
 
-  $\name{alt} : \kw{re} \to \kw{re} \to \kw{re}$ \\
+  $\name{alt} : \tre \to \tre \to \tre$ \\
   $\name{alt}\;r_1\;r_2\;s = r_1\;s \vee r_2\;s$
 \end{tabbing}
 %
-We get the empty set of matches from $\name{bot}$, and 
-$\name{alt}$ unions the matches of its two arguments. 
+We get the empty set of matches from $\name{bot}$, and
+$\name{alt}$ unions the matches of its two arguments.
 %
 \begin{tabbing}
-\qquad \=   $\name{star} : \iso\kw{re} \to \kw{re}$ \+\\
-  $\name{star}\;\ebox{r}\;\ebox{s} = \name{nil}\;\ebox{s} \vee \name{tc}\;\ebox{r\;\ebox{s}}$ 
+\qquad \=   $\name{star} : \iso\tre \to \tre$ \+\\
+  $\name{star}\;\ebox{r}\;\ebox{s} = \name{nil}\;\ebox{s} \vee \name{tc}\;\ebox{r\;\ebox{s}}$
 \end{tabbing}
 The most interesting regular expression combinator is the Kleene star
 operation $\name{star}$.  It uses $\name{nil}$ to get the
@@ -330,10 +342,10 @@ occur inside of fixed point expressions.\footnote{As a technical note,
   sets of pairs of integers do not form a finite-height lattice, so by
   typing this program is not an acceptable fixed point expression.
   However, since the positions in a string form a finite set,
-  semantically it is fine. The original Datafun paper shows how one can 
+  semantically it is fine. The original Datafun paper shows how one can
   define bounded fixed points to handle cases like this, so we will not be
   scrupulous.}
-  
+
 
 
 \subsubsection{Combinators for Regular Expression Matching, Take 2}
@@ -348,51 +360,51 @@ use functions to manage strict input/output divisions, and relations
 to manage nondeterminism and search.
 %
 \begin{tabbing}
-\qquad \=  $\kw{type}\;re\;=\iso (\kw{string} \times \kw{int}) \to \tset{\kw{int}}$ \+ 
+\qquad \=  $\kw{type}\;re\;=\iso (\tstring \times \tint) \to \tset{\tint}$ \+
 \end{tabbing}
 %
 Our new type of combinators takes a string and a starting
 position, and returns a set of ending positions. In contrast, the earlier type
-took a string and returned a set of start/end pairs. 
+took a string and returned a set of start/end pairs.
 %
 \begin{tabbing}
-\qquad \=  $\name{sym} : \kw{char} \to \kw{re}$\+ \\
-  $\name{sym}\;c\;\ebox{s,n} = \ewhen{s[n] = c}{\eset{n+1}}$ 
+\qquad \=  $\name{sym} : \typename{char} \to \tre$\+ \\
+  $\name{sym}\;c\;\ebox{s,n} = \ewhen{s[n] = c}{\eset{n+1}}$
 \end{tabbing}
 %
 $\name{sym}\;c$ checks if $c$ occurs at position
 $n$, returning $n+1$ if it does, and the empty
-set otherwise. 
+set otherwise.
 %
 \begin{tabbing}
-\qquad \=  $\name{nil} : \kw{re}$\+ \\
+\qquad \=  $\name{nil} : \tre$\+ \\
   $\name{nil}\;\ebox{s, n} = \eset{n}$ \\[1em]
 
-  $\name{seq} : \kw{re} \to \kw{re} \to \kw{re}$ \\
+  $\name{seq} : \tre \to \tre \to \tre$ \\
   $\name{seq}\;r_1\;r_2\;\ebox{s,n} = \efor{m}{r_1\;\ebox{s,n}}{r_2\;[s,m]}$
 \end{tabbing}
 %
 The $\name{nil}$ function simply returns the same index $n$ it received as an
 argument, since an empty string matches starting from any position. Sequencing
 via $\name{seq}\;r_1\;r_2$ checks first to see the possible ending positions from
-matching $r_1$, and carries on with $r_2$ from there. 
+matching $r_1$, and carries on with $r_2$ from there.
 %
 \begin{tabbing}
   \qquad \=
-  $\name{bot} : \kw{re}$ \+\\
+  $\name{bot} : \tre$ \+\\
   $\name{bot}\;\_ = \bot$ \\[1em]
-  
-  $\name{alt} : \kw{re} \to \kw{re} \to \kw{re}$ \\
-  $\name{alt}\;r_1\;r_2\;\ebox{s,n} =\ x = r_1\;x \vee r_2\;x$ 
+
+  $\name{alt} : \tre \to \tre \to \tre$ \\
+  $\name{alt}\;r_1\;r_2\;\ebox{s,n} =\ x = r_1\;x \vee r_2\;x$
 \end{tabbing}
 %
-We still get the empty set from $\name{bot}$, and $\name{alt}$ 
-still unions the two sets of end positions. 
+We still get the empty set from $\name{bot}$, and $\name{alt}$
+still unions the two sets of end positions.
 %
 \begin{tabbing}
-\qquad \=  $\name{star} : \iso\kw{re} \to \kw{re}$\+ \\
-  $\name{star}\;\ebox{r}\;\ebox{s, n} = \efixis{\name{self}}{\eset{n} \vee 
-                                                \efor{m}{\name{self}}{r\;\ebox{s,m}}}$ 
+\qquad \=  $\name{star} : \iso\tre \to \tre$\+ \\
+  $\name{star}\;\ebox{r}\;\ebox{s, n} = \efixis{\name{self}}{\eset{n} \vee
+                                                \efor{m}{\name{self}}{r\;\ebox{s,m}}}$
 \end{tabbing}
 %
 As before, the $\name{star}$ combinator takes a boxed regular expression as an argument,
@@ -400,4 +412,4 @@ and for the same reason -- we are implementing sequencing with a fixed point. On
 worth noting about this definition is that it is \emph{left-recursive} -- the definition
 takes the endpoints from the fixed point $\name{self}$, and then continues matching using
 the argument $\name{r}$. This should make clear that this is not just plain old functional
-programming -- we are genuinely relying upon the fixed point semantics of Datafun. 
+programming -- we are genuinely relying upon the fixed point semantics of Datafun.
