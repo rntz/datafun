@@ -147,9 +147,8 @@ point at product type, nor stratified fixed points \emph{\`a la} Datalog.
 
 \input{fig-sugar}
 
-In the examples, we make free use of strings and integers, ordered
-with the trivial discrete order ($x \leq y$ if and only if they are
-equal). We also make use of some syntax sugar in the
+In the examples, we make free use of strings and integers, ordered discretely
+($x \le y$ iff $x = y$). We also make use of some syntax sugar in the
 definitions:
 
 \begin{enumerate}
@@ -161,14 +160,13 @@ definitions:
   $\ebox{p}$ is to ensure that all of the variables bound in the
   pattern $p$ are treated as discrete variables.
 
-\item We mentioned earlier that Datafun's boolean type
-  $\kw{bool}$ is ordered, with $\efalse \leq \etrue$.  This is because
-  we do not use the usual encoding $1+1$ for booleans. Instead, we use the encoding $\tset 1$
-  with $\efalse$ defined as the empty set $\eset{}$ and $\etrue$ defined as the
-  singleton set $\eset{\etuple{}}$. We also make use of a ``one-sided''
-  conditional test form $\ewhen{b}{e}$. This test must must be at lattice
-  type, and if $b$ is true, it returns $e$, and returns the bottom
-  element of the lattice otherwise. 
+\item We mentioned earlier that Datafun's boolean type $\typename{bool}$ is
+  ordered $\efalse < \etrue$. This is because we do not use the usual encoding
+  $1+1$ for booleans. Instead, we encode booleans as sets of empty tuples,
+  $\tset 1$, with $\efalse$ being the empty set $\eset{}$ and $\etrue$ being the
+  singleton $\eset{\etuple{}}$. We also make use of a ``one-sided'' conditional
+  test, $\ewhen{b}{e}$. This test must must be at lattice type, and if $b$ is
+  true, it returns $e$, and returns the bottom element of the lattice otherwise.
   
 \item Finally, we make use of set comprehension notation. The
   desugaring we use is based on the translation of comprehensions to
