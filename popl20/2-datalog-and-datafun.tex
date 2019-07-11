@@ -56,7 +56,7 @@ $Y$, such that $X$ is $Y$'s ancestor and $Y$ is $Z$'s parent.
 Semantically, each predicate can be interpeted as the set of tuples
 which satisfy the predicate. Recursive definitions can be interpreted
 by viewing the whole program as a relation transformer, and taking the
-least fixed point of that function. Datalog's syntax is set up sp the
+least fixed point of that function. Datalog's syntax is set up so the
 relation transformer the rules define is always a monotone function on
 sets, ensuring the least fixed point always exists.
 
@@ -71,7 +71,7 @@ sets, ensuring the least fixed point always exists.
 %% is extremely elegant, and Datafun arose as an attempt to generalize
 %% this semantics.
 
-The idea behind Datafun is that, if the semantics of a Datalog program
+The idea behind Datafun is that since the semantics of a Datalog program
 is a monotone set-valued operator, its natural home is the category
 \Poset{} of partial orders and monotone functions. Since \Poset{} is
 bicartesian closed, it can interpret the simply-typed \fn-calculus,
@@ -183,7 +183,7 @@ We summarize (except for pattern matching) the sugaring rules we use in
 \subsubsection{Set\, Operations}
 
 Even before higher-order functions, one of the main benefits of
-Datafun relative to is that it offers the ability to manipulate relations
+Datafun relative to Datalog is that it offers the ability to manipulate relations
 as first class values. In this subsection we will show how a variety
 of standard operations on sets can be represented in Datafun. 
 
