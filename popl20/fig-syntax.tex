@@ -10,8 +10,12 @@
     \\[.5ex]
     \text{semilattices} & L,M &\bnfeq& \tset{\eqt A} \bnfor \tunit \bnfor L \x M
     \\[.5ex]
+    \text{finite eqtypes} & \fint A, \fint B &\bnfeq&
+    \tunit \bnfor \fint A \x \fint B \bnfor \fint A + \fint B
+    \bnfor \tset{\fint A}
+    \\[.5ex]
     \text{fixtypes} & \fixt L, \fixt M &\bnfeq&
-    \tset{\color{red}\fint A} \bnfor \tunit \bnfor \fixt L \x \fixt M
+    \tset{\fint A} \bnfor \tunit \bnfor \fixt L \x \fixt M
     \\[.5em]
     \text{terms} & e,f,g &\bnfeq& x \bnfor \dvar x \bnfor \fnof{x} e
     \bnfor e\<f \bnfor \etuple{} \bnfor \etuple{e,f} \bnfor \pi_i\<e
@@ -19,17 +23,12 @@
     \inj i e \bnfor \ecase{e} (\inj i x_i \caseto f_i)_{i\in\{1,2\}}
     \\&&&
     \ebox e \bnfor \eletbox x e f
+    %\\&&&
+    \bnfor
+    \eeq e f \bnfor \eisempty e \bnfor \esplit e
     \\&&&
-    \bot \bnfor e \vee f \bnfor \eset{e_i}_i \bnfor \efor x e f\\
-    &&& \eeq e f \bnfor \eisempty e \bnfor \esplit e \bnfor \efix e
- %   \\[1ex]
-    %% \multicolumn{2}{r}{\textsf{\scshape Surface syntax}}
-    %% \\[1ex]
-%     \text{surface types} & A,B &\bnfeq& ... \bnfor \tbool
-%     \\[.5ex]
-%     \text{surface terms} & e,f,g &\bnfeq&
-%     ... \bnfor \elet{x = e} f \bnfor \efixis x e\\
-%     &&& \efalse \bnfor \etrue \bnfor \eif e f g \bnfor \ewhen e f
+    \bot \bnfor e \vee f \bnfor \eset{e_i}_i \bnfor \efor x e f
+    \bnfor \efix e
   \end{array}
   \]
 
