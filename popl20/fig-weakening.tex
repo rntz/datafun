@@ -1,15 +1,18 @@
 %% ---- Semantics in a Datafun Model ----
 \begin{figure*}
   \begin{mathpar}
-    \infer[Eps]{ }{ \epsilon \sqsubseteq \epsilon }
+    \infer[Empty]
+        { }{ \emptycx \sqsubseteq \emptycx }
     \and
-    \infer[Cons]{ \Gamma \sqsubseteq \Delta}{ \Gamma, H \sqsubseteq \Delta, H}
+    \infer[Cons]
+        { \Gamma \sqsubseteq \Delta}{ \Gamma, H \sqsubseteq \Delta, H}
     \and
-    \infer[Drop]{ \Gamma \sqsubseteq \Delta}{ \Gamma \sqsubseteq \Delta, H}
+    \infer[Drop]
+        { \Gamma \sqsubseteq \Delta}{ \Gamma \sqsubseteq \Delta, H}
     \and
-    \infer[Disc]{ \Gamma \sqsubseteq \Delta}{ \Gamma, \h x A \sqsubseteq \Delta, \hd x A}
-    
+    \infer[Disc]
+        { \Gamma \sqsubseteq \Delta}{ \Gamma, \h x A \sqsubseteq \Delta, \hd x A}
   \end{mathpar}
-  \caption{Weakening Relation}
+  \caption{Weakening relation}
   \label{fig:weakening}
 \end{figure*}
