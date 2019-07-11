@@ -227,14 +227,14 @@ products, and $\morph{dist}^\Box_+$  to name the map witnessing distributivity o
 define the finite powerset poset $\pfinof(A, \leq_A)$ as
 $(\pfinof A, \subseteq)$, with subsets of $A$ as elements ordered by
 subset inclusion. This is obviously a semilattice, with the least
-element $\morph{join}_0$ given by the empty set, and binary join
-$\morph{join}_2$ given by union. If $A$ itself is finite, then this is
+element $\morph{join}^{\pfinof A}_0$ given by the empty set, and binary join
+$\morph{join}^{\pfinof A}_2$ given by union. If $A$ itself is finite, then this is
 also a \emph{complete} semilattice.  We can define the following
 collection of useful morphisms on sets:
 \begin{displaymath}
   \begin{array}{lclclcl}
-    \morph{join}_0& : & 1 \to \pfinof(A) & \qquad & \morph{join}_2 & : & \pfinof(A) \times \pfinof(A) \to \pfinof(A) \\
-    \morph{join}_0& = & \etuple{} \mapsto \emptyset  &  & \morph{join}_2 & : & \etuple{X, Y} \mapsto X \cup Y \\[1em]
+    \morph{join}^{\pfinof A}_0& : & 1 \to \pfinof(A) & \qquad & \morph{join}^{\pfinof A}_2 & : & \pfinof(A) \times \pfinof(A) \to \pfinof(A) \\
+    \morph{join}^{\pfinof A}_0& = & \etuple{} \mapsto \emptyset  &  & \morph{join}^{\pfinof A}_2 & : & \etuple{X, Y} \mapsto X \cup Y \\[1em]
     \morph{singleton} & : & \iso A \to \pfinof{A} & & \morph{isEmpty} & : & \iso \pfinof{A} \to 1 + 1 \\
     \morph{singleton} & = & a \mapsto \esetraw{a}
     & &
