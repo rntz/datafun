@@ -201,9 +201,9 @@ between our iterations $\name{path}_i$:
 
 \noindent These exactly mirror the derivative and accumulator rules for
 \(\name{path}_i\) and \(\name{dpath}_i\) we gave earlier.
-%
-\todo{Explain how this lets us compute $\name{path}_i$ more
-  efficiently and wait until it quiesces as before.}
+
+%% TODO: Explain how this lets us compute $\name{path}_i$ more
+%% efficiently and wait until it quiesces as before.
 
 The problem of semi\naive\ evaluation for Datafun, then, reduces to the problem
 of finding functions, like $\name{step}'$, which compute the change in a
@@ -410,21 +410,23 @@ semi\naive\ evaluation --- indeed, $\name{step}'$ is a zero-change to
 \]
 
 \noindent
-Function zero-changes are so important we give them a special name:
-\emph{derivatives}. We now have enough machinery to prove correct a general
-\emph{semi\naive\ fixed point strategy}. First, observe that:
+Function zero changes are so important we give them a special name:
+\emph{derivatives}. We now have enough machinery to prove correct a
+general \emph{semi\naive\ fixed point strategy}. First, observe that:
 
 \begin{lemma}\label{lem:DeltaL}
   At every semilattice type $L$, we have $\D L = L$ and
   $\changesat{L}{\dx}{x}{y} \iff (x \binvee \dx) = y$.
 \end{lemma}
-\begin{proof}
-  By induction on semilattice types $L$. \todo{See appendix.}
-\end{proof}
+
+%% \begin{proof}
+%%   By induction on semilattice types $L$.
+%% \end{proof}
 
 \noindent
-Now, given a monotone map $f : L \to L$ and its derivative $f' : \iso L \to L
-\to L$, we can find $f$'s fixed-point as the limit of the sequence $x_i$
+This holds by a simple induction on semilattice types $L$. Now, given
+a monotone map $f : L \to L$ and its derivative $f' : \iso L \to L \to
+L$, we can find $f$'s fixed-point as the limit of the sequence $x_i$
 defined:
 
 \begin{align*}
@@ -433,10 +435,10 @@ defined:
 \end{align*}
 
 \noindent Let $\fastfix\<(f,f') = \bigvee_i x_i$. By induction and the
-derivative property, we have $\changes{\dx_{i+1}}{x_i}{f\<x_i}$ and so $x_i =
-f^i\<x$, and therefore $\fastfix\<(f,f') = \efix f$. \todo{Moreover, if $L$
-  satisfies the ascending chain property, we will reach our fixed point $x_i =
-  x_{i+1}$ in a finite number of iterations.}
+derivative property, we have $\changes{\dx_{i+1}}{x_i}{f\<x_i}$ and so
+$x_i = f^i\<x$, and therefore $\fastfix\<(f,f') = \efix f$. Moreover,
+if $L$ has no infinite ascending chains, we will reach our fixed point
+$x_i = x_{i+1}$ in a finite number of iterations.
 
 \label{sec:seminaive-strategy}
 

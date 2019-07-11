@@ -24,10 +24,7 @@ To compute derivatives, we need to solve the general problem of computing
 %
 So, modelled on the incremental \fn-calculus' $\Deriv$ \citep{incremental},
 $\delta e$ will compute how $\phi e$ changes as its free variables
-change.%
-%% \footnote{In order to make their mutual recursion work, $\delta e$
-%%   incrementalizes $\phi e$, not $e$. We'll see why this is necessary later.
-%%   \todo{insert forward ref.}}
+change.
 
 However, to speed up $\efix e$ we don't want the change to $e$; we want its
 derivative.
@@ -76,6 +73,7 @@ first-order data:
   Induct on $\eqt A$.
 \end{proof}
 
+%% XXX
 For reasons that we'll discuss later \todo{fwdref}, $\phi$ and $\delta$ are
 mutually recursive; to make this work, $\delta e$ must find the change to $\phi
 e$ rather than $e$.
@@ -283,9 +281,6 @@ As for $\delta(\efix e)$, since $e$ can't change (having $\iso$ type), neither
 can $\efix e$ (or $\fastfix\<\phi e$). All we need is a zero change at type
 $\fixt L$; by \cref{lem:DeltaL}, $\bot$ suffices.
 
-%% \todo{Give typing rules and semantics for \fastfix. Semantics does not depend on
-%%   \fastfix\ being given a derivative; it's well-defined regardless.}
-
 
 \subsection{Variables, \boldfn, and application}
 \label{sec:var-fn-app}
@@ -332,7 +327,7 @@ $\delta e$ in \hilite{pink}.
 The same argument applies (all the more easily) when $\phi e$ is used in a
 monotone rather than a discrete position.
 
-\todo{Discuss self-maintainable functions, citing \citet{incremental}.}
+%% TODO: Discuss self-maintainable functions, citing \citet{incremental}.
 
 
 \subsection{The discreteness comonad, \iso}
