@@ -7,7 +7,7 @@ RNTZTEXDIR := ../rntztex/
 export TEXINPUTS := $(RNTZTEXDIR):
 
 # Path to latexrun.
-LATEXRUN := $(RNTZTEXDIR)/latexrun/latexrun
+LATEXRUN := $(RNTZTEXDIR)/latexrun/latexrun -Wall
 
 # By default, try to build every tex file in this directory.
 # Customize $(TEXS) to change this.
