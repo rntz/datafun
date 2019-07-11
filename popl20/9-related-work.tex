@@ -44,10 +44,64 @@ derivatives. We leave this to future work.
 %%   if your program has $n$ nested fixed points, you probably need
 %%   $n$\textsuperscript{th} derivatives. Future work!}
 
-\paragraph{Differential Lambda Calculus}
+\paragraph{Related Work}
+The incremental lambda calculus was introduced by \citet{incremental},
+as a static program transformation which associated a type of
+\emph{changes} to each base type, along with operations to update a
+value based on a change.  Then, a program transformation on the
+simply-typed lambda calculus with base types and functions was
+defined, which rewrote lambda terms into incremental functions which
+propagated changes as needed to reduce recomputation. The fundamental
+idea of the incremental function type taking two arguments (a base
+point and a change) is one we have built on, though we have extended
+the transformation to support many more types like sums, sets,
+modalities, and fixed points.
 
-\paragraph{Incremental Lambda Calculus}
+Subsequently, \citet{DBLP:conf/esop/GiarrussoRS19} extended this work
+to support the \emph{untyped} lambda calculus, additionally also
+extending the incremental transform to support additional
+\emph{caching}. Correctness was established via a surpringly intricate
+argument. First, the overall correctness of change propagation was
+proven using a step-indexed logical relation, and on top of that a
+simulation argument was needed to establish the correctness of
+caching. This work naturally suggests looking at caching as a way
+for optimizing Datafun, as an alternative to very aggressive
+inlining. 
+
+The motivating examples of this line of work was to optimize bulk
+collection operations, and benchmarks showing asymptotic performance
+improvements were demonstrated. However, all of the intuitions were
+phrased in terms of calculus -- a change structure can be thought of
+as a space paired with its tangent space, a zero change on functions
+is a derivative, and so on.
+
+The idea of a derivative as a linear approximation to a function is
+taken quite seriously in the work on the differential lambda
+calculus~\cite{dlc}. These calculi have the beautiful property that
+the \emph{syntactic} notion of linearity in the lambda calculus
+corresponds to the \emph{semantic} notion of linear
+transformation. Despite their beautiful semantics, differential lambda
+calculi are initially startling to traditional functional programmers:
+for example, arbitrary terms of the same type can be added together,
+reflecting the fact that real-valued functions can be summed. 
+
+Unfortunately, though, the intuition of a derivative has its limits. A
+function's derivative is \emph{unique}, a property which models of
+differential lambda calculi have gone to considerable length to
+enforce~\cite{differential-categories}. This is problematic from the
+point of view of semi\naive\ evaluation, since we must have the
+freedom to overapproximate. In
+section~\ref{sec:semilattice-delta-phi}, we took the derivative
+$\delta(e \vee f)$ to be $\delta(e) \vee \delta(f)$, which may
+overapproximate the change to $e \vee f$. This spares us from having
+to do expensive recomputations to construct set differences, and
+without this freedom it is doubtful that semi\naive\ evaluation
+would even be useful at all! 
+
+
+\paragraph{Semantics of Seminaive Evaluation}
 
 \paragraph{Flix and Higher-Order Datalog}
 
-\paragraph{Seminaive Evaluation and Peyton-Jones}
+
+

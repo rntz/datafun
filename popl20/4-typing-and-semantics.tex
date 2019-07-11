@@ -1,7 +1,7 @@
 \section{Typing and Semantics of Core Datafun}
 \label{sec:typing-and-semantics}
 
-In this section, we give the typing and semantics of core Datafun. 
+%In this section, we give the typing and semantics of core Datafun. 
 \input{fig-typing}
 
 \subsection{Syntax}
@@ -87,7 +87,7 @@ $e_i$ has type $A$. Furthermore, each $e_i$ has to typecheck in the discrete
 context, since membership relies on the non-monotonic property of equality.
 This can be seen in the \rn{Eq} rule, which checks equality of two terms
 $\eeq e f$ only when they are discrete, checking in stripped contexts.
-
+%
 Finally, the rule \rn{Fix} for fixed points $\efix e$, takes an endofunction
 $e$ of type $\iso (L \to L)$ and yields an expression of type $L$. In addition
 to being of semilattice type, we also demand here that $L$ is of finite height,
