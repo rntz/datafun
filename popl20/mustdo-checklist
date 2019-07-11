@@ -1,0 +1,13 @@
+1. Add missing citations. delta-fix refers to my unpublished note on
+fixed points of derivatives, http://www.rntz.net/files/fixderiv.pdf.
+
+2. Add required keywords & CCS metadata.
+
+3. Add missing fields to citations.
+
+4. Write section 3 intro on seminaive evaluation in Datalog.
+
+5. In semantics section, define join and so forth to work on any
+semilattice, not just finite sets.
+
+6. Fix underfull vboxes.

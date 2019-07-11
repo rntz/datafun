@@ -1,3 +1,21 @@
+1. Check formatting code examples in section 2. Avoid use of \isocolor in code
+   examples - but what about for discrete variables?
+
+2. Check spacing around align* environments, lists, figures, etc.
+   Try adjusting \listisep.
+   Check inter-figure and figure-text spacing.
+
+3. Check for awkward line breaks, eg. before align* environments etc.
+
+4. Check we compare with incremental & cache-passing-incremental in sec 7.
+
+5. Do we introduce "boxing"/"unboxing" terminology somewhere? Probably section 2
+   or section 4 is a good place.
+
+6. Consider arraycolsep in fig-syntax, fig-typing. Grep for uses of
+   begin{array}.
+
+---------- POST SUBMISSION
 1. TeX up the proof of correctness. (Also weakening & type-correctness.)
 
 2. Try other formulations for logical relation, eg. a speeds-up and a changes
