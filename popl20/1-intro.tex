@@ -107,45 +107,44 @@ language code implementing a semilattice interface), and for this Flix
 offers program-verification style correctness checking (including
 SMT-based tooling).
 
-Datafun takes a somewhat different approach. Like Flix, it is a
-functional programming language, but unlike Flix, its type discipline
-has been extended to support tracking whether functions are monotone
-or not. Then, Datalog-style recursively defined relations are just
-ordinary recursive defininitions on set-valued functions, with
-monotonicity typing ensuring that every definable function on
-relations continues to make sense in the model-theoretic semantics of
-Datalog. Tracking monotonicity information in types permits a much
-tighter integration between the functional and logic programming
-styles, but it comes at the cost that many of Datalog's standard
-implementation techniques, which were originally developed in the
-context of a first-order logic language, are no longer obviously
-applicable in the higher-order functional setting.
+Like Flix, Datafun is a functional programming language, but unlike
+Flix, its type discipline supports tracking \emph{monotonicity} of
+functions. Datalog-style recursively defined relations are given via
+an explicit fixed point operator; monotonicity ensures uniqueness of
+this fixed point, playing a role similar to Datalog's stratification
+condition.
+%
+Tracking monotonicity permits a much tighter integration between the
+functional and logic programming styles, but it comes at a cost: many
+of Datalog's standard implementation techniques, developed in the
+context of a first-order logic language, are not obviously applicable
+in a higher-order functional setting.
 
-Second, actually
-making Datalog perform well enough to use in practice calls for very
-sophisticated program analysis and compiler engineering. (This is a
-familiar experience from the database community, where query planners
-must encode a startling amount of knowledge to optimize relatively
-simple SQL queries.) A wide variety of techniques for optimizing
-Datalog programs have been studied in the literature, such as using
-binary decision diagrams to represent relations~\cite{whaley-phd},
-exploiting the structure of well-behaved subsets (e.g.,
-CFL-reachability problems correspond to the ``chain program'' fragment
-of Datalog~\cite{chain-programs}), and combining top-down and
-bottom-up evaluation via the ``magic sets''
+Second, actually making Datalog perform well enough to use in practice
+calls for very sophisticated program analysis and compiler
+engineering. (This is a familiar experience from the database
+community, where query planners must encode a startling amount of
+knowledge to optimize relatively simple SQL queries.) A wide variety
+of techniques for optimizing Datalog programs have been studied in the
+literature, such as using binary decision diagrams to represent
+relations~\cite{whaley-phd}, exploiting the structure of well-behaved
+subsets (e.g., CFL-reachability problems correspond to the ``chain
+program'' fragment of Datalog~\cite{chain-programs}), and combining
+top-down and bottom-up evaluation via the ``magic sets''
 algorithm~\cite{magic-sets}.
 
-Today, one of the workhorse techniques for implementing bottom-up Datalog
-engines is \emph{semi\naive\ evaluation}~\cite{seminaive}. This optimization
-improves the performance of Datalog's most distinctive feature: recursively
-defined predicates. These can be understood as the fixed point of a set-valued
-function $f$. The \naive\ way to compute this is to iterate the sequence
-$\emptyset, f(\emptyset), f^2(\emptyset), \dots$ until $f^i(\emptyset) =
-f^{i+1}(\emptyset)$. However, each iteration will recompute all previous values.
-Semi\naive\ evaluation computes a safe approximation of the \emph{difference}
-between iterations. This optimization is critical, as it can
-\emph{asymptotically} improve the performance of Datalog queries.
-
+Today, one of the workhorse techniques for implementing bottom-up
+Datalog engines is \emph{semi\naive\ evaluation}~\cite{seminaive}.
+This optimization improves the performance of Datalog's most
+distinctive feature: recursively defined predicates. These can be
+understood as the fixed point of a set-valued function $f$. The
+\naive\ way to compute this is to iterate the sequence $\emptyset,
+f(\emptyset), f^2(\emptyset), \dots$ until $f^i(\emptyset) =
+f^{i+1}(\emptyset)$. However, each iteration will recompute all
+previous values. Semi\naive\ evaluation instead computes a safe
+approximation of the \emph{difference} between iterations. This
+optimization is critical, as it can asymptotically improve the
+performance of Datalog queries.
 
 \paragraph{Contributions} The semi\naive\ evaluation algorithm is
 defined partly as a program transformation on sets of Datalog rules,
@@ -166,28 +165,25 @@ in the Datafun language.
   of Datafun more closely in line with Datalog's, and substantially
   simplifies the program transformation we present.
   
-\item We define a program transformation to statically convert
-  well-typed Datafun programs into an incrementalized version. The
-  translation is a compositional type-and-syntax-directed
-  transformation, which works uniformly at all types including
-  function types. Our approach builds upon the \emph{change structure}
-  methodology for static program incrementalization introduced by
-  \citet{incremental}, extending it to support for sum types, set
-  types, comonads, and (well-founded) fixed points.
+\item We define a program transformation to \emph{incrementalize}
+  well-typed Datafun programs. The translation is a compositional
+  type-and-syntax-directed transformation, and works uniformly at all
+  types including function types. We build on the \emph{change
+    structure} approach to static program incrementalization
+  introduced by \citet{incremental}, extending it to support sum
+  types, set types, comonads, and (well-founded) fixed points.
 
-\item We establish the correctness of our transformation using a novel logical
-  relation which simultaneously defines the changes connecting old and updated
-  programs, as well as the optimized version of both. The fundamental lemma then
-  lets us show that our transformation is semantics-preserving, in the sense
-  that any closed program term of first-order type has the same meaning after
-  optimization.
+\item We establish the correctness of our transformation using a novel
+  logical relation which simultaneously defines the changes connecting
+  old and updated programs, as well as the optimized version of both.
+  The fundamental lemma shows that our transformation is
+  semantics-preserving: any closed program of first-order type has the
+  same meaning after optimization.
   
-\item We then discuss an implementation of semi\naive\ Datafun, which
-  works by compiling Datafun to Haskell, in both \naive\ and
-  semi\naive\ form. This lets us both give examples of the translation
-  on nontrivial terms, and empirically demonstrate the asymptotic
-  speedups predicted by the theory. We additionally discuss the
-  (surprisingly modest) set of program optimizations we found
-  helpful for putting the 
-  optimization into  practice. 
+\item We then discuss our implementation of a compiler from Datafun to
+  Haskell, in both \naive\ and semi\naive\ form. This lets us
+  empirically demonstrate the asymptotic speedups predicted by the
+  theory. We additionally discuss the (surprisingly modest) set of
+  program optimizations we found helpful for putting the optimization
+  into practice.
 \end{itemize}

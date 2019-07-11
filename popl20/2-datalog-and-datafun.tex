@@ -56,11 +56,10 @@ $Y$, such that $X$ is $Y$'s ancestor and $Y$ is $Z$'s parent.
 
 Semantically, each predicate can be interpeted as the set of tuples
 which satisfy the predicate. Recursive definitions can be interpreted
-by viewing the whole program as a relation transformer,
-and taking the least fixed point of that function. 
-Datalog's syntax is set up sp the relation transformer the rules define is
-always a monotone function on sets, ensuring the least fixed point
-always exists.
+by viewing the whole program as a relation transformer, and taking the
+least fixed point of that function. Datalog's syntax is set up sp the
+relation transformer the rules define is always a monotone function on
+sets, ensuring the least fixed point always exists.
 
 \subsection{Datafun}
 
@@ -74,24 +73,25 @@ is extremely elegant, and Datafun arose as an attempt to generalize
 this semantics.
 
 The idea undergirding Datafun is that if the semantics of a Datalog
-program is a montone set-valued operator, then the natural home for
-that semantics is in the category Poset, of partial orders and
+program is a monotone set-valued operator, then the natural home for
+that semantics is in the category \Poset{} of partial orders and
 monotone functions. Since this category is cartesian closed, then it
 can interpret the simply-typed lambda calculus, which gives us a
 notation for writing monotone functions. We can now give a
 reconstruction of Datafun hewing very closely to this semantic
 intuition.
 
-So Datafun begins as the simply-typed lambda calculus with functions ($\fnof{x}{e}$
-and $f\<e$), sums ($\inj i e$ and $\ecase{e} (\inj i x_i \caseto f_i)_{i\in\{1,2\}}$)
-and products ($(\etuple{e_1, e_2}$ and $\pi_i e$). To this, we add a type of finite
-sets\footnote{To implement set types, their elements must support decidable equality.
-  In our core calculus, we use a subgrammar of
-  ``eqtypes'', and in our implementation (which compiles to Haskell) we use typeclass
-  constraints to pick out such types.}
-$\tset{\eqt A}$, which are introduced with set literals $\eset{e_0, \ldots e_n}$, 
-and can be eliminated using (a slight generalization of) Moggi's monadic
-bind syntax $\efor{x}{e}{e'}$.
+So Datafun begins as the simply-typed lambda calculus with functions
+($\fnof{x}{e}$ and $f\<e$), sums ($\inj i e$ and $\ecase{e} (\inj i
+x_i \caseto f_i)_{i\in\{1,2\}}$) and products ($(\etuple{e_1, e_2}$
+and $\pi_i e$). To this, we add a type of finite sets\footnote{To
+  implement set types, their elements must support decidable equality.
+  In our core calculus, we use a subgrammar of ``eqtypes'', and in our
+  implementation (which compiles to Haskell) we use typeclass
+  constraints to pick out such types.} $\tset{\eqt A}$, which are
+introduced with set literals $\eset{e_0, \ldots e_n}$, and can be
+eliminated using (a slight generalization of) Moggi's monadic bind
+syntax $\efor{x}{e}{e'}$.
 
 As long as all the primitives are monotone, every definable
 function is also monotone. This is essential for taking
