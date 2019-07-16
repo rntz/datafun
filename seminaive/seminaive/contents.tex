@@ -1,4 +1,4 @@
-\title{Semi\naive{} Datafun}
+\title{Change Semantics for Semi\naive{} Datafun}
 \author{\scshape Michael Arntzenius}
 \date{\today}
 
@@ -12,22 +12,17 @@
 \section{Outline}
 
 The key insight behind \emph{semi\naive{} evaluation} is to find fixed points
-faster by computing only what changes between iterations
-(\todo{??}). To apply this in Datafun, we first need to
-understand what \emph{change} means.
+faster by computing only what changes between iterations (\cref{sec:fastfix}).
+To apply this in Datafun, we first need to understand what \emph{change} means.
 %
 To this end, we generalize Datafun's \Poset{} semantics to any category with
-appropriate structures (\cref{sec:datafun-models}). We construct such a
-category, \CP{}, whose objects are posets equipped with a notion of increasing
-changes, and whose morphisms are monotone maps possessing \emph{derivatives}
-relating input and output changes (\cref{sec:changeposets}).
+appropriate structures (\cref{sec:datafun-models}).
 
-This yields an incremental semantics for Datafun (\cref{sec:incremental}).
-%
-\todo{Unfortunately, the relationship between the incremental and standard semantics
-is unwieldy, and \CP\ on its own is not rich enough to account for semi\naive{}
-evaluation. We spec\-u\-late that specialising from \emph{once-differentiable}
-to \emph{smooth} functions might yield a rich enough structure.}
+\todo{We construct such a category, \CP{}, whose objects are posets equipped
+with a notion of increasing changes, and whose morphisms are monotone maps
+possessing \emph{derivatives} relating input and output changes
+(\cref{sec:changeposets}). This yields an incremental semantics for Datafun
+(\cref{sec:incremental}).}
 
 Nonetheless, we use \CP\ as a rough guide when constructing a semi\naive{}
 evaluation static transformation (\cref{sec:seminaive}). This transformation
@@ -48,7 +43,7 @@ using logical relations (\cref{sec:logical-relations}).
   f$.
 
 \item I write $\subst{e}{x \substo f}$ to mean ``$e$ with all free occurrences of $x$
-  replaced by $f$ ($\alpha$-vary\-ing as necessary to avoid capture)''.
+  replaced by $f$ ($\alpha$-varying as necessary to avoid capture)''.
 
   \newcommand\iexpr{\phi}
 \item I write $(\iexpr_i)_i$ for the tuple or sequence $(\iexpr_1,
@@ -85,6 +80,7 @@ using logical relations (\cref{sec:logical-relations}).
 
 
 \section{Fixed points and \fastfix}
+\label{sec:fastfix}
 
 \todo{TODO: more explanation.} Let $L$ be a semilattice satisfying the ascending
 chain condition. Fix monotone maps $f : L \to L$ and $\deriv f : L \to L \to L$,
@@ -133,6 +129,7 @@ bound is guaranteed by the ascending chain condition, since $x_i \le x_i \vee
 
 
 \section{Surface syntax and its desugaring}
+\label{sec:syntax}
 
 We present Datafun in two layers: a simpler \emph{core}
 (\cref{fig:core-datafun}) and a more liberal \emph{surface}
@@ -240,18 +237,12 @@ bicartesian closed category \catC{} equipped with the following structures:
 \noindent
 \Cref{fig:semantics} shows how to interpret Datafun into any Datafun
 model. The standard semantics is an instance of this, letting \catC{} be
-\Poset{}, \iso{} be \iso{}, and \pfin{} be the finite power\-set functor.
+\Poset{}, \iso{} be \iso{}, and \pfin{} be the finite powerset functor.
 \todo{TODO: explain in more detail?}
 
 Since we have not imposed any laws, there is no useful general equational theory
 of Datafun models. Instead, our approach is to relate the models we construct to
 the standard model and use \emph{its} equational theory.
-
-
-%%% ---------- Change posets ----------
-%% We're not really using this section at present, and we don't need the full
-%% generality of the section on ``Datafun models'' either.
-\input{seminaive/sec5-deltaposet}
 
 
 \section{Semi\naive{} evaluation}
@@ -373,3 +364,7 @@ e {\h x A, \hd y B} C$. Then \cref{thm:type-correct} tells us:
 %% \end{proof}
 
 
+%% %%% ---------- Change posets ----------
+%% %% We're not really using this section at present, and we don't need the full
+%% %% generality of the section on ``Datafun models'' either.
+%% \input{seminaive/old-deltaposet}
