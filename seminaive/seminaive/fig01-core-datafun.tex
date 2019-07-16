@@ -14,11 +14,14 @@
       \\
       \text{semilattices} & L,M &\bnfeq& \tset{\eqt A} \bnfor \tunit \bnfor L \x M
       \\
+      \text{finite eqtype} & \fint A, \fint B &\bnfeq&
+      \tset{\fint A} \bnfor \tunit \bnfor \fint A \x \fint B
+      \\
       \text{fixtypes} & \fixt L, \fixt M &\bnfeq&
-      \tset{\color{red}\fint A} \bnfor \tunit \bnfor \fixt L \x \fixt M
+      \tset{\fint A} \bnfor \tunit \bnfor \fixt L \x \fixt M
       \\[.5em]
       \text{terms} & e,f,g &\bnfeq& x \bnfor \dvar x \bnfor \fnof{x} e
-      \bnfor e\<f \bnfor \etuple{} \bnfor \etuple{e,f} \bnfor \pi_i\<e\\
+      \bnfor e\<f \bnfor \etuple{} \bnfor \etuple{e,f} \bnfor \prj i e\\
       &&& \inj i e \bnfor \ecase{e} (\inj i x \caseto f_i)_{i\in\{1,2\}}\\
       &&& \eboxd e \bnfor \elet{\eboxd x = e} f\\
       &&& \bot \bnfor e \vee f \bnfor \esetd{e_i}_i \bnfor \eford x e f\\
@@ -42,14 +45,14 @@
 
     \infer{(\J{e_i}\G{A_i})_i}{\J{\etuple{e_1,e_2}} \G {A_1 \x A_2}}
 
-    \infer{\J e \G {A_1 \x A_2}}{\J{\pi_i\<e}\G{A_i}}
+    \infer{\J e \G {A_1 \x A_2}}{\J{\prj i e}\G{A_i}}
 
     \infer{\J e \G A_i}{\J{\inj i e}\G{A_1 + A_2}}
 
     \infer{\J e \G {A_1 + A_2} \\
       (\J {f_i} {\G,\h {x_i} {A_i}} {B})_i
     }{
-      \J {\ecase{e} (\inj i {x_i} \caseto f_i)_i} \G B
+      \J {\ecase{e} (\inj i x_i \caseto f_i)_i} \G B
     }
 
     \infer{\J {\isocolor e} {\stripcxd\G} A}{\J{\eboxd e} \G {\iso A}}

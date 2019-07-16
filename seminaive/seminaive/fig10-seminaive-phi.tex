@@ -21,11 +21,11 @@
     \phi(\esplit e) &= \ecase{\phi e}\\
     &\phantom{{}={}}\quad
     \left(\eboxd{\etuple{\inj i x, \inj i \dx}}
-    \caseto \inj i {\eboxd {\etuple{x,\dx}}}\right)_{i\in\{1,2\}}
+    \caseto \inj i \eboxd{\etuple{x,\dx}}\right)_{i\in\{1,2\}}
     \\
     &\phantom{{}={}}\quad
     \left(\eboxd{\etuple{\inj i x, \inj j \pwild}}
-    \caseto \inj i {\eboxd {\etuple{x, \dummy\<x}}} \right)_{i\ne j\in\{1,2\}}
+    \caseto \inj i \eboxd {\etuple{x, \dummy\<x}} \right)_{i\ne j\in\{1,2\}}
     %% \phi(\esplit e) &= \color{red} \elet{\eboxd{x} = \phi e}\\
     %% &\phantom{{}={}} \esplit [\isocolor \ecase x\\
     %% &\phantom{= \esplit}\quad\isocolor
@@ -44,7 +44,7 @@
     \phi x &= x & \phi \dvar x &= \dvar x\\
     \phi(\fnof x e) &= \fnof x \phi e & \phi(e\<f) &= \phi e\<\phi f\\
     \phi\etuple{e_i}_i &= \etuple{\phi e_i}_i &
-    \phi(\pi_i\<e) &= \pi_i\<\phi e\\
+    \phi(\prj i e) &= \prj i \phi e\\
     \phi(\inj i e) &= \inj i \phi e\\
     \phi\bot &= \bot &
     \phi(e \vee f) &= \phi e \vee \phi f\\

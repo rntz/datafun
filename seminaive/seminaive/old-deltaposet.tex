@@ -135,7 +135,7 @@ maps in \CP{} are differentiable, so are the elements of $\vals{(\expO A B)}$.
 
 %% \nopagebreak[2]
 %% \begin{align*}
-%%   \deriv\pi_i\<x\<\dx &= \pi_i\<\dx &
+%%   \deriv\pi_i \<x\<\dx &= \prj i \dx &
 %%   \deriv{\fork{f_i}_i} &= \fork{\deriv f_i}_i
 %% \end{align*}
 
@@ -221,7 +221,7 @@ then for each $i$ we have $\valid{\dx_i \compose \dy_i}{x_i}{z_i}$ and therefore
 \noindent
 Likewise for correctness of $\deriv\pi_i$; if $\valid{\dx_i}{x_i}{y_i}$ for each
 $i$ then by definition
-\[\valid{\pi_i\<(\dx_i)_i = \dx_i}{x_i}{y_i}\]
+\[\valid{\prj i (\dx_i)_i = \dx_i}{x_i}{y_i}\]
 
 \noindent As for correctness of $\deriv{\fork{f_i}_i}$:
 
@@ -293,7 +293,7 @@ Correctness of $\deriv\injc_i$ is immediate: suppose $\vld\dx x x$. Then
 %%   \chgs{\sum_{i \in I} A_i} &= \sum_{i \in I} \chgs A_i
 %%   %\label{eqn:delta-distributes-over-sums-and-products}
 %%   \\
-%%   \deriv\pi_i\<x\<\dx &= \pi_i\<\dx & \deriv\injc_i\<x\<\dx &= \inj i \dx
+%%   \deriv\pi_i \<x\<\dx &= \prj i \dx & \deriv\inj i\<x\<\dx &= \inj i \dx
 %% \end{align*}
 
 %% \noindent \todo{TODO: derivatives of fork \& split!}
@@ -668,7 +668,7 @@ letting $\deriv{\morph{join}} \<x \<\dx = \morph{join}\<\dx$, because:
 \nopagebreak[2]
 \begin{align*}
   \morph{join}\<(x \upd \dx) &= \bigvee_i \pi_i \<(x \vee \dx)\\
-  &= \left(\bigvee_i \pi_i\<x\right) \vee \left(\bigvee_i \pi_i\<\dx\right)\\
+  &= \left(\bigvee_i \prj i x\right) \vee \left(\bigvee_i \prj i \dx\right)\\
   &= \morph{join}\<x \vee \morph{join}\<\dx\\
   &= \morph{join}\<x \upd \deriv{\morph{join}}\<x\<\dx
 \end{align*}

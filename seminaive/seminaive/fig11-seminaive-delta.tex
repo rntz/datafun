@@ -8,7 +8,7 @@
     \delta(\fnof{x} e) &= \fnof{\eboxd x} \fnof\dx \delta e
     & \delta(e\<f) &= \delta e \<\eboxd{\color{Rhodamine}\phi e} \<\delta f\\
     \delta\etuple{e_i}_i &= \etuple{\delta e_i}_i
-    & \delta(\pi_i\<e) &= \pi_i\<\delta e\\
+    & \delta(\prj i e) &= \prj i \delta e\\
     \delta(\inj i e) &= \inj i {\delta e} &
     \delta(e \vee f) &= \delta e \vee \delta f\\
     \delta\eboxd{e} &= \etuple{} &
@@ -20,8 +20,8 @@
     %% TODO: double-check this!
     \delta(\ecase e (\inj i x \caseto f_i)_i)
     &= \ecase{\esplit{\eboxd{\color{Rhodamine} \phi e}},\, \delta e}\\
-    &\qquad ({\inj i {\eboxd x},\, \inj i \dx} \caseto \delta f_i)_{i\in\{1,2\}}\\
-    &\qquad ({\inj i {\eboxd x},\, \inj j \pwild}
+    &\qquad ({\inj i \eboxd x,\, \inj i \dx} \caseto \delta f_i)_{i\in\{1,2\}}\\
+    &\qquad ({\inj i \eboxd x,\, \inj j \pwild}
       \caseto \subst{\delta f_i}{\dx \substo \dummy\<\dvar x})_{i\ne j \in\{1,2\}}
     %% &= \ecase{\esplit{\eboxd{\phi e}}}\\
     %% &\qquad (\inj i \eboxd x
@@ -43,7 +43,7 @@
     \\
     \delta(\esplit e) &= \ecase{\phi e}
     (\eboxd{\etuple{\inj i \pwild, \pwild}}
-    \caseto \inj i {\etuple{}} )_i
+    \caseto \inj i \etuple{})_i
   \end{align*}
   %\vskip -.5\baselineskip
 

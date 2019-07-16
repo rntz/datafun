@@ -28,7 +28,7 @@
     & \den{e\<f} &= \fork{\den{e}, \den{f}} \then \eval
     \\
     \den{\etuple{e_i}_i} &= \fork{\den{e_i}}_i
-    & \den{\pi_i\<e} &= \den{e} \then \pi_i
+    & \den{\prj i e} &= \den{e} \then \pi_i
     \\
     \bigden{\eboxd e} &= \boxd e
     & \bigden{\elet{\eboxd x = e} f} &=
@@ -57,7 +57,7 @@
   \begin{align*}
     \den{\inj i e} &= \den{e} \then \injc_i
     \\
-    \den{\ecase{e} (\inj i{x_i} \caseto f_i)_i} &=
+    \den{\ecase{e} (\inj i x_i \caseto f_i)_i} &=
     \fork{\id, \den{e}} \then \morph{dist}^\x_+ \then \bigkrof{\den{f_i}}_i
     %\bigkrof{\den{f_i}}_i \circ \morph{dist}^\x_+ \circ \fork{\id, \den{e}}
   \end{align*}

@@ -2,16 +2,8 @@
   \begin{align*}
     \tbool &\desugars \tset{\tunit}
     \\
-    %% \eeqd e f &\desugars \prim{eq}\< \eboxd{\etuple{e, f}}\\
-    %% \esetd{e_i}_i &\desugars \edown\eboxd{e_0} \vee ... \vee \edown\eboxd{e_n} \quad \text{(or $\bot$ if $n=0$)}\\
-    %% \eford x e f &\desugars \ebigvee {\freshvar y} e {\elet{\eboxd x = \freshvar y} f}\\
     \eifd e {f_1}{f_2} &\desugars
-    \ecase{\eisempty e} (\inj i {\pwild} \caseto f_i)_i
-    %% %% NB. This is mostly redundant with the pattern-matching elaboration in fig:
-    %% \edcase e (\inj i {\dvar{x_i}} \caseto f_i)_i
-    %% &\desugars \ecase{\esplit \eboxd e}
-    %% (\inj i {\freshvar y} \caseto \elet{\eboxd{x_i} = \freshvar y} f_i)_i
-    %% \\
+    \ecase{\eisempty e} (\inj i \pwild \caseto f_i)_i
   \end{align*}
 
   \begin{align*}
