@@ -25,7 +25,6 @@ watch\:%: %
 	@while inotifywait -e modify -r . >/dev/null 2>&1; do \
 		echo; \
 		make --no-print-directory -j $^; \
-		make --no-print-directory -j $^; \
 	done
 
 %.pdf: %.tex FORCE
