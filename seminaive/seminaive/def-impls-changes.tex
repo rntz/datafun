@@ -16,7 +16,7 @@
     \changesat{A \to B}{\df}{f}{g}
     &\impliedby \fa{\changes\dx x y} \changes{\df\<x\<\dx}{f\<x}{g\<y}
     \\
-    \changesat{\isof A}{\tuple{}}{x}{x}\\
+    \changesat{\iso A}{\tuple{}}{x}{x}\\
     \changesat{\tseteq A}{\dx}{x}{(x \cup \dx)}
   \end{align*}
 
@@ -30,14 +30,14 @@
     &\hspace*{1.8em}\wedge
     %\wedge
     \fa{\hd x A \in \G}
-    \changesat{\isof A}{\tuple{}}{\g_{\dvar x}}{\g'_{\dvar x}}
+    \changesat{\iso A}{\tuple{}}{\g_{\dvar x}}{\g'_{\dvar x}}
   \end{align*}
 
-  \noindent Observe that the condition $\changesat{\isof A}{\tuple{}}{\g_{\dvar
+  \noindent Observe that the condition $\changesat{\iso A}{\tuple{}}{\g_{\dvar
       x}}{\g'_{\dvar x}}$ is equivalent to $\g_{\dvar x} = \g'_{\dvar x}$.
 
   %% Finally, this extends to \Poset-morphisms $f,g : \den{\G} \to \den{A}$ and
-  %% $\df : \den{\isocx \G \x \D\G} \to \den{\D A}$:
+  %% $\df : \den{\iso \G \x \D\G} \to \den{\D A}$:
   %% \begin{align*}
   %%   \changesat{\G \vdash A}{\df}{f}{g} \impliedby&
   %%   \fa{\changesat{\G}{\dgamma}{\g}{\g'}}
@@ -54,7 +54,7 @@
     \infer{}{a \impls_{\tseteq A} a}
 
     \infer{x \impls_A a \\ \changesat{\Phi A}\dx x x}{
-      (x,\dx) \impls_{\isof A} a}
+      (x,\dx) \impls_{\iso A} a}
 
     \tuple{} \impls_\tunit \tuple{}
 
@@ -77,7 +77,7 @@
     %\wedge
     \\&\hspace*{1.8em}\wedge
     \fa{\hd x A \in \G}
-    (\gamma_{\dvar x}, \gamma_{\dvar \dx}) \impls_{\isof A} \rho_{\dvar x}
+    (\gamma_{\dvar x}, \gamma_{\dvar \dx}) \impls_{\iso A} \rho_{\dvar x}
   \end{align*}
 
   \noindent Observe that the last condition is equivalent to \( (\gamma_{\dvar

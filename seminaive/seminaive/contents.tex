@@ -48,7 +48,7 @@ using logical relations (\cref{sec:logical-relations}).
   f$.
 
 \item I write $\subst{e}{x \substo f}$ to mean ``$e$ with all free occurrences of $x$
-  replaced by $f$ ($\alpha$-varying as necessary to avoid capture)''.
+  replaced by $f$ ($\alpha$-vary\-ing as necessary to avoid capture)''.
 
   \newcommand\iexpr{\phi}
 \item I write $(\iexpr_i)_i$ for the tuple or sequence $(\iexpr_1,
@@ -77,9 +77,9 @@ using logical relations (\cref{sec:logical-relations}).
   \emph{discrete} poset on the same elements, defined:
 
   \begin{eqnarray*}
-    x \in \isof A &\iff& x \in A\\
-    x \le y : \isof A &\iff& x = y\\
-    \isof(f : A \to B) &=& f : \isof A \to \isof B
+    x \in \iso A &\iff& x \in A\\
+    x \le y : \iso A &\iff& x = y\\
+    \iso(f : A \to B) &=& f : \iso A \to \iso B
   \end{eqnarray*}
 \end{enumerate}
 
@@ -151,17 +151,17 @@ The specific surface features we add are:
 \item Booleans, ordered $\efalse < \etrue$. Since sum types are ordered
   disjointly, booleans are instead desugared into sets of empty tuples, with
   $\efalse = \emptyset$ and $\etrue = \eset{\etuple{}}$. \todo{TODO: explain
-    $(\eisEmpty e)$}.
+    $(\eisempty e)$}.
 
 \item Pattern matching on tuples and boxes. \todo{TODO: explain $\prim{split}$.}
 
 %% \item In the core language, semilattice operations ($\bot$, $e \vee f$, and
-%%   \kwname{for}-loops) are permitted only at \emph{first-order} semilattice types
+%%   \kw{for}-loops) are permitted only at \emph{first-order} semilattice types
 %%   $\eqt L$. This limitation is lifted in the surface language using
 %%   $\eta$-expansion (\cref{fig:desugaring-higher-order-semilattice}).
 
 \item In the core language, we express fixed point computations using what
-  amounts to a higher-order operator $\prim{fix} : \isof{(\fixt L \to \fixt L)}
+  amounts to a higher-order operator $\prim{fix} : \iso{(\fixt L \to \fixt L)}
   \to \fixt L$. In the surface language there is a more convenient binding form,
   $\efixisd x e$.
 
@@ -191,13 +191,13 @@ bicartesian closed category \catC{} equipped with the following structures:
 
   \nopagebreak[2]
   \begin{align*}
-    \morph{singleton} &: \isof A \to \pfinof{A} &
+    \morph{single} &: \iso A \to \pfinof{A} &
     \morph{isEmpty} &: \discof{\pfinof{\termO}} \to \termO + \termO
   \end{align*}
 
   %% \noindent
   %% and, moreover, for any objects $\G,A$, semilattice object $L$, and morphism
-  %% $f : \G \x \isof A \to L$, a ``collecting'' morphism \( \pcollect{f} : \G \x
+  %% $f : \G \x \iso A \to L$, a ``collecting'' morphism \( \pcollect{f} : \G \x
   %% \pfinof A \to L \).
 
 \item \emph{Equality}, \emph{semilattice}, and \emph{fixed point objects}, which
@@ -207,29 +207,29 @@ bicartesian closed category \catC{} equipped with the following structures:
 
   \nopagebreak[2]
   \begin{align*}
-    \morph{eq} &: \isof{\eqt A} \x \isof{\eqt A} \to \pfinof\termO
+    \morph{eq} &: \iso{\eqt A} \x \iso{\eqt A} \to \pfinof\termO
     &
     \morph{join}_n &: L^n \to L
     &
-    \morph{fix} &: \isof{(\expO{\fixt L}{\fixt L})} \to \fixt L
+    \morph{fix} &: \iso{(\expO{\fixt L}{\fixt L})} \to \fixt L
   \end{align*}
 
-\item To interpret \kwname{for}-loops, for any objects $\G, A$ and any
+\item To interpret \kw{for}-loops, for any objects $\G, A$ and any
   semilattice object $L$ we require a family of morphisms $\pcollect{f}$:
 
   \nopagebreak[2]
   \[
-    \infer{f : \G \x \isof A \to L}
+    \infer{f : \G \x \iso A \to L}
           {\pcollect{f} : \G \x \pfinof{A} \to L}
   \]
 
 %% , Given objects $\G, A$, a semilattice equality type $\eqt L$, and
-%%   a morphism $f : \G \x \isof{A} \to \den{\eqt L}$, we require a morphism
+%%   a morphism $f : \G \x \iso{A} \to \den{\eqt L}$, we require a morphism
 %%   $\pcollect{f} : \G \x \pfinof{A} \to \den{\eqt L}$. Or, abusing inference rule
 %%   notation:
 %%   %
 %%   \[
-%%     \infer{f : \G \x \isof A \to \den{\eqt L}}
+%%     \infer{f : \G \x \iso A \to \den{\eqt L}}
 %%           {\pcollect{f} : \G \x \pfinof{A} \to \den{\eqt L}}
 %%   \]
 
@@ -240,7 +240,7 @@ bicartesian closed category \catC{} equipped with the following structures:
 \noindent
 \Cref{fig:semantics} shows how to interpret Datafun into any Datafun
 model. The standard semantics is an instance of this, letting \catC{} be
-\Poset{}, \iso{} be \iso{}, and \pfin{} be the finite powerset functor.
+\Poset{}, \iso{} be \iso{}, and \pfin{} be the finite power\-set functor.
 \todo{TODO: explain in more detail?}
 
 Since we have not imposed any laws, there is no useful general equational theory
@@ -263,7 +263,7 @@ the standard model and use \emph{its} equational theory.
 \input{seminaive/fig12-dummy}
 
 \todo{TODO: explain \fastfix. explain $\Phi$ type transformation as
-  ``decorating'' $\isof A$ values with their zero changes so that \prim{fix}
+  ``decorating'' $\iso A$ values with their zero changes so that \prim{fix}
   gets its argument's derivative and can be implemented via \fastfix.
   Give semantics for \fastfix. Explain that we need $\Phi{\eqt A}$ to be
   an eqtype for $\Phi{\tseteq{A}} = \tset{\Phi{\eqt A}}$ to be well-formed, and
@@ -280,11 +280,11 @@ speeding up fixed point computation by using derivatives; and $\delta e$, which
 computes the \emph{derivative} of $\phi e$.
 %
 To describe the types of $\phi e$ and $\delta e$, we'll need three new operators
-on contexts: $\isocx\G$, $\D\G$, and $\Phi\G$. \Cref{fig:PhiDelta} defines these
+on contexts: $\iso\G$, $\D\G$, and $\Phi\G$. \Cref{fig:PhiDelta} defines these
 pointwise by their action on hypotheses. For example,
 %\par\nopagebreak[2]\vspace{-.5\baselineskip}
 \begin{mathpar}
-  \isocx{(\h x A, \hd y B)} = \hd x A, \hd y B
+  \iso{(\h x A, \hd y B)} = \hd x A, \hd y B
 
   \D(\h x A, \hd y B) = \h \dx {\D A}
 
@@ -292,9 +292,9 @@ pointwise by their action on hypotheses. For example,
 \end{mathpar}
 
 \noindent
-The idea is that $\isof\G$, $\D\G$, and $\Phi\G$ mirror the effect of $\iso$,
-$\D$, and $\Phi$ on the semantics of $\G$. In particular, $\den{\isocx\G} =
-\isof{\den\G}$, and:
+The idea is that $\iso\G$, $\D\G$, and $\Phi\G$ mirror the effect of $\iso$,
+$\D$, and $\Phi$ on the semantics of $\G$. In particular, $\den{\iso\G} =
+\iso{\den\G}$, and:
 
 \nopagebreak[2]
 \begin{align*}
@@ -302,9 +302,9 @@ $\D$, and $\Phi$ on the semantics of $\G$. In particular, $\den{\isocx\G} =
   &
   \den{\Phi(\h x A)} &\cong \den{\Phi A}
   \\
-  \den{\D(\hd x A)} &\cong \den{\D \isof A}
+  \den{\D(\hd x A)} &\cong \den{\D \iso A}
   &
-  \den{\Phi(\hd x A)} &\cong \den{\Phi \isof A}
+  \den{\Phi(\hd x A)} &\cong \den{\Phi \iso A}
 \end{align*}
 
 \noindent
@@ -316,7 +316,7 @@ type-correct:
   If $\J e \G A$, then
   \[ \J {\phi e} {\Phi\G} {\Phi A}
   \qquad\text{and}\qquad
-  \J {\delta e} {\isocx{\Phi\G}, \DP\G} {\DP A}
+  \J {\delta e} {\iso{\Phi\G}, \DP\G} {\DP A}
   \]
 \end{restatable}
 \begin{proof}

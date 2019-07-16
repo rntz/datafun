@@ -8,7 +8,7 @@
     \den{\tseteq A} &= \pfinof{\den{\eqt A}}
     & \den{A \x B} &= \den{A} \x \den{B}
     \\
-    \den{\isof A} &= \discof{\den{A}} & \den{A + B} &= \den{A} + \den{B}
+    \den{\iso A} &= \discof{\den{A}} & \den{A + B} &= \den{A} + \den{B}
   \end{align*}
 
   \begin{align*}
@@ -24,13 +24,13 @@
     \den{\dvar x} &= \pi_{\dvar x} \then \varepsilon \quad \text{($\dvar x$ discrete)}
     & \den{x} &= \pi_x \quad \text{($x$ monotone)}
     \\
-    \den{\fnof x e} &= \lambda\den{e}
+    \den{\fnof x e} &= \lambda_x\den{e}
     & \den{e\<f} &= \fork{\den{e}, \den{f}} \then \eval
     \\
     \den{\etuple{e_i}_i} &= \fork{\den{e_i}}_i
     & \den{\pi_i\<e} &= \den{e} \then \pi_i
     \\
-    \bigden{\eboxd e} &= \strip \then \discof{\den e}
+    \bigden{\eboxd e} &= \boxd e
     & \bigden{\elet{\eboxd x = e} f} &=
     \fork{\id, \den{e}} \then \den{f}
     \\
@@ -39,15 +39,14 @@
     \den{e \vee f} &= \fork{\den{e}, \den{f}} \then \morph{join}_2
     \\
     %\den{\color{red}\prim{isEmpty}\<e} &= \den{e} \then \morph{isEmpty}
-    \den{\eisEmpty e} &= \den{\eboxd e} \then \morph{isEmpty}
+    \den{\eisempty e} &= \boxd{e} \then \morph{isEmpty}
     & \den{\esplit e} &= \den{e}\then \discosum
     \\
     %\den{\color{red}\prim{eq}\<e} &= \den{e} \then \morph{eq}
-    \den{\eeqd{e_1}{e_2}} &= \fork{\den{\eboxd{e_i}}}_i \then \morph{eq}
+    \den{\eeqd{e_1}{e_2}} &= \fork{\boxd{e_i}}_i \then \morph{eq}
     & \den{\efix e} &= \den{e} \then \morph{fix}
     \\
-    %\den{\edown e} &= \den{e} \then \morph{gen} % <- THIS IS WRONG
-    \den{\esetd{e_i}_i} &= \fork{\den{\eboxd{e_i}} \then \morph{singleton}}_i \then \morph{join}
+    \den{\esetd{e_i}_i} &= \fork{\boxd{e_i} \then \morph{single}}_i \then \morph{join}
     &
     \den{\eford x e f} &=
     \fork{\id,\den{e}} \then \pcollect{\den{f}}
@@ -67,20 +66,21 @@
   \figsectionname{Lemmas}
 
   \begin{align*}
-    \morph{dist}^\x_+ &: A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)\\
+    \morph{box} &: (\stripcxd\G \vdash A) \to \den{\G \vdash \iso A}
+    %\den\G \to_\catC \discof{\den{\stripcxd\G}} % of \strip
+    \\
+    \boxd e &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \discox
+    \then \iso \den{\isocolor e}
+    \\[1ex]
+    \morph{dist}^\x_+ &: A \x (B_1 + B_2) \to_\catC (A \x B_1) + (A \x B_2)
+    \\
     % this could be simpler if it distributed in the opposite direction.
     \morph{dist}^\x_+ &= \fork{\pi_2 \then \krof{\lambda (\fork{\pi_2,\pi_1} \then \injc_i)}_i, \pi_1}
     \then \eval
-    \\[1ex]
-    \strip &: \den\G \to \discof{\den{\stripcxd\G}}\\
-    \strip &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \discox
   \end{align*}
 
-  \todo{TODO: add a function $\morph{box}(f) = \strip \then \isof f$, so
-    $\den{\eboxd e} = \morph{box}(\den{e})$?}
-
   %% \raggedright\footnotesize Strictly speaking, the cases for
-  %% $\den{\esetd{e_i}_i}$, $\den{\eisEmpty e}$, and $\den{\eeqd e f}$ are not
+  %% $\den{\esetd{e_i}_i}$, $\den{\eisempty e}$, and $\den{\eeqd e f}$ are not
   %% structurally inductive; nonetheless $\den{e}$ is well-defined.
 
   \caption{Datafun semantics in a Datafun model $\tuple{\catC, \disco, \pfin}$}

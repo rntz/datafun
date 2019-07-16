@@ -70,7 +70,7 @@ need only exhibit their derivatives. These follow a variant of the chain rule:
 It's easy to see these functions are monotone in \dx\ as required.
 
 
-\subsection{The forgetful functor \valfn}
+\subsection{\texorpdfstring{\boldmath}{}The forgetful functor \valfn}
 \label{sec:CP-vals}
 
 The functor $\valfn : \CP \to \Poset$ takes objects $A$ to $\vals A$ and
@@ -346,7 +346,7 @@ The values $\vals{(\expO A B)}$ of the exponential object are the
 require differentiability, \valfn\ does \emph{not} commute with exponentials:
 $\vals{(\expO A B)} \ne \expO{\vals A}{\vals B}$.
 %
-Meanwhile, the changes $\chgs{(\expO A B)}$ are monotone maps $\isof{\vals A}
+Meanwhile, the changes $\chgs{(\expO A B)}$ are monotone maps $\iso{\vals A}
 \to \chgs A \to \chgs B$, ordered pointwise. The update relation and change
 composition must be very carefully defined, so we examine them at length below.
 
@@ -439,7 +439,7 @@ this valid, suppose $\vld\df f g$, $\vld\dg g h$ and $\vld\dx x y$. Then
 \todo{TODO: discuss unavoidable asymmetry in definitions of \(\changetofn_{\expO
     A B}\) and \(\composefn_{\expO A B}\).}
 
-\subsubsection{\eval\ and \fn}
+\subsubsection{\texorpdfstring{\boldmath}{}\eval\ and \fn}
 
 To show that $\expO A B$ is an exponential object, we need evaluation and
 currying maps, \eval\ and $\fn f$. Modulo differentiability, these are
@@ -486,7 +486,7 @@ y = g \<x \<y$ and so $\fn f = g$.
 %\renewcommand\pseudoexp{\overset{?}{\Rightarrow}}
 
 You might have expected changes $\chgs{(\expO A B)}$ to be given pointwise, as
-maps $\isof{\vals A} \to \chgs B$. Intriguingly, this does yield a valid change
+maps $\iso{\vals A} \to \chgs B$. Intriguingly, this does yield a valid change
 poset, one rather simpler than $\expO A B$, but it does not satisfy the
 properties of an exponential. I call this the \emph{pseudo-exponential}, $A
 \pseudoexp B$. Pseudo-exponentials are irrelevant to Datafun, but are an
@@ -497,7 +497,7 @@ constructed as follows:
 \begin{mathpar}
   \vals{(A \pseudoexp B)} = \CP(A,B)
 
-  \chgs{(A \pseudoexp B)} = \isof{\vals A} \to \chgs B
+  \chgs{(A \pseudoexp B)} = \iso{\vals A} \to \chgs B
 
   \vld{\df} f g : A \pseudoexp B \iff \fa{x} \vld{\df\<x}{f\<x}{g\<x}
 
@@ -516,19 +516,19 @@ correctness of composition. \todo{TODO: explain why they aren't the exponential
 %% \emph{pseudo-exponential}, written $A \pseudoexp B$.
 
 
-\subsection{The lifted \iso\ comonad}
+\subsection{\texorpdfstring{\boldmath}{}The lifted \iso\ comonad}
 \label{sec:CP-iso}
 
 Now we construct a comonad $\iso$ on \CP\ such that $\valfn\iso_\CP =
 \iso_\Poset\valfn$. This requirement defines the value-level structure, leaving
-only the change poset, update map, and composition. Since $\isof A$ is ordered
+only the change poset, update map, and composition. Since $\iso A$ is ordered
 discretely, values \emph{cannot} increase. So the simplest definition is:
 
 \nopagebreak[2]
 \begin{align*}
-  \chgs{\isof A} &= \termO &
-  x \upd_{\isof A} \tuple{} &= x &
-  \tuple{} \compose_{\isof A} \tuple{} &= \tuple{}
+  \chgs{\iso A} &= \termO &
+  x \upd_{\iso A} \tuple{} &= x &
+  \tuple{} \compose_{\iso A} \tuple{} &= \tuple{}
 \end{align*}
 
 \noindent
@@ -560,7 +560,7 @@ which I'll call $\altiso$ for clarity, defined like so:
 
 \nopagebreak[2]
 \begin{align*}
-  \chgs{\altiso A} &= \isof{\chgs A} &
+  \chgs{\altiso A} &= \iso{\chgs A} &
   %% x \upd_{\altiso A} \dx = y &\iff x = y \wedge x \upd_A \dx = y
   \vld{\dx} x x : \altiso A &\iff \vld{\dx} x x : A
   &
@@ -589,7 +589,7 @@ Meanwhile, product- and sum-distribution become identity maps, because $\prod_i
 A_i$ (checking this is left as an exercise for the reader).
 
 
-\subsection{The lifted \pfin\ functor}
+\subsection{\texorpdfstring{\boldmath}{}The lifted \pfin\ functor}
 \label{sec:CP-pfin}
 
 We lift the finite powerset functor \pfin\ to \CP\ as follows:
@@ -616,12 +616,12 @@ $\cup$:
 \[ (x \cup \dx = y) \wedge (y \cup \dy = z) \implies (x \cup \dx \cup \dy = z) \]
 
 \noindent
-Since the arguments to \morph{singleton} and \morph{isEmpty} cannot change
+Since the arguments to \morph{single} and \morph{isEmpty} cannot change
 (having $\iso$ type), their derivatives always return zero-changes:
 
 \nopagebreak[2]
 \begin{align*}
-  \deriv{\morph{singleton}}_A \<x \<\tuple{} &= \emptyset &
+  \deriv{\morph{single}}_A \<x \<\tuple{} &= \emptyset &
   \deriv{\morph{isEmpty}} \<x \<\tuple{} &= \morph{isEmpty} \< x
 \end{align*}
 
@@ -681,7 +681,7 @@ letting $\deriv{\morph{join}} \<x \<\dx = \morph{join}\<\dx$, because:
 \subsection{Collecting morphisms}
 \label{sec:CP-collect}
 
-Let $\G, A$ be objects, $L$ be a semilattice object, and $f : \G \x \isof A \to
+Let $\G, A$ be objects, $L$ be a semilattice object, and $f : \G \x \iso A \to
 L$. Our derivative for $\pcollect f : \G \x \pfinof A \to L$ is:
 
 \nopagebreak[2]
@@ -768,7 +768,7 @@ necessarily differentiable, and this causes no end of pain.
 %
 In particular, there seems to be no way to re-use the validity relations from
 objects in \CP\ to prove correctness of the semi\naive{} transform. Because
-$\chgs(\expO A B) = \isof{\vals A} \to \chgs A \to \chgs B$ mixes differentiable
+$\chgs(\expO A B) = \iso{\vals A} \to \chgs A \to \chgs B$ mixes differentiable
 and non-differentiable things, we can't use it either on values we get out of
 the \Poset{}-semantics or out of the the \CP-semantics.}
 
@@ -812,7 +812,7 @@ the \Poset{}-semantics or out of the the \CP-semantics.}
 %%   an inductive hypothesis; additionally, $\daggereq$ indicates an appeal to
 %%   \cref{thm:agree-first-order}.
 %%   \begin{description}
-%%     \item[Case $\isof A$:] \(\D\incdens{\isof A} = \D{\isof{\incdens A}} =
+%%     \item[Case $\iso A$:] \(\D\incdens{\iso A} = \D{\iso{\incdens A}} =
 %%       \termO_\Poset = \vals\termO_\CP = \vals{\incdens{\tunit}} \).
 
 %%     \item[Case $\tseteq A$:]
@@ -842,12 +842,12 @@ the \Poset{}-semantics or out of the the \CP-semantics.}
 %%     \item[Case $A \to B$:]
 %%       \begin{align*}\D\incden{A \to B}
 %%         &= \D(\expO{\incdens A}{\incdens B})\\
-%%         &= \expO{\isof{\vals{\incdens
+%%         &= \expO{\iso{\vals{\incdens
 %%               A}}}{\expO{\D\incdens{A}}{\D\incdens{B}}}\\
 %%         &= ...\\
-%%         &= \CP(\isof{\incdens A},\ {\expO{\incdens{\D A}}{\incdens{\D B}}})\\
-%%         &= \vals{(\expO{\isof{\incdens{A}}}{\expO{\incdens{\D A}}{\incdens{\D B}}})}\\
-%%         &= \vals{\incden{\isof A \to \D A \to \D B}}\\
+%%         &= \CP(\iso{\incdens A},\ {\expO{\incdens{\D A}}{\incdens{\D B}}})\\
+%%         &= \vals{(\expO{\iso{\incdens{A}}}{\expO{\incdens{\D A}}{\incdens{\D B}}})}\\
+%%         &= \vals{\incden{\iso A \to \D A \to \D B}}\\
 %%         &= \vals{\incdens{\D(A \to B)}}
 %%       \end{align*}
 
