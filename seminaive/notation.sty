@@ -3,9 +3,14 @@
 \newcommand\XXX{\todo{\text{XXX}}}
 \newcommand\naive{na\"ive}
 \newcommand\Naive{Na\"ive}
-\newcommand\isocolor{\color{ForestGreen}} % ACMBlue is used in links
-\newcommand\commentcolor{\color{ACMPurple}}
 \newcommand\figsectionname\textsc
+
+% Red is too attention-grabbing. Blue can be confused with links (also blue),
+% and doesn't stand out well. Green works well, but make sure it's dark enough
+% to be legible but light enough to be clearly non-black.
+\definecolor{IsoGreen}{cmyk}{1, 0, 1, 0.12} % or ForestGreen
+\definecolor{IsoBlue}{cmyk}{0.9, 0.4, 0, 0}
+\newcommand\isocolor{\color{ForestGreen}}
 
 
 %% ===== General math & PL notation =====
