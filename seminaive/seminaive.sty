@@ -27,10 +27,6 @@
 %\usepackage[skip=.5\baselineskip,labelfont=sc,textfont=it,labelsep=period,format=hang]{caption}
 %\usepackage[labelfont=sc,labelsep=period,format=hang]{caption}
 
-\usepackage{enumitem}\setlist{labelindent=1em,labelsep=.75em,leftmargin=*}
-\setlist{labelindent=.5em,labelsep=.75em,leftmargin=*}
-\setlist{labelindent=0em,labelsep=.75em,leftmargin=*}
-
 % Unfortunately, only pdftex supports most of the features of microtype.
 \usepackage{iftex}
 \ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=25,}{microtype}\else\fi
@@ -48,4 +44,19 @@
 % A minimum of 3 letters before & 3 after a hyphenated line-break.
 \renewcommand\britishhyphenmins{33}
 
+
+%% ===== Fiddling with lists =====
+\usepackage{enumitem}
+\SetEnumitemKey{flushleft}{labelindent=0pt,leftmargin=*,}
+\setlist{labelsep=.75em,labelindent=.75em,}
+
+%% Default to flush-left with lots of label separation.
+%\setlist[enumerate]{flushleft,labelsep=.75em,}
+%\setlist[itemize]{leftmargin=\parindent,labelsep=.6em,labelindent=*}
+%\setlist[itemize]{labelsep=*,leftmargin=\parindent,labelindent=0pt,}
+
+%% %% Label offset matches paragraph indent.
+%% \setlist[itemize,enumerate]{labelindent=\parindent, leftmargin=*,}
+
+
 \usepackage{notation}
