@@ -18,24 +18,26 @@ To apply this in Datafun, we first need to understand what \emph{change} means.
 To this end, we generalize Datafun's \Poset{} semantics to any category with
 appropriate structures (\cref{sec:datafun-models}).
 
-\todo{We construct such a category, \CP{}, whose objects are posets equipped
-with a notion of increasing changes, and whose morphisms are monotone maps
-possessing \emph{derivatives} relating input and output changes
-(\cref{sec:changeposets}). This yields an incremental semantics for Datafun
-(\cref{sec:incremental}).}
+We construct such a category, \CP{}, whose objects are posets equipped with a
+notion of increasing changes, and whose morphisms are monotone maps equipped
+with \emph{derivatives} relating input and output changes
+(\cref{sec:changeposet}). This yields an incremental semantics for Datafun
+(\cref{sec:incremental}). \todo{TODO discuss relation $\phi$/$\delta$
+translation via alternate comonad $\blackiso$.}
 
-Nonetheless, we use \CP\ as a rough guide when constructing a semi\naive{}
-evaluation static transformation (\cref{sec:seminaive}). This transformation
-reinterprets the discreteness comonad to compute derivatives, and uses these to
-speed up fixed point computations. Finally, we prove this transformation correct
-using logical relations (\cref{sec:logical-relations}).
+We use \CP\ as a guide to constructing a semi\naive{} evaluation static
+transformation (\cref{sec:seminaive}). This transformation reinterprets the
+discreteness comonad to compute derivatives, and uses these to speed up fixed
+point computations. Finally, we prove this transformation preserves the
+semantics of closed first-order programs using logical relations
+(\cref{sec:logical-relations}).
 
 % TODO: more section links once I finish them.
 
 
 \section{Notation and conventions}
 
-\begin{enumerate}
+\begin{enumerate}[flushleft,widest=0]
 \item Adjacency $f\<x$ denotes the function $f$ applied to an argument $x$.
 
 \item I write $f \then g$ for the composition of morphisms $f : A \to B$ and $g
@@ -76,6 +78,7 @@ using logical relations (\cref{sec:logical-relations}).
     x \le y : \iso A &\iff& x = y\\
     \iso(f : A \to B) &=& f : \iso A \to \iso B
   \end{eqnarray*}
+
 \end{enumerate}
 
 
@@ -140,8 +143,10 @@ The simpler core terms are easier to \emph{analyse}, so our semantics and static
 transformations consume core terms; conversely, surface terms are easier to
 \emph{construct}, so we use them in example programs and in the outputs of our
 static transformations.
-
+%
 The specific surface features we add are:
+
+\nopagebreak[2]
 \begin{enumerate}
 \item Let-bindings.
 
@@ -243,6 +248,9 @@ model. The standard semantics is an instance of this, letting \catC{} be
 Since we have not imposed any laws, there is no useful general equational theory
 of Datafun models. Instead, our approach is to relate the models we construct to
 the standard model and use \emph{its} equational theory.
+
+
+\input{seminaive/sec-changeposet}
 
 
 \section{Semi\naive{} evaluation}

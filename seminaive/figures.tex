@@ -1,25 +1,30 @@
 \documentclass{rntz}
 \usepackage[a5]{rntzgeometry}
 %\usepackage[fullwidth=130mm,width=115mm,]{narrow}\usepackage{rntzfont}
-\usepackage[fullwidth=130mm,width=330pt,width=119.14mm,]{narrow}\usepackage[scaled=1.036,]{rntzfont}
+\usepackage[fullwidth=122mm,]{narrow}
+\usepackage[scaled=1.036,scaled=1.0417,]{rntzfont}
 
 \usepackage{seminaive}
+
 \begin{document}
 \input{seminaive/fig-core-datafun}
 \input{seminaive/fig-surface-syntax}
 \input{seminaive/fig-desugaring}
-%\input{seminaive/fig-desugaring-higher-order-semilattice}
+\input{seminaive/fig-desugaring-higher-order-semilattice}
 \input{seminaive/fig-desugaring-pattern-matching}
 \input{seminaive/fig-semantics}
 
+\input{seminaive/fig-changeposet-cartesian}
+
 \input{seminaive/fig-PhiDelta}
+\input{seminaive/fig-dummy}
 \input{seminaive/fig-seminaive-phi}
 \input{seminaive/fig-seminaive-delta}
-\input{seminaive/fig-dummy}
 
 \FloatBarrier
 \input{seminaive/thm-phi-eqtype}
 \input{seminaive/def-impls-changes}
+\pagebreak                      %hack.
 \input{seminaive/def-weird}
 
 \end{document}

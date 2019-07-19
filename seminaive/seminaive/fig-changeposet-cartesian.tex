@@ -1,0 +1,40 @@
+\begin{figure}
+  \begin{align*}
+    %% \vals{\prod_i A_i} &= \prod_i \vals A_i &
+    \chgs{\prod_i A_i} &= \prod_i \chgs A_i &
+    \infer{
+      \fa{i} \valid{\dx_i}{x_i}{y_i}
+    }{\textstyle
+      \valid{\tuple{\dx_i}_i}{\tuple{x_i}_i}{\tuple{y_i}_i}
+    }
+    \\[.5\baselineskip]
+    %% \vals{\sum_i A_i} &= \sum_i \vals A_i &
+    \chgs{\sum_i A_i} &= \sum_i \chgs A_i &
+    \infer{
+      \valid{\dx}{x}{y}
+    }{\textstyle
+      \valid{\inj i \dx}{\inj i x}{\inj i y}
+    }
+  \end{align*}
+
+  \begin{align*}
+    \dummy \<\tuple{x_i}_i &= \tuple{\dummy\<x_i}_i &
+    \deriv\pi_i \<x \<\dx &= \prj i \dx &
+    \deriv{\fork{f_i}_i} \<x \<\dx &= \tuple{\deriv f_i \<x \<\dx}_i
+    \\
+    \dummy\<(\inj i x) &= \inj i (\dummy\<x) &
+    \deriv\injc_i \<x \<\dx &= \inj i \dx
+  \end{align*}
+
+  \begin{equation*}
+    \deriv{\krof{f_i}_i} \<(\inj i x) \<(\inj j \dx)
+    =
+    \begin{cases}
+      \deriv f_i \<x \<\dx & \text{if}~i = j\\
+      \deriv f_i \<x \<(\dummy \<x) & \text{otherwise}
+    \end{cases}
+  \end{equation*}
+
+  \caption{Products and sums in \CP}
+  \label{fig:CP-cartesian}
+\end{figure}

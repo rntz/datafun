@@ -38,11 +38,9 @@
     &
     \den{e \vee f} &= \fork{\den{e}, \den{f}} \then \morph{join}_2
     \\
-    %\den{\color{red}\prim{isEmpty}\<e} &= \den{e} \then \morph{isEmpty}
     \den{\eisempty e} &= \boxd{e} \then \morph{isEmpty}
     & \den{\esplit e} &= \den{e}\then \discosum
     \\
-    %\den{\color{red}\prim{eq}\<e} &= \den{e} \then \morph{eq}
     \den{\eeqd{e_1}{e_2}} &= \fork{\boxd{e_i}}_i \then \morph{eq}
     & \den{\efix e} &= \den{e} \then \morph{fix}
     \\
@@ -50,8 +48,6 @@
     &
     \den{\eford x e f} &=
     \fork{\id,\den{e}} \then \pcollect{\den{f}}
-    %\den{\ebigvee x e f} &=
-    %\fork{\id,\den{e}} \then \morph{strong} \then \downof{\den{f}} \then \morph{collect}
   \end{align*}
 
   \begin{align*}

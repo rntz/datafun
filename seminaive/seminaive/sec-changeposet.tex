@@ -1,0 +1,84 @@
+\section{The category \CP}
+\label{sec:changeposet}
+
+Objects $A$ of \CP{} are tuples $\tuple{\vals A,\, \chgs A,\, {\validto_A},\,
+  \dummy_A}$ where
+%
+\begin{enumerate}
+\item $\vals A$ and $\chgs A$ are posets of ``values'' and ``changes'' respectively.
+
+\item ${\validto_A} \subseteq \chgs A \x \vals A \x \vals A$ is a relation. We
+  gloss $(\dx,x,y) \in {\validto_A}$ as ``$\dx$ changes $x$ into $y$'', and
+  usually write it as $\valid \dx x y$ or more briefly $\vld \dx x y$.
+
+\item $\dummy_A$ is a map $\iso \vals A \to \D A$. Classically, the existence of
+  $\dummy$ is equivalent to saying that if $\vals A$ is inhabited then so is $\D
+  A$. As we will see later, this is a crude hack to ensure the existence of
+  (weak) sums.
+\end{enumerate}
+
+\noindent
+Morphisms $A \to B$ consist of a map $f : \vals A \to \vals B$ equipped with a
+derivative $\deriv f : \iso \vals A \to \chgs A \to \chgs B$ yielding the change
+in $f$'s output given a change to its input:
+%
+\begin{equation}\label{eqn:deriv}
+    \vld \dx x y \implies \vld {\deriv f \<x\<\dx} {f\<x}{f\<y}
+\end{equation}
+
+\noindent
+Identity and composition follow the chain rule:
+%
+\begin{align*}
+  \deriv \id \<x \<\dx &= \dx &
+  \deriv{(f \then g)} \<x \<\dx &= g \<(f\<x) \<(\deriv f \<x \<\dx)
+\end{align*}
+
+
+\subsection{\boldmath The forgetful functor \valfn}
+
+The functor $\valfn : \CP \to \Poset$ takes objects $A$ to $\vals A$ and
+morphisms $(f,\deriv f)$ to the underlying map $f : \vals A \to \vals B$. This
+can be seen as a process of ``forgetting''. On objects, it forgets a value
+poset's associated change-structure; on morphisms, it forgets their derivatives.
+%
+Our constructions in \CP{} will commute with \valfn, inheriting from the
+corresponding constructions in \Poset. For example, products have $\vals{(A \x
+  B)} = \vals A \x \vals B$ and $\vals{\fork{f,g}} = \fork{\vals f, \vals g}$.
+%
+Where applicable, we omit for brevity this inherited structure.
+
+
+\subsection{Cartesian structure}
+\label{sec:CP-cartesian}
+\input{seminaive/fig-changeposet-cartesian}
+
+\CP\ has all finite products and (weak) sums. Their value-level structure is
+inherited from \Poset; \valfn\ distributes across products, sums, $\pi_i$,
+$\injc_i$, $\fork{f_i}_i$, and $\krof{f_i}_i$. We give $\chgfn$, $\dummy$, and
+the relevant derivatives in \cref{fig:CP-cartesian}. \todo{Give the proof that
+  $\deriv{\fork{f_i}_i}$ is unique.}
+
+Observe that we need the definition of \dummy\ to construct the derivative of
+$\krof{f_i}_i$. \todo{Discuss dead code. Show how this makes
+  $\deriv{\krof{f_i}_i}$ not unique and sums weak. Discuss how sums become
+  strong if we forget derivatives into differentiability.}
+
+
+
+\section{The semi\naive\ Datafun model in \CP}
+
+\subsection{\boldmath The ``tangent bundle'' comonad \tangfn}
+\label{sec:tangent-comonad}
+
+\begin{align*}
+  \vals{\tang A} &= \iso \vals A \x \chgs A &
+  \chgs{\tang A} &= \termO &
+  \infer{\validat A \dx x x}{
+    \validat {\tang A} {\tuple{}} {\tuple{x,\dx}} {\tuple{x,\dx}}
+  }
+  \span
+\end{align*}
+
+\[ \dummy_{\tang A} \<\pwild = \tuple{} \]
+

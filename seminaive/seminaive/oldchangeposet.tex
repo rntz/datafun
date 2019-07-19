@@ -1,3 +1,26 @@
+\newcommand\upd{\mathbin{\oplus}}
+\newcommand\updfn{\ensuremath{{\upd}}}
+\newcommand\compose\cdot
+\newcommand\composefn{\ensuremath{{\compose}}}
+%% TODO: want a jaggy arrow here
+\newcommand\changeto\rightsquigarrow
+\newcommand\changetofn{\ensuremath{{\changeto}}}
+
+%% TODO: get rid of incden etc!
+\newcommand\incdenfn{\mathcal{D}}
+\newcommand\incdens{\incdenfn} % s for "short"
+\newcommand\incden[1]{\incdenfn({#1})}
+%% % See
+%% % https://tex.stackexchange.com/questions/419860/how-to-declare-a-bracket-style-math-operator
+%% % https://tex.stackexchange.com/questions/252648/left-right-double-curly-brace-blackboard-bold-symbol
+\renewcommand\incden[1]{\langle\kern -.26em\langle{#1}\rangle\kern -.26em\rangle}
+\renewcommand\incden[1]{\{\kern-.18em\{\kern-.05em{#1}\kern-.05em\}\kern -.18em\}}
+%\renewcommand\incden[1]{\{\kern-.16em|{#1}|\kern -.16em\}}
+%\renewcommand\incden[1]{\llparenthesis{#1}\rrparenthesis}
+\renewcommand\incdens\incden
+\renewcommand\incdenfn{\ensuremath{\incden{-}}}
+
+
 %% ---------- Incremental semantics via change posets ----------
 \section{The category \CP}
 
@@ -249,11 +272,11 @@ Correctness of the other case is straightforward: since $i = j$, from the
 definition of $\updfn_{\sum_i A_i}$ we know all the tags must agree and we have:
 
 \nopagebreak[2]
-\[ \inj i x \longvalidarrow{\inj i \dx} \inj i y
-\longvalidarrow{\inj i \dy} \inj i z \]
+\[ \inj i x \longvalidto{\inj i \dx} \inj i y
+\longvalidto{\inj i \dy} \inj i z \]
 
-\noindent From this it follows that \( {x} \longvalidarrow{\dx} {y}
-\longvalidarrow{\dy} {z} \) and therefore $\vld{\dx\compose\dy} x z$ and so
+\noindent From this it follows that \( {x} \longvalidto{\dx} {y}
+\longvalidto{\dy} {z} \) and therefore $\vld{\dx\compose\dy} x z$ and so
 finally
 
 \nopagebreak[2]
@@ -465,7 +488,7 @@ $\deriv{\eval}$ is correct by the definition of $\updfn_{\expO A B}$, for if
 $\valid\df f g$ and $\valid\dx x y$ then
 
 \nopagebreak[2]
-\[ \eval\<(f,x) = {f\<x} \longvalidarrow{\df\<x\<\dx} {g\<y} = \eval\<(g,y) \]
+\[ \eval\<(f,x) = {f\<x} \longvalidto{\df\<x\<\dx} {g\<y} = \eval\<(g,y) \]
 
 \noindent
 Similarly, \(\deriv{(\fn f)}\) is correct, for suppose $\valid\dx {x_1}{x_2}$
@@ -473,7 +496,7 @@ and $\valid\dy{y_1}{y_2}$. Then by differentiability of $f$ we have
 
 \nopagebreak[2]
 \[ \fn f \<x_1 \<y_1 =
-f\<(x_1,y_1) \longvalidarrow{\deriv f \<(x_1,y_1) \<(\dx,\dy)} f\<(x_2,y_2)
+f\<(x_1,y_1) \longvalidto{\deriv f \<(x_1,y_1) \<(\dx,\dy)} f\<(x_2,y_2)
 = \fn f \<x_2 \<y_2
 \]
 

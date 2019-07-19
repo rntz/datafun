@@ -1,15 +1,26 @@
 %% ----- Figure: Dummy function -----
 \begin{figure*}
-  \[\setlength\arraycolsep{.3em}\begin{array}{lcl}
-    \dummy &:& A \to \D A\\
-    \dummy \<(\pwild : \tbool) &=& \efalse\\
-    \dummy \<(\pwild : \tset{A}) &=& \eset{}\\
-    \dummy \<\eboxd{x} &=& \eboxd{\dummy\<x}\\
-    \dummy \<(f : A \to B) &=& \fnof{x} \dummy\<(f\<x)\\
-    \dummy \<\etuple{x,y} &=& \etuple{\dummy\<x, \dummy\<y}\\
-    %% \dummy \<\etuple{x_i}_i &=& \etuple{\dummy\<x_i}_i\\
-    \dummy \<(\inj i x) &=& \inj i (\dummy\<x)
-  \end{array}\]
-  \caption{The \dummy\ function}
+  %% \[\setlength\arraycolsep{.3em}\begin{array}{lcl}
+  %%   \dummy &:& A \to \D A\\
+  %%   %% \dummy \<(\pwild : \tbool) &=& \efalse\\
+  %%   \dummy \<(\pwild : \tseteq{A}) &=& \eset{}\\
+  %%   \dummy \<\eboxd{x} &=& \eboxd{\dummy\<x}\\
+  %%   \dummy \<(f : A \to B) &=& \fnof{x} \dummy\<(f\<x)\\
+  %%   \dummy \<\etuple{} &=& \etuple{}\\
+  %%   \dummy \<\etuple{x,y} &=& \etuple{\dummy\<x, \,\dummy\<y}\\
+  %%   %% \dummy \<\etuple{x_i}_i &=& \etuple{\dummy\<x_i}_i\\
+  %%   \dummy \<(\inj i x) &=& \inj i (\dummy\<x)
+  %% \end{array}\]
+  \begin{align*}
+    \dummy \<\etuple{} &= \etuple{}
+    & \dummy \<\etuple{x,y} &= \etuple{\dummy\<x,\, \dummy\<y}
+    \\
+    \dummy \<\eboxd{x} &= \eboxd{\dummy\<x}
+    & \dummy \<(\inj i x) &= \inj i (\dummy \<x)
+    \\
+    \dummy_{\tseteq A} \<\pwild &= \eset{}
+    & \dummy_{A \to B} \<f &= \fnof x \dummy \<(f \<x)
+  \end{align*}
+  \caption{The function $\dummy_A : A \to \D A$}
   \label{fig:dummy}
 \end{figure*}
