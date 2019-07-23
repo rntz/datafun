@@ -1,3 +1,19 @@
+\definecolor{isobg}{cmyk}{.06, 0, .06, 0}
+\definecolor{isorule}{cmyk}{.36, 0, .36, .36}
+%\definecolor{isorule}{cmyk}{.5, 0, .5, .5}
+%\definecolor{isorule}{cmyk}{.8, 0, .8, .8}
+
+%% \definecolor{isobg}{cmyk}{0, 0.03, .3, 0}
+%% \definecolor{isorule}{cmyk}{0, 0.03, .3, 0.37}
+
+\newcommand\eiso[1]{\adjustbox{margin=0pt 1pt,}{\adjustbox{
+      cframe=isorule .25pt 2pt,
+      bgcolor=isobg,
+}{%
+\vphantom{lp}% room for ascenders & descenders
+\(#1\)}}}
+\renewcommand\eisempty[1]{{\prim{empty?}\<{#1}}}
+
 \begin{figure*}\centering
   \begin{mathpar}
     \setlength\arraycolsep{.33em}\begin{array}{r@{\hskip 1em}ccl}
@@ -21,11 +37,20 @@
       \tset{\fint A} \bnfor \tunit \bnfor \fixt L \x \fixt M
       \\[.5em]
       \text{terms} & e,f,g &\bnfeq& x \bnfor \dvar x \bnfor \fnof{x} e
-      \bnfor e\<f \bnfor \etuple{} \bnfor \etuple{e,f} \bnfor \prj i e\\
-      &&& \inj i e \bnfor \ecase{e} (\inj i x \caseto f_i)_{i\in\{1,2\}}\\
-      &&& \eboxd e \bnfor \elet{\eboxd x = e} f\\
-      &&& \bot \bnfor e \vee f \bnfor \esetd{e_i}_i \bnfor \eford x e f\\
-      &&& \eeqd e f \bnfor \eisempty e \bnfor \esplit e \bnfor \efix e
+      \bnfor e\<f \bnfor \etuple{} \bnfor \etuple{e,f} \bnfor \prj i e
+      \bnfor \inj i e
+      \\&&&%\bnfor
+      \ecase{e} (\inj i x \caseto f_i)_{i\in\{1,2\}}
+      \bnfor%\\&&&
+      \eiso{\ebox e} \bnfor \elet{\eboxd x = e} f
+      \\&&&
+      \bot \bnfor e \vee f \bnfor \eford x e f
+      \\&&&
+      \eiso{\eset{e_i}_i} \bnfor
+      \eiso{\eeq e f}
+      \bnfor \eiso{\eisempty e}
+      \bnfor \esplit e
+      \bnfor \efix e
       \\[.5em]
       \text{contexts} & \G &\bnfeq& (H_i)_i\\
       \text{hypotheses} & H &\bnfeq& \h x A \bnfor \hd x A
@@ -55,7 +80,10 @@
       \J {\ecase{e} (\inj i x_i \caseto f_i)_i} \G B
     }
 
-    \infer{\J {\isocolor e} {\stripcxd\G} A}{\J{\eboxd e} \G {\iso A}}
+    \infer{\J {e} {\stripcxd\G} A
+    }{
+      \J{\eiso{\ebox e}} \G {\iso A}
+    }
 
     \infer{\J e \G {\iso A} \\ \J f {\G,\hd x A} B}{
       \J {\elet{\eboxd x = e} f} \G B}
@@ -65,8 +93,9 @@
     \infer{(\J{e_i} \G {\eqt L})_i}{\J{e_1 \vee e_2}\G {\eqt L}}
 
     %% \infer{\J e \G {\eqt A}}{\J {\edown e} \G {\tdown {\eqt A}}}
-    \infer{(\J {\isocolor e_i} {\stripcxd\G} {\eqt A})_i}{
-      \J {\esetd{e_i}_i} \G {\tset{\eqt A}}}
+    \infer{(\J {e_i} {\stripcxd\G} {\eqt A})_i}{
+      \J {\eiso{\eset{e_i}_i}} \G {\tset{\eqt A}}
+    }
 
     %% \infer{\J e \G {\tdown {\eqt A}} \\
     %%   \J f {\G,\h x {\eqt A}} L
@@ -78,11 +107,11 @@
     }{\J {\eford x e f} \G {\eqt L}}
 
     %%\infer{\J e \G {\iso{(\eqt A \x \eqt A)}}}{\J{\prim{eq}\<e} \G {\tdown\tunit}}
-    \infer{(\J {\isocolor e_i} {\stripcxd\G} {\eqt A})_i}
-          {\J {\eeqd{e_1}{e_2}} \G \tbool}
+    \infer{(\J {e_i} {\stripcxd\G} {\eqt A})_i}
+          {\J {\eiso{\eeq{e_1}{e_2}}} \G \tbool}
 
-    \infer{\J {\isocolor e} {\stripcxd\G} {\tset\tunit}}{
-      \J {\eisempty e} \G {\tunit + \tunit}}
+    \infer{\J {e} {\stripcxd\G} {\tset\tunit}}{
+      \J {\eiso{\eisempty e}} \G {\tunit + \tunit}}
 
     \infer{\J e \G {\iso{(A + B)}}}{\J{\esplit e} \G {\iso A + \iso B}}
 
