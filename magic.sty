@@ -1,0 +1,31 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{magic}[2019/07/23]
+\RequirePackage{kvoptions}      % option processing
+\RequirePackage{geometry}       % for \geometry
+\RequirePackage{etoolbox}       % for \ifdefstring, \ifdefvoid, etc.
+\RequirePackage{xfp}            % for \fpeval
+
+%% Options
+\DeclareStringOption[3/4]{text}
+\DeclareStringOption[4/5]{paper}
+\DeclareStringOption[5/6]{hscale}
+\DeclareStringOption[345pt]{width}
+\DeclareStringOption[1]{scaled}
+
+\ProcessLocalKeyvalOptions*
+
+\newlength\magic@pw \newlength\magic@ph
+\newlength\magic@tw \newlength\magic@th
+
+\setlength\magic@tw{\magic@width}
+\setlength\magic@tw{\fpeval{1/(\magic@scaled)}\magic@tw}
+\setlength\magic@th{\fpeval{1/(\magic@text)}\magic@tw}
+\setlength\magic@pw{\fpeval{1/(\magic@hscale)}\magic@tw}
+\setlength\magic@ph{\fpeval{1/(\magic@paper)}\magic@pw}
+
+\pagestyle{empty}
+\geometry{
+  papersize={\magic@pw,\magic@ph},
+  total={\magic@tw,\magic@th},
+  vratio={1:1}
+}
