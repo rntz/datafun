@@ -1,0 +1,59 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{aspect}[2019/07/23]
+\RequirePackage{kvoptions}      % option processing
+\RequirePackage{geometry}       % for \geometry
+\RequirePackage{etoolbox}       % for \ifdefstring, \ifdefvoid, etc.
+\RequirePackage{xfp}            % for \fpeval
+
+%% Options
+\DeclareStringOption[4/3]{aspect}
+\DeclareStringOption[6/7]{hscale}
+% vscale=6/7 is very large. 7/8, 8/9 good. 9/10 small but acceptable.
+\DeclareStringOption[9/10]{vscale}
+\DeclareStringOption[345pt]{width}
+\DeclareStringOption{paperheight}
+\DeclareStringOption[1]{scaled}
+
+\ProcessLocalKeyvalOptions*
+
+%% Styling.
+\pagestyle{empty}
+
+
+%% ---------- Calculating paper & text size ----------
+\edef\aspect@aspect{\fpeval{\aspect@aspect}}
+\edef\aspect@hscale{\fpeval{\aspect@hscale}}
+\edef\aspect@vscale{\fpeval{\aspect@vscale}}
+
+\newlength\aspect@tw \newlength\aspect@th
+\newlength\aspect@pw \newlength\aspect@ph
+\setlength\aspect@tw{\aspect@width}
+
+%% Calculate paper size.
+\ifdefvoid{\aspect@paperheight}{
+  %% No paper height given, make up a reasonable default using hscale &
+  %% aspectratio.
+  \setlength\aspect@pw{\fpeval{1/\aspect@hscale}\aspect@tw}
+  \setlength\aspect@ph{\aspect@aspect\aspect@pw}
+}{
+  %% Paper height supplied, use it.
+  \setlength\aspect@ph{\aspect@paperheight}
+  \setlength\aspect@pw{\fpeval{1/\aspect@aspect}\aspect@ph}
+}
+
+%% Calculate text height.
+\setlength\aspect@th{\aspect@vscale\aspect@ph}
+
+
+%% Scale everything by 1/\aspect@scaled.
+\edef\aspect@scaled{\fpeval{1/(\aspect@scaled)}}
+\setlength\aspect@th{\aspect@scaled\aspect@th}
+\setlength\aspect@tw{\aspect@scaled\aspect@tw}
+\setlength\aspect@ph{\aspect@scaled\aspect@ph}
+\setlength\aspect@pw{\aspect@scaled\aspect@pw}
+
+\geometry{
+  papersize={\aspect@pw,\aspect@ph},
+  total={\aspect@tw,\aspect@th},
+  vratio={1:1}
+}

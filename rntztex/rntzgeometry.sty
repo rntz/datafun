@@ -12,6 +12,11 @@
 \DeclareOption{a4}{\def\rntz@geom{a4paper,text={160mm,247mm}}}
 \DeclareOption{letter}{\def\rntz@geom{letterpaper,text={175mm,230mm}}}
 
+% Based on a bad experience with an HP OfficeJet 6700 printer, 118mm ≈ 335pt
+% seems to be about the widest safe area when printing A5 pages 2-up on an A4
+% page. Keeping it at 115mm for safety's sake (and for margin scribbles) seems
+% prudent.
+
 % Pass unrecognized options to `geometry'.
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{geometry}}
 
