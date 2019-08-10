@@ -1,0 +1,245 @@
+%% Laptop-optimized.
+\documentclass{rntz}
+\usepackage[laptop,]{fantasy}
+\usepackage[scaled=1.036,scaled=1.0417,]{rntzfont}
+
+%% %% A5 paper.
+%% \documentclass{rntz}
+%% \usepackage[a5]{rntzgeometry}
+%% \usepackage[width=\textwidth,fullwidth=120mm,]{narrow}
+%% \usepackage[newmath,scaled=1.02]{rntzfont}
+%% %% \providecommand\mathvar[1]{\ensuremath{\mathit{#1}}}
+%% %% \providecommand\mathbold[1]{{\boldsymbol#1}}
+
+%% %% Compromise between screen viewing & printing one-sided on A4 or letter.
+%% \documentclass{rntz}
+%% \usepackage[hscale=4/5,
+%%   aspect=1.4142135623730951, vscale=6/7, % A4 aspect ratio.
+%%   %aspect=11/8.5, vscale=.85, % US letter aspect ratio.
+%% ]{aspect}
+%% \geometry{vratio=2:3}\pagestyle{plain}
+%% %\usepackage[width=\textwidth,fullwidth=380pt,]{narrow}
+%% \usepackage[scaled=1.0417,]{rntzfont}
+
+
+\usepackage{seminaive}
+
+%\definecolor{VibrantRed}{cmyk}{0, 0.85, 1, 0}
+
+%\definecolor{Morph}{cmyk}{0, 1, 0.75, 0.33} % reddish
+%\definecolor{Morph}{cmyk}{0, 1, 0.5, 0.5} % mahogany
+%\definecolor{Morph}{cmyk}{0, 0.8, 1, 0.5} % brown
+%\definecolor{Morph}{cmyk}{1, 0.75, 0, 0} % dark blue
+\definecolor{Morph}{cmyk}{1, 0.5, 0, 0.2} % darkened Royal Blue
+
+% DarkOrchid, Sepia, RoyalBlue, Blue.
+\renewcommand\morph[1]{\ensuremath{\mathrm{\color{Sepia}#1}}}
+\renewcommand\tuple[1]{\ensuremath{(#1)}}
+
+
+\title{Semi\naive\ Datafun via tangent bundles in \CP}
+\author{\scshape Michael Arntzenius}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+
+\section{The category \CP}
+
+An object $A : \CP$ consists of:
+\begin{mathpar}
+  \vals A,\, \chgs A : \Poset
+  \and
+  {\validto_A} \subseteq \chgs A \x \vals A \x \vals A
+  \and
+  \dummy : \vals A \to \chgs A
+\end{mathpar}
+
+\noindent
+A morphism $f : A \to B$ consists of $\vals f : \vals A \to \vals B$ and $f' :
+\iso \vals A \to \chgs A \to \chgs B$ such that
+%
+\begin{equation}\label{eqn:derivative}
+  \validat A \dx x y \implies \validat B {f'\<x \<\dx}{f\<x}{f\<y}
+\end{equation}
+
+\noindent
+Identity and composition are straightforward:
+%
+\begin{align*}
+  \vals \id &= \id
+  & \vals (g \circ f) &= \vals g \circ \vals f
+  \\
+  \id' \<x \<\dx &= \dx
+  & (g \circ f)' \<x \<\dx &= g' \<(\vals f\<x) \<(f' \<x \<\dx)
+\end{align*}
+
+\noindent The identity law for composition is inherited from \Poset\ on the
+value-level, and also holds for derivatives:
+
+\begin{gather*}
+  (\id \circ f)' \<x \<\dx = \id' \<(f\<x) \<(f'\<x\<\dx)
+  = f'\<x\<\dx
+  \\
+  (f \circ \id)' \<x \<\dx = f' \<(\id\<x) \<(\id'\<x\<\dx)
+  = f' \<x \<\dx
+\end{gather*}
+
+\noindent
+Associativity of derivatives also holds:
+
+\begin{align*}
+  ((h \circ g) \circ f)' \<x \<\dx
+  &= (h \circ g)' \<(f\<x) \<(f'\<x\<\dx)
+  \\
+  &= (h \circ g)' \<(f\<x) \<(f'\<x\<\dx)
+  \\
+  &= h' \<(g\<(f\<x)) \<(g' \<(f\<x) \<(f'\<x\<\dx))
+  \\
+  &= h' \<((g \circ f)\<x) \<((g \circ f)'\<x\<\dx)
+  \\
+  &= (h \circ (g \circ f))' \<x \<\dx
+\end{align*}
+
+
+\section{The semi\naive\ model of Datafun}
+
+A Datafun model consists of a bicartesian closed category \catC\ equipped with:
+a ``discreteness'' comonad \iso; for every object $A$, a ``finite powerset''
+object $\pfin A$; families of equality objects $\eqt A$, semilattice objects
+$L$, and fixed point objects $\fixt L$ which interpret the corresponding Datalog
+type families; and the following morphism families: \nopagebreak[2]
+\begin{mathpar}
+  \textstyle
+  \discox : \prod_i \iso A_i \to \iso \prod_i A_i
+
+  \discosum : \iso \sum_i A_i \to \sum_i \iso A_i
+
+  \morph{empty?} : \iso \pfin \termO \to \termO + \termO
+
+  \morph{single} : \iso A \to \pfin A
+
+  \infer{f : \G \x \iso A \to L}{\pcollect f : \G \x \pfin A \to L}
+
+  \morph{eq} : \iso \eqt A \x \iso \eqt A \to \pfin \termO
+
+  \morph{join}_n : L^n \to L
+
+  \morph{fix} : \iso (\expO{\fixt L}{\fixt L}) \to \fixt L
+\end{mathpar}
+
+\noindent
+In the remainder of this section we construct a Datafun model in \CP\ that
+corresponds to semi\naive\ evaluation.
+
+
+\subsection{\boldmath The tangent bundle comonad \tangfn}
+
+For our discreteness comonad, we use the ``tangent bundle'' comonad $\tangfn$ on
+$\CP$ is defined by:
+%
+\begin{mathpar}
+  \vals\tang A = \iso \vals A \x \chgs A
+
+  \chgs\tang A = \termO
+
+  \dummy_{\tang A} \<(x,dx) = ()
+
+  \infer{\validat A \dx x x}{\validat{\tang A}{()}{(x,\dx)}{(x,\dx)}}
+\end{mathpar}
+
+\noindent The functorial action $\tang f$, extraction $\extract_A : TA \to A$,
+and duplication $\dup_A : \tang A \to \tang{\tang A}$ are:
+\begin{align*}
+  \tang{f} \<(x,\dx) &= (f\<x,\, f'\<x\<\dx)
+  &
+  (\tang{f})' \<(x,\dx) \<() &= ()
+  \\
+  \extract_A \<(x,\dx) &= x
+  &
+  \extract_A' \<(x,\dx) \<() &= \dx
+  \\
+  \dup_A \<(x,\dx) &= ((x,\dx),())
+  &
+  \dup_A' \<(x,dx) \<() &= ()
+\end{align*}
+
+\noindent
+Correctness of $(\tang f)'$ follows from correctness of $f'$:
+%
+\nopagebreak[3]
+\begin{align*}
+  &\mathrel{\phantom{\implies}}
+  \validat{\tang A}{()}{(x,\dx)}{(x,\dx)}
+  \\
+  &\implies \validat{A}{\dx} x x &\text{inversion}
+  \\
+  &\implies \validat{B}{f'\<x\<\dx}{f\<x}{f\<x}
+  &\text{by \cref{eqn:derivative}}
+  \\
+  &\implies \validat{\tang B}{()}{\tang f \<(x,dx)}{\tang f \<(x,dx)}
+\end{align*}
+
+\noindent
+We show $T$ respects \id\ and composition, ignoring the derivatives since they
+are trivial:
+%
+\nopagebreak[3]
+\begin{align*}
+  \tang{\id} \<(x,\dx) &= (\id \<x,\, \id'\<x\<\dx) = (x,\dx)
+  = \id\<(x,\dx)
+  \\[1ex]
+  \tang{(g \circ f)} \<(x,\dx)
+  &= ((g \circ f) \<x,\, (g \circ f)' \<x \<\dx)
+  \\
+  &= (g \<(f\<x),\, g' \<(f\<x) \<(f'\<x\<\dx))
+  \\
+  &= (\tang g \circ \tang f) \<(x,\dx)
+\end{align*}
+
+\noindent
+The derivatives of $\extract$ and $\dup$ are correct: \XXX
+%
+\noindent
+Naturality of $\extract$ and $\dup$: \XXX
+%
+\noindent
+The comonad laws hold: \XXX
+%
+\todo{I've checked these things on paper.}
+
+
+\subsection{Finite powersets}
+
+Finite powerset objects in \CP\ are defined using the analogous finite powerset
+functor on \Poset: \nopagebreak[3]
+\begin{mathpar}
+  \vals \pfin A = \pfin \vals A
+
+  \chgs \pfin A = \pfin \vals A
+
+  \dummy\<x = \emptyset
+
+  \infer{}{\validat{\pfin A}{\dx}{x}{x \cup \dx}}
+\end{mathpar}
+
+\noindent
+Although we won't need this fact, \pfin\ is also an endofunctor on \CP.
+
+\subsection{Equality objects}
+
+\subsection{Semilattice objects}
+
+\subsection{Fixed point objects}
+
+Any semilattice object satisfying the ascending chain condition is a fixed point
+object. \todo{TODO: define derivative of \prim{fix}.}
+
+
+\section{Reading off semi\naive\ evaluation as a static transformation}
+
+\XXX
+
+\end{document}
