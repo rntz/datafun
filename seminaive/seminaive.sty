@@ -15,44 +15,46 @@
 % https://tex.stackexchange.com/questions/106714/stmaryrd-and-boldsymbol-avoid-warnings
 \SetSymbolFont{stmry}{bold}{U}{stmry}{m}{n}
 
+
 % Default to vertically centered colons. Doesn't quite work with euler, but
 % better than nothing.
 \mathtoolsset{centercolon}
 
 % Make section name references use \S.
-\makeatletter\crefname{section}{\S\@gobble}{\S\@gobble}\makeatother
+\crefname{section}{\S\@gobble}{\S\@gobble}
 
 % hang is only relevant for long captions, which I don't have
-\usepackage[labelsep=period,font={it},format=hang]{caption}
-%\usepackage[labelsep=period,font=rm,labelfont=sc,format=hang]{caption}
-%\usepackage[skip=.5\baselineskip,labelfont=sc,textfont=it,labelsep=period,format=hang]{caption}
-%\usepackage[labelfont=sc,labelsep=period,format=hang]{caption}
+%\usepackage[labelsep=period,font=it,format=hang]{caption}
+\usepackage[labelsep=period,font=rm,labelfont=sc,format=hang]{caption}
 
 % Unfortunately, only pdftex supports most of the features of microtype.
 \usepackage{iftex}
-\ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=25,}{microtype}\else\fi
+\ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=30,}{microtype}\else\fi
 \usepackage{microtype}\frenchspacing
 
 %% Controls hyphenation and date formatting defaults, among other things.
 \usepackage[british]{babel}
-%\renewcommand\britishhyphenmins{33}
-\hyphenation{data-fun semi-na\"ive power-set vary-ing}
+% A minimum of 3 letters before & 3 after a hyphenated line-break.
+\renewcommand\britishhyphenmins{33}
+\hyphenation{data-fun semi-naive power-set vary-ing boo-le-ans co-mo-nad
+bi-carte-sian se-man-tics eq-uip-ped}
+%\hyphenation{semi-na\"ive} % "Improper hyphenation"?
 
 % Make date formatted like "10^{th} June 2019".
 % TODO: can babel do this?
 \usepackage[en-GB]{datetime2}
 \DTMlangsetup[en-GB]{ord=omit} % ord={level,raise,omit,sc}
-% A minimum of 3 letters before & 3 after a hyphenated line-break.
-\renewcommand\britishhyphenmins{33}
 
 
 %% ===== Fiddling with lists =====
 \usepackage{enumitem}
 \SetEnumitemKey{flushleft}{labelindent=0pt,leftmargin=*,}
-\setlist{labelsep=.75em,labelindent=.75em,}
 
-%% Default to flush-left with lots of label separation.
-%\setlist[enumerate]{flushleft,labelsep=.75em,}
+\setlist{labelsep=.8em,}
+%\setlist{labelsep=.667em,}
+
+%% Default to flush-left?
+%\setlist[enumerate]{flushleft,}
 %\setlist[itemize]{leftmargin=\parindent,labelsep=.6em,labelindent=*}
 %\setlist[itemize]{labelsep=*,leftmargin=\parindent,labelindent=0pt,}
 
