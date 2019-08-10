@@ -8,11 +8,13 @@
 \newcommand{\authorsize}{\normalsize}
 
 %% TODO: omit {title,author,date} if not provided
-%% TODO: support \subtitle.
+%% TODO: support \subtitle?
 \renewcommand*{\maketitle}{
   \begingroup%
-  \setlength{\parindent}{0pt}%
-  {\titlesize\@title\vspace{0.5ex}\\}%
-  {\authorsize\@author\vspace{0.5ex}\\}%
-  {\authorsize\@date}%
-  \endgroup\FloatBarrier\par}
+  \setlength\parindent{0pt}%
+  \setlength\parskip{.5ex}%
+  %\setlength\parskip{.1\baselineskip}
+  {\titlesize\@title\par}%
+  {\authorsize\@author\par}%
+  {\authorsize\@date\par}%
+  \endgroup\FloatBarrier}

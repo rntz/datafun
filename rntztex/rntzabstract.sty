@@ -1,4 +1,7 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{rntzabstract}[2018/11/16]
 
-\renewenvironment{abstract}{\par\vspace{1em}\noindent\textbf{Abstract.}}{}
+\renewenvironment{abstract}{%
+  \begingroup\setlength\parskip{1em}\par%
+  \noindent\textbf{Abstract.}%
+  \endgroup}{}
