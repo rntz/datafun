@@ -1,18 +1,50 @@
-%% %% Laptop-optimized.
-%% \documentclass{rntz}
-%% \usepackage{fantasy}
-%% %\usepackage[newmath,]{rntzfont}
-%% \usepackage[scaled=1.036,]{rntzfont}
+%% %% About the smallest I'll ever need to fit.
+%% \documentclass[nomarginums]{rntz}
+%% %\usepackage[vratio=1:1, text={115mm,458pt}, papersize={382.5pt,510pt}]{geometry}\pagestyle{empty}
+%% \usepackage[aspect=4/3, width=115mm,
+%%   %width=330pt, hscale=11/13, vscale=58/65, % imitate fantasy[tablet]
+%%   %hscale=5/6, vscale=8/9, % Generous spacing.
+%%   %hscale=11/13, vscale=58/65, % Middle spacing.
+%%   %hscale=7/8, vscale=10/11, % Tight spacing.
+%%   fullwidth=365pt,
+%% ]{aspect}
+%% %\usepackage[fullwidth=365pt, width=\textwidth]{narrow}
+%% \usepackage[scaled=1.015]{rntzfont}
 
-%% A5 paper.
+%% Laptop-optimized.
 \documentclass{rntz}
-\usepackage[a5]{rntzgeometry}
-%\usepackage[fullwidth=13cm,width=331.2pt,]{narrow}\usepackage{rntzfont}
-%\usepackage[fullwidth=13cm,width=343.1pt,]{narrow}\usepackage[scaled=1.036,]{rntzfont}
-\usepackage[fullwidth=122mm,]{narrow}\usepackage[scaled=1.0417,]{rntzfont}
+\usepackage[laptop,]{fantasy}
+\usepackage[newmath,scaled=1.036,scaled=1.0417,]{rntzfont}
+
+%% \usepackage[onlytext,osf]{MinionPro}\linespread{1.03}
+%% \usepackage[cal=cm]{mathalfa}
+%% \usepackage[scaled=0.9012325102880658]{sourcesanspro}
+%% %\usepackage[scaled=1.0138889210391693]{biolinum}
+%% %\usepackage[scaled=0.9563296943231442]{AlegreyaSans}
+%% \usepackage[scaled=0.9584244166836252]{inconsolata}
+%% \usepackage[euler-digits]{eulervm}\makeatletter\edef\zeu@Scale{0.9542461873638345}\makeatother
+%% \providecommand\mathvar\ensuremath
+
+%% %% Compromise between screen viewing & printing one-sided on A4 or letter.
+%% \documentclass{rntz}
+%% \usepackage[hscale=4/5,
+%%   aspect=1.4142135623730951, vscale=6/7, % A4 aspect ratio.
+%%   %aspect=11/8.5, vscale=.85, % US letter aspect ratio.
+%% ]{aspect}
+%% \geometry{vratio=2:3}\pagestyle{plain}
+%% %\usepackage[width=\textwidth,fullwidth=380pt,]{narrow}
+%% \usepackage[scaled=1.0417,]{rntzfont}
+
+%% %% A5 paper.
+%% \documentclass{rntz}
+%% \usepackage[a5]{rntzgeometry}
+%% \usepackage[width=\textwidth,fullwidth=120mm,]{narrow}
+%% \usepackage[newmath,scaled=1.02]{rntzfont}
+%% %% \providecommand\mathvar[1]{\ensuremath{\mathit{#1}}}
+%% %% \providecommand\mathbold[1]{{\boldsymbol#1}}
 
 %% %% B5 paper.
-%% \documentclass{rntz}
+%% \documentclass[11pt]{rntz}
 %% \usepackage[b5]{rntzgeometry}
 %% \usepackage[fullwidth=146mm,width=365pt,]{narrow}\usepackage[scaled=1.0417]{rntzfont}
 %% %\usepackage[fullwidth=146mm,width=136mm,]{narrow}\usepackage[scaled=1.0417]{rntzfont}
@@ -20,8 +52,8 @@
 %% %% A4 paper.
 %% \documentclass[12pt]{rntz}
 %% \usepackage[a4]{rntzgeometry}
-%% %\usepackage[fullwidth=175mm,width=420pt,]{narrow}\usepackage{rntzfont} % ~365pt @ 10pt
-%% \usepackage[fullwidth=175mm,width=446pt,]{narrow}\usepackage{rntzfont} % ~136mm @ 10pt
+%% \usepackage[fullwidth=175mm,width=420pt,]{narrow}\usepackage[scaled=1.0417]{rntzfont} % ~365pt @ 10pt
+%% %\usepackage[fullwidth=175mm,width=446pt,]{narrow}\usepackage{rntzfont} % ~136mm @ 10pt
 
 %% %% Phone-optimized.
 %% \documentclass[nomarginums]{rntz}
@@ -37,4 +69,5 @@
 
 %% ---------- Content ----------
 \usepackage{seminaive}
+
 \begin{document}\input{seminaive/contents}\end{document}

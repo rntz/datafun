@@ -3,7 +3,7 @@
     \text{types} & A,B &\bnfeq& ... \bnfor \tbool\\
     \text{terms} & e,f,g &\bnfeq&
     ... \bnfor \elet{x = e} f \bnfor \efixisd x e\\
-    &&& \efalse \bnfor \etrue \bnfor \eif e f g \bnfor \ewhen e f
+    &&& \efalse \bnfor \etrue \bnfor \eifd e f g \bnfor \ewhen e f
   \end{array}\]
 
   \begin{mathpar}
@@ -16,14 +16,14 @@
 
     \infer{\J e \G A \\ \J f {\G,\h x A} B}{\J{\elet{x = e} f} \G B}
 
-    \infer{\J {\isocolor e} {\stripcxd{\G}, \h x {\fixt L}} {\fixt L}}
+    \infer{\J {e} {\stripcxd{\G}, \h x {\fixt L}} {\fixt L}}
           {\J {\efixisd x e} \G {\fixt L}}
 
     \infer{\quad}{\J \etrue \G \tbool}
 
     \infer{\quad}{\J \efalse \G \tbool}
 
-    \infer{\J {\isocolor e} {\stripcxd\G} \tbool \\ (\J{f_i}\G B)_i}
+    \infer{\J {e} {\stripcxd\G} \tbool \\ (\J{f_i}\G B)_i}
           {\J {\eifd e{f_1}{f_2}} \G {B}}
 
     \infer{\J e \G \tbool \\ \J f \G L}{\J {\ewhen e f} \G L}

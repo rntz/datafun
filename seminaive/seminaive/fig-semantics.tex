@@ -1,3 +1,5 @@
+\newcommand\Den[1]{\left\llbracket{#1}\right\rrbracket}
+
 %% ---- Semantics in a Datafun Model ----
 \begin{figure*}
   \figsectionname{Types and Contexts}
@@ -69,15 +71,13 @@
     \then \iso \den{\isocolor e}
     \\[1ex]
     \morph{dist}^\x_+ &: A \x (B_1 + B_2) \to_\catC (A \x B_1) + (A \x B_2)
+    %% \morph{dist}^\x_+ &: (A_1 + A_2) \x B \to_\catC (A_1 \x B) + (A_2 \x B)
     \\
     % this could be simpler if it distributed in the opposite direction.
-    \morph{dist}^\x_+ &= \fork{\pi_2 \then \krof{\lambda (\fork{\pi_2,\pi_1} \then \injc_i)}_i, \pi_1}
-    \then \eval
+    \morph{dist}^\x_+ &= \fork{\pi_2 \then \krof{\lambda (\fork{\pi_2,\pi_1} \then \injc_i)}_i, \pi_1} \then \eval
+    %% \\
+    %% \morph{dist}^\x_+ &= ({\krof{\lambda\, \injc_i}_i} \x \id) \then \eval
   \end{align*}
-
-  %% \raggedright\footnotesize Strictly speaking, the cases for
-  %% $\den{\esetd{e_i}_i}$, $\den{\eisempty e}$, and $\den{\eeqd e f}$ are not
-  %% structurally inductive; nonetheless $\den{e}$ is well-defined.
 
   \caption{Datafun semantics in a Datafun model $\tuple{\catC, \disco, \pfin}$}
   \label{fig:semantics}\label{def:strip}

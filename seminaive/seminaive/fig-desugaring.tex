@@ -3,7 +3,7 @@
     \tbool &\desugars \tset{\tunit}
     \\
     \eifd e {f_1}{f_2} &\desugars
-    \ecase{\eisempty e} (\inj i \pwild \caseto f_i)_i
+    \ecase{\eiso{\eisempty e}} (\inj i \pwild \caseto f_i)_i
   \end{align*}
 
   \begin{align*}
