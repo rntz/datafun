@@ -11,16 +11,6 @@
 %% %% \providecommand\mathvar[1]{\ensuremath{\mathit{#1}}}
 %% %% \providecommand\mathbold[1]{{\boldsymbol#1}}
 
-%% %% Compromise between screen viewing & printing one-sided on A4 or letter.
-%% \documentclass{rntz}
-%% \usepackage[hscale=4/5,
-%%   aspect=1.4142135623730951, vscale=6/7, % A4 aspect ratio.
-%%   %aspect=11/8.5, vscale=.85, % US letter aspect ratio.
-%% ]{aspect}
-%% \geometry{vratio=2:3}\pagestyle{plain}
-%% %\usepackage[width=\textwidth,fullwidth=380pt,]{narrow}
-%% \usepackage[scaled=1.0417,]{rntzfont}
-
 
 \usepackage{seminaive}
 
@@ -145,25 +135,29 @@ $\CP$ is defined by:
 
   \chgs\tang A = \termO
 
-  \dummy_{\tang A} \<(x,dx) = ()
+  \dummy_{\tang A} \<(\eboxd{x}, dx) = ()
 
-  \infer{\validat A \dx x x}{\validat{\tang A}{()}{(x,\dx)}{(x,\dx)}}
+  \infer{\validat A \dx x x}{\validat{\tang A}{()}{(\eboxd x,\dx)}{(\eboxd x,\dx)}}
 \end{mathpar}
 
 \noindent The functorial action $\tang f$, extraction $\extract_A : TA \to A$,
-and duplication $\dup_A : \tang A \to \tang{\tang A}$ are:
+and duplication $\dup_A : \tang A \to \tang{\tang A}$ are: \todo{FIXME: $\dup$
+  isn't monotone! uh-oh, is $\tangfn$ not a comonad?}
+%
+\nopagebreak[3]
 \begin{align*}
-  \tang{f} \<(x,\dx) &= (f\<x,\, f'\<x\<\dx)
+  \tang{f} \<(\eboxd x,\dx) &= (f\<\dvar x,\, f' \<\eboxd x \<\dx)
   &
-  (\tang{f})' \<(x,\dx) \<() &= ()
+  (\tang{f})' \<(\eboxd x,\dx) \<() &= ()
   \\
-  \extract_A \<(x,\dx) &= x
+  \extract_A \<(\eboxd x,\dx) &= \dvar x
   &
-  \extract_A' \<(x,\dx) \<() &= \dx
+  \extract_A' \<(\eboxd x,\dx) \<() &= \dx
   \\
-  \dup_A \<(x,\dx) &= ((x,\dx),())
+  \dup_A \<(\eboxd x,\dx) &=
+  \color{red} ((x,\dx),()) % uh-oh
   &
-  \dup_A' \<(x,dx) \<() &= ()
+  \dup_A' \<(\eboxd x,dx) \<() &= ()
 \end{align*}
 
 \noindent
@@ -209,6 +203,12 @@ Naturality of $\extract$ and $\dup$: \XXX
 The comonad laws hold: \XXX
 %
 \todo{I've checked these things on paper.}
+
+The distributive morphisms $\discox$ and $\discosum$ are:
+\nopagebreak[3]
+\begin{align*}
+  \discox \<(\eboxd{x_i}, \dx_i)_i &=
+\end{align*}
 
 
 \subsection{Finite powersets}
