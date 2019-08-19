@@ -181,7 +181,7 @@
 \newcommand\efixisd[2]{\efixis{#1}{\isocolor #2}}
 \newcommand\eeqd[2]{\eeq{\isocolor #1}{\isocolor #2}}
 
-\newcommand\fastfix{\prim{semifix}}
+\newcommand\fastfix{\morph{semifix}}
 
 %\newcommand\J[3]{{#1} \mathrel{\,:\,} {#2} \vdash {#3}}
 \newcommand\J[3]{{#2} \vdash {#1} \mathrel{:} {#3}}
@@ -201,8 +201,13 @@
 \newcommand\dummy{\fname{pick}} % pick, choose, choice, dummy, arb, witness
 
 \newcommand\iso{{\texorpdfstring{\ensuremath{\square}}{box}}}
-\newcommand\blackiso{{\texorpdfstring{\ensuremath{\blacksquare}}{black box}}}
 \newcommand\altiso{\texorpdfstring{\ensuremath{\iso_{\textrm{alt}}}}{altiso}}
+\newcommand\ciso{\texorpdfstring{\ensuremath{\mathord{\boxtimes}}}{cross box}}
+
+%% TODO: get rid of \blackiso, \tang, \tangfn from seminaive.tex
+\newcommand\blackiso{{\texorpdfstring{\ensuremath{\blacksquare}}{black box}}}
+\newcommand\tangfn{\texorpdfstring{\ensuremath{T}}{T}}
+\newcommand\tang{\tangfn}
 
 \newcommand\zero{\texorpdfstring{\ensuremath{\mathbold{0}}}{0}}
 \newcommand\valfn{\texorpdfstring{\ensuremath{V}}{V}}
@@ -210,9 +215,6 @@
 \newcommand\chgfn{\ensuremath{\D}}
 \newcommand\chgs\chgfn
 \newcommand\deriv[1]{\ensuremath{#1'}}
-
-\newcommand\tangfn{\texorpdfstring{\ensuremath{T}}{T}}
-\newcommand\tang{\tangfn}
 
 %% Validity/update relation arrows
 \newcommand\validto\to
