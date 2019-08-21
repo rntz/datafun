@@ -25,13 +25,14 @@
 \crefname{section}{\S\@gobble}{\S\@gobble}
 
 % hang is only relevant for long captions, which I don't have
-%\usepackage[labelsep=period,font=it,format=hang]{caption}
-\usepackage[labelsep=period,font=rm,labelfont=sc,format=hang]{caption}
+\usepackage[labelsep=period,font={it},format=hang]{caption}
+%\usepackage[labelsep=period,font=rm,labelfont=sc,format=hang]{caption}
 
 % Unfortunately, only pdftex supports most of the features of microtype.
 \usepackage{iftex}
-\ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=30,}{microtype}\else\fi
-\usepackage{microtype}\frenchspacing
+\ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=25,}{microtype}\else\fi
+\usepackage{microtype}
+\frenchspacing
 
 %% Controls hyphenation and date formatting defaults, among other things.
 \usepackage[british]{babel}
@@ -50,6 +51,7 @@ bi-carte-sian se-man-tics eq-uip-ped}
 %% ===== Fiddling with lists =====
 \usepackage{enumitem}
 \SetEnumitemKey{flushleft}{labelindent=0pt,leftmargin=*,}
+\setlist[description]{font=\normalfont\itshape,}
 
 \setlist{labelsep=.8em,}
 %\setlist{labelsep=.667em,}

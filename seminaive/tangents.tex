@@ -1,31 +1,45 @@
 %% Laptop-optimized.
 \documentclass{rntz}
-%\usepackage[laptop]{fantasy}
-\usepackage[a5]{rntzgeometry}\usepackage[width=\textwidth,fullwidth=120mm,]{narrow}
-%\usepackage[scaled=1.036,scaled=1.0417,scaled=1.02,]{rntzfont}
+\usepackage[laptop]{fantasy}
+%\usepackage[aspect=5/4,]{aspect}
+%\usepackage[a5]{rntzgeometry}%\usepackage[width=\textwidth,fullwidth=120mm,]{narrow}
 
-\usepackage{xfp}
+% Charter is narrow. Avoid shrinking, allow stretching.
+\PassOptionsToPackage{shrink=10,stretch=25,}{microtype}
+\usepackage[scaled=1.0417,scaled=1,scaled=1.036,]{rntzfont}
+
+%% \usepackage{xfp}
+%% \makeatletter
+%% \edef\@scaled{1}
+%% % Crimson Pro is a wide font, don't stretch it too much.
+%% \PassOptionsToPackage{shrink=25,stretch=10,}{microtype}
+%% \newcommand\CrimsonProInitials@scale{1}
+%% \edef\zeu@Scale{\@scaled}
+%% \usepackage[p,lf,sb,scaled=\fpeval{\@scaled*1.0957269037956552}]{CrimsonPro}
+%% \usepackage[scaled=\fpeval{\@scaled*1.002183406113537}]{AlegreyaSans}
+%% \usepackage{eulervm}
+%% \usepackage[cal=cm]{mathalfa}
+%% \linespread{\fpeval{\@scaled*1.0661*1.02}}
+%% \usepackage{inconsolata}        %TODO: scaling
+%% \makeatother
+%% \providecommand\mathvar\ensuremath
+%% \providecommand\mathbold\boldsymbol
+
 \makeatletter
-\edef\@scaled{1.016}
-\newcommand\CrimsonProInitials@scale{1}
-\edef\zeu@Scale{\@scaled}
-\usepackage[p,lf,sb,scaled=\fpeval{\@scaled*1.0957269037956552}]{CrimsonPro}
-\usepackage[scaled=\fpeval{\@scaled*1.002183406113537}]{AlegreyaSans}
-\usepackage{eulervm}
-\usepackage[cal=cm]{mathalfa}
-\linespread{\fpeval{\@scaled*1.0661}}
+%% \def\rntz@secbefore{1\baselineskip plus .4\baselineskip minus .4\baselineskip}
+%% \def\rntz@secafter{.618034\baselineskip plus 0.2472136\baselineskip minus 0.2472136\baselineskip}
+
+%% %% Tight spacing. Golden ratio before:after.
+%% \def\rntz@secbefore{0.809017\baselineskip plus 0.404508\baselineskip minus .1618034\baselineskip}
+%% \def\rntz@secafter{.5\baselineskip plus .25\baselineskip minus .1\baselineskip}
+
+%% \def\rntz@secafter{1ex}
+%% %\def\rntz@secbefore{3ex plus 2ex minus 2ex}
+%% %\def\rntz@secbefore{2.8ex plus 2.2ex minus 1.8ex}
+%% \def\rntz@secbefore{2.5ex plus 2ex minus 1.5ex}
+%% %\def\rntz@secbefore{2.2ex plus 2.2ex minus 1.2ex}
+%% %\def\rntz@secbefore{2ex plus 2ex minus 1ex}
 \makeatother
-
-\providecommand\mathvar\ensuremath
-\providecommand\mathbold\boldsymbol
-
-%% %% A5 paper.
-%% \documentclass{rntz}
-%% \usepackage[a5]{rntzgeometry}
-%% \usepackage[width=\textwidth,fullwidth=120mm,]{narrow}
-%% \usepackage[newmath,scaled=1.02]{rntzfont}
-%% %% \providecommand\mathvar[1]{\ensuremath{\mathit{#1}}}
-%% %% \providecommand\mathbold[1]{{\boldsymbol#1}}
 
 
 \usepackage{seminaive}
@@ -116,7 +130,9 @@ A Datafun model consists of a bicartesian closed category \catC\ equipped with:
 a ``discreteness'' comonad \iso; for every object $A$, a ``finite powerset''
 object $\pfin A$; families of equality objects $\eqt A$, semilattice objects
 $L$, and fixed point objects $\fixt L$ which interpret the corresponding Datalog
-type families; and the following morphism families: \nopagebreak[2]
+type families; and the following morphism families:
+%
+\nopagebreak[0]
 \begin{mathpar}
   \textstyle
   \discox : \prod_i \iso A_i \to \iso \prod_i A_i
@@ -151,7 +167,7 @@ corresponds to semi\naive\ evaluation.
 
 \subsection{The comonad \ciso}
 
-\begin{figure*}[pth]
+\begin{figure*}[p]
   \begin{mathpar}
     \vals\ciso A = \iso(\vals A \x \chgs A)
 
@@ -194,7 +210,7 @@ corresponds to semi\naive\ evaluation.
   \label{fig:ciso}
 \end{figure*}
 
-\begin{figure*}[pth]
+\begin{figure*}[p]
   \begin{align*}
     \morph{collect}(f) \<(\gamma, s)
     &= \bigvee_{\dvar x \in s} f\<(\gamma,\ebox{\dvar x, \zero_{\dvar x}})
@@ -411,8 +427,8 @@ Second, $\dup_{\ciso A} \circ \dup_A = \ciso\dup_A \circ \dup_A$ because:
 
 \subsection{Other Datafun model structures}
 
-\begin{description}
-\item[Finite powersets] Finite powerset objects in \CP\ are defined using the
+\begin{description}[leftmargin=12.5ex, style=multiline]
+\item[Powersets] Finite powerset objects in \CP\ are defined using the
   analogous finite powerset functor on \Poset: \nopagebreak[3]
   \begin{mathpar}
     \vals \pfin A = \pfin \vals A
@@ -444,8 +460,7 @@ Second, $\dup_{\ciso A} \circ \dup_A = \ciso\dup_A \circ \dup_A$ because:
 
 \noindent
 The remaining morphism families are given in \cref{fig:morphisms}. \todo{TODO:
-  write up correctness proofs (done on paper, except for
-  $\morph{collect}(f)'$).}
+  write up correctness proofs (done with pen \& paper).}
 
 
 \subsection{The function \fastfix}
@@ -461,7 +476,7 @@ L \to L \to L$. It yields the limit of the ascending sequence $(x_i)_i$ defined 
 
 \noindent
 If $f'$ is a derivative of $f$, then $\fastfix\<f\<f'$ will be the least fixed
-point of $f$. \todo{TODO: Import proof here that I've given elsewhere.}
+point of $f$. \todo{I have proven this elsewhere.}
 
 
 %% \section{Reading off semi\naive\ evaluation as a static transformation}
