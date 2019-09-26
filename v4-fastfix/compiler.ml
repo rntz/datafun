@@ -39,7 +39,7 @@ All tagless-final. Compiler flowchart:
 
 MODAL
  |
- | φ/δ
+ | φ/δ seminaive magic
  V
 ZERO  with explicit "this is a zero-change"
  |
@@ -131,7 +131,7 @@ module Option = struct
   let all (l: 'a option list): 'a list option =
     let rec loop acc = function
       | [] -> Some (List.rev acc)
-      | None :: xs -> None
+      | None :: _xs -> None
       | Some x :: xs -> loop (x::acc) xs
     in loop [] l
 end
@@ -200,7 +200,7 @@ module Cx = struct
   include Map.Make(Sym)
   (* Prefers later bindings to earlier ones. *)
   let from_list l = List.fold_left (fun cx (k,v) -> add k v cx) empty l
-  let add_list l cx = union (fun k x y -> Some x) (from_list l) cx
+  let add_list l cx = union (fun _k x _y -> Some x) (from_list l) cx
   let add_opt k vopt cx = match vopt with None -> cx | Some v -> add k v cx
 end
 type 'a cx = 'a Cx.t
@@ -266,7 +266,7 @@ let rec asLat: 'a -> 'a semilat = function
   | `Tuple tps -> `Tuple (List.map asLat tps)
   | `String | `Box _ -> typeError "not a semilattice type"
 
-let rec isLat (x: 'a): 'a semilat option =
+let isLat (x: 'a): 'a semilat option =
   try Some (asLat x) with TypeError _ -> None
 
 
@@ -392,11 +392,11 @@ module Typecheck(Imp: MODAL): BIDIR
     let exprType, exprX = expr cx in
     Imp.letIn exprType tp x exprX (body (Cx.add x (Id,exprType) cx) tp)
 
-  let string (s: string) (cx: cx) = function
+  let string (s: string) (_cx: cx) = function
     | `String -> Imp.string s
     | _ -> typeError "strings must have string type"
 
-  let bool (b: bool) (cx: cx) = function
+  let bool (b: bool) (_cx: cx) = function
     | `Bool -> Imp.bool b
     | _ -> typeError "booleans must have boolean type"
 
@@ -518,7 +518,7 @@ module DropBoxes(Imp: SIMPLE): MODAL with type term = Imp.term
   let forIn a b = Imp.forIn a (deboxLat b)
   let fix = Imp.fix
   let equals = Imp.equals
-  let box a m = m
+  let box _a m = m
   let letBox a b = Imp.letIn (debox a) (debox b)
 end
 
@@ -574,7 +574,7 @@ module Seminaive(Imp: ZERO): MODAL
 
   (* φ(let box x = M in N) = let x,dx = φM in φN
    * δ(let box x = M in N) = let x,dx = φM in δN *)
-  let letBox (a: tp) (b: tp) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term): term =
+  let letBox (a: tp) (b: tp) (x: sym) (fExpr, _dExpr: term) (fBody, dBody: term): term =
     let fa,da = phiDelta a and fb,db = phiDelta b and dx = Sym.d x in
     (* let (x,dx) = φM in ... *)
     let binder bodyTp body = Imp.letTuple [fa,x;da,dx] bodyTp fExpr body
@@ -627,7 +627,7 @@ module Seminaive(Imp: ZERO): MODAL
 
   (* φ(if M then N else O) = if φM then φN else φO
    * δ(if M then N else O) = if φM then δN else δO  -- condition can't change! *)
-  let ifThenElse (a: tp) (fCond,dCond: term) (fThn,dThn: term) (fEls,dEls: term): term =
+  let ifThenElse (a: tp) (fCond,_dCond: term) (fThn,dThn: term) (fEls,dEls: term): term =
     let fA,dA = phiDelta a in
     Imp.ifThenElse fA fCond fThn fEls, Imp.ifThenElse dA fCond dThn dEls
 
@@ -685,12 +685,12 @@ module Seminaive(Imp: ZERO): MODAL
 
   (* φ(fix M) = semifix φM
    * δ(fix M) = zero ⊥ = ⊥ *)
-  let fix (a: eqtp semilat) (fFunc, dFunc: term) =
+  let fix (a: eqtp semilat) (fFunc, _dFunc: term) =
     Imp.semifix a fFunc,
     Imp.zero (a :> rawtp) (Imp.union (a :> rawtp semilat) [])
 
   (* φ(M == N) = φM == φN       δ(M == N) = false *)
-  let equals (a: eqtp) (fM, dM: term) (fN, dN: term): term =
+  let equals (a: eqtp) (fM, _dM: term) (fN, _dN: term): term =
     Imp.equals a fM fN,
     Imp.zero `Bool (Imp.bool false)
 end
@@ -776,8 +776,8 @@ end = struct
     Imp.letTuple tpxs bodyTp (expr cx |> snd) (body cx |> snd)
     |> notZero
 
-  let string s cx = notZero (Imp.string s)
-  let bool x cx = notZero (Imp.bool x)
+  let string s _cx = notZero (Imp.string s)
+  let bool x _cx = notZero (Imp.bool x)
 
   let ifThenElse a cnd thn els cx =
     notZero (Imp.ifThenElse a (snd (cnd cx)) (snd (thn cx)) (snd (els cx)))
@@ -844,7 +844,7 @@ end = struct
     propagate (Imp.tuple tptms) Option.(all empties |> map (fun x -> `Tuple x))
 
   let proj tps i (term: term) cx: value = match term cx with
-    | termX, Some `Tuple lats -> empty (List.nth lats i)
+    | _termX, Some `Tuple lats -> empty (List.nth lats i)
     | termX, _ -> full (Imp.proj tps i termX)
 
   let letTuple tpxs bodyTp expr body cx =
@@ -856,8 +856,8 @@ end = struct
     let bodyX, bodyE = body (Cx.add_list knowns cx) in
     propagate (Imp.letTuple tpxs bodyTp exprX bodyX) bodyE
 
-  let string s cx = Imp.string s, None
-  let bool x cx = Imp.bool x, if x then None else Some `Bool
+  let string s _cx = Imp.string s, None
+  let bool x _cx = Imp.bool x, if x then None else Some `Bool
 
   let ifThenElse a cnd thn els cx =
     match cnd cx, thn cx, els cx with
@@ -878,7 +878,7 @@ end = struct
     | terms -> full (Imp.set a terms)
 
   let union a terms cx =
-    let f tm = match tm cx with tmX, Some _ -> [] | tmX, None -> [tmX] in
+    let f tm = match tm cx with _tmX, Some _ -> [] | tmX, None -> [tmX] in
     match List.(concat (map f terms)) with
     | [] -> empty a | elems -> full (Imp.union a elems)
 
@@ -951,23 +951,23 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
   let letBind pat expr body =
     parenSpaces [string "let"; pat; string "="; expr; string "in"; body]
 
-  let var tp x = sym x
-  let letIn a b x expr body = letBind (sym x) expr body
-  let equals a m n = parenSpaces [m; string "=="; n]
-  let lam a b x body = paren (string "\\" ^ sym x ^ string " -> " ^ body)
-  let app a b fnc arg = parenSpaces [fnc; arg]
+  let var _tp x = sym x
+  let letIn _a _b x expr body = letBind (sym x) expr body
+  let equals _a m n = parenSpaces [m; string "=="; n]
+  let lam _a _b x body = paren (string "\\" ^ sym x ^ string " -> " ^ body)
+  let app _a _b fnc arg = parenSpaces [fnc; arg]
 
   let bool b = string (if b then "True" else "False")
-  let ifThenElse tp cond thn els =
+  let ifThenElse _tp cond thn els =
     parenSpaces [string "if"; cond; string "then"; thn; string "else"; els]
-  let guard tp cond body = call "guard" [cond; body]
+  let guard _tp cond body = call "guard" [cond; body]
 
   let tuple = function
     | [] -> string "()"
     | [_,term] -> term (* singleton tuples turn into the contained type *)
     | terms -> paren (commas List.(map snd terms))
-  let letTuple tpxs bodyTp tuple body =
-    letBind (List.map (fun (tp,x) -> sym x) tpxs |> commas |> paren) tuple body
+  let letTuple tpxs _bodyTp tuple body =
+    letBind (List.map (fun (_tp,x) -> sym x) tpxs |> commas |> paren) tuple body
   let proj tps i term = match List.length tps, i with
     | x, y when y >= x -> impossible "out of bounds projection"
     | 1, 0 -> term     (* singleton tuples turn into the contained type *)
@@ -986,7 +986,7 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
      * Simplify can generate them by rewriting (λx.⊥) → ⊥. *)
     | `Fn(a,b) -> lam a b (Sym.gen "_") (empty b)
 
-  let set a terms = call "set" [listOf terms]
+  let set _a terms = call "set" [listOf terms]
   let union tp = function
     | [] -> empty tp
     | [tm] -> tm
@@ -994,8 +994,8 @@ module ToHaskell: SIMPLE with type term = StringBuilder.t = struct
     | terms -> call "unions" [listOf terms]
 
   let forIn a b x set body = call "forIn" [set; lam a b x body]
-  let fix tp term = call "fix" [term]
-  let semifix tp term = call "semifix" [term]
+  let fix _tp term = call "fix" [term]
+  let semifix _tp term = call "semifix" [term]
 
   (* This has to come at the end because we use string to mean
      StringBuilder.string earlier. *)
