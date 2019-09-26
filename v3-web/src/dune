@@ -1,0 +1,8 @@
+(library
+ (name datafun))
+
+(menhir
+ (flags --explain)
+ (modules DatafunParser))
+
+(ocamllex DatafunLexer)
