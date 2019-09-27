@@ -1,6 +1,6 @@
 (library
  (name datafun))
 
-; (menhir
-;  (flags --explain)
-;  (modules DatafunParser))
+(menhir
+ (flags --explain)
+ (modules Parser))
