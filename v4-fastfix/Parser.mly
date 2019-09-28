@@ -1,8 +1,6 @@
 %{
-    open Util
-    open Types
-    (* open Langs *)
-
+    open Util open Types
+    module B = Backend
     let parseError msg = todo ("parse error: " ^ msg)
 %}
 
@@ -10,8 +8,8 @@
 %token
 /* punctuation */ DOT COMMA UNDER SEMI COLON BANG PLUS DASH ASTERISK SLASH
 PERCENT ARROW DBLARROW BAR LE LT GE GT EQ EQEQ RPAREN LPAREN
-RBRACE LBRACE RBRACK LBRACK
-/* keywords */ TYPE DEF THE LET IN END EMPTY OR FOR DO FIX AS FN CASE IF THEN
+RBRACE LBRACE RBRACK LBRACK BACKSLASH
+/* keywords */ TYPE DEF THE LET IN END EMPTY OR FOR DO FIX IS CASE IF THEN WHEN
 ELSE SHADOW
 /* end of file */ EOF
 
@@ -24,22 +22,24 @@ ELSE SHADOW
 
 /* Types for nonterminals */
 %start <Types.modaltp> tp test_tp
+%start <Backend.term> term test_term
+%start <Backend.expr> expr test_expr
 %start <unit> unused
 
 %%
-/* ---------- PARSING RULES ---------- */
+// ---------- PARSING RULES ----------
 
-unused: AS ASTERISK BANG BAR BOOL CAPID CASE COLON DASH DBLARROW DEF DO DOT ELSE
-EMPTY END EQ EQEQ FIX FN FOR GE GT IF IN LBRACK LE LET LT OR PERCENT PLUS RBRACK
-SEMI SHADOW SLASH STRING THE THEN TYPE UNDER {()};
+unused: ASTERISK BANG BAR CAPID CASE COLON DASH DBLARROW DEF ELSE END EQEQ GE GT
+IF LE LT PERCENT PLUS SEMI SHADOW SLASH THEN TYPE UNDER {()};
 
+// ===== Types =====
 test_tp: tp EOF { $1 }
 tp: tp_product {$1}
-| tp_product ARROW tp { `Fn($1, $3) }
+| a=tp_product ARROW b=tp { `Fn(a, b) }
 
 tp_product: tp_atom
 | tp_atom COMMA { `Tuple [$1] }
-| tp_atom nonempty_list(COMMA tp_atom {$2}) { `Tuple($1::$2) }
+| x=tp_atom xs=nonempty_list(COMMA tp_atom {$2}) { `Tuple(x::xs) }
 
 tp_atom:
 | LPAREN RPAREN { `Tuple [] }
@@ -51,10 +51,62 @@ tp_atom:
 | LBRACE eqtp RBRACE { `Set $2 }
 | LPAREN tp RPAREN { $2 }
 
-/* I need eqtp productions because eg. `Set takes an eqtp. */
-eqtp: tp {
-  match firstOrder $1 with
-  | Some a -> a
-  | None -> parseError "not an eqtp"
-}
-  
+/* Need this because `Set takes an eqtp. */
+eqtp: tp { match firstOrder $1 with
+           | Some a -> a
+           | None -> parseError "not an eqtp" }
+
+// ===== Terms & Expressions =====
+// TODO: explain precedence here.
+// TODO: ifThenElse, proj
+test_term: term EOF {$1}
+term: expr {B.expr $1}          /* reduce/reduce */
+| term_app {$1}
+| term_app nonempty_list(COMMA term_app {$2}) { B.tuple ($1::$2) }
+| term_app nonempty_list(OR term_app {$2}) { B.union ($1::$2) }
+| BACKSLASH xs=nonempty_list(var) DOT body=term
+    { List.fold_right B.lam xs body }
+| cs=list(comp) DO body=term { List.fold_right (fun f x -> f x) cs body }
+/* let bindings. I probably want patterns, actually. */
+| LET LBRACK x=var RBRACK EQ e=expr IN body=term { B.letBox x e body }
+| LET x=var EQ e=expr IN body=term { B.letIn x e body }
+| LET LPAREN xs=separated_list(COMMA, var) RPAREN EQ e=expr IN body=term
+    { B.letTuple xs e body }
+| FIX x=var IS e=term { B.fix x e }
+
+comp: FOR x=var IN e=expr { B.forIn x e }
+| WHEN term_app { B.guard $2 }
+
+term_app: term_atom {$1}
+| expr_app { B.expr $1 }        /* reduce/reduce */
+
+term_atom:
+| expr_atom { B.expr $1 }       /* reduce/reduce */
+| EMPTY { B.union [] }
+| STRING { B.string $1 }
+| BOOL { B.bool $1 }
+| LPAREN RPAREN { B.tuple [] }
+| LPAREN term RPAREN { $2 }
+| LBRACK term RBRACK { B.box $2 }
+| LBRACE separated_list(COMMA, term_app) RBRACE { B.set $2 }
+// set comprehensions
+| LBRACE term_app nonempty_list(comp) RBRACE
+  { List.fold_right (fun f x -> f x) $3 (B.set [$2]) }
+
+test_expr: expr EOF {$1}
+expr: expr_app {$1}
+| THE tp_atom term { B.asc $2 $3 }
+
+expr_app: expr_fnapp { $1 }
+| expr_fnapp EQ expr_fnapp { B.equals $1 $3 }
+
+expr_fnapp: expr_atom { $1 }
+| expr_fnapp term_atom { B.app $1 $2 }
+
+expr_atom: var { B.var $1 }
+
+/* NB. We generate symbols which always have id 0. I think this is safe, because
+ * symbol comparison also uses the symbol's name, and I _think_ all my code
+ * handles shadowing properly. I admit I'm not entirely confident, though.
+ */
+var: ID { {name = $1; id = 0; degree = 0} }
