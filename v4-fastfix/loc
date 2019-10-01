@@ -5,9 +5,7 @@ filter() {
     egrep --no-filename -v '^ *(//.*|\(\*.*\*\))? *$' "$@"
 }
 
-# FIXME.
-#files="*.ml *.mll *.mly"
-files="[A-Z]*.ml *.mli *.mly"
+files="*.ml *.mli *.mly"
 
 for name in $files; do
     printf "%5d %s\n" $(filter "$name" | wc -l) "$name"
