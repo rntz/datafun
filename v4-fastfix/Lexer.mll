@@ -31,9 +31,9 @@ rule token = parse
   (* expression keywords *)
   | "let" {LET} | "in" {IN} | "end" {END}
   | "empty" {EMPTY} | "or" {OR} | "for" {FOR} | "do" {DO}
-  | "fix" {FIX} | "is" {IS} | "as" {AS}
   | "case" {CASE}
   | "if" {IF} | "then" {THEN} | "else" {ELSE}
+  | "as" {AS}
 
   (* literals *)
   | "true" {BOOL(true)}

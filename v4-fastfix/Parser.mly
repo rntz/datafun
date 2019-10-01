@@ -8,7 +8,7 @@
 /* punctuation */ AT DOT COMMA UNDER SEMI COLON BANG PLUS DASH ASTERISK SLASH
 PERCENT ARROW DBLARROW BAR LE LT GE GT EQ EQEQ RPAREN LPAREN
 RBRACE LBRACE RBRACK LBRACK BACKSLASH
-/* keywords */ TYPE DEF LET IN END EMPTY OR FOR DO FIX IS CASE IF THEN WHEN
+/* keywords */ TYPE DEF LET IN END EMPTY OR FOR DO CASE IF THEN WHEN
 ELSE SHADOW AS
 /* end of file */ EOF
 
@@ -27,7 +27,7 @@ ELSE SHADOW AS
 // ---------- PARSING RULES ----------
 
 unused: ASTERISK BANG BAR CAPID CASE COLON DASH DBLARROW DEF ELSE END EQEQ GE GT
-IF LE LT PERCENT PLUS SEMI SHADOW SLASH THEN TYPE UNDER {()};
+IF LE LT PLUS SHADOW SLASH THEN TYPE UNDER {()};
 
 // ===== Types =====
 tp: tp_product {$1}
@@ -60,30 +60,32 @@ replcmd:
 | EOF { `Cmd "quit" }
 
 // ===== Expressions =====
-// TODO: explain precedence here.
 // TODO: ifThenElse, proj
-term: term_app {$1}
-| term_app nonempty_list(COMMA term_app {$2}) { B.tuple ($1::$2) }
-| term_app nonempty_list(OR term_app {$2}) { B.union ($1::$2) }
-| AT tp_atom term { B.asc $2 $3 }
+term: term1 {$1}
+| AT a=tp_atom m=term | m=term1 COLON a=tp { B.asc a m }
 | BACKSLASH xs=nonempty_list(var) DOT body=term
     { List.fold_right B.lam xs body }
 | cs=list(comp) DO body=term { List.fold_right (fun f x -> f x) cs body }
-// let bindings. I probably want patterns, actually.
+// let-bindings.
 | LET LBRACK x=var RBRACK EQ e=term IN body=term { B.letBox x e body }
 | LET x=var EQ e=term IN body=term { B.letIn x e body }
 | LET LPAREN xs=separated_list(COMMA, var) RPAREN EQ e=term IN body=term
     { B.letTuple xs e body }
-| FIX x=var IS e=term | x=var AS e=term { B.fix x e }
+| x=var AS e=term { B.fix x e }
 
-comp: FOR x=var IN e=term { B.forIn x e }
-| WHEN term_app { B.guard $2 }
+// Comprehensions (for & when)
+comp: FOR x=var IN e=term { B.forIn x e } | WHEN term1 { B.guard $2 }
 
-term_app: term_fnapp {$1}
-| term_fnapp EQ term_fnapp { B.equals $1 $3 }
+// Tuples and unions
+term1: term2 {$1}
+| term2 nonempty_list(COMMA term2 {$2}) { B.tuple ($1::$2) }
+| term2 nonempty_list(OR term2 {$2}) { B.union ($1::$2) }
 
-term_fnapp: term_atom { $1 }
-| term_fnapp term_atom { B.app $1 $2 }
+// Equality tests
+term2: term3 {$1} | term3 EQ term3 { B.equals $1 $3 }
+
+// function applications
+term3: term_atom { $1 } | term3 term_atom { B.app $1 $2 }
 
 term_atom:
 | var { B.var $1 }
@@ -93,9 +95,9 @@ term_atom:
 | LPAREN RPAREN { B.tuple [] }
 | LPAREN term RPAREN { $2 }
 | LBRACK term RBRACK { B.box $2 }
-| LBRACE separated_list(COMMA, term_app) RBRACE { B.set $2 }
+| LBRACE separated_list(COMMA, term2) RBRACE { B.set $2 }
 // set comprehensions
-| LBRACE term_app nonempty_list(comp) RBRACE
+| LBRACE term nonempty_list(comp) RBRACE
   { List.fold_right (fun f x -> f x) $3 (B.set [$2]) }
 
 // NB. We generate symbols which always have id 0. I think this is safe, because
