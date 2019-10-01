@@ -15,11 +15,11 @@ type mode = Id | Box | Hidden
 type modalcx = (mode * modaltp) Cx.t
 
 module Surface(Imp: MODAL): SURFACE
-       with type term = modaltp option -> modalcx -> modaltp * Imp.term
+       with type term = modalcx -> modaltp option -> modaltp * Imp.term
 = struct
   type tp = modaltp
   type cx = modalcx
-  type term = tp option -> cx -> tp * Imp.term
+  type term = cx -> tp option -> tp * Imp.term
 
   let subtype (a: tp) (b: tp) = a = b
 
@@ -36,83 +36,118 @@ I need an expression of type %s
      but I found one of type %s" (to_string want) (to_string got))
     | _ -> got
 
-  let check (term: term) (tp: tp) (cx: cx): Imp.term = snd (term (Some tp) cx)
+  let check (term: term) (cx: cx) (tp: tp): Imp.term = snd (term cx (Some tp))
 
   (* Transparent terms (can either check or synthesize) *)
-  let letIn (x: sym) (expr: term) (body: term) (expect: tp option) (cx: cx): tp * Imp.term =
-    let exprType, exprX = expr None cx in
-    let bodyType, bodyX = body expect (Cx.add x (Id, exprType) cx) in
+  let letIn (x: sym) (expr: term) (body: term) (cx: cx) (expect: tp option): tp * Imp.term =
+    let exprType, exprX = expr cx None in
+    let bodyType, bodyX = body (Cx.add x (Id, exprType) cx) expect in
     bodyType, Imp.letIn exprType bodyType x exprX bodyX
 
-  let letBox (x: sym) (expr: term) (body: term) (expect: tp option) (cx: cx): tp * Imp.term =
-    match expr None cx with
+  let letBox (x: sym) (expr: term) (body: term) (cx: cx) (expect: tp option): tp * Imp.term =
+    match expr cx None with
     | `Box a, exprX ->
-       let bodyTp, bodyX = body expect (Cx.add x (Box, a) cx) in
+       let bodyTp, bodyX = body (Cx.add x (Box, a) cx) expect in
        bodyTp, Imp.letBox a bodyTp x exprX bodyX
     | a, _ -> complain "cannot unbox non-box type" a
 
-  let letTuple (xs: sym list) (expr: term) (body: term) (expect: tp option) (cx: cx): tp * Imp.term =
-    match expr None cx with
+  let letTuple (xs: sym list) (expr: term) (body: term) (cx: cx) (expect: tp option): tp * Imp.term =
+    match expr cx None with
     | (`Tuple tps as tupleTp), exprX ->
        let tpxs = try List.map2 (fun tp x -> tp,x) tps xs
                   with Invalid_argument _ -> complain "wrong tuple length" tupleTp in
        let bindings = List.map (fun (tp,x) -> x, (Box,tp)) tpxs in
-       let bodyTp, bodyX = body expect (Cx.add_list bindings cx) in
+       let bodyTp, bodyX = body (Cx.add_list bindings cx) expect in
        bodyTp, Imp.letTuple tpxs bodyTp exprX bodyX
     | a, _ -> complain "cannot detuple non-tuple" a
 
-  let box (expr: term) (expect: tp option) (cx: cx): tp * Imp.term =
+  let box (expr: term) (cx: cx) (expect: tp option): tp * Imp.term =
     let exprExpect = match expect with
       | None -> None
       | Some (`Box a) -> Some a
       | Some tp -> complain "box expression must have box type" tp in
-    let tp, exprX = expr exprExpect (scrub cx) in
+    let tp, exprX = expr (scrub cx) exprExpect in
     `Box tp, Imp.box tp exprX
 
-  let forIn (x: sym) (set: term) (body: term) (expect: tp option) (cx: cx): tp * Imp.term =
-    let elemType, setX = match set None cx with
+  let forIn (x: sym) (set: term) (body: term) (cx: cx) (expect: tp option): tp * Imp.term =
+    let elemType, setX = match set cx None with
         | `Set a, setX -> a, setX
         | b, _ -> complain "cannot comprehend over non-set" b in
-    let bodyType, bodyX = body expect (Cx.add x (Box, (elemType :> tp)) cx) in
+    let bodyType, bodyX = body (Cx.add x (Box, (elemType :> tp)) cx) expect in
     bodyType, Imp.forIn elemType (asLat bodyType) x setX bodyX
 
-  let guard (cond: term) (body: term) (expect: tp option) (cx: cx): tp * Imp.term =
-    let exprX = snd (cond (Some `Bool) cx) in
-    let bodyType, bodyX = body expect cx in
-    bodyType, Imp.guard (asLat bodyType) exprX bodyX
+  let guard (cond: term) (body: term) (cx: cx) (expect: tp option): tp * Imp.term =
+    let bodyType, bodyX = body cx expect in
+    bodyType, Imp.guard (asLat bodyType) (check cond cx `Bool) bodyX
 
   (* Synthesizing terms *)
-  let asc (ascribed: tp) (expr: term) (expect: tp option) (cx: cx): tp * Imp.term =
-    let tp, impl = expr (Some ascribed) cx in synth tp expect, impl
+  let asc (ascribed: tp) (expr: term) (cx: cx) (expect: tp option): tp * Imp.term =
+    let tp, impl = expr cx (Some ascribed) in synth tp expect, impl
 
-  let var (x: sym) (expect: tp option) (cx: cx): tp * Imp.term =
+  let var (x: sym) (cx: cx) (expect: tp option): tp * Imp.term =
     let oops msg = typeError (Printf.sprintf "variable %s is %s" (Sym.to_string x) msg) in
     match (try Cx.find x cx with Not_found -> oops "unbound") with
     | Box, tp -> synth tp expect, Imp.discvar tp x
     | Id, tp -> synth tp expect, Imp.var tp x
     | Hidden, _ -> oops "hidden"
 
-  let app (fnc: term) (arg: term) (expect: tp option) (cx: cx): tp * Imp.term =
-    match fnc None cx with
-    | `Fn(a,b), fncX -> synth b expect, Imp.app a b fncX (check arg a cx)
+  let app (fnc: term) (arg: term) (cx: cx) (expect: tp option): tp * Imp.term =
+    match fnc cx None with
+    | `Fn(a,b), fncX -> synth b expect, Imp.app a b fncX (check arg cx a)
     | a, _ -> complain "cannot apply non-function" a
 
-  let proj _ = todo "IMPLEMENT TYPECHECKING FOR PROJECTIONS"
-  let equals _ = todo "equals"
+  let proj _ = todo "proj"
 
-  let bool (b: bool) (expect: tp option) (_cx: cx): tp * Imp.term =
+  let equals (e1: term) (e2: term) (cx: cx) (expect: tp option): tp * Imp.term =
+    let e1tp, e1x = e1 cx None in
+    match firstOrder e1tp with
+    | None -> complain "cannot compare at non-equality type" e1tp
+    | Some tp -> synth `Bool expect, Imp.equals tp e1x (check e2 cx e1tp)
+
+  let bool (b: bool) (_cx: cx) (expect: tp option): tp * Imp.term =
     synth `Bool expect, Imp.bool b
 
-  let string (s: string) (expect: tp option) (_cx: cx) =
+  let string (s: string) (_cx: cx) (expect: tp option) =
     synth `String expect, Imp.string s
 
   (* Checking terms *)
+  let lam (x: sym) (body: term) (cx: cx): tp option -> tp * Imp.term = function
+    | Some (`Fn (a,b) as tp) -> tp, check body (Cx.add x (Id,a) cx) b
+    | Some a -> complain "lambda must have function type" a
+    | None -> typeError "cannot infer type for lambda"
+
+  let tuple (terms: term list) (cx: cx): tp option -> tp * Imp.term = function
+    | None ->
+       let tpterms = List.map (fun term -> term cx None) terms in
+       `Tuple List.(map fst tpterms), Imp.tuple tpterms
+    | Some (`Tuple tps as tp) ->
+       (try tp, Imp.tuple (List.map2 (fun tp term -> term cx (Some tp)) tps terms)
+        with Invalid_argument _ -> complain "wrong length tuple" tp)
+    | Some a -> complain "tuple must have tuple type" a
+
+  let set (terms: term list) (cx: cx): tp option -> tp * Imp.term = function
+    | Some (`Set elemtp as tp) ->
+       let f term = check term (scrub cx) (elemtp :> tp) in
+       tp, Imp.set elemtp (List.map f terms)
+    | Some tp -> complain "set literal must have set type" tp
+    | None -> typeError "cannot infer type for set literal"
+
+  let union (terms: term list) (cx: cx): tp option -> tp * Imp.term = function
+    | None -> typeError "cannot infer type of union"
+    | Some tp ->
+       tp, Imp.union (asLat tp) (List.map (fun m -> check m cx tp) terms)
+
+  let fix (x: sym) (body: term) (cx: cx): tp option -> tp * Imp.term = function
+    | None -> typeError "cannot infer type of fix expression"
+    | Some tp ->
+       match firstOrder tp with
+       | None -> complain "cannot take fixed point at higher-order type" tp
+       | Some eqtp ->
+          tp,
+          check body (scrub cx |> Cx.add x (Id, tp)) tp
+          |> Imp.lam tp tp x |> Imp.box (`Fn (tp, tp)) |> Imp.fix (asLat eqtp)
+
   let ifThenElse _ = todo "ifThenElse"
-  let lam _ = todo "lam"
-  let tuple _ = todo "tuple"
-  let set _ = todo "set"
-  let union _ = todo "union"
-  let fix _ = todo "fix"
 end
 
 
