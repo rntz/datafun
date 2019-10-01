@@ -73,33 +73,3 @@ module type SURFACE = sig
   val union: term list -> term
   val fix: sym -> term -> term
 end
-
-module type BIDIR = sig
-  type tp = modaltp
-  type term
-  type expr
-
-  (* inferring exprs *)
-  val asc: tp -> term -> expr
-  val var: sym -> expr
-  val app: expr -> term -> expr
-  val proj: int -> expr -> expr
-  val equals: expr -> expr -> expr
-
-  (* checking terms *)
-  val expr: expr -> term
-  val letIn: sym -> expr -> term -> term
-  val string: string -> term
-  val bool: bool -> term
-  val ifThenElse: term -> term -> term -> term
-  val guard: term -> term -> term
-  val lam: sym -> term -> term
-  val tuple: term list -> term
-  val letTuple: sym list -> expr -> term -> term
-  val set: term list -> term
-  val union: term list -> term
-  val forIn: sym -> expr -> term -> term
-  val box: term -> term
-  val letBox: sym -> expr -> term -> term
-  val fix: sym -> term -> term
-end

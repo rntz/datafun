@@ -14,68 +14,68 @@ let i = Sym.gen "i" and j = Sym.gen "j" and k = Sym.gen "k"
 let self = Sym.gen "self"
 
 module Examples(Modal: MODAL) = struct
-  module Lang = Typecheck(Modal)
+  module Lang = Surface(Modal)
   open Lang
 
   type test = Modal.term
   let testIn (tp: tp) cx (ex: term): Modal.term =
-    ex (cx |> List.map (fun (a,b,c) -> a,(b,c)) |> Cx.from_list) tp
-  let test (tp: tp) (ex: term) = ex Cx.empty tp
+    check ex (cx |> List.map (fun (a,b,c) -> a,(b,c)) |> Cx.from_list) tp
+  let test (tp: tp) (ex: term) = check ex Cx.empty tp
 
   let shouldFail f = try ignore (f ()); impossible "shouldn't typecheck"
                      with TypeError _ -> ()
-  let _ = shouldFail (fun _ -> testIn `Bool [x,Hidden,`Bool] (expr (var x)))
+  let _ = shouldFail (fun _ -> testIn `Bool [x,Hidden,`Bool] (var x))
 
   (* TODO: more tests. *)
-  let t0 = testIn `Bool [x,Id,`Bool] (expr (var x))
-  let t1 = testIn `Bool [x,Box,`Bool] (expr (var x))
+  let t0 = testIn `Bool [x,Id,`Bool] (var x)
+  let t1 = testIn `Bool [x,Box,`Bool] (var x)
   (* t2 = λx.x *)
-  let t2 = test (`Fn(`Bool,`Bool)) (lam x (expr (var x)))
+  let t2 = test (`Fn(`Bool,`Bool)) (lam x (var x))
   let t3 = testIn `Bool
              [x,Id,`Fn(`Bool,`Bool); y,Id,`Bool]
-             (expr (app (var x) (expr (var y))))
+             (app (var x) (var y))
 
   let t4 = test (`Box (`Fn(`Bool, `Bool)))
-             (box (lam x (expr (var x))))
+             (box (lam x (var x)))
 
   let term5 = letBox x
                 (asc (`Box (`Fn(`Bool, `Bool)))
-                   (box (lam x (expr (var x)))))
-                (expr (app (var x) (expr (var y))))
+                   (box (lam x (var x))))
+                (app (var x) (var y))
   let t5 = testIn `Bool [y,Id,`Bool] term5
 
-  let t6 = test (`Tuple []) (fix x (expr (var x)))
+  let t6 = test (`Tuple []) (fix x (var x))
 
   (* Relation composition *)
   let strel: tp = `Set (`Tuple [`String; `String])
   let t7 = testIn strel [a,Id,strel;b,Id,strel]
              (forIn x (var a)
                 (forIn y (var b)
-                   (guard (expr (equals (proj 1 (var x)) (proj 0 (var y))))
-                      (set [tuple [expr (proj 0 (var x));
-                                   expr (proj 1 (var y))]]))))
+                   (guard (equals (proj 1 (var x)) (proj 0 (var y)))
+                      (set [tuple [proj 0 (var x);
+                                   proj 1 (var y)]]))))
 
   (* Intersection *)
   let strset: tp = `Set `String
   let t8 = testIn strset [a,Id,strset; b,Id,strset]
              (forIn x (var a)
                 (forIn y (var b)
-                   (guard (expr (equals (var x) (var y)))
-                      (set [expr (var x)]))))
+                   (guard (equals (var x) (var y))
+                      (set [var x]))))
 
   (* Test for letBox at first-order type.
    * Should optimize derivative to False. *)
   let t9 = testIn `Bool [x,Id,`Box `Bool]
-             (letBox y (var x) (expr (var y)))
+             (letBox y (var x) (var y))
 
   (* Transitive closure *)
   let t10 = testIn strel [edge, Box, strel]
-          (fix path (union [expr (var edge);
+          (fix path (union [var edge;
                             forIn a (var edge)
                               (forIn b (var path)
-                                 (guard (expr (equals (proj 1 (var a)) (proj 0 (var b))))
-                                    (set [tuple [expr (proj 0 (var a));
-                                                 expr (proj 1 (var b))]])))]))
+                                 (guard (equals (proj 1 (var a)) (proj 0 (var b)))
+                                    (set [tuple [proj 0 (var a);
+                                                 proj 1 (var b)]])))]))
 
   (* TODO: regular expressions.
    * I'll eventually need arithmetic for this! *)
@@ -92,16 +92,16 @@ module Examples(Modal: MODAL) = struct
       (`Fn (`Box tregex, tregex))
       [trans, Box, `Fn(`Box natrel, natrel)]
       (* λ[r] [s]. trans [r [s]] *)
-      (lamBox r (lamBox s (expr (app (var trans)
-                                   (box (expr (app (var r) (box (expr (var s))))))))))
+      (lamBox r (lamBox s (app (var trans)
+                             (box (app (var r) (box (var s)))))))
 
   let mkTrans (edge: sym) =
-    (fix path (union [expr (var edge);
+    (fix path (union [var edge;
                       forIn a (var edge)
                         (forIn b (var path)
-                           (guard (expr (equals (proj 1 (var a)) (proj 0 (var b))))
-                              (set [tuple [expr (proj 0 (var a));
-                                           expr (proj 1 (var b))]])))]))
+                           (guard (equals (proj 1 (var a)) (proj 0 (var b)))
+                              (set [tuple [proj 0 (var a);
+                                           proj 1 (var b)]])))]))
 
   (* Explicitly inlining transitive closure into regex star. *)
   let t12rplus =
@@ -110,7 +110,7 @@ module Examples(Modal: MODAL) = struct
       (* λ[r] [s]. let edges = [r [s]] in trans edges *)
       (lamBox r
          (lamBox s
-            (letBox edge (asc (`Box natrel) (box (expr (app (var r) (box (expr (var s)))))))
+            (letBox edge (asc (`Box natrel) (box (app (var r) (box (var s)))))
                (mkTrans edge))))
 
 (* 12 generates:
@@ -135,9 +135,9 @@ semifix
          (lamBox s
             (lamBox i
                (fix self
-                  (union [ set [expr (var i)]
+                  (union [ set [var i]
                          ; forIn j (var self)
-                             (expr (app (app (var r) (box (expr (var s)))) (box (expr (var j)))))
+                             (app (app (var r) (box (var s))) (box (var j)))
          ])))))
 
 (* 13 generates:
