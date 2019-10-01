@@ -21,6 +21,19 @@ type 'a semilat =
 type mode = Id | Box | Hidden
 type modalcx = (mode * modaltp) Cx.t
 
+let rec to_string: modaltp -> string = function
+  | `Fn (a,b) -> to_string1 a ^ " -> " ^ to_string b
+  | a -> to_string1 a
+and to_string1 = function
+  | `Tuple ts -> String.concat ", " (List.map to_string2 ts)
+  | a -> to_string2 a
+and to_string2 = function
+  | `Bool -> "bool"
+  | `String -> "string"
+  | `Set a -> "{" ^ to_string (a :> modaltp) ^ "}"
+  | `Box a -> "[" ^ to_string a ^ "]"
+  | (`Fn _ | `Tuple _) as a -> "(" ^ to_string a ^ ")"
+
 let rec firstOrder: modaltp -> eqtp option = function
   | #firstorder as a -> Some a
   | `Fn _ | `Box _ -> None

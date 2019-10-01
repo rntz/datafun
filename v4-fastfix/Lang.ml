@@ -1,4 +1,4 @@
-open Util open Types
+open Util open Type
 
 (* For now, no typing contexts or variable usage/freeness information. *)
 module type BASE = sig
@@ -42,6 +42,36 @@ end
 module type ZERO = sig
   include SIMPLE
   val zero: tp -> term -> term
+end
+
+module type SURFACE = sig
+  type tp = modaltp
+  type term
+
+  (* transparent (checking OR synthesizing) terms *)
+  val letIn: sym -> term -> term -> term
+  val letBox: sym -> term -> term -> term
+  val letTuple: sym list -> term -> term -> term
+  val box: term -> term
+  val forIn: sym -> term -> term -> term
+  val guard: term -> term -> term
+
+  (* synthesizing terms *)
+  val asc: tp -> term -> term
+  val var: sym -> term
+  val app: term -> term -> term
+  val proj: int -> term -> term
+  val equals: term -> term -> term
+  val bool: bool -> term
+  val string: string -> term
+
+  (* checking terms *)
+  val ifThenElse: term -> term -> term -> term
+  val lam: sym -> term -> term
+  val tuple: term list -> term
+  val set: term list -> term
+  val union: term list -> term
+  val fix: sym -> term -> term
 end
 
 module type BIDIR = sig
