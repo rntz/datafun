@@ -1,16 +1,15 @@
 %{
     open Util open Types
     module B = Backend
-    let parseError msg = todo ("parse error: " ^ msg)
 %}
 
 /* TODO: filter this to only what I need */
 %token
-/* punctuation */ DOT COMMA UNDER SEMI COLON BANG PLUS DASH ASTERISK SLASH
+/* punctuation */ AT DOT COMMA UNDER SEMI COLON BANG PLUS DASH ASTERISK SLASH
 PERCENT ARROW DBLARROW BAR LE LT GE GT EQ EQEQ RPAREN LPAREN
 RBRACE LBRACE RBRACK LBRACK BACKSLASH
-/* keywords */ TYPE DEF THE LET IN END EMPTY OR FOR DO FIX IS CASE IF THEN WHEN
-ELSE SHADOW
+/* keywords */ TYPE DEF LET IN END EMPTY OR FOR DO FIX IS CASE IF THEN WHEN
+ELSE SHADOW AS
 /* end of file */ EOF
 
 %token <string> STRING
@@ -18,12 +17,10 @@ ELSE SHADOW
 %token <string> ID CAPID        /* lower/uppercase identifiers */
 
 // Operator precedence
-// %nonassoc EQ LE LT GE GT
+//%nonassoc EQ LE LT GE GT
 
 /* Types for nonterminals */
-%start <Types.modaltp> tp test_tp
-%start <Backend.term> term test_term
-%start <Backend.expr> expr test_expr
+%start <[ `Cmd of string | `Expr of Backend.expr | `Type of Backend.tp]> replcmd
 %start <unit> unused
 
 %%
@@ -33,11 +30,10 @@ unused: ASTERISK BANG BAR CAPID CASE COLON DASH DBLARROW DEF ELSE END EQEQ GE GT
 IF LE LT PERCENT PLUS SEMI SHADOW SLASH THEN TYPE UNDER {()};
 
 // ===== Types =====
-test_tp: tp EOF { $1 }
 tp: tp_product {$1}
 | a=tp_product ARROW b=tp { `Fn(a, b) }
 
-tp_product: tp_atom
+tp_product: tp_atom { $1 }
 | tp_atom COMMA { `Tuple [$1] }
 | x=tp_atom xs=nonempty_list(COMMA tp_atom {$2}) { `Tuple(x::xs) }
 
@@ -46,7 +42,7 @@ tp_atom:
 | ID { match $1 with
          | "bool" -> `Bool
          | "string" -> `String
-         | _ -> parseError "unrecognized type name" }
+         | _ -> $syntaxerror (* parseError "unrecognized type name" *) }
 | LBRACK tp RBRACK { `Box $2 }
 | LBRACE eqtp RBRACE { `Set $2 }
 | LPAREN tp RPAREN { $2 }
@@ -54,12 +50,18 @@ tp_atom:
 /* Need this because `Set takes an eqtp. */
 eqtp: tp { match firstOrder $1 with
            | Some a -> a
-           | None -> parseError "not an eqtp" }
+           | None -> $syntaxerror (* parseError "not an eqtp" *) }
+
+// ===== The repl =====
+replcmd:
+| AT a=tp SEMI { `Type a }
+| e=expr SEMI { `Expr e }
+| PERCENT c=ID SEMI { `Cmd c }
+| EOF { `Cmd "quit" }
 
 // ===== Terms & Expressions =====
 // TODO: explain precedence here.
 // TODO: ifThenElse, proj
-test_term: term EOF {$1}
 term: expr {B.expr $1}          /* reduce/reduce */
 | term_app {$1}
 | term_app nonempty_list(COMMA term_app {$2}) { B.tuple ($1::$2) }
@@ -72,7 +74,7 @@ term: expr {B.expr $1}          /* reduce/reduce */
 | LET x=var EQ e=expr IN body=term { B.letIn x e body }
 | LET LPAREN xs=separated_list(COMMA, var) RPAREN EQ e=expr IN body=term
     { B.letTuple xs e body }
-| FIX x=var IS e=term { B.fix x e }
+| FIX x=var IS e=term | x=var AS e=term { B.fix x e }
 
 comp: FOR x=var IN e=expr { B.forIn x e }
 | WHEN term_app { B.guard $2 }
@@ -93,9 +95,8 @@ term_atom:
 | LBRACE term_app nonempty_list(comp) RBRACE
   { List.fold_right (fun f x -> f x) $3 (B.set [$2]) }
 
-test_expr: expr EOF {$1}
 expr: expr_app {$1}
-| THE tp_atom term { B.asc $2 $3 }
+| AT tp_atom term { B.asc $2 $3 }
 
 expr_app: expr_fnapp { $1 }
 | expr_fnapp EQ expr_fnapp { B.equals $1 $3 }
@@ -104,6 +105,7 @@ expr_fnapp: expr_atom { $1 }
 | expr_fnapp term_atom { B.app $1 $2 }
 
 expr_atom: var { B.var $1 }
+| LPAREN expr RPAREN { $2 }
 
 /* NB. We generate symbols which always have id 0. I think this is safe, because
  * symbol comparison also uses the symbol's name, and I _think_ all my code

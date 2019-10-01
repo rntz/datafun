@@ -1,4 +1,5 @@
 { open Parser }
+
 let comment = "#" [^'\n']* "\n"
 let digit  = ['0'-'9']
 let integer = '-'? digit+
@@ -10,12 +11,11 @@ let string_literal = ([^'\\' '\"' '\n'] | "\\n" | "\\t" | "\\\\" |"\\\"" )*
 
 rule token = parse
   (* punctuation *)
-  | "_" {UNDER}
+  | "_" {UNDER} | "@" {AT} | "|" {BAR} | "\\" {BACKSLASH}
   | "," {COMMA} | "." {DOT} | "!" {BANG}
   | ":" {COLON} | ";" {SEMI}
   | "+" {PLUS}  | "-" {DASH} | "*" {ASTERISK} | "/" {SLASH}  | "%" {PERCENT}
   | "->" {ARROW} | "=>" {DBLARROW}
-  | "|" {BAR}   | "\\" {BACKSLASH}
 
   | "<=" {LE} | "<" {LT} | ">=" {GE} | ">" {GT}
   | "=" {EQ} | "==" {EQEQ}
@@ -29,10 +29,9 @@ rule token = parse
   | "type" {TYPE} | "def" {DEF} | "shadow" {SHADOW}
 
   (* expression keywords *)
-  | "the" {THE}
   | "let" {LET} | "in" {IN} | "end" {END}
   | "empty" {EMPTY} | "or" {OR} | "for" {FOR} | "do" {DO}
-  | "fix" {FIX} | "is" {IS}
+  | "fix" {FIX} | "is" {IS} | "as" {AS}
   | "case" {CASE}
   | "if" {IF} | "then" {THEN} | "else" {ELSE}
 

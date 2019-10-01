@@ -120,10 +120,11 @@ module Typecheck(Imp: MODAL): BIDIR
   let asc (tp: tp) (term: term) (cx: cx): tp * Imp.term = tp, term cx tp
 
   let var (x: sym) (cx: cx): tp * Imp.term =
-    match Cx.find x cx with
-    | Box, tp -> tp, Imp.discvar tp x
-    | Id, tp -> tp, Imp.var tp x
-    | Hidden, _ -> typeError (Printf.sprintf "variable %s is hidden" (Sym.to_string x))
+    try (match Cx.find x cx with
+         | Box, tp -> tp, Imp.discvar tp x
+         | Id, tp -> tp, Imp.var tp x
+         | Hidden, _ -> typeError (Printf.sprintf "variable %s is hidden" (Sym.to_string x)))
+    with Not_found -> typeError (Printf.sprintf "unbound variable %s" (Sym.to_string x))
 
   let app (fnc: expr) (arg: term) (cx: cx): tp * Imp.term =
     match fnc cx with
