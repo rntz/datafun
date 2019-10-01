@@ -55,6 +55,26 @@ module Examples(Modal: MODAL) = struct
                       (set [tuple [proj 0 (var x);
                                    proj 1 (var y)]]))))
 
+(* From the repl, resugared by hand.
+
+phi: \s.
+for x in s for y in s do
+let (x1, x2) = x in
+let (y1, y2) = y in
+when x2 == y1 do
+{(x1, y2)}
+
+delta: \s ds.
+union
+  (for x in ds for y in s do
+   let (x1, x2) = x in let (y1, y2) = y in
+   when x2 = y1 do {(x1, y2)})
+  (for x in s or ds for y in ds do
+   let (x1, x2) = x in (let (y1, y2) = y in
+   when x2 = y1 do {(x1, y2)}))
+
+ *)
+
   (* Intersection *)
   let strset: tp = `Set `String
   let t8 = testIn strset [a,Id,strset; b,Id,strset]

@@ -41,7 +41,7 @@ tp_atom:
 | LPAREN RPAREN { `Tuple [] }
 | ID { match $1 with
          | "bool" -> `Bool
-         | "string" -> `String
+         | "str" -> `String
          | _ -> $syntaxerror (* parseError "unrecognized type name" *) }
 | LBRACK tp RBRACK { `Box $2 }
 | LBRACE eqtp RBRACE { `Set $2 }
@@ -74,7 +74,7 @@ term: term1 {$1}
 | x=var AS e=term { B.fix x e }
 
 // Comprehensions (for & when)
-comp: FOR x=var IN e=term { B.forIn x e } | WHEN term1 { B.guard $2 }
+comp: FOR x=var IN e=term { B.forIn x e } | WHEN term { B.guard $2 }
 
 // Tuples and unions
 term1: term2 {$1}

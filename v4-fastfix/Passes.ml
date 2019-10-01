@@ -141,7 +141,16 @@ I need an expression of type %s
        let f term = check term (scrub cx) (elemtp :> tp) in
        tp, Imp.set elemtp (List.map f terms)
     | Some tp -> complain "set literal must have set type" tp
-    | None -> typeError "cannot infer type for set literal"
+    | None ->
+       match terms with
+       | [] -> typeError "cannot infer type for empty set"
+       | m::ms ->
+          let mtp, mx = infer m (scrub cx) in
+          match firstOrder mtp with
+          | Some elemtp ->
+             let elems = mx :: List.map (fun n -> check n (scrub cx) mtp) ms in
+             `Set elemtp, Imp.set elemtp elems
+          | None -> complain "set elements must have equality type" mtp
 
   let union (terms: term list) (cx: cx): tp option -> tp * Imp.term = function
     | None -> typeError "cannot infer type of union"
