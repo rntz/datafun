@@ -1,5 +1,5 @@
 (* The speedup φ and derivative δ transformations. *)
-open Util open Types open Langs
+open Util open Type open Lang
 
 (* A simple pass-through that ignores zero annotations. *)
 module DummyZero(S: SIMPLE)
@@ -14,6 +14,108 @@ end
 type mode = Id | Box | Hidden
 type modalcx = (mode * modaltp) Cx.t
 
+module Surface(Imp: MODAL): SURFACE
+       with type term = modaltp option -> modalcx -> modaltp * Imp.term
+= struct
+  type tp = modaltp
+  type cx = modalcx
+  type term = tp option -> cx -> tp * Imp.term
+
+  let subtype (a: tp) (b: tp) = a = b
+
+  let scrub: cx -> cx =
+    Cx.map (function Box, tp -> Box, tp
+                   | (Id|Hidden), tp -> Hidden, tp)
+
+  let complain msg tp = typeError (Printf.sprintf "%s: %s" msg (Type.to_string tp))
+
+  let synth (got: tp) : tp option -> tp = function
+    | Some want when not (subtype got want) ->
+       typeError (Printf.sprintf "
+I need an expression of type %s
+     but I found one of type %s" (to_string want) (to_string got))
+    | _ -> got
+
+  let check (term: term) (tp: tp) (cx: cx): Imp.term = snd (term (Some tp) cx)
+
+  (* Transparent terms (can either check or synthesize) *)
+  let letIn (x: sym) (expr: term) (body: term) (expect: tp option) (cx: cx): tp * Imp.term =
+    let exprType, exprX = expr None cx in
+    let bodyType, bodyX = body expect (Cx.add x (Id, exprType) cx) in
+    bodyType, Imp.letIn exprType bodyType x exprX bodyX
+
+  let letBox (x: sym) (expr: term) (body: term) (expect: tp option) (cx: cx): tp * Imp.term =
+    match expr None cx with
+    | `Box a, exprX ->
+       let bodyTp, bodyX = body expect (Cx.add x (Box, a) cx) in
+       bodyTp, Imp.letBox a bodyTp x exprX bodyX
+    | a, _ -> complain "cannot unbox non-box type" a
+
+  let letTuple (xs: sym list) (expr: term) (body: term) (expect: tp option) (cx: cx): tp * Imp.term =
+    match expr None cx with
+    | (`Tuple tps as tupleTp), exprX ->
+       let tpxs = try List.map2 (fun tp x -> tp,x) tps xs
+                  with Invalid_argument _ -> complain "wrong tuple length" tupleTp in
+       let bindings = List.map (fun (tp,x) -> x, (Box,tp)) tpxs in
+       let bodyTp, bodyX = body expect (Cx.add_list bindings cx) in
+       bodyTp, Imp.letTuple tpxs bodyTp exprX bodyX
+    | a, _ -> complain "cannot detuple non-tuple" a
+
+  let box (expr: term) (expect: tp option) (cx: cx): tp * Imp.term =
+    let exprExpect = match expect with
+      | None -> None
+      | Some (`Box a) -> Some a
+      | Some tp -> complain "box expression must have box type" tp in
+    let tp, exprX = expr exprExpect (scrub cx) in
+    `Box tp, Imp.box tp exprX
+
+  let forIn (x: sym) (set: term) (body: term) (expect: tp option) (cx: cx): tp * Imp.term =
+    let elemType, setX = match set None cx with
+        | `Set a, setX -> a, setX
+        | b, _ -> complain "cannot comprehend over non-set" b in
+    let bodyType, bodyX = body expect (Cx.add x (Box, (elemType :> tp)) cx) in
+    bodyType, Imp.forIn elemType (asLat bodyType) x setX bodyX
+
+  let guard (cond: term) (body: term) (expect: tp option) (cx: cx): tp * Imp.term =
+    let exprX = snd (cond (Some `Bool) cx) in
+    let bodyType, bodyX = body expect cx in
+    bodyType, Imp.guard (asLat bodyType) exprX bodyX
+
+  (* Synthesizing terms *)
+  let asc (ascribed: tp) (expr: term) (expect: tp option) (cx: cx): tp * Imp.term =
+    let tp, impl = expr (Some ascribed) cx in synth tp expect, impl
+
+  let var (x: sym) (expect: tp option) (cx: cx): tp * Imp.term =
+    let oops msg = typeError (Printf.sprintf "variable %s is %s" (Sym.to_string x) msg) in
+    match (try Cx.find x cx with Not_found -> oops "unbound") with
+    | Box, tp -> synth tp expect, Imp.discvar tp x
+    | Id, tp -> synth tp expect, Imp.var tp x
+    | Hidden, _ -> oops "hidden"
+
+  let app (fnc: term) (arg: term) (expect: tp option) (cx: cx): tp * Imp.term =
+    match fnc None cx with
+    | `Fn(a,b), fncX -> synth b expect, Imp.app a b fncX (check arg a cx)
+    | a, _ -> complain "cannot apply non-function" a
+
+  let proj _ = todo "IMPLEMENT TYPECHECKING FOR PROJECTIONS"
+  let equals _ = todo "equals"
+
+  let bool (b: bool) (expect: tp option) (_cx: cx): tp * Imp.term =
+    synth `Bool expect, Imp.bool b
+
+  let string (s: string) (expect: tp option) (_cx: cx) =
+    synth `String expect, Imp.string s
+
+  (* Checking terms *)
+  let ifThenElse _ = todo "ifThenElse"
+  let lam _ = todo "lam"
+  let tuple _ = todo "tuple"
+  let set _ = todo "set"
+  let union _ = todo "union"
+  let fix _ = todo "fix"
+end
+
+
 module Typecheck(Imp: MODAL): BIDIR
      with type term = modalcx -> modaltp -> Imp.term
      with type expr = modalcx -> modaltp * Imp.term

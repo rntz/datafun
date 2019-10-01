@@ -1,5 +1,5 @@
 (* Compiling to Haskell. *)
-open Util open Types open StringBuilder
+open Util open Type open StringBuilder
 
 type tp = rawtp
 type term = StringBuilder.t

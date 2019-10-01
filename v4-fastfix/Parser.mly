@@ -1,5 +1,5 @@
 %{
-    open Util open Types
+    open Util open Type
     module B = Backend
 %}
 
@@ -20,7 +20,7 @@ ELSE SHADOW AS
 //%nonassoc EQ LE LT GE GT
 
 // Types for nonterminals
-%start <[ `Cmd of string | `Expr of Backend.expr | `Type of Backend.tp]> replcmd
+%start <[ `Cmd of string | `Expr of Backend.term | `Type of Backend.tp]> replcmd
 %start <unit> unused
 
 %%
@@ -55,35 +55,38 @@ eqtp: tp { match firstOrder $1 with
 // ===== The repl =====
 replcmd:
 | AT a=tp SEMI { `Type a }
-| e=expr SEMI { `Expr e }
+| e=term SEMI { `Expr e }
 | PERCENT c=ID SEMI { `Cmd c }
 | EOF { `Cmd "quit" }
 
-// ===== Terms & Expressions =====
+// ===== Expressions =====
 // TODO: explain precedence here.
 // TODO: ifThenElse, proj
-term: expr {B.expr $1}          /* reduce/reduce */
-| term_app {$1}
+term: term_app {$1}
 | term_app nonempty_list(COMMA term_app {$2}) { B.tuple ($1::$2) }
 | term_app nonempty_list(OR term_app {$2}) { B.union ($1::$2) }
+| AT tp_atom term { B.asc $2 $3 }
 | BACKSLASH xs=nonempty_list(var) DOT body=term
     { List.fold_right B.lam xs body }
 | cs=list(comp) DO body=term { List.fold_right (fun f x -> f x) cs body }
 // let bindings. I probably want patterns, actually.
-| LET LBRACK x=var RBRACK EQ e=expr IN body=term { B.letBox x e body }
-| LET x=var EQ e=expr IN body=term { B.letIn x e body }
-| LET LPAREN xs=separated_list(COMMA, var) RPAREN EQ e=expr IN body=term
+| LET LBRACK x=var RBRACK EQ e=term IN body=term { B.letBox x e body }
+| LET x=var EQ e=term IN body=term { B.letIn x e body }
+| LET LPAREN xs=separated_list(COMMA, var) RPAREN EQ e=term IN body=term
     { B.letTuple xs e body }
 | FIX x=var IS e=term | x=var AS e=term { B.fix x e }
 
-comp: FOR x=var IN e=expr { B.forIn x e }
+comp: FOR x=var IN e=term { B.forIn x e }
 | WHEN term_app { B.guard $2 }
 
-term_app: term_atom {$1}
-| expr_app { B.expr $1 }        /* reduce/reduce */
+term_app: term_fnapp {$1}
+| term_fnapp EQ term_fnapp { B.equals $1 $3 }
+
+term_fnapp: term_atom { $1 }
+| term_fnapp term_atom { B.app $1 $2 }
 
 term_atom:
-| expr_atom { B.expr $1 }       /* reduce/reduce */
+| var { B.var $1 }
 | EMPTY { B.union [] }
 | STRING { B.string $1 }
 | BOOL { B.bool $1 }
@@ -94,18 +97,6 @@ term_atom:
 // set comprehensions
 | LBRACE term_app nonempty_list(comp) RBRACE
   { List.fold_right (fun f x -> f x) $3 (B.set [$2]) }
-
-expr: expr_app {$1}
-| AT tp_atom term { B.asc $2 $3 }
-
-expr_app: expr_fnapp { $1 }
-| expr_fnapp EQ expr_fnapp { B.equals $1 $3 }
-
-expr_fnapp: expr_atom { $1 }
-| expr_fnapp term_atom { B.app $1 $2 }
-
-expr_atom: var { B.var $1 }
-| LPAREN expr RPAREN { $2 }
 
 // NB. We generate symbols which always have id 0. I think this is safe, because
 // symbol comparison also uses the symbol's name, and I _think_ all my code

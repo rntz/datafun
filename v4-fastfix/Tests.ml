@@ -1,4 +1,4 @@
-open Util open Langs open Passes
+open Util open Lang open Passes
 
 (* Putting it all together. *)
 let x = Sym.gen "x" let y = Sym.gen "y"

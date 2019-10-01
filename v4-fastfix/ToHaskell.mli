@@ -1,1 +1,1 @@
-include Langs.SIMPLE with type term = StringBuilder.t
+include Lang.SIMPLE with type term = StringBuilder.t
