@@ -14,8 +14,13 @@ end
 type mode = Id | Box | Hidden
 type modalcx = (mode * modaltp) Cx.t
 
-module Surface(Imp: MODAL): SURFACE
-       with type term = modalcx -> modaltp option -> modaltp * Imp.term
+module Surface(Imp: MODAL): sig
+  include SURFACE
+          with type term = modalcx -> modaltp option -> modaltp * Imp.term
+  type cx = modalcx
+  val check: term -> cx -> tp -> Imp.term
+  val infer: term -> cx -> Imp.tp * Imp.term
+end
 = struct
   type tp = modaltp
   type cx = modalcx
@@ -29,14 +34,15 @@ module Surface(Imp: MODAL): SURFACE
 
   let complain msg tp = typeError (Printf.sprintf "%s: %s" msg (Type.to_string tp))
 
+  let infer term cx = term cx None
+  let check (term: term) (cx: cx) (tp: tp): Imp.term = snd (term cx (Some tp))
+
   let synth (got: tp) : tp option -> tp = function
     | Some want when not (subtype got want) ->
        typeError (Printf.sprintf "
 I need an expression of type %s
      but I found one of type %s" (to_string want) (to_string got))
     | _ -> got
-
-  let check (term: term) (cx: cx) (tp: tp): Imp.term = snd (term cx (Some tp))
 
   (* Transparent terms (can either check or synthesize) *)
   let letIn (x: sym) (expr: term) (body: term) (cx: cx) (expect: tp option): tp * Imp.term =
@@ -92,11 +98,16 @@ I need an expression of type %s
     | Hidden, _ -> oops "hidden"
 
   let app (fnc: term) (arg: term) (cx: cx) (expect: tp option): tp * Imp.term =
-    match fnc cx None with
+    match infer fnc cx with
     | `Fn(a,b), fncX -> synth b expect, Imp.app a b fncX (check arg cx a)
     | a, _ -> complain "cannot apply non-function" a
 
-  let proj _ = todo "proj"
+  let proj (i:int) (e:term) (cx: cx) (expect: tp option): tp * Imp.term =
+    match infer e cx with
+    | (`Tuple tps as tp), eX ->
+       (try synth (List.nth tps i) expect, Imp.proj tps i eX
+        with Invalid_argument _ -> complain "tuple too short" tp)
+    | a, _ -> complain "cannot project from non-tuple" a
 
   let equals (e1: term) (e2: term) (cx: cx) (expect: tp option): tp * Imp.term =
     let e1tp, e1x = e1 cx None in
