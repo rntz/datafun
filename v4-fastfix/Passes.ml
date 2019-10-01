@@ -123,7 +123,7 @@ I need an expression of type %s
 
   (* Checking terms *)
   let lam (x: sym) (body: term) (cx: cx): tp option -> tp * Imp.term = function
-    | Some (`Fn (a,b) as tp) -> tp, check body (Cx.add x (Id,a) cx) b
+    | Some (`Fn (a,b) as tp) -> tp, Imp.lam a b x (check body (Cx.add x (Id,a) cx) b)
     | Some a -> complain "lambda must have function type" a
     | None -> typeError "cannot infer type for lambda"
 
