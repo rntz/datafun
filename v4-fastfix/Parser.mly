@@ -3,7 +3,7 @@
     module B = Backend
 %}
 
-/* TODO: filter this to only what I need */
+// TODO: filter this to only what I need
 %token
 /* punctuation */ AT DOT COMMA UNDER SEMI COLON BANG PLUS DASH ASTERISK SLASH
 PERCENT ARROW DBLARROW BAR LE LT GE GT EQ EQEQ RPAREN LPAREN
@@ -19,7 +19,7 @@ ELSE SHADOW AS
 // Operator precedence
 //%nonassoc EQ LE LT GE GT
 
-/* Types for nonterminals */
+// Types for nonterminals
 %start <[ `Cmd of string | `Expr of Backend.expr | `Type of Backend.tp]> replcmd
 %start <unit> unused
 
@@ -47,7 +47,7 @@ tp_atom:
 | LBRACE eqtp RBRACE { `Set $2 }
 | LPAREN tp RPAREN { $2 }
 
-/* Need this because `Set takes an eqtp. */
+// Need this because `Set takes an eqtp.
 eqtp: tp { match firstOrder $1 with
            | Some a -> a
            | None -> $syntaxerror (* parseError "not an eqtp" *) }
@@ -69,7 +69,7 @@ term: expr {B.expr $1}          /* reduce/reduce */
 | BACKSLASH xs=nonempty_list(var) DOT body=term
     { List.fold_right B.lam xs body }
 | cs=list(comp) DO body=term { List.fold_right (fun f x -> f x) cs body }
-/* let bindings. I probably want patterns, actually. */
+// let bindings. I probably want patterns, actually.
 | LET LBRACK x=var RBRACK EQ e=expr IN body=term { B.letBox x e body }
 | LET x=var EQ e=expr IN body=term { B.letIn x e body }
 | LET LPAREN xs=separated_list(COMMA, var) RPAREN EQ e=expr IN body=term
@@ -107,8 +107,7 @@ expr_fnapp: expr_atom { $1 }
 expr_atom: var { B.var $1 }
 | LPAREN expr RPAREN { $2 }
 
-/* NB. We generate symbols which always have id 0. I think this is safe, because
- * symbol comparison also uses the symbol's name, and I _think_ all my code
- * handles shadowing properly. I admit I'm not entirely confident, though.
- */
+// NB. We generate symbols which always have id 0. I think this is safe, because
+// symbol comparison also uses the symbol's name, and I _think_ all my code
+// handles shadowing properly. I admit I'm not entirely confident, though.
 var: ID { {name = $1; id = 0; degree = 0} }
