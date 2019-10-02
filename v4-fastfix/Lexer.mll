@@ -39,6 +39,7 @@ rule token = parse
   (* literals *)
   | "true" {BOOL(true)}
   | "false" {BOOL(false)}
+  | integer as n {INTEGER(int_of_string n)}
   (* | integer as n         {LITERAL(`Int (int_of_string n))} *)
   | '\"' (string_literal as s) '\"'
     {for i = 0 to String.length s - 1 do

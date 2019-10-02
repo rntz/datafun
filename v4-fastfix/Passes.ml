@@ -117,9 +117,8 @@ I need an expression of type %s
 
   let bool (b: bool) (_cx: cx) (expect: tp option): tp * Imp.term =
     synth `Bool expect, Imp.bool b
-
-  let string (s: string) (_cx: cx) (expect: tp option) =
-    synth `String expect, Imp.string s
+  let string (s: string) (_cx: cx) (expect: tp option) = synth `String expect, Imp.string s
+  let nat (i: int) (_cx: cx) (expect: tp option) = synth `Nat expect, Imp.nat i
 
   (* Checking terms *)
   let lam (x: sym) (body: term) (cx: cx): tp option -> tp * Imp.term = function
@@ -184,8 +183,7 @@ module DropBoxes(Imp: SIMPLE): MODAL with type term = Imp.term
   let tuple tpterms = Imp.tuple List.(map (fun (a,m) -> debox a, m) tpterms)
   let proj tps = Imp.proj (List.map debox tps)
   let letTuple axs b = Imp.letTuple List.(map (fun (a,x) -> debox a,x) axs) (debox b)
-  let string = Imp.string
-  let bool = Imp.bool
+  let string = Imp.string let bool = Imp.bool let nat = Imp.nat
   let ifThenElse a = Imp.ifThenElse (debox a)
   let guard a = Imp.guard (deboxLat a)
   let set a = Imp.set a
@@ -212,6 +210,7 @@ module Seminaive(Imp: ZERO): MODAL
    *)
   let rec makeZero (tp: eqtp) (term: Imp.term): Imp.term = match tp with
     | `Bool -> Imp.bool false
+    | `Nat -> Imp.nat 0
     | `String -> Imp.tuple []
     | `Set a -> Imp.set a []
     | `Tuple tps ->
@@ -295,6 +294,9 @@ module Seminaive(Imp: ZERO): MODAL
 
   (* φ(s: string) = s   δ(s: string) = () *)
   let string (s: string): term = Imp.string s, Imp.zero (`Tuple []) (Imp.tuple [])
+
+  (* φ(n: nat) = n      δ(n: nat) = 0 *)
+  let nat (i: int): term = Imp.nat i, Imp.zero `Nat (Imp.nat 0)
 
   (* φ(b: bool) = b     δ(b: bool) = false *)
   let bool (b: bool): term = Imp.bool b, Imp.zero `Bool (Imp.bool false)
@@ -453,7 +455,9 @@ end = struct
     |> notZero
 
   let string s _cx = notZero (Imp.string s)
+  (* TODO: wait, why isn't this zero if x is false? *)
   let bool x _cx = notZero (Imp.bool x)
+  let nat i _cx = notZero (Imp.nat i)
 
   let ifThenElse a cnd thn els cx =
     notZero (Imp.ifThenElse a (snd (cnd cx)) (snd (thn cx)) (snd (els cx)))
@@ -534,6 +538,7 @@ end = struct
 
   let string s _cx = Imp.string s, None
   let bool x _cx = Imp.bool x, if x then None else Some `Bool
+  let nat x _cx = Imp.nat x, if x = 0 then Some `Nat else None
 
   let ifThenElse a cnd thn els cx =
     match cnd cx, thn cx, els cx with

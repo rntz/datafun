@@ -42,6 +42,7 @@ let proj tps i term = match List.length tps, i with
  * such an expression it gets mad. So we make it explicit. *)
 let rec empty: tp semilat -> term = function
   | `Bool -> string "False"
+  | `Nat -> string "0"
   | `Set _ -> string "Set.empty"
   | `Tuple tps -> tuple (List.map (fun tp -> tp, empty tp) tps)
   (* NB. Even if we don't treat functions as semilattice types in source code,
@@ -62,3 +63,4 @@ let semifix _tp term = call "semifix" [term]
 (* This has to come at the end because we use string to mean
    StringBuilder.string earlier. *)
 let string s = StringBuilder.string (Printf.sprintf "%S" s)
+let nat i = StringBuilder.string (string_of_int i)

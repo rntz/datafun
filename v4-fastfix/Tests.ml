@@ -66,11 +66,9 @@ when x2 == y1 do
 
 delta: \s ds.
 union
-  (for x in ds for y in s do
-   let (x1, x2) = x in let (y1, y2) = y in
+  (for (x1,x2) in ds for (y1,y2) in s do
    when x2 = y1 do {(x1, y2)})
-  (for x in s or ds for y in ds do
-   let (x1, x2) = x in (let (y1, y2) = y in
+  (for (x1,x2) in (s or ds) for (y1,y2) in ds do
    when x2 = y1 do {(x1, y2)}))
 
  *)

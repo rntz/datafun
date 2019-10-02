@@ -2,9 +2,9 @@ open Util
 
 type 'a cx = 'a Cx.t
 
-type ('a,'b) weird = [ `Bool | `String | `Set of 'a | `Tuple of 'b list ]
+type ('a,'b) weird = [ `Bool | `Nat | `String | `Set of 'a | `Tuple of 'b list ]
 type eqtp = (eqtp, eqtp) weird
-type firstorder = [ `Bool | `String | `Set of eqtp ]
+type firstorder = [ `Bool | `Nat | `String | `Set of eqtp ]
 type 'a maketypes = [ (eqtp, 'a) weird | `Fn of 'a * 'a ]
 
 (* Frontend, modal types. *)
@@ -13,7 +13,7 @@ type modaltp = [ modaltp maketypes | `Box of modaltp ]
 type rawtp = rawtp maketypes
 (* Semilattices, parameterized by underlying types *)
 type 'a semilat =
-  [ `Bool
+  [ `Bool | `Nat
   | `Set of eqtp
   | `Tuple of 'a semilat list
   | `Fn of 'a * 'a semilat ]
@@ -28,8 +28,7 @@ and to_string1 = function
   | `Tuple ts -> String.concat ", " (List.map to_string2 ts)
   | a -> to_string2 a
 and to_string2 = function
-  | `Bool -> "bool"
-  | `String -> "string"
+  | `Bool -> "bool" | `String -> "str" | `Nat -> "nat"
   | `Set a -> "{" ^ to_string (a :> modaltp) ^ "}"
   | `Box a -> "[" ^ to_string a ^ "]"
   | (`Fn _ | `Tuple _) as a -> "(" ^ to_string a ^ ")"
@@ -55,7 +54,7 @@ let rec phi: modaltp -> rawtp = function
 
 (* delta corresponds to ΔΦ (_not_ to Δ alone), except it drops □. *)
 and delta: modaltp -> rawtp = function
-  | (`Bool | `Set _) as a -> a
+  | (`Bool | `Nat | `Set _) as a -> a
   | `String | `Box _ -> `Tuple []        (* discrete types don't change *)
   | `Tuple tps -> `Tuple List.(map delta tps)
   | `Fn (a,b) -> `Fn(phi a, `Fn(delta a, delta b))
@@ -72,7 +71,7 @@ let phiDeltaLat: modaltp semilat -> rawtp semilat * rawtp semilat =
   Obj.magic phiDelta
 
 let rec asLat: 'a -> 'a semilat = function
-  | `Bool -> `Bool
+  | (`Nat|`Bool) as x -> x
   | `Set a -> `Set a
   | `Fn (a,b) -> `Fn (a, asLat b)
   | `Tuple tps -> `Tuple (List.map asLat tps)

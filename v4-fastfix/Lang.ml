@@ -13,6 +13,7 @@ module type BASE = sig
   val letTuple: (tp * sym) list -> tp -> term -> term -> term
   val string: string -> term
   val bool: bool -> term
+  val nat: int -> term
   val ifThenElse: tp -> term -> term -> term -> term
   val guard: tp semilat -> term -> term -> term
   (* set A [M0;...;Mn] = {M0,...,Mn} : {A} *)
@@ -64,6 +65,7 @@ module type SURFACE = sig
   val equals: term -> term -> term
   val bool: bool -> term
   val string: string -> term
+  val nat: int -> term
 
   (* checking terms *)
   val ifThenElse: term -> term -> term -> term

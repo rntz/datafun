@@ -14,6 +14,7 @@ ELSE SHADOW AS
 
 %token <string> STRING
 %token <bool> BOOL
+%token <int> INTEGER
 %token <string> ID CAPID        /* lower/uppercase identifiers */
 
 // Operator precedence
@@ -42,6 +43,7 @@ tp_atom:
 | ID { match $1 with
          | "bool" -> `Bool
          | "str" -> `String
+         | "nat" -> `Nat
          | _ -> $syntaxerror (* parseError "unrecognized type name" *) }
 | LBRACK tp RBRACK { `Box $2 }
 | LBRACE eqtp RBRACE { `Set $2 }
@@ -92,6 +94,7 @@ term_atom:
 | EMPTY { B.union [] }
 | STRING { B.string $1 }
 | BOOL { B.bool $1 }
+| INTEGER { if $1 < 0 then $syntaxerror else B.nat $1 }
 | LPAREN RPAREN { B.tuple [] }
 | LPAREN term RPAREN { $2 }
 | LBRACK term RBRACK { B.box $2 }
