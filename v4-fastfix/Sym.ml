@@ -10,7 +10,7 @@
  *)
 open Util
 type t = sym
-let compare = Pervasives.compare
+let compare = compare           (* export the right comparison operator *)
 let next_id = ref 0
 let nextId () = let x = !next_id in next_id := x + 1; x
 let gen name = {name = name; id = nextId(); degree = 0}
