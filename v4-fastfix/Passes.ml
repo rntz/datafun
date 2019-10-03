@@ -575,3 +575,118 @@ end = struct
     | fdX, None -> full (Imp.semifix a fdX)
   let equals a tm1 tm2 cx = full (Imp.equals a (fst (tm1 cx)) (fst (tm2 cx)))
 end
+
+
+(* Gives distinct variables distinct and human-readable names.
+ * I'm not happy with this. It's too complicated.
+ *
+ * TODO: find example programs where this transformation is actually needed
+ * to make variable names unique! it should be possible, by naming
+ * source variables "dx" etc.
+ *
+ * TODO: I really need to test this but I haven't. also the parser won't
+ * generate the most interesting edge-cases.
+ *)
+module PrettyName(Imp: SIMPLE) : sig
+  include SIMPLE with type tp = rawtp
+  val finish: term -> sym Cx.t * Imp.term
+end = struct
+  (* We pass along:
+   *
+   * 1. A hash table mapping symbols to the names assigned them.
+   *
+   * 2. A set of the variable names we've used so far.
+   *
+   * TODO describe algorithm in more detail.
+   *)
+  type cx = { vars: (sym, sym) Hashtbl.t
+            ; used: (string, unit) Hashtbl.t }
+
+  type tp = rawtp
+  type term = cx -> Imp.term
+
+  (* Yields a map from free variables to their renamed versions, and
+   * the generated term. *)
+  let finish (term: term): sym Cx.t * Imp.term =
+    let cx = { vars = Hashtbl.create 5; used = Hashtbl.create 5 } in
+    let impl = term cx in
+    Hashtbl.fold Cx.add cx.vars Cx.empty, impl
+
+  (* This function must be total, pure, and injective on `i`, but not
+   * necessarily injective on `name`! *)
+  let rename (name: string): int -> string = function
+    | 0 -> name
+    | i -> name ^ string_of_int i
+
+  let make_var (cx: cx) (oldsym: sym): sym =
+    (* Generate an unused name for the variable. *)
+    let base = Sym.name oldsym in
+    let rec fresh i = let name = rename base i in
+                     if Hashtbl.mem cx.used name then fresh (i+1) else name in
+    let name = fresh 0 in
+    let newsym = Sym.fresh name in
+    Hashtbl.add cx.used name ();
+    Hashtbl.add cx.vars oldsym newsym;
+    newsym
+
+  (* Binds a variable within `body`. *)
+  let bind (x: sym) (cx: cx) (body: cx -> 'a): sym * 'a =
+    (* Remember what x is currently bound to; we'll need it later. *)
+    let prior = Hashtbl.find_opt cx.vars x in
+    (* Visit the body. This might find uses of the variable `x` and generate
+     * a new name for it, which will be recorded in `cx`. *)
+    let body_result = body cx in
+    (* Figure out what variable to replace x by. *)
+    let newx = match prior, Hashtbl.find_opt cx.vars x with
+      (* If x wasn't bound and still isn't, we didn't use it. Make a dummy var.
+       * FIXME: relies on actual variables never having the name "_"! *)
+      | None, None -> Sym.fresh "_"
+      (* If x wasn't bound but now is, pop the binding and use it.
+       * Also remove the used variable name.
+       * Wait, is this right? *)
+      | None, Some y -> Hashtbl.remove cx.vars x;
+                        (* NB. requires Sym.(name (fresh s)) = s. *)
+                        Hashtbl.remove cx.used (Sym.name y);
+                        y
+      (* If x was bound, it should still be bound to the same thing. *)
+      | Some _, None -> impossible "used variable was destroyed?!"
+      | Some a, Some b when a <> b -> impossible "variable mutated?!"
+      | Some _, Some b -> b
+    in newx, body_result
+
+  let var (a: tp) (x: sym) (cx: cx): Imp.term =
+    Imp.var a (try Hashtbl.find cx.vars x with Not_found -> make_var cx x)
+
+  let letIn a b x expr body cx =
+    let expr = expr cx in
+    let x, body = bind x cx body in
+    Imp.letIn a b x expr body
+
+  (* some mind-melting code right here *)
+  let letTuple tpxs a expr body cx =
+    let expr = expr cx in
+    let f (tp,x) body cx = let x, (tpxs,body) = bind x cx body in (tp,x)::tpxs, body in
+    let tpxs, body = List.fold_right f tpxs (fun cx -> [], body cx) cx in
+    Imp.letTuple tpxs a expr body
+
+  let lam a b x body cx = let x, body = bind x cx body in Imp.lam a b x body
+  (* Order of visitation unspecified but who cares? *)
+  let app a b fnc arg cx = Imp.app a b (fnc cx) (arg cx)
+  let tuple tpterms cx =
+    Imp.tuple (List.map (fun (tp, term) -> tp, term cx) tpterms)
+  let proj tps i term cx = Imp.proj tps i (term cx)
+  let string s _cx = Imp.string s
+  let bool b _cx = Imp.bool b
+  let nat i _cx = Imp.nat i
+  let ifThenElse a cnd thn els cx = Imp.ifThenElse a (cnd cx) (thn cx) (els cx)
+  let guard lat cnd thn cx = Imp.guard lat (cnd cx) (thn cx)
+  let set elemtp terms cx = Imp.set elemtp (List.map (fun x -> x cx) terms)
+  let union lat terms cx = Imp.union lat (List.map (fun x -> x cx) terms)
+  let forIn elemtp lat x expr body cx =
+    let expr = expr cx in
+    let x, body = bind x cx body in
+    Imp.forIn elemtp lat x expr body
+  let fix tp body cx = Imp.fix tp (body cx)
+  let equals tp e1 e2 cx = Imp.equals tp (e1 cx) (e2 cx)
+  let semifix tp body cx = Imp.semifix tp (body cx)
+end

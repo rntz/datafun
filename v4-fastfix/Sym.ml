@@ -10,7 +10,7 @@
  *)
 type t = {name: string; id: int; degree: int}
 let compare = compare           (* export a suitable comparison operator *)
-let name x = x.name
+
 (* The variable signifying another variable's derivative. *)
 let d x = {name = x.name; id = x.id; degree = 1+x.degree}
 
@@ -31,12 +31,16 @@ let intern name =
   with Not_found -> let sym = fresh name in
                     Hashtbl.add table name sym; sym
 
-(* to_string is injective over syms generated through the Sym interface,
- * although not over all possible syms. In particular, it relies on the
- * invariant that x.id = y.id implies x.name = y.name, (although not
- * x.degree = y.degree).
- *)
+(* to_string is injective over syms generated through the Sym interface.
+ * In particular, it relies on the invariant that x.id = y.id implies
+ * x.name = y.name, (although not x.degree = y.degree). *)
 let to_string x =
   let d = match x.degree with
     | 0 -> "" | 1 -> "d" | d -> "d" ^ string_of_int d
   in Printf.sprintf "%s%s_%i" d x.name x.id
+
+(* A human-readable name, without the unique id. Not injective.
+ * However, name (fresh x) = name (intern x) = x. *)
+let name x =
+  (match x.degree with 0 -> "" | 1 -> "d" | d -> "d" ^ string_of_int d)
+  ^ x.name
