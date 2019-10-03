@@ -1,17 +1,17 @@
 open Util open Lang open Passes
 
 (* Putting it all together. *)
-let x = Sym.gen "x" let y = Sym.gen "y"
-let a = Sym.gen "a" let b = Sym.gen "b"
-let x1 = Sym.gen "x1" let x2 = Sym.gen "x2"
-let y1 = Sym.gen "y1" let y2 = Sym.gen "y2"
-let path = Sym.gen "path"
-let edge = Sym.gen "edge"
-let trans = Sym.gen "trans"
-let r = Sym.gen "r" and r1 = Sym.gen "r1" and r2 = Sym.gen "r2"
-let s = Sym.gen "s"
-let i = Sym.gen "i" and j = Sym.gen "j" and k = Sym.gen "k"
-let self = Sym.gen "self"
+let x = Sym.fresh "x" let y = Sym.fresh "y"
+let a = Sym.fresh "a" let b = Sym.fresh "b"
+let x1 = Sym.fresh "x1" let x2 = Sym.fresh "x2"
+let y1 = Sym.fresh "y1" let y2 = Sym.fresh "y2"
+let path = Sym.fresh "path"
+let edge = Sym.fresh "edge"
+let trans = Sym.fresh "trans"
+let r = Sym.fresh "r" and r1 = Sym.fresh "r1" and r2 = Sym.fresh "r2"
+let s = Sym.fresh "s"
+let i = Sym.fresh "i" and j = Sym.fresh "j" and k = Sym.fresh "k"
+let self = Sym.fresh "self"
 
 module Examples(Modal: MODAL) = struct
   module Lang = Surface(Modal)
@@ -97,7 +97,7 @@ union
 
   (* TODO: regular expressions.
    * I'll eventually need arithmetic for this! *)
-  let lamBox x e = let xtmp = Sym.gen x.name in
+  let lamBox x e = let xtmp = Sym.(fresh (name x)) in
                    lam xtmp (letBox x (var xtmp) e)
   let tnat = `String
   let tchar = `String

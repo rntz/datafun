@@ -4,7 +4,7 @@ open Util open Type open StringBuilder
 type tp = rawtp
 type term = StringBuilder.t
 
-let sym x = string (Sym.to_uid x)
+let sym x = string (Sym.to_string x)
 let paren t = string "(" ^ t ^ string ")"
 let parenSpaces xs = paren (concat (string " ") xs)
 let commas = concat (string ", ")
@@ -47,7 +47,7 @@ let rec empty: tp semilat -> term = function
   | `Tuple tps -> tuple (List.map (fun tp -> tp, empty tp) tps)
   (* NB. Even if we don't treat functions as semilattice types in source code,
    * Simplify can generate them by rewriting (λx.⊥) → ⊥. *)
-  | `Fn(a,b) -> lam a b (Sym.gen "_") (empty b)
+  | `Fn(a,b) -> lam a b (Sym.fresh "_") (empty b)
 
 let set _a terms = call "set" [listOf terms]
 let union tp = function

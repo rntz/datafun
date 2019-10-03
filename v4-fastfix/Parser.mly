@@ -1,5 +1,5 @@
 %{
-    open Util open Type
+    open Type
     module B = Backend
 %}
 
@@ -103,7 +103,4 @@ term_atom:
 | LBRACE term nonempty_list(comp) RBRACE
   { List.fold_right (fun f x -> f x) $3 (B.set [$2]) }
 
-// NB. We generate symbols which always have id 0. I think this is safe, because
-// symbol comparison also uses the symbol's name, and I _think_ all my code
-// handles shadowing properly. I admit I'm not entirely confident, though.
-var: ID { {name = $1; id = 0; degree = 0} }
+var: ID { Sym.intern $1 }

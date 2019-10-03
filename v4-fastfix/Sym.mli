@@ -1,6 +1,7 @@
-type t = Util.sym
+type t
 val compare: t -> t -> int
-val gen: string -> t
-val d: t -> t
-val to_uid: t -> string
+val name: t -> string
 val to_string: t -> string
+val d: t -> t
+val fresh: string -> t          (* makes a new one every time *)
+val intern: string -> t
