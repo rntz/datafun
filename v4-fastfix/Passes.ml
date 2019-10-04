@@ -588,7 +588,7 @@ end
  * generate the most interesting edge-cases.
  *)
 module PrettyName(Imp: SIMPLE) : sig
-  include SIMPLE with type tp = rawtp
+  include SIMPLE
   val finish: term -> sym Cx.t * Imp.term
 end = struct
   (* We pass along:
@@ -629,7 +629,7 @@ end = struct
     Hashtbl.add cx.vars oldsym newsym;
     newsym
 
-  (* Binds a variable within `body`. *)
+  (* Binds a variable within `body`. Really need tests & test coverage here. *)
   let bind (x: sym) (cx: cx) (body: cx -> 'a): sym * 'a =
     (* Remember what x is currently bound to; we'll need it later. *)
     let prior = Hashtbl.find_opt cx.vars x in

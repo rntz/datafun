@@ -1,0 +1,53 @@
+type char = nat
+type string = {nat, char}
+type regex = [string] -> {nat,nat}
+
+type regex = [{nat,nat}] -> {nat,nat}
+
+rstar =
+@([[{nat,nat}] -> {nat,nat}] -> [{nat,nat}] -> {nat,nat})
+\rbox. let [r] = rbox in
+\sbox. let [s] = sbox in
+let [edge] = [r [s]] in
+path as
+edge or
+(for a in edge for b in path do
+let (x,y) = a in let (y1,z) = b in
+when y = y1 do {(x,z)});
+
+# output, from pretty-printer:
+phi:   \rbox.
+let (r,_) = rbox in
+\sbox.
+let (s,_) = sbox in
+let (edge,_) = r (s, empty@{nat, nat}), empty@{nat, nat} in
+semifix
+(
+ (\path.
+  edge or
+  (for a in edge do
+   for b in path do
+   let (x,y) = a in let (y1,z) = b in when y = y1 do {(x, z)})),
+ (\_.
+  \dpath.
+  or (
+      or (for a in or edge do
+          or (for b in dpath do
+              let (x,y) = a in let (y1,z) = b in when y = y1 do {(x, z)})))))
+delta: empty@(({nat, nat}, {nat, nat} -> {nat, nat}), ({nat, nat}, {nat, nat} ->  -> {nat, nat})
+ ->  -> {nat, nat}, {nat, nat} ->  -> {nat, nat})
+
+# cleaned up by hand
+phi:
+\rbox. let (r, dr) = rbox in
+\sbox. let (s, ds) = sbox in
+let (edge, dedge) = (r (s, Set.empty), Set.empty) in
+semifix
+  (\path. edge or
+    for ((x,y) in edge, (y1,z) in path)
+    when (y == y1) {(x, z)})
+  (\path dpath.
+    for ((x,y) in edge, (y1,z) in dpath)
+    when (y == y1) {(x, z)})
+
+delta: (\__47. (\__46. (\__45. (\__44. Set.empty))))

@@ -1,7 +1,7 @@
 (library
  (name datafun)
- (modules Lexer Parser Backend Cx Lang Option Passes StringBuilder Sym Tests
-  ToHaskell Type Util Repl))
+ (modules Lexer Parser Backend Cx Lang Option Passes Pretty StringBuilder Sym
+  Tests ToHaskell Type Util Repl))
 
 (executable
  (name run)
