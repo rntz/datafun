@@ -11,7 +11,6 @@ type term = int -> Format.formatter -> unit
 let finish (term:term) (out: formatter): unit = fprintf out "@[%t@]" (term 0)
 
 let tpstr = (Type.to_string :> tp -> string)
-let latstr2 = (Type.to_string2 :> tp semilat -> string)
 
 let paren f out = fprintf out "@[<hov 1>(@,%t@,)@]" f
 let brace f out = fprintf out "@[<hov 1>{@,%t@,}@]" f
@@ -52,10 +51,15 @@ let guard _lat cnd thn =
 
 let set _a terms _prec = brace (commasep terms)
 
-let empty (lat: tp semilat) _prec out = fprintf out "empty%@%s" (latstr2 lat)
+(* TODO: several options here.
+ * - should I print the types of "empty" unions?
+ * - should I indicate singleton unions?
+ *)
+let _latstr2 = (Type.to_string2 :> tp semilat -> string)
+let empty (_lat: tp semilat) _prec out = fprintf out "empty"
+  (* fprintf out "empty%@%s" (latstr2 lat) *)
 let union (lat: tp semilat): term list -> term = function
   | [] -> empty lat
-  (* Do I want to indicate singleton unions or omit them? *)
   | [term] -> term
   (* | [term] -> at 1 (fun out -> fprintf out "or %t" (term 2)) *)
   | terms ->

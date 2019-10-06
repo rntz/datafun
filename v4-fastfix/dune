@@ -1,5 +1,6 @@
 (library
  (name datafun)
+ (libraries unix)
  (modules Lexer Parser Backend Cx Lang Option Passes Pretty StringBuilder Sym
   Tests ToHaskell Type Util Repl))
 

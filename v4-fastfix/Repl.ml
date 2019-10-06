@@ -1,19 +1,23 @@
 open Util
+open Backend
 
 exception Quit
+
+let pretty (x: Zeroed.term): Format.formatter -> unit =
+  x |> Zeroed.finish |> Simplified.finish |> Renamed.finish
+  |> snd |> Pretty.finish
 
 let perform = function
   | `Cmd "quit" -> raise Quit
   | `Cmd cmd -> print_endline ("Unrecognized command: " ^ cmd)
-  | `Type _tp -> print_endline "TODO: implement type printer"
+  | `Type tp -> Printf.printf " type: %s\n" Type.(to_string tp);
   | `Expr e ->
-     let _tp, phi, delta = Backend.phiDeltaExpr e in
-     (* TODO: pretty-printer for types *)
-     print_endline ("phi:   " ^ phi);
-     print_endline ("delta: " ^ delta)
+     let tp, (phi, delta) = infer e Cx.empty in
+     Format.printf "@[<v> type: %s@,  phi: @[%t@]@,delta: @[%t@]@]@."
+       Type.(to_string tp) (pretty phi) (pretty delta)
 
 let readEvalPrint buf =
-  print_string "> "; flush stdout;
+  if Unix.isatty Unix.stdin then (print_string "> "; flush stdout);
   try perform (Parser.replcmd Lexer.token buf)
     with Parser.Error -> print_endline "Sorry, I can't parse that."
        | TypeError msg -> print_endline ("Type error: " ^ msg)

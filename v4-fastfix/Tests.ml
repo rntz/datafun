@@ -55,24 +55,6 @@ module Examples(Modal: MODAL) = struct
                       (set [tuple [proj 0 (var x);
                                    proj 1 (var y)]]))))
 
-(* From the repl, resugared by hand.
-
-phi: \s.
-for x in s for y in s do
-let (x1, x2) = x in
-let (y1, y2) = y in
-when x2 == y1 do
-{(x1, y2)}
-
-delta: \s ds.
-union
-  (for (x1,x2) in ds for (y1,y2) in s do
-   when x2 = y1 do {(x1, y2)})
-  (for (x1,x2) in (s or ds) for (y1,y2) in ds do
-   when x2 = y1 do {(x1, y2)}))
-
- *)
-
   (* Intersection *)
   let strset: tp = `Set `String
   let t8 = testIn strset [a,Id,strset; b,Id,strset]
@@ -131,19 +113,6 @@ union
             (letBox edge (asc (`Box natrel) (box (app (var r) (box (var s)))))
                (mkTrans edge))))
 
-(* 12 generates:
-
-\r_18. let (r_11, dr_11) = r_18 in
-\s_17. let (s_14, ds_14) = s_17 in
-let (edge_9, dedge_9) = ((r_11 (s_14, Set.empty)), Set.empty) in
-semifix
- ((\path_8. (union edge_9 (forIn edge_9 (\a_2. (forIn path_8 (\b_3. (guard ((snd a_2) == (fst b_3)) (set [((fst a_2), (snd b_3))])))))))),
-  \path. \dpath.
-    for (a in edge_9, b in dpath, snd a == fst b)
-       {(fst a, snd b)})
-
- *)
-
   let tregex2 = `Fn(`Box tstring, `Fn (`Box tnat, `Set tnat))
   let t13rstar =
     testIn (`Fn (`Box tregex2, tregex2))
@@ -157,18 +126,6 @@ semifix
                          ; forIn j (var self)
                              (app (app (var r) (box (var s))) (box (var j)))
          ])))))
-
-(* 13 generates:
-
-\r_25. let (r_11, dr_11) = r_25 in
-\s_24. (let (s_14, ds_14) = s_24 in
-\i_23. (let (i_15, di_15) = i_23 in
-semifix
-((\self_18. (union (set [i_15]) (forIn self_18 (\j_16. ((r_11 (s_14, Set.empty)) (j_16, ())))))),
- \self. \dself.
-   for (j ∈ dself) r_11 (s_14, Set.empty) (j, ()))))
-
- *)
 
   let tests = [t0;t1;t2;t3;t4;t5;t6;t7;t8;t9;t10;t11rplus;t12rplus;t13rstar]
 end

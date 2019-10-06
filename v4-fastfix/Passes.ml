@@ -11,9 +11,6 @@ end
 
 
 (* Bidirectional type checking/inference *)
-type mode = Id | Box | Hidden
-type modalcx = (mode * modaltp) Cx.t
-
 module Surface(Imp: MODAL): sig
   include SURFACE
           with type term = modalcx -> modaltp option -> modaltp * Imp.term
