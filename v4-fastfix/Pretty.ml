@@ -8,19 +8,17 @@ type tp = rawtp
 (* A term takes a precdence level & a formatter and prints itself. *)
 type term = int -> Format.formatter -> unit
 
-let finish (term:term) (out: formatter): unit = fprintf out "@[%t@]" (term 0)
+let finish (term:term) (out: formatter): unit = fprintf out "@[<hov 0>%t@]" (term 0)
 
 let tpstr = (Type.to_string :> tp -> string)
 
 let paren f out = fprintf out "@[<hov 1>(@,%t@,)@]" f
 let brace f out = fprintf out "@[<hov 1>{@,%t@,}@]" f
-let _brack f out = fprintf out "@[<hov 1>[@,%t@,]@]" f
 
 let at myPrec f (envPrec: int) (out: formatter) =
   if envPrec <= myPrec then fprintf out "@[<hov 0>%t@]" f else paren f out
 
-let var _ x (_prec: int) (out: formatter) =
-  fprintf out "%s" (Sym.name x)
+let var _ x (_prec: int) (out: formatter) = fprintf out "%s" (Sym.name x)
 
 let letIn (a: tp) _b x expr body =
   at 0 (fun out -> fprintf out "let %s: %s =@ %t@ in@ %t"
@@ -33,7 +31,8 @@ let commasep (terms: term list) (out: formatter) =
 let lam _a _b x body =
   at 0 (fun out -> fprintf out "\\%s.@ %t" (Sym.name x) (body 0))
 
-let app _ _ fnc arg = at 3 (fun out -> fprintf out "%t@ %t" (fnc 3) (arg 4))
+let apply fnc arg = at 3 (fun out -> fprintf out "@[<hov 1>%t@ %t@]" (fnc 3) (arg 4))
+let app _ _ fnc arg = apply fnc arg
 
 let tuple tpterms = at 1 (commasep (List.map snd tpterms))
 let proj _ = todo "proj"
@@ -73,4 +72,4 @@ let forIn _a _lat x expr body =
 
 let fix _ = todo "fix"
 let equals _tp e1 e2 = at 2 (fun out -> fprintf out "%t@ = %t" (e1 3) (e2 3))
-let semifix _lat body = at 3 (fun out -> fprintf out "semifix@ %t" (body 4))
+let semifix _lat body = apply (fun _ out -> fprintf out "semifix") body

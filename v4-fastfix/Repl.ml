@@ -13,7 +13,7 @@ let perform = function
   | `Type tp -> Printf.printf " type: %s\n" Type.(to_string tp);
   | `Expr e ->
      let tp, (phi, delta) = infer e Cx.empty in
-     Format.printf "@[<v> type: %s@,  phi: @[%t@]@,delta: @[%t@]@]@."
+     Format.printf "@[<v>@[<hov 2>type:@ %s@]@,@[<hov 2>phi:  @ @[%t@]@]@,@[<hov 2>delta:@ @[%t@]@]@]@."
        Type.(to_string tp) (pretty phi) (pretty delta)
 
 let readEvalPrint buf =
