@@ -1,10 +1,13 @@
-.PHONY: FORCE repl clean
+.PHONY: all repl compile clean
 
-_build/default/run.exe: FORCE
-	dune build run.exe
+all:
+	dune build datafun.cma compile.exe run.exe
 
-repl: _build/default/run.exe
+repl: all
 	rlwrap _build/default/run.exe
+
+compile: all
+	_build/default/compile.exe
 
 tests: $(wildcard *.hs)
 	ghc --make $@

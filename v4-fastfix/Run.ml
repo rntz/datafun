@@ -1,1 +1,1 @@
-Datafun.Repl.repl();;
+Datafun.Repl.repl()

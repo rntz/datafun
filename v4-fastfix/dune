@@ -1,13 +1,18 @@
 (library
  (name datafun)
  (libraries unix)
- (modules Lexer Cx Lang Option Passes Pretty StringBuilder Sym
-  Tests ToHaskell Type Util Repl Tokens Parser))
+ (modules Compiler Cx Lang Lexer Option Parser Passes Pretty
+  Repl StringBuilder Sym Tests ToHaskell Tokens Type Util))
 
 (executable
  (name run)
  (libraries datafun)
  (modules Run))
+
+(executable
+ (name compile)
+ (libraries datafun)
+ (modules Compile))
 
 ;; We separate out the tokens into their own module so that the lexer can depend
 ;; on them directly instead of on the whole parser. This lets us parameterize

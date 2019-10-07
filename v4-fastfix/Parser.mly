@@ -9,12 +9,21 @@
 
 // Types for nonterminals
 %start <[ `Cmd of string | `Expr of B.term | `Type of B.tp]> replcmd
+%start <B.term> term_eof
 %start <unit> unused
 
 %%
 // ---------- PARSING RULES ----------
 unused: ASTERISK BANG BAR CAPID CASE COLON DASH DBLARROW DEF ELSE END EQEQ GE GT
 IF LE LT PLUS SHADOW SLASH THEN TYPE UNDER {()};
+
+// ===== Start symbols =====
+term_eof: term list(SEMI) EOF { $1 }
+replcmd:
+| AT a=tp SEMI { `Type a }
+| e=term SEMI { `Expr e }
+| PERCENT c=ID SEMI { `Cmd c }
+| EOF { `Cmd "quit" }
 
 // ===== Types =====
 tp: tp_product {$1}
@@ -39,13 +48,6 @@ tp_atom:
 eqtp: tp { match firstOrder $1 with
            | Some a -> a
            | None -> $syntaxerror (* parseError "not an eqtp" *) }
-
-// ===== The repl =====
-replcmd:
-| AT a=tp SEMI { `Type a }
-| e=term SEMI { `Expr e }
-| PERCENT c=ID SEMI { `Cmd c }
-| EOF { `Cmd "quit" }
 
 // ===== Expressions =====
 // TODO: ifThenElse, proj
