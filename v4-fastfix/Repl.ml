@@ -1,6 +1,12 @@
-open Util
-open Backend
-module Parse = Parser.Make(Backend)
+open Util open Passes
+
+(* The compiler passes, back-to-front. *)
+module Renamed = PrettyName(Pretty)
+module Simplified = Simplify(Renamed)
+module Zeroed = ZeroChange(Simplified)
+module Semi = Seminaive(Zeroed)
+module Surf = Surface(Semi)
+module Parse = Parser.Make(Surf)
 
 exception Quit
 
@@ -13,7 +19,7 @@ let perform = function
   | `Cmd cmd -> print_endline ("Unrecognized command: " ^ cmd)
   | `Type tp -> Printf.printf " type: %s\n" Type.(to_string tp);
   | `Expr e ->
-     let tp, (phi, delta) = infer e Cx.empty in
+     let tp, (phi, delta) = Surf.infer e Cx.empty in
      Format.printf "@[<v>@[<hov 2>type:@ %s@]@,@[<hov 2>phi:  @ @[%t@]@]@,@[<hov 2>delta:@ @[%t@]@]@]@."
        Type.(to_string tp) (pretty phi) (pretty delta)
 
