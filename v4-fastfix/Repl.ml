@@ -1,5 +1,6 @@
 open Util
 open Backend
+module Parse = Parser.Make(Backend)
 
 exception Quit
 
@@ -18,8 +19,8 @@ let perform = function
 
 let readEvalPrint buf =
   if Unix.isatty Unix.stdin then (print_string "> "; flush stdout);
-  try perform (Parser.replcmd Lexer.token buf)
-    with Parser.Error -> print_endline "Sorry, I can't parse that."
+  try perform (Parse.replcmd Lexer.token buf)
+    with Parse.Error -> print_endline "Sorry, I can't parse that."
        | TypeError msg -> print_endline ("Type error: " ^ msg)
        | Failure x when x = "lexing: empty token" ->
           print_endline "I can't lex that."

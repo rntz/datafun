@@ -1,32 +1,18 @@
+%parameter <B: Lang.SURFACE>
+
 %{
     open Type
-    module B = Backend
 %}
-
-// TODO: filter this to only what I need
-%token
-/* punctuation */ AT DOT COMMA UNDER SEMI COLON BANG PLUS DASH ASTERISK SLASH
-PERCENT ARROW DBLARROW BAR LE LT GE GT EQ EQEQ RPAREN LPAREN
-RBRACE LBRACE RBRACK LBRACK BACKSLASH
-/* keywords */ TYPE DEF LET IN END EMPTY OR FOR DO CASE IF THEN WHEN
-ELSE SHADOW AS
-/* end of file */ EOF
-
-%token <string> STRING
-%token <bool> BOOL
-%token <int> INTEGER
-%token <string> ID CAPID        /* lower/uppercase identifiers */
 
 // Operator precedence
 //%nonassoc EQ LE LT GE GT
 
 // Types for nonterminals
-%start <[ `Cmd of string | `Expr of Backend.term | `Type of Backend.tp]> replcmd
+%start <[ `Cmd of string | `Expr of B.term | `Type of B.tp]> replcmd
 %start <unit> unused
 
 %%
 // ---------- PARSING RULES ----------
-
 unused: ASTERISK BANG BAR CAPID CASE COLON DASH DBLARROW DEF ELSE END EQEQ GE GT
 IF LE LT PLUS SHADOW SLASH THEN TYPE UNDER {()};
 

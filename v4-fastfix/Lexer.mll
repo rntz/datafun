@@ -1,4 +1,4 @@
-{ open Parser }
+{ open Tokens }
 
 let comment = "#" [^'\n']* "\n"
 let digit  = ['0'-'9']

@@ -1,16 +1,24 @@
 (library
  (name datafun)
  (libraries unix)
- (modules Lexer Parser Backend Cx Lang Option Passes Pretty StringBuilder Sym
-  Tests ToHaskell Type Util Repl))
+ (modules Lexer Backend Cx Lang Option Passes Pretty StringBuilder Sym
+  Tests ToHaskell Type Util Repl Tokens Parser))
 
 (executable
  (name run)
  (libraries datafun)
  (modules Run))
 
+;; We separate out the tokens into their own module so that the lexer can depend
+;; on them directly instead of on the whole parser. This lets us parameterize
+;; the parser over the backend without also needing to parameterize the lexer.
 (menhir
- (flags --explain)
- (modules Parser))
+ (modules Tokens)
+ (flags --only-tokens))
+
+(menhir
+ (merge_into Parser)
+ (modules Tokens Parser)
+ (flags --explain --external-tokens Tokens))
 
 (ocamllex Lexer)
