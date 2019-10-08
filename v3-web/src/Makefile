@@ -1,12 +1,10 @@
 .PHONY: all repl clean sparkling remake FORCE
 
 all: FORCE
-	jbuilder build --dev datafun.cma
-	# jbuilder build datafun.cma
+	dune build datafun.cma
 
 repl: FORCE
-	jbuilder utop .
-	# opam config exec -- jbuilder utop .
+	dune utop .
 
 clean:
 
