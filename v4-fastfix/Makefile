@@ -1,16 +1,22 @@
-.PHONY: all repl compile clean
+.PHONY: all project repl compile clean
 
-all:
+all: project benchmark test/rplus.hs test/trans.hs
+
+project:
 	dune build datafun.cma compile.exe run.exe
 
-repl: all
+test/%.hs: test/% project
+	_build/default/compile.exe < $< >$@
+
+repl: project
 	rlwrap _build/default/run.exe
 
-compile: all
+compile: project
 	_build/default/compile.exe
 
-tests: $(wildcard *.hs)
+benchmark: benchmark.hs Runtime.hs
 	ghc --make $@
 
 clean:
-	rm -f *.hi *.o
+	dune clean
+	rm -f benchmark *.hi *.o test/*.hs
