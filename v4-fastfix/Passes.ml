@@ -112,6 +112,9 @@ I need an expression of type %s
     | None -> complain "cannot compare at non-equality type" e1tp
     | Some tp -> synth `Bool expect, Imp.equals tp e1x (check e2 cx e1tp)
 
+  let binop (op: binop) (e1: term) (e2: term) (cx: cx) (expect: tp option): tp * Imp.term = match op with
+    | `Plus -> synth `Nat expect, Imp.binop op (check e1 cx `Nat) (check e2 cx `Nat)
+
   let bool (b: bool) (_cx: cx) (expect: tp option): tp * Imp.term =
     synth `Bool expect, Imp.bool b
   let string (s: string) (_cx: cx) (expect: tp option) = synth `String expect, Imp.string s
@@ -162,8 +165,6 @@ I need an expression of type %s
           tp,
           check body (scrub cx |> Cx.add x (Id, tp)) tp
           |> Imp.lam tp tp x |> Imp.box (`Fn (tp, tp)) |> Imp.fix (asLat eqtp)
-
-  let ifThenElse _ = todo "ifThenElse"
 end
 
 
@@ -188,6 +189,7 @@ module DropBoxes(Imp: SIMPLE): MODAL with type term = Imp.term
   let forIn a b = Imp.forIn a (deboxLat b)
   let fix = Imp.fix
   let equals = Imp.equals
+  let binop = Imp.binop
   let box _a m = m
   let letBox a b = Imp.letIn (debox a) (debox b)
 end
@@ -366,6 +368,14 @@ module Seminaive(Imp: ZERO): MODAL
   let equals (a: eqtp) (fM, _dM: term) (fN, _dN: term): term =
     Imp.equals a fM fN,
     Imp.zero `Bool (Imp.bool false)
+
+  (* φ(M + N) = φM + φN         δ(M + N) = φM + φN
+   *
+   * The δ-translation is inefficient. I don't think it can be more efficient
+   * in general, but it might be able to handle some special-cases.
+   *)
+  let binop (op: binop) (fM, _dM: term) (fN, _dN: term): term = match op with
+    | `Plus -> Imp.binop `Plus fM fN, Imp.binop `Plus fM fN
 end
 
 
@@ -392,6 +402,7 @@ end
  * - Projecting from zero-changes.
  * - Unions of zero-changes.
  * - if-then-elses or guards which always return zero changes.
+ * - Anything to do with binops.
  *
  * or anything else. I should figure out if there are reasonable examples where
  * this matters, add those as tests, and implement them; or else comment that I
@@ -476,10 +487,12 @@ end = struct
     Imp.semifix a (fncderiv cx |> snd) |> notZero
   let equals a tm1 tm2 cx =
     notZero (Imp.equals a (tm1 cx |> snd) (tm2 cx |> snd))
+  let binop op tm1 tm2 cx =
+    notZero (Imp.binop op (tm1 cx |> snd) (tm2 cx |> snd))
 end
 
 
-(* Optimization/simplification. This is ugly and hackish, but works. *)
+(* Optimization/simplification. Currently just bottom-propagation. *)
 module Simplify(Imp: SIMPLE): sig
   include SIMPLE
           with type term = rawtp semilat cx -> Imp.term * rawtp semilat option
@@ -571,6 +584,7 @@ end = struct
     | _, Some _ -> empty (a :> tp semilat)
     | fdX, None -> full (Imp.semifix a fdX)
   let equals a tm1 tm2 cx = full (Imp.equals a (fst (tm1 cx)) (fst (tm2 cx)))
+  let binop op e f cx = full (Imp.binop op (fst (e cx)) (fst (f cx)))
 end
 
 
@@ -685,5 +699,6 @@ end = struct
     Imp.forIn elemtp lat x expr body
   let fix tp body cx = Imp.fix tp (body cx)
   let equals tp e1 e2 cx = Imp.equals tp (e1 cx) (e2 cx)
+  let binop op e1 e2 cx = Imp.binop op (e1 cx) (e2 cx)
   let semifix tp body cx = Imp.semifix tp (body cx)
 end

@@ -1,5 +1,8 @@
 open Util open Type
 
+(* Only _monomorphic_ binary operations. *)
+type binop = [ `Plus ]
+
 (* For now, no typing contexts or variable usage/freeness information. *)
 module type BASE = sig
   type tp
@@ -24,6 +27,7 @@ module type BASE = sig
   val forIn: eqtp -> tp semilat -> sym -> term -> term -> term
   val fix: eqtp semilat -> term -> term
   val equals: eqtp -> term -> term -> term
+  val binop: binop -> term -> term -> term
 end
 
 module type MODAL = sig
@@ -66,9 +70,10 @@ module type SURFACE = sig
   val bool: bool -> term
   val string: string -> term
   val nat: int -> term
+  val binop: binop -> term -> term -> term
 
   (* checking terms *)
-  val ifThenElse: term -> term -> term -> term
+  (* val ifThenElse: term -> term -> term -> term *) (* TODO *)
   val lam: sym -> term -> term
   val tuple: term list -> term
   val set: term list -> term

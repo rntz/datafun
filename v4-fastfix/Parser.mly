@@ -4,8 +4,10 @@
     open Type
 %}
 
-// Operator precedence
-//%nonassoc EQ LE LT GE GT
+// Operator precedence & associativity. Operators listed later bind tighter.
+// (see 4.1.4 in http://gallium.inria.fr/~fpottier/menhir/manual.html)
+%nonassoc EQ
+%right PLUS
 
 // Types for nonterminals
 %start <[ `Cmd of string | `Expr of B.term | `Type of B.tp]> replcmd
@@ -72,7 +74,9 @@ term1: term2 {$1}
 | term2 nonempty_list(OR term2 {$2}) { B.union ($1::$2) }
 
 // Equality tests
-term2: term3 {$1} | term3 EQ term3 { B.equals $1 $3 }
+term2: term3 {$1}
+| term2 EQ term2 { B.equals $1 $3 }
+| term2 PLUS term2 { B.binop `Plus $1 $3 }
 
 // function applications
 term3: term_atom { $1 } | term3 term_atom { B.app $1 $2 }

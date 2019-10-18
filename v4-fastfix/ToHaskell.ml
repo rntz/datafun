@@ -16,6 +16,8 @@ let letBind pat expr body =
 let var _tp x = sym x
 let letIn _a _b x expr body = letBind (sym x) expr body
 let equals _a m n = parenSpaces [m; string "=="; n]
+let binop op e1 e2 = let opname = match op with `Plus -> "+" in
+                     parenSpaces [e1; string opname; e2]
 let lam _a _b x body = paren (string "\\" ^ sym x ^ string " -> " ^ body)
 let app _a _b fnc arg = parenSpaces [fnc; arg]
 

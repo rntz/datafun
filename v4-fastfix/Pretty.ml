@@ -35,7 +35,7 @@ let apply fnc arg = at 3 (fun out -> fprintf out "@[<hov 1>%t@ %t@]" (fnc 3) (ar
 let app _ _ fnc arg = apply fnc arg
 
 let tuple tpterms = at 1 (commasep (List.map snd tpterms))
-let proj _ = todo "proj"
+let proj _ = todo "Pretty.proj"
 let letTuple (tpxs: (tp * sym) list) _tp expr body =
   at 0 (fun out -> fprintf out "let (%s) =@ %t@ in@ %t"
                      (String.concat "," (List.map (fun (_,x) -> Sym.name x) tpxs))
@@ -44,7 +44,7 @@ let letTuple (tpxs: (tp * sym) list) _tp expr body =
 let string s _ out = fprintf out "%S" s
 let bool b _ out = fprintf out "%B" b
 let nat n _ out = fprintf out "%i" n
-let ifThenElse _ = todo "ifThenElse"
+let ifThenElse _ = todo "Pretty.ifThenElse"
 let guard _lat cnd thn =
   at 0 (fun out -> fprintf out "when %t do@ %t" (cnd 0) (thn 0))
 
@@ -70,6 +70,8 @@ let forIn _a _lat x expr body =
   at 0 (fun out -> fprintf out "for %s in %t do@ %t"
                      (Sym.name x) (expr 0) (body 0))
 
-let fix _ = todo "fix"
-let equals _tp e1 e2 = at 2 (fun out -> fprintf out "%t@ = %t" (e1 3) (e2 3))
+let fix _ = todo "Pretty.fix"
+let oper name e f = at 2 (fun out -> fprintf out "%t@ %s %t" (e 3) name (f 3))
+let equals _tp = oper "="
+let binop op = oper (match op with `Plus -> "+")
 let semifix _lat body = apply (fun _ out -> fprintf out "semifix") body
