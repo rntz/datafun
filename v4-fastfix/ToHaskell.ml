@@ -45,7 +45,7 @@ let proj tps i term = match List.length tps, i with
 let rec empty: tp semilat -> term = function
   | `Bool -> string "False"
   | `Nat -> string "0"
-  | `Set _ -> string "Set.empty"
+  | `Set _ -> string "Data.Set.empty"
   | `Tuple tps -> tuple (List.map (fun tp -> tp, empty tp) tps)
   (* NB. Even if we don't treat functions as semilattice types in source code,
    * Simplify can generate them by rewriting (λx.⊥) → ⊥. *)
