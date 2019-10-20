@@ -1,22 +1,36 @@
-.PHONY: all project repl compile clean
+TESTS=$(wildcard test/*.df)
+HSTESTS=$(TESTS:.df=-naive.hs) $(TESTS:.df=-seminaive.hs)
 
-all: project benchmark test/rplus.hs test/trans.hs
+.PHONY: all tests ocaml repl compile clean FORCE
 
-project:
-	dune build datafun.cma compile.exe run.exe
+all: ocaml tests benchmark
 
-test/%.hs: test/% project
-	_build/default/compile.exe < $< >$@
+ocaml:
+	dune build datafun.cma naive.exe seminaive.exe run.exe
+_build/default/seminaive.exe: ocaml
+_build/default/naive.exe: ocaml
+_build/default/run.exe: ocaml
 
-repl: project
+repl: _build/default/run.exe
 	rlwrap _build/default/run.exe
 
-compile: project
-	_build/default/compile.exe
+compile: _build/default/seminaive.exe
+	_build/default/seminaive.exe
+
+tests: $(HSTESTS)
+test/%-naive.hs: test/%.df _build/default/naive.exe
+	_build/default/naive.exe < $< >$@
+test/%-seminaive.hs: test/%.df _build/default/seminaive.exe
+	_build/default/seminaive.exe < $< >$@
 
 benchmark: benchmark.hs Runtime.hs
-	ghc --make $@
+	ghc -O2 --make $@
 
 clean:
 	dune clean
 	rm -f benchmark *.hi *.o test/*.hs
+
+# debugging: `make print-FOO` will print the value of $(FOO)
+.PHONY: print-%
+print-%:
+	@echo $*=$($*)

@@ -495,7 +495,6 @@ end
 (* Optimization/simplification. Currently just bottom-propagation. *)
 module Simplify(Imp: SIMPLE): sig
   include SIMPLE
-          with type term = rawtp semilat cx -> Imp.term * rawtp semilat option
   val finish: term -> Imp.term
 end = struct
   type tp = rawtp

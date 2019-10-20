@@ -1,1 +1,0 @@
-exit (Datafun.Compiler.compile ())

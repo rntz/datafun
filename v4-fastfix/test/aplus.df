@@ -1,5 +1,3 @@
-
-
 let rplus = @([[{nat,nat}] -> {nat,nat}] -> [{nat,nat}] -> {nat,nat})
   \rbox. let [r] = rbox in
   \sbox. let [s] = sbox in
@@ -10,4 +8,11 @@ let rplus = @([[{nat,nat}] -> {nat,nat}] -> [{nat,nat}] -> {nat,nat})
   let (x,y) = a in let (y1,z) = b in
   when y = y1 do {(x,z)})
 in
-  rplus
+let [rchar] = [@([nat] -> [{nat,nat}] -> {nat,nat})
+  \c0box. let [c0] = c0box in 
+  \sbox. let [s] = sbox in
+  for e in s do
+  let (i, c1) = e in
+  {(i,i+1) when c0 = c1}]
+in
+  rplus [rchar [97]];   # 'a+'
