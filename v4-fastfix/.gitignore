@@ -1,2 +1,3 @@
 test/*.hs
-/benchmark
+/benchmark-trans
+/benchmark-regex

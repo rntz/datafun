@@ -3,7 +3,7 @@ HSTESTS=$(TESTS:.df=-naive.hs) $(TESTS:.df=-seminaive.hs)
 
 .PHONY: all tests ocaml repl compile clean FORCE
 
-all: ocaml tests benchmark
+all: ocaml tests benchmark-trans benchmark-regex
 
 ocaml:
 	dune build datafun.cma naive.exe seminaive.exe run.exe
@@ -13,7 +13,6 @@ _build/default/run.exe: ocaml
 
 repl: _build/default/run.exe
 	rlwrap _build/default/run.exe
-
 compile: _build/default/seminaive.exe
 	_build/default/seminaive.exe
 
@@ -23,12 +22,14 @@ test/%-naive.hs: test/%.df _build/default/naive.exe
 test/%-seminaive.hs: test/%.df _build/default/seminaive.exe
 	_build/default/seminaive.exe < $< >$@
 
-benchmark: benchmark.hs Runtime.hs
+benchmark-trans: benchmark-trans.hs Benchmark.hs Runtime.hs
+	ghc -O2 --make $@
+benchmark-regex: benchmark-regex.hs Benchmark.hs Runtime.hs
 	ghc -O2 --make $@
 
 clean:
 	dune clean
-	rm -f benchmark *.hi *.o test/*.hs
+	rm -f benchmark-trans benchmark-regex *.hi *.o test/*.hs
 
 # debugging: `make print-FOO` will print the value of $(FOO)
 .PHONY: print-%
