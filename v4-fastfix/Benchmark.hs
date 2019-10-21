@@ -4,6 +4,7 @@ import Text.Printf
 import System.CPUTime
 import Control.Exception (evaluate)
 import System.IO
+import System.Environment
 
 -- Given a test size, produces a naive & seminaive time.
 type Benchmark = Int -> IO (Double, Double)
@@ -18,11 +19,18 @@ time x = do
 
 benchmark :: Benchmark -> IO ()
 benchmark run = do
+  -- Figure out how many benchmarks to run. If no argument, we run "forever"
+  -- (eg. until the user interrupts us via Ctrl-C).
+  args <- getArgs
+  benches <- case args of
+               [] -> return [80,100..]
+               [x] -> do n <- evaluate (read x); return [80,100..60 + 20 * n]
+               _ -> error "too many program arguments"
   -- Use line buffering to make sure (or at least make it more likely) that we
   -- generate a valid .dat file.
   hSetBuffering stdout LineBuffering
   printf "n\tnaive\tseminaive\tspeedup\n"
-  mapM_ (test run) [80,100..]
+  mapM_ (test run) benches
   hFlush stdout
 
 test :: Benchmark -> Int -> IO ()
