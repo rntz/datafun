@@ -6,8 +6,10 @@ import Control.Exception (evaluate)
 import System.IO
 import System.Environment
 
--- Given a test size, produces a naive & seminaive time.
-type Benchmark = Int -> IO (Double, Double)
+-- Given a "run index", a benchmark produces an input size, a naive runtime, and
+-- a seminaive runtime. Increasing the run index should increase the input size
+-- by some appropriate amount.
+type Benchmark = Int -> IO (Int, Double, Double)
 
 -- What a weird type signature.
 time :: a -> IO Double
@@ -23,8 +25,8 @@ benchmark run = do
   -- (eg. until the user interrupts us via Ctrl-C).
   args <- getArgs
   benches <- case args of
-               [] -> return [80,100..]
-               [x] -> do n <- evaluate (read x); return [80,100..60 + 20 * n]
+               [] -> return [0..]
+               [x] -> do n <- evaluate (read x); return [0..n-1]
                _ -> error "too many program arguments"
   -- Use line buffering to make sure (or at least make it more likely) that we
   -- generate a valid .dat file.
@@ -34,7 +36,7 @@ benchmark run = do
   hFlush stdout
 
 test :: Benchmark -> Int -> IO ()
-test run n = do
-  (naiveT, semiT) <- run n
+test run i = do
+  (n, naiveT, semiT) <- run i
   let speedup = naiveT / semiT -- the speedup ratio
   printf "%i\t%.2f\t%.2f\t%.2f\n" n naiveT semiT speedup

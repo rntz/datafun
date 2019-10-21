@@ -1,10 +1,6 @@
-.PHONY: all tests ocaml repl compile clean FORCE
+.PHONY: all ocaml tests benchmarks run-benchmarks repl compile clean FORCE
 
-all: ocaml tests benchmark-trans benchmark-regex
-
-clean:
-	dune clean
-	rm -f benchmark-trans benchmark-regex graph.pdf *.hi *.o test/*.hs
+all: ocaml tests benchmarks
 
 # The Datafun repl & compiler, in ocaml.
 _build/default/seminaive.exe: ocaml
@@ -29,19 +25,33 @@ test/%-seminaive.hs: test/%.df _build/default/seminaive.exe
 
 # The benchmarks. NBENCH is the number of different input sizes to test on (the
 # number of different data points we'll get on the x-axis of the graph).
+BENCHES := trans astar astar2
+BENCH_PROGS := $(addprefix benchmark-,$(BENCHES))
+BENCH_DATS := $(addsuffix .dat,$(BENCHES))
 NBENCH ?= 12
+benchmarks: $(BENCH_PROGS)
+run-benchmarks: $(BENCH_DATS)
 benchmark-%: benchmark-%.hs Benchmark.hs Runtime.hs
 	ghc -O2 --make $@
 %.dat: benchmark-%
 	./$< $(NBENCH) | tee $@
 
 # The graph pdf. I don't want building graph.pdf to force re-running the
-# benchmarks, so I don't list trans.dat and regex.dat as dependencies.
+# benchmarks, because that takes a while, so I don't list trans.dat and
+# regex.dat as dependencies, but I do test they exist.
 RNTZTEXDIR := ../rntztex/
 export TEXINPUTS := $(RNTZTEXDIR):
 LATEXRUN := $(RNTZTEXDIR)/latexrun/latexrun
 graph.pdf: graph.tex FORCE
+	test -f trans.dat
+	test -f astar.dat
+	test -f astar2.dat
 	$(LATEXRUN) $<
+
+# Cleanup
+clean:
+	dune clean
+	rm -f graph.pdf *.hi *.o $(BENCH_PROGS) test/*.hs
 
 # Automatic recompilation.
 .PHONY: watch watch\:%

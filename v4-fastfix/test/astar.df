@@ -1,0 +1,28 @@
+let trans: [{nat,nat}] -> {nat,nat} =
+  \edgebox. let [edge] = edgebox in
+  fix path is
+    edge or
+    (for (a in edge) for (b in path)
+     let (x,y1) = a in let (y2,z) = b in
+     {(x,z) when y1 = y2})
+in
+let pos: {nat,nat} -> {nat} =
+  \s. for (pair in s) let (i,c) = pair in {i,i+1}
+in
+let nil: [{nat,nat}] -> {nat,nat} =
+  \sbox. let [s] = sbox in
+  {(i,i) for i in pos s}
+in
+let star: [[{nat,nat}] -> {nat,nat}] -> [{nat,nat}] -> {nat,nat} =
+  \rbox. let [r] = rbox in
+  \sbox. let [s] = sbox in
+  nil [s] or trans [r [s]]
+in
+let [sym: [nat] -> [{nat,nat}] -> {nat,nat}] =
+  [\c0box. let [c0] = c0box in 
+   \sbox. let [s] = sbox in
+   for (e in s)
+   let (i, c1) = e in
+   {(i,i+1) when c0 = c1}]
+in
+  star [sym [97]];   # /a+/

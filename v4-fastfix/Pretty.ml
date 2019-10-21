@@ -46,7 +46,7 @@ let bool b _ out = fprintf out "%B" b
 let nat n _ out = fprintf out "%i" n
 let ifThenElse _ = todo "Pretty.ifThenElse"
 let guard _lat cnd thn =
-  at 0 (fun out -> fprintf out "when %t do@ %t" (cnd 0) (thn 0))
+  at 0 (fun out -> fprintf out "when (%t)@ %t" (cnd 0) (thn 0))
 
 let set _a terms _prec = brace (commasep terms)
 
@@ -67,7 +67,7 @@ let union (lat: tp semilat): term list -> term = function
      at 1 (fun out -> pp_print_list ~pp_sep:orspace f out terms)
 
 let forIn _a _lat x expr body =
-  at 0 (fun out -> fprintf out "for %s in %t do@ %t"
+  at 0 (fun out -> fprintf out "for (%s in %t)@ %t"
                      (Sym.name x) (expr 0) (body 0))
 
 let fix _ = todo "Pretty.fix"

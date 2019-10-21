@@ -57,13 +57,20 @@ term: term1 {$1}
 | AT a=tp_atom m=term | m=term1 COLON a=tp { B.asc a m }
 | BACKSLASH xs=nonempty_list(var) DOT body=term
     { List.fold_right B.lam xs body }
-| cs=list(comp) DO body=term { List.fold_right (fun f x -> f x) cs body }
+// | cs=list(comp) DO body=term { List.fold_right (fun f x -> f x) cs body }
+| FOR "(" x=var IN e=term ")" body=term { B.forIn x e body }
+| WHEN "(" e=term ")" body=term { B.guard e body }
+| FIX x=var IS e=term { B.fix x e }
 // let-bindings.
 | LET LBRACK x=var RBRACK EQ e=term IN body=term { B.letBox x e body }
 | LET x=var EQ e=term IN body=term { B.letIn x e body }
 | LET LPAREN xs=separated_list(COMMA, var) RPAREN EQ e=term IN body=term
     { B.letTuple xs e body }
-| x=var AS e=term { B.fix x e }
+// type-annotated forms
+| FIX x=var ":" a=tp IS e=term { B.asc a (B.fix x e) }
+| LET x=var ":" a=tp "=" e=term IN body=term { B.letIn x (B.asc a e) body }
+| LET "[" x=var ":" a=tp "]" "=" e=term IN body=term
+    { B.letBox x (B.asc (`Box a) e) body }
 
 // Comprehensions (for & when)
 comp: FOR x=var IN e=term { B.forIn x e } | WHEN term { B.guard $2 }

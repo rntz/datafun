@@ -1,6 +1,6 @@
 \documentclass{article}
 
-\usepackage[papersize={12cm,175mm},scale=0.9]{geometry}
+\usepackage[papersize={129mm,172mm},scale=0.9]{geometry}
 \pagestyle{empty}
 \usepackage{mathpazo}
 \linespread{1.12}
@@ -28,8 +28,8 @@
           nodes={inner sep=3pt,}
         },
       ]
-      \addplot [color=red,mark=square*] table [x=n,y=naive] {trans.dat};
-      \addplot [color=blue,mark=*] table  [x=n,y=seminaive] {trans.dat};
+      \addplot table [x=n,y=naive] {trans.dat};
+      \addplot table  [x=n,y=seminaive] {trans.dat};
     \end{axis}
   \end{tikzpicture}
   \caption{Transitive closure on a linear graph}
@@ -53,18 +53,48 @@
           nodes={inner sep=3pt,}
         },
       ]
-      \addplot [color=red,mark=square*] table [x=n,y=naive] {regex.dat};
-      \addplot [color=blue,mark=*] table  [x=n,y=seminaive] {regex.dat};
+      \addplot table [x=n,y=naive] {astar.dat};
+      \addplot table  [x=n,y=seminaive] {astar.dat};
     \end{axis}
   \end{tikzpicture}
-  \caption{Finding all occurrences of the regex \texttt{/a+/} in \texttt{a}\textsuperscript{\emph{n}}}
+  \caption{Finding all occurrences of the regex \texttt{/a*/} in \texttt{a}\textsuperscript{\emph{n}}}
 \end{figure}
 
 \noindent
-\textbf{NB.} If these graphs look suspiciously similar, that's no accident.
-Finding all matches of \texttt{/a+/} is the same as finding the \emph{transitive
-  closure} of all matches of \texttt{/a/}; on the string
-\texttt{a}\textsuperscript{\itshape n}, the matches of \texttt{/a/} form a
-\emph{linear graph}.
+If these graphs look similar, that's no accident. Finding all matches of
+\texttt{/a*/} is the same as finding the reflexive, transitive closure of the
+set of index-pairs which match \texttt{/a/}; and on the string
+\texttt{a}\textsuperscript{\itshape n}, the matching index-pairs of \texttt{/a/}
+form a linear graph.
+
+
+\clearpage
+\begin{figure}
+  \centering
+  \begin{tikzpicture}[baseline=(current bounding box.center)]
+    \begin{axis}[
+        xlabel={Length of string},
+        ylabel={Seconds},
+        height=140pt, width=220pt,
+        % If we include the explicit table, we can make it this large without
+        % enlarging the figure.
+        height=172pt, width=280pt,
+        legend entries={\naive,semi\naive},
+        legend cell align=left,
+        legend pos = north west,
+        legend style={
+          draw=none,
+          nodes={inner sep=3pt,}
+        },
+      ]
+      \addplot table [x=n,y=naive] {astar2.dat};
+      \addplot table  [x=n,y=seminaive] {astar2.dat};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Finding all \emph{leading} occurrences of the regex \texttt{/a*/} in \texttt{a}\textsuperscript{\emph{n}}}
+\end{figure}
+
+\noindent By \emph{leading occurrences}, I mean occurrences which start at the
+beginning of the string.
 
 \end{document}

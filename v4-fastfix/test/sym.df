@@ -1,0 +1,8 @@
+# Implemented in a more direct manner than in the paper, taking advantage
+# of coding strings as sets of (index, character) pairs.
+@([nat] -> {nat,nat} -> {nat,nat})
+\c0box. let [c0] = c0box in
+\s.
+for (e in s)
+let (i, c1) = e in
+{(i,i+1) when c0 = c1};

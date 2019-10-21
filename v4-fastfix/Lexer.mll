@@ -31,10 +31,10 @@ rule token = parse
   (* expression keywords *)
   | "let" {LET} | "in" {IN} | "end" {END}
   | "empty" {EMPTY} | "or" {OR}
-  | "for" {FOR} | "when" {WHEN} | "do" {DO}
+  | "for" {FOR} | "when" {WHEN}
   | "case" {CASE}
   | "if" {IF} | "then" {THEN} | "else" {ELSE}
-  | "as" {AS}
+  | "fix" {FIX} | "is" {IS}
 
   (* literals *)
   | "true" {BOOL(true)}

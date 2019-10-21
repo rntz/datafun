@@ -1,0 +1,10 @@
+# The one-or-more iteration of a regex.
+@([[{nat,nat}] -> {nat,nat}] -> [{nat,nat}] -> {nat,nat})
+\rbox. let [r] = rbox in
+\sbox. let [s] = sbox in
+let [edge] = [r [s]] in
+fix path is
+  edge or
+  (for (a in edge) for (b in path)
+   let (x,y) = a in let (y1,z) = b in
+   {(x,z) when y = y1});

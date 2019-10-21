@@ -1,3 +1,5 @@
 test/*.hs
 /benchmark-trans
-/benchmark-regex
+/benchmark-astar
+/benchmark-astar2
+/*.dat

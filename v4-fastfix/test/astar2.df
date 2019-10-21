@@ -1,0 +1,17 @@
+let [sym: [nat] -> [{nat,nat}] -> [nat] -> {nat}] =
+  [\cbox. let [c] = cbox in
+   \sbox. let [s] = sbox in
+   \ibox. let [i] = ibox in
+   {i+1
+    for pair in s
+    when i = (let (j,d) = pair in j)
+    when c = (let (j,d) = pair in d)}]
+in
+let star: [[{nat,nat}] -> [nat] -> {nat}]
+       -> [{nat,nat}] -> [nat] -> {nat}
+= \rbox. let [r] = rbox in
+  \sbox. let [s] = sbox in
+  \ibox. let [i] = ibox in
+  fix self is {i} or (for (j in self) r [s] [j])
+in
+  star [sym [97]]; # /a*/

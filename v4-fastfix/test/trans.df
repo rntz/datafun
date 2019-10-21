@@ -1,7 +1,7 @@
 @([{str,str}] -> {str,str})
 \edgebox. let [edge] = edgebox in
-path as
+fix path is
   edge or
-  (for a in edge for b in path do
-   let (x,y) = a in let (y1,z) = b in
-   when y = y1 do {(x,z)})
+  (for (a in edge) for (b in path)
+   let (x,y1) = a in let (y2,z) = b in
+   {(x,z) when y1 = y2});
