@@ -1,0 +1,72 @@
+\documentclass{article}
+
+\usepackage[papersize={12cm,17cm},scale=0.9]{geometry}
+\pagestyle{empty}
+\usepackage{XCharter}
+\usepackage{eulervm}
+\makeatletter\edef\zeu@Scale{1.047930283224401}\makeatother
+\usepackage[scaled=1.0525187144829635]{inconsolata}
+\usepackage{pgfplots}\pgfplotsset{compat=1.5}
+\newcommand\naive{na\"ive}
+\newcommand\Naive{Na\"ive}
+
+\begin{document}
+
+\begin{figure}[t!]
+  \centering
+  \begin{tikzpicture}[baseline=(current bounding box.center)]
+    \begin{axis}[
+        xlabel={Number of nodes},
+        ylabel={Seconds},
+        height=140pt, width=220pt,
+        % If we include the explicit table, we can make it this large without
+        % enlarging the figure.
+        height=172pt, width=280pt,
+        legend entries={\naive,semi\naive},
+        legend cell align=left,
+        legend pos = north west,
+        legend style={
+          draw=none,
+          nodes={inner sep=3pt,}
+        },
+      ]
+      \addplot [color=red,mark=square*] table [x=n,y=naive] {trans.dat};
+      \addplot [color=blue,mark=*] table  [x=n,y=seminaive] {trans.dat};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Transitive closure on a linear graph}
+\end{figure}
+
+\begin{figure}[t!]
+  \centering
+  \begin{tikzpicture}[baseline=(current bounding box.center)]
+    \begin{axis}[
+        xlabel={Length of string},
+        ylabel={Seconds},
+        height=140pt, width=220pt,
+        % If we include the explicit table, we can make it this large without
+        % enlarging the figure.
+        height=172pt, width=280pt,
+        legend entries={\naive,semi\naive},
+        legend cell align=left,
+        legend pos = north west,
+        legend style={
+          draw=none,
+          nodes={inner sep=3pt,}
+        },
+      ]
+      \addplot [color=red,mark=square*] table [x=n,y=naive] {regex.dat};
+      \addplot [color=blue,mark=*] table  [x=n,y=seminaive] {regex.dat};
+    \end{axis}
+  \end{tikzpicture}
+  \caption{Finding all occurrences of the regex \texttt{/a+/} in \texttt{a}\textsuperscript{\emph{n}}}
+\end{figure}
+
+\noindent
+\textbf{NB.} If these graphs look suspiciously similar, that's no accident.
+Finding all matches of \texttt{/a+/} is the same as finding the \emph{transitive
+  closure} of all matches of \texttt{/a/}; on the string
+\texttt{a}\textsuperscript{\itshape n}, the matches of \texttt{/a/} form a
+\emph{linear graph}.
+
+\end{document}
