@@ -27,13 +27,13 @@ test/%-naive.hs: test/%.df _build/default/naive.exe
 test/%-seminaive.hs: test/%.df _build/default/seminaive.exe
 	_build/default/seminaive.exe < $< >$@
 
-# The benchmarks. NBENCH is one more than the number of benchmarks to run. For
-# example, NBENCH=12 means we'll run benchmarks on 11 distinct input sizes.
+# The benchmarks. NBENCH is the number of different input sizes to test on (the
+# number of different data points we'll get on the x-axis of the graph).
 NBENCH ?= 12
 benchmark-%: benchmark-%.hs Benchmark.hs Runtime.hs
 	ghc -O2 --make $@
 %.dat: benchmark-%
-	./$< | tee $@ | head -n$(NBENCH)
+	./$< $(NBENCH) | tee $@
 
 # The graph pdf. I don't want building graph.pdf to force re-running the
 # benchmarks, so I don't list trans.dat and regex.dat as dependencies.
