@@ -1,15 +1,12 @@
-let trans = @([{nat,nat}] -> {nat,nat})
-  \edgebox. let [edge] = edgebox in
-  path as
-    edge or
-    (for a in edge for b in path do
-     let (x,y) = a in let (y1,z) = b in
-     when y = y1 do {(x,z)})
-in
 let rplus = @([[{nat,nat}] -> {nat,nat}] -> [{nat,nat}] -> {nat,nat})
   \rbox. let [r] = rbox in
   \sbox. let [s] = sbox in
-  trans [r [s]]
+  let [edge] = [r [s]] in
+  path as
+  edge or
+  (for a in edge for b in path do
+  let (x,y) = a in let (y1,z) = b in
+  when y = y1 do {(x,z)})
 in
 let [rchar] = [@([nat] -> [{nat,nat}] -> {nat,nat})
   \c0box. let [c0] = c0box in 
