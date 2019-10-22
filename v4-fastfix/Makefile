@@ -33,7 +33,7 @@ benchmarks: $(BENCH_PROGS)
 run-benchmarks: $(BENCH_DATS)
 benchmark-%: benchmark-%.hs Benchmark.hs Runtime.hs
 	ghc -O2 --make $@
-%.dat: benchmark-%
+%.dat: benchmark-% FORCE
 	./$< $(NBENCH) | tee $@
 
 # The graph pdf. I don't want building graph.pdf to force re-running the

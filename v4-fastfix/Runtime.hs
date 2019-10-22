@@ -42,6 +42,7 @@ guard False x = empty
 forIn :: Semilat b => Set a -> (a -> b) -> b
 forIn set f = unions [f x | x <- Set.toList set]
 
+-- Some debugging infrastructure. Currently disabled.
 tracer name i =
   if True || i `mod` 13 /= 0 then id
   else trace (name ++ " " ++ show i)
