@@ -1,14 +1,14 @@
 \section{Proving the Semi\naive\ Transformation Correct}
 
 We formalize the intended behavior of $\phi e$ and $\delta e$ using a logical
-relation.
+relation. 
 %
-Inductively on types $A$, letting $a,b \in \den{A}$, $x,y \in \den{\Phi A}$, and
-$\dx \in \den{\DP A}$, we define $\weirdat{A}{\dx}{x}{a}{y}{b}$, which may be
-glossed as ``$x,y$ speed up $a,b$ respectively, and $\dx$ changes $x$ into
-$y$'', as follows:
-
-\nopagebreak[1]
+Inductively on types $A$, letting $a,b \in \den{A}$,
+$x,y \in \den{\Phi A}$, and $\dx \in \den{\DP A}$, we define a five
+place relation $\weirdat{A}{\dx}{x}{a}{y}{b}$, which may be glossed as
+``$x,y$ speed up $a,b$ respectively, and $\dx$ changes $x$ into $y$''.
+The definition is given in Figure~\ref{fig:logical-relation}.
+\begin{figure}
 \begin{align*}
   \weirdat{\tunit}{\tuple{}}{\tuple{}}{\tuple{}}{\tuple{}}{\tuple{}}
   &\iff \top
@@ -31,9 +31,14 @@ $y$'', as follows:
   &\hphantom{{}\iff{}}
   \weirdat{B}{\df\<x\<\dx}{f\<x}{f_s\<a}{g\<y}{g_s\<b}
 \end{align*}
+  \caption{Definition of the logical relation}
+  \label{fig:logical-relation}
+\end{figure}
 
-\noindent This extends to contexts $\G$, letting $\rho,\rho' \in \den{\G}$, $\g,\g' \in
-\den{\Phi\G}$, and $\dgamma \in \den{\DP\G}$:
+
+This definition can be extended to contexts $\G$, letting
+$\rho,\rho' \in \den{\G}$, $\g,\g' \in \den{\Phi\G}$, and
+$\dgamma \in \den{\DP\G}$:
 
 \nopagebreak[1]
 \begin{align*}
@@ -49,6 +54,28 @@ $y$'', as follows:
           {\rho'_{\dvar x}}
 \end{align*}
 
+\begin{lemma}[Equality Changes]
+For all equality types $\eqt A$, we have that $\weirdat{\eqt A}{\dx}{x}{a}{y}{b}$ implies $x = a$ and $y = b$.
+\end{lemma}
+
+\begin{lemma}[Dummy Changes]
+  For all equality types $\eqt A$, we have that $\weirdat{\eqt A}{\dummy(x)}{x}{x}{x}{x}$.
+\end{lemma}
+
+\begin{lemma}[Semilattice Changes]
+  At lattice types $L$, we have that $\weirdat{L}{\dx}{x}{a}{y}{b}$ if and only if $x = a$ and $y = b = x \vee_L \dx$
+\end{lemma}
+
+\begin{lemma}[Discrete Contexts Don't Change]
+  If $\weirdat{\stripcx{\G}}{\tuple{}}{\gamma}{\rho}{\gamma'}{\rho'}$ then $\gamma = \gamma'$ and $\rho = \rho'$.  
+\end{lemma}
+
+\begin{lemma}[Context Stripping]
+  If $\weirdat{\G}{\dg}{\gamma}{\rho}{\gamma'}{\rho'}$ 
+  then $\weirdat{\stripcx{\G}}{\tuple{}}{\strip(\g)}{\strip(\rho)}{\strip(\g')}{\strip(\rho')}$.
+\end{lemma}
+
+
 \noindent
 Our fundamental result is that $\phi$ and $\delta$ generate expressions which
 preserve this logical relation:
@@ -60,9 +87,8 @@ preserve this logical relation:
 \end{theorem}
 
 \noindent
-At eqtypes, it's easy to show inductively that $\weirdat{\eqt
-  A}{\dx}{x}{a}{y}{b}$ implies $x = a$. Consequently, first-order closed
-programs compute the same result when $\phi$-translated:
+Consequently, first-order closed programs compute the same result when
+$\phi$-translated:
 
 \begin{corollary}[First-order Correctness]
   If $\J e {\emptycx} {\eqt A}$ then $\den{e} = \den{\phi e}$.
