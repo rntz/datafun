@@ -94,8 +94,8 @@ So consider $\name{step}'$ defined by:
 
 \newcommand\colorpath{{\color{BlindVermilion}\name{path}}}
 \newcommand\colordpath{{\color{BlindBlue}\name{dpath}}}
-\newcommand\colorA{\color{BlindVermilion}}
-\newcommand\colorB{\color{BlindBlue}}
+\newcommand\colorA{\color{ColorA}}
+\newcommand\colorB{\color{ColorB}}
 \renewcommand\colorpath{\name{path}}
 \renewcommand\colordpath{\name{dpath}}
 %% \renewcommand\colorA\relax
@@ -105,23 +105,13 @@ So consider $\name{step}'$ defined by:
 Observe that
 %
 \begin{align*}
-  &\mathrel{\hphantom{=}} {\colorA\name{step}\<\colorpath}
-  \cup
-  {\colorB\name{step}'\<\colordpath}
+  &\mathrel{\hphantom{=}} \name{step} \<(\colorpath \cup \colordpath)
   \\
-  &=
-  {\colorA
-  \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath}}
-  \cup
-  {\colorB
-  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colordpath}}
+  &= \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath \cup \colordpath}
   \\
-  &=
-  \name{edge} \cup
-  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath \cup \colordpath}
+  &= {\colorA \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath}} \cup {\colorB \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colordpath}}
   \\
-  &=
-  \name{step} \<(\colorpath \cup \colordpath)
+  &= {\colorA\name{step}\<\colorpath} \cup {\colorB\name{step}'\<\colordpath}
 \end{align*}
 
 \noindent

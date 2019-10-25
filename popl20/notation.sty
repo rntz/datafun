@@ -51,19 +51,26 @@
 \newcommand\Naive{Na\"ive}
 \newcommand\rn\textsc % inference rule names
 
-%% according to http://mkweb.bcgsc.ca/colorblind/ and Figure 2 in
-%% https://www.nature.com/articles/nmeth.1618?WT.ec_id=NMETH-201106, Vermilion
-%% and Blue make a reasonable contrasting color combo. However, both are a
-%% little light for use as text on a white background so we add some black (K in
-%% CMYK).
-\definecolor{BlindVermilion}{cmyk}{0, 0.8, 1, 0.1}
-\definecolor{BlindBlue}{cmyk}{1, 0.5, 0, 0.1}
-%\definecolor{BlindGreen}{cmyk}{.97, 0, .75, 0.1}
-%\definecolor{BlindOrange}{cmyk}{0, 0.5, 1, 0.15}
-
-% used to distinguish discrely bound variables, etc.
-\definecolor{IsoGreen}{cmyk}{.95, 0, .9, .2}
-\newcommand\isocolor{\color{IsoGreen}}
+%% COLORS USED.
+%% - discreteness: cmyk(1, 0.3, 0, 0)  "IsoBlue" cyanish blue
+%% - hilighting:   cmyk(0, 0.8, 1, 0)  "Hilite"  red
+%% - color A:      cmyk(0, 0.7, 1, 0.2) "ColorA" dull red
+%% - color B:      cmyk(1, 0, 0.5, 0.3) "ColorB" dull sea green
+%%
+%% Discreteness must be distinct from everything. In addition,
+%% - Hilighting should be very distinct from black.
+%% - Color A & Color B must be distinct from each other.
+%%
+%% https://davidmathlogic.com/colorblind/#%23F1471D-%230E88D3-%23AA1318-%23721D69
+%%
+%% For more general colorblindness stuff, see also:
+%% http://mkweb.bcgsc.ca/colorblind/
+%% https://www.nature.com/articles/nmeth.1618?WT.ec_id=NMETH-201106
+\definecolor{IsoBlue}{cmyk}{1, 0.3, 0, 0}  % #0e88d3
+\definecolor{Hilite}{cmyk}{0, 0.8, 1, 0}   % #f1471d
+\definecolor{ColorA}{cmyk}{0, 0.7, 1, 0.2} % #c84b14
+\definecolor{ColorB}{cmyk}{1, 0, 0.5, 0.3} % #007c75
+\newcommand\isocolor{\color{IsoBlue}}
 
 % used for names of functions, primitives, etc. in math mode
 \newcommand\name[1]{\text{\itshape #1}}
@@ -98,9 +105,8 @@
 \newcommand\N{\mathbb{N}}
 \newcommand\tuple[1]{\langle{#1}\rangle}
 \newcommand\den[1]{\ensuremath{\llbracket{#1}\rrbracket}}
-% Space for function application. Between \; and \:.
-\newcommand\<{\mskip 4mu plus 4mu minus 1mu}
-\renewcommand\<\;
+% Space for function application.
+\newcommand\<\;
 \newcommand\fnspace{\;}
 \newcommand\fnof[1]{\fn{#1}.\fnspace}
 \newcommand\setfor[2]{\ensuremath{\{#1 \mathrel{|} #2\}}}
