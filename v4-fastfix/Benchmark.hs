@@ -32,6 +32,9 @@ benchmark run = do
   -- generate a valid .dat file.
   hSetBuffering stdout LineBuffering
   printf "n\tnaive\tseminaive\tspeedup\n"
+  -- Do a ridiculously simple warmup by running the first benchmark & discarding
+  -- the results.
+  run 0
   mapM_ (test run) benches
   hFlush stdout
 
@@ -39,4 +42,4 @@ test :: Benchmark -> Int -> IO ()
 test run i = do
   (n, naiveT, semiT) <- run i
   let speedup = naiveT / semiT -- the speedup ratio
-  printf "%i\t%.2f\t%.2f\t%.2f\n" n naiveT semiT speedup
+  printf "%i\t%.6f\t%.6f\t%.6f\n" n naiveT semiT speedup
