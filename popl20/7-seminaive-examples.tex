@@ -148,19 +148,21 @@ we start with the derivative of the loop body, $\delta(\dvar e \cup (\dvar e
   \cup ((\dvar e \cup \delta\dvar e) \bullet \deep)
   \\
   &= \bot \cup (\bot \bullet p) \cup ((\dvar e \cup \bot) \bullet \deep)
-  && \delta\dvar e ~\text{is a zero change}
+  && \delta\dvar e ~\text{is a zero change; insert }\bot
   \\
   &= \dvar e \bullet \deep
   && \text{propagate}~\bot
 \end{align*}
 
 \noindent
-This requires a new optimization: by definition, $\delta\dvar e = \dvar{de}$.
-However, since $\dvar e$ is discrete we know it's not changing, and since it's
-of set type, $\dvar{de}$ may as well be the empty set. So we replace $\delta e$
-with $\bot$ instead.
+The penultimate step requires a new optimization.
 %
-Finally, putting everything together:
+By definition $\delta\dvar e = \dvar{de}$, but since $\dvar e$ is discrete we
+know $\dvar{de}$ is a zero change, so we may safely replace it by $\bot$.
+%
+We call this ``$\bot$ insertion''.
+
+Putting everything together, we have:
 
 \begin{align*}
   \phi(\efixis p \dvar e \cup (\dvar e \bullet p)
@@ -178,8 +180,9 @@ Finally, putting everything together:
   && \text{previous work}
 \end{align*}
 
-Examining the recurrence produced by this use of \fastfix, we recover exactly
-the semi\naive\ transitive closure algorithm we gave in
+\noindent
+Examining the recurrence produced by this use of \fastfix, we recover the
+semi\naive\ transitive closure algorithm from
 \cref{sec:seminaive-tc-in-datafun}:
 
 \begin{align*}
