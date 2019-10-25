@@ -105,23 +105,13 @@ So consider $\name{step}'$ defined by:
 Observe that
 %
 \begin{align*}
-  &\mathrel{\hphantom{=}} {\colorA\name{step}\<\colorpath}
-  \cup
-  {\colorB\name{step}'\<\colordpath}
+  &\mathrel{\hphantom{=}} \name{step} \<(\colorpath \cup \colordpath)
   \\
-  &=
-  {\colorA
-  \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath}}
-  \cup
-  {\colorB
-  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colordpath}}
+  &= \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath \cup \colordpath}
   \\
-  &=
-  \name{edge} \cup
-  \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath \cup \colordpath}
+  &= {\colorA \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath}} \cup {\colorB \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colordpath}}
   \\
-  &=
-  \name{step} \<(\colorpath \cup \colordpath)
+  &= {\colorA\name{step}\<\colorpath} \cup {\colorB\name{step}'\<\colordpath}
 \end{align*}
 
 \noindent
