@@ -15,8 +15,8 @@
           nodes={inner sep=3pt,}
         },
       ]
-      \addplot table {naive2.dat};
-      \addplot table {seminaive2.dat};
+      \addplot [color=red,mark=square*] table [x=n,y=naive] {naive-seminaive.dat};
+      \addplot [color=blue,mark=*] table  [x=n,y=seminaive] {naive-seminaive.dat};
     \end{axis}
   \end{tikzpicture}
   \hfil
