@@ -38,10 +38,15 @@ optimizations:
 We benchmarked the transitive closure function \name{tc} from
 \cref{sec:generic-transitive-closure}, compiled both \naive{}ly and
 semi\naive{}ly (i.e. omitting or using $\phi$), against the linear graph
-$\setfor{(i,i+1)}{0 \le i \le n}$. The results
+$\setfor{(i,i+1)}{0 \le i \le n}$. We chose transitive closure on a linear graph
+because this is a best-case for semi\naive\ evaluation, with a well-understood
+asymptotic speedup (discussed in \cref{sec:seminaive-and-ilc}). The results
 (\cref{fig:seminaive-vs-naive-graph}) are consistent with our expectation that
 $\phi$-translated code, with appropriate optimisation, can perform
-asymptotically better than \naive\ evaluation.
+asymptotically better than \naive\ evaluation. As with semi\naive\ evaluation in
+Datalog, we do not expect this to generalize to all recursive programs.
+\todo{discuss what kinds of problems semi\naive\ evaluation produces speedups
+  on? (generally, ones which require many iterations, since \naive\ evaluation grows monotonically more expensive with more iterations.) can we cite somebody here -- maybe ``Fixing incremental computation''?}
 
 %% TODO: Discuss when \& why inlining might be helpful.
 %% We speculate that \emph{function inlining} would also be a helpful optimisation.
