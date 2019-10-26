@@ -55,7 +55,7 @@
     \delta x &= \dx &
     \delta \dvar x &= \dvar\dx\\
     \delta(\fnof{x} e) &= \fnof{\ebox x} \fnof\dx \delta e
-    & \delta(e\<f) &= \delta e \<\ebox{\hilite{\phi e}} \<\delta f\\
+    & \delta(e\<f) &= \delta e \<\ebox{\phi e} \<\delta f\\
     \delta\etuple{e_i}_i &= \etuple{\delta e_i}_i
     & \delta(\pi_i\<e) &= \pi_i\<\delta e\\
     \delta(\inj i e) &= \inj i {\delta e} &
@@ -64,7 +64,7 @@
     \delta(\eletbox x e f)
     &= \elet{\ebox{\etuple{\dvar x,\dvar\dx}} = \phi e} \delta f
     \\
-    \delta(\eisempty e) &= \eisempty {\hilite{\phi e}}
+    \delta(\eisempty e) &= \eisempty {\phi e}
     &
     \delta(\esplit e) &= \ecase{\phi e}
     (\ebox{\etuple{\inj i \pwild, \pwild}}
@@ -73,7 +73,7 @@
   %
   \begin{align*}
     \delta(\ecase e (\inj i x \caseto f_i)_i)
-    &= \ecase{\esplit{\ebox{\hilite{\phi e}}},\, \delta e}\\
+    &= \ecase{\esplit{\ebox{\phi e}},\, \delta e}\\
     &\qquad ({\inj i {\eboxvar x},\, \inj i \dx} \caseto \delta f_i)_{i}\\
     &\qquad ({\inj i {\eboxvar x},\, \inj j \pwild}
     %\caseto \subst{\delta f_i}{\dx \substo \dummy\<\dvar x})_{i\ne j}
