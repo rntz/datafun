@@ -294,7 +294,7 @@ and application, $\delta$ is more interesting:
   &
   \delta(\fnof x e) &= \fnof{\eboxvar x} \fnof\dx \delta e
   &
-  \delta(e\<f) &= \delta e \<\ebox{\color{Rhodamine}\phi f} \<\delta f
+  \delta(e\<f) &= \delta e \<\ebox{\hilite{\phi f}} \<\delta f
 \end{align*}
 
 The intuition behind $\delta(\fnof x e) = \fnof{\eboxvar x} \fnof\dx \delta e$
@@ -320,11 +320,14 @@ discrete variables alone, so this includes \emph{at least} $\iso\Phi\G$. The
 context $\phi f$ needs is $\Phi\G$. Since $\iso$ only makes a context stronger,
 we're safe.
 %
-To emphasize this, we've marked all \emph{discrete} uses of $\phi e$ inside
-$\delta e$ in \hilite{pink}.
+To emphasize this, we've marked all discrete uses of $\phi e$ inside $\delta e$
+in \hilite{\hilitecolorname}.
 %
 The same argument applies (all the more easily) when $\phi e$ is used in a
 monotone rather than a discrete position.
+%
+\todo{Simplify this explanation? We're basically establishing that $\Phi\G
+  \sqsubseteq \stripcxraw{\iso\Phi\G, \DP\G}$.}
 
 %% TODO: Discuss self-maintainable functions, citing \citet{incremental}.
 

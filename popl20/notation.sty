@@ -52,25 +52,33 @@
 \newcommand\rn\textsc % inference rule names
 
 %% COLORS USED.
-%% - discreteness: cmyk(1, 0.3, 0, 0)  "IsoBlue" cyanish blue
-%% - hilighting:   cmyk(0, 0.8, 1, 0)  "Hilite"  red
-%% - color A:      cmyk(0, 0.7, 1, 0.2) "ColorA" dull red
-%% - color B:      cmyk(1, 0, 0.5, 0.3) "ColorB" dull sea green
+%% - discreteness: a cyan-heavy blue
+%% - hilighting:   a reddish orange
+%% - color A:      a dull sepia brown
+%% - color B:      a dark purple
 %%
 %% Discreteness must be distinct from everything. In addition,
-%% - Hilighting should be very distinct from black.
-%% - Color A & Color B must be distinct from each other.
 %%
-%% https://davidmathlogic.com/colorblind/#%23F1471D-%230E88D3-%23AA1318-%23721D69
+%% - Hilighting should be very distinct from black.
+%%
+%% - Color A & Color B should be distinct from each other, but the difference
+%%   can be subdued - these are just to guide the eye, and could both be black
+%%   without causing any real trouble.
+%%
+%% https://davidmathlogic.com/colorblind/#%230994DC-%23F25C19-%23994A20-%235E2590
 %%
 %% For more general colorblindness stuff, see also:
 %% http://mkweb.bcgsc.ca/colorblind/
 %% https://www.nature.com/articles/nmeth.1618?WT.ec_id=NMETH-201106
-\definecolor{IsoBlue}{cmyk}{1, 0.3, 0, 0}  % #0e88d3
-\definecolor{Hilite}{cmyk}{0, 0.8, 1, 0}   % #f1471d
-\definecolor{ColorA}{cmyk}{0, 0.7, 1, 0.2} % #c84b14
-\definecolor{ColorB}{cmyk}{1, 0, 0.5, 0.3} % #007c75
-\newcommand\isocolor{\color{IsoBlue}}
+\definecolor{CyanBlue}{cmyk}{1, 0.25, 0, 0}    % M=.3 #0e88d3 M=.2 #0994DC
+\definecolor{BrightOrange}{cmyk}{0, 0.7, 1, 0} % #f25c19
+\definecolor{Vermilion}{cmyk}{0, 0.8, 1, 0}    % #f1471d
+\definecolor{ColorA}{cmyk}{0, 0.56, .8, 0.43}  % #994A20
+\definecolor{ColorB}{cmyk}{0.75, 1, 0, 0}      % #5E2590
+
+\newcommand\isocolor{\color{CyanBlue}}
+\newcommand\hilite[1]{{\color{BrightOrange}#1}}
+\newcommand\hilitecolorname{orange}
 
 % used for names of functions, primitives, etc. in math mode
 \newcommand\name[1]{\text{\itshape #1}}
@@ -233,7 +241,6 @@
 \newcommand\J[3]{{#2} \vdash {#1} \mathrel{:} {#3}}
 \newcommand\Jalign[3]{{#2} &\vdash {#1} \mathrel{:} {#3}}
 \newcommand\h[2]{{#1} : {#2}}
-\newcommand\freshvar[1]{{\color{Rhodamine}#1}}
 \newcommand\hd[2]{\dvar{#1} \dblcolon {#2}}
 
 \newcommand\stripcxraw[1]{\lceil{#1}\rceil}
