@@ -11,6 +11,7 @@
 \usepackage{placeins}           %\FloatBarrier
 \usepackage{stmaryrd}           % \shortrightarrow, \llbracket, etc.
 %\usepackage{subcaption}   % for complex figures with subfigures/subcaptions
+\usepackage{adjustbox}          % \adjustbox
 
 \hyphenation{semi-na\"ive}
 
@@ -79,6 +80,9 @@
 \newcommand\isocolor{\color{CyanBlue}}
 \newcommand\hilite[1]{{\color{BrightOrange}#1}}
 \newcommand\hilitecolorname{orange}
+
+\colorlet{isorule}{CyanBlue!80!black}
+\colorlet{isobg}{CyanBlue!6}
 
 % used for names of functions, primitives, etc. in math mode
 \newcommand\name[1]{\text{\itshape #1}}
@@ -217,11 +221,32 @@
 \newcommand\eforraw[1]{\kw{for}\:({#1})\fnspace}
 \newcommand\eeqraw[2]{{#1} = {#2}}
 
-\newcommand\eset[1]{\esetraw{\isocolor #1}}
-\newcommand\ebox[1]{\eboxraw{\isocolor #1}}
 \newcommand\efor[2]{\eforraw{\dvar{#1} \in #2}}
-\newcommand\eeq[2]{\eeqraw{\isocolor #1}{\isocolor #2}}
-\newcommand\esetfor[2]{\setfor{{\isocolor #1}}{#2}}
+\newcommand\eset[1]{\hilite{\esetraw{#1}}}
+\newcommand\ebox[1]{\hilite{\eboxraw{#1}}}
+\newcommand\eeq[2]{\hilite{\eeqraw{#1}{#2}}}
+\newcommand\esetfor[2]{\setfor{\hilite{#1}}{#2}}
+
+%% NEW BOXED VERSIONS!
+\newcommand\eiso[1]{\adjustbox{margin=0pt 1pt,}{\adjustbox{
+      cframe=isorule .3pt 2pt, bgcolor=isobg,
+}{%
+\vphantom{lp\textsuperscript{+}}% room for ascenders & descenders
+\(\vphantom{}#1\)%
+}}}
+
+\newcommand\pbox[1]{\eboxraw{#1}}
+\newcommand\pboxvar[1]{\pbox{\dvar #1}}
+\newcommand\ptuple\etuple
+\newcommand\eboxtuple[1]{\ebox{\etuple{#1}}}
+\newcommand\pboxtuple[1]{\pbox{\ptuple{#1}}}
+
+\renewcommand\ebox[1]{\eiso{\eboxraw{#1}}}
+\renewcommand\eletbox[2]{\elet{\pboxvar{#1} = {#2}}}
+\renewcommand\eset[1]{\eiso{\esetraw{#1}}}
+\renewcommand\eeq[2]{\eiso{\eeqraw{#1}{#2}}}
+\renewcommand\esetfor[2]{\setfor{\eiso{#1}}{#2}}
+
 
 %% more surface syntax
 \newcommand\efixis[1]{\kw{fix}~#1~\kw{is}\fnspace}
