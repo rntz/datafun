@@ -13,7 +13,7 @@
     \begin{aligned}
       \esetfor{e}{\emptycx} &\desugars \eset{e}
       \\
-      \esetfor{e}{p \in f,\, \dots} &\desugars \efor{p}{f} \esetfor{e}{\dots}
+      \esetfor{e}{p \in f,\, \dots} &\desugars \eforraw{p \in f} \esetfor{e}{\dots}
       \\
       \esetfor{e}{f,\, \dots} &\desugars \ewhen{f} \esetfor{e}{\dots}
     \end{aligned}

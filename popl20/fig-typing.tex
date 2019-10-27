@@ -37,7 +37,7 @@
     \infer[box]{\J {\eisiso e} {\stripcx\G} A}{\J{\ebox e} \G {\iso A}}
 
     \infer[letbox]{\J e \G {\iso A} \\ \J f {\G,\hd x A} B}{
-      \J {\elet{\ebox x = e} f} \G B}
+      \J {\eletbox x e f} \G B}
 
     \infer[bot]{\quad}{\J\bot\G {\eqt L}}
 
@@ -68,6 +68,6 @@
     \infer[fix]{\J e \G {\iso{(\fixt L \to \fixt L)}}}{\J{\prim{fix}\< e} \G {\fixt L}}
   \end{mathpar}
 
-  \caption{Datafun core syntax and typing rules}
+  \caption{Datafun typing rules}
   \label{fig:core-datafun}
 \end{figure}
