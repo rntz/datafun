@@ -239,12 +239,17 @@
 \newcommand\pboxtuple[1]{\pbox{\ptuple{#1}}}
 
 %% NEW BOXED VERSIONS!
+\colorlet{isobg}{Orange!20!Yellow!25}
 \newcommand\eiso[1]{\adjustbox{margin=0pt 1pt,}{\adjustbox{
-      cframe=isorule .3pt 2pt, bgcolor=isobg,
+      %cframe=isorule 0pt 0pt,
+      bgcolor=isobg,
 }{%
 \vphantom{lp\textsuperscript{+}}% room for ascenders & descenders
 \(\vphantom{}#1\)%
 }}}
+%\renewcommand\eiso[1]{{\color{ColorB}#1}}
+%\renewcommand\eiso[1]{{\isocolor#1}}
+%\let\eiso\relax
 
 \let\eisiso\relax
 
