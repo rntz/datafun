@@ -32,9 +32,9 @@
 \captionsetup{labelfont={sf,sc},textfont={sf},labelsep=period}
 %\captionsetup{labelfont=it,textfont=it,labelsep=period}
 
-% Letter-space author names.
-\let\rntz@author\author
-\renewcommand\author[1]{\rntz@author{\textls{#1}}}
+%% % Letter-space uppercased text.
+\let\@mtu\MakeTextUppercase
+\renewcommand\MakeTextUppercase[1]{\@mtu{\textls{#1}}}
 
 % Make author lines all sans-serif.
 \def\@affiliationfont{\small\normalfont\sffamily}
@@ -48,7 +48,7 @@
 
 %% ----- #1: Alegreya, large section titles -----
 \usepackage[scaled=0.9872074235807861,lf,tabular,]{AlegreyaSans}
-\microtypesetup{letterspace=12,letterspace=30,}  % 5-12
+\microtypesetup{letterspace=12,letterspace=25,}
 %\let\MakeTextUppercase\relax
 %\renewcommand\MakeTextUppercase\scshape % hack
 %\renewcommand\MakeTextUppercase{\scshape\MakeTextLowercase}
