@@ -1,12 +1,11 @@
 \begin{figure}
+  \centering\small\sffamily
   \begin{tikzpicture}[baseline=(current bounding box.center)]
     \begin{axis}[
+        title={\scshape transitive closure on a linear graph},
         xlabel={Number of nodes},
-        ylabel={Seconds},
-        height=140pt, width=220pt,
-        % If we include the explicit table, we can make it this large without
-        % enlarging the figure.
-        height=172pt, width=280pt,
+        ylabel={Time (seconds)},
+        height=123.6pt, width=200pt,
         legend entries={\naive,semi\naive},
         legend cell align=left,
         legend pos = north west,
@@ -15,30 +14,43 @@
           nodes={inner sep=3pt,}
         },
       ]
-      \addplot [color=red,mark=square*] table [x=n,y=naive] {naive-seminaive.dat};
-      \addplot [color=blue,mark=*] table  [x=n,y=seminaive] {naive-seminaive.dat};
+      \addplot [color=red,mark=square*] table [x=n,y=naive] {trans.dat};
+      \addplot [color=blue,mark=*] table  [x=n,y=seminaive] {trans.dat};
     \end{axis}
   \end{tikzpicture}
   \hfil
-  {\small
-  \begin{tabular}{@{}rrr@{}}
-    \parbox[b]{24pt}{\raggedleft Graph size} & \Naive &
-    \parbox[b]{24pt}{\raggedleft Semi-\naive}
-    \\\midrule
-60 & 0.23 & 0.01\\
-80 & 0.70 & 0.01\\
-100 & 1.74 & 0.03\\
-120 & 3.53 & 0.05\\
-140 & 7.12 & 0.08\\
-160 & 13.09 & 0.11\\
-180 & 21.85 & 0.16\\
-200 & 36.44 & 0.22\\
-220 & 52.57 & 0.29\\
-240 & 80.43 & 0.37\\
-260 & 110.49 & 0.59
-  \end{tabular}
-  }
+  \begin{tikzpicture}[baseline=(current bounding box.center)]
+    \begin{axis}[
+        title={{\scshape matching \texttt{/a*/} against} \texttt{a}\textsuperscript{n}},
+        xlabel={String length},
+        %% ylabel={Time (seconds)},
+        height=123.6pt, width=200pt,
+        legend entries={\naive,semi\naive},
+        legend cell align=left,
+        legend pos = north west,
+        legend style={
+          draw=none,
+          nodes={inner sep=3pt,}
+        },
+      ]
+      \addplot [color=red,mark=square*] table [x=n,y=naive] {astar.dat};
+      \addplot [color=blue,mark=*] table  [x=n,y=seminaive] {astar.dat};
+    \end{axis}
+  \end{tikzpicture}
+  \scriptsize
 
-  \caption{\Naive\ and semi\naive\ transitive closure on a linear graph}
+  \vspace{\baselineskip}
+
+  \begin{tabular}{r@{\qquad}*{11}{r}}
+    & \multicolumn{11}{c}{\scshape graph size / length of string}\\
+    & 100 & 120 & 140 & 160 & 180 & 200 & 220 & 240 & 260 & 280 & 300
+    \\\midrule
+    \scshape transitive closure, \naive     & 0.730 & 1.472 & 2.672 & 4.734 & 7.303 & 11.186 & 17.193 & 28.545 & 44.682 & 63.571 & 87.864 \\
+    \scshape regex search, \naive & 0.730 & 1.471 & 2.643 & 4.463 & 7.303 & 11.199 & 16.816 & 25.085 & 44.220 & 64.248 & 89.467\\
+    \scshape transitive closure, semi\naive & 0.013 & 0.021 & 0.034 & 0.051 & 0.073 & 0.099 & 0.128 & 0.164 & 0.205 & 0.254 & 0.315 \\
+    \scshape regex search, semi\naive & 0.013 & 0.023 & 0.039 & 0.056 & 0.076 & 0.104 & 0.136 & 0.167 & 0.216 & 0.262 & 0.319
+  \end{tabular}
+
+  \caption{Benchmarking transitive closure and regex matching in Datafun}
   \label{fig:seminaive-vs-naive-graph}
 \end{figure}
