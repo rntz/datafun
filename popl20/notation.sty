@@ -118,6 +118,7 @@
 \newcommand\tuple[1]{\langle{#1}\rangle}
 \newcommand\den[1]{\ensuremath{\llbracket{#1}\rrbracket}}
 % Space for function application.
+% FIXME: not used consistently, in many places we use \;. Abandon?
 \newcommand\<\;
 \newcommand\fnspace{\;}
 \newcommand\fnof[1]{\fn{#1}.\fnspace}
@@ -204,8 +205,7 @@
 \newcommand\fixt[1]{\undertype{fix}{#1}}
 
 \newcommand\elet[1]{\kw{let}\;{#1}\;\kw{in}\;}
-\newcommand\etuple[1]{\langle{#1}\rangle}
-\newcommand\Etuple[1]{\left\langle{#1}\right\rangle}
+\newcommand\etuple[1]{({#1})}
 \newcommand\ecase[1]{\kw{case} \;{#1}\; \kw{of}\;}
 \newcommand\efix{\prim{fix}\<}
 \newcommand\esplit{\prim{split}\<}
