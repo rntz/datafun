@@ -12,60 +12,60 @@
       \stripcxraw{\G, \hd x A} & = & \stripcxraw\G, \hd x A
     \end{array}
     \\
-    \infer[Var]{\h x A \in \G}{\J x \G A}
+    \infer[var]{\h x A \in \G}{\J x \G A}
 
-    \infer[DVar]{\hd x A \in \G}{\J {\dvar x} \G A}
+    \infer[dvar]{\hd x A \in \G}{\J {\dvar x} \G A}
 
-    \infer[Lam]{\J e {\G,\h x A} B}{\J {\fnof x e} \G {A \to B}}
+    \infer[lam]{\J e {\G,\h x A} B}{\J {\fnof x e} \G {A \to B}}
 
-    \infer[App]{\J e \G {A \to B} \\ \J f \G A}{\J {e\<f} \G B}
+    \infer[app]{\J e \G {A \to B} \\ \J f \G A}{\J {e\<f} \G B}
 
-    \infer[Unit]{\quad}{\J {\etuple{}} \G \tunit}
+    \infer[unit]{\quad}{\J {\etuple{}} \G \tunit}
 
-    \infer[Pair]{(\J{e_i}\G{A_i})_i}{\J{\etuple{e_1,e_2}} \G {A_1 \x A_2}}
+    \infer[pair]{(\J{e_i}\G{A_i})_i}{\J{\etuple{e_1,e_2}} \G {A_1 \x A_2}}
 
-    \infer[Prj]{\J e \G {A_1 \x A_2}}{\J{\pi_i\<e}\G{A_i}}
+    \infer[prj]{\J e \G {A_1 \x A_2}}{\J{\pi_i\<e}\G{A_i}}
 
-    \infer[Inj]{\J e \G A_i}{\J{\inj i e}\G{A_1 + A_2}}
+    \infer[inj]{\J e \G A_i}{\J{\inj i e}\G{A_1 + A_2}}
 
-    \infer[Case]{\J e \G {A_1 + A_2} \\
+    \infer[case]{\J e \G {A_1 + A_2} \\
       (\J {f_i} {\G,\h {x_i} {A_i}} {B})_i
     }{
       \J {\ecase{e} (\inj i {x_i} \caseto f_i)_i} \G B
     }
 
-    \infer[BoxI]{\J {\eisiso e} {\stripcx\G} A}{\J{\ebox e} \G {\iso A}}
+    \infer[box]{\J {\eisiso e} {\stripcx\G} A}{\J{\ebox e} \G {\iso A}}
 
-    \infer[BoxE]{\J e \G {\iso A} \\ \J f {\G,\hd x A} B}{
+    \infer[letbox]{\J e \G {\iso A} \\ \J f {\G,\hd x A} B}{
       \J {\elet{\ebox x = e} f} \G B}
 
-    \infer[Bot]{\quad}{\J\bot\G {\eqt L}}
+    \infer[bot]{\quad}{\J\bot\G {\eqt L}}
 
-    \infer[Join]{(\J{e_i} \G {\eqt L})_i}{\J{e_1 \vee e_2}\G {\eqt L}}
+    \infer[join]{(\J{e_i} \G {\eqt L})_i}{\J{e_1 \vee e_2}\G {\eqt L}}
 
     %% \infer{\J e \G {\eqt A}}{\J {\edown e} \G {\tdown {\eqt A}}}
-    \infer[Set]{(\J {\eisiso e_i} {\stripcx\G} {\eqt A})_i}{
+    \infer[set]{(\J {\eisiso e_i} {\stripcx\G} {\eqt A})_i}{
       \J {\esetsub{e_i}{i}} \G {\tset{\eqt A}}}
 
     %% \infer{\J e \G {\tdown {\eqt A}} \\
     %%   \J f {\G,\h x {\eqt A}} L
     %% }{\J {\ebigvee x e f} \G L}
     %%
-    \infer[SetFor]{
+    \infer[for]{
       \J e \G {\tset A} \\
       \J f {\G,\hd x A} {\eqt L}
     }{\J {\efor x e f} \G {\eqt L}}
 
     %%\infer{\J e \G {\iso{(\eqt A \x \eqt A)}}}{\J{\prim{eq}\<e} \G {\tdown\tunit}}
-    \infer[Eq]{(\J {\eisiso e_i} {\stripcx\G} {\eqt A})_i}
+    \infer[eq]{(\J {\eisiso e_i} {\stripcx\G} {\eqt A})_i}
           {\J {\eeq{e_1}{e_2}} \G \tbool}
 
-    \infer[IsEmpty]{\J {\eisiso e} {\stripcx\G} {\tset\tunit}}{
+    \infer[empty?]{\J {\eisiso e} {\stripcx\G} {\tset\tunit}}{
       \J {\eisempty e} \G {\tunit + \tunit}}
 
-    \infer[Split]{\J e \G {\iso{(A + B)}}}{\J{\esplit e} \G {\iso A + \iso B}}
+    \infer[split]{\J e \G {\iso{(A + B)}}}{\J{\esplit e} \G {\iso A + \iso B}}
 
-    \infer[Fix]{\J e \G {\iso{(\fixt L \to \fixt L)}}}{\J{\prim{fix}\< e} \G {\fixt L}}
+    \infer[fix]{\J e \G {\iso{(\fixt L \to \fixt L)}}}{\J{\prim{fix}\< e} \G {\fixt L}}
   \end{mathpar}
 
   \caption{Datafun core syntax and typing rules}

@@ -1,16 +1,16 @@
 %% ---- Semantics in a Datafun Model ----
 \begin{figure*}
   \begin{mathpar}
-    \infer[Empty]
+    \infer[empty]
         { }{ \emptycx \sqsubseteq \emptycx }
     \and
-    \infer[Cons]
+    \infer[cons]
         { \Gamma \sqsubseteq \Delta}{ \Gamma, H \sqsubseteq \Delta, H}
     \and
-    \infer[Drop]
+    \infer[drop]
         { \Gamma \sqsubseteq \Delta}{ \Gamma \sqsubseteq \Delta, H}
     \and
-    \infer[Disc]
+    \infer[disc]
         { \Gamma \sqsubseteq \Delta}{ \Gamma, \h x A \sqsubseteq \Delta, \hd x A}
   \end{mathpar}
   \caption{Weakening relation}

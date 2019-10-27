@@ -289,7 +289,7 @@ Finally we come to the most interesting case: functions.
 \begin{align*}
   \D(A \to B) &= \iso A \to \D A \to \D B
   &
-  \infer[FnChange]{
+  \infer[fn change]{
     \fa{\changesat A \dx x y}
     \changesat B {\df\<x\<\dx} {f\<x} {g\<y}
   }{
@@ -313,7 +313,7 @@ $g\<y$: we've accounted for the change in the function, but not the argument.
 %
 We can account for both by giving $\df$ an additional parameter: not just the
 base point $x$ but also the change $\dx$ to it. Then by inverting
-\textsc{FnChange} we have $\changes{\df\<x\<\dx}{f\<x}{g\<y}$ as desired.
+\rn{fn change} we have $\changes{\df\<x\<\dx}{f\<x}{g\<y}$ as desired.
 
 %% This makes it easy to incrementalize function application, $f\<x$; given
 %% changes $\changes \df f g$ and $\changes \dx x y$ to the function and its
