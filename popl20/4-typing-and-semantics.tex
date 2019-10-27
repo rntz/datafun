@@ -1,6 +1,8 @@
 \section{Typing and Semantics of Core Datafun}
 \label{sec:typing-and-semantics}
 
+\todo{remove uppercase from all rule names; only small caps}
+
 %In this section, we give the typing and semantics of core Datafun.
 \input{fig-typing}
 
@@ -42,36 +44,35 @@ types.\footnote{An alternative syntax, pursued in \citet{datafun}, would be to
 \iso B \to \iso (A + B)$, is already derivable, as is the isomorphism $\iso A
 \times \iso B \cong \iso (A \times B)$. In the examples we give, we use all
 these operations implicitly, to propagate discreteness onto the variables bound
-by a box pattern -- in the pattern $\ebox{\etuple{\inj 1 x, \inj 2 y}}$, we
-expect both the variables $\dvar x$ and $\dvar y$ to be discrete, which is
+by a box pattern -- in the pattern $\pboxtuple{\inj 1 \dvar x, \inj 2 \dvar y}$,
+we expect both the variables $\dvar x$ and $\dvar y$ to be discrete, which is
 information we propagate using these coercions. Semantically, all of these
 operations are the identity, as we will see in the following subsection.
 
-This leaves only the rules for manipulating sets and other
-semilattices. Recall that sets form a semilattice in the inclusion order,
-with the empty set as least element and set union as join, and also that
-products of semilattices are semilattices (with order and operations given
-pointwise). So we take the \emph{semilattice types} $L$ to be the set type
-$\tset A$, as well as units $1$ and products of lattice types
-$L_1 \times L_2$.  Then, the \rn{Bot} rule says that the term $\bot$ is the
-least element of any semilattice type $L$, and the \rn{Join} rule gives the
-type of joins, saying that $e_1 \vee e_2$ is of semilattice type $L$ when
-each $e_i$ has type $L$. These constructors work for any semilattice $L$,
-but there are rules specialized to sets as well. The typing rule for
-eliminating sets, \rn{SetFor}, is \emph{almost} the monadic bind. However,
-we generalize it by not requiring the term $\efor{x}{e}{e'}$ to eliminate
-into a set type. Instead, we permit $e'$ to be \emph{any} semilattice type,
-not just sets. Similarly, the introduction form \rn{Set} is specific to set
-types, saying that $\eset{e_i}_{i\in I}$ has type $\tset A$ when each of the
-$e_i$ has type $A$. Furthermore, each $e_i$ has to typecheck in the discrete
-context, since membership relies on the non-monotonic property of equality.
-This can be seen in the \rn{Eq} rule, which checks equality of two terms
-$\eeq e f$ only when they are discrete, checking in stripped contexts.
+This leaves only the rules for manipulating sets and other semilattices. Recall
+that sets form a semilattice in the inclusion order, with the empty set as least
+element and set union as join, and also that products of semilattices are
+semilattices (with order and operations given pointwise). So we take the
+\emph{semilattice types} $L$ to be the set type $\tset A$, as well as units $1$
+and products of lattice types $L_1 \times L_2$. Then, the \rn{Bot} rule says
+that the term $\bot$ is the least element of any semilattice type $L$, and the
+\rn{Join} rule gives the type of joins, saying that $e_1 \vee e_2$ is of
+semilattice type $L$ when each $e_i$ has type $L$. These constructors work for
+any semilattice $L$, but there are rules specialized to sets as well. The typing
+rule for eliminating sets, \rn{SetFor}, is \emph{almost} the monadic bind.
+However, we generalize it by not requiring the term $\efor{x}{e}{e'}$ to
+eliminate into a set type. Instead, we permit $e'$ to be \emph{any} semilattice
+type, not just sets. Similarly, the introduction form \rn{Set} is specific to
+set types, saying that $\esetsub{e_i}{i\in I}$ has type $\tset A$ when each of
+the $\eisiso{e_i}$ has type $A$. Furthermore, each $\eisiso{e_i}$ has to typecheck
+in the discrete context, since membership relies on the non-monotonic property
+of equality. This can be seen in the \rn{Eq} rule, which checks equality of two
+terms $\eeq e f$ only when they are discrete, checking in stripped contexts.
 %
-Finally, the rule \rn{Fix} for fixed points $\efix e$, takes an endofunction
-$e$ of type $\iso (L \to L)$ and yields an expression of type $L$. In addition
-to being of semilattice type, we also demand here that $L$ is of finite height,
-ensuring that the recursion will terminate.
+Finally, the rule \rn{Fix} for fixed points $\efix e$, takes an endofunction $e$
+of type $\iso (\fixt L \to \fixt L)$ and yields an expression of type $\fixt L$.
+In addition to being of semilattice type, we also demand here that $\fixt L$ is
+of \todo{finite height}, ensuring that the recursion will terminate.
 
 \subsection{Semantics}
 

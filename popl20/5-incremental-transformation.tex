@@ -114,22 +114,12 @@ to the analogous type operators $\iso$, $\Phi$, and $\Delta$:
   \Phi(\h x A) &= \h x {\Phi A} & \Phi(\hd x A) &= \hd x {\Phi A}, \hd \dx {\DP A}
   \\
   \D(\h x A) &= \h \dx {\D A}
-  & \D(\hd x A) &= \emptycx \quad\text{\small(the empty context)}
+  & \D(\hd x A) &= \emptycx\quad\textsf{\small(the empty context)}
 \end{align*}
 
-%% \begin{align*}
-%%   \iso{(\h x A)} &= \hd x A & \iso{(\hd x A)} &= \hd x A
-%%   \\
-%%   \Phi(\h x A) &= \h x {\Phi A} & \Phi(\hd x A) &= \hd x {\Phi A}, \hd \dx {\DP A}
-%%   \\
-%%   \D(\h x A) &= \h \dx {\D A} & \D(\hd x A) &= \emptycx\quad\text{(the empty context)}
-%% \end{align*}
-
 \noindent
-%% (All three preserve empty contexts and distribute over union; e.g. $\Phi\emptycx
-%% = \emptycx$ and $\Phi(\G_1,\G_2) = \Phi\G_1, \Phi\G_2$.)
-(Otherwise all three operators distribute; e.g.\ $\iso\emptycx = \emptycx$ and
-$\iso(\G_1,\G_2) = \iso\G_1, \iso\G_2$.)
+Otherwise all three operators distribute; e.g.\ $\iso\emptycx = \emptycx$ and
+$\iso(\G_1,\G_2) = \iso\G_1, \iso\G_2$.
 
 Intuitively, $\iso\G$, $\Phi\G$, and $\D\G$ mirror the effect of
 $\iso$, $\Phi$, and $\D$ on the semantics of $\G$:
@@ -168,7 +158,7 @@ These defined, we can state the types of $\phi e$ and $\delta e$:
 
 \begin{theorem}[Well-typedness]
   \label{thm:type-correct}
-  If $\J e \G A$, then
+  If\/ $\J e \G A$, then $\phi e$ and $\delta e$ have the following types:
   \begin{align*}
     \Jalign {\phi e} {\Phi\G} {\Phi A}\\
     \Jalign {\delta e} {\iso{\Phi\G}, \DP\G} {\DP A}
@@ -256,10 +246,10 @@ In a fixed point expression $\efix e$, we know $e : \iso(\fixt L
 \end{align*}
 
 \noindent
-The behavior of $\phi e$ is to compute a boxed pair $\eboxraw{\etuple{f,f'}}$,
-where $f : \fixt L \to \fixt L$ is a sped-up function and $f' : \iso\fixt L \to
-\fixt L \to \fixt L$ is its derivative. This is exactly what we need to call
-\fastfix. Therefore $\phi(\efix e) = \fastfix\<\phi e$.
+The behavior of $\phi e$ is to compute a boxed pair $\eboxtupleraw{f,f'}$, where
+$f : \fixt L \to \fixt L$ is a sped-up function and $f' : \iso\fixt L \to \fixt
+L \to \fixt L$ is its derivative. This is exactly what we need to call \fastfix.
+Therefore $\phi(\efix e) = \fastfix\<\phi e$.
 %
 However, if we're going to use $\fastfix$ in the output of $\phi$, we ought to
 give it a typing rule and semantics:
@@ -292,12 +282,12 @@ and application, $\delta$ is more interesting:
 \begin{align*}
   \DP(A \to B) &= \iso\Phi A \to \DP A \to \DP B
   &
-  \delta(\fnof x e) &= \fnof{\eboxvar x} \fnof\dx \delta e
+  \delta(\fnof x e) &= \fnof{\pboxvar x} \fnof\dx \delta e
   &
-  \delta(e\<f) &= \delta e \<\ebox{\hilite{\phi f}} \<\delta f
+  \delta(e\<f) &= \delta e \<\ebox{\phi f} \<\delta f
 \end{align*}
 
-The intuition behind $\delta(\fnof x e) = \fnof{\eboxvar x} \fnof\dx \delta e$
+The intuition behind $\delta(\fnof x e) = \fnof{\pboxvar x} \fnof\dx \delta e$
 is that a function change takes two arguments, a base point $\dvar x$ and a
 change $\dx$, and yields the change in the result of the function, $\delta e$.
 However, we are given an argument of type $\iso \Phi A$, but consulting
@@ -412,12 +402,12 @@ $\dx$.
 To bind $\dvar x$ discretely, we need to use $\ebox{\phi e} : \iso(\Phi A + \Phi
 B)$; to pattern-match on this, we need \emph{split} to distribute the $\iso$.
 
-This handles the first two cases, $(\inj i {\eboxvar x},\, \inj i \dx \caseto
+This handles the first two cases, $(\inj i {\pboxvar x},\, \inj i \dx \caseto
 \delta f_i)_i$. Since we know the tags on $\phi e$ and $\delta e$ agree, these
 are the only possible cases. However, to appease our type-checker we must handle
 the \emph{impossible} case that $i \ne j$. This case is dead code: it needs to
 typecheck, but is otherwise irrelevant. It suffices to generate a dummy change
-$\dx : \DP A_i$ from our base point $\dvar x : \Phi A_i$. We do this using a
+$\dx : \DP A_i$ from our base point $\hd{x}{\Phi A_i}$. We do this using a
 simple function $\dummy_A : A \to \D A$ (\cref{fig:dummy}).
 
 \input{fig-dummy}
@@ -491,8 +481,8 @@ changes:
 %% TODO: explain why this can't work at function types, which is one reason we
 %% restrict sets to containing first-order data?
 
-\begin{lemma}
-  $\changesat{\eqt A}{\dummy\<x}{x}{x}$ for any $x : \eqt A$.
+\begin{lemma} If $x : \eqt A$ then
+  $\changesat{\eqt A}{\dummy\<x}{x}{x}$.
 \end{lemma}
 
 \noindent For clarity, we write \zero\ rather than \dummy\ when we use it to
@@ -517,8 +507,8 @@ elements.
 
 The $\phi$ rules we haven't yet discussed simply distribute $\phi$ over
 subexpressions. The remaining $\delta$ rules mostly do the same, with a few
-exceptions. In the case of $\delta(\eset{e_i}_i) = \delta(\eeq e f) = \bot$, the
-sub-expressions are discrete and cannot change, so we produce a zero-change
+exceptions. In the case of $\delta(\esetsub{e_i}{i}) = \delta(\eeq e f) = \bot$,
+the sub-expressions are discrete and cannot change, so we produce a zero-change
 $\bot$. This is also the case for $\delta(\eisempty e) = \eisempty{\phi e}$, but
 as with $\delta(\esplit e)$, the zero-change here is at type $\tunit + \tunit$,
 so to get the tag right we use $\phi e$.

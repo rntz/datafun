@@ -14,7 +14,7 @@ transitive closure function \name{tc} from
 \newcommand\ytwo{\dvar y_{\isocolor 2}}
 
 \[\begin{array}{l}
-\name{tc} \< \eboxvar{e}
+\name{tc} \< \pboxvar{e}
 = \efixis{p} \dvar e \cup (\dvar e \bullet p)
 \\
 s \bullet t =
@@ -164,17 +164,17 @@ Putting everything together, we have:
 
 \begin{align*}
   \phi(\efixis p \dvar e \cup (\dvar e \bullet p)
-  &= \phi(\efix \eboxraw{\fnof{p} \dvar e \cup (\dvar e \bullet p)})
+  &= \phi(\efix \ebox{\fnof{p} \dvar e \cup (\dvar e \bullet p)})
   && \text{desugaring}
   \\
-  &= \fastfix\< \phi\eboxraw{\fnof{p} \dvar e \cup (\dvar e \bullet p)}
+  &= \fastfix\< \phi\ebox{\fnof{p} \dvar e \cup (\dvar e \bullet p)}
   \\
-  &= \fastfix\<\eboxraw{\etuple{\phi({\fnof{p} \dvar e \cup (\dvar e \bullet p)}),\
-  \delta({\fnof{p} \dvar e \cup (\dvar e \bullet p)})}}
+  &= \fastfix\<\bigeboxtuple{\phi({\fnof{p} \dvar e \cup (\dvar e \bullet p)}),\
+  \delta({\fnof{p} \dvar e \cup (\dvar e \bullet p)})}
   \\
-  &= \fastfix\<\eboxraw{\etuple{
+  &= \fastfix\<\bigeboxtuple{
       ({\fnof{p} \dvar e \cup (\dvar e \bullet p)}),\
-      ({\fnof{\eboxvar p} \fnof{\deep} \dvar e \bullet \deep})}}
+      ({\fnof{\pboxvar p} \fnof{\deep} \dvar e \bullet \deep})}
   && \text{previous work}
 \end{align*}
 
@@ -189,7 +189,7 @@ semi\naive\ transitive closure algorithm from
   = \dvar e
   &
   \dx_{i+1} &=
-  ({\fnof{\eboxvar p} \fnof{\dx} \dvar e \bullet \deep})
+  ({\fnof{\pboxvar p} \fnof{\dx} \dvar e \bullet \deep})
   \<\eboxraw{x_i} \<\dx_i
   = \dvar e \bullet \dx_i
 \end{align*}

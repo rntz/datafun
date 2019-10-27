@@ -216,9 +216,10 @@ Using comprehensions, this could alternately be written as:
 
 \paragraph{Relational Composition}
 We can also define the composition of two relations in Datafun.
+
 \begin{tabbing}
   \qquad\=\+ \kill
-  $\_ {\bullet} \_$ \quad\:\= $\,:$\;\; \=
+  $\_ {\bullet} \_$ \quad\quad\= $\,:$\;\; \=
   $ \tset{A \times B} \to \tset{B \times C} \to \tset{A \times C}$ \\
 
   $\var{xs} \mathrel{\bullet} \var{ys}$
@@ -230,9 +231,12 @@ We can also define the composition of two relations in Datafun.
   %% \>     \> $\efor{(b',c)}{\mathit{ys}}{}$ \\
   %% \>     \> $\ewhen{b = b'}{\eset{(a,c)}}$
 \end{tabbing}
+
+\noindent
 This is basically a transcription of the mathematical definition, where we build
-those pairs which agree on their $B$-typed components. It can also be written using
-set comprehension as:
+those pairs which agree on their $B$-typed components. It can also be written
+using set comprehension as:
+
 \begin{tabbing}
   \qquad\=\+ \kill
   $\_ \bullet \_$ \;\;\;\= $\,:$\;\; \=
@@ -315,13 +319,14 @@ since an empty substring can start anywhere.
 \qquad \=   $\name{seq} : \tre \to \tre \to \tre$ \+\\
   $\name{seq}\;r_1\;r_2\;s = r_1\;s \bullet r_2\;s$
 \end{tabbing}
-%
+
+\noindent
 The $\name{seq}$ combinator takes two regular expressions $r_1$ and $r_2$
 as arguments, applies its argument to both, and takes the relational
 composition of the results. Therefore, if the range $(i,j)$ was in the
 result of $r_1$, and $(j,k)$ was in the result of $r_2$, then
 we will return $(i,k)$, just as desired.
-%
+
 \begin{tabbing}
 \qquad \=   $\name{bot} : \tre$ \+\\
   $\name{bot}\;\_ = \bot$ \\[1em]
@@ -329,30 +334,30 @@ we will return $(i,k)$, just as desired.
   $\name{alt} : \tre \to \tre \to \tre$ \\
   $\name{alt}\;r_1\;r_2\;s = r_1\;s \vee r_2\;s$
 \end{tabbing}
-%
+
+\noindent
 We get the empty set of matches from $\name{bot}$, and
 $\name{alt}$ unions the matches of its two arguments.
-%
+
 \begin{tabbing}
 \qquad \=   $\name{star} : \iso\tre \to \tre$ \+\\
   $\name{star}\;\pboxvar{r}\;\pboxvar{s} = \name{nil}\;\eboxvar{s} \vee \name{tc}\;\ebox{\dvar r\;\eboxvar{s}}$
 \end{tabbing}
-The most interesting regular expression combinator is the Kleene star
-operation $\name{star}$.  It uses $\name{nil}$ to get the
-reflexive relation on positions, and then takes the transitive closure
-of the regular expression it received as an argument using the
-$\name{tc}$ operation. This forces its argument to be boxed, since
-$\name{tc}$ calculates a fixed point, and only discrete variables can
-occur inside of fixed point expressions.\footnote{As a technical note,
-  sets of pairs of integers do not form a finite-height lattice, so by
-  typing this program is not an acceptable fixed point expression.
-  However, since the positions in a string form a finite set,
-  semantically it is fine. The original Datafun paper shows how one can
-  define bounded fixed points to handle cases like this, so we will not be
-  scrupulous.}
 
+\noindent
+The most interesting regular expression combinator is the Kleene star operation
+$\name{star}$. It uses $\name{nil}$ to get the reflexive relation on positions,
+and then takes the transitive closure of the regular expression it received as
+an argument using the $\name{tc}$ operation. This forces its argument to be
+boxed, since $\name{tc}$ calculates a fixed point, and only discrete variables
+can occur inside of fixed point expressions.\footnote{As a technical note, sets
+  of pairs of integers do not form a finite-height lattice, so by typing this
+  program is not an acceptable fixed point expression. However, since the
+  positions in a string form a finite set, semantically it is fine. The original
+  Datafun paper shows how one can define bounded fixed points to handle cases
+  like this, so we will not be scrupulous.}
 
-
+
 \subsubsection{Combinators for Regular Expression Matching, Take 2}
 
 The combinators in the previous section found \emph{all} matches

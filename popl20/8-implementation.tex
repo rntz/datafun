@@ -26,10 +26,10 @@ optimizations:
   changes to discrete variables $\delta \dvar x$). This makes $\bot$-propagation
   more effective.
 
-\item Recognising complex zero change expressions; for example, $\delta e \<\phi
-  f \<\delta f$ is a zero change if $\delta e$ and $\delta f$ are. This allows
-  more zero changes to be replaced by $\bot$, especially in higher-order code
-  such as our regular expression example.
+\item Recognising complex zero change expressions; for example, $\delta e
+  \<\ebox{\phi f} \<\delta f$ is a zero change if $\delta e$ and $\delta f$ are.
+  This allows more zero changes to be replaced by $\bot$, especially in
+  higher-order code such as our regular expression example.
   %% TODO: does this actually make a difference?
 \end{itemize}
 

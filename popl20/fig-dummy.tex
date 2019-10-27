@@ -1,6 +1,6 @@
 \begin{figure}
   \begin{align*}
-    \dummy_{\tseteq A} \<\pwild &= \eset{}
+    \dummy_{\tseteq A} \<\pwild &= \bot
     &
     \dummy_{A \x B} \<\etuple{x,y} &= \etuple{\dummy\<x, \dummy\<y}
     \\
@@ -8,7 +8,7 @@
     &
     \dummy_{A + B} \<(\inj i x) &= \inj i (\dummy\<x)
     \\
-    \dummy_{\iso A} \<\ebox{x} &= \ebox{\dummy\<x}
+    \dummy_{\iso A} \<\pboxvar{x} &= \ebox{\dummy\<\dvar x}
     &
     \dummy_{A \to B} \<f &= \fnof{x} \dummy\<(f\<x)
   \end{align*}

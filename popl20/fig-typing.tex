@@ -7,9 +7,9 @@
     \end{array}
 
     \begin{array}{lcl}
-      \stripcx{\emptycx} & = & \emptycx\\
-      \stripcx{\G, \h x A} & = & \stripcx\G\\
-      \stripcx{\G, \hd x A} & = & \stripcx\G, \hd x A
+      \stripcxraw{\emptycx} & = & \emptycx\\
+      \stripcxraw{\G, \h x A} & = & \stripcxraw\G\\
+      \stripcxraw{\G, \hd x A} & = & \stripcxraw\G, \hd x A
     \end{array}
     \\
     \infer[Var]{\h x A \in \G}{\J x \G A}
@@ -34,7 +34,7 @@
       \J {\ecase{e} (\inj i {x_i} \caseto f_i)_i} \G B
     }
 
-    \infer[BoxI]{\J {\isocolor e} {\stripcx\G} A}{\J{\ebox e} \G {\iso A}}
+    \infer[BoxI]{\J {\eisiso e} {\stripcx\G} A}{\J{\ebox e} \G {\iso A}}
 
     \infer[BoxE]{\J e \G {\iso A} \\ \J f {\G,\hd x A} B}{
       \J {\elet{\ebox x = e} f} \G B}
@@ -44,8 +44,8 @@
     \infer[Join]{(\J{e_i} \G {\eqt L})_i}{\J{e_1 \vee e_2}\G {\eqt L}}
 
     %% \infer{\J e \G {\eqt A}}{\J {\edown e} \G {\tdown {\eqt A}}}
-    \infer[Set]{(\J {\isocolor e_i} {\stripcx\G} {\eqt A})_i}{
-      \J {\eset{e_i}_i} \G {\tset{\eqt A}}}
+    \infer[Set]{(\J {\eisiso e_i} {\stripcx\G} {\eqt A})_i}{
+      \J {\esetsub{e_i}{i}} \G {\tset{\eqt A}}}
 
     %% \infer{\J e \G {\tdown {\eqt A}} \\
     %%   \J f {\G,\h x {\eqt A}} L
@@ -57,10 +57,10 @@
     }{\J {\efor x e f} \G {\eqt L}}
 
     %%\infer{\J e \G {\iso{(\eqt A \x \eqt A)}}}{\J{\prim{eq}\<e} \G {\tdown\tunit}}
-    \infer[Eq]{(\J {\isocolor e_i} {\stripcx\G} {\eqt A})_i}
+    \infer[Eq]{(\J {\eisiso e_i} {\stripcx\G} {\eqt A})_i}
           {\J {\eeq{e_1}{e_2}} \G \tbool}
 
-    \infer[IsEmpty]{\J {\isocolor e} {\stripcx\G} {\tset\tunit}}{
+    \infer[IsEmpty]{\J {\eisiso e} {\stripcx\G} {\tset\tunit}}{
       \J {\eisempty e} \G {\tunit + \tunit}}
 
     \infer[Split]{\J e \G {\iso{(A + B)}}}{\J{\esplit e} \G {\iso A + \iso B}}
