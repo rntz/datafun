@@ -80,24 +80,22 @@ possible in Datalog itself!
 In the remainder of this section we reconstruct Datafun hewing closely
 to this semantic intuition.
 
-Datafun begins as the simply-typed \fn-calculus with functions ($\fnof
-x e$ and $e\<f$), sums ($\inj i e$ and $\ecase{e}{\dots}$), and
-products ($\etuple{e,f}$ and $\pi_i\<e$). To this, we add a type of
-finite sets\footnote{To implement set types, their elements must
-  support decidable equality. In our core calculus, we use a
-  subgrammar of ``eqtypes'', and in our implementation (which compiles
-  to Haskell) we use typeclass constraints to pick out such types.}
-$\tset{\eqt A}$, introduced with set literals $\eset{e_0, \ldots
-  e_n}$, and eliminated using Moggi's monadic bind syntax,
-$\efor{x}{e_1}{e_2}$, signifying the union over all $\dvar x \in e_1$
-of $e_2$.
+Datafun begins as the simply-typed \fn-calculus with functions ($\fnof x e$ and
+$e\<f$), sums ($\inj i e$ and $\ecase{e}{\dots}$), and products ($\etuple{e,f}$
+and $\pi_i\<e$). To this, we add a type of finite sets\footnote{To implement set
+  types, their elements must support decidable equality. In our core calculus,
+  we use a subgrammar of ``eqtypes'', and in our implementation (which compiles
+  to Haskell) we use typeclass constraints to pick out such types.} $\tset{\eqt
+  A}$, introduced with set literals $\eset{e_0, \ldots e_n}$, and eliminated
+using Moggi's monadic bind syntax, $\efor{x}{e_1}{e_2}$, signifying the union
+over all $\dvar x \in e_1$ of $e_2$.
 
 As long as all primitives are monotone, every definable function is also
 monotone. This is necessary for taking fixed points, but may seem too
 restrictive. There are many essential non-monotone operations, such as equality
-tests $\eeq e f$. For example, $\eset{} = \eset{}$ is true, but if the first
-argument is increased to $\esetraw{1}$ then it becomes false, a \emph{decrease}
-(in Datafun, $\efalse < \etrue$).
+tests $\eeq e f$. For example, $\esetraw{} = \esetraw{}$ is true, but if the
+first argument is increased to $\esetraw{1}$ then it becomes false, a
+\emph{decrease} (in Datafun, $\efalse < \etrue$).
 
 How can we express non-monotone operations while preserving the property that
 all functions are monotone? We square this circle by introducing the
@@ -111,8 +109,8 @@ for this is a variant of \citet{jrml}'s syntax for constructive S4 modal logic.
 We make discrete terms with the introduction form $\ebox{e}$ and eliminate them
 with a pattern matching eliminator $\eletbox x e f$. Discrete variables are
 colored and italicised $\dvar x$, while monotone variables are uncolored and
-upright $x$. Colored terms $\isocolor e$ are restricted to only refer to
-discrete variables. So in the equality test $\eeq e f$, the terms $e$ and $f$
+upright $x$. \todo{Colored terms $\isocolor e$ are restricted to only refer to
+  discrete variables.} So in the equality test $\eeq e f$, the terms $e$ and $f$
 must be discrete.
 
 %% TODO: should we note that we really definitely mean □(L → L) and
