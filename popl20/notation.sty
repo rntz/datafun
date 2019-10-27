@@ -190,12 +190,8 @@
 \newcommand\tstring{\typename{string}}
 \newcommand\tint{\typename{int}}
 
-\newcommand\dvar[1]{{\isocolor #1}}
-% I need to mark discrete vs. monotone variables in some
-% colorblind/greyscale-printing-safe way. For example:
-\renewcommand\dvar[1]{{\isocolor\mathit{#1}}}
-%\renewcommand\dvar[1]{{\isocolor\underline{#1}}}
-%\renewcommand\dvar[1]{{\isocolor\boldsymbol{#1}}}
+%% Discrete variables are colored and italicised.
+\newcommand\dvar[1]{{\mathit{\isocolor#1}}}
 
 \newcommand\undertype[2]{\underaccent{\textsf{\upshape #1}}{#2}}
 \newcommand\eqt[1]{\undertype{eq}{#1}}
@@ -220,12 +216,11 @@
 \newcommand\eboxraw[1]{[{#1}]}
 \newcommand\eforraw[1]{\kw{for}\:({#1})\fnspace}
 \newcommand\eeqraw[2]{{#1} = {#2}}
-\newcommand\eifraw[2]{\kw{if}\;{#1}\;\kw{then}\;{#2}\;\kw{else}\;}
+
 \newcommand\eset[1]{\esetraw{\isocolor #1}}
 \newcommand\ebox[1]{\eboxraw{\isocolor #1}}
 \newcommand\efor[2]{\eforraw{\dvar{#1} \in #2}}
 \newcommand\eeq[2]{\eeqraw{\isocolor #1}{\isocolor #2}}
-\newcommand\eif[2]{\eifraw{\isocolor #1}{#2}}
 \newcommand\esetfor[2]{\setfor{{\isocolor #1}}{#2}}
 
 %% more surface syntax
