@@ -53,14 +53,11 @@
 \newcommand\rn\textsc % inference rule names
 
 %% COLORS USED.
-%% - discreteness: a cyan-heavy blue
-%% - hilighting:   a reddish orange
+%% - discreteness: a cyan-heavy blue OR a strong red, not sure yet
 %% - color A:      a dull sepia brown
 %% - color B:      a dark purple
 %%
 %% Discreteness must be distinct from everything. In addition,
-%%
-%% - Hilighting should be very distinct from black.
 %%
 %% - Color A & Color B should be distinct from each other, but the difference
 %%   can be subdued - these are just to guide the eye, and could both be black
@@ -71,15 +68,21 @@
 %% For more general colorblindness stuff, see also:
 %% http://mkweb.bcgsc.ca/colorblind/
 %% https://www.nature.com/articles/nmeth.1618?WT.ec_id=NMETH-201106
-\definecolor{CyanBlue}{cmyk}{1, 0.25, 0, 0}    % M=.3 #0e88d3 M=.2 #0994DC
+\definecolor{CyanBlue}{cmyk}{1, 0.36, 0, 0}    % M=.3 #0e88d3 M=.2 #0994DC
 \definecolor{BrightOrange}{cmyk}{0, 0.7, 1, 0} % #f25c19
 \definecolor{Vermilion}{cmyk}{0, 0.8, 1, 0}    % #f1471d
 \definecolor{ColorA}{cmyk}{0, 0.56, .8, 0.43}  % #994A20
 \definecolor{ColorB}{cmyk}{0.75, 1, 0, 0}      % #5E2590
 
-\newcommand\isocolor{\color{CyanBlue}}
-\newcommand\hilite[1]{{\color{BrightOrange}#1}}
-\newcommand\hilitecolorname{orange}
+% Blue for discrete things just doesn't stand out enough when printed unless I
+% make it totally cyan, which is too light to be easily readable on white. Red
+% is the standard printers' second color for a reason.
+\newcommand\isocolor{\color{ACMRed}}
+% If we use red for discrete things, using it for links is confusing.
+\AtEndPreamble{\hypersetup{linkcolor=CyanBlue,}}
+
+%\newcommand\hilite[1]{{\color{BrightOrange}#1}}
+%\newcommand\hilitecolorname{orange}
 
 % used for names of functions, primitives, etc. in math mode
 \newcommand\name[1]{\text{\itshape #1}}
@@ -236,8 +239,7 @@
 \newcommand\pboxtuple[1]{\pbox{\ptuple{#1}}}
 
 %% NEW BOXED VERSIONS!
-\colorlet{isorule}{CyanBlue!80!black}
-\colorlet{isobg}{CyanBlue!6}
+\colorlet{isobg}{CyanBlue!15}
 \colorlet{isobg}{Red!5!Yellow!28}
 \newcommand\isobgname{yellow}
 
