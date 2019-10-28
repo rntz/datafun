@@ -252,7 +252,7 @@ Now, we define the transitive closure of a relation.
   \qquad\=\+ \kill
   $\name{trans}$ \quad\: \= $\,:$ \;\;\= $\iso{\tset{A \times A}} \to \tset{A \times A}$ \\
   $\name{trans} \;\pboxvar{e}$ \> $=$ \>
-  $\efixis{\var{s}}{\dvar{e} \vee (\dvar{e} \bullet \var{s})}$
+  $\efixis{s}{\dvar{e} \vee (\dvar{e} \bullet s)}$
 \end{tabbing}
 
 This definition uses recursion, just like the mathematical definition --
@@ -414,7 +414,7 @@ still unions the two sets of end positions.
 
 \begin{tabbing}
 \qquad \=  $\name{star} : \iso\tre \to \tre$\+ \\
-  $\name{star}\;\pboxvar{r}\;\pboxtuple{\dvar s, \dvar n} = \efixis{\name{self}}{\eset{\dvar n} \vee \efor{m}{\name{self}}{r\;\eboxtuple{\dvar s,\dvar m}}}$
+  $\name{star}\;\pboxvar{r}\;\pboxtuple{\dvar s, \dvar n} = \efixis{s}{\bigl(\eset{\dvar n} \vee \efor{m}{\dvar s}{\dvar r\;\eboxtuple{\dvar s,\dvar m}}\bigr)}$
 \end{tabbing}
 
 \noindent
