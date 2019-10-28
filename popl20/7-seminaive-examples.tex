@@ -2,9 +2,8 @@
 \section{Applying the Semi\naive\ Transformation to Transitive Closure}
 \label{sec:seminaive-examples}
 
-%% TODO: update name if the name of tc changes.
 Let's try applying the semi\naive\ transform to a simple Datafun program: the
-transitive closure function \name{tc} from
+transitive closure function \name{trans} from
 \cref{sec:generic-transitive-closure}:
 
 %\newcommand\var\mathrm
@@ -14,7 +13,7 @@ transitive closure function \name{tc} from
 \newcommand\ytwo{\dvar y_{\isocolor 2}}
 
 \[\begin{array}{l}
-\name{tc} \< \pboxvar{e}
+\name{trans} \< \pboxvar{e}
 = \efixis{p} \dvar e \cup (\dvar e \bullet p)
 \\
 s \bullet t =
@@ -136,9 +135,9 @@ With a bit of rewriting, this is equivalent to $(\ds \bullet t) \cup (s \bullet
 \dt) \cup (\ds \bullet \dt)$, which is perhaps the derivative a human would
 give.
 
-Let's use this to figure out $\phi(\name{tc}\<\eboxvar{e})$. Working inside out,
-we start with the derivative of the loop body, $\delta(\dvar e \cup (\dvar e
-\bullet p))$:
+Let's use this to figure out $\phi(\name{trans}\<\eboxvar{e})$. Working inside
+out, we start with the derivative of the loop body, $\delta(\dvar e \cup (\dvar
+e \bullet p))$:
 
 \begin{align*}
   \delta({\dvar e \cup (\dvar e \bullet p)})

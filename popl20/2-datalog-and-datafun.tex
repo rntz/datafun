@@ -250,8 +250,8 @@ using set comprehension as:
 Now, we define the transitive closure of a relation.
 \begin{tabbing}
   \qquad\=\+ \kill
-  $\name{tc}$ \quad\: \= $\,:$ \;\;\= $\iso{\tset{A \times A}} \to \tset{A \times A}$ \\
-  $\name{tc}\;\pboxvar{e}$ \> $=$ \>
+  $\name{trans}$ \quad\: \= $\,:$ \;\;\= $\iso{\tset{A \times A}} \to \tset{A \times A}$ \\
+  $\name{trans} \;\pboxvar{e}$ \> $=$ \>
   $\efixis{\var{s}}{\dvar{e} \vee (\dvar{e} \bullet \var{s})}$
 \end{tabbing}
 
@@ -339,21 +339,21 @@ $\name{alt}$ unions the matches of its two arguments.
 
 \begin{tabbing}
 \qquad \=   $\name{star} : \iso\tre \to \tre$ \+\\
-  $\name{star}\;\pboxvar{r}\;\pboxvar{s} = \name{nil}\;\eboxvar{s} \vee \name{tc}\;\ebox{\dvar r\;\eboxvar{s}}$
+  $\name{star}\;\pboxvar{r}\;\pboxvar{s} = \name{nil}\;\eboxvar{s} \vee \name{trans}\;\ebox{\dvar r\;\eboxvar{s}}$
 \end{tabbing}
 
 \noindent
 The most interesting regular expression combinator is the Kleene star operation
 $\name{star}$. It uses $\name{nil}$ to get the reflexive relation on positions,
 and then takes the transitive closure of the regular expression it received as
-an argument using the $\name{tc}$ operation. This forces its argument to be
-boxed, since $\name{tc}$ calculates a fixed point, and only discrete variables
-can occur inside of fixed point expressions.\footnote{As a technical note, sets
-  of pairs of integers do not form a finite-height lattice, so by typing this
-  program is not an acceptable fixed point expression. However, since the
-  positions in a string form a finite set, semantically it is fine. The original
-  Datafun paper shows how one can define bounded fixed points to handle cases
-  like this, so we will not be scrupulous.}
+an argument using the $\name{trans}$ operation. This forces its argument to be
+boxed, since $\name{trans}$ calculates a fixed point, and only discrete
+variables can occur inside of fixed point expressions.\footnote{As a technical
+  note, sets of pairs of integers do not form a \todo{finite-height} lattice, so
+  by typing this program is not an acceptable fixed point expression. However,
+  since the positions in a string form a finite set, semantically it is fine.
+  The original Datafun paper shows how one can define bounded fixed points to
+  handle cases like this, so we will not be scrupulous.}
 
 
 \subsubsection{Combinators for Regular Expression Matching, Take 2}
