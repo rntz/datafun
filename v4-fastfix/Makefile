@@ -34,7 +34,7 @@ test/%-seminaive-simple.hs: test/%.df _build/default/seminaive_simple.exe
 BENCHES := trans astar astar2
 BENCH_PROGS := $(addprefix benchmark-,$(BENCHES))
 BENCH_DATS := $(addsuffix .dat,$(BENCHES))
-NBENCH ?= 12
+NBENCH ?= 13
 benchmarks: $(BENCH_PROGS)
 run-benchmarks: $(BENCH_DATS)
 benchmark-%: benchmark-%.hs Benchmark.hs Runtime.hs

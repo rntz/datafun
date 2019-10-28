@@ -20,7 +20,7 @@
         % If we include the explicit table, we can make it this large without
         % enlarging the figure.
         height=172pt, width=280pt,
-        legend entries={\naive,semi\naive},
+        legend entries={\naive,semi\naive\ unoptimized,semi\naive},
         legend cell align=left,
         legend pos = north west,
         legend style={
@@ -28,8 +28,9 @@
           nodes={inner sep=3pt,}
         },
       ]
-      \addplot table [x=n,y=naive] {trans.dat};
-      \addplot table  [x=n,y=seminaive] {trans.dat};
+      \addplot [color=red,mark=square*] table [x=n,y=naive] {trans.dat};
+      \addplot [color=black,mark=triangle*] table [x=n,y=seminaive_raw] {trans.dat};
+      \addplot [color=blue, mark=*] table [x=n,y=seminaive] {trans.dat};
     \end{axis}
   \end{tikzpicture}
   \caption{Transitive closure on a linear graph}
@@ -45,7 +46,7 @@
         % If we include the explicit table, we can make it this large without
         % enlarging the figure.
         height=172pt, width=280pt,
-        legend entries={\naive,semi\naive},
+        legend entries={\naive,semi\naive\ unoptimized,semi\naive},
         legend cell align=left,
         legend pos = north west,
         legend style={
@@ -53,8 +54,9 @@
           nodes={inner sep=3pt,}
         },
       ]
-      \addplot table [x=n,y=naive] {astar.dat};
-      \addplot table  [x=n,y=seminaive] {astar.dat};
+      \addplot [color=red, mark=square*] table [x=n,y=naive] {astar.dat};
+      \addplot [color=black,mark=triangle*] table [x=n,y=seminaive_raw] {astar.dat};
+      \addplot [color=blue, mark=*] table [x=n,y=seminaive] {astar.dat};
     \end{axis}
   \end{tikzpicture}
   \caption{Finding all occurrences of the regex \texttt{/a*/} in \texttt{a}\textsuperscript{\emph{n}}}
