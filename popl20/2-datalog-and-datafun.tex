@@ -100,18 +100,18 @@ first argument is increased to $\esetraw{1}$ then it becomes false, a
 How can we express non-monotone operations while preserving the property that
 all functions are monotone? We square this circle by introducing the
 \emph{discreteness} type constructor $\iso A$. The elements of $\iso A$ are
-\emph{exactly the same} as the elements of $A$, but the order on $\iso A$ is
-discrete, $x \le y : \iso A$ iff $x = y$. Monotonicity of a function $\iso A \to
-B$ is vacuous: $x = y$ always implies $f(x) \le f(y)$! This lets us encode
-ordinary, possibly non-monotone, functions $A \to B$ as monotone functions $\iso
-A \to B$. Semantically, $\iso$ is a comonad, and accordingly the syntax we use
-for this is a variant of \citet{jrml}'s syntax for constructive S4 modal logic.
-We make discrete terms with the introduction form $\ebox{e}$ and eliminate them
-with a pattern matching eliminator $\eletbox x e f$. Discrete variables are
-colored and italicised $\dvar x$, while monotone variables are uncolored and
-upright $x$. \todo{Colored terms $\isocolor e$ are restricted to only refer to
-  discrete variables.} So in the equality test $\eeq e f$, the terms $e$ and $f$
-must be discrete.
+exactly the same as those of $A$, but the order on $\iso A$ is discrete, $x \le
+y : \iso A$ iff $x = y$. Monotonicity of a function $\iso A \to B$ is vacuous:
+$x = y$ always implies $f(x) \le f(y)$! This lets us encode ordinary, possibly
+non-monotone, functions $A \to B$ as monotone functions $\iso A \to B$.
+Semantically, $\iso$ is a comonad, and accordingly the syntax we use for this is
+a variant of \citet{jrml}'s syntax for constructive S4 modal logic. We make
+discrete terms with the introduction form $\ebox{e}$ and eliminate them with a
+pattern matching eliminator $\eletbox x e f$. Discrete variables are colored and
+italicised $\dvar x$, while monotone variables are uncolored and upright $x$.
+\todo{Colored terms $\isocolor e$ are restricted to only refer to discrete
+  variables.} So in the equality test $\eeq e f$, the terms $e$ and $f$ must be
+discrete.
 
 %% TODO: should we note that we really definitely mean □(L → L) and
 %% not (□L → L)? Reader may be confused.
@@ -368,7 +368,7 @@ use functions to manage strict input/output divisions, and relations
 to manage nondeterminism and search.
 
 \begin{tabbing}
-\qquad \=  $\kw{type}\;re\;=\iso (\tstring \times \tint) \to \tset{\tint}$ \+
+\qquad \=  $\kw{type}\;\tre\;=\iso (\tstring \times \tint) \to \tset{\tint}$ \+
 \end{tabbing}
 
 \noindent

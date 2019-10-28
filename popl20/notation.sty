@@ -81,9 +81,6 @@
 \newcommand\hilite[1]{{\color{BrightOrange}#1}}
 \newcommand\hilitecolorname{orange}
 
-\colorlet{isorule}{CyanBlue!80!black}
-\colorlet{isobg}{CyanBlue!6}
-
 % used for names of functions, primitives, etc. in math mode
 \newcommand\name[1]{\text{\itshape #1}}
 \newcommand\var[1]{\mathvar{#1}} % for long local variable/parameter names
@@ -190,7 +187,7 @@
 \newcommand\tset[1]{\{{#1}\}}
 \newcommand\tunit{1}
 \newcommand\tseteq[1]{\tset{\eqt{#1}}}
-\newcommand\typename\textbf     % TODO: reconsider use of boldface.
+\newcommand\typename\textit     % should this be rm? sf? it? bf?
 \newcommand\tbool{\typename{bool}}
 \newcommand\tstring{\typename{string}}
 \newcommand\tint{\typename{int}}
@@ -239,14 +236,15 @@
 \newcommand\pboxtuple[1]{\pbox{\ptuple{#1}}}
 
 %% NEW BOXED VERSIONS!
-\colorlet{isobg}{Orange!20!Yellow!25}
-\newcommand\eiso[1]{\adjustbox{margin=0pt 1pt,}{\adjustbox{
-      %cframe=isorule 0pt 0pt,
-      bgcolor=isobg,
-}{%
+\colorlet{isorule}{CyanBlue!80!black}
+\colorlet{isobg}{CyanBlue!6}
+\colorlet{isobg}{Red!5!Yellow!28}
+\newcommand\isobgname{yellow}
+
+\newcommand\eiso[1]{\adjustbox{bgcolor=isobg,}{%
 \vphantom{lp\textsuperscript{+}}% room for ascenders & descenders
 \(\vphantom{}#1\)%
-}}}
+}}
 %\renewcommand\eiso[1]{{\color{ColorB}#1}}
 %\renewcommand\eiso[1]{{\isocolor#1}}
 %\let\eiso\relax
