@@ -4,10 +4,12 @@ all: ocaml tests benchmarks
 
 # The Datafun repl & compiler, in ocaml.
 _build/default/seminaive.exe: ocaml
+_build/default/seminaive_raw.exe: ocaml
+_build/default/seminaive_simple.exe: ocaml
 _build/default/naive.exe: ocaml
 _build/default/run.exe: ocaml
 ocaml:
-	dune build datafun.cma naive.exe seminaive.exe run.exe
+	dune build datafun.cma run.exe naive.exe seminaive.exe seminaive_raw.exe seminaive_simple.exe
 
 repl: _build/default/run.exe
 	rlwrap _build/default/run.exe
@@ -16,12 +18,16 @@ compile: _build/default/seminaive.exe
 
 # Compiling Datafun to Haskell.
 TESTS=$(wildcard test/*.df)
-HSTESTS=$(TESTS:.df=-naive.hs) $(TESTS:.df=-seminaive.hs)
+HSTESTS=$(TESTS:.df=-naive.hs) $(TESTS:.df=-seminaive.hs) $(TESTS:.df=-seminaive-raw.hs) $(TESTS:.df=-seminaive-simple.hs)
 tests: $(HSTESTS)
 test/%-naive.hs: test/%.df _build/default/naive.exe
 	_build/default/naive.exe < $< >$@
 test/%-seminaive.hs: test/%.df _build/default/seminaive.exe
 	_build/default/seminaive.exe < $< >$@
+test/%-seminaive-raw.hs: test/%.df _build/default/seminaive_raw.exe
+	_build/default/seminaive_raw.exe < $< >$@
+test/%-seminaive-simple.hs: test/%.df _build/default/seminaive_simple.exe
+	_build/default/seminaive_simple.exe < $< >$@
 
 # The benchmarks. NBENCH is the number of different input sizes to test on (the
 # number of different data points we'll get on the x-axis of the graph).

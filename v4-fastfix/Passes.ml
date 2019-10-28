@@ -168,7 +168,13 @@ I need an expression of type %s
 end
 
 
-(* Dummy transform to compare against Seminaive. *)
+(* Dummy pass-through transforms. *)
+module DropZeros(Imp: SIMPLE): ZERO with type term = Imp.term
+= struct
+  include Imp
+  let zero _ term = term
+end
+
 module DropBoxes(Imp: SIMPLE): MODAL with type term = Imp.term
 = struct
   type tp = modaltp
@@ -286,7 +292,7 @@ module Seminaive(Imp: ZERO): MODAL
   let letTuple (tpxs: (tp * sym) list) (bodyTp: tp)
                (fTuple, dTuple: term) (fBody, dBody: term): term =
     let fBodyTp, dBodyTp = phiDelta bodyTp in
-    let f (a,x) = let (fa,da) = phiDelta a in (fa,x),(da,x) in
+    let f (a,x) = let (fa,da) = phiDelta a in (fa, x), (da, Sym.d x) in
     let ftpxs, dtpxs = List.(map f tpxs |> split) in
     Imp.letTuple ftpxs fBodyTp fTuple fBody,
     Imp.letTuple ftpxs dBodyTp fTuple (Imp.letTuple dtpxs dBodyTp dTuple dBody)
@@ -408,7 +414,6 @@ end
  * this matters, add those as tests, and implement them; or else comment that I
  * could find no reasonable examples.
  *)
-
 module ZeroChange(Imp: SIMPLE): sig
   type state = Zero | AppliedZero
   include ZERO with type term = state cx -> state option * Imp.term

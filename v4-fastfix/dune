@@ -9,15 +9,10 @@
  (libraries datafun)
  (modules Run))
 
-(executable
- (name seminaive)
- (libraries datafun)
- (modules seminaive))
-
-(executable
- (name naive)
- (libraries datafun)
- (modules naive))
+(executable (name seminaive) (modules seminaive) (libraries datafun))
+(executable (name seminaive_raw) (modules seminaive_raw) (libraries datafun))
+(executable (name seminaive_simple) (modules seminaive_simple) (libraries datafun))
+(executable (name naive) (modules naive) (libraries datafun))
 
 ;; We separate out the tokens into their own module so that the lexer can depend
 ;; on them directly instead of on the whole parser. This lets us parameterize

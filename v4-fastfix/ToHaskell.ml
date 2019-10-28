@@ -51,7 +51,9 @@ let rec empty: tp semilat -> term = function
    * Simplify can generate them by rewriting (λx.⊥) → ⊥. *)
   | `Fn(a,b) -> lam a b (Sym.fresh "_") (empty b)
 
-let set _a terms = call "set" [listOf terms]
+let set _a = function
+  | [] -> string "Data.Set.empty"
+  | terms -> call "set" [listOf terms]
 let union tp = function
   | [] -> empty tp
   | [tm] -> tm
