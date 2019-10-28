@@ -7,6 +7,10 @@ To test whether the $\phi$ translation can produce the asymptotic performance
 gains we claim, we have implemented a compiler from a fragment of Datafun
 (omitting sum types) to Haskell.
 %
+The source is available at
+\url{https://github.com/rntz/datafun/tree/popl20/v4-fastfix}.
+%\url{http://www.rntz.net/datafun/popl20/}.
+%
 We use Haskell's \texttt{Data.Set} to represent Datafun sets, and
 typeclasses to implement Datafun's notions of equality and semilattice types.
 %
@@ -18,7 +22,7 @@ Consequently our performance is worse than any real Datalog engine.
 However, we do implement the $\phi$ translation, along with the following
 optimizations:
 
-\begin{itemize}
+\begin{enumerate}
 \item Propagating $\bot$; for example, rewriting $(e \vee \bot) \rewrites e$ and
   $(\efor{x}{e} \bot) \rewrites \bot$.
 
@@ -30,8 +34,7 @@ optimizations:
   \<\ebox{\phi f} \<\delta f$ is a zero change if $\delta e$ and $\delta f$ are.
   This allows more zero changes to be replaced by $\bot$, especially in
   higher-order code such as our regular expression example.
-  %% TODO: does this actually make a difference?
-\end{itemize}
+\end{enumerate}
 
 \input{fig-seminaive-vs-naive-graph}
 
