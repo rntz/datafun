@@ -14,12 +14,12 @@ transitive closure function \name{trans} from
 
 \[\begin{array}{l}
 \name{trans} \< \pboxvar{e}
-= \efixis{p} \dvar e \cup (\dvar e \bullet p)
+= \efixis{p}{\dvar e \cup (\dvar e \bullet p)}
 \\
 s \bullet t =
 \eforraw{\etuple{\dvar x, \yone} \in s}
 \eforraw{\etuple{\ytwo , \dvar z} \in t}
-\ewhen{\eeqraw{\yone}{\ytwo}} \esetraw{\etuple{\dvar x, \dvar z}}
+\ewhen{\eeq{\yone}{\ytwo}} \eset{\etuple{\dvar x, \dvar z}}
 \end{array}
 \]
 
@@ -33,15 +33,15 @@ $(\dvar e \bullet p)$, and at the core of relation composition is a
 \kw{when}-expression. Let's take a look at its $\phi$ and $\delta$ translations:
 
 \begin{align*}
-  \phi(\ewhen {\eeqraw \yone \ytwo} \esetraw{\etuple{\dvar x, \dvar z}})
-  &= \phi(\eforraw {\etuple{} \in \eeqraw \yone \ytwo} \esetraw{\etuple{\dvar x,
+  \phi(\ewhen {\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
+  &= \phi(\eforraw {\etuple{} \in \eeq \yone \ytwo} \eset{\etuple{\dvar x,
       \dvar z}})
   && \text{desugaring}
   \\
-  &= \eforraw{\etuple{} \in \eeqraw \yone \ytwo}
-  \phi{\esetraw{\etuple{\dvar x, \dvar z}}}
+  &= \eforraw{\etuple{} \in \eeq \yone \ytwo}
+  \phi{\eset{\etuple{\dvar x, \dvar z}}}
   && \text{omitting a needless \kw{let}-binding}\\
-  &= \ewhen{\eeqraw \yone \ytwo} \esetraw{\etuple{\dvar x, \dvar z}}
+  &= \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}}
   && \text{resugaring}
 \end{align*}
 
@@ -51,49 +51,49 @@ skip such no-op translations.
 
 \begin{align*}
   &\mathrel{\hphantom{=}}
-  \delta(\ewhen {\eeqraw \yone \ytwo} \esetraw{\etuple{\dvar x, \dvar z}})
+  \delta(\ewhen {\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   \\
-  &= \delta(\eforraw{\etuple{} \in \yone = \ytwo} \esetraw{\etuple{\dvar x, \dvar z}})
+  &= \delta(\eforraw{\etuple{} \in \eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   && \text{desugaring \kw{when}}
   \\
-  &= \eforraw{\etuple{} \in \delta(\yone = \ytwo)}
-  \phi\esetraw{\etuple{\dvar x, \dvar z}}
+  &= \eforraw{\etuple{} \in \delta(\eeq \yone \ytwo)}
+  \phi\eset{\etuple{\dvar x, \dvar z}}
   && \text{omitting needless \kw{let}-bindings}
   \\
   &\cup
-  \eforraw{\etuple{} \in \phi(\yone = \ytwo) \cup \delta(\yone = \ytwo)}
-  \delta\esetraw{\etuple{\dvar x, \dvar z}}
+  \eforraw{\etuple{} \in \phi(\eeq \yone \ytwo) \cup \delta(\eeq \yone \ytwo)}
+  \delta\eset{\etuple{\dvar x, \dvar z}}
   \\
-  &= \eforraw{\etuple{} \in \bot} \esetraw{\etuple{\dvar x, \dvar z}}
-  \cup \eforraw{\etuple{} \in \phi(\yone = \ytwo) \cup \bot} \bot
+  &= \eforraw{\etuple{} \in \bot} \eset{\etuple{\dvar x, \dvar z}}
+  \cup \eforraw{\etuple{} \in \phi(\eeq \yone \ytwo) \cup \bot} \bot
   && \text{rules for $\phi(\eeq e f)$ and $\delta\esetsub{e_i}{i}$}
   \\
   &= \bot && \text{propagating }\bot
 \end{align*}
 
-The core insight here is that $\yone = \ytwo$ can't change, and neither can
-$\esetraw{\etuple{\dvar x,\dvar z}}$. By propagating this information --- for
+The core insight here is that $\eeq \yone \ytwo$ can't change, and neither can
+$\eset{\etuple{\dvar x,\dvar z}}$. By propagating this information --- for
 example, rewriting $(\eforraw{x \in \bot} e)$ to $\bot$ --- we can simplify our
 derivative down to nothing.
 %
 Now let's pull out and examine $\eforraw{\etuple{\ytwo, \dvar z} \in t}
-\ewhen{\yone = \ytwo} \esetraw{\etuple{\dvar x, \dvar z}}$. The $\phi$
+\ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}}$. The $\phi$
 translation is again a no-op.
 
 \begin{align*}
   &\mathrel{\hphantom{=}}
   \delta(\eforraw{\etuple{\ytwo, \dvar z} \in t}
-  \ewhen{\yone = \ytwo} \esetraw{\etuple{\dvar x, \dvar z}})
+  \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   \\
   &= \eforraw{\etuple{\ytwo, \dvar z} \in \dt}
-  \phi(\ewhen{\yone = \ytwo} \esetraw{\etuple{\dvar x, \dvar z}})
+  \phi(\ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   && \text{omitting needless \kw{let}-bindings}
   \\
   &\cup \eforraw{\etuple{\ytwo, \dvar z} \in t \cup \dt}
-  \delta(\ewhen{\yone = \ytwo} \esetraw{\etuple{\dvar x, \dvar z}})
+  \delta(\ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   \\
   &= \eforraw{\etuple{\ytwo, \dvar z} \in \dt}
-  \ewhen{\yone = \ytwo} \esetraw{\etuple{\dvar x, \dvar z}}
+  \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}}
   && \text{propagating }\bot
 \end{align*}
 
@@ -104,26 +104,26 @@ translation is again a no-op.
   \delta(
   \eforraw{\etuple{\dvar x, \yone} \in s}
   \eforraw{\etuple{\ytwo, \dvar z} \in t}
-  \ewhen{\yone = \ytwo} \esetraw{\etuple{\dvar x, \dvar z}})
+  \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   \\
   &= \eforraw{\etuple{\dvar x, \yone} \in \ds}
   \phi(\eforraw{\etuple{\ytwo, \dvar z} \in t}
-  \ewhen{\yone = \ytwo} \esetraw{\etuple{\dvar x, \dvar z}})
+  \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   && \text{definition of $\delta(\kw{for} \dots)$}
   \\
   &\cup \eforraw{\etuple{\dvar x, \yone} \in s \cup \ds}
   \delta(\eforraw{\etuple{\ytwo, \dvar z} \in t}
-  \ewhen{\yone = \ytwo} \esetraw{\etuple{\dvar x, \dvar z}})
+  \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   \\
   &= \eforraw{\etuple{\dvar x, \yone} \in \ds}
   \eforraw{\etuple{\ytwo, \dvar z} \in t}
-  \ewhen{\yone = \ytwo} \esetraw{\etuple{\dvar x, \dvar z}}
+  \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}}
   && \text{applying previous work}
   \\
   &\cup
   \eforraw{\etuple{\dvar x, \yone} \in s \cup \ds}
   \eforraw{\etuple{\ytwo, \dvar z} \in \dt}
-  \ewhen{\yone = \ytwo} \esetraw{\etuple{\dvar x, \dvar z}}
+  \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}}
   \\
   &= (\ds \bullet t) \cup ((s \cup \ds) \bullet \dt)
   && \text{rewriting in terms of ${\bullet}$}
@@ -189,6 +189,6 @@ semi\naive\ transitive closure algorithm from
   &
   \dx_{i+1} &=
   ({\fnof{\pboxvar p} \fnof{\dx} \dvar e \bullet \deep})
-  \<\eboxraw{x_i} \<\dx_i
+  \<\ebox{x_i} \<\dx_i
   = \dvar e \bullet \dx_i
 \end{align*}
