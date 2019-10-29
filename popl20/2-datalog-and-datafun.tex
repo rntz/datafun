@@ -19,8 +19,8 @@ declarations:
 
 \noindent
 This defines two binary relations, \name{parent} and \name{ancestor}. Lowercase
-sans-serif words like \datum{rhaegar} and \datum{lyanna} are symbols \emph{\`a
-  la} Lisp, and uppercase characters like $X$ and $Y$ are variables.
+sans-serif words like \datum{rhaegar} and \datum{lyanna} are symbols \`a la
+Lisp, and uppercase characters like $X$ and $Y$ are variables.
 
 The \name{parent} relation is defined as a set of ground facts: we assert that
 \datum{aerys} is \datum{rhaegar}'s parent, that \datum{rhaegar} is \datum{jon}'s
@@ -106,13 +106,13 @@ point.
 
 %% TODO: ``at box type'' is ambiguous. makes me think of (□A → B)
 %% rather than □(A → B).
-Second, we require that the recursive function be boxed,
-$\iso(\fixt L \to \fixt L)$. Since boxed expressions can only
-refer to discrete values, and fixed point functions themselves must be monotone,
-this has the effect of preventing semantically nested fixed points. We discuss
-this in more detail in \cref{sec:nested-fixed-points}. Note that this does
-\emph{not} prevent mutual recursion, which can be expressed by taking a fixed
-point at product type, nor stratified fixed points \emph{\`a la} Datalog.
+Second, we require that the recursive function be boxed, $\iso(\fixt L \to \fixt
+L)$. Since boxed expressions can only refer to discrete values, and fixed point
+functions themselves must be monotone, this has the effect of preventing
+semantically nested fixed points. We discuss this in more detail in
+\cref{sec:nested-fixed-points}. Note that this does not prevent mutual
+recursion, which can be expressed by taking a fixed point at product type, nor
+stratified fixed points \`a la Datalog.
 
 %% This blocks (semantically) nested fixed points,
 %% and leaves the semantics of Datafun close to that of Datalog, where all
