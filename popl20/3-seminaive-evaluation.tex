@@ -341,9 +341,9 @@ change.
 However, there is one very interesting exception: function zero changes. Suppose
 $\changesat{A \to B}{\df}{f}{f}$. This implies that
 
-\begin{equation}\label{eqn:derivative}
+\begin{equation*}
   \changesat A \dx x y \implies \changesat B{\df\<x\<\dx}{f\<x}{f\<y}
-\end{equation}
+\end{equation*}
 
 \noindent
 In other words, $\df$ yields the change in the output of $f$ given a change to
@@ -390,14 +390,19 @@ $x_i = x_{i+1}$ in a finite number of iterations.
 
 \label{sec:seminaive-strategy}
 
-This leads directly to our strategy for semi\naive\ Datafun. \Citet{incremental}
-defines a static transformation $\Deriv e$ which computes the change in $e$
-given the change in its free variables; it \emph{incrementalizes} $e$. Our goal
-is not to incrementalize Datafun \emph{per se}, but to find fixed points faster.
+This leads directly to our strategy for semi\naive\ Datafun.
+%
+\Citet{incremental} defines a static transformation $\Deriv e$ which computes
+the change in $e$ given the change in its free variables; it
+\emph{incrementalizes} $e$.
+%
+Our goal is not to incrementalize Datafun \emph{per se}, but to find fixed
+points faster.
+%
 Consequently, we define two mutually recursive transformations: $\phi e$, which
 computes $e$ faster by replacing fixed points with calls to \fastfix; and
-$\delta e$, which incrementalizes $\phi e$ so that we can compute the derivative
-of fixed point functions.
+$\delta e$, which incrementalizes $\phi e$ just enough that we can compute
+the derivative of fixed point functions.
 %
 In order to define $\phi$ and $\delta$ and show them correct, however, we first
 need a fuller account of Datafun's type system and semantics.
