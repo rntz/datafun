@@ -3,19 +3,14 @@
 
 \newcommand\rewrites\leadsto
 
-To test whether the $\phi$ translation can produce the asymptotic performance
-gains we claim, we have implemented a compiler from a fragment of Datafun
-(omitting sum types) to Haskell.
+We have implemented a compiler from a fragment of Datafun (omitting sum types) to Haskell, available at \url{https://github.com/rntz/datafun/tree/popl20/v4-fastfix}.
+%\url{http://www.rntz.net/datafun/popl20/}. % TODO
 %
-The source is available at
-\url{https://github.com/rntz/datafun/tree/popl20/v4-fastfix}.
-%\url{http://www.rntz.net/datafun/popl20/}.
+We use Haskell's \texttt{Data.Set} to represent Datafun sets, and typeclasses to implement Datafun's notions of equality and semilattice types.
 %
-We use Haskell's \texttt{Data.Set} to represent Datafun sets, and
-typeclasses to implement Datafun's notions of equality and semilattice types.
-%
-We do no query planning; relational joins, written in Datafun as nested
-\kw{for}-loops, are compiled into nested loops.
+We do no query planning and implement no join algorithms; relational
+joins, written in Datafun as nested \kw{for}-loops, are compiled into nested
+loops.
 %
 Consequently our performance is worse than any real Datalog engine.
 %
@@ -38,18 +33,56 @@ optimizations:
 
 \input{fig-seminaive-vs-naive-graph}
 
-We benchmarked the transitive closure function \name{trans} from
-\cref{sec:generic-transitive-closure}, compiled both \naive{}ly and
-semi\naive{}ly (i.e. omitting or using $\phi$), against the linear graph
-$\setfor{(i,i+1)}{0 \le i \le n}$. We chose transitive closure on a linear graph
-because it is a best-case for semi\naive\ evaluation, with a well-understood
-asymptotic speedup (discussed in \cref{sec:seminaive-and-ilc}). The results
-(\cref{fig:seminaive-vs-naive-graph}) are consistent with our expectation that
-$\phi$-translated code, with appropriate optimisation, can perform
-asymptotically better than \naive\ evaluation. As in Datalog, we do not expect
-this to generalize to all recursive programs; as a rule of thumb,
-semi\naive\ evaluation speeds up programs that take many iterations to reach a
-fixed point.
+\noindent
+To test whether the $\phi$ translation can produce the asymptotic performance
+gains we claim, we benchmark two example Datafun programs:
+
+\begin{enumerate}
+\item Finding the transitive closure of a linear graph using the \name{trans}
+  function from \cref{sec:generic-transitive-closure}. We chose this example
+  because, as discussed in \cref{sec:seminaive-and-ilc}, it has a well
+  understood asymptotic speed-up under semi\naive\ evaluation. \todo{explain
+    further? ``maximize visibility of failure''?}
+
+\item Finding all matches of the regular expression \texttt{/a*/} in the string
+  $\texttt{a}^n$, using the regex combinators from \cref{sec:regex-combinators}.
+  Finding all matches for \texttt{/a*/} amounts to finding the reflexive,
+  transitive closure of the matches of \texttt{/a/}, and on $\texttt{a}^n$ these
+  form a linear graph. Thus it is a close computational analogue of our first
+  example, written in a higher-order style. We chose this example to test
+  whether our extension of semi\naive\ evaluation properly handles Datafun's
+  distinctive feature: higher-order programming.
+\end{enumerate}
+
+We compiled each program in three distinct ways: \emph{\naive{}}, without the
+$\phi$ transform (but with $\bot$-propagation); \emph{semi\naive{} unoptimized},
+with the $\phi$ transform but without further optimization; and
+\emph{semi\naive{} optimized}, with the $\phi$ transform followed by all three
+optimizations listed previously. The results are shown in
+\cref{fig:seminaive-vs-naive-graph}. The $\phi$ transform alone
+(\emph{semi\naive\ unoptimized}) provides only a small speed-up, roughly
+\todo{15--20\%}. Only when followed by other optimizations
+(\emph{semi\naive\ optimized}) does it provide the expected asymptotic speedup.
+We believe this is because, as we observed in \cref{sec:seminaive-examples}, the
+
+\todo{why are these optimizations necessary?}
+
+%% \noindent
+%% We benchmarked the transitive closure function \name{trans} from
+%% \cref{sec:generic-transitive-closure}, compiled both \naive{}ly and
+%% semi\naive{}ly (i.e. omitting or using $\phi$), against the linear graph
+%% $\setfor{(i,i+1)}{0 \le i \le n}$. We chose transitive closure on a linear graph
+%% because it is a best-case for semi\naive\ evaluation, with a well-understood
+%% asymptotic speedup (discussed in \cref{sec:seminaive-and-ilc}).
+
+%% The results
+%% (\cref{fig:seminaive-vs-naive-graph}) are consistent with our expectation that
+%% $\phi$-translated code, with appropriate optimization, can perform
+%% asymptotically better than \naive\ evaluation.
+
+As in Datalog, we do not expect semi\naive\ evaluation to be so useful on
+\emph{all} recursive programs; as a rule of thumb, it speeds up programs that
+take many iterations to reach a fixed point.
 %
 %% We expect and hope the same pattern holds true of Datafun.
 %
@@ -59,4 +92,4 @@ fixed point.
   can we cite somebody here -- maybe ``Fixing incremental computation''?}
 
 %% TODO: Discuss when \& why inlining might be helpful.
-%% We speculate that \emph{function inlining} would also be a helpful optimisation.
+%% We speculate that \emph{function inlining} would also be a helpful optimization.
