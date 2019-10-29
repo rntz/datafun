@@ -61,10 +61,10 @@ previously. The results are shown in \cref{fig:seminaive-vs-naive-graph}.
 %
 The measured times are substantially similar for transitive closure and regex
 search across all three optimization levels, suggesting that higher-order code
-does not pose a particular problem for our optimizations. However, the $\phi$
-transform alone (\emph{semi\naive\ raw}) provides only a small speed-up, roughly
-\todo{15--20\%}. Only when followed by other optimizations
-(\emph{semi\naive\ full}) does it provide the expected asymptotic
+does not pose a particular problem for our optimizations. However, compared to
+\emph{\naive}, the $\phi$ transform alone (\emph{semi\naive\ raw}) provides only
+a small speed-up, roughly \todo{15--20\%}. Only when followed by other
+optimizations (\emph{semi\naive\ full}) does it provide the expected asymptotic
 speedup.\footnote{We also tried following the $\phi$ transform with only
   $\bot$-propagation, dropping the other two optimisations. This produced
   essentially the same results as \emph{semi\naive\ full}, so we have omitted it
@@ -87,7 +87,7 @@ Consulting our logical relation at set type, we see that in this case $e$ and
 $\phi e$ will be identical, and so the number of iterations never shrinks.
 However, as demonstrated in \cref{sec:seminaive-examples}, if the body can be
 simplified to $\bot$, then we can eliminate the loop entirely by rewriting
-$(\efor x e \bot)$ to $\bot$, potentially an asymptotic improvement.
+$(\efor x e \bot)$ to $\bot$, which allows for asymptotic improvement.
 
 As in Datalog, we do not expect semi\naive\ evaluation to be useful on
 \emph{all} recursive programs. Under \naive\ evaluation, each iteration towards
