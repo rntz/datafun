@@ -39,8 +39,9 @@ gains we claim, we benchmark two example Datafun programs:
 \item Finding the transitive closure of a linear graph using the \name{trans}
   function from \cref{sec:generic-transitive-closure}. We chose this example
   because, as discussed in \cref{sec:seminaive-and-ilc}, it has a well
-  understood asymptotic speed-up under semi\naive\ evaluation. \todo{explain
-    further? ``maximize visibility of failure''?}
+  understood asymptotic speed-up under semi\naive\ evaluation. This means that
+  if we've failed to capture the essence of semi\naive\ evaluation, it should be
+  highly visible.
 
 \item Finding all matches of the regular expression \texttt{/a*/} in the string
   $\texttt{a}^n$, using the regex combinators from \cref{sec:regex-combinators}.
@@ -53,41 +54,41 @@ gains we claim, we benchmark two example Datafun programs:
 \end{enumerate}
 
 We compiled each program in three distinct ways: \emph{\naive{}}, without the
-$\phi$ transform (but with $\bot$-propagation); \emph{semi\naive{} unoptimized},
-with the $\phi$ transform but without further optimization; and
-\emph{semi\naive{} optimized}, with the $\phi$ transform followed by all three
-optimizations listed previously. The results are shown in
-\cref{fig:seminaive-vs-naive-graph}. The $\phi$ transform alone
-(\emph{semi\naive\ unoptimized}) provides only a small speed-up, roughly
-\todo{15--20\%}. Only when followed by other optimizations
-(\emph{semi\naive\ optimized}) does it provide the expected asymptotic speedup.
-We believe this is because, as we observed in \cref{sec:seminaive-examples}, the
+$\phi$ transform (but with $\bot$-propagation); \emph{semi\naive{} raw}, with
+the $\phi$ transform but without further optimization; and \emph{semi\naive{}
+  full}, with the $\phi$ transform followed by all three optimizations listed
+previously. The results are shown in \cref{fig:seminaive-vs-naive-graph}. The
+$\phi$ transform alone (\emph{semi\naive\ raw}) provides only a small speed-up,
+roughly \todo{15--20\%}. Only when followed by other optimizations
+(\emph{semi\naive\ full}) does it provide the expected asymptotic
+speedup.\footnote{We also tried following the $\phi$ transform with only
+  $\bot$-propagation, dropping the other two optimisations. This produced
+  essentially the same results as \emph{semi\naive\ full}, so we have omitted
+  it from \cref{fig:seminaive-vs-naive-graph}. It is unclear to us whether
+  inserting $\bot$ or recognizing complex zero changes is ever necessary to
+  achieve an asymptotic speed-up.
 
-\todo{why are these optimizations necessary?}
+  It's also worth addressing the asymptotic performance of
+  \emph{semi\naive\ full}. On regex search, for example, doubling the string
+  length from $160$ to $320$ produces a slowdown factor of $\frac{.401}{.054}
+  \approx 7.42$! However, since there are quadratically many matches and we find
+  all of them, the best possible runtime is $O(n^2)$. Moreover, our nested-loop
+  joins are roughly a factor of $n$ slower than optimal, so we expect $O(n^3)$
+  behavior or worse. This back-of-the-envelope estimation predicts a slowdown of
+  $2^3 = 8$, reasonably close to $7.42$. Phew!}
 
-%% \noindent
-%% We benchmarked the transitive closure function \name{trans} from
-%% \cref{sec:generic-transitive-closure}, compiled both \naive{}ly and
-%% semi\naive{}ly (i.e. omitting or using $\phi$), against the linear graph
-%% $\setfor{(i,i+1)}{0 \le i \le n}$. We chose transitive closure on a linear graph
-%% because it is a best-case for semi\naive\ evaluation, with a well-understood
-%% asymptotic speedup (discussed in \cref{sec:seminaive-and-ilc}).
-
-%% The results
-%% (\cref{fig:seminaive-vs-naive-graph}) are consistent with our expectation that
-%% $\phi$-translated code, with appropriate optimization, can perform
-%% asymptotically better than \naive\ evaluation.
+We believe this is because both $\phi(\efor x e ...)$ and $\delta(\efor x e
+...)$ produce loops that iterate over at least every $\dvar x \in \phi e$.
+Consulting our logical relation at set type, we know $e$ and $\phi e$ are
+identical, and so the number of iterations never shrinks. However, as
+demonstrated in \cref{sec:seminaive-examples}, if the body can be simplified to
+$\bot$, rewriting $(\efor x e \bot)$ to $\bot$ can eliminate the loop entirely,
+potentially an asymptotic improvement.
 
 As in Datalog, we do not expect semi\naive\ evaluation to be so useful on
-\emph{all} recursive programs; as a rule of thumb, it speeds up programs that
-take many iterations to reach a fixed point.
-%
-%% We expect and hope the same pattern holds true of Datafun.
-%
-\todo{discuss what kinds of problems semi\naive\ evaluation produces
-  speedups on? (generally, ones which require many iterations, since
-  \naive\ evaluation grows monotonically more expensive with more iterations.)
-  can we cite somebody here -- maybe ``Fixing incremental computation''?}
+\emph{all} recursive programs. Under \naive\ evaluation, each iteration towards
+a fixed point is more expensive than the last, so as a rule of thumb,
+semi\naive\ evaluation is more valuable the more iterations required.
 
 %% TODO: Discuss when \& why inlining might be helpful.
 %% We speculate that \emph{function inlining} would also be a helpful optimization.
