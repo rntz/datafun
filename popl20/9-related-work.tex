@@ -8,7 +8,7 @@
 The typing rule for $\efix e$ requires $e : \iso(\fixt L \to \fixt L)$.
 %
 The $\phi$ translation takes advantage of this $\iso$, decorating expressions of
-type $\iso A$ with their zero-changes.
+type $\iso A$ with their zero changes.
 %
 However, it also prevents an otherwise valid idiom: in a nested fixed-point
 expression $\efixis{x}{\dots (\efixis{y}{e}) \dots}$, the inner fixed point body $e$
@@ -19,7 +19,7 @@ closer to Datalog, whose syntax cannot express this sort of nested fixed point.
 
 We suspect it is possible to lift this restriction without losing
 semi\naive\ evaluation, by decorating \emph{all} expressions and variables (not
-just discrete ones) with zero-changes.
+just discrete ones) with zero changes.
 %
 However, this also invalidates $\delta(\efix f) = \bot$: now that $f$ can
 change, so can $\efix f$.
@@ -31,12 +31,12 @@ Luckily, there is a simple and correct solution: $\delta(\efix f) =
 \efix \ebox{\delta f \<\ebox{\efix f}}$~\cite{delta-fix}.
 %
 However, to compute this new fixed point semi\naive{}ly, we need a \emph{second
-  derivative}: the zero-change to $\delta f \<\ebox{\efix f}$. Indeed, for a
+  derivative}: the zero change to $\delta f \<\ebox{\efix f}$. Indeed, for a
 program with fixed points nested $n$ deep, we need $n$\textsuperscript{th}
 derivatives. We leave this to future work.
 
 %% Can't we just have \delta produce two expressions: the derivative, and the
-%% zero-change to the derivative?
+%% zero change to the derivative?
 
 \paragraph{Related Work}
 The incremental lambda calculus was introduced by \citet{incremental},

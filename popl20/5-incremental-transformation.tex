@@ -29,14 +29,14 @@ change.
 However, to speed up $\efix e$ we don't want the change to $e$; we want its
 derivative.
 %
-Since derivatives are zero-changes, function changes and derivatives coincide if
+Since derivatives are zero changes, function changes and derivatives coincide if
 \emph{the function cannot change}.
 %
 This is why the typing rule for $\efix e$ requires that $e : \iso(\fixt L \to
 \fixt L)$: the use of $\iso$ prevents $e$ from changing!
 %
 So the key strategy of our speed-up transformation is to {\bfseries\boldmath
-  decorate expressions of type ${\iso A}$ with their zero-changes.}
+  decorate expressions of type ${\iso A}$ with their zero changes.}
 %
 This makes derivatives available exactly where we need them: at \prim{fix}
 expressions.
@@ -55,7 +55,7 @@ In particular, if $e : \iso A$ then $\phi e$ will have type $\Phi(\iso A) =
 %
 The idea is that evaluating $\phi e$ will produce a pair
 $\eboxraw{\etuple{x,\dx}}$ where $x : \Phi A$ is the sped-up result and $\dx :
-\DP A$ is a zero-change to $x$.
+\DP A$ is a zero change to $x$.
 %
 Thus, if $e : \iso(\fixt L \to \fixt L)$, then $\phi e$ will compute
 $\eboxraw{\etuple{f,f'}}$, where $f'$ is the derivative of $f$.
@@ -323,7 +323,7 @@ monotone rather than a discrete position.
 \label{sec:phi-delta-box}
 
 Our strategy hinges on decorating expressions of type $\iso A$ with their
-zero-changes, so the translations of $\ebox e$ and $(\eletbox x e f)$ are of
+zero changes, so the translations of $\ebox e$ and $(\eletbox x e f)$ are of
 particular interest.
 %
 The most trivial of these is $\delta\ebox{e} = \etuple{}$; this follows from
@@ -500,7 +500,7 @@ First, if the set $\phi e$ we're looping over gains new elements $\dvar x \in
 \delta e$, we need to compute $\phi f$ over these new elements. Second, if the
 inner loop $\phi f$ changes, we need to add in its changes $\delta f$ for every
 element, new or old, in the looped-over set, $\phi e \vee \delta e$. Just as in
-the $\phi$-translation, we use \zero/\dummy\ to calculate zero-changes to set
+the $\phi$-translation, we use \zero/\dummy\ to calculate zero changes to set
 elements.
 
 
@@ -509,7 +509,7 @@ elements.
 The $\phi$ rules we haven't yet discussed simply distribute $\phi$ over
 subexpressions. The remaining $\delta$ rules mostly do the same, with a few
 exceptions. In the case of $\delta(\esetsub{e_i}{i}) = \delta(\eeq e f) = \bot$,
-the sub-expressions are discrete and cannot change, so we produce a zero-change
+the sub-expressions are discrete and cannot change, so we produce a zero change
 $\bot$. This is also the case for $\delta(\eisempty e) = \eisempty{\phi e}$, but
-as with $\delta(\esplit e)$, the zero-change here is at type $\tunit + \tunit$,
+as with $\delta(\esplit e)$, the zero change here is at type $\tunit + \tunit$,
 so to get the tag right we use $\phi e$.

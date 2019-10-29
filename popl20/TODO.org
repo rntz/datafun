@@ -133,7 +133,7 @@ could have, in no particular order:
    fixed points. But then we'd have to think about how they interact! Future
    work?
 
-7. Only stored zero-changes for _functions_, not for everything inside a boxed
+7. Only stored zero changes for _functions_, not for everything inside a boxed
    type. This seems related to letting Φ(A_eq) = A_eq. Or perhaps having
    separate Δ□ and Δ.
 
@@ -165,9 +165,9 @@ could have, in no particular order:
    trying to separate {-} into F□ turned out to be a messy maze of dead-ends.
 
 10. Make □A an eqtype. The problem with this is showing that φ(e ∨ f : {□A})
-    respects the logical relation, since Φ will add zero-change information to
+    respects the logical relation, since Φ will add zero change information to
     each element of the set, but a given value may have more than one valid
-    zero-change. Various possible approaches here.
+    zero change. Various possible approaches here.
 
    OLD UN-UPDATED REASONS:
 
@@ -179,7 +179,7 @@ could have, in no particular order:
    - First, then Φ{A} = ΦF□A = F□(ΦA × ΔΦA). So now our sets carry around extra,
      seemingly unnecessary information. However, this is actually exactly the
      information we need to reconstruct in φ(for ...)! However, we _know_ that
-     this extra information is a *zero-change*, and our current scheme exposes
+     this extra information is a *zero change*, and our current scheme exposes
      this information to the optimizer (XXX DOES OUR OPTIMIZER USE IT?), while
      this scheme would not make it quite so obvious.
 
