@@ -1,11 +1,13 @@
 \section{Proving the Semi\naive\ Transformation Correct}
 
-We have given a program transformation which compute a change from a
-term $e$ to a term $e'$ in terms of the change $\delta(e)$ and the
-optimized versions $\phi(e)$ and $\phi(e')$. To state the correctness
-of $\delta()$ and $\phi()$, we need to show that $\phi e$ and
-$\phi e'$ preserve the meaning of $e$ and $e'$ respectively, and that
-$\delta e$ correctly sends $e$ to $e'$.
+We have given a program transformation which computes a change on a
+term $e$ given a change in its free variables, by giving a function
+$\delta(e)$ computing the change in $e$, and another function 
+$\phi(e)$ using the change to optimize $e$. To state the correctness
+of $\delta()$ and $\phi()$, we need to show that $\phi(e)$ preserves
+the meaning of $e$, and that
+$\delta(e)$ correctly sends $e$ with one set of bindings for its free
+variables to $e$ with the changed bindings.
 %
 Since Datafun supports higher-order functions, we cannot directly
 prove that the semantics is preserved. Instead, we will need to
@@ -18,13 +20,13 @@ So inductively on types $A$, letting $a,b \in \den{A}$,
 $x,y \in \den{\Phi A}$, and $\dx \in \den{\DP A}$, we define a five
 place relation $\weirdat{A}{\dx}{x}{a}{y}{b}$, which may be glossed as
 ``$x,y$ speed up $a,b$ respectively, and $\dx$ changes $x$ into $y$''.
-The definition is given in Figure~\ref{fig:logical-relation}. At the
-unit type  $1$, the unit value $\tuple{}$ changes a unit to a unit; and at pair
-types $A_1 \times A_2$, a pair of changes sends a pair and its optimized version to
-a new pair and \emph{its} optimized version componentwise. At set
-types $\tset{A}$, we expect values and their sped-up versions to be the same,
-and a change to be a set of values that, when unioned on to the
-old value, yield the new value.
+The definition is given in Figure~\ref{fig:logical-relation}. Units,
+products and sums essentially mimic the definition of change
+structures we give in \cref{sec:change-structures}. At set types
+$\tset{A}$, a change is a set of values to add to the
+starting set. It is also the case that values and their
+sped-up versions are equal, because we engineered the definition of
+$\Phi(A)$ to be the identity on equality types.
 
 Since the box type $\Box A$ represents values which do not change, the
 only valid change is the unit value, which takes a value and a sped-up
@@ -40,8 +42,8 @@ $\df$ is a valid change from $f$ to $g$ (with $f_s$ and $g_s$ as the
 sped-up versions of $f$ and $g$ respectively), when, given any
 change $dx$ sending $x$ to $y$ (with $a$ and $b$ as respective sped-up
 versions), we have that $\df\,x\dx$ is a valid change sending
-$f\,x$ to $g\,y$ (with $f_s\,a$ and $g_s\,b$ as the respective
-sped-up versions). 
+$f_\phi\,x$ to $g_\phi\,y$ (with $f\,a$ and $g\,b$ as the respective
+slow versions). 
 
 The logical relation is defined on closed terms, and so
 before we can state the fundamental theorem, we have to extend
@@ -91,11 +93,11 @@ relation:
   \weirdat{A_1 + A_2}{\inj i \dx}{\inj j x}{\inj k a}{\inj l y}{\inj m b}
   &\iff i = j = k = l = m \wedge \weirdat{A_i}{\dx}{x}{a}{y}{b}
   \\
-  \weirdat{A \to B}{\df}{f}{f_s}{g}{g_s}
+  \weirdat{A \to B}{\df}{f_\phi}{f}{g_\phi}{g}
   &\iff
   \fa{\weirdat{A}{\dx}{x}{a}{y}{b}}\\
   &\hphantom{{}\iff{}}
-  \weirdat{B}{\df\<x\<\dx}{f\<x}{f_s\<a}{g\<y}{g_s\<b}
+  \weirdat{B}{\df\<x\<\dx}{f_\phi\<x}{f\<a}{g_\phi\<y}{g_\phi\<b}
 \end{align*}
   \caption{Definition of the logical relation}
   \label{fig:logical-relation}
