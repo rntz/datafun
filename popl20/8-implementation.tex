@@ -57,16 +57,20 @@ We compiled each program in three distinct ways: \emph{\naive{}}, without the
 $\phi$ transform (but with $\bot$-propagation); \emph{semi\naive{} raw}, with
 the $\phi$ transform but without further optimization; and \emph{semi\naive{}
   full}, with the $\phi$ transform followed by all three optimizations listed
-previously. The results are shown in \cref{fig:seminaive-vs-naive-graph}. The
-$\phi$ transform alone (\emph{semi\naive\ raw}) provides only a small speed-up,
-roughly \todo{15--20\%}. Only when followed by other optimizations
+previously. The results are shown in \cref{fig:seminaive-vs-naive-graph}.
+%
+The measured times are substantially similar for transitive closure and regex
+search across all three optimization levels, suggesting that higher-order code
+does not pose a particular problem for our optimizations. However, the $\phi$
+transform alone (\emph{semi\naive\ raw}) provides only a small speed-up, roughly
+\todo{15--20\%}. Only when followed by other optimizations
 (\emph{semi\naive\ full}) does it provide the expected asymptotic
 speedup.\footnote{We also tried following the $\phi$ transform with only
   $\bot$-propagation, dropping the other two optimisations. This produced
-  essentially the same results as \emph{semi\naive\ full}, so we have omitted
-  it from \cref{fig:seminaive-vs-naive-graph}. It is unclear to us whether
-  inserting $\bot$ or recognizing complex zero changes is ever necessary to
-  achieve an asymptotic speed-up.
+  essentially the same results as \emph{semi\naive\ full}, so we have omitted it
+  from \cref{fig:seminaive-vs-naive-graph}. It is unclear whether inserting
+  $\bot$ or recognizing complex zero changes are ever necessary to achieve an
+  asymptotic speed-up.
 
   It's also worth addressing the asymptotic performance of
   \emph{semi\naive\ full}. On regex search, for example, doubling the string
@@ -79,13 +83,13 @@ speedup.\footnote{We also tried following the $\phi$ transform with only
 
 We believe this is because both $\phi(\efor x e ...)$ and $\delta(\efor x e
 ...)$ produce loops that iterate over at least every $\dvar x \in \phi e$.
-Consulting our logical relation at set type, we know $e$ and $\phi e$ are
-identical, and so the number of iterations never shrinks. However, as
-demonstrated in \cref{sec:seminaive-examples}, if the body can be simplified to
-$\bot$, rewriting $(\efor x e \bot)$ to $\bot$ can eliminate the loop entirely,
-potentially an asymptotic improvement.
+Consulting our logical relation at set type, we see that in this case $e$ and
+$\phi e$ will be identical, and so the number of iterations never shrinks.
+However, as demonstrated in \cref{sec:seminaive-examples}, if the body can be
+simplified to $\bot$, then we can eliminate the loop entirely by rewriting
+$(\efor x e \bot)$ to $\bot$, potentially an asymptotic improvement.
 
-As in Datalog, we do not expect semi\naive\ evaluation to be so useful on
+As in Datalog, we do not expect semi\naive\ evaluation to be useful on
 \emph{all} recursive programs. Under \naive\ evaluation, each iteration towards
 a fixed point is more expensive than the last, so as a rule of thumb,
 semi\naive\ evaluation is more valuable the more iterations required.
