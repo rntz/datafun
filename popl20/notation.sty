@@ -13,6 +13,7 @@
 %\usepackage{subcaption}   % for complex figures with subfigures/subcaptions
 \usepackage{adjustbox}          % \adjustbox
 \usepackage{tabu}               % tabu environment, \rowfont
+\usepackage{environ}            % \NewEnviron
 
 \hyphenation{semi-na\"ive}
 
@@ -45,6 +46,26 @@
 \renewcommand\vee{\mathrel{\binvee}}
 \renewcommand\wedge{\mathrel{\binwedge}}
 \renewcommand\bullet{\mathrel{\binbullet}}
+
+
+%% ---------- Environments ----------
+\newlength\codeoffset\setlength\codeoffset{15pt}
+
+\NewEnviron{code}{
+  \begin{fleqn}[\codeoffset]
+    \begin{flalign*}
+      \begin{array}{l}\BODY\end{array}
+  \end{flalign*}
+  \end{fleqn}
+}
+
+\NewEnviron{flail}{
+  \begin{fleqn}[\codeoffset]
+    \begin{align*}
+      \BODY
+    \end{align*}
+  \end{fleqn}
+}
 
 
 %% ---------- Commands ----------

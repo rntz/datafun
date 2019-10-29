@@ -8,17 +8,14 @@ declarations:
 
 \newcommand\datum[1]{\textsf{#1}}
 
-\[\begin{array}{l}
-  %% \name{parent}(\datum{e\"arendil}, \datum{elrond})\\
-  %% \name{parent}(\datum{elrond}, \datum{arwen})\\
-  %% \name{parent}(\datum{arwen}, \datum{eldarion})\hspace{28em}
+\begin{code}
   \name{parent}(\datum{aerys}, \datum{rhaegar})\\
   \name{parent}(\datum{rhaegar}, \datum{jon})\\
   \name{parent}(\datum{lyanna}, \datum{jon})\hspace{30em}
   \\[6pt]
   \name{ancestor}(X,Z) \gets \name{parent}(X,Z)\\
   \name{ancestor}(X,Z) \gets \name{parent}(X,Y) \wedge \name{ancestor}(Y,Z)
-\end{array}\]
+\end{code}
 
 \noindent
 This defines two binary relations, \name{parent} and \name{ancestor}. Lowercase

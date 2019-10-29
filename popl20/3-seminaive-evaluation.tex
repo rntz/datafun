@@ -10,11 +10,6 @@ than ancestry:
   \name{path}(X,Z) &\gets \name{edge}(X,Y) \wedge \name{path}(Y,Z)
 \end{align*}
 
-%% \begin{minted}{prolog}
-%%   path(X, Z) ← edge(X, Z).
-%%   path(X, Z) ← edge(X,Y), path(Y, Z).
-%% \end{minted}
-
 \noindent
 Suppose \name{edge} denotes a linear graph, $\{(1, 2),\, (2, 3),\, \dots,\,
 ({n-1}, n)\}$. Then \name{path} should denote its reachability relation,

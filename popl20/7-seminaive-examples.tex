@@ -12,16 +12,15 @@ transitive closure function \name{trans} from
 \newcommand\yone{\dvar y_{\isocolor 1}}
 \newcommand\ytwo{\dvar y_{\isocolor 2}}
 
-\[\begin{array}{l}
-\name{trans} \< \pboxvar{e}
-= \efixis{p}{\dvar e \cup (\dvar e \bullet p)}
-\\
-s \bullet t =
-\eforraw{\etuple{\dvar x, \yone} \in s}
-\eforraw{\etuple{\ytwo , \dvar z} \in t}
-\ewhen{\eeq{\yone}{\ytwo}} \eset{\etuple{\dvar x, \dvar z}}
-\end{array}
-\]
+\begin{code}
+  \name{trans} \< \pboxvar{e}
+  = \efixis{p}{\dvar e \cup (\dvar e \bullet p)}
+  \\
+  s \bullet t =
+  \eforraw{\etuple{\dvar x, \yone} \in s}
+  \eforraw{\etuple{\ytwo , \dvar z} \in t}
+  \ewhen{\eeq{\yone}{\ytwo}} \eset{\etuple{\dvar x, \dvar z}}
+\end{code}
 
 \noindent
 In the process we'll discover that besides $\phi$ itself we need a few simple
@@ -33,7 +32,7 @@ work inside-out. At the core of transitive closure is a relation composition,
 $(\dvar e \bullet p)$, and at the core of relation composition is a
 \kw{when}-expression. Let's take a look at its $\phi$ and $\delta$ translations:
 
-\begin{align*}
+\begin{flail}
   \phi(\ewhen {\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   &= \phi(\eforraw {\etuple{} \in \eeq \yone \ytwo} \eset{\etuple{\dvar x,
       \dvar z}})
@@ -44,13 +43,13 @@ $(\dvar e \bullet p)$, and at the core of relation composition is a
   && \text{apply $\phi$, omitting an unused \kw{let}}\\
   &= \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}}
   && \text{resugar}
-\end{align*}
+\end{flail}
 
 \noindent
 Frequently, as in this case, $\phi$ does nothing interesting. For brevity we'll
 skip such no-op translations.
 
-\begin{align*}
+\begin{flail}
   &\mathrel{\hphantom{=}}
   \delta(\ewhen {\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   \\
@@ -71,7 +70,7 @@ skip such no-op translations.
   && \text{apply $\phi(\eeq \yone \ytwo)$ and $\delta\eset{\etuple{\dvar x, \dvar z}}$}
   \\
   &= \bot && \text{propagate }\bot
-\end{align*}
+\end{flail}
 
 \noindent
 The core insight here is that neither $\eeq \yone \ytwo$ nor
@@ -83,7 +82,7 @@ Now let's pull out and examine $\eforraw{\etuple{\ytwo, \dvar z} \in t}
 \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}}$. The $\phi$
 translation is again a no-op.
 
-\begin{align*}
+\begin{flail}
   &\mathrel{\hphantom{=}}
   \delta(\eforraw{\etuple{\ytwo, \dvar z} \in t}
   \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
@@ -98,11 +97,11 @@ translation is again a no-op.
   &= \eforraw{\etuple{\ytwo, \dvar z} \in \dt}
   \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}}
   && \text{applying prior work, propagating }\bot
-\end{align*}
+\end{flail}
 
 \noindent Tackling the outermost \kw{for} loop:
 
-\begin{align*}
+\begin{flail}
   &\mathrel{\hphantom{=}}
   \delta(
   \eforraw{\etuple{\dvar x, \yone} \in s}
@@ -130,7 +129,7 @@ translation is again a no-op.
   \\
   &= (\ds \bullet t) \cup ((s \cup \ds) \bullet \dt)
   && \text{rewriting in terms of ${\bullet}$}
-\end{align*}
+\end{flail}
 
 \noindent
 This, then, is the derivative $\delta(s \bullet t)$ of relation composition.
@@ -142,7 +141,7 @@ Let's use this to figure out $\phi(\name{trans}\<\eboxvar{e})$. Working inside
 out, we start with the derivative of the loop body, $\delta(\dvar e \cup (\dvar
 e \bullet p))$:
 
-\begin{align*}
+\begin{flail}
   \delta({\dvar e \cup (\dvar e \bullet p)})
   &= \delta\dvar e \cup \delta(\dvar e \bullet p)\\
   &= \delta\dvar e
@@ -154,7 +153,7 @@ e \bullet p))$:
   \\
   &= \dvar e \bullet \deep
   && \text{propagate}~\bot
-\end{align*}
+\end{flail}
 
 \noindent
 The penultimate step requires a new optimization.
@@ -164,7 +163,7 @@ know $\dvar{de}$ is a zero change, so we may safely replace it by $\bot$.
 
 Putting everything together, we have:
 
-\begin{align*}
+\begin{flail}
   \phi(\efixis{p}{\dvar e \cup (\dvar e \bullet p)}
   &= \phi(\efix \ebox{\fnof{p} \dvar e \cup (\dvar e \bullet p)})
   && \text{desugaring}
@@ -178,7 +177,7 @@ Putting everything together, we have:
       ({\fnof{p} \dvar e \cup (\dvar e \bullet p)}),\
       ({\fnof{\pboxvar p} \fnof{\deep} \dvar e \bullet \deep})}
   && \text{previous work}
-\end{align*}
+\end{flail}
 
 \noindent
 Examining the recurrence produced by this use of \fastfix, we recover the
