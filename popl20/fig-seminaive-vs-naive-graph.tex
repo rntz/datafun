@@ -46,22 +46,23 @@
 
   \vspace{\baselineskip}
 
+  %% TODO: color according to colors used in figures (blue, black, red)
   \setlength\tabcolsep{3.6pt}
   \begin{tabular}{@{}l*{11}{r}@{}}
     & \multicolumn{11}{c}{\scshape graph size / string length}\\
     & 120 & 140 & 160 & 180 & 200 & 220 & 240 & 260 & 280 & 300 & 320
     \\\midrule
-    \scshape transitive closure, semi\naive\ optimized & 0.026 & 0.037 & 0.056 & 0.072 & 0.099 & 0.130 & 0.170 & 0.204 & 0.259 & 0.312 & 0.377
-    \\
-    \scshape regex search, semi\naive\ optimized& 0.028 & 0.037 & 0.054 & 0.075 & 0.102 & 0.133 & 0.171 & 0.220 & 0.269 & 0.331 & 0.401
-    \\
-    \scshape transitive closure, semi\naive\ unoptimized & 1.187 & 2.163 & 4.154 & 5.835 & 8.982 & 13.350 & 21.069 & 36.512 & 53.197 & 75.209 & 101.933
-    \\
-    \scshape regex search, semi\naive\ unoptimized & 1.687 & 2.454 & 4.134 & 6.573 & 9.854 & 14.611 & 21.661 & 39.171 & 56.345 & 79.687 & 108.236
+    \scshape regex search, \naive & 1.683 & 2.786 & 4.549 & 7.324 & 11.357 & 17.304 & 25.788 & 45.634 & 65.174 & 90.934 & 123.023
     \\
     \scshape transitive closure, \naive & 1.446 & 2.599 & 4.356 & 6.933 & 10.840 & 16.803 & 27.159 & 44.136 & 64.953 & 88.154 & 119.604
     \\
-    \scshape regex search, \naive & 1.683 & 2.786 & 4.549 & 7.324 & 11.357 & 17.304 & 25.788 & 45.634 & 65.174 & 90.934 & 123.023
+    \scshape regex search, semi\naive\ raw & 1.687 & 2.454 & 4.134 & 6.573 & 9.854 & 14.611 & 21.661 & 39.171 & 56.345 & 79.687 & 108.236
+    \\
+    \scshape transitive closure, semi\naive\ raw & 1.187 & 2.163 & 4.154 & 5.835 & 8.982 & 13.350 & 21.069 & 36.512 & 53.197 & 75.209 & 101.933
+    \\
+    \scshape regex search, semi\naive\ full& 0.028 & 0.037 & 0.054 & 0.075 & 0.102 & 0.133 & 0.171 & 0.220 & 0.269 & 0.331 & 0.401
+    \\
+    \scshape transitive closure, semi\naive\ full & 0.026 & 0.037 & 0.056 & 0.072 & 0.099 & 0.130 & 0.170 & 0.204 & 0.259 & 0.312 & 0.377
   \end{tabular}
 
   \caption{\Naive\ vs semi\naive\ evaluation of transitive closure and regex matching in Datafun}
