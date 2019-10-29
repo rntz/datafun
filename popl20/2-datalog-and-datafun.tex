@@ -3,58 +3,39 @@
 
 \subsection{Datalog}
 
-Datalog's syntax is a subset of Prolog's. Programs
-are collections of predicate declarations:
+Datalog's syntax is a subset of Prolog's. Programs are collections of predicate
+declarations:
 
-\begin{minted}[]{prolog}
-  parent(earendil, elrond).
-  parent(elrond, arwen).
-  parent(arwen, eldarion).
+\newcommand\datum[1]{\textsf{#1}}
 
-  ancestor(X, Z) ← parent(X, Z).
-  ancestor(X, Z) ← ancestor(X, Y), parent(Y, Z).
-\end{minted}
+\[\begin{array}{l}
+  %% \name{parent}(\datum{e\"arendil}, \datum{elrond})\\
+  %% \name{parent}(\datum{elrond}, \datum{arwen})\\
+  %% \name{parent}(\datum{arwen}, \datum{eldarion})\hspace{28em}
+  \name{parent}(\datum{aerys}, \datum{rhaegar})\\
+  \name{parent}(\datum{rhaegar}, \datum{jon})\\
+  \name{parent}(\datum{lyanna}, \datum{jon})\hspace{30em}
+  \\[6pt]
+  \name{ancestor}(X,Z) \gets \name{parent}(X,Z)\\
+  \name{ancestor}(X,Z) \gets \name{parent}(X,Y) \wedge \name{ancestor}(Y,Z)
+\end{array}\]
 
-This defines two binary relations, \rel{parent} and \rel{ancestor}. Lowercase
-terms like \datalog{elrond} and \datalog{arwen} are symbols \emph{a la} Lisp,
-and uppercase terms like \datalog{X} and \datalog{Y} are variables.
+\noindent
+This defines two binary relations, \name{parent} and \name{ancestor}. Lowercase
+sans-serif words like \datum{rhaegar} and \datum{lyanna} are symbols \emph{\`a
+  la} Lisp, and uppercase characters like $X$ and $Y$ are variables.
 
-The \rel{parent} relation declares a set of ground \emph{facts}; we assert that
-\datalog{earendil} is the parent of \datalog{elrond}, \datalog{elrond} the
-parent of \datalog{arwen}, and so on. The \rel{ancestor} relation is declared as
-a pair of \emph{rules}, the first saying $X$ is an ancestor of $Z$ if $X$ is
-$Z$'s parent, and the second saying $X$ is an ancestor of $Z$ if there is a
-intermediate person $Y$ such that $X$ is $Y$'s ancestor and $Y$ is $Z$'s parent.
-
-% In inference rule form, this program could be rendered as:
-%
-% \begin{mathpar}
-%   \inferrule*[]
-%              { }
-%              { \mathsf{parent(earendil, elrond)} }
-%   \and
-%   \inferrule*[]
-%              { }
-%              { \mathsf{parent(elrond, arwen)} }
-%   \and
-%   \inferrule*[]
-%              { }
-%              { \mathsf{parent(arwen, eldarion)} }
-%   \\\vspace{1em}
-%   \inferrule*[]
-%              { \mathsf{parent}(x, y) }
-%              { \mathsf{ancestor}(x, y) }
-%   \and
-%   \inferrule*[]
-%              { \mathsf{ancestor}(x, y) \\ \mathsf{parent}(y, z) }
-%              { \mathsf{ancestor}(x, z) }
-% \end{mathpar}
+The \name{parent} relation is defined as a set of ground facts: we assert that
+\datum{aerys} is \datum{rhaegar}'s parent, that \datum{rhaegar} is \datum{jon}'s
+parent, and so on. The \name{ancestor} relation is defined by a pair of rules:
+first, that $X$ is $Z$'s ancestor if $X$ is $Z$'s parent; second, that $X$ is
+$Z$'s ancestor if $X$ has a child $Y$ who is an ancestor of $Z$.
 
 Semantically, a predicate denotes the set of tuples that satisfy it. Recursive
-definitions can be interpreted by viewing the whole program as a relation
-transformer, and taking the least fixed point of that function. Datalog imposes
-syntactic restrictions which ensure the relation transformer the rules define is
-monotone, guaranteeing a unique least fixed point.
+definitions like \name{ancestor} can be interpreted by viewing the whole program
+as a relation transformer, and taking the least fixed point of that function.
+Datalog imposes syntactic restrictions which ensure the relation transformer the
+rules define is monotone, guaranteeing a unique least fixed point.
 
 \subsection{Datafun}
 

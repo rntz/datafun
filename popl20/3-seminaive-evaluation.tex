@@ -4,42 +4,55 @@
 Let's return to our example Datalog program, modified to consider graphs rather
 than ancestry:
 
-\begin{minted}{prolog}
-  path(X, Z) ← edge(X, Z).
-  path(X, Z) ← edge(X,Y), path(Y, Z).
-\end{minted}
+\begin{align*}
+  \name{path}(X,Z) &\gets \name{edge}(X,Z)
+  &
+  \name{path}(X,Z) &\gets \name{edge}(X,Y) \wedge \name{path}(Y,Z)
+\end{align*}
+
+%% \begin{minted}{prolog}
+%%   path(X, Z) ← edge(X, Z).
+%%   path(X, Z) ← edge(X,Y), path(Y, Z).
+%% \end{minted}
 
 \noindent
-Let's suppose that \rel{edge} denotes a linear graph, $\{(a_1, a_2),\, (a_2,
-a_3),\, \dots,\, (a_{n-1}, a_n)\}$. Then \rel{path} should denote its
-reachability relation, $\setfor{(a_i, a_j)}{1 \le i < j \le n}$. How can we
-compute this relation? The \naive\ approach is to begin with nothing in the
-\rel{path} relation and repeatedly apply its rules until nothing more is
-deducible. We can make this precise by explicitly time-indexing our rules:
+Suppose \name{edge} denotes a linear graph, $\{(1, 2),\, (2, 3),\, \dots,\,
+({n-1}, n)\}$. Then \name{path} should denote its reachability relation,
+$\setfor{(i, j)}{1 \le i < j \le n}$. How can we compute this? The simplest
+approach is to begin with nothing in the \name{path} relation and repeatedly
+apply its rules until nothing more is deducible. We can make this strategy
+explicit by time-indexing our rules:
 
 \begin{align*}
   \name{path}_{i+1}(X,Z) &\gets \name{edge}(X,Z)
   &
-  \name{path}_{i+1}(X,Z) &\gets \name{path}_i(X,Y) \wedge \name{edge}(Y,Z)
+  \name{path}_{i+1}(X,Z) &\gets \name{edge}(X,Y) \wedge \name{path}_i(Y,Z)
 \end{align*}
 
-By omission $\name{path}_0 = \emptyset$. From this it's easy to see that
-inductively $\name{path}_i \subseteq \name{path}_{i+1}$.
+\noindent
+By omission $\name{path}_0 = \emptyset$. From this we can see inductively that
+$\name{path}_i \subseteq \name{path}_{i+1}$.
 %
-Consequently, at step $i+1$ we re-deduce every fact known at step $i$.
+This is because at step $i+1$ we re-deduce every fact known at step $i$.
 %
-For example, suppose $\name{path}_i(a_j, a_k)$. Then at step $i+1$ we apply the
-second rule to $\name{edge}(a_{j-1}, a_j)$ and deduce
-$\name{path}_{i+1}(a_{j-1}, a_k)$.
+For example, suppose $\name{path}_i(j, k)$ holds. Then at step $i+1$ the second
+rule deduces $\name{path}_{i+1}({j-1}, k)$ from $\name{edge}({j-1}, j) \wedge
+\name{path}_i(j,k)$.
 %
-But since we also have $\name{path}_{i+1}(a_j, a_k)$, at time $i+2$ we deduce
-the very same thing again, and again at $i+3$, $i+4$, and so on.
+But since $\name{path}_{i+1}(j, k)$ holds, we perform the same deduction at time
+$i+2$, and again at $i+3$, $i+4$, \emph{etc}.
 
 Because we append edges one at a time, $\name{path}_i$ contains exactly paths of
-$i$ or fewer edges. Therefore it takes $n$ steps until we reach our fixed point
-$\name{path}_{n-1} = \name{path}_n$. Since step $i$ involves $|\name{path}_i|
-\in \Theta(i^2)$ deductions, we make $\Theta(n^3)$ deductions in total. This
-seems wasteful, since there are only $\Theta(n^2)$ paths in the final result.
+$i$ or fewer edges.
+%
+Therefore it takes $n$ steps until we reach our fixed point $\name{path}_{n-1} =
+\name{path}_n$.
+%
+Since step $i$ involves $|\name{path}_i| \in \Theta(i^2)$ deductions, we make
+$\Theta(n^3)$ deductions in total.
+%
+There being only $\Theta(n^2)$ paths in the final result, this is terribly
+wasteful; hence we term this \emph{\naive\ evaluation}.
 
 Semi\naive\ evaluation avoids this waste by transforming the rules for
 \rel{path} to find the newly deducible paths, $\name{dpath}_i$, at iteration
@@ -74,13 +87,11 @@ the fixed point of the monotone function \name{step} defined by:
 \]
 
 \noindent
-The \naive\ way to compute \name{step}'s fixed point is to iterate it: start
-with \(\name{path}_0 = \emptyset\) and compute \(\name{path}_{i+1} =
+The \naive\ way to compute \name{step}'s fixed point is to iterate it: start from \(\name{path}_0 = \emptyset\) and compute \(\name{path}_{i+1} =
 \name{step}\<\name{path}_i\) for increasing $i$ until \(\name{path}_i =
 \name{path}_{i+1}\).
 %
-But since $\name{path}_i \subseteq \name{step}\<\name{path}_i$, each iteration
-re-computes every path found by the previous iteration.
+But as before, $\name{path}_i \subseteq \name{step}\<\name{path}_i$; each iteration re-computes the paths found by its predecessor.
 %
 Following Datalog, we'd prefer to compute only the \emph{change} between
 iterations.
@@ -118,25 +129,8 @@ Observe that
 In other words, $\name{step}'$ tells us how \name{step} changes as its input
 grows.
 %
-Using this property, we can directly compute the changes $\name{dpath}_i$
-between our iterations $\name{path}_i$:
-
-%% \begin{align*}
-%%   \name{dpath}_0 &= \name{step}\<\emptyset
-%%   & \name{dpath}_{i+1} &= \name{step}'\<\name{dpath}_i
-%%   & \name{path}_{i+1} &= \name{path}_i \cup \name{dpath}_i
-%% \end{align*}
-
-%% \[\def\arraystretch{1.2}
-%% \begin{array}{rclcl}
-%%   \name{dpath}_0 &=& \name{step}\<\emptyset
-%%   &=& \name{edge}
-%%   \\
-%%   \name{dpath}_{i+1} &=& \name{step}'\<\name{dpath}_i
-%%   &=& \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}_i}
-%%   \\
-%%   \name{path}_{i+1} &=& \name{path}_i \cup \name{dpath}_i
-%% \end{array}\]
+This lets us directly compute the changes $\name{dpath}_i$ between our
+iterations $\name{path}_i$:
 
 \begin{align*}
   \name{dpath}_0
