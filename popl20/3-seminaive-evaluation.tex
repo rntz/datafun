@@ -4,11 +4,11 @@
 Let's return to our example Datalog program, modified to consider graphs rather
 than ancestry:
 
-\begin{align*}
+\begin{flail}
   \name{path}(X,Z) &\gets \name{edge}(X,Z)
-  &
+  \\
   \name{path}(X,Z) &\gets \name{edge}(X,Y) \wedge \name{path}(Y,Z)
-\end{align*}
+\end{flail}
 
 \noindent
 Suppose \name{edge} denotes a linear graph, $\{(1, 2),\, (2, 3),\, \dots,\,
@@ -18,11 +18,11 @@ approach is to begin with nothing in the \name{path} relation and repeatedly
 apply its rules until nothing more is deducible. We can make this strategy
 explicit by time-indexing our rules:
 
-\begin{align*}
+\begin{flail}
   \name{path}_{i+1}(X,Z) &\gets \name{edge}(X,Z)
-  &
+  \\
   \name{path}_{i+1}(X,Z) &\gets \name{edge}(X,Y) \wedge \name{path}_i(Y,Z)
-\end{align*}
+\end{flail}
 
 \noindent
 By omission $\name{path}_0 = \emptyset$. From this we can see inductively that
@@ -53,13 +53,13 @@ Semi\naive\ evaluation avoids this waste by transforming the rules for
 \rel{path} to find the newly deducible paths, $\name{dpath}_i$, at iteration
 $i$, and accumulating these changes to produce a final result:
 
-\begin{align*}
+\begin{flail}
   \name{dpath}_0(X,Y) &\gets \name{edge}(X,Y)
   \\
   \name{dpath}_{i+1}(X,Z) &\gets \name{edge}(X,Y) \wedge \name{dpath}_i(Y,Z)
   \\
   \name{path}_{i+1}(X,Y) &\gets \name{path}_i(X,Y) \vee\name{dpath}_i(X,Y)
-\end{align*}
+\end{flail}
 
 \noindent
 It's easy to show inductively that $\name{dpath}_{i}$ contains only paths
@@ -76,10 +76,10 @@ and we make $\Theta(n^2)$ deductions overall.\footnote{Here we must assume the
 Now let's move from Datalog to Datafun.\footnote{In this section we do not bother marking discrete variables $\dvar x$ or expressions $\eiso e$, as it muddies our examples to no benefit.} The transitive closure of \name{edge} is
 the fixed point of the monotone function \name{step} defined by:
 
-\[
+\begin{code}
 \name{step} \<\name{path} = \name{edge} \cup
 \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{path}}
-\]
+\end{code}
 
 \noindent
 The \naive\ way to compute \name{step}'s fixed point is to iterate it: start from \(\name{path}_0 = \emptyset\) and compute \(\name{path}_{i+1} =
@@ -93,10 +93,10 @@ iterations.
 %
 So consider $\name{step}'$ defined by:
 
-\[
+\begin{code}
 \name{step}' \<\name{dpath} =
 \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
-\]
+\end{code}
 
 \newcommand\colorpath{{\color{BlindVermilion}\name{path}}}
 \newcommand\colordpath{{\color{BlindBlue}\name{dpath}}}
@@ -110,7 +110,7 @@ So consider $\name{step}'$ defined by:
 \noindent
 Observe that
 %
-\begin{align*}
+\begin{flail}
   &\mathrel{\hphantom{=}} \name{step} \<(\colorpath \cup \colordpath)
   \\
   &= \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath \cup \colordpath}
@@ -118,7 +118,7 @@ Observe that
   &= {\colorA \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath}} \cup {\colorB \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colordpath}}
   \\
   &= {\colorA\name{step}\<\colorpath} \cup {\colorB\name{step}'\<\colordpath}
-\end{align*}
+\end{flail}
 
 \noindent
 In other words, $\name{step}'$ tells us how \name{step} changes as its input
@@ -127,7 +127,7 @@ grows.
 This lets us directly compute the changes $\name{dpath}_i$ between our
 iterations $\name{path}_i$:
 
-\begin{align*}
+\begin{flail}
   \name{dpath}_0
   &= \name{step}\<\emptyset
   = \name{edge}
@@ -138,7 +138,7 @@ iterations $\name{path}_i$:
   \\
   \name{path}_{i+1}
   &= \name{path}_i \cup \name{dpath}_i
-\end{align*}
+\end{flail}
 
 \noindent These exactly mirror the derivative and accumulator rules for
 \(\name{path}_i\) and \(\name{dpath}_i\) we gave earlier.
