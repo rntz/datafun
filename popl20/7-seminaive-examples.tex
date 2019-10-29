@@ -23,10 +23,11 @@ s \bullet t =
 \end{array}
 \]
 
+\noindent
 In the process we'll discover that besides $\phi$ itself we need a few simple
 optimisations to actually speed up our program: most importantly, we need to
 propagate $\bot$ expressions.
-%
+
 In our experience, performing $\phi$ and $\delta$ by hand is easiest when you
 work inside-out. At the core of transitive closure is a relation composition,
 $(\dvar e \bullet p)$, and at the core of relation composition is a
@@ -36,13 +37,13 @@ $(\dvar e \bullet p)$, and at the core of relation composition is a
   \phi(\ewhen {\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   &= \phi(\eforraw {\etuple{} \in \eeq \yone \ytwo} \eset{\etuple{\dvar x,
       \dvar z}})
-  && \text{desugaring}
+  && \text{desugar \kw{when}}
   \\
   &= \eforraw{\etuple{} \in \eeq \yone \ytwo}
   \phi{\eset{\etuple{\dvar x, \dvar z}}}
-  && \text{omitting a needless \kw{let}-binding}\\
+  && \text{apply $\phi$, omitting an unused \kw{let}}\\
   &= \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}}
-  && \text{resugaring}
+  && \text{resugar}
 \end{align*}
 
 \noindent
@@ -54,28 +55,29 @@ skip such no-op translations.
   \delta(\ewhen {\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   \\
   &= \delta(\eforraw{\etuple{} \in \eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
-  && \text{desugaring \kw{when}}
+  && \text{desugar \kw{when}}
   \\
-  &= \eforraw{\etuple{} \in \delta(\eeq \yone \ytwo)}
+  &= \hphantom{{}\cup} \eforraw{\etuple{} \in \delta(\eeq \yone \ytwo)}
   \phi\eset{\etuple{\dvar x, \dvar z}}
-  && \text{omitting needless \kw{let}-bindings}
+  && \multirow{2}{*}{\text{apply $\phi$, omitting unused \kw{let}s}}
   \\
-  &\cup
+  &\hphantom{={}} \cup
   \eforraw{\etuple{} \in \phi(\eeq \yone \ytwo) \cup \delta(\eeq \yone \ytwo)}
   \delta\eset{\etuple{\dvar x, \dvar z}}
   \\
   &= \eforraw{\etuple{} \in \bot} \eset{\etuple{\dvar x, \dvar z}}
   \cup \eforraw{\etuple{} \in \phi(\eeq \yone \ytwo) \cup \bot} \bot
-  && \text{rules for $\phi(\eeq e f)$ and $\delta\esetsub{e_i}{i}$}
+  && \text{apply $\phi(\eeq \yone \ytwo)$ and $\delta\eset{\etuple{\dvar x, \dvar z}}$}
   \\
-  &= \bot && \text{propagating }\bot
+  &= \bot && \text{propagate }\bot
 \end{align*}
 
-The core insight here is that $\eeq \yone \ytwo$ can't change, and neither can
-$\eset{\etuple{\dvar x,\dvar z}}$. By propagating this information --- for
-example, rewriting $(\eforraw{x \in \bot} e)$ to $\bot$ --- we can simplify our
-derivative down to nothing.
-%
+\noindent
+The core insight here is that neither $\eeq \yone \ytwo$ nor
+$\eset{\etuple{\dvar x, \dvar z}}$ can change. Propagating this information ---
+for example, rewriting $(\eforraw {...} \bot)$ to $\bot$ --- can simplify
+derivatives and eliminate expensive \kw{for}-loops.
+
 Now let's pull out and examine $\eforraw{\etuple{\ytwo, \dvar z} \in t}
 \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}}$. The $\phi$
 translation is again a no-op.
@@ -85,16 +87,16 @@ translation is again a no-op.
   \delta(\eforraw{\etuple{\ytwo, \dvar z} \in t}
   \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   \\
-  &= \eforraw{\etuple{\ytwo, \dvar z} \in \dt}
+  &= \hphantom{{}\cup} \eforraw{\etuple{\ytwo, \dvar z} \in \dt}
   \phi(\ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
-  && \text{omitting needless \kw{let}-bindings}
+  && {\text{apply $\delta$, omitting some unused \kw{let}s}}
   \\
-  &\cup \eforraw{\etuple{\ytwo, \dvar z} \in t \cup \dt}
+  &\hphantom{{}=} \cup \eforraw{\etuple{\ytwo, \dvar z} \in t \cup \dt}
   \delta(\ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}})
   \\
   &= \eforraw{\etuple{\ytwo, \dvar z} \in \dt}
   \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}}
-  && \text{propagating }\bot
+  && \text{applying prior work, propagating }\bot
 \end{align*}
 
 \noindent Tackling the outermost \kw{for} loop:
@@ -118,7 +120,7 @@ translation is again a no-op.
   &= \eforraw{\etuple{\dvar x, \yone} \in \ds}
   \eforraw{\etuple{\ytwo, \dvar z} \in t}
   \ewhen{\eeq \yone \ytwo} \eset{\etuple{\dvar x, \dvar z}}
-  && \text{applying previous work}
+  && \text{applying prior work}
   \\
   &\cup
   \eforraw{\etuple{\dvar x, \yone} \in s \cup \ds}
