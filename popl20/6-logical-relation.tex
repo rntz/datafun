@@ -1,13 +1,79 @@
 \section{Proving the Semi\naive\ Transformation Correct}
 
-We formalize the intended behavior of $\phi e$ and $\delta e$ using a logical
-relation. 
+We have given a program transformation which compute a change from a
+term $e$ to a term $e'$ in terms of the change $\delta(e)$ and the
+optimized versions $\phi(e)$ and $\phi(e')$. To state the correctness
+of $\delta()$ and $\phi()$, we need to show that $\phi e$ and
+$\phi e'$ preserve the meaning of $e$ and $e'$ respectively, and that
+$\delta e$ correctly sends $e$ to $e'$.
 %
-Inductively on types $A$, letting $a,b \in \den{A}$,
+Since Datafun supports higher-order functions, we cannot directly
+prove that the semantics is preserved. Instead, we will need to
+formalize the intended relationship of $\phi e$ and $\delta e$ using a
+logical relation, and then use that relation to prove an
+\emph{adequacy theorem} saying that the semantics is preserved for
+first-order types.
+
+So inductively on types $A$, letting $a,b \in \den{A}$,
 $x,y \in \den{\Phi A}$, and $\dx \in \den{\DP A}$, we define a five
 place relation $\weirdat{A}{\dx}{x}{a}{y}{b}$, which may be glossed as
 ``$x,y$ speed up $a,b$ respectively, and $\dx$ changes $x$ into $y$''.
-The definition is given in Figure~\ref{fig:logical-relation}.
+The definition is given in Figure~\ref{fig:logical-relation}. At the
+unit type  $1$, the unit value $\tuple{}$ changes a unit to a unit; and at pair
+types $A_1 \times A_2$, a pair of changes sends a pair and its optimized version to
+a new pair and \emph{its} optimized version componentwise. At set
+types $\tset{A}$, we expect values and their sped-up versions to be the same,
+and a change to be a set of values that, when unioned on to the
+old value, yield the new value.
+
+Since the box type $\Box A$ represents values which do not change, the
+only valid change is the unit value, which takes a value and a sped-up
+value to the very same value and sped-up value. However, the sped-up
+version of a value is taken to be a \emph{pair} of a value and a
+change, and the change is a zero-change for that value at type $A$.
+This ensures that at a boxed function type, we will always have a
+derivative (i.e., a zero-change) available. 
+%
+Speaking of functions, the relation at the type $A \to B$ works very
+much the way one would expect from the incremental lambda calculus.
+$\df$ is a valid change from $f$ to $g$ (with $f_s$ and $g_s$ as the
+sped-up versions of $f$ and $g$ respectively), when, given any
+change $dx$ sending $x$ to $y$ (with $a$ and $b$ as respective sped-up
+versions), we have that $\df\,x\dx$ is a valid change sending
+$f\,x$ to $g\,y$ (with $f_s\,a$ and $g_s\,b$ as the respective
+sped-up versions). 
+
+The logical relation is defined on closed terms, and so
+before we can state the fundamental theorem, we have to extend
+the relation to contexts $\G$ and substitutions, letting
+$\rho,\rho' \in \den{\G}$, $\g,\g' \in \den{\Phi\G}$, and
+$\dgamma \in \den{\DP\G}$:
+
+\nopagebreak[1]
+\begin{align*}
+  \weirdat{\G}{\dgamma}{\g}{\rho}{\g'}{\rho'}
+  &\iff \fa{\h x A \in \G} \weirdat{A}{\dgamma_{\dx}}{\g_x}{\rho_x}{\g'_x}{\rho'_x}
+  \\
+  &\hphantom{{}\iff{}} \hspace*{-13.2pt} \wedge \fa{\hd x A \in \G}
+  \weirdat{\iso A}
+          {\etuple{}}
+          {(\g_{\dvar \dx}, \g_{\dvar x})}
+          {\rho_{\dvar x}}
+          {(\g'_{\dvar\dx}, \g'_{\dvar x})}
+          {\rho'_{\dvar x}}
+\end{align*}
+\noindent
+With that in place, we can state the fundamental theorem, showing that
+$\phi$ and $\delta$ generate expressions which satisfy this logical
+relation:
+
+\begin{theorem}[Fundamental Property]
+  If $\J e \G A$ and $\weirdat{\G}{\dgamma}{\g}{\rho}{\g'}{\rho'}$ then
+  \[\weirdat{A}{\den{\delta e} \<\tuple{\g,\dgamma}}{\den{\phi
+      e}\<\g}{\den{e}\<\rho}{\den{\phi e}\<\g'}{\den{e}\<\rho'}\]
+\end{theorem}
+
+
 \begin{figure}
 \begin{align*}
   \weirdat{\tunit}{\tuple{}}{\tuple{}}{\tuple{}}{\tuple{}}{\tuple{}}
@@ -35,24 +101,13 @@ The definition is given in Figure~\ref{fig:logical-relation}.
   \label{fig:logical-relation}
 \end{figure}
 
+This theorem follows by a structural induction on typing derivations
+as usual, but a number of lemmas need to be proved in order to
+establish the fundamental theorem.
 
-This definition can be extended to contexts $\G$, letting
-$\rho,\rho' \in \den{\G}$, $\g,\g' \in \den{\Phi\G}$, and
-$\dgamma \in \den{\DP\G}$:
-
-\nopagebreak[1]
-\begin{align*}
-  \weirdat{\G}{\dgamma}{\g}{\rho}{\g'}{\rho'}
-  &\iff \fa{\h x A \in \G} \weirdat{A}{\dgamma_{\dx}}{\g_x}{\rho_x}{\g'_x}{\rho'_x}
-  \\
-  &\hphantom{{}\iff{}} \hspace*{-13.2pt} \wedge \fa{\hd x A \in \G}
-  \weirdat{\iso A}
-          {\etuple{}}
-          {(\g_{\dvar \dx}, \g_{\dvar x})}
-          {\rho_{\dvar x}}
-          {(\g'_{\dvar\dx}, \g'_{\dvar x})}
-          {\rho'_{\dvar x}}
-\end{align*}
+First, we prove a pair of lemmas about the behaviour of the logical
+relation at equality types. Both of these follow by induction on the
+structure of equality types. 
 
 \begin{lemma}[Equality Changes]
 For all equality types $\eqt A$, we have that $\weirdat{\eqt A}{\dx}{x}{a}{y}{b}$ implies $x = a$ and $y = b$.
@@ -62,37 +117,71 @@ For all equality types $\eqt A$, we have that $\weirdat{\eqt A}{\dx}{x}{a}{y}{b}
   For all equality types $\eqt A$, we have that $\weirdat{\eqt A}{\dummy(x)}{x}{x}{x}{x}$.
 \end{lemma}
 
+The equality changes lemma shows that at equality types, the sped-up
+version of a value is the value itself. We then show a relational
+analogue of Lemma~\ref{lem:dummy-change}, that the $\dummy$ function
+calculates a zero change for all equality types. This justifies the
+use of $0$ to notate uses of $\dummy$ in the $\phi$ and $\delta$
+translations.
+
+The next pair of lemmas involve the lattice types. First, we show that the change type for
+a lattice type $L$ is $L$ itself, by induction on $L$:
+
+\begin{lemma}[Semilattice Change Types]
+  At lattice types $L$, we have that $\Delta L = L$. 
+\end{lemma}
+
+\noindent We use this when showing that a change for a lattice type $L$ is something that
+can be joined on to it:
+
 \begin{lemma}[Semilattice Changes]
   At lattice types $L$, we have that $\weirdat{L}{\dx}{x}{a}{y}{b}$ if and only if $x = a$ and $y = b = x \vee_L \dx$
 \end{lemma}
+\begin{proof}
+  This follows by induction on the structure of $L$. The first two properties are a corollary
+  of the equality changes lemma, and the third property follows from the fact that it is true
+  by definition for set types, and that products work pointwise. 
+\end{proof}
+
+This lemma is used in the proofs of the fundamental theorem in all the
+cases involving lattice types -- we use it in the cases for the least
+element $\bot$, the join $e \vee e'$, for-comprehensions
+$\efor x e f$, and the fixed point operator $\prim{fix}\< e$.
+
+Similarly, we also need to prove theorems about context manipulations
+to establish the soundness of the rules for the box type. First, we
+show that all valid changes for a discrete context (i.e., a context
+with only discrete variables) send terms to themselves.  
 
 \begin{lemma}[Discrete Contexts Don't Change]
   If $\weirdat{\stripcx{\G}}{\tuple{}}{\gamma}{\rho}{\gamma'}{\rho'}$ then $\gamma = \gamma'$ and $\rho = \rho'$.  
 \end{lemma}
+
+We state this lemma by quantifying over all contexts and then
+stripping because we use it in the proof of the next lemma, which
+says that for any valid context change, its effect on the discrete
+part is a no-op:
 
 \begin{lemma}[Context Stripping]
   If $\weirdat{\G}{\dg}{\gamma}{\rho}{\gamma'}{\rho'}$ 
   then $\weirdat{\stripcx{\G}}{\tuple{}}{\strip(\g)}{\strip(\rho)}{\strip(\g')}{\strip(\rho')}$.
 \end{lemma}
 
+This lemma is used in all the cases of the fundamental theorem
+involving discrete variables -- equality $\eeq{e_1}{e_2}$, set constructors
+like $\esetsub{e_i}{i}$, emptiness tests $\eisempty e$, and box
+introduction $\ebox e$. 
 
-\noindent
-Our fundamental result is that $\phi$ and $\delta$ generate expressions which
-preserve this logical relation:
 
-\begin{theorem}[Fundamental]
-  If $\J e \G A$ and $\weirdat{\G}{\dgamma}{\g}{\rho}{\g'}{\rho'}$ then
-  \[\weirdat{A}{\den{\delta e} \<\tuple{\g,\dgamma}}{\den{\phi
-      e}\<\g}{\den{e}\<\rho}{\den{\phi e}\<\g'}{\den{e}\<\rho'}\]
-\end{theorem}
 
-\noindent
-Consequently, first-order closed programs compute the same result when
-$\phi$-translated:
+Once the fundamental theorem has been established, we can specialize
+it to closed terms and equality types, Then, the equality changes
+lemma implies adequacy -- that first-order closed programs compute the
+same result when $\phi$-translated:
 
-\begin{corollary}[First-order Correctness]
+\begin{theorem}[Adequacy of the Translation]
   If $\J e {\emptycx} {\eqt A}$ then $\den{e} = \den{\phi e}$.
-\end{corollary}
+\end{theorem}
 
 %% \nopagebreak[2]
 %% \vspace{-\baselineskip}
