@@ -5,7 +5,7 @@
 \usepackage{booktabs}           % \midrule
 \usepackage{mathpartir}         % \begin{mathpar}, \infer, etc.
 \usepackage{mathtools}          % vertical centered colon, \dblcolon, \Coloneqq
-%\usepackage{multirow}           % \begin{multirow}
+\usepackage{multirow}           % \begin{multirow}
 \usepackage{nccmath}      % fix spacing around AMS math environments like align*
 \usepackage{pgfplots}\pgfplotsset{compat=1.5}
 \usepackage{placeins}           %\FloatBarrier
@@ -39,9 +39,11 @@
 \let\bincup\cup
 \let\binvee\vee
 \let\binwedge\wedge
+\let\binbullet\bullet
 \renewcommand\cup{\mathrel{\bincup}}
 \renewcommand\vee{\mathrel{\binvee}}
 \renewcommand\wedge{\mathrel{\binwedge}}
+\renewcommand\bullet{\mathrel{\binbullet}}
 
 
 %% ---------- Commands ----------
@@ -145,6 +147,9 @@
 \newcommand\daggereq{\overset{\dagger}{=}}
 \newcommand\stardaggereq{\overset{\boldsymbol\star\dagger}{=}}
 
+%% Used in sections 7 & 8
+\newcommand\rewrites\leadsto
+
 
 %% ===== Semantic and categorical notation =====
 \newcommand\iso{{\texorpdfstring{\ensuremath{\square}}{box}}}
@@ -239,8 +244,8 @@
 \newcommand\pboxtuple[1]{\pbox{\ptuple{#1}}}
 
 %% NEW BOXED VERSIONS!
-\colorlet{isobg}{CyanBlue!15}
-\colorlet{isobg}{Red!5!Yellow!28}
+\colorlet{isobg}{Cyan!15}
+\colorlet{isobg}{Red!5!Yellow!24}
 \newcommand\isobgname{yellow}
 
 \newcommand\eiso[1]{\adjustbox{bgcolor=isobg,}{%
