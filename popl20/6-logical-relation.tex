@@ -38,8 +38,8 @@ derivative (i.e., a zero-change) available.
 %
 Speaking of functions, the relation at the type $A \to B$ works very
 much the way one would expect from the incremental lambda calculus.
-$\df$ is a valid change from $f$ to $g$ (with $f_s$ and $g_s$ as the
-sped-up versions of $f$ and $g$ respectively), when, given any
+$\df$ is a valid change from $f_\phi$ to $g_\phi$ (with $f$ and $g$ as the
+respective slow versions), when, given any
 change $dx$ sending $x$ to $y$ (with $a$ and $b$ as respective sped-up
 versions), we have that $\df\,x\dx$ is a valid change sending
 $f_\phi\,x$ to $g_\phi\,y$ (with $f\,a$ and $g\,b$ as the respective
@@ -126,23 +126,19 @@ calculates a zero change for all equality types. This justifies the
 use of $0$ to notate uses of $\dummy$ in the $\phi$ and $\delta$
 translations.
 
-The next pair of lemmas involve the lattice types. First, we show that the change type for
-a lattice type $L$ is $L$ itself, by induction on $L$:
-
-\begin{lemma}[Semilattice Change Types]
-  At lattice types $L$, we have that $\Delta L = L$. 
-\end{lemma}
-
-\noindent We use this when showing that a change for a lattice type $L$ is something that
-can be joined on to it:
+The lemma involves the lattice types, showing that a change for a
+lattice type $L$ is something that can be joined on to it:
 
 \begin{lemma}[Semilattice Changes]
-  At lattice types $L$, we have that $\weirdat{L}{\dx}{x}{a}{y}{b}$ if and only if $x = a$ and $y = b = x \vee_L \dx$
+  At lattice types $L$, we have that $\Delta L = L$ and $\weirdat{L}{\dx}{x}{a}{y}{b}$ if and only if $x = a$ and $y = b = x \vee_L \dx$
 \end{lemma}
 \begin{proof}
-  This follows by induction on the structure of $L$. The first two properties are a corollary
-  of the equality changes lemma, and the third property follows from the fact that it is true
-  by definition for set types, and that products work pointwise. 
+  This follows by induction on the structure of $L$. The first
+  property is a consequence of the fact that all lattice types are
+  equality types. The first two properties of the bi-implication are a
+  corollary of the equality changes lemma, and the third property
+  follows from the fact that it is true by definition for set types,
+  and that products work pointwise.
 \end{proof}
 
 This lemma is used in the proofs of the fundamental theorem in all the
@@ -164,15 +160,17 @@ stripping because we use it in the proof of the next lemma, which
 says that for any valid context change, its effect on the discrete
 part is a no-op:
 
+\todo{Define strip}
+
 \begin{lemma}[Context Stripping]
   If $\weirdat{\G}{\dg}{\gamma}{\rho}{\gamma'}{\rho'}$ 
   then $\weirdat{\stripcx{\G}}{\tuple{}}{\strip(\g)}{\strip(\rho)}{\strip(\g')}{\strip(\rho')}$.
 \end{lemma}
 
 This lemma is used in all the cases of the fundamental theorem
-involving discrete variables -- equality $\eeq{e_1}{e_2}$, set constructors
-like $\esetsub{e_i}{i}$, emptiness tests $\eisempty e$, and box
-introduction $\ebox e$. 
+involving discrete expressions -- equality $\eeq{e_1}{e_2}$, set
+constructors like $\esetsub{e_i}{i}$, emptiness tests $\eisempty e$,
+and box introduction $\ebox e$.
 
 
 
