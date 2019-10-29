@@ -292,13 +292,13 @@ Finally we come to the most interesting case: functions.
 \end{align*}
 
 \noindent
-Observe that a function change $\df$ takes two
-arguments: a base point $x : \iso A$ and a change $\dx : \D A$.
+Observe that a function change $\df$ takes two arguments: a base point $x : \iso A$ and a change $\dx : \D A$.
 %
 To understand why we need both, consider incrementalizing function application:
-we wish to know how $f\<x$ changes as both $f$ and $x$ change. So fix
-$\changes{\df}{f}{g}$ and $\changes{\dx}{x}{y}$. How do we find the change $f\<x
-\changesto g\<y$ that updates both function and argument?
+we wish to know how $f\<x$ changes as both $f$ and $x$ change.
+%
+Supposing $\changes{\df}{f}{g}$ and $\changes{\dx}{x}{y}$, how do we find a
+change $f\<x \changesto g\<y$ that updates both function and argument?
 
 If changes were given
 pointwise, taking only a base point, we'd stipulate that $\changes{\df}{f} g$
@@ -306,8 +306,10 @@ iff $\fa{x} \changes{\df\<x}{f\<x}{g\<x}$. But this only gets us to $g\<x$, not
 $g\<y$: we've accounted for the change in the function, but not the argument.
 %
 We can account for both by giving $\df$ an additional parameter: not just the
-base point $x$ but also the change $\dx$ to it. Then by inverting
-\rn{fn change} we have $\changes{\df\<x\<\dx}{f\<x}{g\<y}$ as desired.
+base point $x$, but also the change $\dx$ to it.
+%
+Then by inverting \rn{fn change} we have $\changes{\df\<x\<\dx}{f\<x}{g\<y}$ as
+desired.
 
 %% This makes it easy to incrementalize function application, $f\<x$; given
 %% changes $\changes \df f g$ and $\changes \dx x y$ to the function and its
