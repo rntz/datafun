@@ -2,18 +2,19 @@
   \centering\small\sffamily
   \begin{tikzpicture}[baseline=(current bounding box.center)]
     \begin{axis}[
-        title={{\scshape transitive closure on a linear graph}\vphantom{\texttt{/a*/}\textsuperscript{N}}},
+        title={{\scshape transitive closure on a linear graph}\vphantom{\texttt{/a*/}$\texttt{a}^n$\textsuperscript{N}}},
         xlabel={Number of nodes},
         ylabel={Time (seconds)},
         height=123.6pt, width=200pt,
         height=130pt, width=210.34pt,
-        legend entries={\naive,semi\naive\ unoptimized,semi\naive\ optimized},
+        legend entries={\naive,semi\naive\ raw,semi\naive\ full},
         legend cell align=left,
         legend pos = north west,
         legend style={
           draw=none,
           nodes={inner sep=3pt,}
         },
+        xtick = {120, 160, ..., 320}, ytick = {0, 60, ..., 150},
       ]
       \addplot [color=red,mark=square*] table [x=n,y=naive] {trans.dat};
       \addplot [color=black,mark=triangle*] table [x=n,y=seminaive_raw] {trans.dat};
@@ -23,17 +24,18 @@
   \hfil
   \begin{tikzpicture}[baseline=(current bounding box.center)]
     \begin{axis}[
-        title={{\scshape matching \texttt{/a*/} against} \texttt{a}\textsuperscript{n}},
+        title={{\scshape matching \texttt{/a*/} against} $\texttt{a}^{n}$},
         xlabel={Number of characters},
         height=123.6pt, width=200pt,
         height=130pt, width=210.34pt,
-        legend entries={\naive,semi\naive\ unoptimized,semi\naive\ optimized},
+        legend entries={\naive,semi\naive\ raw,semi\naive\ full},
         legend cell align=left,
         legend pos = north west,
         legend style={
           draw=none,
           nodes={inner sep=3pt,}
         },
+        xtick = {120, 160, ..., 320}, ytick = {0, 60, ..., 150},
       ]
       \addplot [color=red,mark=square*] table [x=n,y=naive] {astar.dat};
       \addplot [color=black,mark=triangle*] table [x=n,y=seminaive_raw] {astar.dat};
