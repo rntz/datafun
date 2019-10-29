@@ -70,18 +70,22 @@
 %% For more general colorblindness stuff, see also:
 %% http://mkweb.bcgsc.ca/colorblind/
 %% https://www.nature.com/articles/nmeth.1618?WT.ec_id=NMETH-201106
-\definecolor{CyanBlue}{cmyk}{1, 0.36, 0, 0}    % M=.3 #0e88d3 M=.2 #0994DC
+\definecolor{CyanBlue}{cmyk}{1, 0.2, 0, 0}    % M=.3 #0e88d3 M=.2 #0994DC
+\definecolor{LinkBlue}{cmyk}{1, 0.36, 0, 0}
 \definecolor{BrightOrange}{cmyk}{0, 0.7, 1, 0} % #f25c19
 \definecolor{Vermilion}{cmyk}{0, 0.8, 1, 0}    % #f1471d
 \definecolor{ColorA}{cmyk}{0, 0.56, .8, 0.43}  % #994A20
 \definecolor{ColorB}{cmyk}{0.75, 1, 0, 0}      % #5E2590
 
+\definecolor{M}{cmyk}{0,1,0.7,0}
+
 % Blue for discrete things just doesn't stand out enough when printed unless I
 % make it totally cyan, which is too light to be easily readable on white. Red
 % is the standard printers' second color for a reason.
-\newcommand\isocolor{\color{ACMRed}}
+\newcommand\isocolor{\color{Cyan}}
+\renewcommand\isocolor{\color{M}}
 % If we use red for discrete things, using it for links is confusing.
-\AtEndPreamble{\hypersetup{linkcolor=CyanBlue,}}
+\AtEndPreamble{\hypersetup{linkcolor=LinkBlue,}}
 
 %\newcommand\hilite[1]{{\color{BrightOrange}#1}}
 %\newcommand\hilitecolorname{orange}
