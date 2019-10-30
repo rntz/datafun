@@ -11,7 +11,7 @@ declarations:
 \begin{code}
   \name{parent}(\datum{aerys}, \datum{rhaegar})\\
   \name{parent}(\datum{rhaegar}, \datum{jon})\\
-  \name{parent}(\datum{lyanna}, \datum{jon})\hspace{30em}
+  \name{parent}(\datum{lyanna}, \datum{jon})
   \\[6pt]
   \name{ancestor}(X,Z) \gets \name{parent}(X,Z)\\
   \name{ancestor}(X,Z) \gets \name{parent}(X,Y) \wedge \name{ancestor}(Y,Z)
@@ -19,9 +19,9 @@ declarations:
 
 \noindent
 This defines two binary relations, \name{parent} and \name{ancestor}. Lowercase
-sans-serif words like \datum{rhaegar} and \datum{lyanna} are symbols \`a la
-Lisp, and uppercase characters like $X$ and $Y$ are variables.
-
+sans-serif words like \datum{aerys} and \datum{rhaegar} are symbols \`a la
+Lisp, and uppercase characters like $X,Y,Z$ are variables.
+%
 The \name{parent} relation is defined as a set of ground facts: we assert that
 \datum{aerys} is \datum{rhaegar}'s parent, that \datum{rhaegar} is \datum{jon}'s
 parent, and so on. The \name{ancestor} relation is defined by a pair of rules:
@@ -29,10 +29,20 @@ first, that $X$ is $Z$'s ancestor if $X$ is $Z$'s parent; second, that $X$ is
 $Z$'s ancestor if $X$ has a child $Y$ who is an ancestor of $Z$.
 
 Semantically, a predicate denotes the set of tuples that satisfy it. Recursive
-definitions like \name{ancestor} can be interpreted by viewing the whole program
-as a relation transformer, and taking the least fixed point of that function.
-Datalog imposes syntactic restrictions which ensure the relation transformer the
-rules define is monotone, guaranteeing a unique least fixed point.
+definitions like \name{ancestor} denote the set of fact-tuples deducible from
+the rules defining them. More formally, we can view these rules as defining a
+relation transformer, and taking its least fixed point. One of Datalog's key
+syntactic restrictions is \emph{stratification}: a recursive definition cannot
+refer to itself beneath a negation. For example, the liar paradox is prohibited:
+
+\begin{code}
+  \quad\name{liar}() \gets \neg \name{liar}().
+  \qquad\color{Red}\textsf{\scshape\ding{55}\: not valid datalog}
+\end{code}
+
+\noindent
+Stratification ensures the transformer the rules define is monotone,
+guaranteeing a unique least fixed point.
 
 \subsection{Datafun}
 
