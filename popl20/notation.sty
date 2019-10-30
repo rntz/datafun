@@ -102,12 +102,13 @@
 
 \definecolor{M}{cmyk}{0,1,0.7,0}
 
-% Blue for discrete things just doesn't stand out enough when printed unless I
-% make it totally cyan, which is too light to be easily readable on white. Red
-% is the standard printers' second color for a reason.
-\newcommand\isocolor{\color{Cyan}}
-\renewcommand\isocolor{\color{M}}
-% If we use red for discrete things, using it for links is confusing.
+\newcommand\isocolor{\color{ACMBlue}}\newcommand\isocolorname{cyan}
+
+%% Blue for discrete things just doesn't stand out enough when printed unless I
+%% make it totally cyan, which is too light to be easily readable on white. Red
+%% is the standard printers' second color for a reason.
+\renewcommand\isocolor{\color{Red}}\renewcommand\isocolorname{red}
+%% If we use red for discrete things, using it for links is confusing.
 \AtEndPreamble{\hypersetup{linkcolor=LinkBlue,}}
 
 %\newcommand\hilite[1]{{\color{BrightOrange}#1}}
