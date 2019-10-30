@@ -141,8 +141,14 @@ that recursion occur at \emph{semilattice types with no infinite ascending
   chains}, $\fixt L$. A join-semilattice is a partial order with a least element
 $\bot$ and a least upper bound operation $\vee$ (``join''). Finite sets (with
 the empty set as least element, and union as join) are an example, as are tuples
-of semilattices. As long as the semilattice has no infinite ascending chains,
-recursion from the bottom element is guaranteed to find the least fixed point.
+of semilattices. As long as the semilattice has no infinite ascending
+chains,\footnote{As a technical detail, the finite set type $\tseteq{A}$ will
+  possess infinite ascending chains if $\eqt A$ has infinitely many inhabitants.
+  Thus we need to distinguish a class of \emph{finite} eqtypes $\fint A$.
+  Although their grammars in \cref{fig:syntax} are identical, their intent is
+  different. For example, if we extended Datafun with natural numbers $\N$, this
+  would be an eqtype, but not a finite one.} recursion from the bottom element
+is guaranteed to find the least fixed point.
 
 Second, we require that the recursive function be boxed, $\iso(\fixt L \to \fixt
 L)$. Since boxed expressions can only refer to discrete values, and fixed point
