@@ -78,31 +78,6 @@
     \mkbox_\Gamma(f) &= \fork{\pi_{\dvar x} \then \delta}_{\hd x A \in \G} \then \isox \then \iso(f)
   \end{align*}
 
-
-  \begin{displaymath}
-    \begin{array}{ll}
-      \begin{array}{lcl }
-        \morph{join}^{L}_0 & : & 1 \to L \\
-        \morph{join}^1_0 & = & !_{1} \\ 
-        \morph{join}^{L_1 \times L_2}_2 & = & \fork{\morph{join}^{L_1}_0, \morph{join}^{L_2}_0} \\ 
-        \morph{join}^{\pfinof A}_0 & = & \morph{join}^{\pfinof A}_0 \\[1em]
-      \end{array} 
-      \qquad &
-      \begin{array}{lcl}
-        \morph{join}^{L}_2 & : & L \times L \to L \\
-        \morph{join}^1_2 & = & !_{1 \times 1} \\ 
-        \morph{join}^{L_1 \times L_2}_2 & = & \alpha_{L_1, L_2} \then \morph{join}^{L_1}_2 \times \morph{join}^{L_2}_2 \\
-        \morph{join}^{\pfinof A}_2 & = & \morph{join}^{\pfinof A}_2 \\ 
-      \end{array}
-    \end{array}
-  \end{displaymath}
-  \begin{displaymath}
-    \begin{array}{lcl}
-      \alpha_{L,M} & : & (L \times M) \times (L \times M) \to (L \times L) \times (M \times M) \\ 
-      \alpha_{L,M} & = & ((l_1, m_1), (l_2, m_2)) \mapsto ((l_1, l_2), (m_1, m_2)) 
-    \end{array}
-  \end{displaymath}
-
   \caption{Semantics of Datafun}
   \label{fig:semantics}\label{def:strip}
 \end{figure*}

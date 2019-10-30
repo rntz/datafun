@@ -81,168 +81,133 @@ chains, ensuring that the recursion will terminate.
 
 \subsection{Semantics}\label{sec:semantics}
 
-The syntax of core Datafun can be interpreted in $\Poset$, the
-category of partially ordered sets and monotone functions between
-them. That is, an object $A$ of $\Poset$ is a pair $(A, \leq_A)$
-consisting of a set $A$ of elements, and a partial order relation
-$\leq_A \subseteq A \times A$ which is reflexive, transitive, and
-antisymmetric. A morphism $f : A \to B$ in $\Poset$ is a function on
-sets $f : A \to B$ which is monotone.  That is, for all $a$ and $a'$
-such that $a \leq_A a'$ we have $f(a) \leq_B f(a')$. The identity
-morphism is the identity function on the underlying sets, and
-composition of morphisms is just ordinary function composition.
-We will typically write composition in diagramamtic
-or ``pipeline'' order: given $f : A \to B$ and $g : B \to C$ we
-write $(f \then g) : A \to C$.
+The syntax of core Datafun can be interpreted in $\Poset$, the category of
+partially ordered sets and monotone maps. That is, an object of $\Poset$ is a
+pair $(A, \leq_A)$ consisting of a set $A$ and a reflexive, transitive,
+antisymmetric relation $\leq_A \subseteq A \times A$, while a morphism $f : A
+\to B$ is a function such that $x \leq_A y \implies f(a) \leq_B f(b)$. We write
+composition in diagrammatic or ``pipeline'' order and use a simple centered dot,
+writing $f \cdot g : A \to C$ to mean $f : A \to B$ followed by $g : B \to C$.
 
 \input{fig-semantics}
 
-\subsubsection{Cartesian Closed Structure}
+\subsubsection{Bicartesian structure}
 
-The cartesian closed structure of $\Poset$ is largely the
-same as in $\kw{Set}$.
+The bicartesian closed structure of $n\Poset$ is largely the same as in $\Set$.
+%
+The product and sum sets are constructed the same way, and ordered pointwise:
 
-\paragraph{Products} Given  partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
-we define the poset $(A , \leq_A) \times (B, \leq_B)$ to be
-$(A \times B, \leq_{A \times B})$ with the order defined as:
+\begin{align*}
+  (a,b) \le_{A \x B} (a',b') &\iff a \le_A a \wedge b \le_B b'\\
+  \inj i x \le_{A_1 + A_2} \inj j y &\iff i = j \wedge x \le_{A_i} y
+\end{align*}
 
-\begin{displaymath}
-  (a,b) \leq_{A \times B} (a', b') \iff a \leq_A a' \;\mbox{and}\; b \leq_B b'
-\end{displaymath}
+\noindent Projections $\pi_i$, injections $\injc_i$, tupling $\fork{f,g}$ and
+case-analysis $\krof{f,g}$ are all the same as in \Set, pausing only to note
+that all these operations preserve monotonicity, as we need.
 
-The verification that this forms a partial order is routine. To
-form the product object, we equip $A \times B$ with the projection
-maps $\pi_1 : A \times B \to A$ and $\pi_2 : A \times B \to B$, which are
-defined by the first and second projection on the underlying sets
-respectively.
-%
-Given two maps $f : A \to B$ and $g : A \to C$, the universal property
-of products is witnessed by $\fork{f,g} : A \to B \times C$, where
-\begin{displaymath}
-  \fork{f, g} \triangleq a \mapsto \etuple{f(a), g(a)}
-\end{displaymath}
-%
-The verification that these maps are monotone and that the relevant
-diagrams commute is routine.
+The exponential $\expO A B$ consists of only the \emph{monotone} maps $f : A \to
+B$, again ordered pointwise:
 
-\paragraph{Exponentials} Given partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
-we define the poset $(A , \leq_A) \to (B, \leq_B)$ to be $(A \to B, \leq_{A \to B})$
-with the order defined as:
-%
-\begin{displaymath}
-  f \leq_{A \to B} g \iff \forall a \in A.\; f(a) \leq_B g(a)
-\end{displaymath}
-That this gives a partial order is immediate. We form the exponential object by
-equipping it with the evaluation map $\eval_{A,B} \in \Poset((A \to B) \times A, B)$,
-defined via evaluation on sets:
-\begin{displaymath}
-  \eval \triangleq (f,x) \mapsto f(x)
-\end{displaymath}
-%
-Given $f : C \times A \to B$, the ``exponential transpose'' (i.e., currying
-operation) is defined as:
-\begin{eqnarray*}
-  \lambda(f) & : & C \to (A \to B) \\
-  \lambda(f) & \triangleq & c \mapsto (\fnof{a} f(c,a))
-\end{eqnarray*}
-Verifying that these maps are monotone and that the relevant
-diagrams commute is straightforward.
+\[ f \le_{\expO A B} g \iff \fa{x \le_A y} f\<x \le_B g\<y \]
 
-\paragraph{Coproducts} Given partial orders $(A, \leq_A)$ and $(B, \leq_B)$,
-we define the poset $(A , \leq_A) + (B, \leq_B)$ to be $(A + B, \leq_{A + B})$ with
-the order defined by (with the understanding that if no clause matches there is
-no order relationship):
-%
-\begin{eqnarray*}
-  \inj 1 a \leq_{A+B} \inj 1 a' & \iff & a \leq_A a' \\
-  \inj 2 b \leq_{A+B} \inj 2 b' & \iff & b \leq_B b'
-\end{eqnarray*}
-%
-It is easy to check this yields a partial order. We can construct the coproduct
-object by equipping this poset with the injections $\inj 1 {} : A \to A + B$
-and $\inj 2 {} : B \to A + B$, which are given by the injections on the underlying
-sets.
-%
-Given two maps $f : A \to C$ and $g : B \to C$, the universal property
-of coproducts is witnessed by $\krof{f,g} : A + B \to C$, where
-\begin{displaymath}
-  \krof{f, g} \triangleq x \mapsto \left\{\begin{array}{ll}
-                                            f(a) & \mbox{when}\;x = \inj 1 a \\
-                                            g(b) & \mbox{when}\;x = \inj 2 b
-                                          \end{array}
-                                        \right.
-\end{displaymath}
-It is easy to check the defined maps are monotone and that the relevant diagrams commute.
+\noindent
+Currying $\fn$ and evaluation are the same as in \Set. Supposing $f : A \x B \to
+C$, then:
+
+\begin{align*}
+  \fn(f) &\isa A \to (\expO B C) &
+  \eval_{A,B} &\isa (\expO A B) \x A \to B
+  \\
+  \fn(f) &= x \mapsto y \mapsto f(x,y) &
+  \eval_{A,B} &= (g,x) \mapsto g(x)
+\end{align*}
+
+
 \subsubsection{The Discreteness Comonad}
-Given a poset $(A, \leq_A)$ we define the discreteness operator $\Box(A, \leq_A)$
+
+Given a poset $(A, \leq_A)$ we define the discreteness comonad $\iso(A, \leq_A)$
 as $(A, \leq_{\iso A})$, where
+
 \begin{displaymath}
   a \leq_{\iso A} a' \iff a = a'
 \end{displaymath}
-That is, the discrete order preserves the underlying elements, but reduces the partial order
-to mere equality. Given a morphism $f : A \to B$, the functorial
+
+\noindent
+That is, the discrete order preserves the underlying elements, but reduces the
+partial order to mere equality. Given a morphism $f : A \to B$, the functorial
 action is defined as:
+
 \begin{displaymath}
   \iso(f) \triangleq f
 \end{displaymath}
-That is, the action on morphisms just gives back the same underlying function on sets. Checking
-that this preserves monotonicity is trivial, as is the preservation of identities and
-composition. This functor forms a comonad, with the extraction $\varepsilon_A : \iso A \to A$
-and duplication $\delta_A : \iso A \to \iso \iso A$ given by identities on the underlying
-sets:
-\begin{displaymath}
-  \begin{array}{llcll}
-  \varepsilon_A & : \iso A \to A & \hspace{2cm} & \delta_A & : \iso A \to \iso \iso A \\
-  \varepsilon_A & = a \mapsto a & & \delta_A & = a \mapsto a
-  \end{array}
-\end{displaymath}
-Once we check that the monotonicity requirements are satisfied, this
-makes checking the comonad diagrams easy. It is also immediate that $\iso$ is a comonad
-monoidal with respect to \emph{both} products and coproducts. That is, $\iso (A \times B)
-\simeq \iso A \times \iso B$, and also $\iso (A + B) \simeq \iso A + \iso B$. In both
-cases the isomorphism is witnessed in both directions by identity on the underlying elements.
-We will write $\morph{dist}^\Box_\times$  to name the map witnessing distributivity of $\iso$ over
-products, and $\morph{dist}^\Box_+$  to name the map witnessing distributivity of $\iso$ over coproducts.
+
+\noindent
+That is, the action on morphisms just gives back the same underlying function on
+sets. Checking that this preserves monotonicity is trivial, as is the
+preservation of identities and composition. This functor forms a comonad, with
+the extraction $\varepsilon_A : \iso A \to A$ and duplication $\delta_A : \iso A
+\to \iso \iso A$ given by identities on the underlying sets:
+
+\begin{align*}
+  \varepsilon_A &\isa \iso A \to A
+  &\delta_A &\isa \iso A \to \iso\iso A
+  \\
+  \varepsilon_A &= a \mapsto a & \delta_A &= a \mapsto a
+\end{align*}
+
+\noindent
+Once we check that the monotonicity requirements are satisfied, this makes
+checking the comonad diagrams easy. It is also immediate that $\iso$ is a
+monoidal with respect to \emph{both} products and coproducts. That is, $\iso (A
+\times B) \simeq \iso A \times \iso B$, and also $\iso (A + B) \simeq \iso A +
+\iso B$. In both cases the isomorphism is witnessed in both directions by
+identity on the underlying elements. We will write $\morph{dist}^\iso_\times$ to
+name the map witnessing distributivity of $\iso$ over products, and
+$\morph{dist}^\iso_+$ to name the map witnessing distributivity of $\iso$ over
+coproducts.
 
 
-\subsubsection{Sets and Lattices}
+\subsubsection{Sets and Semilattices}
 
 Given a poset $(A, \leq_A)$ we define the finite powerset poset $\pfinof(A,
 \leq_A)$ as $(\pfinof A, \subseteq)$, with subsets of $A$ as elements ordered by
 subset inclusion.
 %
-Note that the subset ordering completely ignores the element ordering $\leq_A$,
-which is why set construction $\eset{e}$ is discrete rather than
-monotone.
+Note that the subset ordering completely ignores the element ordering $\leq_A$.
 %
-This is obviously a semilattice, with the least element $\morph{join}^{\pfinof
-  A}_0$ given by the empty set, and binary join $\morph{join}^{\pfinof A}_2$
-given by union.
+Sets admit a pair of useful morphisms:
 
-\begin{displaymath}
-  \begin{array}{lclclcl}
-    \morph{join}^{\pfinof A}_0& : & 1 \to \pfinof(A) & \qquad & \morph{join}^{\pfinof A}_2 & : & \pfinof(A) \times \pfinof(A) \to \pfinof(A) \\
-    \morph{join}^{\pfinof A}_0& = & \etuple{} \mapsto \emptyset  &  & \morph{join}^{\pfinof A}_2 & : & \etuple{X, Y} \mapsto X \cup Y \\[1em]
-    \morph{singleton} & : & \iso A \to \pfinof{A} & & \morph{isEmpty} & : & \iso \pfinof{A} \to 1 + 1 \\
-    \morph{singleton} & = & a \mapsto \esetraw{a}
-    & &
-    \morph{isEmpty} & = & X \mapsto \left\{ \begin{array}{ll}
-                                              \inj 1 {\etuple{}} & \mbox{when}\;X = \emptyset \\
-                                              \inj 2 {\etuple{}} & \mbox{otherwise}
-                                            \end{array}
-                                    \right.
-  \end{array}
-\end{displaymath}
+\begin{align*}
+  \morph{singleton} &\isa \iso A \to \pfinof A
+  &
+  \morph{isEmpty} &\isa \iso \pfinof A \to \termO + \termO
+  \\
+  \morph{singleton} &= a \mapsto \{a\}
+  &
+  \morph{isEmpty} &= X \mapsto 
+  \begin{cases}
+    \inj 1 () &\text{when }X = \emptyset\\
+    \inj 2 () &\text{otherwise}
+  \end{cases}
+\end{align*}
 
 \noindent
-The $\morph{singleton}$ function takes a value and makes a singleton set out of it. The
-domain must be discrete, as otherwise the map will not be monotone (sets are ordered by
-inclusion, and set membership relies on equality, not the partial order). Similarly,
-the emptiness test $\morph{isEmpty}$ also takes a discrete set-valued argument, because
-otherwise the boolean test would not be monotone.
+The $\morph{singleton}$ function takes a value and makes a singleton set out of
+it. The domain must be discrete, as otherwise the map will not be monotone (sets
+are ordered by inclusion, and set membership relies on equality, not the partial
+order). Similarly, the emptiness test $\morph{isEmpty}$ also takes a discrete
+set-valued argument, because otherwise the boolean test would not be monotone.
 
-Finally, if $f : A \times \iso B \to L$, then we can define we can also define
-the morphism $\morph{collect}(f) : A \times \pfinof{B} \to L$ as follows:
+Sets also form a semilattice, with the least element given by the empty set, and
+join given by union.
+%
+For this and other semilattices $L \in \Poset$, in particular products of
+semilattices, we will write $\morph{join}^L_n : L^n \to L$ to denote the $n$-ary
+semilattice join (least upper bound).
+%
+Also, if $f : A \times \iso B \to L$, we can define a morphism
+$\morph{collect}(f) : A \times \pfinof{B} \to L$ as follows:
 
 \begin{displaymath}
  \morph{collect}(f)  = (a, X) \mapsto \bigvee_{b \in X} f(a, b)
@@ -253,11 +218,24 @@ We will use this to interpret \kw{for}-loops. However, it is worth noting that
 the discreteness restrictions on $\morph{singleton}$ mean that finite sets do
 not quite form a monad in $\Poset$.
 
+\subsubsection{Equality} Every object $A \in \Poset$ admits an equality-test morphism \morph{eq}:
+
+\begin{align*}
+  \morph{eq} &\isa \iso A \x \iso A \to \pfinof{\termO}\\
+  \morph{eq} &= (x,y) \mapsto 
+  \begin{cases}
+    \{()\} &\text{if }x = y\\
+    \emptyset &\text{otherwise}
+  \end{cases}
+\end{align*}
+
+\noindent
+The domain must be discrete, since $x = y$ and $y \le z$ certainly doesn't imply $x = z$.
+
 \subsubsection{Fixed Points}
 
-Given a semilattice $\fixt L$ without infinite ascending chains, we can define a
-fixed point operation $\efix{} : \iso (\fixt L \to \fixt L) \to \fixt L$ as
-follows:
+Given a semilattice $L \in \Poset$ without infinite ascending chains, we can
+define a fixed point operation $\efix{} : \iso (L \to L) \to L$ as follows:
 
 \begin{displaymath}
   \efix{} = f \mapsto \bigvee_{n \in \mathbb{N}} f^n(\bot)
