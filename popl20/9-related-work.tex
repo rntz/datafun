@@ -38,6 +38,36 @@ derivatives. We leave this to future work.
 %% Can't we just have \delta produce two expressions: the derivative, and the
 %% zero change to the derivative?
 
+
+\paragraph{Self-maintainability}
+
+In the incremental $\fn$-calculus, a function $f$ is called
+\emph{self-maintainable} if its derivative $f'$ depends only upon the change
+$\dx$ to the argument and not upon the base point $x$. This is a crucial
+property, because it means we can compute the change in the function's result
+without re-computing the original input, which might be expensive. So it's
+reasonable to ask whether self-maintainability (or rather, its absence) is ever
+an issue for semi\naive\ Datafun. We suspect (but have no proof) that because of
+the limited way semi\naive\ evaluation uses incremental computation, it usually
+isn't. For example, consider a variant definition of transitive closure, as the
+fixed point of \(f = \fnof{\name{path}} \name{edge} \cup (\name{path} \relcomp
+\name{path})\). This is not self-maintainable; its derivative is:
+
+\begin{code}
+  f' \<\name{path} \<\name{dpath} =
+  (\name{path} \relcomp \name{dpath})
+  \vee (\name{dpath} \relcomp \name{path})
+  \vee (\name{dpath} \relcomp \name{dpath})
+\end{code}
+
+\noindent
+However, this is not a problem when computing its fixed point semi\naive{}ly,
+because both \name{path} and \name{dpath} are available from the previous
+iteration. Thus non-self-maintainable fixed points do not appear to be forced
+into doing extensive recomputation.
+
+
+
 \paragraph{Related work}
 
 The incremental lambda calculus was introduced by \citet{incremental},
