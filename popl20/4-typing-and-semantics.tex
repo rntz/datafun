@@ -256,7 +256,8 @@ not quite form a monad in $\Poset$.
 \subsubsection{Fixed Points}
 
 Given a semilattice $\fixt L$ without infinite ascending chains, we can define a
-fixed point operation $\efix{} : \iso (L \to L) \to L$ as follows:
+fixed point operation $\efix{} : \iso (\fixt L \to \fixt L) \to \fixt L$ as
+follows:
 
 \begin{displaymath}
   \efix{} = f \mapsto \bigvee_{n \in \mathbb{N}} f^n(\bot)
