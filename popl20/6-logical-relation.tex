@@ -1,55 +1,52 @@
 \section{Proving the semi\naive\ transformation correct}
 
-We have given a program transformation which computes a change on a
-term $e$ given a change in its free variables, by giving a function
-$\delta(e)$ computing the change in $e$, and another function
-$\phi(e)$ using the change to optimize $e$. To state the correctness
-of $\delta()$ and $\phi()$, we need to show that $\phi(e)$ preserves
-the meaning of $e$, and that
-$\delta(e)$ correctly sends $e$ with one set of bindings for its free
-variables to $e$ with the changed bindings.
+We have given two program transformations: $\phi e$, which optimizes $e$ by
+computing fixed points semi\naive{}ly; and $\delta e$, which finds the change in
+$\phi e$ under a change in its free variables.
 %
-Since Datafun supports higher-order functions, we cannot directly
-prove that the semantics is preserved. Instead, we will need to
-formalize the intended relationship of $\phi e$ and $\delta e$ using a
-logical relation, and then use that relation to prove an
-\emph{adequacy theorem} saying that the semantics is preserved for
-first-order types.
-
-So inductively on types $A$, letting $a,b \in \den{A}$,
-$x,y \in \den{\Phi A}$, and $\dx \in \den{\DP A}$, we define a five
-place relation $\weirdat{A}{\dx}{x}{a}{y}{b}$, which may be glossed as
-``$x,y$ speed up $a,b$ respectively, and $\dx$ changes $x$ into $y$''.
-The definition is given in \cref{fig:logical-relation}. Units,
-products and sums essentially mimic the definition of change
-structures we give in \cref{sec:change-structures}. At set types
-$\tset{A}$, a change is a set of values to add to the
-starting set. It is also the case that values and their
-sped-up versions are equal, because we engineered the definition of
-$\Phi(A)$ to be the identity on equality types.
-
-Since the box type $\Box A$ represents values which do not change, the
-only valid change is the unit value, which takes a value and a sped-up
-value to the very same value and sped-up value. However, the sped-up
-version of a value is taken to be a \emph{pair} of a value and a
-change, and the change is a zero change for that value at type $A$.
-This ensures that at a boxed function type, we will always have a
-derivative (i.e. a zero change) available.
+To state the correctness of $\phi$ and $\delta$, we need to show that $\phi e$
+preserves the meaning of $e$ and that $\delta e$ correctly updates $\phi e$ with
+respect to changes in its variable bindings.
 %
-Speaking of functions, the relation at the type $A \to B$ works very
-much the way one would expect from the incremental lambda calculus.
-$\df$ is a valid change from $f_\phi$ to $g_\phi$ (with $f$ and $g$ as the
-respective slow versions), when, given any
-change $dx$ sending $x$ to $y$ (with $a$ and $b$ as respective sped-up
-versions), we have that $\df\,x\dx$ is a valid change sending
-$f_\phi\,x$ to $g_\phi\,y$ (with $f\,a$ and $g\,b$ as the respective
-slow versions).
+Since our transformations modify the types of higher-order expressions to
+include the extra information needed for semi\naive\ evaluation, we cannot
+directly prove that the semantics is preserved.
+%
+Instead, we formalize the relationship between $e$, $\phi e$, and $\delta e$
+using a logical relation, and use this relation to prove an \emph{adequacy
+  theorem} saying that the semantics is preserved for closed, first-order
+programs.
 
-The logical relation is defined on closed terms, and so
-before we can state the fundamental theorem, we have to extend
-the relation to contexts $\G$ and substitutions, letting
-$\rho,\rho' \in \den{\G}$, $\g,\g' \in \den{\Phi\G}$, and
-$\dgamma \in \den{\DP\G}$:
+\input{fig-logical-relation}
+
+So, inductively on types $A$, letting $a,b \in \den{A}$, $x,y \in \den{\Phi A}$,
+and $\dx \in \den{\DP A}$, we define a five place relation
+$\weirdat{A}{\dx}{x}{a}{y}{b}$, meaning roughly ``$x,y$ speed up $a,b$
+respectively, and $\dx$ changes $x$ into $y$''. The full definition is in
+\cref{fig:logical-relation}.
+
+At product, sum, and function types this is essentially a more elaborate version
+of the change structures given in \cref{sec:change-structures}.
+%
+At set types, changes are still a set of values added to the initial value, but
+we additionally insist that the ``slow'' $a,b$ and ``speedy'' $x,y$ are equal.
+%
+This is because we have engineered the definitions of $\Phi$ and $\phi$ to
+preserve behavior on equality types.
+%
+Finally, since $\iso A$ represents values which cannot change, $\dx$ is an
+uninformative empty tuple and the original and updated values are identical.
+%
+However, the ``speedy'' values are now \emph{pairs} of a value and its zero
+change.
+%
+This ensures that at a boxed function type, we will always have a derivative (a
+zero change) available.
+
+The logical relation is defined on simple values, and so before we can state the
+fundamental theorem, we have to extend it to contexts $\G$ and substitutions,
+letting $\rho,\rho' \in \den{\G}$, $\g,\g' \in \den{\Phi\G}$, and $\dgamma \in
+\den{\DP\G}$:
 
 \nopagebreak[1]
 \begin{align*}
@@ -74,34 +71,6 @@ relation:
   \[\weirdat{A}{\den{\delta e} \<\tuple{\g,\dgamma}}{\den{\phi
       e}\<\g}{\den{e}\<\rho}{\den{\phi e}\<\g'}{\den{e}\<\rho'}\]
 \end{theorem}
-
-
-\begin{figure}
-\begin{align*}
-  \weirdat{\tunit}{\tuple{}}{\tuple{}}{\tuple{}}{\tuple{}}{\tuple{}}
-  &\iff \top
-  \\
-  \weirdat{\tseteq A}{\dx}{x}{a}{y}{b}
-  &\iff (x,y,x \cup \dx) = (a,b,y)
-  \\
-  \weirdat{\iso A}{\tuple{}}{(x,\dx)}{a}{(y,\dy)}{b}
-  &\iff (a,x,\dx) = (b,y,\dy) \wedge \weirdat{A}{\dx}{x}{a}{y}{b}
-  \\
-  \weirdat{A_1 \x A_2}{\vec{\dx}}{\vec x}{\vec a}{\vec y}{\vec b}
-  &\iff \fa{i} \weirdat{A_i}{\dx_i}{x_i}{a_i}{y_i}{b_i}
-  \\
-  \weirdat{A_1 + A_2}{\inj i \dx}{\inj j x}{\inj k a}{\inj l y}{\inj m b}
-  &\iff i = j = k = l = m \wedge \weirdat{A_i}{\dx}{x}{a}{y}{b}
-  \\
-  \weirdat{A \to B}{\df}{f_\phi}{f}{g_\phi}{g}
-  &\iff
-  \fa{\weirdat{A}{\dx}{x}{a}{y}{b}}\\
-  &\hphantom{{}\iff{}}
-  \weirdat{B}{\df\<x\<\dx}{f_\phi\<x}{f\<a}{g_\phi\<y}{g_\phi\<b}
-\end{align*}
-  \caption{Definition of the logical relation}
-  \label{fig:logical-relation}
-\end{figure}
 
 This theorem follows by a structural induction on typing derivations
 as usual, but a number of lemmas need to be proved in order to

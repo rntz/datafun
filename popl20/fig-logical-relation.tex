@@ -1,0 +1,26 @@
+\begin{figure}
+  \begin{align*}
+    \weirdat{\tunit}{\tuple{}}{\tuple{}}{\tuple{}}{\tuple{}}{\tuple{}}
+    &\iff \top
+    \\
+    \weirdat{A_1 \x A_2}{\vec{\dx}}{\vec x}{\vec a}{\vec y}{\vec b}
+    &\iff \fa{i} \weirdat{A_i}{\dx_i}{x_i}{a_i}{y_i}{b_i}
+    \\
+    \weirdat{A_1 + A_2}{\inj i \dx}{\inj j x}{\inj k a}{\inj l y}{\inj m b}
+    &\iff i = j = k = l = m \wedge \weirdat{A_i}{\dx}{x}{a}{y}{b}
+    \\
+    \weirdat{A \to B}{\df}{f_\phi}{f}{g_\phi}{g}
+    &\iff
+    \fa{\weirdat{A}{\dx}{x}{a}{y}{b}} \\
+    &\hphantom{{}\iff{}}
+    \weirdat{B}{\df\<x\<\dx}{f_\phi\<x}{f\<a}{g_\phi\<y}{g_\phi\<b}
+    \\
+    \weirdat{\tseteq A}{\dx}{x}{a}{y}{b}
+    &\iff (x,y,x \cup \dx) = (a,b,y)
+    \\
+    \weirdat{\iso A}{\tuple{}}{(x,\dx)}{a}{(y,\dy)}{b}
+    &\iff (a,x,\dx) = (b,y,\dy) \wedge \weirdat{A}{\dx}{x}{a}{y}{b}
+  \end{align*}
+  \caption{Definition of the logical relation}
+  \label{fig:logical-relation}
+\end{figure}
