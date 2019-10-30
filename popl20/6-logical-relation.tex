@@ -61,6 +61,7 @@ letting $\rho,\rho' \in \den{\G}$, $\g,\g' \in \den{\Phi\G}$, and $\dgamma \in
           {(\g'_{\dvar\dx}, \g'_{\dvar x})}
           {\rho'_{\dvar x}}
 \end{align*}
+
 \noindent
 With that in place, we can state the fundamental theorem, showing that
 $\phi$ and $\delta$ generate expressions which satisfy this logical
@@ -72,49 +73,54 @@ relation:
       e}\<\g}{\den{e}\<\rho}{\den{\phi e}\<\g'}{\den{e}\<\rho'}\]
 \end{theorem}
 
-This theorem follows by a structural induction on typing derivations
-as usual, but a number of lemmas need to be proved in order to
-establish the fundamental theorem.
+\noindent
+This theorem follows by a structural induction on typing derivations as usual,
+but a number of lemmas need to be proved in order to establish the fundamental
+theorem.
 
-First, we prove a pair of lemmas about the behaviour of the logical
-relation at equality types. Both of these follow by induction on the
-structure of equality types.
+By and large, these lemmas generalize or build on results stated
+earlier in this paper regarding the simpler change structures from
+\cref{sec:change-structures}.
+%
+For example, we build on \cref{thm:phi-eqt,lem:dummy-change} to characterize the
+logical relation at equality types $\eqt A$ and the behavior of \dummy:
 
-\begin{lemma}[equality changes]
-For all equality types $\eqt A$, we have that $\weirdat{\eqt A}{\dx}{x}{a}{y}{b}$ implies $x = a$ and $y = b$.
+\begin{lemma}[equality changes]\label{lem:equality-changes}
+If $\weirdat{\eqt A}{\dx}{x}{a}{y}{b}$ then $x = a$ and $y = b$.
 \end{lemma}
 
-\begin{lemma}[dummy changes]
-  For all equality types $\eqt A$, we have that $\weirdat{\eqt A}{\dummy(x)}{x}{x}{x}{x}$.
+\begin{lemma}[dummy is zero at eqtypes]\label{lem:lr-dummy}
+  If $x \in \den{\eqt A}$ then $\weirdat{\eqt A}{\dummy\<x}{x}{x}{x}{x}$.
 \end{lemma}
 
-%% FIXME: broken reference
-The equality changes lemma shows that at equality types, the sped-up
-version of a value is the value itself. We then show a relational
-analogue of Lemma~\ref{lem:dummy-change}, that the $\dummy$ function
-calculates a zero change for all equality types. This justifies the
-use of $\zero$ to notate uses of $\dummy$ in the $\phi$ and $\delta$
-translations.
+\noindent
+\Cref{lem:equality-changes} tells us that at equality types, the sped-up version
+of a value is the value itself. This is used later to prove our adequacy
+theorem.
+%
+\Cref{lem:lr-dummy} is an analogue of \cref{lem:dummy-change}, showing that
+$\dummy$ function computes zero changes at equality types.
+%
+This is used in the proof of the fundamental theorem for \kw{for}-loops,
+in whose $\phi$ and $\delta$ translations $\zero$ is implemented by \dummy.
 
-The lemma involves the lattice types, showing that a change for a
-lattice type $L$ is something that can be joined on to it:
+Next, we generalize \cref{lem:DeltaL} to characterize changes at semilattice
+type:
+
+%% The lemma involves the lattice types, showing that a change for a lattice type
+%% $L$ is something that can be joined on to it:
 
 \begin{lemma}[semilattice changes]
-  At lattice types $L$, we have that $\Delta L = L$ and $\weirdat{L}{\dx}{x}{a}{y}{b}$ if and only if $x = a$ and $y = b = x \vee_L \dx$
+  At any semilattice type $L$, we have $\Delta L = L$, and moreover
+  $\weirdat{L}{\dx}{x}{a}{y}{b}$ iff $x = a$ and $y = b = x \vee_L \dx$
 \end{lemma}
-\begin{proof}
-  This follows by induction on the structure of $L$. The first
-  property is a consequence of the fact that all lattice types are
-  equality types. The first two properties of the bi-implication are a
-  corollary of the equality changes lemma, and the third property
-  follows from the fact that it is true by definition for set types,
-  and that products work pointwise.
-\end{proof}
 
-This lemma is used in the proofs of the fundamental theorem in all the
-cases involving lattice types -- we use it in the cases for the least
-element $\bot$, the join $e \vee e'$, for-comprehensions
-$\efor x e f$, and the fixed point operator $\prim{fix}\< e$.
+\noindent
+This follows by induction on semilattice types $L$, and from
+\cref{lem:equality-changes} (noting that every semilattice type is an equality
+type). We require this lemma in the proofs of the fundamental theorem in all the
+cases involving semilattice types --- namely $\bot$, ${\vee}$, \kw{for}-loops,
+and $\prim{fix}$.
 
 Similarly, we also need to prove theorems about context manipulations
 to establish the soundness of the rules for the box type. First, we
@@ -123,7 +129,8 @@ with only discrete variables) send terms to themselves, recalling that
 the $\stripcx{\G}$ function returns only the discrete variables in $\G$. 
 
 \begin{lemma}[discrete contexts don't change]
-  If $\weirdat{\stripcx{\G}}{\tuple{}}{\gamma}{\rho}{\gamma'}{\rho'}$ then $\gamma = \gamma'$ and $\rho = \rho'$.
+  If\/ $\weirdat{\stripcx{\G}}{\tuple{}}{\gamma}{\rho}{\gamma'}{\rho'}$ then
+  $\gamma = \gamma'$ and $\rho = \rho'$.
 \end{lemma}
 
 We state this lemma by quantifying over all contexts and then
@@ -151,8 +158,6 @@ identity on the discrete part. We use these facts in all the cases of
 the fundamental theorem involving discrete expressions -- equality
 $\eeq{e_1}{e_2}$, set constructors like $\esetsub{e_i}{i}$, emptiness
 tests $\eisempty e$, and box introduction $\ebox e$.
-
-
 
 Once the fundamental theorem has been established, we can specialize
 it to closed terms and equality types, Then, the equality changes
