@@ -159,31 +159,29 @@ the $\stripcx{\G}$ function returns only the discrete variables in $\G$.
 
 We state this lemma by quantifying over all contexts and then
 stripping because we want to use it in the proof of the next lemma,
-which says that for any valid context change, its effect on the
-discrete part is a no-op. To define the discrete part of a
+which says that any valid context change gives rise to a valid change
+on a stripped context. To define the discrete part of a
 substitution, we use the function $\strip_\G(\gamma)$, which drops
 all the monotonic variables:
 
 \begin{displaymath}
   \begin{array}{lcl}
     \strip_\G & : & \den{\G} \to \den{\stripcx{\G}} \\
-    \strip_\cdot\;(\cdot) & = & \cdot \\
-    \strip_{\G, \h{x}{A}} \;(\gamma, v/x) & = &  \strip_\G(\gamma) \\
-    \strip_{\G, \hd{x}{A}} \;(\gamma, v/x) & = &  \strip_\G(\gamma), v/x \\
+    \strip_\G\;(\gamma) & = & \left< x \mapsto \gamma_x \right>_{\hd x A \in \G} \\
   \end{array}
 \end{displaymath}
 
 
-
 \begin{lemma}[Context Stripping]
-  If $\weirdat{\G}{\dg}{\gamma}{\rho}{\gamma'}{\rho'}$
+  If $\weirdat{\G}{\dgamma}{\gamma}{\rho}{\gamma'}{\rho'}$
   then $\weirdat{\stripcx{\G}}{\tuple{}}{\strip_{\Phi\G}(\g)}{\strip_{\G}(\rho)}{\strip_{\Phi\G}(\g')}{\strip_{\G}(\rho')}$.
 \end{lemma}
 
-This lemma is used in all the cases of the fundamental theorem
-involving discrete expressions -- equality $\eeq{e_1}{e_2}$, set
-constructors like $\esetsub{e_i}{i}$, emptiness tests $\eisempty e$,
-and box introduction $\ebox e$.
+Jointly, these two lemmas ensure that a change to any context s an
+identity on the discrete part. We use these facts in all the cases of
+the fundamental theorem involving discrete expressions -- equality
+$\eeq{e_1}{e_2}$, set constructors like $\esetsub{e_i}{i}$, emptiness
+tests $\eisempty e$, and box introduction $\ebox e$.
 
 
 
