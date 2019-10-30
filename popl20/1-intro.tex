@@ -50,12 +50,11 @@ termination continues to hold). So despite the fact that kernel
 Datalog has a very clean semantics, its metatheory seemingly needs to
 be laboriously re-established once again for each extension.
 
-A natural approach to solving this problem is to find a language in
-which to write the extensions, which preserves the semantic guarantees
-that Datalog offers. Two such proposals are the Flix
-language~\cite{flix} and the Datafun language~\cite{datafun}. 
-Conveniently for our exposition, these two languages embody two
-alternative design strategies.
+A natural approach to solving this problem is to find a language in which to
+write the extensions, which preserves the semantic guarantees that Datalog
+offers. Two such proposals are Flix~\cite{flix} and Datafun~\cite{datafun}.
+Conveniently for our exposition, these two languages embody two alternative
+design strategies.
 
 %% FIXME: this is not up-to-date with Flix's current design. I think
 %% it's even not up-to-date with Flix's old design. Old Flix wasn't a
@@ -91,34 +90,51 @@ alternative design strategies.
 %
 %% But a summary this^ long belongs in related work, not here.
 
-Flix adopts the route of treating Datalog as an embedded
-domain-specific language~\cite{edsl}. That is, Flix is a fairly
-conventional (albeit well-designed) functional programming language
-roughly comparable to ML or Haskell, extended with types representing
-Datalog predicates and programs. The evaluation of a Flix program
-builds a Datalog program, which is then handed off to a custom Datalog
-engine (albeit extended to support arbitrary semilattices).  This
-stratification means that (a) standard Datalog implementation
-techniques can be used mostly off-the-shelf, but that (b) its
-functional programming side is mostly a very powerful macro system for
-Datalog.  The only way Flix code runs at Datalog execution time is via
-the definition of new semilattices (which is functional Flix code
-implementing a semilattice interface), and for this Flix offers
-program-verification style correctness checking (including SMT-based
-tooling).
+Flix extends a Datalog-like relational language, generalized to handle arbitrary
+semilattices instead of only finite sets, with a functional sublanguage, roughly
+comparable to ML or Haskell. The functional side can be used to implement custom
+semilattices and data structures which can then be used from the Datalog side.
+Flix is aimed at static analysis, where defining custom semilattices for
+abstract interpretation is highly useful. To this end, Flix integrates with SMT
+solvers for lightweight verification of properties such as monotonicity,
+soundness, and completeness. However, this SMT-based approach works best for
+first-order code, and Flix maintains a pretty clear (if permeable) separation
+between its relational and functional components.
 
-Like Flix, Datafun is a functional programming language, but unlike
-Flix, its type discipline supports tracking \emph{monotonicity} of
-functions. Datalog-style recursively defined relations are given via
-an explicit fixed point operator; monotonicity ensures uniqueness of
-this fixed point, playing a role similar to Datalog's stratification
-condition.
+%% Flix adopts the route of treating Datalog as an embedded domain-specific
+%% language~\cite{edsl}.
+%% %
+%% That is, Flix is a fairly conventional (albeit well-designed) functional
+%% programming language roughly comparable to ML or Haskell, extended with types
+%% representing Datalog predicates and programs.
+%% %
+%% The evaluation of a Flix program builds a Datalog program, which is then handed
+%% off to a custom Datalog engine (albeit extended to support arbitrary
+%% semilattices).
+%% %
+%% This stratification means that (a) standard Datalog implementation techniques
+%% can be used mostly off-the-shelf, but that (b) its functional programming side
+%% is mostly a very powerful macro system for Datalog.
+%% %
+%% The only way Flix code runs at Datalog execution time is via the definition of
+%% new semilattices (which is functional Flix code implementing a semilattice
+%% interface), and for this Flix offers program-verification style correctness
+%% checking (including SMT-based tooling).
+
+Datafun, by contrast, is a functional language capable of expressing relational
+idioms directly.
 %
-Tracking monotonicity permits a much tighter integration between the
-functional and logic programming styles, but it comes at a cost: many
-of Datalog's standard implementation techniques, developed in the
-context of a first-order logic language, are not obviously applicable
-in a higher-order functional setting.
+Datafun's type system tracks \emph{monotonicity} of functions, including
+higher-order functions.
+%
+Datalog-style recursively defined relations are given via an explicit fixed
+point operator; monotonicity ensures uniqueness of this fixed point, playing a
+role similar to stratification in Datalog.
+%
+Tracking monotonicity permits a much tighter integration between the functional
+and relational styles, but it comes at a cost: many of Datalog's standard
+implementation techniques, developed in the context of a first-order logic
+language, are not obviously applicable in a higher-order functional setting.
 
 Second, actually making Datalog perform well enough to use in practice
 calls for very sophisticated program analysis and compiler
