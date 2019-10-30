@@ -2,6 +2,7 @@
 \label{sec:datalog-and-datafun}
 
 \subsection{Datalog}
+\label{sec:datalog}
 
 Datalog's syntax is a subset of Prolog's. Programs are collections of predicate
 declarations:
@@ -55,13 +56,6 @@ guaranteeing a unique least fixed point.
 
 \input{fig-syntax}
 
-%% Datalog makes it very easy to define relations recursively, but
-%% because it is such a small and restricted language, it is not possible
-%% to build abstractions over these rules. However, its semantics, given
-%% in terms of least fixed points of monotone functions on relations,
-%% is extremely elegant, and Datafun arose as an attempt to generalize
-%% this semantics.
-
 The idea behind Datafun is to capture the essence of Datalog in a typed,
 higher-order, functional setting.
 %
@@ -90,45 +84,65 @@ To represent relations, we add a type of finite sets\footnote{To implement set
   A}$, introduced with set literals $\eset{e_0, \ldots e_n}$, and eliminated
 using Moggi's monadic bind syntax, $\efor{x}{e_1}{e_2}$, signifying the union
 over all $\dvar x \in e_1$ of $e_2$.
+%
+Since we are working in \Poset, each type comes with a partial order on it; sets
+are ordered by inclusion, $x \le y : \tseteq{A} \iff x \subseteq y$.
 
 As long as all primitives are monotone, every definable function is also
-monotone. This is necessary for taking fixed points, but may seem too
-restrictive. There are many essential non-monotone operations, such as equality
+monotone. This is necessary for defining fixed points, but may seem too
+restrictive. There are many useful non-monotone operations, such as equality
 tests $\eeq e f$. For example, $\esetraw{} = \esetraw{}$ is true, but if the
-first argument is increased to $\esetraw{1}$ then it becomes false, a
-\emph{decrease} (in Datafun, $\efalse < \etrue$).
+first argument increases to $\esetraw{1}$ it becomes false, a \emph{decrease}
+(as we'll see later, in Datafun, $\efalse < \etrue$).
 
-How can we express non-monotone operations while preserving the property that
-all functions are monotone? We square this circle by introducing the
-\emph{discreteness} type constructor $\iso A$. The elements of $\iso A$ are
-exactly the same as those of $A$, but the order on $\iso A$ is discrete, $x \le
-y : \iso A$ iff $x = y$. Monotonicity of a function $\iso A \to B$ is vacuous:
-$x = y$ always implies $f(x) \le f(y)$! This lets us encode ordinary, possibly
-non-monotone, functions $A \to B$ as monotone functions $\iso A \to B$.
-Semantically, $\iso$ is a comonad, and accordingly the syntax we use for this is
-a variant of \citet{jrml}'s syntax for constructive S4 modal logic. We make
-discrete terms with the introduction form $\ebox{e}$ and eliminate them with a
-pattern matching eliminator $\eletbox x e f$. Discrete variables are colored and
-italicised $\dvar x$, while monotone variables are uncolored and upright $x$.
-\todo{Colored terms $\isocolor e$ are restricted to only refer to discrete
-  variables.} So in the equality test $\eeq e f$, the terms $e$ and $f$ must be
-discrete.
+How can we express non-monotone operations if all functions are monotone?
+%
+We square this circle by introducing the \emph{discreteness} type constructor,
+$\iso A$.
+%
+The elements of $\iso A$ are the same as those of $A$, but the partial order on
+$\iso A$ is discrete, $x \le y : \iso A \iff x = y$.
+%
+Monotonicity of a function $\iso A \to B$ is vacuous: $x = y$ implies $f(x) \le
+f(y)$ by reflexivity!
+%
+In this way we represent ordinary, possibly non-monotone, functions $A \to B$ as
+monotone functions $\iso A \to B$.
+
+Semantically, $\iso$ is a monoidal comonad or necessity modality, and so we base
+our syntax on \citet{jrml}'s syntax for the necessity fragment of constructive
+S4 modal logic.
+%
+This involves distinguishing two kinds of variable: discrete variables $\dvar x$
+are italic and {\isocolor\isocolorname}, while monotone variables $x$ are
+upright and black.
+%
+Discrete variables may be used wherever they're in scope, but crucially,
+monotone variables are hidden within non-monotone expressions.
+%
+For example, in an equality test $\eeq e f$, the terms $e$ and $f$ cannot refer
+to monotone variables bound outside the equality expression.
+%
+We highlight such expressions with a
+\adjustbox{bgcolor=isobg}{\isobgname\ background}.
+%
+Putting this all together, we construct the type $\iso A$ with the non-monotone
+introduction form $\ebox{e}$ and eliminate it by pattern-matching, $\eletbox x e
+f$, giving access to a discrete variable $\dvar{x}$.
 
 %% TODO: should we note that we really definitely mean □(L → L) and
 %% not (□L → L)? Reader may be confused.
 Finally, Datafun includes fixed points, $\efix{e}$. The $\prim{fix}$ combinator
 takes a function $\iso (\fixt L \to \fixt L)$ and returns its least fixed point.
-We impose two restrictions on the fixed point operator to ensure
-well-definedness and termination. First, we require that recursion occur at
-\emph{semilattice types}, $L$. A join-semilattice is a partial order with a
-least element $\bot$ and a least-upper-bound (``join'') operation $\vee$. Finite
-sets (with the empty set as least element, and union as join) are an example, as
-are tuples of semilattices. As long as the lattice has no infinite ascending
-chains, recursion from the bottom element is guaranteed to find the least fixed
-point.
+Besides monotonicity of the function, we impose two restrictions on the fixed
+point operator to ensure well-definedness and termination. First, we require
+that recursion occur at \emph{semilattice types with no infinite ascending
+  chains}, $\fixt L$. A join-semilattice is a partial order with a least element
+$\bot$ and a least upper bound operation $\vee$ (``join''). Finite sets (with
+the empty set as least element, and union as join) are an example, as are tuples
+of semilattices. As long as the semilattice has no infinite ascending chains,
+recursion from the bottom element is guaranteed to find the least fixed point.
 
-%% TODO: ``at box type'' is ambiguous. makes me think of (□A → B)
-%% rather than □(A → B).
 Second, we require that the recursive function be boxed, $\iso(\fixt L \to \fixt
 L)$. Since boxed expressions can only refer to discrete values, and fixed point
 functions themselves must be monotone, this has the effect of preventing
@@ -137,27 +151,15 @@ semantically nested fixed points. We discuss this in more detail in
 recursion, which can be expressed by taking a fixed point at product type, nor
 stratified fixed points \`a la Datalog.
 
-%% This blocks (semantically) nested fixed points,
-%% and leaves the semantics of Datafun close to that of Datalog, where all
-%% recursion happens once, at the level of the whole program.
-
 
 \section{Datafun by example}
 
 \input{fig-sugar}
 
-In the examples, we make free use of strings and integers, ordered discretely
-($x \le y$ iff $x = y$). We also make use of some syntax sugar in the
-definitions:
+For the sake of brevity and clarity, the examples that follow make use of some
+syntax sugar:
 
 \begin{enumerate}
-\item First, we make free use of curried functions and pattern
-  matching. Desugaring these is relatively standard, and so we will
-  say little about it, with one exception. Namely, the box-elimination
-  form $\eletbox x e e'$ is a pattern matching form, and so we allow
-  it to occur inside of patterns. The effect of a box pattern
-  $\pbox{\isocolor p}$ is to ensure that all of the variables bound in the
-  pattern $\isocolor p$ are treated as discrete variables.
 
 \item We mentioned earlier that Datafun's boolean type $\tbool$ is ordered
   $\efalse < \etrue$. This is because we encode booleans as sets of empty
@@ -167,103 +169,115 @@ definitions:
   if $b$ is \etrue\ and $\bot$ otherwise. Encoding booleans as sets has the
   advantage that $\ewhen{b}{e}$ is monotone in the condition $b$.
 
-\item Finally, we make use of set comprehension notation. The
-  desugaring we use is based on the translation of comprehensions to
-  the monadic operators~\cite{wadler-monad-comprehensions}.
+\item We make use of set comprehensions, which can be desugared into the monadic
+  operators \kw{for} and \kw{when} in the usual
+  way~\cite{wadler-monad-comprehensions}.
+
+\item It is convenient to treat $\prim{fix}$ as a binding form, $\efixis x e$,
+  rather than supplying a function, $\efix\ebox{\fnof x e}$.
+
+\item Finally, we make free use of curried functions and pattern matching.
+  Desugaring these is relatively standard, and so we will say little about it,
+  with one exception: the box-elimination form $\eletbox x e e'$ is a pattern
+  matching form, and so we allow it to occur inside of patterns. The effect of a
+  box pattern $\pbox{\isocolor p}$ is to ensure that all of the variables bound
+  in the pattern $\isocolor p$ are treated as discrete variables.
+
 \end{enumerate}
-We summarize (except for pattern matching) the sugaring rules we use in
+
+\noindent
+We summarize (except for pattern matching) the desugaring rules we use in
 \cref{fig:sugar}.
 
 
 \subsection{Set operations}
 
-Even before higher-order functions, one of the main benefits of
-Datafun relative to Datalog is that it offers the ability to manipulate relations
-as first class values. In this subsection we will show how a variety
-of standard operations on sets can be represented in Datafun.
+%\newcommand\isin{\mathbin{\in?}}
+\newcommand\mem{\name{member}}
+\newcommand\isa{~:~}
+\newcommand\relcomp\bullet
+\newcommand\bone{\dvar b_{\isocolor 1}}
+\newcommand\btwo{\dvar b_{\isocolor 2}}
+\newcommand\yone{\dvar y_{\isocolor 1}}
+\newcommand\ytwo{\dvar y_{\isocolor 2}}
 
-\paragraph{Membership Tests} The first operation we consider is the
-membership test operation.
-\begin{tabbing}
-  \qquad\=\+ \kill
-  $\name{mem} : \iso A \to \tset A \to \tbool$ \\
-  $\name{mem} \;\pboxvar{x} \;\var{ys} = \efor{y}{\var{ys}} \eeq{\dvar x}{\dvar y}$
-\end{tabbing}
+Even before higher-order functions, one of the main benefits of Datafun over
+Datalog is that it permits manipulating relations as first class values.
+%
+In this subsection we will show how a variety of standard operations on sets can
+be represented in Datafun.
+%
+The first operation we consider is testing membership:
+
+\begin{code}
+  \mem \isa \eqt A \to \tseteq A \to \tbool\\
+  \mem \<\pboxvar x \<s = \efor{y}{s} \eeq {\dvar x} {\dvar y}
+\end{code}
 
 \noindent
-This checks if the input $\dvar x$ is equal to any $\dvar y \in \var{ys}$. The
-argument $x$ to $\name{mem}$ is discrete, because an element is in a set or not
--- the test is not monotone in $\dvar x$.
+This checks if $\dvar x$ is equal to any element $\dvar y \in s$. The argument
+$\dvar x$ is discrete because increasing $\dvar x$ might send it from being
+\emph{in} the set to being \emph{outside} the set (e.g. $1 \in \esetraw{1}$ but
+$2 \notin \esetraw{1}$). Notice that here we're taking advantage of encoding
+booleans as sets of empty tuples --- unioning these sets implements logical
+\emph{or}.
 
-\paragraph{Set Intersection}
-Using $\name{mem}$, it is possible to define set intersection, by taking the
-union of all the singleton sets $\esetraw{\dvar x}$ where $\dvar x$ is an
-element of both $\var{xs}$ and $ys$.
+Using $\mem$ we can define set intersection by taking the union of every
+singleton set $\esetraw{\dvar x}$ where $\dvar x$ is an element of both
+$s$ and $t$:
 
-\begin{tabbing}
-  \qquad\=\+ \kill
-  $\_ {\cap} \_ : \tset A \to \tset A \to \tset A$ \\
-  $\var{xs} \cap \var{ys} = \efor{x}{xs}
-  \ewhen{\name{mem}\;\eboxvar{x}\;\var{ys}}{\eset{\dvar x}}$
-\end{tabbing}
+\begin{code}
+  \pwild \cap \pwild \isa \tseteq A \to \tseteq A \to \tseteq A\\
+  s \cap t = \efor x {s} \ewhen{\mem \<\eboxvar x \<t} \eset{\dvar x}
+\end{code}
 
 \noindent
 Using comprehensions, this could alternately be written as:
-\begin{tabbing}
-  \qquad\=\+ \kill
-  $\var{xs} \cap \var{ys} = \esetfor{x}{\dvar x \in \var{xs},\, \name{mem}\;\eboxvar{x}\;\var{ys}}$
-\end{tabbing}
 
-\paragraph{Relational Composition}
-We can also define the composition of two relations in Datafun.
+\begin{code}
+  s \cap t = \esetfor{\dvar x}{\dvar x \in s, \mem \<\eboxvar x \<s}
+\end{code}
 
-\begin{tabbing}
-  \qquad\=\+ \kill
-  $\_ {\bullet} \_$ \quad\quad\= $\,:$\;\; \=
-  $ \tset{A \times B} \to \tset{B \times C} \to \tset{A \times C}$ \\
+\noindent From now on, we'll use comprehensions whenever possible. For example,
+we can also define the composition of two relations in Datafun:
 
-  $\var{xs} \mathrel{\bullet} \var{ys}$
-  \> $=$ \> $\eforraw{\etuple{\dvar a,\dvar b} \in \var{xs}}
-  \eforraw{\etuple{\dvar{b'}, \dvar c} \in \var{ys}}
-  \ewhen{\eeq{\dvar b}{\dvar{b'}}} \eset{\etuple{\dvar a,\dvar c}}
-  $
-  %% \\
-  %% \>     \> $\efor{(b',c)}{\mathit{ys}}{}$ \\
-  %% \>     \> $\ewhen{b = b'}{\eset{(a,c)}}$
-\end{tabbing}
+\begin{code}
+  \pwild \relcomp \pwild \isa \tset{\eqt A \x \eqt B} \to \tset{\eqt B \x \eqt
+    C} \to \tset{\eqt A \x \eqt C}\\
+  s \relcomp t = \esetfor{\etuple{\dvar a, \dvar c}}{
+    \ptuple{\dvar a, \bone} \in s,
+    \ptuple{\btwo, \dvar c} \in t,
+    \eeq \bone \btwo}
+\end{code}
 
 \noindent
 This is basically a transcription of the mathematical definition, where we build
-those pairs which agree on their $B$-typed components. It can also be written
-using set comprehension as:
+those pairs which agree on their $B$-typed components.
 
-\begin{tabbing}
-  \qquad\=\+ \kill
-  $\_ \bullet \_$ \;\;\;\= $\,:$\;\; \=
-  $ \tset{A \times B} \to \tset{B \times C} \to \tset{A \times C}$ \\
+%\subsubsection{Transitive Closure}
+\label{sec:generic-transitive-closure}
+Finally, generalizing the \name{ancestor} relation from the Datalog program in
+\cref{sec:datalog}, we can define the transitive closure of a relation:
 
-  $\var{xs} \bullet \var{ys} =
-  \esetfor{\etuple{\dvar a, \dvar c}}{
-    \etuple{\dvar a, \dvar b} \in \var{xs},
-    \etuple{\dvar{b'}, \dvar c} \in \var{ys}, \eeq{\dvar b}{\dvar{b'}}}$
-\end{tabbing}
+\begin{code}
+  \name{trans} \isa \iso \tset{\eqt A \x \eqt A} \to \tset{\eqt A \x \eqt A}\\
+  \name{trans} \<\pboxvar{edge} = \efixis{s}{\dvar{edge} \vee (\dvar{edge} \relcomp s)}
+\end{code}
 
-\paragraph{Transitive Closure}\label{sec:generic-transitive-closure}
-Now, we define the transitive closure of a relation.
-\begin{tabbing}
-  \qquad\=\+ \kill
-  $\name{trans}$ \quad\: \= $\,:$ \;\;\= $\iso{\tset{A \times A}} \to \tset{A \times A}$ \\
-  $\name{trans} \;\pboxvar{e}$ \> $=$ \>
-  $\efixis{s}{\dvar{e} \vee (\dvar{e} \bullet s)}$
-\end{tabbing}
-
-This definition uses recursion, just like the mathematical definition --
-a transitive closure is the least relation containing the original relation $\name{xs}$
-and the composition of $\name{xs}$ with the transitive closure. However, one
-feature of this definition peculiar to core Datafun is that the argument type
-is $\iso \tset{A \times A}$ -- the transitive closure takes a \emph{discrete} relation.
-This is because we must use the relation within the fixed point, and so its parameter needs
-to be discrete to occur within.
+\noindent
+This definition uses a least fixed point, just like the mathematical definition
+-- a transitive closure is the least relation $R$ containing the original
+relation $\dvar{edge}$ and the composition of $\dvar{edge}$ with $R$.
+%
+However, one feature of this definition peculiar to Datafun is that the argument
+type is $\iso \tset{\eqt A \times \eqt A}$ -- the transitive closure takes a
+\emph{discrete} relation.
+%
+This is because we must use the relation within the fixed point, and so its
+parameter needs to be discrete to occur within.
+%
+This restriction is artificial --- transitive closure is semantically a monotone
+operation --- but we'll see why it's necessary in \cref{sec:transformations}.
 
 
 \subsection{Regular expression combinators}
