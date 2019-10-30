@@ -7,7 +7,7 @@
       \\
       \etrue &\desugars \eset{\etuple{}}
       \\
-      \ewhen e f &\desugars \eforraw{\etuple{} \in e} f
+      \efixis x e &\desugars \efix \ebox{\fnof x e}
     \end{aligned}
     &&
     \begin{aligned}
@@ -16,6 +16,8 @@
       \esetfor{e}{p \in f,\, \dots} &\desugars \eforraw{p \in f} \esetfor{e}{\dots}
       \\
       \esetfor{e}{f,\, \dots} &\desugars \ewhen{f} \esetfor{e}{\dots}
+      \\
+      \ewhen e f &\desugars \eforraw{\etuple{} \in e} f
     \end{aligned}
   \end{align*}
 

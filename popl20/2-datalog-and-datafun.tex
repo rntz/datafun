@@ -146,18 +146,11 @@ stratified fixed points \`a la Datalog.
 
 \input{fig-sugar}
 
-In the examples, we make free use of strings and integers, ordered discretely
+In these examples, we make free use of strings and integers, ordered discretely
 ($x \le y$ iff $x = y$). We also make use of some syntax sugar in the
 definitions:
 
 \begin{enumerate}
-\item First, we make free use of curried functions and pattern
-  matching. Desugaring these is relatively standard, and so we will
-  say little about it, with one exception. Namely, the box-elimination
-  form $\eletbox x e e'$ is a pattern matching form, and so we allow
-  it to occur inside of patterns. The effect of a box pattern
-  $\pbox{\isocolor p}$ is to ensure that all of the variables bound in the
-  pattern $\isocolor p$ are treated as discrete variables.
 
 \item We mentioned earlier that Datafun's boolean type $\tbool$ is ordered
   $\efalse < \etrue$. This is because we encode booleans as sets of empty
@@ -167,11 +160,24 @@ definitions:
   if $b$ is \etrue\ and $\bot$ otherwise. Encoding booleans as sets has the
   advantage that $\ewhen{b}{e}$ is monotone in the condition $b$.
 
-\item Finally, we make use of set comprehension notation. The
-  desugaring we use is based on the translation of comprehensions to
-  the monadic operators~\cite{wadler-monad-comprehensions}.
+\item We make use of set comprehensions, which can be desugared into the monadic
+  operators \kw{for} and \kw{when} in the usual
+  way~\cite{wadler-monad-comprehensions}.
+
+\item It is often convenient to treat $\prim{fix}$ as a binding form, $\efixis x
+  e$, instead of explicitly supplying a function, $\efix\ebox{\fnof x e}$.
+
+\item Finally, we make free use of curried functions and pattern matching.
+  Desugaring these is relatively standard, and so we will say little about it,
+  with one exception: the box-elimination form $\eletbox x e e'$ is a pattern
+  matching form, and so we allow it to occur inside of patterns. The effect of a
+  box pattern $\pbox{\isocolor p}$ is to ensure that all of the variables bound
+  in the pattern $\isocolor p$ are treated as discrete variables.
+
 \end{enumerate}
-We summarize (except for pattern matching) the sugaring rules we use in
+
+\noindent
+We summarize (except for pattern matching) the desugaring rules we use in
 \cref{fig:sugar}.
 
 
