@@ -4,8 +4,6 @@
 %In this section, we give the typing and semantics of core Datafun.
 \input{fig-typing}
 
-\todo{Explain typing of \isempty.}
-
 The syntax of core Datafun is given in \cref{fig:syntax} and its typing rules in
 \cref{fig:core-datafun}. Contexts are lists of hypotheses $H$; a hypothesis
 gives the type of either a monotone variable $\h x A$ or a discrete variable
@@ -13,7 +11,7 @@ $\hd x A$. The stripping operation $\stripcx\G$ drops all monotone hypotheses
 from the context $\G$, leaving only the discrete ones.
 %
 The typing judgement $\J{e}{\G}{A}$ may be read as ``under hypotheses $\G$,
-the term $e$ has the type $A$''.
+the term $e$ has type $A$''.
 
 The \rn{var} and \rn{dvar} rules say that both monotone hypotheses $\h x A$ and
 discrete hypotheses $\hd x A$ justify ascribing the variable $x$ the type $A$.
@@ -47,34 +45,41 @@ these operations implicitly, to propagate discreteness onto the variables bound
 by a box pattern -- in the pattern $\pboxtuple{\inj 1 \dvar x, \inj 2 \dvar y}$,
 we expect both the variables $\dvar x$ and $\dvar y$ to be discrete, which is
 information we propagate using these coercions. Semantically, all of these
-operations are the identity, as we will see in the following subsection.
+operations are the identity, as we shall see shortly.
 
-This leaves only the rules for manipulating sets and other semilattices. Recall
-that sets form a semilattice in the inclusion order, with the empty set as least
-element and set union as join, and also that products of semilattices are
-semilattices (with order and operations given pointwise). So we take the
-\emph{semilattice types} $L$ to be the set type $\tset A$, as well as units $1$
-and products of lattice types $L_1 \times L_2$. Then, the \rn{bot} rule says
-that the term $\bot$ is the least element of any semilattice type $L$, and the
-\rn{join} rule gives the type of joins, saying that $e_1 \vee e_2$ is of
-semilattice type $L$ when each $e_i$ has type $L$. These constructors work for
-any semilattice $L$, but there are rules specialized to sets as well. The typing
-rule for eliminating sets, \rn{for}, is \emph{almost} the monadic bind. However,
-we generalize it by not requiring the term $\efor{x}{e}{e'}$ to eliminate into a
-set type. Instead, we permit $e'$ to be \emph{any} semilattice type, not just
-sets. Similarly, the introduction form \rn{set} is specific to set types, saying
-that $\esetsub{e_i}{i\in I}$ has type $\tset A$ when each of the $\eisiso{e_i}$
-has type $A$. Furthermore, each $\eisiso{e_i}$ has to typecheck in the discrete
-context, since membership relies on the non-monotonic property of equality. This
-can be seen in the \rn{eq} rule, which checks equality of two terms $\eeq e f$
-only when they are discrete, checking in stripped contexts.
+This leaves only the rules for manipulating sets and other semilattices.
+\rn{bot} and \rn{join} tell us that $\bot$ and $\vee$ are valid at any
+semilattice type $L$, that is, at sets and products of semilattice types.
+%
+The rule for set-elimination, \rn{for}, is \emph{almost} monadic bind.
+%
+However, we generalize it by allowing $\efor{x}{e}{f}$ to eliminate into any
+semilattice type, not just sets, denoting a ``big semilattice join'' rather than
+a ``big union''.
+%
+Finally, the introduction rule \rn{set} is says that $\esetsub{e_i}{i\in I}$ has
+type $\tseteq A$ when each of the $\eisiso{e_i}$ has type $\eqt A$.
+%
+Just as in \rn{box}, each $\eisiso{e_i}$ has to typecheck in a stripped context;
+constructing a set is a discrete operation, since $1 \le 2$ but $\esetraw{1}
+\not\subseteq \esetraw{2}$.
+
+Likewise discrete is equality comparison $\eeq{e_1}{e_2}$, whose rule \rn{eq} is
+otherwise straightforward; and \rn{empty?}, which requires more explanation. The
+idea is that $\eisempty e$ determines whether $e : \tset{\tunit}$ is empty,
+returning $\inj 1 \etuple{}$ if it is, and $\inj 2 \etuple{}$ if it isn't. This
+lets us turn ``booleans'' (sets of units) into values we can \kw{case}-analyse.
+This is, however, not monotone, because while booleans are ordered $\efalse <
+\etrue$, sum types are ordered disjointly; $\inj 1 ()$ and $\inj 2 ()$ are
+simply incomparable.
 
 Finally, the rule \rn{fix} for fixed points $\efix e$ takes a function $e : \iso
 (\fixt L \to \fixt L)$ and yields an expression of type $\fixt L$. Besides
 having semilattice type, we also insist that $\fixt L$ has no infinite ascending
 chains, ensuring that the recursion will terminate.
 
-\subsection{Semantics}
+
+\subsection{Semantics}\label{sec:semantics}
 
 The syntax of core Datafun can be interpreted in $\Poset$, the
 category of partially ordered sets and monotone functions between
@@ -90,12 +95,7 @@ We will typically write composition in diagramamtic
 or ``pipeline'' order: given $f : A \to B$ and $g : B \to C$ we
 write $(f \then g) : A \to C$.
 
-
-
 \input{fig-semantics}
-
-
-
 
 \subsubsection{Cartesian Closed Structure}
 
