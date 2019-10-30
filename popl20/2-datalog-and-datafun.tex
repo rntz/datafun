@@ -347,8 +347,10 @@ These assumed, we define the type of regular expression matchers:
 
 \noindent
 A regular expression takes a discrete string $\pboxvar s$ and returns the set of
-all pairs $(i,j)$ such that the substring $s_i,\, \ldots,\, s_{j-1}$ matches the
-regular expression. For example, to find all matches for a single character:
+all pairs $(i,j)$ such that the substring $\dvar s_i,\, \ldots,\, \dvar s_{j-1}$
+matches the regular expression. For example, to find all matches for a single
+character $c$, we return the range $(i,i+1)$ whenever $(i,c) \in
+\name{chars}\<\eboxvar s$:
 
 \begin{code}
   \name{sym} \isa \iso\tchar \to \tre\\
@@ -359,60 +361,58 @@ regular expression. For example, to find all matches for a single character:
 \end{code}
 
 \noindent
-The $\name{sym}$ combinator takes a character and returns a set of substrings by
-returning the set $(\dvar n, \dvar n+1)$ where the $\dvar n$\textsuperscript{th}
-element of the string $\dvar s$ is the character $\dvar c$.
+To find all matches for the empty regex, i.e.\ all empty substrings, including
+the one ``beyond the last character'':
 
-\begin{tabbing}
-\qquad \=   $\name{nil} : \tre$ \+\\
-  $\name{nil}\;\pboxvar{s} = \efor{n}{\name{pos}\;\dvar s}{\eset{\etuple{\dvar n,\dvar n}}}$
-\end{tabbing}
-
-\noindent
-Then $(\name{nil} \;s)$ yields $\etuple{n,n}$ for each position $n$ in $s$,
-since an empty substring can start anywhere.
-
-\begin{tabbing}
-\qquad \=   $\name{seq} : \tre \to \tre \to \tre$ \+\\
-  $\name{seq}\;r_1\;r_2\;s = r_1\;s \bullet r_2\;s$
-\end{tabbing}
+\begin{code}
+  \name{nil} \isa \tre\\
+  \name{nil} \<\pboxvar s =
+  \esetfor{\dvar i}{\ptuple{\dvar i, \pwild} \in \name{chars}\<\eboxvar s}
+  \vee \eset{\name{length}\<\eboxvar s}
+\end{code}
 
 \noindent
-The $\name{seq}$ combinator takes two regular expressions $r_1$ and $r_2$
-as arguments, applies its argument to both, and takes the relational
-composition of the results. Therefore, if the range $(i,j)$ was in the
-result of $r_1$, and $(j,k)$ was in the result of $r_2$, then
-we will return $(i,k)$, just as desired.
+Appending regexes $r_1, r_2$ amounts to relation composition, since we wish to
+find all substrings consisting of adjacent substrings $s_i \ldots s_{j-1}$ and
+$s_j \ldots s_{k-1}$ matching $r_1$ and $r_2$ respectively:
 
-\begin{tabbing}
-\qquad \=   $\name{bot} : \tre$ \+\\
-  $\name{bot}\;\_ = \bot$ \\[1em]
-
-  $\name{alt} : \tre \to \tre \to \tre$ \\
-  $\name{alt}\;r_1\;r_2\;s = r_1\;s \vee r_2\;s$
-\end{tabbing}
+\nopagebreak[2]
+\begin{code}
+  \name{seq} \isa \tre \to \tre \to \tre\\
+  \name{seq} \<r_1 \<r_2 \<s = r_1\<s \relcomp r_2\<s
+\end{code}
 
 \noindent
-We get the empty set of matches from $\name{bot}$, and
-$\name{alt}$ unions the matches of its two arguments.
+Similarly, regex alternation \texttt{r\textsubscript{1}|r\textsubscript{2}} is
+accomplished by unioning all matches of each:
 
-\begin{tabbing}
-\qquad \=   $\name{star} : \iso\tre \to \tre$ \+\\
-  $\name{star}\;\pboxvar{r}\;\pboxvar{s} = \name{nil}\;\eboxvar{s} \vee \name{trans}\;\ebox{\dvar r\;\eboxvar{s}}$
-\end{tabbing}
+\nopagebreak[2]
+\begin{code}
+  \name{alt} \isa \tre \to \tre \to \tre\\
+  \name{alt} \<r_1 \<r_2 \<s = r_1\<s \vee r_2\<s
+\end{code}
 
 \noindent
-The most interesting regular expression combinator is the Kleene star operation
-$\name{star}$. It uses $\name{nil}$ to get the reflexive relation on positions,
-and then takes the transitive closure of the regular expression it received as
-an argument using the $\name{trans}$ operation. This forces its argument to be
-boxed, since $\name{trans}$ calculates a fixed point, and only discrete
-variables can occur inside of fixed point expressions.\footnote{As a technical
-  note, sets of pairs of integers do not form a \todo{finite-height} lattice, so
-  by typing this program is not an acceptable fixed point expression. However,
-  since the positions in a string form a finite set, semantically it is fine.
-  The original Datafun paper shows how one can define bounded fixed points to
-  handle cases like this, so we will not be scrupulous.}
+The most interesting regular expression combinator is Kleene star. Thinking
+relationally, if we consider the set of pairs $(i,j)$ matching some regex
+\texttt{r}, then \texttt{r*} matches its \emph{reflexive, transitive closure}.
+This can be accomplished by combining \emph{nil} and \emph{trans}.
+
+\begin{code}
+  \name{star} \isa \iso\tre \to \tre\\
+  \name{star} \<\pboxvar r \<\pboxvar s =
+  \name{nil}\<\eboxvar s \vee
+  \name{trans} \<\ebox{\dvar r \<\eboxvar s}
+\end{code}
+
+\noindent
+Note that the argument $\dvar r$ is must be discrete because \name{trans} uses
+it to compute a fixed point.\footnote{As a technical note, sets of pairs of
+  integers do not form a \todo{finite-height} lattice, so by typing this program
+  is not an acceptable fixed point expression. However, since the positions in a
+  string form a finite set, semantically it is fine. The original Datafun paper
+  shows how one can define bounded fixed points to handle cases like this, so we
+  will not be scrupulous.}
 
 
 \subsection{Regular expression combinators, take 2}
@@ -426,61 +426,62 @@ integrating functional and relational styles of programming -- we can
 use functions to manage strict input/output divisions, and relations
 to manage nondeterminism and search.
 
-\begin{tabbing}
-\qquad \=  $\kw{type}\;\tre\;=\iso (\tstring \times \tint) \to \tset{\tint}$ \+
-\end{tabbing}
+\begin{code}
+  \kw{type}\ \tre = \iso (\tstring \x \tint) \to \tset{\tint}
+\end{code}
 
 \noindent
-Our new type of combinators takes a string and a starting
-position, and returns a set of ending positions. In contrast, the earlier type
-took a string and returned a set of start/end pairs.
+Our new type of combinators takes a string and a starting position, and returns
+a set of ending positions. For example, $\name{sym} \<\eboxvar c$ checks if
+$\dvar c$ occurs at the start position $\dvar i$, yielding $\esetraw{\dvar i+1}$
+if it does and the empty set otherwise, while $\name{nil}$ simply returns the
+start position $\dvar i$.
 
-\begin{tabbing}
-\qquad \=  $\name{sym} : \iso\typename{char} \to \tre$\+ \\
-  $\name{sym} \;\pboxvar c \;\pboxtuple{\dvar s, \dvar n} = \ewhen{\eeq{\dvar s[\dvar n]}{\dvar c}}{\eset{\dvar n+1}}$
-\end{tabbing}
-
-\noindent
-$\name{sym}\;c$ checks if $c$ occurs at position $n$, yielding $\esetraw{n+1}$
-if it does, and the empty set otherwise.
-
-\begin{tabbing}
-\qquad \=  $\name{nil} : \tre$\+ \\
-  $\name{nil}\;\pboxtuple{\dvar s, \dvar n} = \eset{\dvar n}$
-\\[.5\baselineskip]
-  $\name{seq} : \tre \to \tre \to \tre$ \\
-  $\name{seq}\;r_1\;r_2 \;\pboxtuple{\dvar s,\dvar n} = \efor{m}{r_1\;\eboxtuple{\dvar s,\dvar n}}{r_2\;\eboxtuple{\dvar s,\dvar m}}$
-\end{tabbing}
+\begin{code}
+  \name{sym} \isa \iso\tchar \to \tre\\
+  \name{sym} \<\pboxvar c \<\pboxtuple{\dvar s, \dvar i}
+  = \esetfor{\dvar i+1}{
+    \ptuple{\dvar j, \dvar d} \in \name{chars} \<\eboxvar s,
+    \eeq {\dvar i} {\dvar j},
+    \eeq {\dvar c} {\dvar d}}
+  \\[8pt]
+  \name{nil} \isa \tre \to \tre\\
+  \name{nil} \<\pboxtuple{\dvar s, \dvar i} = \eset{\dvar i}
+\end{code}
 
 \noindent
-The $\name{nil}$ function simply returns the same index $n$ it received as an
-argument, since an empty string matches starting from any position. Sequencing
-via $\name{seq}\;r_1\;r_2$ checks first to see the possible ending positions from
-matching $r_1$, and carries on with $r_2$ from there.
+Appending regexes $\name{seq}\<r_1\<r_2$ simply applies $r_2$ starting from
+every ending position that $r_1$ can find:
 
-\begin{tabbing}
-  \qquad \=
-  $\name{bot} : \tre$ \+\\
-  $\name{bot}\;\_ = \bot$ \\[1em]
-
-  $\name{alt} : \tre \to \tre \to \tre$ \\
-  $\name{alt}\;r_1\;r_2\;x =\ r_1\;x \vee r_2\;x$
-\end{tabbing}
+\begin{code}
+  \name{seq} \isa \tre \to \tre \to \tre\\
+  \name{seq} \<r_1 \<r_2 \<\pboxtuple{\dvar s, \dvar i} =
+  \efor{j}{r_1\<\eboxtuple{\dvar s, \dvar i}} r_2 \<\eboxtuple{\dvar s, \dvar j}
+\end{code}
 
 \noindent
-We still get the empty set from $\name{bot}$, and $\name{alt}$
-still unions the two sets of end positions.
+Regex alternation \name{alt} is effectively unchanged:
 
-\begin{tabbing}
-\qquad \=  $\name{star} : \iso\tre \to \tre$\+ \\
-  $\name{star}\;\pboxvar{r}\;\pboxtuple{\dvar s, \dvar n} = \efixis{s}{\bigl(\eset{\dvar n} \vee \efor{m}{\dvar s}{\dvar r\;\eboxtuple{\dvar s,\dvar m}}\bigr)}$
-\end{tabbing}
+\begin{code}
+  \name{alt} \isa \tre \to \tre \to \tre\\
+  \name{alt} \<r_1 \<r_2 \<x = r_1\<x \vee r_2\<x
+\end{code}
 
 \noindent
-As before, the $\name{star}$ combinator takes a boxed regular expression as an
-argument, and for the same reason -- we are implementing sequencing with a fixed
-point. One thing worth noting about this definition is that it is
-\emph{left-recursive} -- the definition takes the endpoints from the fixed point
-$\name{self}$, and then continues matching using the argument $\name{r}$. This
-should make clear that this is not just plain old functional programming -- we
-are genuinely relying upon the fixed point semantics of Datafun.
+Finally, Kleene star is implemented by recursively appending $\dvar r$ to a
+set $x$ of matches found so far:
+
+\begin{code}
+  \name{star} \isa \iso\tre \to \tre\\
+  \name{star} \<\pboxvar r \<\pboxtuple{\dvar s, \dvar i}
+  = \efixis{x}{\bigl(\eset{\dvar i} \vee
+    \efor j {x} \dvar r\<\eboxtuple{\dvar s, \dvar j}
+    \bigr)}
+\end{code}
+
+\noindent
+It's worth noting that this definition is effectively \emph{left-recursive} ---
+it takes the endpoints from the fixed point $x$, and then continues matching
+using the argument $\dvar r$. This should make clear that this is not just plain
+old functional programming --- we are genuinely relying upon the fixed point
+semantics of Datafun.
