@@ -48,12 +48,17 @@
 
 %% ----- #1: Alegreya, large section titles -----
 \usepackage[scaled=0.9872074235807861,osf,proportional,]{AlegreyaSans}
-\microtypesetup{letterspace=12,letterspace=25,}
-%\let\MakeTextUppercase\relax
-%\renewcommand\MakeTextUppercase\scshape % hack
-%\renewcommand\MakeTextUppercase{\scshape\MakeTextLowercase}
+\microtypesetup{letterspace=12,letterspace=35,letterspace=20,}
+\SetTracking[spacing={250,,}]{
+  encoding={T1,LY1,T2A},
+  shape={sc*,},
+  family={AlegreyaSans-OsF,AlegreyaSans-TOsF}
+}{25}
 \renewcommand\@secfont{\large\sffamily\bfseries\section@raggedright}
-%\renewcommand\@subsecfont{\AlegreyaSansMedium\section@raggedright}
+
+\let\prev@subsubsection\subsubsection
+\renewcommand\subsubsection[1]{\prev@subsubsection{\MakeLowercase{#1}}}
+\renewcommand\@subsubsecfont{\sffamily\scshape\section@raggedright}
 
 %% %% ----- #2: Lato, all caps OR large section titles -----
 %% %% No small caps.
