@@ -122,47 +122,44 @@ type). We require this lemma in the proofs of the fundamental theorem in all the
 cases involving semilattice types --- namely $\bot$, ${\vee}$, \kw{for}-loops,
 and $\prim{fix}$.
 
-Similarly, we also need to prove theorems about context manipulations
-to establish the soundness of the rules for the box type. First, we
-show that all valid changes for a discrete context (i.e., a context
-with only discrete variables) send terms to themselves, recalling that
-the $\stripcx{\G}$ function returns only the discrete variables in $\G$. 
+Since typing rules that involve discreteness (such as the $\iso$ rules)
+manipulate the context, we need some lemmas regarding these manipulations.
+First, we show that all valid changes for a context with only discrete variables
+send terms to themselves, recalling that $\stripcx{\G}$ contains only the
+discrete variables from $\G$.
 
 \begin{lemma}[discrete contexts don't change]
   If\/ $\weirdat{\stripcx{\G}}{\tuple{}}{\gamma}{\rho}{\gamma'}{\rho'}$ then
   $\gamma = \gamma'$ and $\rho = \rho'$.
 \end{lemma}
 
-We state this lemma by quantifying over all contexts and then
-stripping because we want to use it in the proof of the next lemma,
-which says that any valid context change gives rise to a valid change
-on a stripped context. To define the discrete part of a
-substitution, we use the function $\strip_\G(\gamma)$, which drops
-all the monotonic variables:
-
-\begin{displaymath}
-  \begin{array}{lcl}
-    \strip_\G & : & \den{\G} \to \den{\stripcx{\G}} \\
-    \strip_\G\;(\gamma) & = & \left< x \mapsto \gamma_x \right>_{\hd x A \in \G} \\
-  \end{array}
-\end{displaymath}
-
+\noindent
+We use this lemma in combination with the next, which says that any valid
+context change gives rise to a valid change on a stripped context:
 
 \begin{lemma}[context stripping]
   If $\weirdat{\G}{\dgamma}{\gamma}{\rho}{\gamma'}{\rho'}$
-  then $\weirdat{\stripcx{\G}}{\tuple{}}{\strip_{\Phi\G}(\g)}{\strip_{\G}(\rho)}{\strip_{\Phi\G}(\g')}{\strip_{\G}(\rho')}$.
+  then
+
+  \[
+  \weirdat{\stripcx{\G}}{\tuple{}}{\strip_{\Phi\G}(\g)}{\strip_{\G}(\rho)}{\strip_{\Phi\G}(\g')}{\strip_{\G}(\rho')}
+  \]
+
+  where $\strip_\G = \fork{\pi_{\dvar x}}_{\hd x A \in \G}$ keeps only the
+  discrete variables from a substitution.
 \end{lemma}
 
-Jointly, these two lemmas ensure that a change to any context s an
-identity on the discrete part. We use these facts in all the cases of
-the fundamental theorem involving discrete expressions -- equality
-$\eeq{e_1}{e_2}$, set constructors like $\esetsub{e_i}{i}$, emptiness
-tests $\eisempty e$, and box introduction $\ebox e$.
+\noindent
+Jointly, these two lemmas ensure that a valid change to any context is an
+identity on the discrete part. We use these in all the cases of the fundamental
+theorem involving discrete expressions -- equality $\eeq{e_1}{e_2}$, set
+literals $\esetsub{e_i}{i}$, emptiness tests $\eisempty e$, and box
+introduction $\ebox e$.
 
-Once the fundamental theorem has been established, we can specialize
-it to closed terms and equality types, Then, the equality changes
-lemma implies adequacy -- that first-order closed programs compute the
-same result when $\phi$-translated:
+Once the fundamental theorem has been established, we can specialize it to
+closed terms and equality types, Then, the equality changes lemma implies
+adequacy -- that first-order closed programs compute the same result when
+$\phi$-translated:
 
 \begin{theorem}[adequacy]
   If $\J e {\emptycx} {\eqt A}$ then $\den{e} = \den{\phi e}$.
