@@ -28,12 +28,18 @@ parent, and so on. The \name{ancestor} relation is defined by a pair of rules:
 first, that $X$ is $Z$'s ancestor if $X$ is $Z$'s parent; second, that $X$ is
 $Z$'s ancestor if $X$ has a child $Y$ who is an ancestor of $Z$.
 
-Semantically, a predicate denotes the set of tuples that satisfy it. Recursive
-definitions like \name{ancestor} denote the set of fact-tuples deducible from
-the rules defining them. More formally, we can view these rules as defining a
-relation transformer, and taking its least fixed point. One of Datalog's key
-syntactic restrictions is \emph{stratification}: a recursive definition cannot
-refer to itself beneath a negation. For example, the liar paradox is prohibited:
+Semantically, a predicate denotes the set of tuples that satisfy it. Compared to
+Prolog, one of the key restrictions Datalog imposes is that these sets are
+always \emph{finite}. This helps keep proof search decidable, allowing for a
+variety of implementation strategies. In practice, most Datalog engines use
+bottom-up evaluation instead of Prolog's top-down backtracking search.
+
+Recursive definitions like \name{ancestor} give rise to the set of facts
+deducible from the rules defining them. More formally, we can view these rules
+as defining a relation transformer and producing its least fixed point. For this
+to make sense, these rules must be \emph{stratified}: a recursive definition
+cannot refer to itself beneath a negation. For example, the liar paradox is
+prohibited:
 
 \begin{code}
   \quad\name{liar}() \gets \neg \name{liar}().
@@ -44,6 +50,7 @@ refer to itself beneath a negation. For example, the liar paradox is prohibited:
 Stratification ensures the transformer the rules define is monotone,
 guaranteeing a unique least fixed point.
 
+
 \subsection{Datafun}
 
 \input{fig-syntax}
@@ -55,11 +62,15 @@ guaranteeing a unique least fixed point.
 %% is extremely elegant, and Datafun arose as an attempt to generalize
 %% this semantics.
 
-The idea behind Datafun is that since the semantics of a Datalog program
-is a monotone set-valued operator, its natural home is the category
-\Poset{} of partial orders and monotone functions. Since \Poset{} is
-bicartesian closed, it can interpret the simply-typed \fn-calculus,
-which gives us a notation for writing monotone and \emph{higher-order}
+The idea behind Datafun is to capture the essence of Datalog in a typed,
+higher-order, functional setting.
+%
+Since the key restriction that makes Datalog tractable --- stratification ---
+requires tracking \emph{monotonicity}, we locate Datafun's semantics in the
+category \Poset\ of partial orders and monotone maps.
+%
+Since \Poset\ is bicartesian closed, it can interpret the simply typed
+\fn-calculus, giving us a notation for writing monotone and higher-order
 functions.
 %
 This lets us \emph{abstract} over Datalog rules, something not
@@ -70,7 +81,9 @@ to this semantic intuition.
 
 Datafun begins as the simply-typed \fn-calculus with functions ($\fnof x e$ and
 $e\<f$), sums ($\inj i e$ and $\ecase{e}{\dots}$), and products ($\etuple{e,f}$
-and $\pi_i\<e$). To this, we add a type of finite sets\footnote{To implement set
+and $\pi_i\<e$).
+%
+To represent relations, we add a type of finite sets\footnote{To implement set
   types, their elements must support decidable equality. In our core calculus,
   we use a subgrammar of ``eqtypes'', and in our implementation (which compiles
   to Haskell) we use typeclass constraints to pick out such types.} $\tset{\eqt
