@@ -23,10 +23,9 @@ just discrete ones) with zero changes.
 %
 However, this also invalidates $\delta(\efix f) = \bot$: now that $f$ can
 change, so can $\efix f$.
-% TODO: Argh, using \delta here is technically wrong. because \delta
-% should be incrementalizing \phi. this is more like \Deriv. But if we
-% use \Deriv people will be confused, and this is a very technical
-% point.
+% Argh, using \delta here is technically wrong. because \delta should be
+% incrementalizing \phi. this is more like \Deriv. But if we use \Deriv people
+% will be confused, and this is a very technical point.
 Luckily, there is a simple and correct solution: $\delta(\efix f) =
 \efix \ebox{\delta f \<\ebox{\efix f}}$~\cite{delta-fix}.
 %
