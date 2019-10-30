@@ -66,7 +66,7 @@ With that in place, we can state the fundamental theorem, showing that
 $\phi$ and $\delta$ generate expressions which satisfy this logical
 relation:
 
-\begin{theorem}[Fundamental Property]
+\begin{theorem}[fundamental property]
   If $\J e \G A$ and $\weirdat{\G}{\dgamma}{\g}{\rho}{\g'}{\rho'}$ then
   \[\weirdat{A}{\den{\delta e} \<\tuple{\g,\dgamma}}{\den{\phi
       e}\<\g}{\den{e}\<\rho}{\den{\phi e}\<\g'}{\den{e}\<\rho'}\]
@@ -80,11 +80,11 @@ First, we prove a pair of lemmas about the behaviour of the logical
 relation at equality types. Both of these follow by induction on the
 structure of equality types.
 
-\begin{lemma}[Equality Changes]
+\begin{lemma}[equality changes]
 For all equality types $\eqt A$, we have that $\weirdat{\eqt A}{\dx}{x}{a}{y}{b}$ implies $x = a$ and $y = b$.
 \end{lemma}
 
-\begin{lemma}[Dummy Changes]
+\begin{lemma}[dummy changes]
   For all equality types $\eqt A$, we have that $\weirdat{\eqt A}{\dummy(x)}{x}{x}{x}{x}$.
 \end{lemma}
 
@@ -99,7 +99,7 @@ translations.
 The lemma involves the lattice types, showing that a change for a
 lattice type $L$ is something that can be joined on to it:
 
-\begin{lemma}[Semilattice Changes]
+\begin{lemma}[semilattice changes]
   At lattice types $L$, we have that $\Delta L = L$ and $\weirdat{L}{\dx}{x}{a}{y}{b}$ if and only if $x = a$ and $y = b = x \vee_L \dx$
 \end{lemma}
 \begin{proof}
@@ -122,7 +122,7 @@ show that all valid changes for a discrete context (i.e., a context
 with only discrete variables) send terms to themselves, recalling that
 the $\stripcx{\G}$ function returns only the discrete variables in $\G$. 
 
-\begin{lemma}[Discrete Contexts Don't Change]
+\begin{lemma}[discrete contexts don't change]
   If $\weirdat{\stripcx{\G}}{\tuple{}}{\gamma}{\rho}{\gamma'}{\rho'}$ then $\gamma = \gamma'$ and $\rho = \rho'$.
 \end{lemma}
 
@@ -141,7 +141,7 @@ all the monotonic variables:
 \end{displaymath}
 
 
-\begin{lemma}[Context Stripping]
+\begin{lemma}[context stripping]
   If $\weirdat{\G}{\dgamma}{\gamma}{\rho}{\gamma'}{\rho'}$
   then $\weirdat{\stripcx{\G}}{\tuple{}}{\strip_{\Phi\G}(\g)}{\strip_{\G}(\rho)}{\strip_{\Phi\G}(\g')}{\strip_{\G}(\rho')}$.
 \end{lemma}
@@ -159,7 +159,7 @@ it to closed terms and equality types, Then, the equality changes
 lemma implies adequacy -- that first-order closed programs compute the
 same result when $\phi$-translated:
 
-\begin{theorem}[Adequacy of the Translation]
+\begin{theorem}[adequacy]
   If $\J e {\emptycx} {\eqt A}$ then $\den{e} = \den{\phi e}$.
 \end{theorem}
 
