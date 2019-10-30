@@ -40,10 +40,12 @@
 
 %% More space around \cup, \vee, \wedge.
 \let\bincup\cup
+\let\bincap\cap
 \let\binvee\vee
 \let\binwedge\wedge
 \let\binbullet\bullet
 \renewcommand\cup{\mathrel{\bincup}}
+\renewcommand\cap{\mathrel{\bincap}}
 \renewcommand\vee{\mathrel{\binvee}}
 \renewcommand\wedge{\mathrel{\binwedge}}
 \renewcommand\bullet{\mathrel{\binbullet}}
@@ -218,7 +220,7 @@
 \newcommand\kw\textbf
 \newcommand\prim\name
 \newcommand\caseto\shortrightarrow
-\newcommand\pwild{\underline{\phantom{a}}}
+\newcommand\pwild{\underline{\phantom{o}}}
 
 \newcommand\tset[1]{\{{#1}\}}
 \newcommand\tunit{1}
@@ -265,7 +267,7 @@
 
 \newcommand\pbox[1]{\ebox{#1}}
 \newcommand\ptuple\etuple
-\newcommand\pboxvar[1]{\pbox{\dvar #1}}
+\newcommand\pboxvar[1]{\pbox{\dvar{#1}}}
 
 \newcommand\eboxtupleraw[1]{\eboxraw{\etuple{#1}}}
 \newcommand\eboxtuple[1]{\ebox{\etuple{#1}}}

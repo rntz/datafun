@@ -2,6 +2,7 @@
 \label{sec:datalog-and-datafun}
 
 \subsection{Datalog}
+\label{sec:datalog}
 
 Datalog's syntax is a subset of Prolog's. Programs are collections of predicate
 declarations:
@@ -191,93 +192,92 @@ We summarize (except for pattern matching) the desugaring rules we use in
 
 \subsection{Set operations}
 
-Even before higher-order functions, one of the main benefits of
-Datafun relative to Datalog is that it offers the ability to manipulate relations
-as first class values. In this subsection we will show how a variety
-of standard operations on sets can be represented in Datafun.
+%\newcommand\isin{\mathbin{\in?}}
+\newcommand\mem{\name{member}}
+\newcommand\isa{~:~}
+\newcommand\relcomp\bullet
+\newcommand\bone{\dvar b_{\isocolor 1}}
+\newcommand\btwo{\dvar b_{\isocolor 2}}
+\newcommand\yone{\dvar y_{\isocolor 1}}
+\newcommand\ytwo{\dvar y_{\isocolor 2}}
 
-\paragraph{Membership Tests} The first operation we consider is the
-membership test operation.
-\begin{tabbing}
-  \qquad\=\+ \kill
-  $\name{mem} : \iso A \to \tset A \to \tbool$ \\
-  $\name{mem} \;\pboxvar{x} \;\var{ys} = \efor{y}{\var{ys}} \eeq{\dvar x}{\dvar y}$
-\end{tabbing}
+Even before higher-order functions, one of the main benefits of Datafun over
+Datalog is that it permits manipulating relations as first class values.
+%
+In this subsection we will show how a variety of standard operations on sets can
+be represented in Datafun.
+%
+The first operation we consider is testing membership:
+
+\begin{code}
+  \mem \isa \eqt A \to \tseteq A \to \tbool\\
+  \mem \<\pboxvar x \<s = \efor{y}{s} \eeq {\dvar x} {\dvar y}
+\end{code}
 
 \noindent
-This checks if the input $\dvar x$ is equal to any $\dvar y \in \var{ys}$. The
-argument $x$ to $\name{mem}$ is discrete, because an element is in a set or not
--- the test is not monotone in $\dvar x$.
+This checks if $\dvar x$ is equal to any element $\dvar y \in s$. The argument
+$\dvar x$ is discrete because increasing $\dvar x$ might send it from being
+\emph{in} the set to being \emph{outside} the set (e.g. $1 \in \esetraw{1}$ but
+$2 \notin \esetraw{1}$). Notice that here we're taking advantage of encoding
+booleans as sets of empty tuples --- unioning these sets implements logical
+\emph{or}.
 
-\paragraph{Set Intersection}
-Using $\name{mem}$, it is possible to define set intersection, by taking the
-union of all the singleton sets $\esetraw{\dvar x}$ where $\dvar x$ is an
-element of both $\var{xs}$ and $ys$.
+Using $\mem$ we can define set intersection by taking the union of every
+singleton set $\esetraw{\dvar x}$ where $\dvar x$ is an element of both
+$s$ and $t$:
 
-\begin{tabbing}
-  \qquad\=\+ \kill
-  $\_ {\cap} \_ : \tset A \to \tset A \to \tset A$ \\
-  $\var{xs} \cap \var{ys} = \efor{x}{xs}
-  \ewhen{\name{mem}\;\eboxvar{x}\;\var{ys}}{\eset{\dvar x}}$
-\end{tabbing}
+\begin{code}
+  \pwild \cap \pwild \isa \tseteq A \to \tseteq A \to \tseteq A\\
+  s \cap t = \efor x {s} \ewhen{\mem \<\eboxvar x \<t} \eset{\dvar x}
+\end{code}
 
 \noindent
 Using comprehensions, this could alternately be written as:
-\begin{tabbing}
-  \qquad\=\+ \kill
-  $\var{xs} \cap \var{ys} = \esetfor{x}{\dvar x \in \var{xs},\, \name{mem}\;\eboxvar{x}\;\var{ys}}$
-\end{tabbing}
 
-\paragraph{Relational Composition}
-We can also define the composition of two relations in Datafun.
+\begin{code}
+  s \cap t = \esetfor{\dvar x}{\dvar x \in s, \mem \<\eboxvar x \<s}
+\end{code}
 
-\begin{tabbing}
-  \qquad\=\+ \kill
-  $\_ {\bullet} \_$ \quad\quad\= $\,:$\;\; \=
-  $ \tset{A \times B} \to \tset{B \times C} \to \tset{A \times C}$ \\
+\noindent From now on, we'll use comprehensions whenever possible. For example,
+we can also define the composition of two relations in Datafun:
 
-  $\var{xs} \mathrel{\bullet} \var{ys}$
-  \> $=$ \> $\eforraw{\etuple{\dvar a,\dvar b} \in \var{xs}}
-  \eforraw{\etuple{\dvar{b'}, \dvar c} \in \var{ys}}
-  \ewhen{\eeq{\dvar b}{\dvar{b'}}} \eset{\etuple{\dvar a,\dvar c}}
-  $
-  %% \\
-  %% \>     \> $\efor{(b',c)}{\mathit{ys}}{}$ \\
-  %% \>     \> $\ewhen{b = b'}{\eset{(a,c)}}$
-\end{tabbing}
+\begin{code}
+  \pwild \relcomp \pwild \isa \tset{\eqt A \x \eqt B} \to \tset{\eqt B \x \eqt
+    C} \to \tset{\eqt A \x \eqt C}\\
+  s \relcomp t = \esetfor{\etuple{\dvar a, \dvar c}}{
+    \ptuple{\dvar a, \bone} \in s,
+    \ptuple{\btwo, \dvar c} \in t,
+    \eeq \bone \btwo}
+\end{code}
 
 \noindent
 This is basically a transcription of the mathematical definition, where we build
-those pairs which agree on their $B$-typed components. It can also be written
-using set comprehension as:
+those pairs which agree on their $B$-typed components.
 
-\begin{tabbing}
-  \qquad\=\+ \kill
-  $\_ \bullet \_$ \;\;\;\= $\,:$\;\; \=
-  $ \tset{A \times B} \to \tset{B \times C} \to \tset{A \times C}$ \\
+%\subsubsection{Transitive Closure}
+\label{sec:generic-transitive-closure}
+Finally, generalizing the \name{ancestor} relation from the Datalog program in
+\cref{sec:datalog}, we can define the transitive closure of a relation:
 
-  $\var{xs} \bullet \var{ys} =
-  \esetfor{\etuple{\dvar a, \dvar c}}{
-    \etuple{\dvar a, \dvar b} \in \var{xs},
-    \etuple{\dvar{b'}, \dvar c} \in \var{ys}, \eeq{\dvar b}{\dvar{b'}}}$
-\end{tabbing}
+\begin{code}
+  \name{trans} \isa \iso \tset{\eqt A \x \eqt A} \to \tset{\eqt A \x \eqt A}\\
+  \name{trans} \<\pboxvar{edge} = \efixis{s}{\dvar{edge} \vee (\dvar{edge} \relcomp s)}
+\end{code}
 
-\paragraph{Transitive Closure}\label{sec:generic-transitive-closure}
-Now, we define the transitive closure of a relation.
-\begin{tabbing}
-  \qquad\=\+ \kill
-  $\name{trans}$ \quad\: \= $\,:$ \;\;\= $\iso{\tset{A \times A}} \to \tset{A \times A}$ \\
-  $\name{trans} \;\pboxvar{e}$ \> $=$ \>
-  $\efixis{s}{\dvar{e} \vee (\dvar{e} \bullet s)}$
-\end{tabbing}
-
-This definition uses recursion, just like the mathematical definition --
-a transitive closure is the least relation containing the original relation $\name{xs}$
-and the composition of $\name{xs}$ with the transitive closure. However, one
-feature of this definition peculiar to core Datafun is that the argument type
-is $\iso \tset{A \times A}$ -- the transitive closure takes a \emph{discrete} relation.
-This is because we must use the relation within the fixed point, and so its parameter needs
-to be discrete to occur within.
+\noindent
+This definition uses a least fixed point, just like the mathematical definition
+-- a transitive closure is the least relation $R$ containing the original
+relation $\dvar{edge}$ and the composition of $\dvar{edge}$ with $R$.
+%
+However, one feature of this definition peculiar to Datafun is that the argument
+type is $\iso \tset{\eqt A \times \eqt A}$ -- the transitive closure takes a
+\emph{discrete} relation.
+%
+This is because we must use the relation within the fixed point, and so its
+parameter needs to be discrete to occur within.
+%
+This restriction is artificial --- transitive closure is semantically a monotone
+operation --- but we'll see why it's necessary in \cref{sec:transformations}.
 
 
 \subsection{Regular expression combinators}
