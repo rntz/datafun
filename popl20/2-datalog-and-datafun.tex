@@ -304,13 +304,14 @@ This is because we must use the relation within the fixed point, and so its
 parameter needs to be discrete to occur within.
 %
 This restriction is artificial --- transitive closure is semantically a monotone
-operation --- but we'll see why it's necessary in \cref{sec:transformations}.
+operation --- but we'll see why it's useful in \cref{sec:transformations}.
 
 
 \subsection{Regular expression combinators}
 \label{sec:regex-combinators}
 
 \newcommand\tre{\typename{re}}
+\newcommand\tchar{\typename{char}}
 
 Datafun permits tightly integrating the higher-order functional and
 bottom-up logic programming styles. In this section, we illustrate the
@@ -321,27 +322,41 @@ for the relational style ensures we can write \naive\ code
 \emph{without} the exponential backtracking cliffs typical of parser
 combinators in functional languages.
 
-We assume the existence of a function $\name{pos} : \tstring \to \tset{\tint}$
-which takes a string and returns the set of valid indices in that string, and
-assume that string indexing is written $s[n]$, as in Java or C. Having done
-this, we define the type of regular expression matchers.
+For these examples we'll assume the existence of eqtypes \tstring, \tchar, and
+\tint, an addition operator $+$, and functions \name{length} and \name{chars}
+satisfying:
 
-\begin{tabbing}
-\qquad  $\kw{type}\;\tre\;=\iso \tstring \to \tset{\tint \times \tint}$
-\end{tabbing}
+\begin{code}
+  \name{length} \isa \iso\tstring \to \tint\\
+  \name{length} \<\pboxvar s = \text{the length of }\dvar s
+  \\[8pt]
+  \name{chars} \isa \iso\tstring \to \tset{\tint \x \tchar}\\
+  \name{chars} \<\pboxvar s = \setfor{(i,c)}{\text{the $i$\textsuperscript{th}
+      character of $\dvar s$ is $c$}}
+\end{code}
 
-A regular expression takes a string (boxed so that it can be used inside fixed
-point expressions), and returns a set of pairs of integers. The idea is that if
-the regular expression matcher is passed the string argument $s$, then if
-$\etuple{i,n}$ is one of the returned values, the substring $s_i, s_{i+1},
-\ldots, s_{n-1}$ is matched by the regular expression. That is, it is inclusive
-on the left and exclusive on the right.
+\noindent
+Note that by always boxing string arguments, we avoid committing ourselves to
+any particular partial ordering on \tstring.
 
-\begin{tabbing}
-\qquad \= $\name{sym} : \iso\typename{char} \to \tre$ \+\\
-$\name{sym} \;\pboxvar{c} \;\pboxvar{s} =\; $\=
-$\efor{n}{\name{pos}\;\dvar s}{\ewhen{\eeq{\dvar{s}[\dvar{n}]}{\dvar c}}{\eset{\etuple{\dvar n, \dvar n+1}}}}$
-\end{tabbing}
+These assumed, we define the type of regular expression matchers:
+
+\begin{code}
+\kw{type}\ \tre = \iso \tstring \to \tset{\tint \times \tint}
+\end{code}
+
+\noindent
+A regular expression takes a discrete string $\pboxvar s$ and returns the set of
+all pairs $(i,j)$ such that the substring $s_i,\, \ldots,\, s_{j-1}$ matches the
+regular expression. For example, to find all matches for a single character:
+
+\begin{code}
+  \name{sym} \isa \iso\tchar \to \tre\\
+  \name{sym} \<\pboxvar c \<\pboxvar s =
+  \esetfor{(\dvar i, \dvar i + 1)}{
+    \ptuple{\dvar i, \dvar c'} \in \name{chars} \<\eboxvar s,
+    \eeq{\dvar c}{\dvar{c'}}}
+\end{code}
 
 \noindent
 The $\name{sym}$ combinator takes a character and returns a set of substrings by
