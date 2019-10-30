@@ -68,11 +68,11 @@ has type $A$. Furthermore, each $\eisiso{e_i}$ has to typecheck in the discrete
 context, since membership relies on the non-monotonic property of equality. This
 can be seen in the \rn{eq} rule, which checks equality of two terms $\eeq e f$
 only when they are discrete, checking in stripped contexts.
-%
-Finally, the rule \rn{fix} for fixed points $\efix e$, takes an endofunction $e$
-of type $\iso (\fixt L \to \fixt L)$ and yields an expression of type $\fixt L$.
-In addition to being of semilattice type, we also demand here that $\fixt L$ is
-of \todo{finite height}, ensuring that the recursion will terminate.
+
+Finally, the rule \rn{fix} for fixed points $\efix e$ takes a function $e : \iso
+(\fixt L \to \fixt L)$ and yields an expression of type $\fixt L$. Besides
+having semilattice type, we also insist that $\fixt L$ has no infinite ascending
+chains, ensuring that the recursion will terminate.
 
 \subsection{Semantics}
 
@@ -242,11 +242,16 @@ types (sets, and products of lattices) in core Datafun are complete lattices. Ho
 it is worth noting that the discreteness restrictions on $\morph{singleton}$ mean that
 powersets do not quite form a monad in $\Poset$.
 
-\subsubsection{Fixed Points} Given a finite-height semilattice $L$, we can define a fixed
-point operation $\efix{} : \iso (L \to L) \to L$ as follows:
+\subsubsection{Fixed Points}
+
+Given a semilattice $\fixt L$ without infinite ascending chains, we can define a
+fixed point operation $\efix{} : \iso (L \to L) \to L$ as follows:
+
 \begin{displaymath}
   \efix{} = f \mapsto \bigvee_{n \in \mathbb{N}} f^n(\bot)
 \end{displaymath}
+
+\noindent
 A routine inductive argument shows this must yield a least fixed point.
 
 \subsubsection{Interpretation} The semantic interpetation (defined

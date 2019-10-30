@@ -407,12 +407,12 @@ This can be accomplished by combining \emph{nil} and \emph{trans}.
 
 \noindent
 Note that the argument $\dvar r$ is must be discrete because \name{trans} uses
-it to compute a fixed point.\footnote{As a technical note, sets of pairs of
-  integers do not form a \todo{finite-height} lattice, so by typing this program
-  is not an acceptable fixed point expression. However, since the positions in a
-  string form a finite set, semantically it is fine. The original Datafun paper
-  shows how one can define bounded fixed points to handle cases like this, so we
-  will not be scrupulous.}
+it to compute a fixed point.\footnote{Technically the semilattice on sets of
+  pairs of integers does not satisfy the ascending chain condition, so this
+  program is not well-typed. However, since the positions in a particular string
+  form a finite set, semantically there is no issue. \Citet{datafun} shows how
+  one can define bounded fixed points to handle cases like this, so we will not
+  be scrupulous.}
 
 
 \subsection{Regular expression combinators, take 2}
