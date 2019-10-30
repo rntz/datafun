@@ -43,7 +43,7 @@ cannot refer to itself beneath a negation. For example, the liar paradox is
 prohibited:
 
 \begin{code}
-  \quad\name{liar}() \gets \neg \name{liar}().
+  \quad\name{liar}() \gets \neg \name{liar}()
   \qquad\color{Red}\text{\scshape\ding{55}\: not valid datalog}
 \end{code}
 
@@ -254,11 +254,38 @@ we can also define the composition of two relations in Datafun:
 This is basically a transcription of the mathematical definition, where we build
 those pairs which agree on their $B$-typed components.
 
+We can also define set difference, although we must first detour into boolean
+negation:
+
+\begin{code}
+  {\neg} \isa \iso\tbool \to \tbool\\
+  \neg \pboxvar t = \ecase{\eisempty{\dvar t}}
+  \inj 1 \ptuple{} \caseto \etrue;\ \inj 2 \ptuple{} \caseto \efalse
+  \\[8pt]
+  \pwild\setminus\pwild \isa \tseteq A \to \iso \tseteq A \to \tseteq A\\
+  s \setminus \pboxvar t =
+  \setfor{\dvar x}{\neg \ebox{\mem \<\eboxvar x \<\dvar t}}
+\end{code}
+
+\noindent
+To implement boolean negation, we need the primitive operator $\eisempty e$,
+which produces a tag indicating whether its argument $e$ (a set of empty tuples,
+i.e. a boolean) is the empty set.
+%
+This in turn lets us define set difference, the analogue in Datafun of negation
+in Datalog.
+%
+Note that in both boolean negation and set difference the ``negated'' argument
+$\dvar t$ is boxed, because the operation is not monotone in $\dvar t$.
+%
+This enforces stratification.
+
 %\subsubsection{Transitive Closure}
 \label{sec:generic-transitive-closure}
 Finally, generalizing the \name{ancestor} relation from the Datalog program in
 \cref{sec:datalog}, we can define the transitive closure of a relation:
 
+\nopagebreak[2]
 \begin{code}
   \name{trans} \isa \iso \tset{\eqt A \x \eqt A} \to \tset{\eqt A \x \eqt A}\\
   \name{trans} \<\pboxvar{edge} = \efixis{s}{\dvar{edge} \vee (\dvar{edge} \relcomp s)}
