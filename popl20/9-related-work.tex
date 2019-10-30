@@ -38,7 +38,8 @@ derivatives. We leave this to future work.
 %% Can't we just have \delta produce two expressions: the derivative, and the
 %% zero change to the derivative?
 
-\paragraph{Related Work}
+\paragraph{Related work}
+
 The incremental lambda calculus was introduced by \citet{incremental},
 as a static program transformation which associated a type of
 \emph{changes} to each base type, along with operations to update a
@@ -58,30 +59,29 @@ extending the incremental transform to support additional
 propagation was proven using a step-indexed logical relation, which
 defined which changes were valid in a fashion very similar to our own.
 
-The motivating examples of this line of work was to optimize bulk
-collection operations, and benchmarks showing asymptotic performance
-improvements were demonstrated. However, all of the intuitions were
-phrased in terms of calculus -- a change structure can be thought of
-as a space paired with its tangent space, a zero change on functions
-is a derivative, and so on. The idea of a derivative as a linear
-approximation is taken most seriously in the work on
-the differential lambda calculus~\cite{dlc}. These calculi have the
-beautiful property that the \emph{syntactic} linearity in
-the lambda calculus corresponds to the \emph{semantic} notion of
-linear transformation. 
+The motivating example of this line of work was to optimize bulk collection
+operations. However, all of the intuitions were phrased in terms of calculus ---
+a change structure can be thought of as a space paired with its tangent space, a
+zero change on functions is a derivative, and so on. However, the idea of a
+derivative as a linear approximation is taken most seriously in the work on the
+differential lambda calculus~\cite{dlc}. These calculi have the beautiful
+property that the \emph{syntactic} linearity in the lambda calculus corresponds
+to the \emph{semantic} notion of linear transformation.
 
-Unfortunately, the intuition of a derivative has its limits. A
-function's derivative is \emph{unique}, a property which models of
-differential lambda calculi have gone to considerable length to
-enforce~\cite{differential-categories}. This is problematic from the
-point of view of semi\naive\ evaluation, since we must have the
-freedom to overapproximate. In
-\cref{sec:semilattice-delta-phi}, we took the derivative
-$\delta(e \vee f)$ to be $\delta(e) \vee \delta(f)$, which may
-overapproximate the change to $e \vee f$. This spares us from having
-to do expensive recomputations to construct set differences, and
-without this freedom it is doubtful that semi\naive\ evaluation would
-even be useful at all!
+Unfortunately, the intuition of a derivative has its limits. A function's
+derivative is \emph{unique}, a property which models of differential lambda
+calculi have gone to considerable length to
+enforce~\cite{differential-categories}. This is problematic from the point of
+view of semi\naive\ evaluation, since we make use of the freedom to
+overapproximate.
+%
+In \cref{sec:semilattice-delta-phi}, we followed common practice from Datalog
+and took the derivative $\delta(e \vee f)$ to be $\delta(e) \vee \delta(f)$,
+which may overapproximate the change to $e \vee f$.
+%
+This spares us from having to do certain recomputations to construct set
+differences; it is not clear to what extent semi\naive\ evaluation's practical
+utility depends on this approximation.
 
 \citet{DBLP:conf/esop/Alvarez-Picallo19} offer an alternative
 formulation of change structures, by requiring changes to form a
