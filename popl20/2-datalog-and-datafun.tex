@@ -1,4 +1,4 @@
-\section{Datalog and Datafun by Example}
+\section{Datalog and Datafun, informally}
 \label{sec:datalog-and-datafun}
 
 \subsection{Datalog}
@@ -119,7 +119,7 @@ stratified fixed points \`a la Datalog.
 %% recursion happens once, at the level of the whole program.
 
 
-\subsection{Examples of Datafun Programs}
+\section{Datafun by example}
 
 \input{fig-sugar}
 
@@ -151,7 +151,8 @@ definitions:
 We summarize (except for pattern matching) the sugaring rules we use in
 \cref{fig:sugar}.
 
-\subsubsection{Set\, Operations}
+
+\subsection{Set operations}
 
 Even before higher-order functions, one of the main benefits of
 Datafun relative to Datalog is that it offers the ability to manipulate relations
@@ -241,8 +242,8 @@ is $\iso \tset{A \times A}$ -- the transitive closure takes a \emph{discrete} re
 This is because we must use the relation within the fixed point, and so its parameter needs
 to be discrete to occur within.
 
-
-\subsubsection{Combinators for Regular Expression Matching}
+
+\subsection{Regular expression combinators}
 \label{sec:regex-combinators}
 
 \newcommand\tre{\typename{re}}
@@ -335,7 +336,7 @@ variables can occur inside of fixed point expressions.\footnote{As a technical
   handle cases like this, so we will not be scrupulous.}
 
 
-\subsubsection{Combinators for Regular Expression Matching, Take 2}
+\subsection{Regular expression combinators, take 2}
 
 The combinators in the previous section found \emph{all} matches
 within a given substring, but often we are not interested in all
