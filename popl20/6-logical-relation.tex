@@ -150,22 +150,34 @@ $\efor x e f$, and the fixed point operator $\prim{fix}\< e$.
 Similarly, we also need to prove theorems about context manipulations
 to establish the soundness of the rules for the box type. First, we
 show that all valid changes for a discrete context (i.e., a context
-with only discrete variables) send terms to themselves.
+with only discrete variables) send terms to themselves, recalling that
+the $\stripcx{\G}$ function returns only the discrete variables in $\G$. 
 
 \begin{lemma}[Discrete Contexts Don't Change]
   If $\weirdat{\stripcx{\G}}{\tuple{}}{\gamma}{\rho}{\gamma'}{\rho'}$ then $\gamma = \gamma'$ and $\rho = \rho'$.
 \end{lemma}
 
 We state this lemma by quantifying over all contexts and then
-stripping because we use it in the proof of the next lemma, which
-says that for any valid context change, its effect on the discrete
-part is a no-op:
+stripping because we want to use it in the proof of the next lemma,
+which says that for any valid context change, its effect on the
+discrete part is a no-op. To define the discrete part of a
+substitution, we use the function $\strip_\G(\gamma)$, which drops
+all the monotonic variables:
 
-\todo{Define strip}
+\begin{displaymath}
+  \begin{array}{lcl}
+    \strip_\G & : & \den{\G} \to \den{\stripcx{\G}} \\
+    \strip_\cdot\;(\cdot) & = & \cdot \\
+    \strip_{\G, \h{x}{A}} \;(\gamma, v/x) & = &  \strip_\G(\gamma) \\
+    \strip_{\G, \hd{x}{A}} \;(\gamma, v/x) & = &  \strip_\G(\gamma), v/x \\
+  \end{array}
+\end{displaymath}
+
+
 
 \begin{lemma}[Context Stripping]
   If $\weirdat{\G}{\dg}{\gamma}{\rho}{\gamma'}{\rho'}$
-  then $\weirdat{\stripcx{\G}}{\tuple{}}{\strip(\g)}{\strip(\rho)}{\strip(\g')}{\strip(\rho')}$.
+  then $\weirdat{\stripcx{\G}}{\tuple{}}{\strip_{\Phi\G}(\g)}{\strip_{\G}(\rho)}{\strip_{\Phi\G}(\g')}{\strip_{\G}(\rho')}$.
 \end{lemma}
 
 This lemma is used in all the cases of the fundamental theorem
