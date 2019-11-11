@@ -77,13 +77,13 @@ Datafun begins as the simply-typed \fn-calculus with functions ($\fnof x e$ and
 $e\<f$), sums ($\inj i e$ and $\ecase{e}{\dots}$), and products ($\etuple{e,f}$
 and $\pi_i\<e$).
 %
-To represent relations, we add a type of finite sets\footnote{To implement set
-  types, their elements must support decidable equality. In our core calculus,
-  we use a subgrammar of ``eqtypes'', and in our implementation (which compiles
-  to Haskell) we use typeclass constraints to pick out such types.} $\tset{\eqt
-  A}$, introduced with set literals $\eset{e_0, \ldots e_n}$, and eliminated
-using Moggi's monadic bind syntax, $\efor{x}{e_1}{e_2}$, signifying the union
-over all $\dvar x \in e_1$ of $e_2$.
+To represent relations, we add a type of finite sets $\tset{\eqt
+  A}$,\footnote{To implement set types, their elements must support decidable
+  equality. In our core calculus, we use a subgrammar of ``eqtypes'', and in our
+  implementation (which compiles to Haskell) we use typeclass constraints to
+  pick out such types.} introduced with set literals $\eset{e_0, \ldots e_n}$, and
+eliminated using Moggi's monadic bind syntax, $\efor{x}{e_1}{e_2}$, signifying
+the union over all $\dvar x \in e_1$ of $e_2$.
 %
 Since we are working in \Poset, each type comes with a partial order on it; sets
 are ordered by inclusion, $x \le y : \tseteq{A} \iff x \subseteq y$.
@@ -142,13 +142,13 @@ that recursion occur at \emph{semilattice types with no infinite ascending
 $\bot$ and a least upper bound operation $\vee$ (``join''). Finite sets (with
 the empty set as least element, and union as join) are an example, as are tuples
 of semilattices. As long as the semilattice has no infinite ascending
-chains,\footnote{As a technical detail, the finite set type $\tseteq{A}$ will
-  possess infinite ascending chains if $\eqt A$ has infinitely many inhabitants.
-  Thus we need to distinguish a class of \emph{finite} eqtypes $\fint A$.
-  Although their grammars in \cref{fig:syntax} are identical, their intent is
-  different. For example, if we extended Datafun with natural numbers $\N$, this
-  would be an eqtype, but not a finite one.} recursion from the bottom element
-is guaranteed to find the least fixed point.
+chains,\footnote{\label{note:finite-eqtypes}As a technical detail, the finite
+  set type $\tseteq{A}$ will possess infinite ascending chains if $\eqt A$ has
+  infinitely many inhabitants. Thus we need to distinguish a class of
+  \emph{finite} eqtypes $\fint A$. Although their grammars in \cref{fig:syntax}
+  are identical, their intent is different. For example, if we extended Datafun
+  with natural numbers $\N$, this would be an eqtype, but not a finite one.}
+recursion from the bottom element is guaranteed to find the least fixed point.
 
 Second, we require that the recursive function be boxed, $\iso(\fixt L \to \fixt
 L)$. Since boxed expressions can only refer to discrete values, and fixed point
