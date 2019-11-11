@@ -59,7 +59,7 @@ guaranteeing a unique least fixed point.
 The idea behind Datafun is to capture the essence of Datalog in a typed,
 higher-order, functional setting.
 %
-Since the key restriction that makes Datalog tractable --- stratification ---
+Since the key restriction that makes Datalog tractable -- stratification --
 requires tracking \emph{monotonicity}, we locate Datafun's semantics in the
 category \Poset\ of partial orders and monotone maps.
 %
@@ -114,8 +114,8 @@ our syntax on \citet{jrml}'s syntax for the necessity fragment of constructive
 S4 modal logic.
 %
 This involves distinguishing two kinds of variable: discrete variables $\dvar x$
-are italic and {\isocolor\isocolorname}, while monotone variables $x$ are
-upright and black.
+are in \emph{\isocolor\isocolorname\ italics}, while monotone variables $x$ are
+in $upright\ black\ script$.
 %
 Discrete variables may be used wherever they're in scope, but crucially,
 monotone variables are hidden within non-monotone expressions.
@@ -226,7 +226,7 @@ This checks if $\dvar x$ is equal to any element $\dvar y \in s$. The argument
 $\dvar x$ is discrete because increasing $\dvar x$ might send it from being
 \emph{in} the set to being \emph{outside} the set (e.g. $1 \in \esetraw{1}$ but
 $2 \notin \esetraw{1}$). Notice that here we're taking advantage of encoding
-booleans as sets of empty tuples --- unioning these sets implements logical
+booleans as sets of empty tuples -- unioning these sets implements logical
 \emph{or}.
 
 Using $\mem$ we can define set intersection by taking the union of every
@@ -310,8 +310,8 @@ type is $\iso \tset{\eqt A \times \eqt A}$ -- the transitive closure takes a
 This is because we must use the relation within the fixed point, and so its
 parameter needs to be discrete to occur within.
 %
-This restriction is artificial --- transitive closure is semantically a monotone
-operation --- but we'll see why it's useful in \cref{sec:transformations}.
+This restriction is artificial -- transitive closure is semantically a monotone
+operation -- but we'll see why it's useful in \cref{sec:transformations}.
 
 
 \subsection{Regular expression combinators}
@@ -487,8 +487,8 @@ set $x$ of matches found so far:
 \end{code}
 
 \noindent
-It's worth noting that this definition is effectively \emph{left-recursive} ---
+It's worth noting that this definition is effectively \emph{left-recursive} --
 it takes the endpoints from the fixed point $x$, and then continues matching
 using the argument $\dvar r$. This should make clear that this is not just plain
-old functional programming --- we are genuinely relying upon the fixed point
+old functional programming -- we are genuinely relying upon the fixed point
 semantics of Datafun.

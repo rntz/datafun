@@ -70,8 +70,8 @@ skip such no-op translations.
 
 \noindent
 The core insight here is that neither $\eeq \yone \ytwo$ nor
-$\eset{\etuple{\dvar x, \dvar z}}$ can change. Propagating this information ---
-for example, rewriting $(\eforraw {...} \bot)$ to $\bot$ --- can simplify
+$\eset{\etuple{\dvar x, \dvar z}}$ can change. Propagating this information --
+for example, rewriting $(\eforraw {...} \bot)$ to $\bot$ -- can simplify
 derivatives and eliminate expensive \kw{for}-loops.
 
 Now let's pull out and examine $\eforraw{\etuple{\ytwo, \dvar z} \in t}
