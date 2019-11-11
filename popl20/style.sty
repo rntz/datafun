@@ -21,7 +21,8 @@
 % tracking: use letterspacing on small caps.
 % letterspace: amount of added letter-spacing in \lsstyle, \scshape, &c.
 \microtypesetup{tracking=true,letterspace=0,
-  %spacing=true, stretch=20, shrink=15,
+  %spacing=true,
+  stretch=20, shrink=15,
 }
 
 %% \usepackage{enumitem}\setlist{labelindent=1em,labelsep=.75em,leftmargin=*}
@@ -49,11 +50,11 @@
 %% ----- #1: Alegreya, large section titles -----
 \usepackage[scaled=0.9872074235807861,osf,proportional,]{AlegreyaSans}
 \microtypesetup{letterspace=12,letterspace=35,letterspace=20,}
-\SetTracking[spacing={250,,}]{
+\SetTracking[spacing={230,,}]{
   encoding={T1,LY1,T2A},
   shape={sc*,},
   family={AlegreyaSans-OsF,AlegreyaSans-TOsF}
-}{25}
+}{23}
 \renewcommand\@secfont{\large\sffamily\bfseries\section@raggedright}
 
 \let\prev@subsubsection\subsubsection
