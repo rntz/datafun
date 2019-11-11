@@ -19,27 +19,20 @@
 %\documentclass[acmsmall]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
 \documentclass[acmsmall]{acmart}\settopmatter{}
 
-%% Journal information
-%% Supplied to authors by publisher for camera-ready submission;
-%% use defaults for review submission.
+%%% The following is specific to POPL '20 and the paper
+%%% 'Seminaive Evaluation for a Higher-Order Functional Language'
+%%% by Michael Arntzenius and Neelakantan R. Krishnaswami.
+%%%
+\setcopyright{rightsretained}
+\acmPrice{}
+\acmDOI{10.1145/3371090}
+\acmYear{2020}
+\copyrightyear{2020}
 \acmJournal{PACMPL}
-\acmVolume{1}
-\acmNumber{CONF} % CONF = POPL or ICFP or OOPSLA
-\acmArticle{1}
-\acmYear{2018}
+\acmVolume{4}
+\acmNumber{POPL}
+\acmArticle{22}
 \acmMonth{1}
-\acmDOI{} % \acmDOI{10.1145/nnnnnnn.nnnnnnn}
-\startPage{1}
-
-%% Copyright information
-%% Supplied to authors (based on authors' rights management selection;
-%% see authors.acm.org) by publisher for camera-ready submission;
-%% use 'none' for review submission.
-\setcopyright{none}
-%\setcopyright{acmcopyright}
-%\setcopyright{acmlicensed}
-%\setcopyright{rightsretained}
-%\copyrightyear{2018}           %% If different from \acmYear
 
 %% Bibliography style
 \bibliographystyle{ACM-Reference-Format}
@@ -200,6 +193,9 @@ first-class relations, higher-order functions, and datatypes like sum types.
 
 
 %% ---------- Sections ----------
+%% Needed for \maketitle with \setcopyright{rightsretained}
+\renewcommand*\copyright{\textcopyright}
+
 %% Note: \maketitle command must come after title commands, author
 %% commands, abstract environment, Computing Classification System
 %% environment and commands, and keywords command.
