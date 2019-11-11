@@ -34,18 +34,28 @@ by binding its result to a discrete variable $\hd x A$ in the body $f$.
 
 At this point, our typing rules correspond to standard constructive S4 modal
 logic~\cite{jrml}. We get to Datafun by adding a handful of domain-specific
-types and operations. First, \rn{split} rule says that $\esplit e : \iso A +
-\iso B$ whenever $e : \iso (A + B)$, distributing box across sum
-types.\footnote{An alternative syntax, pursued in \citet{datafun}, would be to
-  give two rules for $\kw{case}$, depending on whether or not the scrutinee
-  could be typechecked in a stripped context.} The other direction, $\iso A +
-\iso B \to \iso (A + B)$, is already derivable, as is the isomorphism $\iso A
-\times \iso B \cong \iso (A \times B)$. In the examples we give, we use all
-these operations implicitly, to propagate discreteness onto the variables bound
-by a box pattern -- in the pattern $\pboxtuple{\inj 1 \dvar x, \inj 2 \dvar y}$,
-we expect both the variables $\dvar x$ and $\dvar y$ to be discrete, which is
-information we propagate using these coercions. Semantically, all of these
-operations are the identity, as we shall see shortly.
+types and operations.
+%
+First, \rn{split} provides an operator $\prim{split} : \iso(A + B) \to \iso A +
+\iso B$ to distribute box across sum types.\footnote{An alternative syntax,
+  pursued in \citet{datafun}, would be to give two rules for $\kw{case}$,
+  depending on whether or not the scrutinee could be typechecked in a stripped
+  context.}
+%
+The other direction, $\iso A + \iso B \to \iso (A + B)$, is already derivable,
+as is the isomorphism $\iso A \times \iso B \cong \iso (A \times B)$.
+%
+These operations are used implicitly by pattern-matching to propagate
+discreteness onto the variables bound by box patterns -- in the pattern
+$\pboxtuple{\inj 1 \dvar x, \inj 2 \dvar y}$, we expect both the variables
+$\dvar x$ and $\dvar y$ to be discrete, which is information we propagate using
+these coercions.
+%
+%% TODO: an example of desugaring pattern-matching here?
+%
+Semantically, all of these operations are the identity, as we
+shall see shortly.
+
 
 This leaves only the rules for manipulating sets and other semilattices.
 \rn{bot} and \rn{join} tell us that $\bot$ and $\vee$ are valid at any
@@ -74,9 +84,9 @@ This is, however, not monotone, because while booleans are ordered $\efalse <
 simply incomparable.
 
 Finally, the rule \rn{fix} for fixed points $\efix e$ takes a function $e : \iso
-(\fixt L \to \fixt L)$ and yields an expression of type $\fixt L$. Besides
-having semilattice type, we also insist that $\fixt L$ has no infinite ascending
-chains, ensuring that the recursion will terminate.
+(\fixt L \to \fixt L)$ and yields an expression of type $\fixt L$.
+%
+The restriction to ``fixtypes'' ensures $\fixt L$ has no infinite ascending chains, guaranteeing the recursion will terminate.
 
 
 \subsection{Semantics}\label{sec:semantics}
@@ -123,60 +133,49 @@ C$, then:
   \eval_{A,B} &= (g,x) \mapsto g(x)
 \end{align*}
 
+\noindent
+Monotonicity here follows from the monotonicity of $f$ and $g$ and the pointwise ordering of $\expO A B$.
+
 
 \subsubsection{The Discreteness Comonad}
 
 Given a poset $(A, \leq_A)$ we define the discreteness comonad $\iso(A, \leq_A)$
-as $(A, \leq_{\iso A})$, where
-
-\begin{displaymath}
-  a \leq_{\iso A} a' \iff a = a'
-\end{displaymath}
-
-\noindent
+as $(A, \leq_{\iso A})$, where \( a \leq_{\iso A} a' \iff a = a' \).
+%
 That is, the discrete order preserves the underlying elements, but reduces the
-partial order to mere equality. Given a morphism $f : A \to B$, the functorial
-action is defined as:
-
-\begin{displaymath}
-  \iso(f) \triangleq f
-\end{displaymath}
-
-\noindent
-That is, the action on morphisms just gives back the same underlying function on
-sets. Checking that this preserves monotonicity is trivial, as is the
-preservation of identities and composition. This functor forms a comonad, with
-the extraction $\varepsilon_A : \iso A \to A$ and duplication $\delta_A : \iso A
-\to \iso \iso A$ given by identities on the underlying sets:
+partial order to mere equality.
+%
+This forms a rather \emph{boring} comonad, whose functorial action $\iso(f)$, extraction $\varepsilon_A : \iso A \to A$, and duplication $\delta_A : \iso A \to \iso \iso A$ are all identities on the underlying sets:
 
 \begin{align*}
-  \varepsilon_A &\isa \iso A \to A
-  &\delta_A &\isa \iso A \to \iso\iso A
-  \\
-  \varepsilon_A &= a \mapsto a & \delta_A &= a \mapsto a
+  \iso(f) &= f & \varepsilon_A &= a \mapsto a & \delta_A &= a \mapsto a
 \end{align*}
 
 \noindent
-Once we check that the monotonicity requirements are satisfied, this makes
-checking the comonad diagrams easy. It is also immediate that $\iso$ is a
-monoidal with respect to \emph{both} products and coproducts. That is, $\iso (A
-\times B) \simeq \iso A \times \iso B$, and also $\iso (A + B) \simeq \iso A +
-\iso B$. In both cases the isomorphism is witnessed in both directions by
-identity on the underlying elements. We will write $\morph{dist}^\iso_\times$ to
-name the map witnessing distributivity of $\iso$ over products, and
-$\morph{dist}^\iso_+$ to name the map witnessing distributivity of $\iso$ over
-coproducts.
+This makes the functor and comonad laws trivial. Monotonicity holds in each case because \emph{all} functions are monotone with respect to $\le_{\iso A}$.
+%
+It is also immediate that $\iso$ is monoidal with respect to \emph{both}
+products and coproducts. That is, $\iso (A \times B) \cong \iso A \times \iso B$
+and $\iso (A + B) \cong \iso A + \iso B$.
+%
+In both cases the isomorphism is witnessed by identity on the underlying
+elements.
+%
+We will write $\isox : \prod_i \iso A_i \to \iso\prod_i A_i$ to name the map
+witnessing distributivity of products over $\iso$, and $\isosum : \iso \sum_i
+A_i \to \sum_i \iso A_i$ to name the map witnessing distributivity of $\iso$
+over coproducts.
 
 
 \subsubsection{Sets and Semilattices}
 
 Given a poset $(A, \leq_A)$ we define the finite powerset poset $\pfinof(A,
-\leq_A)$ as $(\pfinof A, \subseteq)$, with subsets of $A$ as elements ordered by
-subset inclusion.
+\leq_A)$ as $(P_{\textit{fin}}\, A, \subseteq)$, with finite subsets of $A$ as
+elements, ordered by subset inclusion.
 %
 Note that the subset ordering completely ignores the element ordering $\leq_A$.
 %
-Sets admit a pair of useful morphisms:
+Finite sets admit a pair of useful morphisms:
 
 \begin{align*}
   \morph{singleton} &\isa \iso A \to \pfinof A
@@ -235,7 +234,7 @@ The domain must be discrete, since $x = y$ and $y \le z$ certainly doesn't imply
 \subsubsection{Fixed Points}
 
 Given a semilattice $L \in \Poset$ without infinite ascending chains, we can
-define a fixed point operation $\efix{} : \iso (L \to L) \to L$ as follows:
+define a fixed point operation $\prim{fix} : (L \to L) \to L$ as follows:
 
 \begin{displaymath}
   \efix{} = f \mapsto \bigvee_{n \in \mathbb{N}} f^n(\bot)
@@ -245,25 +244,43 @@ define a fixed point operation $\efix{} : \iso (L \to L) \to L$ as follows:
 A routine inductive argument shows this must yield a least fixed point.
 
 \subsubsection{Interpretation} The semantic interpetation (defined
-over typing derivations) is given in \cref{fig:semantics}. We give the
-interpretation in combinatory style, and to increase readability, we freely use
-$n$-ary products to elide the book-keeping associated with reassociating binary
-products. The interpretation itself mostly follows the usual interpretation for
+over typing derivations) is given in \cref{fig:semantics}.
+%
+The interpretation itself mostly follows the usual interpretation for
 constructive S4~\cite{depaiva-s4}, with what novelty there is occuring in the
-interpretation of sets and fixed points. Even there, the semantics is
-straightforward, making fairly direct use of the combinators defined above.
+interpretation of sets and fixed points.
+%
+Even there, the semantics is straightforward, making fairly direct use of the
+combinators defined above.
+%
+We give the interpretation in combinatory style, and to increase readability, we
+freely use $n$-ary products to elide the book-keeping associated with
+reassociating binary products.
+%
+As a matter of notation, if $f_i : A \to B_i$ then we write $\fork{f_i}_i : A
+\to \prod_i B_i$ for the ``tupling'' map such that $\fork{f_i}_i \then \pi_j =
+f_j$.
+%
+In particular, $\fork{}$ is the unique map into the terminal object.
+%
+Dually, if $g_i : A_i \to B$ then we write $\krof{g_i}_i : \sum_i A_i
+\to B$ for the ``case-analysis map'' such that $\injc_j \then \krof{g_i}_i =
+g_j$.
 
+
 \subsection{Metatheory}
+\label{sec:weakening}
 
-If we were presenting core Datafun in isolation, the usual thing to do
-would be to prove the soundness of syntactic substitution, show that
-syntactic and semantic substitution agree, and then establish the
-equational theory. However, that is not our goal in this paper. We
-want to prove the correctness of the semi\naive\ translation, which we
-will do with a logical relations argument. Since we can harvest almost
-all the properties we need from the logical relation, only a small
-residue of metatheory needs to be established manually -- indeed, the
-only thing we need to prove at this stage is the type-correctness of weakening.
+If we were presenting core Datafun in isolation, the usual thing to do would be
+to prove the soundness of syntactic substitution, show that syntactic and
+semantic substitution agree, and then establish the equational theory. However,
+that is not our goal in this paper. We want to prove the correctness of the
+semi\naive\ translation, which we will do with a logical relations argument.
+Since we can harvest almost all the properties we need from the logical
+relation, only a small residue of metatheory needs to be established manually --
+indeed, the only thing we need to prove at this stage is the type-correctness of
+weakening, which we will need to show the type-correctness of the
+semi\naive\ transformation.
 
 We define the weakening relation $\Gamma \sqsubseteq \Delta$ in
 \cref{fig:weakening}. This says that $\Delta$ is a weakening of $\Gamma$, either

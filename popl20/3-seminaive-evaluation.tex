@@ -16,7 +16,7 @@ Suppose \name{edge} denotes a linear graph, $\{(1, 2),\, (2, 3),\, \dots,\,
 $\setfor{(i, j)}{1 \le i < j \le n}$. How can we compute this? The simplest
 approach is to begin with nothing in the \name{path} relation and repeatedly
 apply its rules until nothing more is deducible. We can make this strategy
-explicit by time-indexing our rules:
+explicit by time-indexing the \name{path} relation:
 
 \begin{flail}
   \name{path}_{i+1}(X,Z) &\gets \name{edge}(X,Z)
@@ -25,19 +25,18 @@ explicit by time-indexing our rules:
 \end{flail}
 
 \noindent
-By omission $\name{path}_0 = \emptyset$. From this we can see inductively that
-$\name{path}_i \subseteq \name{path}_{i+1}$.
+By omission $\name{path}_0 = \emptyset$.
 %
-This is because at step $i+1$ we re-deduce every fact known at step $i$.
+From this inductively $\name{path}_i \subseteq \name{path}_{i+1}$, because at step $i+1$ we re-deduce every fact known at step $i$.
 %
 For example, suppose $\name{path}_i(j, k)$ holds. Then at step $i+1$ the second
 rule deduces $\name{path}_{i+1}({j-1}, k)$ from $\name{edge}({j-1}, j) \wedge
 \name{path}_i(j,k)$.
 %
 But since $\name{path}_{i+1}(j, k)$ holds, we perform the same deduction at time
-$i+2$, and again at $i+3$, $i+4$, \emph{etc}.
+$i+2$, and again at $i+3$, $i+4$, etc.
 
-Because we append edges one at a time, $\name{path}_i$ contains exactly paths of
+Because we append edges one at a time, $\name{path}_i$ contains all paths of
 $i$ or fewer edges.
 %
 Therefore it takes $n$ steps until we reach our fixed point $\name{path}_{n-1} =
@@ -49,9 +48,9 @@ $\Theta(n^3)$ deductions in total.
 There being only $\Theta(n^2)$ paths in the final result, this is terribly
 wasteful; hence we term this \emph{\naive\ evaluation}.
 
-Semi\naive\ evaluation avoids this waste by transforming the rules for
-\rel{path} to find the newly deducible paths, $\name{dpath}_i$, at iteration
-$i$, and accumulating these changes to produce a final result:
+Semi\naive\ evaluation avoids waste by transforming the rules for \name{path} to
+find the \emph{newly} deducible paths, $\name{dpath}_i$, at iteration $i$, and
+accumulating these changes to produce a final result:
 
 \begin{flail}
   \name{dpath}_0(X,Y) &\gets \name{edge}(X,Y)
@@ -63,7 +62,7 @@ $i$, and accumulating these changes to produce a final result:
 
 \noindent
 It's easy to show inductively that $\name{dpath}_{i}$ contains only paths
-\emph{exactly} $i+1$ edges long. Consequently $|\name{dpath}_i| \in \Theta(n-i)$
+exactly $i+1$ edges long. Consequently $|\name{dpath}_i| \in \Theta(n-i)$
 and we make $\Theta(n^2)$ deductions overall.\footnote{Here we must assume the
   accumulation rule $\name{path}_{i+1}(X,Y) \gets \name{path}_i(X,Y) \vee
   \name{dpath}_i(X,Y)$ is implemented using an union operator that is efficient
@@ -73,7 +72,9 @@ and we make $\Theta(n^2)$ deductions overall.\footnote{Here we must assume the
 \subsection{Semi\naive\ evaluation as incremental computation}
 \label{sec:seminaive-tc-in-datafun}
 
-Now let's move from Datalog to Datafun.\footnote{In this section we do not bother marking discrete variables $\dvar x$ or expressions $\eiso e$, as it muddies our examples to no benefit.} The transitive closure of \name{edge} is
+Now let's move from Datalog to Datafun.\footnote{In this section we do not
+  bother marking discrete variables $\dvar x$ or expressions $\eiso e$, as it
+  muddies our examples to no benefit.} The transitive closure of \name{edge} is
 the fixed point of the monotone function \name{step} defined by:
 
 \begin{code}
@@ -161,7 +162,7 @@ every type $A$ with a \emph{change structure}, consisting of:\footnote{Our
   \citet{incremental}, although it is similar to the logical relation given in
   \citet{DBLP:conf/esop/GiarrussoRS19}; we discuss this in
   \cref{sec:differences-from-incremental}. Although we do not use change
-  structures \emph{per se} in our proofs, they are an important source of
+  structures \emph{per se} in the proof of correctness sketched in \cref{sec:logical-relation}, they are an important source of
   intuition.}
 
 \begin{enumerate}

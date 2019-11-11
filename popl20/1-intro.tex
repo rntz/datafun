@@ -94,12 +94,12 @@ Flix extends a Datalog-like relational language, generalized to handle arbitrary
 semilattices instead of only finite sets, with a functional sublanguage, roughly
 comparable to ML or Haskell. The functional side can be used to implement custom
 semilattices and data structures which can then be used from the Datalog side.
-Flix is aimed at static analysis, where defining custom semilattices for
-abstract interpretation is highly useful. To this end, Flix integrates with SMT
-solvers for lightweight verification of properties such as monotonicity,
-soundness, and completeness. However, this SMT-based approach works best for
-first-order code, and Flix maintains a pretty clear (if permeable) separation
-between its relational and functional components.
+Flix is aimed at static analysis, where working in a semilattice other than
+Datalog's native finite powersets can be highly useful. To this end, Flix
+integrates with SMT solvers for lightweight verification of properties such as
+monotonicity, soundness, and completeness. However, this SMT-based approach
+works best for first-order code, and Flix maintains a pretty clear (if
+permeable) separation between its relational and functional sublanguages.
 
 %% Flix adopts the route of treating Datalog as an embedded domain-specific
 %% language~\cite{edsl}.
@@ -131,23 +131,21 @@ Datalog-style recursively defined relations are given via an explicit fixed
 point operator; monotonicity ensures uniqueness of this fixed point, playing a
 role similar to stratification in Datalog.
 %
-Tracking monotonicity permits a much tighter integration between the functional
-and relational styles, but it comes at a cost: many of Datalog's standard
+Tracking monotonicity permits a tighter integration between the functional and
+relational styles, but it comes at a cost: many of Datalog's standard
 implementation techniques, developed in the context of a first-order logic
 language, are not obviously applicable in a higher-order functional setting.
 
-Second, actually making Datalog perform well enough to use in practice
-calls for very sophisticated program analysis and compiler
-engineering. (This is a familiar experience from the database
-community, where query planners must encode a startling amount of
-knowledge to optimize relatively simple SQL queries.) A wide variety
-of techniques for optimizing Datalog programs have been studied in the
+Second, making Datalog perform well enough to use in practice calls for very
+sophisticated program analysis and compiler engineering. (This is a familiar
+experience from the database community, where query planners must encode a
+startling amount of knowledge to optimize relatively simple SQL queries.) A wide
+variety of techniques for optimizing Datalog programs have been studied in the
 literature, such as using binary decision diagrams to represent
-relations~\cite{whaley-phd}, exploiting the structure of well-behaved
-subsets (e.g., CFL-reachability problems correspond to the ``chain
-program'' fragment of Datalog~\cite{chain-programs}), and combining
-top-down and bottom-up evaluation via the ``magic sets''
-algorithm~\cite{magic-sets}.
+relations~\cite{whaley-phd}, exploiting the structure of well-behaved subsets
+(e.g., CFL-reachability problems correspond to the ``chain program'' fragment of
+Datalog~\cite{chain-programs}), and combining top-down and bottom-up evaluation
+via the ``magic sets'' algorithm~\cite{magic-sets}.
 
 Today, one of the workhorse techniques for implementing bottom-up
 Datalog engines is \emph{semi\naive\ evaluation}~\cite{seminaive}.
@@ -167,7 +165,7 @@ defined partly as a program transformation on sets of Datalog rules,
 and partly as a modification of the fixed point computation algorithm.
 The central contribution of this paper is to give an extended version
 of this transformation which works on higher-order programs written
-in the Datafun language. 
+in the Datafun language.
 
 \begin{itemize}
 \item We reformulate Datafun in terms of a kernel calculus based on
@@ -179,27 +177,35 @@ in the Datafun language.
   on recursion reminiscent of Hoffman's work on safe
   recursion~\cite{hofmann-safe-recursion}. This brings the semantics
   of Datafun more closely in line with Datalog's, and substantially
-  simplifies the program transformation we present.
+  simplifies the program transformations we present.
   
-\item We define a program transformation to \emph{incrementalize}
-  well-typed Datafun programs. The translation is a compositional
-  type-and-syntax-directed transformation, and works uniformly at all
-  types including function types. We build on the \emph{change
-    structure} approach to static program incrementalization
-  introduced by \citet{incremental}, extending it to support sum
-  types, set types, comonads, and (well-founded) fixed points.
+%% \item We define a program transformation to \emph{incrementalize}
+%%   well-typed Datafun programs. The translation is a compositional
+%%   type-and-syntax-directed transformation, and works uniformly at all
+%%   types including function types. We build on the \emph{change
+%%     structure} approach to static program incrementalization
+%%   introduced by \citet{incremental}, extending it to support sum
+%%   types, set types, comonads, and (well-founded) fixed points.
 
-\item We establish the correctness of our transformation using a novel
-  logical relation which simultaneously defines the changes connecting
-  old and updated programs, as well as the optimized version of both.
-  The fundamental lemma shows that our transformation is
-  semantics-preserving: any closed program of first-order type has the
-  same meaning after optimization.
-  
-\item We then discuss our implementation of a compiler from Datafun to
-  Haskell, in both \naive\ and semi\naive\ form. This lets us
-  empirically demonstrate the asymptotic speedups predicted by the
-  theory. We additionally discuss the (surprisingly modest) set of
-  program optimizations we found helpful for putting the optimization
-  into practice.
+\item We define two type-and-syntax-directed program transformations on Datafun:
+  one to implement semi\naive\ evaluation, and an auxilliary translation that
+  incrementalizes programs with respect to increasing changes. We build on the
+  \emph{change structure} approach to static program incrementalization
+  introduced by \citet{incremental}, extending it to support sum types, set
+  types, a comonad, and (well-founded) fixed points.
+
+\item We establish the correctness of these transformations using a novel
+  logical relation which captures the relation between the source program, its
+  incrementalization, and its semi\naive\ translation. The fundamental lemma
+  shows that our transformation is semantics-preserving: any closed program of
+  first-order type has the same meaning after optimization.
+
+%% defines the changes connecting
+%%   old and updated programs, as well as the optimized version of both.
+
+\item We discuss our implementation of a compiler from Datafun to Haskell, in
+  both \naive\ and semi\naive\ form. This lets us empirically demonstrate the
+  asymptotic speedups predicted by the theory. We additionally discuss the
+  (surprisingly modest) set of auxilliary optimizations we found helpful for
+  putting semi\naive\ evaluation into practice.
 \end{itemize}

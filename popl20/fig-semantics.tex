@@ -1,6 +1,6 @@
 %% ---- Semantics in a Datafun Model ----
 \begin{figure*}
-  \textsc{type and context denotations}
+  \textsf{\scshape type and context denotations}
 
   %% TODO: revert to this more readable version if space allows.
   \begin{align*}
@@ -27,9 +27,9 @@
     \den{\h x A} &= \den{A} & \den{\hd x A} &= \iso{\den{A}} &
     \den{\G \vdash A} &= \Poset(\den\G, \den A)
   \end{align*}
-%  \vspace{0pt} % yes, this matters.
+  %\vspace{0pt} % yes, this matters.
 
-  \textsc{term denotations}
+  \textsf{\scshape term denotations}
 
   \begin{displaymath}
     \def\arraystretch{1.15}
@@ -43,7 +43,7 @@
       \den{\J {\pi_i\<e} \G {A_i}} &=& \den{\J e \G {A_1 \times A_2}} \then \pi_i \\
       \den{\J {\ebox e} \G {\iso A}} &=& \mkbox_\Gamma(\den {\J e {\stripcx \G} A}) \\
       \den{\J {\elet{\ebox x = e} f} \G B} &=&  \fork{\id_\Gamma, \den{\J e \G {\iso A}}} \then \den{\J f {\G, \hd x A} B}  \\
-      \den{\J \bot \G L} &=& !_\Gamma \then \morph{join}^L_0 \\
+      \den{\J \bot \G L} &=& \fork{} \then \morph{join}^L_0 \\
       \den{\J {e \vee f} \G L} &=& \fork{\den{\J e \G L}, \den{\J f \G L}} \then \morph{join}^L_2 \\
       \den{\J {\eisempty e} \G {1+1}}&=& \mkbox_\Gamma(\den{\J e {\stripcx \G} {\tset A}}) \then \morph{isEmpty} \\
       \den{\J {\esplit e} \G {\iso A + \iso B}} &=& \den{\J e \G {\iso(A + B)}}\then \isosum \\
@@ -52,7 +52,7 @@
           \fork{\mkbox_\Gamma(\den{\J {e_1} {\stripcx \G} A}),
                 \mkbox_\Gamma(\den{\J {e_2} {\stripcx \G} A})}
           \then \morph{eq} \\
-      \den{\J {\efix e} \G L} &=& \den{\J e \G {\iso(L \to L)}} \then \morph{fix} \\
+      \den{\J {\efix e} \G L} &=& \den{\J e \G {\iso(L \to L)}} \then \varepsilon \then \morph{fix} \\
 
       \den{\esetsub{e_i}{i}} &=& \fork{\mkbox_\Gamma(\den{\J {e_1} {\stripcx \G} A}) \then \morph{singleton}}_i \then \morph{join}^L \\
 
@@ -65,7 +65,7 @@
   \end{displaymath}
   \vspace{0pt} % yes, this matters
 
-  \textsc{auxilliary operations}
+  \textsf{\scshape auxilliary operations}
 
   \begin{align*}
     \morph{dist}^\x_+ &~:~ A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)

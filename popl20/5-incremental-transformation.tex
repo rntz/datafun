@@ -26,14 +26,14 @@ So, modelled on the incremental \fn-calculus' $\Deriv$ \citep{incremental},
 $\delta e$ will compute how $\phi e$ changes as its free variables
 change.
 
-However, to speed up $\efix e$ we don't want the change to $e$; we want its
+However, to speed up $\efix f$ we don't want the change to $f$; we want its
 derivative.
 %
 Since derivatives are zero changes, function changes and derivatives coincide if
 \emph{the function cannot change}.
 %
-This is why the typing rule for $\efix e$ requires that $e : \iso(\fixt L \to
-\fixt L)$: the use of $\iso$ prevents $e$ from changing!
+This is why the typing rule for $\efix f$ requires that $f : \iso(\fixt L \to
+\fixt L)$: the use of $\iso$ prevents $f$ from changing!
 %
 So the key strategy of our speed-up transformation is to {\bfseries\boldmath
   decorate expressions of type ${\iso A}$ with their zero changes.}
@@ -89,15 +89,15 @@ This is because expressions denote functions of their free variables.
 %
 Moreover, in Datafun free variables come in two flavors, monotone and discrete, and discrete variables are semantically $\iso$-ed.
 
-If we view expressions as functions of their free variables, $\delta e$ will
-denote the \emph{derivative} of the function $\phi e$ denotes.
+Viewed as functions of their free variables, $\delta e$ denotes the
+\emph{derivative} of $\phi e$.
 %
 And just as the derivative of a unary function $f\<x$ has \emph{two} arguments,
 $\df\<x\<\dx$, the derivative of an expression $e$ with $n$ variables $x_1,
 \dots, x_n$ will have $2n$ variables: the original $x_1, \dots, x_n$ and their
 changes $\dx_1, \dots, \dx_n$.%
 %
-\footnote{We assume throughout the paper as a matter of notational convenience
+\footnote{For notational convenience we assume
   that source programs contain no variables starting with the letter \emph{d}.}
 %
 However, this says nothing yet about monotonicity or discreteness.
@@ -120,7 +120,7 @@ to the analogous type operators $\iso$, $\Phi$, and $\Delta$:
 \noindent
 Otherwise all three operators distribute; e.g.\ $\iso\emptycx = \emptycx$ and
 $\iso(\G_1,\G_2) = \iso\G_1, \iso\G_2$.
-
+%
 Intuitively, $\iso\G$, $\Phi\G$, and $\D\G$ mirror the effect of
 $\iso$, $\Phi$, and $\D$ on the semantics of $\G$:
 
@@ -307,16 +307,14 @@ the context $\stripcxraw{\iso\Phi\G, \DP\G}$.
 %
 However, $\iso$ makes every variable discrete, and $\stripcxraw{-}$ leaves
 discrete variables alone, so this includes \emph{at least} $\iso\Phi\G$. The
-context $\phi f$ needs is $\Phi\G$. Since $\iso$ only makes a context stronger,
-we're safe.
+context $\phi f$ needs is $\Phi\G$. Since $\iso$ only makes a context stronger
+(recalling our definition of weakening from \cref{sec:weakening}), we're safe.
 %
 The same argument applies (all the more easily) when $\phi e$ is used in a
 monotone rather than a discrete position.
 %% %
 %% \todo{Simplify this explanation? We're basically establishing that $\Phi\G
 %%   \sqsubseteq \stripcxraw{\iso\Phi\G, \DP\G}$.}
-
-%% TODO: Discuss self-maintainable functions, citing \citet{incremental}.
 
 
 \subsection{The discreteness comonad, \iso}
@@ -331,9 +329,8 @@ $\DP\iso A = \tunit$, since boxed values cannot change.
 
 Next, consider \(\phi\ebox e = \ebox{\etuple{\phi e, \delta e}}\).
 %
-The intuition here is straightforward: $\phi$ needs to decorate $\isocolor e$
-with its zero change; since $\isocolor e$ is discrete and cannot change, we use
-$\delta \isocolor e$.
+The intuition here is straightforward: $\phi$ needs to decorate $e$ with its
+zero change; since $e$ is discrete and cannot change, we use $\delta e$.
 %
 However! In general, one cannot use $\delta$ inside the $\phi$ translation and
 expect the result to be well-typed; $\phi$ and $\delta$ require different typing
@@ -343,7 +340,9 @@ contexts:
 \begin{center}
   \setlength\tabcolsep{10pt}
   \begin{tabular}{@{}lll@{}}
-    $\G$ & $\Phi\G$ & $\iso\Phi\G,\DP\G$
+    $\G$ \small(context of $e$)
+    & $\Phi\G$ \small(context of $\phi e$)
+    & $\iso\Phi\G,\DP\G$ \small(context of $\delta e$)
     \\
     %% $e$'s context & $\phi e$'s context & $\delta e$'s context
     %% \\
@@ -358,9 +357,9 @@ contexts:
 
 \noindent
 Luckily, although $\Phi\G$ and $\iso\Phi\G,\DP\G$ differ on monotone variables,
-they agree on discrete variables. And since $\isocolor e$ is discrete, there
-\emph{are} no monotone variables in $\isocolor e$, justifying the use of
-$\delta\isocolor e$ in $\phi\ebox{e} = \ebox{\etuple{\phi e, \delta e}}$.
+they agree on discrete ones. And since $e$ is discrete, it \emph{has} no
+free monotone variables, justifying the use of $\delta e$ in
+$\phi\ebox{e} = \ebox{\etuple{\phi e, \delta e}}$.
 
 Next we come to $(\eletbox x e f)$, whose $\phi$ and $\delta$ translations are
 very similar:
@@ -447,11 +446,12 @@ $\phi(\esplit e)$ and $\phi e$; \kw{case}-analysing $\phi e$ suffices.
 \label{sec:semilattice-delta-phi}
 
 The translation $\phi(e \vee f) = \phi e \vee \phi f$ is as simple as it seems.
-However, $\delta(e \vee f) = \delta e \vee \delta f$ is slightly cleverer. In
-particular, let's restrict to sets, and suppose that $\dx$ changes $x$ into $x'$
-and $\dy$ changes $y$ to $y'$. In particular, let's suppose these changes are
-\emph{precise}: that $\dx = x' \setminus x$ and $\dy = y' \setminus y$. Then
-the precise change from $x \cup y$ into $x' \cup y'$ is:
+However, $\delta(e \vee f) = \delta e \vee \delta f$ is mildly clever.
+%
+Restricting to sets, suppose that $\dx$ changes $x$ into $x'$ and $\dy$ changes
+$y$ to $y'$. In particular, suppose these changes are \emph{precise}: that $\dx
+= x' \setminus x$ and $\dy = y' \setminus y$. Then the precise change from $x
+\cup y$ into $x' \cup y'$ is:
 
 \[ (x' \cup y') \setminus (x \cup y)
 = (x' \setminus x \setminus y) \cup (y' \setminus y \setminus x)
@@ -476,8 +476,8 @@ Its $\phi$-translation is straightforward, with one hitch: because $\hd x {\eqt
   A}$ is a discrete variable, the inner loop $\phi f$ needs access to its zero
 change $\hd \dx {\D\eqt A}$.
 %
-And at eqtypes (although not in general), the \dummy\ function computes zero
-changes:
+Conveniently, at eqtypes (although not in general), the \dummy\ function
+computes zero changes:
 %% TODO: explain why this can't work at function types, which is one reason we
 %% restrict sets to containing first-order data?
 
@@ -494,7 +494,7 @@ semi\naive\ transformation, as \kw{for} is what enables embedding relational
 algebra (the right-hand-sides of Datalog clauses) into Datafun.
 %
 Here there are two things to consider, corresponding to the two \kw{for}-clauses
-$\delta(\efor x e f)$ generates.
+generated by $\delta(\efor x e f)$.
 %
 First, if the set $\phi e$ we're looping over gains new elements $\dvar x \in
 \delta e$, we need to compute $\phi f$ over these new elements. Second, if the

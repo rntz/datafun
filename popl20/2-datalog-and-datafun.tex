@@ -60,7 +60,7 @@ The idea behind Datafun is to capture the essence of Datalog in a typed,
 higher-order, functional setting.
 %
 Since the key restriction that makes Datalog tractable -- stratification --
-requires tracking \emph{monotonicity}, we locate Datafun's semantics in the
+requires tracking \emph{monotonicity,} we locate Datafun's semantics in the
 category \Poset\ of partial orders and monotone maps.
 %
 Since \Poset\ is bicartesian closed, it can interpret the simply typed
@@ -133,22 +133,24 @@ f$, giving access to a discrete variable $\dvar{x}$.
 %% TODO: should we note that we really definitely mean □(L → L) and
 %% not (□L → L)? Reader may be confused.
 
-Finally, Datafun includes fixed points, $\efix{e}$. The $\prim{fix}$ combinator
-takes a function $\iso (\fixt L \to \fixt L)$ and returns its least fixed point.
-Besides monotonicity of the function, we impose two restrictions on the fixed
-point operator to ensure well-definedness and termination. First, we require
-that recursion occur at \emph{semilattice types with no infinite ascending
-  chains}, $\fixt L$. A join-semilattice is a partial order with a least element
-$\bot$ and a least upper bound operation $\vee$ (``join''). Finite sets (with
-the empty set as least element, and union as join) are an example, as are tuples
-of semilattices. As long as the semilattice has no infinite ascending
-chains,\footnote{\label{note:finite-eqtypes}As a technical detail, the finite
-  set type $\tseteq{A}$ will possess infinite ascending chains if $\eqt A$ has
+Finally, Datafun includes fixed points, $\efix{e}$. The $\prim{fix}$ combinator takes a function $\iso (\fixt L \to \fixt L)$ and returns its least fixed point.
+%
+Besides monotonicity of the function, we impose two restrictions on the fixed point operator to ensure well-definedness and termination.
+%
+First, we require that recursion occur at \emph{semilattice types with no infinite ascending chains}, $\fixt L$.
+%
+A join-semilattice is a partial order with a least element $\bot$ and a least upper bound operation $\vee$ (``join'').
+%
+Finite sets (with the empty set as least element, and union as join) are an example, as are tuples of semilattices.
+%
+As long as the semilattice has no infinite ascending chains, recursion from the bottom element is guaranteed to find the least fixed point.\footnotemark
+
+\footnotetext{\label{note:finite-eqtypes}As a technical detail, the finite set
+  type $\tseteq{A}$ will possess infinite ascending chains if $\eqt A$ has
   infinitely many inhabitants. Thus we need to distinguish a class of
   \emph{finite} eqtypes $\fint A$. Although their grammars in \cref{fig:syntax}
   are identical, their intent is different. For example, if we extended Datafun
   with natural numbers $\N$, this would be an eqtype, but not a finite one.}
-recursion from the bottom element is guaranteed to find the least fixed point.
 
 Second, we require that the recursive function be boxed, $\iso(\fixt L \to \fixt
 L)$. Since boxed expressions can only refer to discrete values, and fixed point
@@ -163,8 +165,7 @@ stratified fixed points \`a la Datalog.
 
 \input{fig-sugar}
 
-For the sake of brevity and clarity, the examples that follow make use of some
-syntax sugar:
+For brevity and clarity, the examples that follow make use of some syntax sugar:
 
 \begin{enumerate}
 
@@ -304,7 +305,7 @@ This definition uses a least fixed point, just like the mathematical definition
 relation $\dvar{edge}$ and the composition of $\dvar{edge}$ with $R$.
 %
 However, one feature of this definition peculiar to Datafun is that the argument
-type is $\iso \tset{\eqt A \times \eqt A}$ -- the transitive closure takes a
+type is $\iso \tset{\eqt A \times \eqt A}$; the transitive closure takes a
 \emph{discrete} relation.
 %
 This is because we must use the relation within the fixed point, and so its
@@ -320,14 +321,15 @@ operation -- but we'll see why it's useful in \cref{sec:transformations}.
 \newcommand\tre{\typename{re}}
 \newcommand\tchar{\typename{char}}
 
-Datafun permits tightly integrating the higher-order functional and
-bottom-up logic programming styles. In this section, we illustrate the
-benefits of doing so by showing how to implement a regular expression
-matching library in combinator parsing style.  Like combinator parsers
-in functional languages, the code is very concise.  However, support
-for the relational style ensures we can write \naive\ code
-\emph{without} the exponential backtracking cliffs typical of parser
-combinators in functional languages.
+Datafun permits tightly integrating the higher-order functional and bottom-up
+logic programming styles. In this section, we illustrate the benefits of doing
+so by showing how to implement a regular expression matching library in
+combinator parsing style. Like combinator parsers in functional languages, the
+code is very concise.
+%
+However, support for the relational style ensures we can write \naive\ code
+\emph{without} the exponential backtracking cliffs typical of parser combinators
+in functional languages.
 
 For these examples we'll assume the existence of eqtypes \tstring, \tchar, and
 \tint, an addition operator $+$, and functions \name{length} and \name{chars}

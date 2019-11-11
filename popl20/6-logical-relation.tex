@@ -1,4 +1,5 @@
 \section{Proving the semi\naive\ transformation correct}
+\label{sec:logical-relation}
 
 We have given two program transformations: $\phi e$, which optimizes $e$ by
 computing fixed points semi\naive{}ly; and $\delta e$, which finds the change in
@@ -125,7 +126,7 @@ and $\prim{fix}$.
 Since typing rules that involve discreteness (such as the $\iso$ rules)
 manipulate the context, we need some lemmas regarding these manipulations.
 First, we show that all valid changes for a context with only discrete variables
-send terms to themselves, recalling that $\stripcx{\G}$ contains only the
+send substitutions to themselves, recalling that $\stripcx{\G}$ contains only the
 discrete variables from $\G$.
 
 \begin{lemma}[discrete contexts don't change]

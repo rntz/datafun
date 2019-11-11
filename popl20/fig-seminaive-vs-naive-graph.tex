@@ -8,7 +8,7 @@
         ylabel={Time (seconds)},
         height=123.6pt, width=200pt,
         height=130pt, width=210.34pt,
-        legend entries={\naive,semi\naive\ raw,semi\naive\ full},
+        legend entries={\naive,semi\naive\ raw,semi\naive\ optimized},
         legend cell align=left,
         legend pos = north west,
         legend style={
@@ -29,7 +29,7 @@
         xlabel={Number of characters},
         height=123.6pt, width=200pt,
         height=130pt, width=210.34pt,
-        legend entries={\naive,semi\naive\ raw,semi\naive\ full},
+        legend entries={\naive,semi\naive\ raw,semi\naive\ optimized},
         legend cell align=left,
         legend pos = north west,
         legend style={
@@ -51,7 +51,7 @@
   \colorlet{darkred}{red!65!black}
   \colorlet{darkblue}{blue!65!black}
 
-  \setlength\tabcolsep{4.7pt}
+  \setlength\tabcolsep{3.9pt}
   \begin{tabu}{@{}l*{11}{r}@{}}
     & \multicolumn{11}{c}{\scshape graph size / string length}\\
     & 120 & 140 & 160 & 180 & 200 & 220 & 240 & 260 & 280 & 300 & 320
@@ -64,9 +64,9 @@
     \\
     \scshape transitive closure, semi\naive\ raw & 1.187 & 2.163 & 4.154 & 5.835 & 8.982 & 13.350 & 21.069 & 36.512 & 53.197 & 75.209 & 101.933
     \\
-    \rowfont{\color{darkblue}} \scshape regex search, semi\naive\ full& 0.028 & 0.037 & 0.054 & 0.075 & 0.102 & 0.133 & 0.171 & 0.220 & 0.269 & 0.331 & 0.401
+    \rowfont{\color{darkblue}} \scshape regex search, semi\naive\ optimized& 0.028 & 0.037 & 0.054 & 0.075 & 0.102 & 0.133 & 0.171 & 0.220 & 0.269 & 0.331 & 0.401
     \\
-    \rowfont{\color{darkblue}} \scshape transitive closure, semi\naive\ full & 0.026 & 0.037 & 0.056 & 0.072 & 0.099 & 0.130 & 0.170 & 0.204 & 0.259 & 0.312 & 0.377
+    \rowfont{\color{darkblue}} \scshape transitive closure, semi\naive\ optimized & 0.026 & 0.037 & 0.056 & 0.072 & 0.099 & 0.130 & 0.170 & 0.204 & 0.259 & 0.312 & 0.377
   \end{tabu}
 
   \caption{\Naive\ vs semi\naive\ evaluation of transitive closure and regex matching in Datafun}

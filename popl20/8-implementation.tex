@@ -56,7 +56,7 @@ gains we claim, we benchmark two example Datafun programs:
 We compiled each program in three distinct ways: \emph{\naive{}}, without the
 $\phi$ transform (but with $\bot$-propagation); \emph{semi\naive{} raw}, with
 the $\phi$ transform but without further optimization; and \emph{semi\naive{}
-  full}, with the $\phi$ transform followed by all three optimizations listed
+  optimized}, with the $\phi$ transform followed by all three optimizations listed
 previously. The results are shown in \cref{fig:seminaive-vs-naive-graph}.
 %
 The measured times are substantially similar for transitive closure and regex
@@ -64,16 +64,16 @@ search across all three optimization levels, suggesting that higher-order code
 does not pose a particular problem for our optimizations. However, compared to
 \emph{\naive}, the $\phi$ transform alone (\emph{semi\naive\ raw}) provides only
 a small speed-up, roughly 10--20\%. Only when followed by other optimizations
-(\emph{semi\naive\ full}) does it provide the expected asymptotic
+(\emph{semi\naive\ optimized}) does it provide the expected asymptotic
 speedup.\footnote{We also tried following the $\phi$ transform with only
   $\bot$-propagation, dropping the other two optimisations. This produced
-  essentially the same results as \emph{semi\naive\ full}, so we have omitted it
+  essentially the same results as \emph{semi\naive\ optimized}, so we have omitted it
   from \cref{fig:seminaive-vs-naive-graph}. It is unclear whether inserting
   $\bot$ or recognizing complex zero changes are ever necessary to achieve an
   asymptotic speed-up.
 
   It's also worth addressing the asymptotic performance of
-  \emph{semi\naive\ full}. On regex search, for example, doubling the string
+  \emph{semi\naive\ optimized}. On regex search, for example, doubling the string
   length from $160$ to $320$ produces a slowdown factor of $\frac{.401}{.054}
   \approx 7.42$! However, since there are quadratically many matches and we find
   all of them, the best possible runtime is $O(n^2)$. Moreover, our nested-loop
