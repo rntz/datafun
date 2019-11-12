@@ -5,9 +5,9 @@ Let's return to our example Datalog program, modified to consider graphs rather
 than ancestry:
 
 \begin{flail}
-  \name{path}(X,Z) &\gets \name{edge}(X,Z)
+  \atom{path}{X,Z} &\gets \atom{edge}{X,Z}
   \\
-  \name{path}(X,Z) &\gets \name{edge}(X,Y) \wedge \name{path}(Y,Z)
+  \atom{path}{X,Z} &\gets \atom{edge}{X,Y} \wedge \atom{path}{Y,Z}
 \end{flail}
 
 \noindent
@@ -19,9 +19,9 @@ apply its rules until nothing more is deducible. We can make this strategy
 explicit by time-indexing the \name{path} relation:
 
 \begin{flail}
-  \name{path}_{i+1}(X,Z) &\gets \name{edge}(X,Z)
+  \name{path}_{i+1}(X,Z) &\gets \atom{edge}{X,Z}
   \\
-  \name{path}_{i+1}(X,Z) &\gets \name{edge}(X,Y) \wedge \name{path}_i(Y,Z)
+  \name{path}_{i+1}(X,Z) &\gets \atom{edge}{X,Y} \wedge \name{path}_i(Y,Z)
 \end{flail}
 
 \noindent
@@ -30,7 +30,7 @@ By omission $\name{path}_0 = \emptyset$.
 From this inductively $\name{path}_i \subseteq \name{path}_{i+1}$, because at step $i+1$ we re-deduce every fact known at step $i$.
 %
 For example, suppose $\name{path}_i(j, k)$ holds. Then at step $i+1$ the second
-rule deduces $\name{path}_{i+1}({j-1}, k)$ from $\name{edge}({j-1}, j) \wedge
+rule deduces $\name{path}_{i+1}({j-1}, k)$ from $\atom{edge}{{j-1}, j} \wedge
 \name{path}_i(j,k)$.
 %
 But since $\name{path}_{i+1}(j, k)$ holds, we perform the same deduction at time
@@ -53,9 +53,9 @@ find the \emph{newly} deducible paths, $\name{dpath}_i$, at iteration $i$, and
 accumulating these changes to produce a final result:
 
 \begin{flail}
-  \name{dpath}_0(X,Y) &\gets \name{edge}(X,Y)
+  \name{dpath}_0(X,Y) &\gets \atom{edge}{X,Y}
   \\
-  \name{dpath}_{i+1}(X,Z) &\gets \name{edge}(X,Y) \wedge \name{dpath}_i(Y,Z)
+  \name{dpath}_{i+1}(X,Z) &\gets \atom{edge}{X,Y} \wedge \name{dpath}_i(Y,Z)
   \\
   \name{path}_{i+1}(X,Y) &\gets \name{path}_i(X,Y) \vee\name{dpath}_i(X,Y)
 \end{flail}

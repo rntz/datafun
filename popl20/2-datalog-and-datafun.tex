@@ -7,15 +7,16 @@
 Datalog's syntax is a subset of Prolog's. Programs are collections of predicate
 declarations:
 
+\newcommand\atom[2]{\name{#1\/}({#2})}
 \newcommand\datum[1]{\textsf{#1}}
 
 \begin{code}
-  \name{parent}(\datum{aerys}, \datum{rhaegar})\\
-  \name{parent}(\datum{rhaegar}, \datum{jon})\\
-  \name{parent}(\datum{lyanna}, \datum{jon})
+  \atom{parent}{\datum{aerys}, \datum{rhaegar}}\\
+  \atom{parent}{\datum{rhaegar}, \datum{jon}}\\
+  \atom{parent}{\datum{lyanna}, \datum{jon}}
   \\[6pt]
-  \name{ancestor}(X,Z) \gets \name{parent}(X,Z)\\
-  \name{ancestor}(X,Z) \gets \name{parent}(X,Y) \wedge \name{ancestor}(Y,Z)
+  \atom{ancestor}{X,Z} \gets \atom{parent}{X,Z}\\
+  \atom{ancestor}{X,Z} \gets \atom{parent}{X,Y} \wedge \atom{ancestor}{Y,Z}
 \end{code}
 
 \noindent
@@ -268,7 +269,7 @@ negation:
 \begin{code}
   {\neg} \isa \iso\tbool \to \tbool\\
   \neg \pboxvar t = \ecase{\eisempty{\dvar t}}
-  \inj 1 \ptuple{} \caseto \etrue;\ \inj 2 \ptuple{} \caseto \efalse
+  \inj 1 \ptuple{} \caseto \etrue\:;\;\inj 2 \ptuple{} \caseto \efalse
   \\[8pt]
   \pwild\setminus\pwild \isa \tseteq A \to \iso \tseteq A \to \tseteq A\\
   s \setminus \pboxvar t =
