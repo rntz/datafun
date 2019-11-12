@@ -1,6 +1,6 @@
 %% ---- Semantics in a Datafun Model ----
 \begin{figure*}
-  \textsf{\scshape type and context denotations}
+  \text{\scshape type and context denotations}
 
   %% TODO: revert to this more readable version if space allows.
   \begin{align*}
@@ -12,27 +12,17 @@
     \den{\iso A} &= \iso{\den{A}} & \den{A + B} &= \den{A} + \den{B}
   \end{align*}
 
-  %% \begin{align*}
-  %%   \den{\tunit} &= \termO
-  %%   & \den{\tseteq A} &= \pfinof{\den{\eqt A}}
-  %%   & \den{\iso A} &= \iso{\den{A}}
-  %%   \\
-  %%   \den{A \to B} &= \expO{\den{A}}{\den{B}}
-  %%   & \den{A \x B} &= \den{A} \x \den{B}
-  %%   & \den{A + B} &= \den{A} + \den{B}
-  %% \end{align*}
-
   \begin{align*}
     \den{\G} &= \prod_{H \in \G} \den{H} &
     \den{\h x A} &= \den{A} & \den{\hd x A} &= \iso{\den{A}} &
     \den{\G \vdash A} &= \Poset(\den\G, \den A)
   \end{align*}
-  %\vspace{0pt} % yes, this matters.
+  \vspace{-1ex} % yes, this matters.
 
-  \textsf{\scshape term denotations}
+  \text{\scshape term denotations}
 
   \begin{displaymath}
-    \def\arraystretch{1.15}
+    \def\arraystretch{1.25} % lots of space
     \begin{array}{lcl}
       \den{\J {\dvar x} \G A} &=& \pi_{\dvar x} \then \varepsilon \qquad \text{(for $\hd x A \in \G$)} \\
       \den{\J x \G A} &=& \pi_x \qquad\quad\, \text{(for $\h x A \in \G$)} \\
@@ -65,7 +55,7 @@
   \end{displaymath}
   \vspace{0pt} % yes, this matters
 
-  \textsf{\scshape auxilliary operations}
+  \text{\scshape auxilliary operations}
 
   \begin{align*}
     \morph{dist}^\x_+ &~:~ A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)

@@ -1,0 +1,26 @@
+%% TODO:
+%% - read through entire paper again to catch bugs
+%% - use italic correction whenever applying italicised name, \name{f}(...).
+%% - check uses of monospace font (eg. for regexes)
+%% - fix overfull hboxes.
+%%
+%% - can I add more column separation to figure 11?
+%%
+%% - find uses of set comprehensions with multiple clauses and add space between
+%%   commas
+
+\def\arraystretch{1.12} % more space
+\setlength\arraycolsep{.4em}
+
+\renewcommand\mathvar\ensuremath % for Euler (b/c it's upright)
+\usepackage{eulervm}
+\edef\zeu@Scale{0.9302832244008714} % calculated based on x-height.
+\edef\zeu@Scale{0.94} % adjusted by eye.
+
+\microtypesetup{tracking=true,letterspace=20}
+%% Slightly more tracking for Libertine small caps (vs Biolinum).
+\SetTracking{
+  encoding={T1,LY1,T2A},
+  family={LinuxLibertineT-*},
+  shape={sc*},
+}{30}

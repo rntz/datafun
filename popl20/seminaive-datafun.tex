@@ -1,3 +1,6 @@
+\providecommand\mathvar\mathit
+\PassOptionsToPackage{dvipsnames}{xcolor}
+
 % From https://tex.stackexchange.com/questions/39415/unload-a-latex-package
 \makeatletter
 \newcommand{\dontusepackage}[2][]{%
@@ -5,15 +8,17 @@
   \@namedef{opt@#2.sty}{#1}}
 \makeatother
 
-\providecommand\mathvar\mathit
-\PassOptionsToPackage{dvipsnames}{xcolor}
-
-%% Avoid using acmart's fonts.
-\dontusepackage[tt=false,type1=true,]{libertine}
+%% Avoid loading newtxmath math font, it interferes with eulervm math font. We
+%% need to use distinct fonts for monotone and discrete variables; this is a
+%% semantically load-bearing choice.
 \dontusepackage[libertine]{newtxmath}
-%% Scale inconsolata to match XCharter[scaled=.94].
-%% Might want to scale it down further.
-\PassOptionsToPackage{scaled=0.9893675916139859}{zi4}
+
+%% %% Avoid using acmart's fonts.
+%% \dontusepackage[tt=false,type1=true,]{libertine}
+%% \dontusepackage[libertine]{newtxmath}
+%% %% Scale inconsolata to match XCharter[scaled=.94].
+%% %% Might want to scale it down further.
+%% \PassOptionsToPackage{scaled=0.9893675916139859}{zi4}
 
 
 %\documentclass[acmsmall]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
@@ -43,7 +48,7 @@
 
 
 \usepackage[utf8]{inputenc}
-\usepackage{style}
+\usepackage{acmstyle}
 \usepackage{notation}
 
 %% Uncomment this to show all the bibliographic keys
