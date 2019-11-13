@@ -99,8 +99,6 @@ antisymmetric relation $\leq_A \subseteq A \times A$, while a morphism $f : A
 composition in diagrammatic or ``pipeline'' order and use a simple centered dot,
 writing $f \cdot g : A \to C$ to mean $f : A \to B$ followed by $g : B \to C$.
 
-\input{fig-semantics}
-
 \subsubsection{Bicartesian structure}
 
 The bicartesian closed structure of $\Poset$ is largely the same as in $\Set$.
@@ -217,6 +215,7 @@ We will use this to interpret \kw{for}-loops. However, it is worth noting that
 the discreteness restrictions on \morph{singleton} mean that finite sets do
 not quite form a monad in $\Poset$.
 
+
 \subsubsection{Equality} Every object $A \in \Poset$ admits an equality-test morphism \morph{eq}:
 
 \begin{align*}
@@ -231,6 +230,7 @@ not quite form a monad in $\Poset$.
 \noindent
 The domain must be discrete, since $x = y$ and $y \le z$ certainly doesn't imply $x = z$.
 
+
 \subsubsection{Fixed Points}
 
 Given a semilattice $L \in \Poset$ without infinite ascending chains, we can
@@ -242,6 +242,9 @@ define a fixed point operation $\prim{fix} : (L \to L) \to L$ as follows:
 
 \noindent
 A routine inductive argument shows this must yield a least fixed point.
+
+
+\input{fig-semantics}
 
 \subsubsection{Interpretation} The semantic interpetation (defined
 over typing derivations) is given in \cref{fig:semantics}.
