@@ -12,6 +12,18 @@
 %% Scale inconsolata to match Libertine x-height.
 \renewcommand{\zifour@scaled}{s*[0.9387308533916848]}
 
+%% Defaults:
+%% - text float sep: 15pt plus 8pt minus 5pt
+%% - above caption skip: 12pt
+%% - below caption skip: 0pt
+%%
+%% Below caption skip is applied unconditionally, while text float sep is only
+%% used when figure is followed by text, not by another figure. I've chosen
+%% these values so as to leave the total skip when followed by text the same,
+%% but enlarge the inter-float skip.
+\setlength\belowcaptionskip{10pt}
+\setlength\textfloatsep{5pt plus 8pt minus 5pt}
+
 \microtypesetup{tracking=true,letterspace=30}
 
 %% Lots of tracking for the really small biolinum text in the table in
