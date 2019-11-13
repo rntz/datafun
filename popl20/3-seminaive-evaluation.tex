@@ -96,29 +96,23 @@ So consider $\name{step}'$ defined by:
 
 \begin{code}
 \name{step}' \<\name{dpath} =
-\setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}}
+\setfor{(x,z)}{(x,y) \in \name{edge},\, (y,z) \in \name{dpath}}
 \end{code}
 
-\newcommand\colorpath{{\color{BlindVermilion}\name{path}}}
-\newcommand\colordpath{{\color{BlindBlue}\name{dpath}}}
 \newcommand\colorA{\color{ColorA}}
 \newcommand\colorB{\color{ColorB}}
-\renewcommand\colorpath{\name{path}}
-\renewcommand\colordpath{\name{dpath}}
-%% \renewcommand\colorA\relax
-%% \renewcommand\colorB\relax
 
 \noindent
 Observe that
 %
 \begin{flail}
-  &\mathrel{\hphantom{=}} \name{step} \<(\colorpath \cup \colordpath)
+  &\mathrel{\hphantom{=}} \name{step} \<(\name{path} \cup \name{dpath})
   \\
-  &= \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath \cup \colordpath}
+  &= \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge},\, (y,z) \in \name{path} \cup \name{dpath}}
   \\
-  &= {\colorA \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colorpath}} \cup {\colorB \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \colordpath}}
+  &= {\colorA \name{edge} \cup \setfor{(x,z)}{(x,y) \in \name{edge},\, (y,z) \in \name{path}}} \cup {\colorB \setfor{(x,z)}{(x,y) \in \name{edge},\, (y,z) \in \name{dpath}}}
   \\
-  &= {\colorA\name{step}\<\colorpath} \cup {\colorB\name{step}'\<\colordpath}
+  &= {\colorA\name{step}\<\name{path}} \cup {\colorB\name{step}'\<\name{dpath}}
 \end{flail}
 
 \noindent
