@@ -25,10 +25,12 @@ watch\:%: %
 	@while inotifywait -e modify -r . >/dev/null 2>&1; do \
 		echo; \
 		make --no-print-directory -j $^; \
+		make --no-print-directory -j $^; \
 	done
 
 # For debugging, add --verbose-cmds.
 %.pdf: %.tex FORCE
+## I think Neel's machine needs -shell-escape?
 	$(LATEXRUN) --latex-args='-shell-escape' $<
 
 # pdfbook (it's in texlive-extra-utils on Ubuntu) combines pages to make a
