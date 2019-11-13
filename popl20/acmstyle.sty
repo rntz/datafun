@@ -14,12 +14,14 @@
 
 \microtypesetup{tracking=true,letterspace=30}
 
-%% %% Adjust tracking for Libertine small caps.
-%% \SetTracking{
-%%   encoding={T1,LY1,T2A},
-%%   family={LinuxLibertineT-LF,LinuxLibertineT-TLF,LinuxLibertineT-OsF,LinuxLibertineT-TOsF},
-%%   shape={sc*,si,scit},
-%% }{30} % 30
+%% Lots of tracking for the really small biolinum text in the table in
+%% fig-seminaive-vs-naive-graph.
+\SetTracking{
+  encoding={T1,LY1,T2A},
+  family={LinuxBiolinumT-LF,LinuxBiolinumT-TLF},
+  shape={sc*,si,scit},
+  size={-small},
+}{40}
 
 %% Add just a smidge of tracking to ALLCAPS.
 \let\@mtu\MakeTextUppercase
