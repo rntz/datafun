@@ -79,7 +79,7 @@ the fixed point of the monotone function \name{step} defined by:
 
 \begin{code}
 \name{step} \<\name{path} = \name{edge} \cup
-\setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{path}}
+\setfor{(x,z)}{(x,y) \in \name{edge},\, (y,z) \in \name{path}}
 \end{code}
 
 \noindent
@@ -135,7 +135,7 @@ iterations $\name{path}_i$:
   \\
   \name{dpath}_{i+1}
   &= \name{step}'\<\name{dpath}_i
-  = \setfor{(x,z)}{(x,y) \in \name{edge}, (y,z) \in \name{dpath}_i}
+  = \setfor{(x,z)}{(x,y) \in \name{edge},\, (y,z) \in \name{dpath}_i}
   \\
   \name{path}_{i+1}
   &= \name{path}_i \cup \name{dpath}_i

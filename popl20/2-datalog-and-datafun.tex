@@ -252,8 +252,8 @@ we can also define the composition of two relations in Datafun:
   \pwild \relcomp \pwild \isa \tset{\eqt A \x \eqt B} \to \tset{\eqt B \x \eqt
     C} \to \tset{\eqt A \x \eqt C}\\
   s \relcomp t = \esetfor{\etuple{\dvar a, \dvar c}}{
-    \ptuple{\dvar a, \bone} \in s,
-    \ptuple{\btwo, \dvar c} \in t,
+    \ptuple{\dvar a, \bone} \in s,\,
+    \ptuple{\btwo, \dvar c} \in t,\,
     \eeq \bone \btwo}
 \end{code}
 
@@ -364,7 +364,7 @@ character $c$, we return the range $(i,i+1)$ whenever $(i,c) \in
   \name{sym} \isa \iso\tchar \to \tre\\
   \name{sym} \<\pboxvar c \<\pboxvar s =
   \esetfor{(\dvar i, \dvar i + 1)}{
-    \ptuple{\dvar i, \dvar c'} \in \name{chars} \<\eboxvar s,
+    \ptuple{\dvar i, \dvar c'} \in \name{chars} \<\eboxvar s,\,
     \eeq{\dvar c}{\dvar{c'}}}
 \end{code}
 
@@ -449,8 +449,8 @@ start position $\dvar i$.
   \name{sym} \isa \iso\tchar \to \tre\\
   \name{sym} \<\pboxvar c \<\pboxtuple{\dvar s, \dvar i}
   = \esetfor{\dvar i+1}{
-    \ptuple{\dvar j, \dvar d} \in \name{chars} \<\eboxvar s,
-    \eeq {\dvar i} {\dvar j},
+    \ptuple{\dvar j, \dvar d} \in \name{chars} \<\eboxvar s,\,
+    \eeq {\dvar i} {\dvar j},\,
     \eeq {\dvar c} {\dvar d}}
   \\[8pt]
   \name{nil} \isa \tre \to \tre\\
