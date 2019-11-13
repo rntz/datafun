@@ -192,10 +192,10 @@ Finite sets admit a pair of useful morphisms:
 \end{align*}
 
 \noindent
-The $\morph{singleton}$ function takes a value and makes a singleton set out of
+The \morph{singleton} function takes a value and makes a singleton set out of
 it. The domain must be discrete, as otherwise the map will not be monotone (sets
 are ordered by inclusion, and set membership relies on equality, not the partial
-order). Similarly, the emptiness test $\morph{isEmpty}$ also takes a discrete
+order). Similarly, the emptiness test \morph{isEmpty} also takes a discrete
 set-valued argument, because otherwise the boolean test would not be monotone.
 
 Sets also form a semilattice, with the least element given by the empty set, and
@@ -206,15 +206,15 @@ semilattices, we will write $\morph{join}^L_n : L^n \to L$ to denote the $n$-ary
 semilattice join (least upper bound).
 %
 Also, if $f : A \times \iso B \to L$, we can define a morphism
-$\morph{collect}(f) : A \times \pfinof{B} \to L$ as follows:
+$\pcollect{f} : A \times \pfinof{B} \to L$ as follows:
 
 \begin{displaymath}
- \morph{collect}(f)  = (a, X) \mapsto \bigvee_{b \in X} f(a, b)
+ \pcollect{f}  = (a, X) \mapsto \bigvee_{b \in X} f(a, b)
 \end{displaymath}
 
 \noindent
 We will use this to interpret \kw{for}-loops. However, it is worth noting that
-the discreteness restrictions on $\morph{singleton}$ mean that finite sets do
+the discreteness restrictions on \morph{singleton} mean that finite sets do
 not quite form a monad in $\Poset$.
 
 \subsubsection{Equality} Every object $A \in \Poset$ admits an equality-test morphism \morph{eq}:

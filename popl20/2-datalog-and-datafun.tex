@@ -41,7 +41,7 @@ cannot refer to itself beneath a negation. For example, the liar paradox is
 prohibited:
 
 \begin{code}
-  \quad\name{liar}() \gets \neg \name{liar}()
+  \quad\atom{liar}{} \gets \neg \atom{liar}{}
   \qquad\color{Red}\text{\scshape\ding{55}\: not valid datalog}
 \end{code}
 
@@ -131,7 +131,7 @@ f$, giving access to a discrete variable $\dvar{x}$.
 %% TODO: should we note that we really definitely mean □(L → L) and
 %% not (□L → L)? Reader may be confused.
 
-Finally, Datafun includes fixed points, $\efix{e}$. The $\prim{fix}$ combinator takes a function $\iso (\fixt L \to \fixt L)$ and returns its least fixed point.
+Finally, Datafun includes fixed points, $\efix{e}$. The \prim{fix} combinator takes a function $\iso (\fixt L \to \fixt L)$ and returns its least fixed point.
 %
 Besides monotonicity of the function, we impose two restrictions on the fixed point operator to ensure well-definedness and termination.
 %
@@ -442,7 +442,7 @@ to manage nondeterminism and search.
 Our new type of combinators takes a string and a starting position, and returns
 a set of ending positions. For example, $\name{sym} \<\eboxvar c$ checks if
 $\dvar c$ occurs at the start position $\dvar i$, yielding $\esetraw{\dvar i+1}$
-if it does and the empty set otherwise, while $\name{nil}$ simply returns the
+if it does and the empty set otherwise, while \name{nil} simply returns the
 start position $\dvar i$.
 
 \begin{code}
