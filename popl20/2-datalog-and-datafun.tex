@@ -167,10 +167,10 @@ For brevity and clarity, the examples that follow make use of some syntax sugar:
 
 \begin{enumerate}
 
-\item We mentioned earlier that Datafun's boolean type $\tbool$ is ordered
+\item We mentioned earlier that Datafun's boolean type \tbool\ is ordered
   $\efalse < \etrue$. This is because we encode booleans as sets of empty
-  tuples, $\tset 1$, with $\efalse$ being the empty set $\esetraw{}$ and
-  $\etrue$ being the singleton $\esetraw{\etuple{}}$. At semilattice type we
+  tuples, $\tset 1$, with \efalse\ being the empty set $\esetraw{}$ and
+  \etrue\ being the singleton $\esetraw{\etuple{}}$. At semilattice type we
   also permit a ``one-sided'' conditional test, $\ewhen{b}{e}$, which yields $e$
   if $b$ is \etrue\ and $\bot$ otherwise. Encoding booleans as sets has the
   advantage that $\ewhen{b}{e}$ is monotone in the condition $b$.
@@ -179,7 +179,7 @@ For brevity and clarity, the examples that follow make use of some syntax sugar:
   operators \kw{for} and \kw{when} in the usual
   way~\cite{wadler-monad-comprehensions}.
 
-\item It is convenient to treat $\prim{fix}$ as a binding form, $\efixis x e$,
+\item It is convenient to treat \prim{fix} as a binding form, $\efixis x e$,
   rather than explicitly supplying a function, $\efix\ebox{\fnof x e}$.
 
 \item Finally, we make free use of curried functions and pattern matching.
@@ -234,7 +234,8 @@ $s$ and $t$:
 
 \begin{code}
   \pwild \cap \pwild \isa \tseteq A \to \tseteq A \to \tseteq A\\
-  s \cap t = \efor x {s} \ewhen{\mem \<\eboxvar x \<t} \eset{\dvar x}
+  %% NB. \kern -.5pt to get "member" closer to open paren.
+  s \cap t = \efor x {s} \ewhen{\kern -.5pt \mem \<\eboxvar x \<t} \eset{\dvar x}
 \end{code}
 
 \noindent
