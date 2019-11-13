@@ -16,6 +16,10 @@
 
 \microtypesetup{tracking=true,letterspace=30}
 
+%% Add just a smidge of tracking to ALLCAPS.
+\let\@mtu\MakeTextUppercase
+\renewcommand*\MakeTextUppercase[1]{\@mtu{\textls[5]{#1}}}
+
 %% %% Adjust tracking for Libertine small caps.
 %% \SetTracking{
 %%   encoding={T1,LY1,T2A},
