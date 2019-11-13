@@ -31,7 +31,8 @@ watch\:%: %
 # For debugging, add --verbose-cmds.
 %.pdf: %.tex FORCE
 ## I think Neel's machine needs -shell-escape?
-	$(LATEXRUN) --latex-args='-shell-escape' $<
+#	$(LATEXRUN) --latex-args='-shell-escape' $<
+	$(LATEXRUN) $<
 
 # pdfbook (it's in texlive-extra-utils on Ubuntu) combines pages to make a
 # zine-style booklet. For example, if foo.pdf is formatted for A5 paper,
