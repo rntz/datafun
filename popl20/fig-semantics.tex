@@ -1,6 +1,7 @@
 %% ---- Semantics in a Datafun Model ----
 \begin{figure*}
   \text{\scshape type and context denotations}
+  \vspace{2pt}
 
   %% TODO: revert to this more readable version if space allows.
   \begin{align*}
@@ -17,9 +18,10 @@
     \den{\h x A} &= \den{A} & \den{\hd x A} &= \iso{\den{A}} &
     \den{\G \vdash A} &= \Poset(\den\G, \den A)
   \end{align*}
-  \vspace{-1ex} % yes, this matters.
+  \vspace{-4pt}                  % yes this matters
 
   \text{\scshape term denotations}
+  \vspace{2pt}
 
   \begin{displaymath}
     \def\arraystretch{1.25} % lots of space
@@ -53,9 +55,10 @@
            \bigkrof{\den{\J {f_i} {\G, \h {x_i} {A_i}} B}}_i \\
     \end{array}
   \end{displaymath}
-  \vspace{0pt} % yes, this matters
+  \vspace{2pt} % yes, this matters
 
   \text{\scshape auxilliary operations}
+  \vspace{2pt}
 
   \begin{align*}
     \morph{dist}^\x_+ &~:~ A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)
