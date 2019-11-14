@@ -39,56 +39,21 @@ alternatives implemented in more conventional languages.
 % Languages: What Will They Look Like and What Changes Will They
 % Bring?''
 
-However, there are two flies in the ointment. First, even though each
-of these applications is supported by the skeleton of Datalog, they
-all had to extend it significantly beyond the theoretical core
-calculus.  For example, core Datalog does not even support arithmetic,
-since its semantics only speaks of finite sets supporting equality of
-their elements. Moreover, arithmetic is not a trivial extension, since
-it can greatly complicates the semantics (for example, proving that
-termination continues to hold). So despite the fact that kernel
-Datalog has a very clean semantics, its metatheory seemingly needs to
-be laboriously re-established once again for each extension.
+However, even though each of these applications is supported by the skeleton of
+Datalog, they all had to extend it significantly beyond the theoretical core
+calculus. For example, core Datalog does not even support arithmetic, since its
+semantics only speaks of finite sets supporting equality of their elements.
+Moreover, arithmetic is not a trivial extension, since it can greatly
+complicates the semantics (for example, proving that termination continues to
+hold). So despite the fact that kernel Datalog has a very clean semantics, its
+metatheory seemingly needs to be laboriously re-established once again for each
+extension.
 
 A natural approach to solving this problem is to find a language in which to
 write the extensions, which preserves the semantic guarantees that Datalog
 offers. Two such proposals are Flix~\cite{flix} and Datafun~\cite{datafun}.
 Conveniently for our exposition, these two languages embody two alternative
 design strategies.
-
-%% FIXME: this is not up-to-date with Flix's current design. I think
-%% it's even not up-to-date with Flix's old design. Old Flix wasn't a
-%% functional program building a Datalog program, it's the reverse: a
-%% Datalog program that can run functional code in certain places to
-%% eg. compute lattice aggregations.
-%
-%% New Flix has both functional code generating Datalog code, and
-%% Datalog code being able to run functional code in certain places.
-%% So it seems like it should be _very_ close to Datafun in
-%% expressivity. I think Madsen has either a draft or a
-%% soon-to-be-published paper on this new design.
-%
-%% Differences between Flix & Datafun as I see them:
-%%
-%% - Flix doesn't have monotonicity types.
-%
-%% - Instead Flix integrates with SMT solvers for lightweight
-%%   verification of properties including monotonicity,
-%%   distributivity, soundness, completeness, etc. However, mostly
-%%   only works for 1st-order stuff.
-%
-%% - Flix makes it easy to extend language with new semilattice types:
-%%   you just write the code for the join operation.
-%
-%% - In Datafun, Datalog is just a mode of use of functional language.
-%%   Flix separates the relational/Datalog and functional
-%%   sublanguages.
-%
-%% - In Flix, the semantics of passing around Datalog code in the
-%%   functional language are unclear; talking with Madsen, he seemed
-%%   unsure what design choice was best.
-%
-%% But a summary this^ long belongs in related work, not here.
 
 Flix extends a Datalog-like relational language, generalized to handle arbitrary
 semilattices instead of only finite sets, with a functional sublanguage, roughly
@@ -100,26 +65,6 @@ integrates with SMT solvers for lightweight verification of properties such as
 monotonicity, soundness, and completeness. However, this SMT-based approach
 works best for first-order code, and Flix maintains a pretty clear (if
 permeable) separation between its relational and functional sublanguages.
-
-%% Flix adopts the route of treating Datalog as an embedded domain-specific
-%% language~\cite{edsl}.
-%% %
-%% That is, Flix is a fairly conventional (albeit well-designed) functional
-%% programming language roughly comparable to ML or Haskell, extended with types
-%% representing Datalog predicates and programs.
-%% %
-%% The evaluation of a Flix program builds a Datalog program, which is then handed
-%% off to a custom Datalog engine (albeit extended to support arbitrary
-%% semilattices).
-%% %
-%% This stratification means that (a) standard Datalog implementation techniques
-%% can be used mostly off-the-shelf, but that (b) its functional programming side
-%% is mostly a very powerful macro system for Datalog.
-%% %
-%% The only way Flix code runs at Datalog execution time is via the definition of
-%% new semilattices (which is functional Flix code implementing a semilattice
-%% interface), and for this Flix offers program-verification style correctness
-%% checking (including SMT-based tooling).
 
 Datafun, by contrast, is a functional language capable of expressing relational
 idioms directly.
@@ -136,7 +81,7 @@ relational styles, but it comes at a cost: many of Datalog's standard
 implementation techniques, developed in the context of a first-order logic
 language, are not obviously applicable in a higher-order functional setting.
 
-Second, making Datalog perform well enough to use in practice calls for very
+Indeed, making Datalog perform well enough to use in practice calls for very
 sophisticated program analysis and compiler engineering. (This is a familiar
 experience from the database community, where query planners must encode a
 startling amount of knowledge to optimize relatively simple SQL queries.) A wide
