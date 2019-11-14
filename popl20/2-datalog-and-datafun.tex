@@ -1,3 +1,7 @@
+\newcommand\adjs{\kern-.3pts\kern.3pt}
+\newcommand\adji{\kern-.5pti\kern.5pt}
+\newcommand\adjj{\kern1pt j}
+
 \section{Datalog and Datafun, informally}
 \label{sec:datalog-and-datafun}
 
@@ -336,10 +340,11 @@ satisfying:
 
 \begin{code}
   \name{length} \isa \iso\tstring \to \tint\\
-  \name{length} \<\pboxvar s = \text{the length of }\dvar s
+  \name{length} \<\pboxvar{\adjs} = \text{the length of }\dvar s
   \\[8pt]
   \name{chars} \isa \iso\tstring \to \tset{\tint \x \tchar}\\
-  \name{chars} \<\pboxvar s = \setfor{(i,c)}{\text{the $i$\textsuperscript{th}
+  \name{chars} \<\pboxvar{\adjs} =
+  \setfor{(i,c)}{\text{the $i$\textsuperscript{th}
       character of $\dvar s$ is $c$}}
 \end{code}
 
@@ -447,14 +452,15 @@ start position $\dvar i$.
 
 \begin{code}
   \name{sym} \isa \iso\tchar \to \tre\\
-  \name{sym} \<\pboxvar c \<\pboxtuple{\dvar s, \dvar i}
+  \name{sym} \<\pboxvar{c} \<\pboxtuple{\dvar{\adjs}, \dvar{\adji}}
   = \esetfor{\dvar i+1}{
-    \ptuple{\dvar j, \dvar d} \in \name{chars} \<\eboxvar s,\,
+    \ptuple{\dvar{\adjj}, \dvar d}
+    \in \name{chars} \<\eboxvar{\adjs},\,
     \eeq {\dvar i} {\dvar j},\,
-    \eeq {\dvar c} {\dvar d}}
+    \eeq {\dvar c} {\dvar {d\kern.5pt}}}
   \\[8pt]
   \name{nil} \isa \tre \to \tre\\
-  \name{nil} \<\pboxtuple{\dvar s, \dvar i} = \eset{\dvar i}
+  \name{nil} \<\pboxtuple{\dvar{\adjs}, \dvar{\adji}} = \eset{\dvar{\adji}}
 \end{code}
 
 \noindent
@@ -463,8 +469,9 @@ every ending position that $r_1$ can find:
 
 \begin{code}
   \name{seq} \isa \tre \to \tre \to \tre\\
-  \name{seq} \<r_1 \<r_2 \<\pboxtuple{\dvar s, \dvar i} =
-  \efor{j}{r_1\<\eboxtuple{\dvar s, \dvar i}} r_2 \<\eboxtuple{\dvar s, \dvar j}
+  \name{seq} \<r_1 \<r_2 \<\pboxtuple{\dvar{\adjs}, \dvar{\adji}} =
+  \efor{\adjj}{r_1\<\eboxtuple{\dvar{\adjs}, \dvar{\adji}}}
+  r_2 \<\eboxtuple{\dvar{\adjs}, \dvar j}
 \end{code}
 
 \noindent
@@ -479,11 +486,12 @@ Regex alternation \name{alt} is effectively unchanged:
 Finally, Kleene star is implemented by recursively appending $\dvar r$ to a
 set $x$ of matches found so far:
 
+\nopagebreak[2]
 \begin{code}
   \name{star} \isa \iso\tre \to \tre\\
-  \name{star} \<\pboxvar r \<\pboxtuple{\dvar s, \dvar i}
-  = \efixis{x}{\bigl(\eset{\dvar i} \vee
-    \efor j {x} \dvar r\<\eboxtuple{\dvar s, \dvar j}
+  \name{star} \<\pboxvar r \<\pboxtuple{\dvar{\adjs}, \dvar{\adji}}
+  = \efixis{x}{\bigl(\eset{\dvar{\adji}} \vee
+    \efor {\adjj} {x} \dvar r\<\eboxtuple{\dvar{\adjs}, \dvar j}
     \bigr)}
 \end{code}
 
