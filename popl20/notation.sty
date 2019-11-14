@@ -87,14 +87,20 @@
 \definecolor{ColorA}{cmyk}{0, 0.56, .8, 0.43}  % #994A20
 \definecolor{ColorB}{cmyk}{0.75, 1, 0, 0}      % #5E2590
 \definecolor{LinkBlue}{cmyk}{1, 0.36, 0, 0}
+\definecolor{IsoRed}{cmyk}{0, 1, 1, 0}
+%\definecolor{IsoRed}{cmyk}{0, 1, 1, 0.05} % TODO try this on printer.
 
 %% Blue for discrete things just doesn't stand out enough when printed unless I
 %% make it totally cyan, which is too light to be easily readable on white. Red
 %% is the standard printers' second color for a reason.
-\newcommand\isocolor{\color{Red}}
+\newcommand\isocolor{\color{IsoRed}}
 \newcommand\isocolorname{red}
 %% If we use red for discrete things, using it for links is confusing.
 \AtEndPreamble{\hypersetup{linkcolor=LinkBlue,}}
+
+%\colorlet{isobg}{Cyan!8}
+\colorlet{isobg}{Yellow!30} % try on printer. 30-40?
+\newcommand\isobgname{yellow}
 
 % used for names of functions, primitives, etc. in math mode
 \newcommand\name\textit
@@ -262,10 +268,6 @@
 \newcommand\pboxtuple[1]{\pbox{\ptuple{#1}}}
 
 %% NEW BOXED VERSIONS!
-%\colorlet{isobg}{Cyan!8}
-\colorlet{isobg}{Yellow!27}
-\newcommand\isobgname{yellow}
-
 \newcommand\eiso[1]{\adjustbox{bgcolor=isobg,}{%
 \vphantom{lp\textsuperscript{+}}% room for ascenders & descenders
 \(\vphantom{}#1\)%
