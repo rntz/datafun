@@ -77,6 +77,7 @@ Now let's move from Datalog to Datafun.\footnote{In this section we do not
   muddies our examples to no benefit.} The transitive closure of \name{edge} is
 the fixed point of the monotone function \name{step} defined by:
 
+\nopagebreak[2]
 \begin{code}
 \name{step} \<\name{path} = \name{edge} \cup
 \setfor{(x,z)}{(x,y) \in \name{edge},\, (y,z) \in \name{path}}
@@ -94,6 +95,7 @@ iterations.
 %
 So consider $\name{step}'$ defined by:
 
+\nopagebreak[2]
 \begin{code}
 \name{step}' \<\name{dpath} =
 \setfor{(x,z)}{(x,y) \in \name{edge},\, (y,z) \in \name{dpath}}
@@ -104,7 +106,8 @@ So consider $\name{step}'$ defined by:
 
 \noindent
 Observe that
-%
+
+\nopagebreak[4]
 \begin{flail}
   &\mathrel{\hphantom{=}} \name{step} \<(\name{path} \cup \name{dpath})
   \\

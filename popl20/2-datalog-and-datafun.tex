@@ -411,6 +411,7 @@ relationally, if we consider the set of pairs $(i,j)$ matching some regex
 \texttt{r}, then \texttt{r*} matches its \emph{reflexive, transitive closure}.
 This can be accomplished by combining \emph{nil} and \emph{trans}.
 
+\nopagebreak[2]
 \begin{code}
   \name{star} \isa \iso\tre \to \tre\\
   \name{star} \<\pboxvar r \<\pboxvar s =
@@ -450,6 +451,7 @@ $\dvar c$ occurs at the start position $\dvar i$, yielding $\esetraw{\dvar i+1}$
 if it does and the empty set otherwise, while \name{nil} simply returns the
 start position $\dvar i$.
 
+\nopagebreak[2]
 \begin{code}
   \name{sym} \isa \iso\tchar \to \tre\\
   \name{sym} \<\pboxvar{c} \<\pboxtuple{\dvar{\adjs}, \dvar{\adji}}
@@ -467,6 +469,7 @@ start position $\dvar i$.
 Appending regexes $\name{seq}\<r_1\<r_2$ simply applies $r_2$ starting from
 every ending position that $r_1$ can find:
 
+\nopagebreak[2]
 \begin{code}
   \name{seq} \isa \tre \to \tre \to \tre\\
   \name{seq} \<r_1 \<r_2 \<\pboxtuple{\dvar{\adjs}, \dvar{\adji}} =
@@ -477,6 +480,7 @@ every ending position that $r_1$ can find:
 \noindent
 Regex alternation \name{alt} is effectively unchanged:
 
+\nopagebreak[2]
 \begin{code}
   \name{alt} \isa \tre \to \tre \to \tre\\
   \name{alt} \<r_1 \<r_2 \<x = r_1\<x \vee r_2\<x
