@@ -222,11 +222,8 @@
 \newcommand\undertype[2]{\underaccent{\textsf{\upshape\scshape#1}}{#2}}
 \newcommand\eqt[1]{\undertype{eq}{#1}}
 \providecommand\fint{}
-%% "fin" and "fix" in small caps are quite wide, and often overhang the letter
-%% they're placed under significantly if letterspaced. so we drop the
-%% letterspacing.
-\renewcommand\fint[1]{\undertype{\textls[0]{fin}}{#1}}
-\newcommand\fixt[1]{\undertype{\textls[0]{fix}}{#1}}
+\renewcommand\fint[1]{\undertype{fin}{#1}}
+\newcommand\fixt[1]{\undertype{fix}{#1}}
 
 \newcommand\elet[1]{\kw{let}\;{#1}\;\kw{in}\;}
 \newcommand\etuple[1]{({#1})}
@@ -332,3 +329,8 @@
 \newcommand\weird[5]{{#1} \changescolon #2 \impls #3 \shortrightarrow #4 \impls #4}
 \newcommand\weirdat[6]{{#2} \changescolon_{#1} #3 \impls #4 \shortrightarrow #5 \impls #6}
 %\renewcommand\weirdat[6]{\weird{#2}{#3}{#4}{#5}{#6} : #1}
+
+
+%% Kerning adjustments
+\newcommand\fixtLkern{\fixt{L}\kern.5pt}
+\newcommand\kernfixtL{\kern.5pt \fixt{L}}

@@ -135,11 +135,13 @@ f$, giving access to a discrete variable $\dvar{x}$.
 %% TODO: should we note that we really definitely mean □(L → L) and
 %% not (□L → L)? Reader may be confused.
 
-Finally, Datafun includes fixed points, $\efix{e}$. The \prim{fix} combinator takes a function $\iso (\fixt L \to \fixt L)$ and returns its least fixed point.
+\newcommand\isofixLtoL{\iso(\kernfixtL \to \fixtLkern)}
+
+Finally, Datafun includes fixed points, $\efix{f}$. The \prim{fix} combinator takes a function $\isofixLtoL$ and returns its least fixed point.
 %
 Besides monotonicity of the function, we impose two restrictions on the fixed point operator to ensure well-definedness and termination.
 %
-First, we require that recursion occur at \emph{semilattice types with no infinite ascending chains}, $\fixt L$.
+First, we require that recursion occur at \emph{semilattice types with no infinite ascending chains}, $\fixtLkern$.
 %
 A join-semilattice is a partial order with a least element $\bot$ and a least upper bound operation $\vee$ (``join'').
 %
@@ -154,8 +156,7 @@ As long as the semilattice has no infinite ascending chains, recursion from the 
   are identical, their intent is different. For example, if we extended Datafun
   with natural numbers $\N$, this would be an eqtype, but not a finite one.}
 
-Second, we require that the recursive function be boxed, $\iso(\fixt L \to \fixt
-L)$. Since boxed expressions can only refer to discrete values, and fixed point
+Second, we require that the recursive function be boxed, $\isofixLtoL$. Since boxed expressions can only refer to discrete values, and fixed point
 functions themselves must be monotone, this has the effect of preventing
 semantically nested fixed points. We discuss this in more detail in
 \cref{sec:nested-fixed-points}. Note that this does not prevent mutual

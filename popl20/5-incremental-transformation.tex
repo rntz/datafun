@@ -32,8 +32,7 @@ derivative.
 Since derivatives are zero changes, function changes and derivatives coincide if
 \emph{the function cannot change}.
 %
-This is why the typing rule for $\efix f$ requires that $f : \iso(\fixt L \to
-\fixt L)$: the use of $\iso$ prevents $f$ from changing!
+This is why the typing rule for $\efix f$ requires that $f : \isofixLtoL$: the use of $\iso$ prevents $f$ from changing!
 %
 So the key strategy of our speed-up transformation is to {\bfseries\boldmath
   decorate expressions of type ${\iso A}$ with their zero changes.}
@@ -58,8 +57,7 @@ The idea is that evaluating $\phi e$ will produce a pair
 $\eboxraw{\etuple{x,\dx}}$ where $x : \Phi A$ is the sped-up result and $\dx :
 \DP A$ is a zero change to $x$.
 %
-Thus, if $e : \iso(\fixt L \to \fixt L)$, then $\phi e$ will compute
-$\eboxraw{\etuple{f,f'}}$, where $f'$ is the derivative of $f$.
+Thus, if $e : \isofixLtoL$, then $\phi e$ will compute $\eboxraw{\etuple{f,f'}}$, where $f'$ is the derivative of $f$.
 
 On types other than $\iso A$, there is no information we need to add, so $\Phi$
 simply distributes.
@@ -228,19 +226,19 @@ examine the most interesting and important parts of these definitions in detail.
 The whole purpose of $\phi$ and $\delta$ is to speed up fixed points, so let's
 start there.
 %
-In a fixed point expression $\efix e$, we know $e : \iso(\fixt L
-\to \fixt L)$. Consequently the type of $\phi e$ is
+In a fixed point expression $\efix e$, we know $e : \isofixLtoL$. Consequently the type of $\phi e$ is
 
 \begin{align*}
-  \Phi(\iso(\fixt L \to \fixt L))
-  &= \iso(\Phi(\fixt L \to \fixt L) \x \DP(\fixt L \to \fixt L))\\
-  &= \iso((\Phi\fixt L \to \Phi\fixt L)
-  \x (\iso\Phi \fixt L \to \DP \fixt L \to \DP \fixt L))
+  \Phi(\isofixLtoL)
+  &= \iso(\Phi(\kernfixtL \to \fixtLkern) \x \DP(\kernfixtL \to \fixtLkern))\\
+  &= \iso((\Phi\fixt L \to \Phi\fixtLkern)
+  \x (\iso\Phi\fixt L \to \DP \fixt L \to \DP \fixtLkern))
   \\
-  &= \iso((\fixt L \to \fixt L) \x (\iso\fixt L \to \D \fixt L \to \D\fixt L)
+  &= \iso((\kernfixtL \to \fixtLkern) \x
+  (\iso\fixt L \to \D \fixt L \to \D\fixtLkern)
   & \text{by \cref{thm:phi-eqt}, }\Phi\fixt L = \fixt L
   \\
-  &= \iso((\fixt L \to \fixt L) \x (\iso\fixt L \to \fixt L \to \fixt L)
+  &= \iso((\kernfixtL \to \fixtLkern) \x (\iso\fixt L \to \fixt L \to \fixtLkern)
   & \text{by \cref{lem:DeltaL}, }\Delta \fixt L = \fixt L
 \end{align*}
 
@@ -256,7 +254,7 @@ give it a typing rule and semantics:
 \nopagebreak[4]
 \begin{align*}
   \infer{
-    \J{e}{\G}{\iso((\fixt L \to \fixt L) \x (\iso\fixt L \to \fixt L \to \fixt L)}
+    \J{e}{\G}{\iso((\kernfixtL \to \fixtLkern) \x (\iso\fixt L \to \fixt L \to \fixtLkern)}
   }{\J{\fastfix\<e}{\G}{\fixt L}}
   &&
   \begin{aligned}
@@ -268,7 +266,7 @@ give it a typing rule and semantics:
 
 As for $\delta(\efix e)$, since $e$ can't change (having $\iso$ type), neither
 can $\efix e$ (or $\fastfix\<\phi e$). All we need is a zero change at type
-$\fixt L$; by \cref{lem:DeltaL}, $\bot$ suffices.
+$\fixtLkern$; by \cref{lem:DeltaL}, $\bot$ suffices.
 
 
 \subsection{Variables, \boldfn, and application}
