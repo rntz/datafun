@@ -69,7 +69,7 @@ $\phi$ and $\delta$ generate expressions which satisfy this logical
 relation:
 
 \begin{theorem}[fundamental property]
-  If $\J e \G A$ and $\weirdat{\G}{\dgamma}{\g}{\rho}{\g'}{\rho'}$ then
+  If\/ $\J e \G A$ and\/ $\weirdat{\G}{\dgamma}{\g}{\rho}{\g'}{\rho'}$ then
   \[\weirdat{A}{\den{\delta e} \<\tuple{\g,\dgamma}}{\den{\phi
       e}\<\g}{\den{e}\<\rho}{\den{\phi e}\<\g'}{\den{e}\<\rho'}\]
 \end{theorem}
@@ -87,11 +87,11 @@ For example, we build on \cref{thm:phi-eqt,lem:dummy-change} to characterize the
 logical relation at equality types $\eqt A$ and the behavior of \dummy:
 
 \begin{lemma}[equality changes]\label{lem:equality-changes}
-If $\weirdat{\eqt A}{\dx}{x}{a}{y}{b}$ then $x = a$ and $y = b$.
+  If\/ $\weirdat{\eqt A}{\dx}{x}{a}{y}{b}$ then\/ $x = a$ and\/ $y = b$.
 \end{lemma}
 
 \begin{lemma}[dummy is zero at eqtypes]\label{lem:lr-dummy}
-  If $x \in \den{\eqt A}$ then $\weirdat{\eqt A}{\dummy\<x}{x}{x}{x}{x}$.
+  If\/ $x \in \den{\eqt A}$ then $\weirdat{\eqt A}{\dummy\<x}{x}{x}{x}{x}$.
 \end{lemma}
 
 \noindent
@@ -112,8 +112,8 @@ type:
 %% $L$ is something that can be joined on to it:
 
 \begin{lemma}[semilattice changes]
-  At any semilattice type $L$, we have $\Delta L = L$, and moreover
-  $\weirdat{L}{\dx}{x}{a}{y}{b}$ iff $x = a$ and $y = b = x \vee_L \dx$
+  At any semilattice type\/ $L$, we have\/ $\Delta L = L$, and moreover\/
+  $\weirdat{L}{\dx}{x}{a}{y}{b}$ iff\/ $x = a$ and\/ $y = b = x \vee_L \dx$
 \end{lemma}
 
 \noindent
@@ -130,8 +130,8 @@ send substitutions to themselves, recalling that $\stripcx{\G}$ contains only th
 discrete variables from $\G$.
 
 \begin{lemma}[discrete contexts don't change]
-  If\/ $\weirdat{\stripcx{\G}}{\tuple{}}{\gamma}{\rho}{\gamma'}{\rho'}$ then
-  $\gamma = \gamma'$ and $\rho = \rho'$.
+  If\/ $\weirdat{\stripcx{\G}}{\tuple{}}{\gamma}{\rho}{\gamma'}{\rho'}$ then\/
+  $\gamma = \gamma'$ and\/ $\rho = \rho'$.
 \end{lemma}
 
 \noindent
@@ -139,11 +139,17 @@ We use this lemma in combination with the next, which says that any valid
 context change gives rise to a valid change on a stripped context:
 
 \begin{lemma}[context stripping]
-  If $\weirdat{\G}{\dgamma}{\gamma}{\rho}{\gamma'}{\rho'}$
+  If\/ $\weirdat{\G}{\dgamma}{\gamma}{\rho}{\gamma'}{\rho'}$
   then
 
   \[
-  \weirdat{\stripcx{\G}}{\tuple{}}{\strip_{\Phi\G}(\g)}{\strip_{\G}(\rho)}{\strip_{\Phi\G}(\g')}{\strip_{\G}(\rho')}
+  \weirdat
+      {\stripcx{\G}}
+      {\tuple{}}
+      {\strip_{\Phi\G}(\g)}
+      {\strip_{\G}(\rho)}
+      {\strip_{\Phi\G}(\g')}
+      {\strip_{\G}(\rho')}
   \]
 
   where $\strip_\G = \fork{\pi_{\dvar x}}_{\hd x A \in \G}$ keeps only the
@@ -163,7 +169,7 @@ adequacy -- that first-order closed programs compute the same result when
 $\phi$-translated:
 
 \begin{theorem}[adequacy]
-  If $\J e {\emptycx} {\eqt A}$ then $\den{e} = \den{\phi e}$.
+  If\/ $\J e {\emptycx} {\eqt A}$ then\/ $\den{e} = \den{\phi e}$.
 \end{theorem}
 
 %% \nopagebreak[2]

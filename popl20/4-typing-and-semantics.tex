@@ -272,7 +272,6 @@ Dually, if $g_i : A_i \to B$ then we write $\krof{g_i}_i : \sum_i A_i
 \to B$ for the ``case-analysis map'' such that $\injc_j \then \krof{g_i}_i =
 g_j$.
 
-
 
 \subsection{Metatheory}
 \label{sec:weakening}
@@ -290,13 +289,12 @@ semi\naive\ transformation.
 
 We define the weakening relation $\Gamma \sqsubseteq \Delta$ in
 \cref{fig:weakening}. This says that $\Delta$ is a weakening of $\Gamma$, either
-because (as usual) it has extra hypotheses (in rule \rn{drop}), or
-(additionally!) because a hypothesis in $\Gamma$ becomes discrete in $\Delta$
-(rule \rn{disc}). The idea is that making a hypothesis discrete only increases
-the number of places it can be used.
+because it has extra hypotheses (\rn{drop}), or because a hypothesis in $\Gamma$
+becomes discrete in $\Delta$ (\rn{disc}). The idea is that making a hypothesis
+discrete only increases the number of places it can be used.
 
 \begin{lemma}\label{thm:weaken}
-  If $\J e \G A$ and $\G \sqsubseteq \D$ then $\J e \D A$.
+  If\/ $\J e \G A$ and $\G \sqsubseteq \D$ then $\J e \D A$.
 \end{lemma}
 
 \noindent This follows by the usual induction on typing derivations.

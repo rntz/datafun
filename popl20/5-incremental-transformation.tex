@@ -68,9 +68,9 @@ first-order data:
 \begin{lemma}\label{thm:phi-eqt}
   $\Phi\eqt A = \eqt A$.
 \end{lemma}
-\begin{proof}
-  Induct on $\eqt A$.
-\end{proof}
+
+\noindent
+This is easily seen by induction on $\eqt A$.
 
 As we'll see in \cref{sec:var-fn-app,sec:phi-delta-box}, $\phi$ and $\delta$ are
 mutually recursive. To make this work, $\delta e$ must find the change to $\phi
@@ -168,8 +168,8 @@ These defined, we can state the types of $\phi e$ and $\delta e$:
 %%   By induction on typing derivations; see appendix.
 %% \end{proof}
 
-\noindent As expected if we view expressions as functions of their free
-variables, if we pretend $\G$ is a type, these correspond to $\Phi(\G \to A)$
+\noindent As expected, if we view expressions as functions of their free
+variables, and pretend $\G$ is a type, these correspond to $\Phi(\G \to A)$
 and $\DP(\G \to A)$ respectively:
 
 \begin{align*}

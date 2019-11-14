@@ -40,17 +40,17 @@ derivatives. We leave this to future work.
 
 \paragraph{Self-maintainability}
 
-In the incremental $\fn$-calculus, a function $f$ is called
-\emph{self-maintainable} if its derivative $f'$ depends only upon the change
-$\dx$ to the argument and not upon the base point $x$. This is a crucial
-property, because it means we can compute the change in the function's result
-without re-computing the original input, which might be expensive. So it's
-reasonable to ask whether self-maintainability (or rather, its absence) is ever
-an issue for semi\naive\ Datafun. We suspect (but have no proof) that because of
-the limited way semi\naive\ evaluation uses incremental computation, it usually
-isn't. For example, consider a variant definition of transitive closure, as the
-fixed point of \(f = \fnof{\name{path}} \name{edge} \cup (\name{path} \relcomp
-\name{path})\). This is not self-maintainable; its derivative is:
+In the incremental $\fn$-calculus, a function $f$ is \emph{self-maintainable} if
+its derivative $f'$ depends only upon the change $\dx$ to the argument and not
+upon the base point $x$. This is a crucial property, because it lets us compute
+the change in the function's result without re-computing the original input,
+which might be expensive. So it's reasonable to ask whether lack of
+self-maintainability is ever an issue in Datafun. We suspect
+(without proof) that due to the limited way semi\naive\ evaluation uses
+incremental computation, it usually isn't. For example, consider a variant
+definition of transitive closure as the fixed point of \(f = \fnof{\name{path}}
+\name{edge} \cup (\name{path} \relcomp \name{path})\). This is not
+self-maintainable; its derivative is:
 
 \begin{code}
   f' \<\name{path} \<\name{dpath} =
