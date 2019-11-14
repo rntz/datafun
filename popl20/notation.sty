@@ -88,7 +88,7 @@
 \definecolor{ColorB}{cmyk}{0.75, 1, 0, 0}      % #5E2590
 \definecolor{LinkBlue}{cmyk}{1, 0.36, 0, 0}
 \definecolor{IsoRed}{cmyk}{0, 1, 1, 0}
-%\definecolor{IsoRed}{cmyk}{0, 1, 1, 0.05} % TODO try this on printer.
+\definecolor{IsoRed}{cmyk}{0, 1, 1, 0.12}
 
 %% Blue for discrete things just doesn't stand out enough when printed unless I
 %% make it totally cyan, which is too light to be easily readable on white. Red
@@ -99,7 +99,7 @@
 \AtEndPreamble{\hypersetup{linkcolor=LinkBlue,}}
 
 %\colorlet{isobg}{Cyan!8}
-\colorlet{isobg}{Yellow!30} % try on printer. 30-40?
+\definecolor{isobg}{cmyk}{0,0,0.4,0} % 0.3 - 0.4?
 \newcommand\isobgname{yellow}
 
 % used for names of functions, primitives, etc. in math mode
