@@ -147,14 +147,14 @@ A join-semilattice is a partial order with a least element $\bot$ and a least up
 %
 Finite sets (with the empty set as least element, and union as join) are an example, as are tuples of semilattices.
 %
-As long as the semilattice has no infinite ascending chains, recursion from the bottom element is guaranteed to find the least fixed point.\footnotemark
+As long as the semilattice has no infinite ascending chains $x_0 < x_1 < x_2 < \cdots$, iteration from the bottom element is guaranteed to find the least fixed point.\footnotemark
 
 \footnotetext{\label{note:finite-eqtypes}As a technical detail, the finite set
   type $\tseteq{A}$ will possess infinite ascending chains if $\eqt A$ has
   infinitely many inhabitants. Thus we need to distinguish a class of
   \emph{finite} eqtypes $\fint A$. Although their grammars in \cref{fig:syntax}
   are identical, their intent is different. For example, if we extended Datafun
-  with natural numbers $\N$, this would be an eqtype, but not a finite one.}
+  with integers, they would form an eqtype, but not a finite one.}
 
 Second, we require that the recursive function be boxed, $\isofixLtoL$. Since boxed expressions can only refer to discrete values, and fixed point
 functions themselves must be monotone, this has the effect of preventing
@@ -185,7 +185,7 @@ For brevity and clarity, the examples that follow make use of some syntax sugar:
   way~\cite{wadler-monad-comprehensions}.
 
 \item It is convenient to treat \prim{fix} as a binding form, $\efixis x e$,
-  rather than explicitly supplying a function, $\efix\ebox{\fnof x e}$.
+  rather than explicitly supplying a boxed function, $\efix\ebox{\fnof x e}$.
 
 \item Finally, we make free use of curried functions and pattern matching.
   Desugaring these is relatively standard, and so we will say little about it,
@@ -221,7 +221,7 @@ be represented in Datafun.
 The first operation we consider is testing membership:
 
 \begin{code}
-  \mem \isa \eqt A \to \tseteq A \to \tbool\\
+  \mem \isa \iso \eqt A \to \tseteq A \to \tbool\\
   \mem \<\pboxvar x \<s = \efor{y}{s} \eeq {\dvar x} {\dvar y}
 \end{code}
 
@@ -233,7 +233,7 @@ $2 \notin \esetraw{1}$). Notice that here we're taking advantage of encoding
 booleans as sets of empty tuples -- unioning these sets implements logical
 \emph{or}.
 
-Using $\mem$ we can define set intersection by taking the union of every
+Using \mem\ we can define set intersection by taking the union of every
 singleton set $\esetraw{\dvar x}$ where $\dvar x$ is an element of both
 $s$ and $t$:
 
@@ -328,8 +328,8 @@ operation -- but we'll see why it's useful in \cref{sec:transformations}.
 Datafun permits tightly integrating the higher-order functional and bottom-up
 logic programming styles. In this section, we illustrate the benefits of doing
 so by showing how to implement a regular expression matching library in
-combinator parsing style. Like combinator parsers in functional languages, the
-code is very concise.
+combinator style. Like combinator parsers in functional languages, the code is
+very concise.
 %
 However, support for the relational style ensures we can write \naive\ code
 \emph{without} the exponential backtracking cliffs typical of parser combinators
@@ -421,13 +421,13 @@ This can be accomplished by combining \emph{nil} and \emph{trans}.
 \end{code}
 
 \noindent
-Note that the argument $\dvar r$ is must be discrete because \name{trans} uses
-it to compute a fixed point.\footnote{Technically the semilattice on sets of
-  pairs of integers does not satisfy the ascending chain condition, so this
-  program is not well-typed. However, since the positions in a particular string
-  form a finite set, semantically there is no issue. \Citet{datafun} shows how
-  one can define bounded fixed points to handle cases like this, so we will not
-  be scrupulous.}
+Note that the argument $\dvar r$ must be discrete because \name{trans} uses it
+to compute a fixed point.\footnote{Technically the inclusion order on sets of
+  integer pairs does not satisfy the ascending chain condition, so this use
+  of \name{trans} is not well-typed. However, since the positions in a
+  particular string form a finite set, semantically there is no issue.
+  \Citet{datafun} shows how to define bounded fixed points to handle cases
+  like this, so we will not be scrupulous.}
 
 
 \subsection{Regular expression combinators, take 2}

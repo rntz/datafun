@@ -34,24 +34,25 @@
            \fork{\den{\J {e_1} \G {A_1}}, \den{\J {e_2} \G {A_2}}} \\
       \den{\J {\pi_i\<e} \G {A_i}} &=& \den{\J e \G {A_1 \times A_2}} \then \pi_i \\
       \den{\J {\ebox e} \G {\iso A}} &=& \mkbox_\Gamma(\den {\J e {\stripcx \G} A}) \\
-      \den{\J {\elet{\ebox x = e} f} \G B} &=&  \fork{\id_\Gamma, \den{\J e \G {\iso A}}} \then \den{\J f {\G, \hd x A} B}  \\
+      \den{\J {\elet{\ebox x = e} f} \G B} &=&  \fork{\id_{\den{\G}}, \den{\J e \G {\iso A}}} \then \den{\J f {\G, \hd x A} B}  \\
       \den{\J \bot \G L} &=& \fork{} \then \morph{join}^L_0 \\
       \den{\J {e \vee f} \G L} &=& \fork{\den{\J e \G L}, \den{\J f \G L}} \then \morph{join}^L_2 \\
-      \den{\J {\eisempty e} \G {1+1}}&=& \mkbox_\Gamma(\den{\J e {\stripcx \G} {\tset A}}) \then \morph{isEmpty} \\
+      \den{\J {\eisempty e} \G {1+1}}&=& \mkbox_\Gamma(\den{\J e {\stripcx \G} {\tset \tunit}}) \then \morph{isEmpty} \\
       \den{\J {\esplit e} \G {\iso A + \iso B}} &=& \den{\J e \G {\iso(A + B)}}\then \isosum \\
 
-      \den{\eeq{e_1}{e_2}} &=&
-          \fork{\mkbox_\Gamma(\den{\J {e_1} {\stripcx \G} A}),
-                \mkbox_\Gamma(\den{\J {e_2} {\stripcx \G} A})}
+      \den{\J {\eeq{e_1}{e_2}} \G {\tbool} } &=&
+          \fork{\mkbox_\Gamma(\den{\J {e_1} {\stripcx \G} {\eqt A}}),
+                \mkbox_\Gamma(\den{\J {e_2} {\stripcx \G} {\eqt A}})}
           \then \morph{eq} \\
-      \den{\J {\efix e} \G L} &=& \den{\J e \G {\iso(L \to L)}} \then \varepsilon \then \morph{fix} \\
-
-      \den{\esetsub{e_i}{i}} &=& \fork{\mkbox_\Gamma(\den{\J {e_1} {\stripcx \G} A}) \then \morph{singleton}}_i \then \morph{join}^L \\
-
-      \den{\J {\efor x e f} \G L} &=&    \fork{\id,\den{\J e \G {\tset A}}} \then \pcollect{\den{\J f {\G, \hd x A} L}} \\
+      \den{\J {\efix e} \G {\fixt L \kern 1pt}} &=& \den{\J e \G {\isofixLtoL}} \then \varepsilon \then \morph{fix}
+      \\
+      \den{\J {\esetsub{e_i}{i}} \G {\tseteq A}}
+      &=& \fork{\mkbox_\Gamma(\den{\J {e_i} {\stripcx \G} {\eqt A}}) \then \morph{singleton}}_i \then \morph{join}^L
+      \\
+      \den{\J {\efor x e f} \G L} &=&    \fork{\id_{\den\G},\den{\J e \G {\tseteq A}}} \then \pcollect{\den{\J f {\G, \hd x {\eqt A}} L}} \\
     \den{\J {\inj i e} \G {A_1 + A_2}} &=& \den{\J e \G {A_i}} \then \injc_i \\
     \den{\J {\ecase{e} (\inj i{x_i} \caseto f_i)_i} \G B} &=&
-    \fork{\id, \den{\J e \G {A_1 + A_2}}} \then \morph{dist}^\x_+ \then
+    \fork{\id_{\den\G}, \den{\J e \G {A_1 + A_2}}} \then \morph{dist}^\x_+ \then
            \bigkrof{\den{\J {f_i} {\G, \h {x_i} {A_i}} B}}_i \\
     \end{array}
   \end{displaymath}
@@ -61,9 +62,12 @@
   \vspace{2pt}
 
   \begin{align*}
-    \morph{dist}^\x_+ &~:~ A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)
+    \morph{dist}^\x_+ &\isa A \x (B_1 + B_2) \to (A \x B_1) + (A \x B_2)
     &
-    \mkbox_\Gamma &~:~ \Poset(\den{\stripcx \G}, A) \to \Poset(\den{\G}, \iso A) \\
+    \mkbox_\Gamma &\isa
+    %\Poset(\den{\stripcx \G}, A) \to \Poset(\den{\G}, \iso A)
+    \den{\stripcx \G \vdash A} \to \den{\G \vdash \iso A}
+    \\
     % this could be simpler if it distributed in the opposite direction.
     \morph{dist}^\x_+ &= \fork{\pi_2 \then \krof{\lambda (\fork{\pi_2,\pi_1} \then \injc_i)}_i, \pi_1}
     \then \eval

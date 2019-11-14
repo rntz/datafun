@@ -324,12 +324,12 @@ base point increases -- hence the use of $\iso$.
 \label{sec:derivatives}
 
 If $\changesat A \dx x x$, we call $\dx$ a \emph{zero change} to $x$. Usually
-zero changes are rather boring -- for example, a zero change to a set $x :
+zero changes are boring -- for example, a zero change to a set $x :
 \tseteq{A}$ is any $\dx \subseteq x$, and so $\emptyset$ is always a zero
 change.
 %
 However, there is one very interesting exception: function zero changes. Suppose
-$\changesat{A \to B}{\df}{f}{f}$. This implies that
+$\changesat{A \to B}{\df}{f}{f}$. Then inverting \rn{fn change} implies that
 
 \begin{equation*}
   \changesat A \dx x y \implies \changesat B{\df\<x\<\dx}{f\<x}{f\<y}
@@ -343,9 +343,41 @@ This is exactly the property of $\name{step}'$ that made it useful for
 semi\naive\ evaluation -- indeed, $\name{step}'$ is a zero change to
 \name{step}, modulo not taking the base point $x$ as an argument:
 
-\[ \changesat{\tseteq A} \dx x y \implies
-\changesat{\tseteq A}{\name{step}'\<\dx}{\name{step}\<x}{\name{step}\<y}
-\]
+%% \begin{equation*}
+%%   \changesat{\tseteq A} \dx x y
+%%   \implies
+%%   \changesat{\tseteq A}{\name{step}'\<\dx}{\name{step}\<x}{\name{step}\<y}
+%% \end{equation*}
+
+\begin{align*}
+  \changesat{\tseteq A} \dx x y
+  &\implies
+  \changesat{\tseteq A}{\name{step}'\<\dx}{\name{step}\<x}{\name{step}\<y}
+  \\
+  &\hphantom{x.}\text{i.e.}
+  \\
+  x \cup \dx = y
+  &\implies
+  \name{step}\<x \cup \name{step}'\<\dx = \name{step}\<y
+\end{align*}
+
+%% \begin{align*}
+%%   \begin{gathered}
+%%     \changesat{\tseteq A} \dx x y\\
+%%     \Updownarrow\\
+%%     x \cup \dx = y
+%%   \end{gathered}
+%%   &%\quad\implies\quad
+%%   \mathrel{\begin{gathered}
+%%     \implies\\\vphantom{\Updownarrow}\\\implies
+%%   \end{gathered}}
+%%   \begin{gathered}
+%%     \changesat{\tseteq A}{\name{step}'\<\dx}{\name{step}\<x}{\name{step}\<y}
+%%     \\
+%%     \Updownarrow\\
+%%     \name{step}\<x \cup \name{step}'\<\dx = \name{step}\<y
+%%   \end{gathered}
+%% \end{align*}
 
 \noindent
 Function zero changes are so important we give them a special name:
@@ -373,7 +405,7 @@ defined:
 \end{align*}
 
 \noindent Let $\fastfix\<(f,f') = \bigvee_i x_i$. By induction and the
-derivative property, we have $\changes{\dx_{i+1}}{x_i}{f\<x_i}$ and so
+derivative property, we have $\changes{\dx_i}{x_i}{f\<x_i}$ and so
 $x_i = f^i\<x$, and therefore $\fastfix\<(f,f') = \efix f$. Moreover,
 if $L$ has no infinite ascending chains, we will reach our fixed point
 $x_i = x_{i+1}$ in a finite number of iterations.

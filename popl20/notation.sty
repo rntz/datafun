@@ -98,6 +98,7 @@
 
 % used for names of functions, primitives, etc. in math mode
 \newcommand\name\textit
+\renewcommand\name[1]{\texorpdfstring{\TextOrMath{\textit{#1}}{\mathit{#1}}}{\textit{#1}}}
 \newcommand\var[1]{\mathvar{#1}} % for long local variable/parameter names
 
 % derivative variables
@@ -187,7 +188,7 @@
 \newcommand\eval{\morph{eval}}
 
 \newcommand\isox{\ensuremath{\morph{dist}^\x_\iso}}
-\newcommand\isosum{\ensuremath{\morph{dist}^\iso_+}}
+\newcommand\isosum{\ensuremath{\morph{dist\kern.5pt}^\iso_+}}
 
 \newcommand\pfin{\ensuremath{P}}
 \newcommand\pfinof[1]{\pfin #1}
@@ -211,13 +212,14 @@
 \newcommand\tset[1]{\{{#1}\}}
 \newcommand\tunit{1}
 \newcommand\tseteq[1]{\tset{\eqt{#1}}}
-\newcommand\typename\textit     % should this be rm? sf? it? bf?
+\newcommand\typename\textit
+\renewcommand\typename[1]{\TextOrMath{\textit{#1}}{\mathit{#1}}}
 \newcommand\tbool{\typename{bool}}
 \newcommand\tstring{\typename{string}}
 \newcommand\tint{\typename{int}}
 
 %% Discrete variables are colored and italicised.
-\newcommand\dvar[1]{{\mathit{\isocolor#1}}}
+\newcommand\dvar[1]{\mathit{\isocolor#1}}
 
 \newcommand\undertype[2]{\underaccent{\textsf{\upshape\scshape#1}}{#2}}
 \newcommand\eqt[1]{\undertype{eq}{#1}}
@@ -306,6 +308,8 @@
 \newcommand\stripcxraw[1]{\lceil{#1}\rceil}
 \newcommand\stripcx[1]{{\isocolor\stripcxraw{#1}}}
 \renewcommand\stripcx\stripcxraw
+%\renewcommand\stripcxraw[1]{{\isocolor\lceil{\color{black}#1}\rceil}}
+%\renewcommand\stripcxraw[1]{\eiso{\lceil{#1}\rceil}}
 
 
 %% ===== Change theory & seminaive translation stuff =====

@@ -45,11 +45,11 @@ First, \rn{split} provides an operator $\prim{split} : \iso(A + B) \to \iso A +
 The other direction, $\iso A + \iso B \to \iso (A + B)$, is already derivable,
 as is the isomorphism $\iso A \times \iso B \cong \iso (A \times B)$.
 %
-These operations are used implicitly by pattern-matching to propagate
-discreteness onto the variables bound by box patterns -- in the pattern
-$\pboxtuple{\inj 1 \dvar x, \inj 2 \dvar y}$, we expect both the variables
-$\dvar x$ and $\dvar y$ to be discrete, which is information we propagate using
-these coercions.
+This is used implicitly by box pattern-matching -- e.g., in the pattern $\pboxtuple{\inj 1 \dvar x, \inj 2 \dvar y}$, the variables $\dvar x$ and $\dvar y$ are both discrete, which is information we propagate via these conversions.
+%
+%% These conversions are used implicitly in pattern-matching to propagate
+%% discreteness onto variables bound inside box patterns -- e.g, in the pattern
+%% $\pboxtuple{\inj 1 \dvar x, \inj 2 \dvar y}$.
 %
 %% TODO: an example of desugaring pattern-matching here?
 %
@@ -94,9 +94,7 @@ The syntax of core Datafun can be interpreted in $\Poset$, the category of
 partially ordered sets and monotone maps. That is, an object of $\Poset$ is a
 pair $(A, \leq_A)$ consisting of a set $A$ and a reflexive, transitive,
 antisymmetric relation $\leq_A \subseteq A \times A$, while a morphism $f : A
-\to B$ is a function such that $x \leq_A y \implies f(a) \leq_B f(b)$. We write
-composition in diagrammatic or ``pipeline'' order and use a simple centered dot,
-writing $f \cdot g : A \to C$ to mean $f : A \to B$ followed by $g : B \to C$.
+\to B$ is a function such that $x \leq_A y \implies f(a) \leq_B f(b)$.
 
 \subsubsection{Bicartesian structure}
 
@@ -142,8 +140,9 @@ as $(A, \leq_{\iso A})$, where \( a \leq_{\iso A} a' \iff a = a' \).
 That is, the discrete order preserves the underlying elements, but reduces the
 partial order to mere equality.
 %
-This forms a rather \emph{boring} comonad, whose functorial action $\iso(f)$, extraction $\varepsilon_A : \iso A \to A$, and duplication $\delta_A : \iso A \to \iso \iso A$ are all identities on the underlying sets:
+This forms a rather boring comonad whose functorial action $\iso(f)$, extraction $\varepsilon_A : \iso A \to A$, and duplication $\delta_A : \iso A \to \iso \iso A$ are all identities on the underlying sets:
 
+\nopagebreak[2]
 \begin{align*}
   \iso(f) &= f & \varepsilon_A &= a \mapsto a & \delta_A &= a \mapsto a
 \end{align*}
@@ -158,16 +157,19 @@ and $\iso (A + B) \cong \iso A + \iso B$.
 In both cases the isomorphism is witnessed by identity on the underlying
 elements.
 %
-We will write $\isox : \prod_i \iso A_i \to \iso\prod_i A_i$ to name the map
-witnessing distributivity of products over $\iso$, and $\isosum : \iso \sum_i
-A_i \to \sum_i \iso A_i$ to name the map witnessing distributivity of $\iso$
-over coproducts.
+These lift to $n$-ary products and sums as well, which we write as $\isox : \prod_i \iso A_i \to \iso\prod_i A_i$ and $\isosum : \iso \sum_i
+A_i \to \sum_i \iso A_i$.
+%% %
+%% We will write $\isox : \prod_i \iso A_i \to \iso\prod_i A_i$ to name the map
+%% witnessing distributivity of products over $\iso$, and $\isosum : \iso \sum_i
+%% A_i \to \sum_i \iso A_i$ to name the map witnessing distributivity of $\iso$
+%% over coproducts.
 
 
 \subsubsection{Sets and Semilattices}
 
 Given a poset $(A, \leq_A)$ we define the finite powerset poset $\pfinof(A,
-\leq_A)$ as $(P_{\textit{fin}}\, A, \subseteq)$, with finite subsets of $A$ as
+\leq_A)$ as $(P_{\mathrm{fin}}\, A, \subseteq)$, with finite subsets of $A$ as
 elements, ordered by subset inclusion.
 %
 Note that the subset ordering completely ignores the element ordering $\leq_A$.
@@ -258,16 +260,18 @@ combinators defined above.
 We give the interpretation in combinatory style, and to increase readability, we
 freely use $n$-ary products to elide the book-keeping associated with
 reassociating binary products.
+
+Regarding notation, we write composition in diagrammatic or ``pipeline'' order with a simple centered dot, letting $f \cdot g : A \to C$ mean $f : A \to B$ followed by $g : B \to C$.
 %
-As a matter of notation, if $f_i : A \to B_i$ then we write $\fork{f_i}_i : A
-\to \prod_i B_i$ for the ``tupling'' map such that $\fork{f_i}_i \then \pi_j =
-f_j$.
+If $f_i : A \to B_i$ then we write $\fork{f_i}_i : A \to \prod_i B_i$ for the
+``tupling map'' such that $\fork{f_i}_i \then \pi_j = f_j$.
 %
-In particular, $\fork{}$ is the unique map into the terminal object.
+In particular, $\fork{}$ is the map into the terminal object.
 %
 Dually, if $g_i : A_i \to B$ then we write $\krof{g_i}_i : \sum_i A_i
 \to B$ for the ``case-analysis map'' such that $\injc_j \then \krof{g_i}_i =
 g_j$.
+
 
 
 \subsection{Metatheory}
