@@ -24,16 +24,25 @@
 \setlength\belowcaptionskip{10pt}
 \setlength\textfloatsep{5pt plus 8pt minus 5pt}
 
-\microtypesetup{tracking=true,letterspace=30}
+\microtypesetup{tracking=true,letterspace=20}
 
-%% Lots of tracking for the really small biolinum text in the table in
+% Libertine smallcaps: More tracking, disable Q-ligatures.
+\SetTracking[
+  no ligatures=q,
+]{
+  encoding={T1,LY1,T2A},
+  family={LinuxLibertineT-LF,LinuxLibertineT-TLF},
+  shape={sc*,si,scit},
+}{40}
+
+%% More tracking for the really small biolinum text in the table in
 %% fig-seminaive-vs-naive-graph.
 \SetTracking{
   encoding={T1,LY1,T2A},
   family={LinuxBiolinumT-LF,LinuxBiolinumT-TLF},
   shape={sc*,si,scit},
   size={-small},
-}{40}
+}{35}
 
 %% Add just a smidge of tracking to ALLCAPS.
 \let\@mtu\MakeTextUppercase
@@ -45,4 +54,4 @@
 ]{
   encoding={T1,LY1,T2A},
   family={LinuxBiolinumT-LF,LinuxBiolinumT-TLF},
-}{12}
+}{12} % 12.
