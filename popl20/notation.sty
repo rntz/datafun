@@ -87,8 +87,8 @@
 \definecolor{ColorA}{cmyk}{0, 0.56, .8, 0.43}  % #994A20
 \definecolor{ColorB}{cmyk}{0.75, 1, 0, 0}      % #5E2590
 \definecolor{LinkBlue}{cmyk}{1, 0.36, 0, 0}
-\definecolor{IsoRed}{cmyk}{0, 1, 1, 0}
-\definecolor{IsoRed}{cmyk}{0, 1, 1, 0.12}
+\definecolor{IsoRed}{cmyk}{0, 1, 1, 0} % tried: K=0, 0.06, 0.12
+\definecolor{IsoRed}{Hsb}{8, 1, .85}
 
 %% Blue for discrete things just doesn't stand out enough when printed unless I
 %% make it totally cyan, which is too light to be easily readable on white. Red
@@ -100,7 +100,17 @@
 
 %\colorlet{isobg}{Cyan!8}
 \definecolor{isobg}{cmyk}{0,0,0.4,0} % 0.3 - 0.4?
+%% Confusingly, pure CMYK yellow doesn't seem to actually generate pure yellow
+%% on the printers I've tried. It has red dots in it instead.
+%\definecolor{isobg}{rgb}{1, 1, 0.4}
+\definecolor{isobg}{Hsb}{60, 0.42, 1}
 \newcommand\isobgname{yellow}
+
+%% %% Orange on light blue.
+%% \definecolor{IsoRed}{Hsb}{25, 1, .92}
+%% \renewcommand\isocolorname{orange}
+%% \definecolor{isobg}{Hsb}{200, 0.09, 1}
+%% \renewcommand\isobgname{blue}
 
 % used for names of functions, primitives, etc. in math mode
 \newcommand\name\textit
