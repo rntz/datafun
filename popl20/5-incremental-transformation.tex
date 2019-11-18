@@ -1,4 +1,4 @@
-\section{The \boldphi\ and \bolddelta\ transformations}
+\section{The \boldphi\ and \bolddelta\ Transformations}
 \label{sec:transformations}
 
 We use two static transformations, $\phi$ and $\delta$, defined in
@@ -221,7 +221,7 @@ given in \cref{fig:phi,fig:delta}. In the remainder of this section, we'll
 examine the most interesting and important parts of these definitions in detail.
 
 
-\subsection{Fixed points}
+\subsection{Fixed Points}
 
 The whole purpose of $\phi$ and $\delta$ is to speed up fixed points, so let's
 start there.
@@ -269,7 +269,7 @@ can $\efix e$ (or $\fastfix\<\phi e$). All we need is a zero change at type
 $\fixtLkern$; by \cref{lem:DeltaL}, $\bot$ suffices.
 
 
-\subsection{Variables, \boldfn, and application}
+\subsection{Variables, \boldfn, and Application}
 \label{sec:var-fn-app}
 
 At the core of a functional language are variables, \fn, and application. The
@@ -315,7 +315,7 @@ monotone rather than a discrete position.
 %%   \sqsubseteq \stripcxraw{\iso\Phi\G, \DP\G}$.}
 
 
-\subsection{The discreteness comonad, \iso}
+\subsection{The Discreteness Comonad, \iso}
 \label{sec:phi-delta-box}
 
 Our strategy hinges on decorating expressions of type $\iso A$ with their
@@ -378,7 +378,7 @@ provides it, so we simply unpack it. We don't use $\delta e$ in $\delta f$, but
 this is unsurprising when you consider that its type is $\DP\iso A = \tunit$.
 
 
-\subsection{Case analysis, \prim{split}, and \name{dummy}}
+\subsection{Case Analysis, \prim{split}, and \name{dummy}}
 
 \newcommand\evalsto\mapsto
 
@@ -440,7 +440,7 @@ All it must do is return $(\inj i \etuple{})$ with a tag that matches
 $\phi(\esplit e)$ and $\phi e$; \kw{case}-analysing $\phi e$ suffices.
 
 
-\subsection{Semilattices and comprehensions}
+\subsection{Semilattices and Comprehensions}
 \label{sec:semilattice-delta-phi}
 
 The translation $\phi(e \vee f) = \phi e \vee \phi f$ is as simple as it seems.
