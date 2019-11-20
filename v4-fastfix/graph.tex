@@ -15,12 +15,12 @@
   \begin{tikzpicture}[baseline=(current bounding box.center)]
     \begin{axis}[
         xlabel={Number of nodes},
-        ylabel={Seconds},
+        ylabel={Time (seconds)},
         height=140pt, width=220pt,
         % If we include the explicit table, we can make it this large without
         % enlarging the figure.
         height=172pt, width=280pt,
-        legend entries={\naive,semi\naive\ unoptimized,semi\naive},
+        legend entries={\naive,semi\naive\ raw,semi\naive\ optimized},
         legend cell align=left,
         legend pos = north west,
         legend style={
@@ -41,12 +41,12 @@
   \begin{tikzpicture}[baseline=(current bounding box.center)]
     \begin{axis}[
         xlabel={Length of string},
-        ylabel={Seconds},
+        ylabel={Time (seconds)},
         height=140pt, width=220pt,
         % If we include the explicit table, we can make it this large without
         % enlarging the figure.
         height=172pt, width=280pt,
-        legend entries={\naive,semi\naive\ unoptimized,semi\naive},
+        legend entries={\naive,semi\naive\ raw,semi\naive\ optimized},
         legend cell align=left,
         legend pos = north west,
         legend style={

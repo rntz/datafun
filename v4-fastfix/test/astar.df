@@ -25,4 +25,4 @@ let [sym: [nat] -> [{nat,nat}] -> {nat,nat}] =
    let (i, c1) = e in
    {(i,i+1) when c0 = c1}]
 in
-  star [sym [97]];   # /a+/
+  star [sym [97]];   # /a*/
