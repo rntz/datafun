@@ -44,14 +44,14 @@
   size={-small},
 }{35}
 
-%% Add just a smidge of tracking to ALLCAPS.
-\let\@mtu\MakeTextUppercase
-%\renewcommand*\MakeTextUppercase[1]{\@mtu{\textls*[10]{#1}}}
-\renewcommand*\MakeTextUppercase[1]{{\microtypecontext{tracking=allcaps}\@mtu{\textls*{#1}}}}
-\SetTracking[context=allcaps,
-  spacing={100*,,},
-  %spacing={300,,},
-]{
-  encoding={T1,LY1,T2A},
-  family={LinuxBiolinumT-LF,LinuxBiolinumT-TLF},
-}{12} % 12.
+%% %% Add just a smidge of tracking to ALLCAPS.
+%% \let\@mtu\MakeTextUppercase
+%% %\renewcommand*\MakeTextUppercase[1]{\@mtu{\textls*[10]{#1}}}
+%% \renewcommand*\MakeTextUppercase[1]{{\microtypecontext{tracking=allcaps}\@mtu{\textls*{#1}}}}
+%% \SetTracking[context=allcaps,
+%%   %spacing={100*,,},
+%%   %spacing={300,,},
+%% ]{
+%%   encoding={T1,LY1,T2A},
+%%   family={LinuxBiolinumT-LF,LinuxBiolinumT-TLF},
+%% }{20} % 12. 40 too large.
