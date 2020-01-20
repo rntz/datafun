@@ -5,37 +5,44 @@
 \usepackage{url,hyperref}
 \usepackage{mathpartir}         % \mathpar, \infer
 \usepackage{booktabs}           % \midrule
+\usepackage{colonequals}
+\usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
 
 %% font fiddling
 \usefonttheme{professionalfonts}
 \renewcommand{\familydefault}{\rmdefault}
 %\usepackage[scaled=0.9543]{XCharter}
 \usepackage[semibold,scaled=0.9663]{sourceserifpro}
-%\usepackage[default,semibold,scaled=0.9663]{sourcesanspro}
-\usepackage[sfdefault,scaled=1.0155]{AlegreyaSans}
+\usepackage[semibold,scaled=0.9663]{sourcesanspro}
+%\usepackage[osf,scaled=1.0155]{AlegreyaSans}
 \usepackage[scaled=1.00438,varqu,var0]{inconsolata}
 \usepackage{eulervm}
 \usepackage[bb=boondox]{mathalfa} % or bb=ams
 \usepackage[T1]{fontenc}
 
-\usepackage{microtype}
+%% TODO: more tracking for charter.
+\usepackage[tracking,letterspace=20]{microtype}
 \frenchspacing
 
-\setlength\mathindent{0pt}
+\setlength\mathindent{12pt}
 \def\arraystretch{1.1}
 
 
 %% ===== COMMANDS =====
+\newcommand\strong\textbf
+
 \newcommand\N{\mathbb{N}}
 \newcommand\x\times
 \newcommand\G\Gamma
 \newcommand\D\Delta
+\newcommand\fn{\ensuremath{\lambda}}
+\newcommand\isa{\mathrel{\ratio}}
 
 \newcommand{\setfor}[2]{\{{#1} \mathrel{|} {#2}\}}
 
 \newcommand\kw[1]{\ensuremath{\textbf{#1}}}
-\newcommand\n\mathrm
-\newcommand\tpname[1]{\text{#1}}
+\newcommand\n\mathit
+\newcommand\tpname\mathrm
 \newcommand\tset{\tpname{Set}~}
 \newcommand\zero{\ensuremath{\mathbf{0}}}
 
@@ -44,7 +51,9 @@
 
 \let\oldcup\cup\renewcommand\cup{\mathrel{\oldcup}}
 
-\newcommand\hi[1]{{\color{Rhodamine}#1}}
+\newcommand\hilite{\color{Rhodamine}}
+\newcommand\hi[1]{{\hilite#1}}
+%\newcommand\hilitetime{\color{Orange}}\newcommand\hiti[1]{{\hilitetime#1}}
 
 
 \title{Semi\naive\ Evaluation for a Higher-Order Language}
@@ -56,18 +65,86 @@
 
   \begin{frame}
     \[\begin{array}{l}
-      \n{edge}, \n{path} : \tset (\N \x \N)
+      \n{edge}, \n{path} \isa \tset (\N \x \N)
       \\
       \alt<1>{
         \hi{\n{path}} = \n{edge} \cup
         \setfor{(x,z)}{(x,y) \in \n{edge}, (y,z) \in \hi{\n{path}}}
       }{
-        \n{path} = \kw{fix} \; \n{step}
+        \n{step} \; {\only<2>{\hilite}s} = \n{edge} \cup
+        \setfor{(x,z)}{(x,y) \in \n{edge}, (y,z) \in {\only<2>{\hilite}s}}
       }
       \\\pause
-      \n{step} \; \hi{s} = \n{edge} \cup
-      \setfor{(x,z)}{(x,y) \in \n{edge}, (y,z) \in \hi{s}}
+      \alt<3->{
+        \n{path}_{\hi 0} = \emptyset
+      }{\n{path} = \n{step} \; \n{path}}
+      \\\pause
+      \n{path}_{\hi{i+1}} = \n{step} \, \n{path}_{\hi i}
     \end{array}\]
+
+    wait until $\n{path}_i = \n{path}_{i+1}$
+  \end{frame}
+
+
+  \begin{frame}
+    \begin{mathpar}
+      \begin{array}{l}
+        \n{step} \; s = \n{edge} \cup
+        \setfor{(x,z)}{(x,y) \in \n{edge}, (y,z) \in s}
+        \\
+        \n{path}_i = \n{step}^i \;\emptyset =
+        \text{paths of length $\le i$}
+      \end{array}
+      \\\pause
+      \begin{tikzpicture}[thick,baseline=(current bounding box.center), scale=1.5]
+        \node (a) at (0, 0) {$\n{path}_0$};
+        \node (ab) at (1, 0) {$\subseteq$};
+        \node (b) at (2, 0) {$\n{path}_1$};
+        \node (bc) at (3, 0) {$\subseteq$};
+        \node (c) at (4, 0) {$\n{path}_2$};
+        \node (cd) at (5, 0) {$\subseteq$};
+        \node (d) at (6, 0) {$\cdots$};
+        \path[-Latex, bend right=50,below]
+          (a) edge node {$\n{dpath}_0$} (b)
+          (b) edge node {$\n{dpath}_1$} (c)
+          (c) edge node {$\n{dpath}_2$} (d);
+      \end{tikzpicture}
+    \end{mathpar}
+  \end{frame}
+
+
+  \begin{frame}
+    \strong{Bottom-up fixed points} of \strong{monotone maps}:
+    \vspace{1ex}
+
+    \begin{itemize}\setlength\itemsep{1ex}
+    \item Graph algorithms (eg.~shortest paths)
+    \item Static analysis (abstract interpretation)
+    \item Parsing (regexes, CFGs)
+    \item \emph{Datalog!} {\normalsize\sffamily(if it's a map on finite sets)}
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    \begin{center}
+      \scshape\huge semi\naive\ evaluation!
+    \end{center}
+
+    \pause
+    Datalog is a \emph{first-order} logic language.
+    \vspace{1em}
+
+    \pause
+    \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]}
+    is a simply-typed \fn-calculus with:
+    \begin{itemize}
+    \item a finite set datatype \& set comprehensions
+    \item bottom-up monotone fixed points
+    \item a type system that tracks monotonicity
+    %% \item where types are posets, \\
+    %%   and monotonicity is tracked in the type system
+    \end{itemize}
+    \vspace{1em}
   \end{frame}
 \end{document}
 
