@@ -1,0 +1,74 @@
+%% TODO: aspect ratio
+\documentclass[fleqn,aspectratio=169,dvipsnames]{beamer}
+
+\usepackage{amssymb,amsmath,amsthm,latexsym}
+\usepackage{url,hyperref}
+\usepackage{mathpartir}         % \mathpar, \infer
+\usepackage{booktabs}           % \midrule
+
+%% font fiddling
+\usefonttheme{professionalfonts}
+\renewcommand{\familydefault}{\rmdefault}
+%\usepackage[scaled=0.9543]{XCharter}
+\usepackage[semibold,scaled=0.9663]{sourceserifpro}
+%\usepackage[default,semibold,scaled=0.9663]{sourcesanspro}
+\usepackage[sfdefault,scaled=1.0155]{AlegreyaSans}
+\usepackage[scaled=1.00438,varqu,var0]{inconsolata}
+\usepackage{eulervm}
+\usepackage[bb=boondox]{mathalfa} % or bb=ams
+\usepackage[T1]{fontenc}
+
+\usepackage{microtype}
+\frenchspacing
+
+\setlength\mathindent{0pt}
+\def\arraystretch{1.1}
+
+
+%% ===== COMMANDS =====
+\newcommand\N{\mathbb{N}}
+\newcommand\x\times
+\newcommand\G\Gamma
+\newcommand\D\Delta
+
+\newcommand{\setfor}[2]{\{{#1} \mathrel{|} {#2}\}}
+
+\newcommand\kw[1]{\ensuremath{\textbf{#1}}}
+\newcommand\n\mathrm
+\newcommand\tpname[1]{\text{#1}}
+\newcommand\tset{\tpname{Set}~}
+\newcommand\zero{\ensuremath{\mathbf{0}}}
+
+\newcommand\naive{na\"ive}
+\newcommand\Naive{Na\"ive}
+
+\let\oldcup\cup\renewcommand\cup{\mathrel{\oldcup}}
+
+\newcommand\hi[1]{{\color{Rhodamine}#1}}
+
+
+\title{Semi\naive\ Evaluation for a Higher-Order Language}
+\author{Michael Arntzenius}
+\institute{University of Birmingham}
+\date{POPL 2020}
+\begin{document}
+  \LARGE
+
+  \begin{frame}
+    \[\begin{array}{l}
+      \n{edge}, \n{path} : \tset (\N \x \N)
+      \\
+      \alt<1>{
+        \hi{\n{path}} = \n{edge} \cup
+        \setfor{(x,z)}{(x,y) \in \n{edge}, (y,z) \in \hi{\n{path}}}
+      }{
+        \n{path} = \kw{fix} \; \n{step}
+      }
+      \\\pause
+      \n{step} \; \hi{s} = \n{edge} \cup
+      \setfor{(x,z)}{(x,y) \in \n{edge}, (y,z) \in \hi{s}}
+    \end{array}\]
+  \end{frame}
+\end{document}
+
+
