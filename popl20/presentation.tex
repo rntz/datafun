@@ -1,12 +1,14 @@
 %% TODO: aspect ratio
-\documentclass[fleqn,aspectratio=169,dvipsnames]{beamer}
+\documentclass[aspectratio=169,dvipsnames]{beamer}
 
 \usepackage{amssymb,amsmath,amsthm,latexsym}
 \usepackage{url,hyperref}
+\usepackage{nccmath}            % fleqn environment
 \usepackage{mathpartir}         % \mathpar, \infer
 \usepackage{booktabs}           % \midrule
 \usepackage{colonequals}
 \usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
+\usepackage{accents}            % \underaccent
 
 %% font fiddling
 \usefonttheme{professionalfonts}
@@ -24,7 +26,6 @@
 \usepackage[tracking,letterspace=20]{microtype}
 \frenchspacing
 
-\setlength\mathindent{12pt}
 \def\arraystretch{1.1}
 
 
@@ -36,7 +37,7 @@
 \newcommand\G\Gamma
 \newcommand\D\Delta
 \newcommand\fn{\ensuremath{\lambda}}
-\newcommand\isa{\mathrel{\ratio}}
+\newcommand\isa{\mathrel{\,\ratio\,}}
 
 \newcommand{\setfor}[2]{\{{#1} \mathrel{|} {#2}\}}
 
@@ -45,6 +46,9 @@
 \newcommand\tpname\mathrm
 \newcommand\tset{\tpname{Set}~}
 \newcommand\zero{\ensuremath{\mathbf{0}}}
+
+\newcommand\fix{\n{fix}}
+\newcommand\semifix{\n{semifix}}
 
 \newcommand\naive{na\"ive}
 \newcommand\Naive{Na\"ive}
@@ -64,7 +68,8 @@
   \LARGE
 
   \begin{frame}
-    \[\begin{array}{l}
+    \begin{fleqn}
+      \[\begin{array}{l}
       \n{edge}, \n{path} \isa \tset (\N \x \N)
       \\
       \alt<1>{
@@ -80,9 +85,41 @@
       }{\n{path} = \n{step} \; \n{path}}
       \\\pause
       \n{path}_{\hi{i+1}} = \n{step} \, \n{path}_{\hi i}
-    \end{array}\]
+      \end{array}\]
+    \end{fleqn}
 
-    wait until $\n{path}_i = \n{path}_{i+1}$
+    \vspace{1ex}
+    \hspace{4pt}\Large(and wait until $\n{path}_i = \n{path}_{i+1}$)
+  \end{frame}
+
+
+  \begin{frame}
+    \strong{Bottom-up fixed points} of \strong{monotone maps}:
+    \vspace{1ex}
+
+    \begin{itemize}\setlength\itemsep{1ex}
+    \item Graph algorithms (eg.~shortest paths)
+    \item Parsing (regexes, CFGs)
+    \item Static analysis (abstract interpretation)
+    \item \emph{Datalog!} {\normalsize\sffamily(if it's a map on finite sets)}
+    \end{itemize}
+  \end{frame}
+
+  \begin{frame}
+    Datalog is a \emph{first-order} logic language.
+    \vspace{3ex}
+
+    \pause
+    \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]}
+    is a simply-typed \fn-calculus with:\vspace{1ex}
+    \begin{itemize}\setlength\itemsep{1ex}
+    \item a finite set datatype \& set comprehensions
+    \item bottom-up monotone fixed points
+    \item a type system that tracks monotonicity
+    %% \item where types are posets, \\
+    %%   and monotonicity is tracked in the type system
+    \end{itemize}
+    \vspace{1em}
   \end{frame}
 
 
@@ -112,39 +149,92 @@
     \end{mathpar}
   \end{frame}
 
-
-  \begin{frame}
-    \strong{Bottom-up fixed points} of \strong{monotone maps}:
-    \vspace{1ex}
+  \begin{frame}{}{}\centering\setlength\baselineskip{2em}
 
-    \begin{itemize}\setlength\itemsep{1ex}
-    \item Graph algorithms (eg.~shortest paths)
-    \item Static analysis (abstract interpretation)
-    \item Parsing (regexes, CFGs)
-    \item \emph{Datalog!} {\normalsize\sffamily(if it's a map on finite sets)}
-    \end{itemize}
+    {\scshape semi\naive\ evaluation}
+
+    {means}
+
+    {\bf computing the changes between iterations}
+
+    {by}
+
+    {\bf incrementalizing the step function}
   \end{frame}
 
-  \begin{frame}
-    \begin{center}
-      \scshape\huge semi\naive\ evaluation!
-    \end{center}
+
+  \begin{frame}{}{}
+    \begin{fleqn}[1em]
+    {\bfseries\boldmath Incremental \fn-calculus} \textsuperscript{\sffamily\scshape[pldi 2014]}
 
-    \pause
-    Datalog is a \emph{first-order} logic language.
-    \vspace{1em}
+    \begin{align*}
+      \makebox[1.2cm][r]{$\alt<2->{\n{step}}{f}$} &\isa \alt<2->{\tset A \to \tset A}{A \to B}\\
+      \alt<2->{\n{step}}{f}' &\isa
+      \alt<2->{
+        \underaccent{\parbox[t][1.4cm]{1.5cm}{\uncover<3->{\centering\vspace{4pt}\small\sffamily paths of length $< i$}}
+        }{\tset A}
+        \to \only<3->{\underaccent{\parbox{2cm}{\centering\vspace{4pt}\small\sffamily paths of length $i$}%
+        }}{\hi{\alt<3->{\tset A}{\D(\tset A)}}}
+        \to \only<3->{\underaccent{\parbox{2cm}{\centering\vspace{4pt}\small\sffamily paths of length $i+1$}%
+        }}{\hi{\alt<3->{\tset A}{\D(\tset A)}}}
+      }{
+        \underaccent{\parbox{1.3cm}{\centering\vspace{4pt}\small\textsf{input}}}{A}
+        \to \underaccent{\parbox{1.3cm}{\centering\small\sffamily\vspace{4pt} change to input}}{\D A}
+        \to \underaccent{\parbox[t][1.4cm]{1.3cm}{\centering\small\sffamily\vspace{4pt} resulting change in output}}{\D B}
+      }
+    \end{align*}
 
-    \pause
-    \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]}
-    is a simply-typed \fn-calculus with:
-    \begin{itemize}
-    \item a finite set datatype \& set comprehensions
-    \item bottom-up monotone fixed points
-    \item a type system that tracks monotonicity
-    %% \item where types are posets, \\
-    %%   and monotonicity is tracked in the type system
+    \pause\pause\pause
+    \begin{align*}
+      \n{path}_0 &= \emptyset
+      & \n{path}_{i+1} &= \n{path}_i \cup \n{dpath}_{i}\\
+      \n{dpath}_0 &= \n{step} \;\emptyset
+      & \n{dpath}_{i+1} &= \n{step}' \;\n{path}_i \;\n{dpath}_i
+    \end{align*}
+
+    \vspace{1ex} Let $\semifix\;(\n{step}, \n{step}') = \n{path}_i$ st.
+    $\n{path}_i = \n{path}_{i+1}$.
+    \end{fleqn}
+    %% \begin{align*}
+    %%   f &\isa A \to B\\
+    %%   f' &\isa \underaccent{\parbox{1.3cm}{\centering\vspace{4pt}\small\textsf{input}}}{A}
+    %%     \to \underaccent{\parbox{1.3cm}{\centering\small\sffamily\vspace{4pt} change to input}}{\hi{\D A}}
+    %%     \to \underaccent{\parbox{1.3cm}{\centering\small\sffamily\vspace{4pt} resulting change in output}}{\hi{\D B}}
+    %% \end{align*}
+  \end{frame}
+
+  %% \begin{frame}
+  %%   \begin{fleqn}
+  %%   \begin{align*}
+  %%     \n{step} &\isa \tset A \to \tset A\\
+  %%     \n{step}' &\isa
+  %%     \underaccent{\parbox{1.3cm}{\centering\vspace{4pt}\small\sffamily previous paths}}{\tset A}
+  %%     \to \underaccent{wub
+  %%     }{\hi{\alt<2->{\tset A}{\D(\tset A)}}}
+  %%     \to \hi{\alt<2->{\tset A}{\D(\tset A)}}
+  %%   \end{align*}
+  %%   \end{fleqn}
+  %% \end{frame}
+
+
+  \begin{frame}\Large
+    %\begin{center}\scshape the core idea\end{center}
+
+    On any expression $e$, we define two
+    mutually recursive static transformations:\vspace{1ex}
+    \begin{itemize}\setlength\itemsep{1ex}
+    \item \hi{$\phi e$} computes $e$ faster by replacing $\fix$ by $\semifix$.
+
+    \item \hi{$\delta e$} incrementalizes $\phi e$ just enough to find the
+      derivatives $\semifix$ needs.
     \end{itemize}
-    \vspace{1em}
+    \vspace{1ex}
+
+    We:\vspace{1ex}
+    \begin{itemize}\setlength\itemsep{1ex}
+    \item Prove these correct using a logical relation.
+    \item Implement them \& test their asymptotic performance.
+    \end{itemize}
   \end{frame}
 \end{document}
 
