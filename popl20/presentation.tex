@@ -9,42 +9,82 @@
 \usepackage{colonequals}
 \usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
 \usepackage{accents}            % \underaccent
-
-%% font fiddling
-\usefonttheme{professionalfonts}
-\renewcommand{\familydefault}{\rmdefault}
-%\usepackage[scaled=0.9543]{XCharter}
-\usepackage[semibold,scaled=0.9663]{sourceserifpro}
-\usepackage[semibold,scaled=0.9663]{sourcesanspro}
-%\usepackage[osf,scaled=1.0155]{AlegreyaSans}
-\usepackage[scaled=1.00438,varqu,var0]{inconsolata}
-\usepackage{eulervm}
-\usepackage[bb=boondox]{mathalfa} % or bb=ams
-\usepackage[T1]{fontenc}
+\usepackage{pdfpages}           % \includepdf
+\usepackage{mathtools}          % \dblcolon
 
 %% TODO: more tracking for charter.
-\usepackage[tracking,letterspace=20]{microtype}
+\usepackage{iftex}
+\ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=30,}{microtype}\else\fi
+\usepackage{microtype}
 \frenchspacing
 
-\def\arraystretch{1.1}
+
+%% Format fiddling.
+\linespread{1.0608}
+\def\arraystretch{1.141}
+
+\let\olditemize\itemize
+\renewcommand\itemize{\olditemize\setlength\itemsep{1ex}}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{background canvas}{bg=} % necessary for \includepdf
+
+\setbeamertemplate{footline}[page number]
+\setbeamerfont{footline}{size=\scriptsize,family=\sffamily,shape=\scshape,}
+%\setbeamertemplate{footline}{\hfil\insertpagenumber\vspace{2ex}}
+%% \setbeamerfont{headline}{size=\scriptsize}
+%% \setbeamertemplate{headline}{\vspace{2ex}\hfill\insertpagenumber\hspace*{2ex}}
+
+%\title{Semi\naive\ Evaluation for a Higher-Order Language}
+%\author{Michael Arntzenius \& Neel Krishnaswami}
+%\institute{University of Birmingham}
+%\date{POPL 2020}
+\date{}
+
+
+%% font fiddling
+\usepackage[LY1,OT1,T1]{fontenc}
+\ifPDFTeX\else\usepackage[no-math]{fontspec}\fi
+\usefonttheme{professionalfonts}
+\renewcommand{\familydefault}{\rmdefault}
+
+%\usepackage[scaled=0.9543]{XCharter}
+\usepackage[semibold,scaled=0.9663]{sourceserifpro}
+\usepackage[osf,semibold,scaled=0.9663]{sourcesanspro}
+%\usepackage[osf,scaled=1.0155]{Alegreya}
+%\usepackage[sfdefault,osf,scaled=1.0155]{AlegreyaSans}
+\usepackage[scaled=1.00438,varqu,var0]{inconsolata}
+
+%\usepackage{fontchoice}
+
+\usepackage[euler-digits]{eulervm}
+\usepackage[bb=boondox]{mathalfa} % or bb=ams
 
 
 %% ===== COMMANDS =====
-\newcommand\strong\textbf
+\providecommand\strong[1]{{\bfseries#1}}
+\newcommand\textsfit[1]{\textsf{\itshape#1}}
 
 \newcommand\N{\mathbb{N}}
 \newcommand\x\times
-\newcommand\G\Gamma
+\providecommand\G{}\renewcommand\G\Gamma
 \newcommand\D\Delta
 \newcommand\fn{\ensuremath{\lambda}}
-\newcommand\isa{\mathrel{\,\ratio\,}}
+\newcommand\isa{\mathrel{\,\text{:}\,}}
+\newcommand\fnof[1]{\fn{#1}.\;}
+\newcommand\fa[1]{(\forall {#1})\ }
+\newcommand\iso{{\texorpdfstring{\ensuremath{\square}}{box}}}
+\newcommand\ebox[1]{[{#1}]}
+\newcommand\pbox[1]{[{#1}]}
 
 \newcommand{\setfor}[2]{\{{#1} \mathrel{|} {#2}\}}
 
-\newcommand\kw[1]{\ensuremath{\textbf{#1}}}
-\newcommand\n\mathit
-\newcommand\tpname\mathrm
+\newcommand\kw\textbf\newcommand\n\textit\newcommand\tpname\text
+%\newcommand\kw[1]{\textsfit{#1}}\newcommand\n\textsfit\newcommand\tpname\textsf
+\renewcommand\c\textsf
 \newcommand\tset{\tpname{Set}~}
+\newcommand\tunit{\ensuremath{1}}
+\newcommand\tnode{\tpname{Node}}
 \newcommand\zero{\ensuremath{\mathbf{0}}}
 
 \newcommand\fix{\n{fix}}
@@ -60,95 +100,216 @@
 %\newcommand\hilitetime{\color{Orange}}\newcommand\hiti[1]{{\hilitetime#1}}
 
 
-\title{Semi\naive\ Evaluation for a Higher-Order Language}
-\author{Michael Arntzenius}
-\institute{University of Birmingham}
-\date{POPL 2020}
 \begin{document}
-  \LARGE
+  \Large
+
+
+  %\includepdf[fitpaper]{title.pdf}
+  \includepdf[fitpaper]{uncropped.pdf}
 
   \begin{frame}
-    \begin{fleqn}
-      \[\begin{array}{l}
-      \n{edge}, \n{path} \isa \tset (\N \x \N)
-      \\
-      \alt<1>{
-        \hi{\n{path}} = \n{edge} \cup
-        \setfor{(x,z)}{(x,y) \in \n{edge}, (y,z) \in \hi{\n{path}}}
-      }{
-        \n{step} \; {\only<2>{\hilite}s} = \n{edge} \cup
-        \setfor{(x,z)}{(x,y) \in \n{edge}, (y,z) \in {\only<2>{\hilite}s}}
-      }
-      \\\pause
-      \alt<3->{
-        \n{path}_{\hi 0} = \emptyset
-      }{\n{path} = \n{step} \; \n{path}}
-      \\\pause
-      \n{path}_{\hi{i+1}} = \n{step} \, \n{path}_{\hi i}
-      \end{array}\]
-    \end{fleqn}
-
+    \textsc{pop quiz}\\ How can you compute each of the following?
     \vspace{1ex}
-    \hspace{4pt}\Large(and wait until $\n{path}_i = \n{path}_{i+1}$)
+    \begin{itemize}
+    \item Graph reachability
+    \item Regular expression matching
+    \item Abstract interpretation
+    \end{itemize}
+
+    \pause\vspace{1ex}
+
+    \textsc{answer}\\ \itshape Iterate a monotone map to its fixed point.
+
+    \vspace{\baselineskip}
+
+%% They're all expressible as, and computable by, iterating a
+%%     monotone map until it reaches a fixed point.
   \end{frame}
 
 
   \begin{frame}
-    \strong{Bottom-up fixed points} of \strong{monotone maps}:
-    \vspace{1ex}
+    \begin{fleqn}[1em]
+      \[\begin{array}{l}
+      \n{reach} \isa \tset (\tnode \x \tnode) \to \tnode \to \tset \tnode\\
+      \n{reach} \;\n{edge} \;\n{start} =
+      \fix\; (\fnof R \{\n{start}\}
+      \cup \setfor{y}{x \in R, (x,y) \in \n{edge}})
+      \end{array}\]
 
-    \begin{itemize}\setlength\itemsep{1ex}
-    \item Graph algorithms (eg.~shortest paths)
-    \item Parsing (regexes, CFGs)
-    \item Static analysis (abstract interpretation)
-    \item \emph{Datalog!} {\normalsize\sffamily(if it's a map on finite sets)}
-    \end{itemize}
+    \pause\vspace{2ex} Or, in Datalog:
+    \begin{minipage}[t][.43\paperheight]{\paperwidth}
+      \[\begin{array}{l}
+      \n{reach}(\c{start}).\\
+      \n{reach}(Y) \gets \n{reach}(X) \wedge \n{edge}(X,Y).\\[1ex]\pause
+      \n{reach2}(\c{start}).\\
+      \n{reach2}(Y) \gets \n{reach2}(X) \wedge \n{edge2}(X,Y).\\[1ex]\pause
+      \n{reach3}(\c{start}).\\
+      \n{reach3}(Y) \gets \n{reach3}(X) \wedge \n{isnt-this-tedious}(X,Y).
+      \end{array}\]
+    \end{minipage}
+    \end{fleqn}
   \end{frame}
 
+
   \begin{frame}
-    Datalog is a \emph{first-order} logic language.
-    \vspace{3ex}
+    %% Datalog is a \emph{first-order} logic language.
+    %% \vspace{\baselineskip}
 
-    \pause
+    %% \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]}
+    %% is a simply-typed \fn-calculus with:\vspace{1ex}
+    %% \begin{itemize}
+    %% \item a finite set datatype \& set comprehensions
+    %% \item bottom-up monotone fixed points
+    %% \item a type system that tracks monotonicity
+    %% \end{itemize}
+
     \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]}
     is a simply-typed \fn-calculus with:\vspace{1ex}
-    \begin{itemize}\setlength\itemsep{1ex}
-    \item a finite set datatype \& set comprehensions
-    \item bottom-up monotone fixed points
-    \item a type system that tracks monotonicity
-    %% \item where types are posets, \\
-    %%   and monotonicity is tracked in the type system
+    \begin{itemize}
+    \item a finite set datatype \& set comprehensions,
+    \item bottom-up monotone fixed points,
+      \pause
+    \item where \emph{types are posets} and \emph{all functions are monotone},
+      \pause
+    \item and non-monotonicity is handled via a comonad type $\iso A$.
     \end{itemize}
-    \vspace{1em}
+
+    %% \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]} is a
+    %% simply-typed \fn-calculus where \emph{types are posets} and \emph{all functions are
+    %% monotone},
+    %% %
+    %% extended with\vspace{1ex}
+    %% \begin{itemize}
+    %% \item a finite set datatype \& set comprehensions;
+    %% \item a bottom-up monotone fixed point operator;
+    %% \item and a \emph{discreteness} comonad, $\iso$.
+    %% \end{itemize}
+
+  \end{frame}
+
+  \begin{frame}
+    The type $\iso A$ is defined:
+    \begin{align*}
+      x \in \iso A &\iff x \in A\\
+      x \le y \isa \iso A &\iff x = y
+    \end{align*}
+
+    Thus $f : \iso A \to B$ is monotone iff:
+
+    \[ x = y \implies f(x) \le f(y) \]
+
+    i.e, \strong{always!}
+  \end{frame}
+
+
+  %% \begin{frame}
+  %%   \begin{fleqn}[1em]
+  %%     \textsc{math}
+  %%
+  %%     \[\begin{array}{l}
+  %%     \n{reach} \isa \tset (\tnode \x \tnode) \to \tnode \to \tset \tnode\\
+  %%     \n{reach} \;\n{edge} \;\n{start} =
+  %%     \kw{fix}\; (\fnof R \{\n{start}\}
+  %%     \cup \setfor{y}{x \in R, (x,y) \in \n{edge}})
+  %%     \end{array}\]
+  %%
+  %%     \vspace{\baselineskip}
+  %%     \textsc{datafun}
+  %%
+  %%     \[
+  %%     \begin{array}{l}
+  %%       \n{reach} \isa \iso(\tset(\tnode \x \tnode)) \to \iso\tnode
+  %%       \to \tset \tnode\\
+  %%       \n{reach} \;\pbox{\n{edge}} \;\pbox{\n{start}} =\\
+  %%       \qquad
+  %%       \kw{fix}\; \ebox{\fnof R \{\n{start}\}
+  %%         \cup \setfor{y}{x \in R, (x',y) \in \n{edge}, x = x'}}
+  %%     \end{array}
+  %%     \]
+  %%   \end{fleqn}
+  %% \end{frame}
+
+  \begin{frame}
+    \begin{fleqn}[2em]
+      \centering
+      \textsc{\alt<2->{datafun}{math}}
+      \vspace{1ex}
+
+      \[\begin{array}{l}
+      \n{reach} \isa
+      \uncover<2>{\iso(}\tset (\tnode \x \tnode)\uncover<2>{)}
+      \to \uncover<2>{\iso}\tnode
+      \to \tset \tnode
+      \\
+      \n{reach} \;\uncover<2>{[}\n{edge}\uncover<2>{]}
+      \;\uncover<2>{[}\n{start}\uncover<2>{]} =\\
+      \qquad
+      \kw{fix}\; \alt<2>{\kern.8pt [\kern .8pt}{(}\fnof R \{\n{start}\}
+      \cup \setfor{y}{x \in R, (x\uncover<2>{'},y) \in \n{edge}%
+        \uncover<2>{, x = x'}}%
+      \alt<2>{\kern .8pt]}{)}
+      \end{array}\]
+    \end{fleqn}
   \end{frame}
 
 
   \begin{frame}
-    \begin{mathpar}
-      \begin{array}{l}
-        \n{step} \; s = \n{edge} \cup
-        \setfor{(x,z)}{(x,y) \in \n{edge}, (y,z) \in s}
-        \\
-        \n{path}_i = \n{step}^i \;\emptyset =
-        \text{paths of length $\le i$}
-      \end{array}
-      \\\pause
-      \begin{tikzpicture}[thick,baseline=(current bounding box.center), scale=1.5]
-        \node (a) at (0, 0) {$\n{path}_0$};
-        \node (ab) at (1, 0) {$\subseteq$};
-        \node (b) at (2, 0) {$\n{path}_1$};
-        \node (bc) at (3, 0) {$\subseteq$};
-        \node (c) at (4, 0) {$\n{path}_2$};
-        \node (cd) at (5, 0) {$\subseteq$};
-        \node (d) at (6, 0) {$\cdots$};
-        \path[-Latex, bend right=50,below]
-          (a) edge node {$\n{dpath}_0$} (b)
-          (b) edge node {$\n{dpath}_1$} (c)
-          (c) edge node {$\n{dpath}_2$} (d);
-      \end{tikzpicture}
-    \end{mathpar}
+      \[\begin{array}{l}
+        \n{step} \;R = \{\n{start}\} \cup \setfor{y}{x \in R, (x,y) \in
+          \n{edge}}\\
+        R_0 = \emptyset\\
+        R_{i+1} = \n{step}\;R_i
+      \end{array}\]
+      \vspace{\baselineskip}
+
+      \color{red} TODO: pictures here explaining
+      \begin{itemize}
+      \item \naive\ evaluation
+      \item semi\naive\ evaluation as ``keeping a frontier'' ie. ``computing the changes''
+      \end{itemize}
+
+      %% \begin{align*}
+      %%   R_0 &= \emptyset & R_{i+1} &= \n{step}\;R_i
+      %% \end{align*}
   \end{frame}
 
+
+  %% \begin{frame}
+  %%   \begin{mathpar}
+  %%     \begin{array}{l}
+  %%       \n{step} \; s = \n{edge} \cup
+  %%       \setfor{(x,z)}{(x,y) \in \n{edge}, (y,z) \in s}
+  %%       \\
+  %%       \n{path}_i = \n{step}^i \;\emptyset =
+  %%       \text{paths of length $\le i$}
+  %%     \end{array}
+  %%     %% TODO: explain why no work is shared!
+  %%     %% (step path_i) appends an edge to _every_ element of path_i
+  %%   \end{mathpar}
+
+  %%   \vspace{1ex} $\n{path}_{i+1} = \n{step}\;\n{path}_i$ appends an edge to
+  %%   \emph{every} previously discovered path!
+  %%   \vspace{1ex}\pause
+
+  %%   \begin{center}
+  %%     \begin{tikzpicture}[thick,baseline=(current bounding box.center), scale=1.5]
+  %%       \node (a) at (0, 0) {$\n{path}_0$};
+  %%       \node (ab) at (1, 0) {$\subseteq$};
+  %%       \node (b) at (2, 0) {$\n{path}_1$};
+  %%       \node (bc) at (3, 0) {$\subseteq$};
+  %%       \node (c) at (4, 0) {$\n{path}_2$};
+  %%       \node (cd) at (5, 0) {$\subseteq$};
+  %%       \node (d) at (6, 0) {$\cdots$};
+  %%       \path[-Latex, bend right=50,below]
+  %%       (a) edge node {$\n{dpath}_0$} (b)
+  %%       (b) edge node {$\n{dpath}_1$} (c)
+  %%       (c) edge node {$\n{dpath}_2$} (d);
+  %%     \end{tikzpicture}
+  %%   \end{center}
+
+  %% \end{frame}
+
+
   \begin{frame}{}{}\centering\setlength\baselineskip{2em}
 
     {\scshape semi\naive\ evaluation}
@@ -159,83 +320,188 @@
 
     {by}
 
-    {\bf incrementalizing the step function}
+    {\bfseries incrementalizing the step function}
   \end{frame}
 
 
-  \begin{frame}{}{}
-    \begin{fleqn}[1em]
-    {\bfseries\boldmath Incremental \fn-calculus} \textsuperscript{\sffamily\scshape[pldi 2014]}
+  \newcommand\chgat[4]{{\ensuremath{{#2} \dblcolon_{#1} {#3} \to {#4}}}}
+  \newcommand\chg[3]{{\ensuremath{{#1} \dblcolon {#2} \to {#3}}}}
 
-    \begin{align*}
-      \makebox[1.2cm][r]{$\alt<2->{\n{step}}{f}$} &\isa \alt<2->{\tset A \to \tset A}{A \to B}\\
-      \alt<2->{\n{step}}{f}' &\isa
-      \alt<2->{
-        \underaccent{\parbox[t][1.4cm]{1.5cm}{\uncover<3->{\centering\vspace{4pt}\small\sffamily paths of length $< i$}}
-        }{\tset A}
-        \to \only<3->{\underaccent{\parbox{2cm}{\centering\vspace{4pt}\small\sffamily paths of length $i$}%
-        }}{\hi{\alt<3->{\tset A}{\D(\tset A)}}}
-        \to \only<3->{\underaccent{\parbox{2cm}{\centering\vspace{4pt}\small\sffamily paths of length $i+1$}%
-        }}{\hi{\alt<3->{\tset A}{\D(\tset A)}}}
-      }{
-        \underaccent{\parbox{1.3cm}{\centering\vspace{4pt}\small\textsf{input}}}{A}
-        \to \underaccent{\parbox{1.3cm}{\centering\small\sffamily\vspace{4pt} change to input}}{\D A}
-        \to \underaccent{\parbox[t][1.4cm]{1.3cm}{\centering\small\sffamily\vspace{4pt} resulting change in output}}{\D B}
-      }
-    \end{align*}
+  \begin{frame}{Incremental \fn-calculus
+      \textsuperscript{\sffamily[Cai et al \textsc{pldi} 2014, Giarrusso's thesis \textsc{2017},
+          Giarrusso et al \textsc{esop} 2019]}}
+    Every type $A$ has a \emph{change type} $\D A$ and a relation
+    $\chgat{A}{dx}{x}{y}$, where $x,y : A$ and $dx : \D A$.
 
-    \pause\pause\pause
-    \begin{align*}
-      \n{path}_0 &= \emptyset
-      & \n{path}_{i+1} &= \n{path}_i \cup \n{dpath}_{i}\\
-      \n{dpath}_0 &= \n{step} \;\emptyset
-      & \n{dpath}_{i+1} &= \n{step}' \;\n{path}_i \;\n{dpath}_i
-    \end{align*}
-
-    \vspace{1ex} Let $\semifix\;(\n{step}, \n{step}') = \n{path}_i$ st.
-    $\n{path}_i = \n{path}_{i+1}$.
-    \end{fleqn}
-    %% \begin{align*}
-    %%   f &\isa A \to B\\
-    %%   f' &\isa \underaccent{\parbox{1.3cm}{\centering\vspace{4pt}\small\textsf{input}}}{A}
-    %%     \to \underaccent{\parbox{1.3cm}{\centering\small\sffamily\vspace{4pt} change to input}}{\hi{\D A}}
-    %%     \to \underaccent{\parbox{1.3cm}{\centering\small\sffamily\vspace{4pt} resulting change in output}}{\hi{\D B}}
-    %% \end{align*}
+    \vspace{1ex}
+    \setlength\arraycolsep{.2em}
+    \[
+    \begin{array}{rcl@{\qquad}c}
+      \D(\tset A) &=& \tset A & \chgat{\tset A}{dx}{x}{x \cup dx}
+      \\[1.5ex]
+      \D(A \x B) &=& \D A \x \D B &
+      \infer{\chgat A{da} a {a'} \\ \chgat B{db} b {b'}
+      }{\chgat{A \x B}{(da,db)}{(a,b)}{(a',b')}}
+      \\[3.5ex]
+      \D(\iso A) &=& \tunit & \chgat{\iso A}{()}{x}{x}
+    \end{array}
+    \]
   \end{frame}
 
+  \newcommand\underexplain[4]{%
+    \underaccent{%
+      \parbox[t][#1]{#2}{\sffamily\centering\vspace{4pt}\small#3}
+    }{#4}}
+
+  \newcommand\chgatcov[4]{{\uncover<2->{{#2} \dblcolon_{#1}} {#3} \to {#4}}}
+  %\newcommand\chgatcovb[4]{{\uncover<5->{{#2} \dblcolon_{#1}} {#3} \to {#4}}}
+  \begin{frame}\LARGE
+    %\setbeamercovered{transparent}
+
+    \begin{mathpar}
+      \D(A \to B)
+      = \underexplain{}{1.5cm}{original input}{\iso A}
+      \to \underexplain{}{1.2cm}{change to input}{\D A}
+      \to \underexplain{}{1.4cm}{change in output}{\D B}
+      \\\pause
+      \chgat{B}{df}{f}{\alt<5->{\hi f}{g}} \iff \pause
+      \infer{\chgat{A}{dx}{x}{y}
+      }{\chgat{B}{\uncover<4->{df\;x\;dx}}{f\;x}{\alt<5->{\hi f}{g}\;y}}
+      %% \infer{\chgatcov{A \to B}{df}{f}{\alt<3>{\hi{f}}{g}}\\
+      %%   \chgatcov{A}{dx}{x}{y}
+      %% }{
+      %%   \chgatcov{B}{df\;x\;dx}{f\;x}{\alt<3>{\hi f}{g}\;y}
+      %% }
+    \end{mathpar}
+
+    \setbeamercovered{invisible}
+    \vspace{2ex}\centering\pause\pause
+    In this case, we call $df$ the
+    \strong{derivative} of $f$.
+
+    \vspace{\baselineskip}
+
+    %% \[
+    %% \infer{
+    %%   \fa{\chgat A {dx} x y}\, \chgat B {df\;x\;dx} {f\;x} {g\;y}
+    %% }{\chgat{A \to B}{df} f g}
+    %% \]
+  \end{frame}
+
+
+  %% %% TODO?
   %% \begin{frame}
-  %%   \begin{fleqn}
-  %%   \begin{align*}
-  %%     \n{step} &\isa \tset A \to \tset A\\
-  %%     \n{step}' &\isa
-  %%     \underaccent{\parbox{1.3cm}{\centering\vspace{4pt}\small\sffamily previous paths}}{\tset A}
-  %%     \to \underaccent{wub
-  %%     }{\hi{\alt<2->{\tset A}{\D(\tset A)}}}
-  %%     \to \hi{\alt<2->{\tset A}{\D(\tset A)}}
-  %%   \end{align*}
-  %%   \end{fleqn}
+  %%   \begin{mathpar}
+  %%     \infer{
+  %%       \chgatcov{A \to B}{df}{f}{g} \\
+  %%       \chgat{A}{dx}{x}{y}
+  %%     }{\chgatcov{B}{df\;x\;dx}{f\;x}{g\;y}}
+  %%   \end{mathpar}
   %% \end{frame}
+
+
+  \begin{frame}
+    %% TODO: this slide should give an intuition for what dR_i is. Perhaps
+    %% graphically, or at least as "the set of nodes at distance exactly i".
+    Suppose $\n{step}'$ is the derivative of $\n{step}$. Then:
+
+    \[
+    \n{step} \;(R_i \cup dR_i) = \n{step}\;R_i \cup \n{step}'\;R_i\;dR_i
+    \]
+
+    So consider the recurrences:
+    \begin{align*}
+      R_0 &= \emptyset & R_{i+1} &= R_i \cup dR_i\\
+      dR_0 &= \n{step}\;\emptyset & dR_{i+1} &= \n{step}'\;R_i\;dR_i
+    \end{align*}
+
+    \strong{Theorem:} $R_i = \n{step}^i\;\emptyset$.
+    \\[\baselineskip]
+    So let $\semifix\;(\n{step}, \n{step}') \triangleq R_i$ such that $R_i =
+    R_{i+1}$.
+    \\
+    Then $\semifix\;(\n{step},\n{step}') = \fix\;\n{step}$.
+    \vspace{\baselineskip}
+  \end{frame}
 
 
   \begin{frame}\Large
     %\begin{center}\scshape the core idea\end{center}
 
     On any expression $e$, we define two
-    mutually recursive static transformations:\vspace{1ex}
-    \begin{itemize}\setlength\itemsep{1ex}
-    \item \hi{$\phi e$} computes $e$ faster by replacing $\fix$ by $\semifix$.
-
-    \item \hi{$\delta e$} incrementalizes $\phi e$ just enough to find the
-      derivatives $\semifix$ needs.
-    \end{itemize}
+    mutually recursive static transformations:
     \vspace{1ex}
+    \begin{itemize}
+    \item \hi{$\phi e$} computes $e$ faster by replacing $\fix\;f$ by $\semifix\;(f,f')$.\\
+      To do this, it needs to find $f'$, for which it uses...
+
+    \item \hi{$\delta e$}, which computes how the expression $\phi e$ changes as
+      its free variables change
+    \end{itemize}
+    \vspace{2ex}
 
     We:\vspace{1ex}
-    \begin{itemize}\setlength\itemsep{1ex}
+    \begin{itemize}
     \item Prove these correct using a logical relation.
     \item Implement them \& test their asymptotic performance.
     \end{itemize}
   \end{frame}
+
+
+  \begin{frame}\centering\Huge\color{red}\scshape unfinished\end{frame}
+
+
+  %% \begin{frame}{}{}
+  %%   \begin{fleqn}[1em]
+  %%   {\bfseries\boldmath Incremental \fn-calculus} \textsuperscript{\sffamily\scshape[pldi 2014]}
+  
+  %%   \begin{align*}
+  %%     \makebox[1.2cm][r]{$\alt<2->{\n{step}}{f}$} &\isa \alt<2->{\tset A \to \tset A}{A \to B}\\
+  %%     \alt<2->{\n{step}}{f}' &\isa
+  %%     \alt<2->{
+  %%       \underaccent{\parbox[t][1.4cm]{1.5cm}{\uncover<3->{\centering\vspace{4pt}\small\sffamily paths of length $< i$}}
+  %%       }{\tset A}
+  %%       \to \only<3->{\underaccent{\parbox{2cm}{\centering\vspace{4pt}\small\sffamily paths of length $i$}%
+  %%       }}{\hi{\alt<3->{\tset A}{\D(\tset A)}}}
+  %%       \to \only<3->{\underaccent{\parbox{2cm}{\centering\vspace{4pt}\small\sffamily paths of length $i+1$}%
+  %%       }}{\hi{\alt<3->{\tset A}{\D(\tset A)}}}
+  %%     }{
+  %%       \underaccent{\parbox{1.3cm}{\centering\vspace{4pt}\small\textsf{input}}}{A}
+  %%       \to \underaccent{\parbox{1.3cm}{\centering\small\sffamily\vspace{4pt} change to input}}{\D A}
+  %%       \to \underaccent{\parbox[t][1.4cm]{1.3cm}{\centering\small\sffamily\vspace{4pt} resulting change in output}}{\D B}
+  %%     }
+  %%   \end{align*}
+  
+  %%   \pause\pause\pause
+  %%   \begin{align*}
+  %%     \n{path}_0 &= \emptyset
+  %%     & \n{path}_{i+1} &= \n{path}_i \cup \n{dpath}_{i}\\
+  %%     \n{dpath}_0 &= \n{step} \;\emptyset
+  %%     & \n{dpath}_{i+1} &= \n{step}' \;\n{path}_i \;\n{dpath}_i
+  %%   \end{align*}
+  
+  %%   \vspace{1ex} Let $\semifix\;(\n{step}, \n{step}') = \n{path}_i$ st.
+  %%   $\n{path}_i = \n{path}_{i+1}$.
+  %%   \end{fleqn}
+  %%   %% \begin{align*}
+  %%   %%   f &\isa A \to B\\
+  %%   %%   f' &\isa \underaccent{\parbox{1.3cm}{\centering\vspace{4pt}\small\textsf{input}}}{A}
+  %%   %%     \to \underaccent{\parbox{1.3cm}{\centering\small\sffamily\vspace{4pt} change to input}}{\hi{\D A}}
+  %%   %%     \to \underaccent{\parbox{1.3cm}{\centering\small\sffamily\vspace{4pt} resulting change in output}}{\hi{\D B}}
+  %%   %% \end{align*}
+  %% \end{frame}
+
+  %% %% \begin{frame}
+  %% %%   \begin{fleqn}
+  %% %%   \begin{align*}
+  %% %%     \n{step} &\isa \tset A \to \tset A\\
+  %% %%     \n{step}' &\isa
+  %% %%     \underaccent{\parbox{1.3cm}{\centering\vspace{4pt}\small\sffamily previous paths}}{\tset A}
+  %% %%     \to \underaccent{wub
+  %% %%     }{\hi{\alt<2->{\tset A}{\D(\tset A)}}}
+  %% %%     \to \hi{\alt<2->{\tset A}{\D(\tset A)}}
+  %% %%   \end{align*}
+  %% %%   \end{fleqn}
+  %% %% \end{frame}
+
 \end{document}
-
-
