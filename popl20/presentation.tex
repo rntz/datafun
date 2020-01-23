@@ -279,15 +279,15 @@
     {\color<-2>{Red}\setfor{y}{x \in R, (x,y) \in \n{edge}}}
     \]
 
-    \begin{align*}
+    \pause\begin{align*}
       R_0 &= \emptyset
-      & \uncover<2->{dR_0} &\uncover<2->{= }\uncover<3->{\color<-4>{RoyalBlue}\{\n{start}\}}
+      & \uncover<3->{dR_0} &\uncover<3->{= }\uncover<4->{\color<-5>{RoyalBlue}\{\n{start}\}}
       \\
-      R_{i+1} &= \makebox[4.3em][l]{$\alt<5->{\hi{R_i \cup dR_i}}{\n{step}\;R_i}$}
-      & \uncover<2->{dR_{i+1}} &\uncover<2->{= }\uncover<4->{\color<-4>{Red} \setfor{y}{x \in dR_i, (x,y) \in \n{edge}}}
+      R_{i+1} &= \makebox[4.3em][l]{$\alt<6->{\hi{R_i \cup dR_i}}{\n{step}\;R_i}$}
+      & \uncover<3->{dR_{i+1}} &\uncover<3->{= }\uncover<5->{\color<-5>{Red} \setfor{y}{x \in dR_i, (x,y) \in \n{edge}}}
     \end{align*}
 
-    \centering\alt<2->{
+    \centering\alt<3->{
       \includegraphics[height=45mm]{imgs/focus-1240.jpg}
     }{
       \includegraphics[height=45mm]{imgs/focus-0946.jpg}
@@ -414,7 +414,7 @@
       \to \underexplain{}{1.2cm}{change to input}{\D A}
       \to \underexplain{}{1.4cm}{change in output}{\D B}
       \\\pause
-      \chgat{B}{df}{f}{\alt<5->{\hi f}{g}} \iff \pause
+      \chgat{A \to B}{df}{f}{\alt<5->{\hi f}{g}} \iff \pause
       \infer{\chgat{A}{dx}{x}{y}
       }{\chgat{B}{\uncover<4->{df\;x\;dx}}{f\;x}{\alt<5->{\hi f}{g}\;y}}
       %% \infer{\chgatcov{A \to B}{df}{f}{\alt<3>{\hi{f}}{g}}\\
