@@ -271,10 +271,34 @@
   \end{frame}
 
 
-  \includepdf[fitpaper]{imgs/naive-0946.pdf}
-  \includepdf[fitpaper]{imgs/naive-1240.pdf}
-  \includepdf[fitpaper]{imgs/naive-1429.pdf}
-  \includepdf[fitpaper]{imgs/naive-1642.pdf}
+  \begin{frame}
+    \[\n{step}\;R =
+    {\color{RoyalBlue}\{\n{start}\}}
+    \cup
+    {\color{Red}\setfor{y}{x \in R, (x,y) \in \n{edge}}}
+    \]
+
+    \begin{align*}
+      R_0 &= \emptyset
+      & \uncover<2->{dR_0} &\uncover<2->{= }\uncover<3->{\color{RoyalBlue}\{\n{start}\}}
+      \\
+      R_{i+1} &= \n{step}\;R_i
+      & \uncover<2->{dR_{i+1}} &\uncover<2->{= }\uncover<4->{\color{Red} \setfor{y}{x \in dR_i, (x,y) \in \n{edge}}}
+    \end{align*}
+
+    \centering\alt<2->{
+      \includegraphics[height=45mm]{imgs/focus-1240.jpg}
+    }{
+      \includegraphics[height=45mm]{imgs/focus-0946.jpg}
+    }
+    \vspace{1ex}
+  \end{frame}
+
+  %% \includepdf[fitpaper]{imgs/naive-0946.pdf}
+  %% \includepdf[fitpaper]{imgs/naive-1240.pdf}
+  %% \includepdf[fitpaper]{imgs/naive-1429.pdf}
+  %% \includepdf[fitpaper]{imgs/naive-1642.pdf}
+
   %% \begin{frame}
   %%     \[\begin{array}{l}
   %%       \n{step} \;R = \{\n{start}\} \cup \setfor{y}{x \in R, (x,y) \in
