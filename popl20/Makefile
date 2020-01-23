@@ -34,8 +34,8 @@ watch\:%: %
 #	$(LATEXRUN) --latex-args='-shell-escape' $<
 	$(LATEXRUN) $<
 
-# presentation.pdf: presentation.tex FORCE
-# 	$(LATEXRUN) --latex-cmd=xelatex $<
+presentation.pdf: presentation.tex FORCE
+	$(LATEXRUN) --latex-cmd=xelatex $<
 
 # pdfbook (it's in texlive-extra-utils on Ubuntu) combines pages to make a
 # zine-style booklet. For example, if foo.pdf is formatted for A5 paper,

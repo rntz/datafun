@@ -8,7 +8,6 @@
 \usepackage{booktabs}           % \midrule
 \usepackage{colonequals}
 \usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
-\usetikzlibrary{calc,tikzmark,arrows,positioning}  % for tikzmark
 \usepackage{accents}            % \underaccent
 \usepackage{pdfpages}           % \includepdf
 \usepackage{mathtools}          % \dblcolon
@@ -50,16 +49,19 @@
 \renewcommand{\familydefault}{\rmdefault}
 
 %\usepackage[scaled=0.9543]{XCharter}
+%\usepackage[llscale=1.0699300699300702,scale=1.0699300699300702,p,mono=false]{libertine}
 \usepackage[semibold,scaled=0.9663]{sourceserifpro}
 \usepackage[osf,semibold,scaled=0.9663]{sourcesanspro}
 %\usepackage[osf,scaled=1.0155]{Alegreya}
 %\usepackage[sfdefault,osf,scaled=1.0155]{AlegreyaSans}
 \usepackage[scaled=1.00438,varqu,var0]{inconsolata}
 
-%\usepackage{fontchoice}
+\usepackage{fontchoice}
 
 \usepackage[euler-digits]{eulervm}
 \usepackage[bb=boondox]{mathalfa} % or bb=ams
+
+\usepackage[euler-digits]{eulervm}
 
 
 %% ===== COMMANDS =====
@@ -150,17 +152,20 @@
   \end{frame}
 
 
-  \newcommand\lineto[3]{%
-    \tikz[remember picture]{\draw[red,overlay,arrows=->] (#2) to[#3] (pic cs:#1)}}
-
   %% TODO: connect this up somehow, either arrows or hilighting in different
   %% colors.
+  \newcommand\setcolor[1]{{\alt<3->{\color{ForestGreen}}{}#1}}
+  \newcommand\compcolor[1]{{\alt<3->{\color{RoyalBlue}}{}#1}}
+  \newcommand\fixptcolor[1]{{\alt<4->{\color{Red}}{}#1}}
+
   \begin{frame}
     \[\begin{array}{l}
-    \n{reach} \isa \tpname{S\tikzmark{settype}et}~(\tnode \x \tnode) \to \tnode \to \tset \tnode\\
+    \n{reach} \isa \setcolor{\tset (\tnode \x \tnode)}
+    \to \tnode
+    \to \setcolor{\tset \tnode}\\
     \n{reach} \;\n{edge} \;\n{start} =
-    \kw{fix}\; (\fnof R \{\n{start}\}
-    \cup \tikzmark{comprehensions}\setfor{y}{x \in R, (x,y) \in \n{edge}})
+    \fixptcolor{\kw{fix}}\; (\fnof R \compcolor{\{\n{start}\}
+    \cup \setfor{y}{x \in R, (x,y) \in \n{edge}}})
     \end{array}\]
     \pause
 
@@ -179,9 +184,9 @@
     is:}
     \begin{itemize}
     \item a simply-typed \fn-calculus with \pause
-    \item a finite set\lineto{settype}{0,0.3}{out=90,in=270} datatype
-      \& set comprehensions, \pause
-    \item a monotone fixed point operator, \pause
+    \item a \setcolor{finite set datatype}
+      \& \compcolor{set comprehensions}, \pause
+    \item a \fixptcolor{monotone fixed point operator}, \pause
     \item where \emph{types are posets} and \emph{all functions are monotone},
       \pause
     \item and non-monotonicity is handled via a comonad type $\iso A$.
@@ -211,7 +216,7 @@
 
     \[ x = y \implies f(x) \le f(y) \]
 
-    i.e, \strong{always!}
+    i.e., \strong{always!}
   \end{frame}
 
 
@@ -346,8 +351,10 @@
   \newcommand\chg[3]{{\ensuremath{{#1} \dblcolon {#2} \chgto {#3}}}}
 
   \begin{frame}{Incremental \fn-calculus
-      \textsuperscript{\sffamily[Cai et al \textsc{pldi} 2014, Giarrusso's thesis 2017,
-          Giarrusso et al \textsc{esop} 2019]}}
+      \textsuperscript{\sffamily[%
+          Cai et al \textsc{pldi 2014},
+          Giarrusso's thesis \textsc{2017},
+          Giarrusso et al \textsc{esop 2019}]}}
     Every type $A$ has a \emph{change type} $\D A$ and a relation
     $\chgat{A}{dx}{x}{y}$, where $x,y : A$ and $dx : \D A$.
 
@@ -438,15 +445,15 @@
       \end{align*}
       \vspace{0pt}\pause\pause
 
-      \setbeamercovered{transparent}
+      %\setbeamercovered{transparent}
       \textsc{implementation}
       \begin{align*}
-        R_0 &= \emptyset \pause
-        & dR_0 &= \n{step}\;\emptyset \pause
+        R_0 &= \emptyset %\pause
+        & dR_0 &= \uncover<4->{\n{step}\;\emptyset} %\pause
         %\dblcolon \emptyset \chgto \n{step}\;\emptyset
         \\
-        R_{i+1} &= R_i \cup dR_i \pause
-        & dR_{i+1} &= \n{step}' \;R_i \;dR_i
+        R_{i+1} &= \uncover<5->{R_i \cup dR_i} %\pause
+        & dR_{i+1} &= \uncover<6->{\n{step}' \;R_i \;dR_i}
         %\dblcolon \n{step}\;R_i \chgto \n{step}\;(R_i \cup dR_i)
       \end{align*}
       \vspace{\baselineskip}
@@ -478,7 +485,7 @@
   %% \end{frame}
 
 
-  \begin{frame}\large
+  \begin{frame}
     %\begin{center}\scshape the core idea\end{center}
 
     %% On any expression $e$, we define two
@@ -522,7 +529,7 @@
     \item Types can let us control what things we need to incrementalize!\\
     \end{itemize}
   \end{frame}
-  \begin{frame}\centering\Huge\color{red}\scshape unfinished\end{frame}
+  \begin{frame}\centering\Huge\color{gray!10}\itshape un{\upshape\scshape\color{black}fin}ished\end{frame}
 
 
   %% \begin{frame}{}{}
