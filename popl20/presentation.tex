@@ -273,17 +273,17 @@
 
   \begin{frame}
     \[\n{step}\;R =
-    {\color{RoyalBlue}\{\n{start}\}}
+    {\color<-2>{RoyalBlue}\{\n{start}\}}
     \cup
-    {\color{Red}\setfor{y}{x \in R, (x,y) \in \n{edge}}}
+    {\color<-2>{Red}\setfor{y}{x \in R, (x,y) \in \n{edge}}}
     \]
 
     \begin{align*}
       R_0 &= \emptyset
-      & \uncover<2->{dR_0} &\uncover<2->{= }\uncover<3->{\color{RoyalBlue}\{\n{start}\}}
+      & \uncover<2->{dR_0} &\uncover<2->{= }\uncover<3->{\color<-4>{RoyalBlue}\{\n{start}\}}
       \\
-      R_{i+1} &= \makebox[4.3em][l]{$\alt<5->{R_i \cup dR_i}{\n{step}\;R_i}$}
-      & \uncover<2->{dR_{i+1}} &\uncover<2->{= }\uncover<4->{\color{Red} \setfor{y}{x \in dR_i, (x,y) \in \n{edge}}}
+      R_{i+1} &= \makebox[4.3em][l]{$\alt<5->{\hi{R_i \cup dR_i}}{\n{step}\;R_i}$}
+      & \uncover<2->{dR_{i+1}} &\uncover<2->{= }\uncover<4->{\color<-4>{Red} \setfor{y}{x \in dR_i, (x,y) \in \n{edge}}}
     \end{align*}
 
     \centering\alt<2->{
@@ -521,9 +521,9 @@
       derivatives.\\[1ex]
 
       {\normalsize\sffamily\textsc{complication:} \it We propagate
-        derivative information by hijacking the $\iso$ comonad.\par}
+        derivatives by hijacking the $\iso$ comonad.\par}
 
-    \item \hi{$\delta e$}, which computes how $\phi e$ changes as
+    \item \hi{$\delta e$} computes how $\phi e$ changes as
       its free variables change.
       \\[1ex]
       {\normalsize\sffamily\textsc{complication:}
