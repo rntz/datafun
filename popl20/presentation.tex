@@ -8,13 +8,14 @@
 \usepackage{booktabs}           % \midrule
 \usepackage{colonequals}
 \usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
+\usetikzlibrary{calc,tikzmark,arrows,positioning}  % for tikzmark
 \usepackage{accents}            % \underaccent
 \usepackage{pdfpages}           % \includepdf
 \usepackage{mathtools}          % \dblcolon
 
 %% TODO: more tracking for charter.
 \usepackage{iftex}
-\ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=30,}{microtype}\else\fi
+\ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=40,}{microtype}\else\fi
 \usepackage{microtype}
 \frenchspacing
 
@@ -129,29 +130,40 @@
 
   \begin{frame}
     \begin{fleqn}[1em]
-      \[\begin{array}{l}
-      \n{reach} \isa \tset (\tnode \x \tnode) \to \tnode \to \tset \tnode\\
-      \n{reach} \;\n{edge} \;\n{start} =
-      \fix\; (\fnof R \{\n{start}\}
-      \cup \setfor{y}{x \in R, (x,y) \in \n{edge}})
-      \end{array}\]
-
-    \pause\vspace{2ex} Or, in Datalog:
-    \begin{minipage}[t][.43\paperheight]{\paperwidth}
+    \begin{minipage}[t][.38\paperheight]{\paperwidth}
       \[\begin{array}{l}
       \n{reach}(\c{start}).\\
       \n{reach}(Y) \gets \n{reach}(X) \wedge \n{edge}(X,Y).\\[1ex]\pause
       \n{reach2}(\c{start}).\\
-      \n{reach2}(Y) \gets \n{reach2}(X) \wedge \n{edge2}(X,Y).\\[1ex]\pause
+      \n{reach2}(Y) \gets \n{reach2}(X) \wedge \n{edge2}(X,Y).\\[1ex]
       \n{reach3}(\c{start}).\\
       \n{reach3}(Y) \gets \n{reach3}(X) \wedge \n{isnt-this-tedious}(X,Y).
+      \\[1ex]
+      \n{reach4}(\c{start}).\\
+      \n{reach4}(Y) \gets \n{reach4}(X) \wedge \n{yes-it-is-rather}(X,Y).
+      \\[1ex]
+      \n{reach5}(\c{start}).\\
+      \n{reach5}(Y) \gets \n{reach5}(X) \wedge \n{yes-it-is-rather}(X,Y).\\
       \end{array}\]
     \end{minipage}
     \end{fleqn}
   \end{frame}
 
 
+  \newcommand\lineto[3]{%
+    \tikz[remember picture]{\draw[red,overlay,arrows=->] (#2) to[#3] (pic cs:#1)}}
+
+  %% TODO: connect this up somehow, either arrows or hilighting in different
+  %% colors.
   \begin{frame}
+    \[\begin{array}{l}
+    \n{reach} \isa \tpname{S\tikzmark{settype}et}~(\tnode \x \tnode) \to \tnode \to \tset \tnode\\
+    \n{reach} \;\n{edge} \;\n{start} =
+    \kw{fix}\; (\fnof R \{\n{start}\}
+    \cup \tikzmark{comprehensions}\setfor{y}{x \in R, (x,y) \in \n{edge}})
+    \end{array}\]
+    \pause
+
     %% Datalog is a \emph{first-order} logic language.
     %% \vspace{\baselineskip}
 
@@ -163,12 +175,13 @@
     %% \item a type system that tracks monotonicity
     %% \end{itemize}
 
-    \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]}
-    is a simply-typed \fn-calculus with:\vspace{1ex}
+    \uncover<5->{\strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]}
+    is:}
     \begin{itemize}
-    \item a finite set datatype \& set comprehensions,
-    \item bottom-up monotone fixed points,
-      \pause
+    \item a simply-typed \fn-calculus with \pause
+    \item a finite set\lineto{settype}{0,0.3}{out=90,in=270} datatype
+      \& set comprehensions, \pause
+    \item a monotone fixed point operator, \pause
     \item where \emph{types are posets} and \emph{all functions are monotone},
       \pause
     \item and non-monotonicity is handled via a comonad type $\iso A$.
@@ -253,25 +266,29 @@
   \end{frame}
 
 
-  \begin{frame}
-      \[\begin{array}{l}
-        \n{step} \;R = \{\n{start}\} \cup \setfor{y}{x \in R, (x,y) \in
-          \n{edge}}\\
-        R_0 = \emptyset\\
-        R_{i+1} = \n{step}\;R_i
-      \end{array}\]
-      \vspace{\baselineskip}
+  \includepdf[fitpaper]{imgs/naive-0946.pdf}
+  \includepdf[fitpaper]{imgs/naive-1240.pdf}
+  \includepdf[fitpaper]{imgs/naive-1429.pdf}
+  \includepdf[fitpaper]{imgs/naive-1642.pdf}
+  %% \begin{frame}
+  %%     \[\begin{array}{l}
+  %%       \n{step} \;R = \{\n{start}\} \cup \setfor{y}{x \in R, (x,y) \in
+  %%         \n{edge}}\\
+  %%       R_0 = \emptyset\\
+  %%       R_{i+1} = \n{step}\;R_i
+  %%     \end{array}\]
+  %%     \vspace{\baselineskip}
 
-      \color{red} TODO: pictures here explaining
-      \begin{itemize}
-      \item \naive\ evaluation
-      \item semi\naive\ evaluation as ``keeping a frontier'' ie. ``computing the changes''
-      \end{itemize}
+  %%     \color{red} TODO: pictures here explaining
+  %%     \begin{itemize}
+  %%     \item \naive\ evaluation
+  %%     \item semi\naive\ evaluation as ``keeping a frontier'' ie. ``computing the changes''
+  %%     \end{itemize}
 
-      %% \begin{align*}
-      %%   R_0 &= \emptyset & R_{i+1} &= \n{step}\;R_i
-      %% \end{align*}
-  \end{frame}
+  %%     %% \begin{align*}
+  %%     %%   R_0 &= \emptyset & R_{i+1} &= \n{step}\;R_i
+  %%     %% \end{align*}
+  %% \end{frame}
 
 
   %% \begin{frame}
@@ -310,25 +327,26 @@
   %% \end{frame}
 
 
-  \begin{frame}{}{}\centering\setlength\baselineskip{2em}
+  \begin{frame}{}{}\huge\centering%\setlength\baselineskip{2em}
 
     {\scshape semi\naive\ evaluation}
-
+    \\[2ex]
     {means}
-
+    \\[2ex]
     {\bf computing the changes between iterations}
 
-    {by}
+    %% {by}
 
-    {\bfseries incrementalizing the step function}
+    %% {\bfseries incrementalizing the step function}
   \end{frame}
 
 
-  \newcommand\chgat[4]{{\ensuremath{{#2} \dblcolon_{#1} {#3} \to {#4}}}}
-  \newcommand\chg[3]{{\ensuremath{{#1} \dblcolon {#2} \to {#3}}}}
+  \newcommand\chgto\rightsquigarrow
+  \newcommand\chgat[4]{{\ensuremath{{#2} \dblcolon_{#1} {#3} \chgto {#4}}}}
+  \newcommand\chg[3]{{\ensuremath{{#1} \dblcolon {#2} \chgto {#3}}}}
 
   \begin{frame}{Incremental \fn-calculus
-      \textsuperscript{\sffamily[Cai et al \textsc{pldi} 2014, Giarrusso's thesis \textsc{2017},
+      \textsuperscript{\sffamily[Cai et al \textsc{pldi} 2014, Giarrusso's thesis 2017,
           Giarrusso et al \textsc{esop} 2019]}}
     Every type $A$ has a \emph{change type} $\D A$ and a relation
     $\chgat{A}{dx}{x}{y}$, where $x,y : A$ and $dx : \D A$.
@@ -338,11 +356,11 @@
     \[
     \begin{array}{rcl@{\qquad}c}
       \D(\tset A) &=& \tset A & \chgat{\tset A}{dx}{x}{x \cup dx}
-      \\[1.5ex]
+      \\[1.5ex]\pause
       \D(A \x B) &=& \D A \x \D B &
       \infer{\chgat A{da} a {a'} \\ \chgat B{db} b {b'}
       }{\chgat{A \x B}{(da,db)}{(a,b)}{(a',b')}}
-      \\[3.5ex]
+      \\[3.5ex]\pause
       \D(\iso A) &=& \tunit & \chgat{\iso A}{()}{x}{x}
     \end{array}
     \]
@@ -353,7 +371,7 @@
       \parbox[t][#1]{#2}{\sffamily\centering\vspace{4pt}\small#3}
     }{#4}}
 
-  \newcommand\chgatcov[4]{{\uncover<2->{{#2} \dblcolon_{#1}} {#3} \to {#4}}}
+  \newcommand\chgatcov[4]{{\uncover<2->{{#2} \dblcolon_{#1}} {#3} \chgto {#4}}}
   %\newcommand\chgatcovb[4]{{\uncover<5->{{#2} \dblcolon_{#1}} {#3} \to {#4}}}
   \begin{frame}\LARGE
     %\setbeamercovered{transparent}
@@ -401,53 +419,109 @@
 
 
   \begin{frame}
-    %% TODO: this slide should give an intuition for what dR_i is. Perhaps
-    %% graphically, or at least as "the set of nodes at distance exactly i".
-    Suppose $\n{step}'$ is the derivative of $\n{step}$. Then:
+      \begin{align*}
+        \n{step} &\isa \tset A \to \tset A
+        %% & \uncover<2->{R_i} &\uncover<2->{= \n{step}^i \;\emptyset}
+        \\
+        \n{step}' &\isa
+        \underexplain{}{4cm}{\vspace{-3.43pt}known world}{\iso(\tset A)}
+        \to \underexplain{}{1.8cm}{frontier}{\tset A}
+        \to \underexplain{}{2cm}{new frontier}{\tset A}
+        %% & \uncover<3->{dR_i} &\uncover<3->{\dblcolon R_i \chgto \n{step}\;R_i}
+      \end{align*}
+      \vspace{0pt}
 
-    \[
-    \n{step} \;(R_i \cup dR_i) = \n{step}\;R_i \cup \n{step}'\;R_i\;dR_i
-    \]
+      \textsc{strategy}
+      \begin{align*}
+        \underexplain{}{2cm}{known world}{{R_i}} &= \n{step}^i\;\emptyset
+        &\uncover<2->{\chg{\underexplain{}{1.5cm}{frontier}{{dR_i}}}{R_i}{\n{step}\;R_i}}
+      \end{align*}
+      \vspace{0pt}\pause\pause
 
-    So consider the recurrences:
-    \begin{align*}
-      R_0 &= \emptyset & R_{i+1} &= R_i \cup dR_i\\
-      dR_0 &= \n{step}\;\emptyset & dR_{i+1} &= \n{step}'\;R_i\;dR_i
-    \end{align*}
-
-    \strong{Theorem:} $R_i = \n{step}^i\;\emptyset$.
-    \\[\baselineskip]
-    So let $\semifix\;(\n{step}, \n{step}') \triangleq R_i$ such that $R_i =
-    R_{i+1}$.
-    \\
-    Then $\semifix\;(\n{step},\n{step}') = \fix\;\n{step}$.
-    \vspace{\baselineskip}
+      \setbeamercovered{transparent}
+      \textsc{implementation}
+      \begin{align*}
+        R_0 &= \emptyset \pause
+        & dR_0 &= \n{step}\;\emptyset \pause
+        %\dblcolon \emptyset \chgto \n{step}\;\emptyset
+        \\
+        R_{i+1} &= R_i \cup dR_i \pause
+        & dR_{i+1} &= \n{step}' \;R_i \;dR_i
+        %\dblcolon \n{step}\;R_i \chgto \n{step}\;(R_i \cup dR_i)
+      \end{align*}
+      \vspace{\baselineskip}
   \end{frame}
 
 
-  \begin{frame}\Large
+  %% \begin{frame}
+  %%   %% TODO: this slide should give an intuition for what dR_i is. Perhaps
+  %%   %% graphically, or at least as "the set of nodes at distance exactly i".
+  %%   Suppose $\n{step}'$ is the derivative of $\n{step}$. Then:
+
+  %%   \[
+  %%   \n{step} \;(R_i \cup dR_i) = \n{step}\;R_i \cup \n{step}'\;R_i\;dR_i
+  %%   \]
+
+  %%   So consider the recurrences:
+  %%   \begin{align*}
+  %%     R_0 &= \emptyset & R_{i+1} &= R_i \cup dR_i\\
+  %%     dR_0 &= \n{step}\;\emptyset & dR_{i+1} &= \n{step}'\;R_i\;dR_i
+  %%   \end{align*}
+
+  %%   \strong{Theorem:} $R_i = \n{step}^i\;\emptyset$.
+  %%   \\[\baselineskip]
+  %%   So let $\semifix\;(\n{step}, \n{step}') \triangleq R_i$ such that $R_i =
+  %%   R_{i+1}$.
+  %%   \\
+  %%   Then $\semifix\;(\n{step},\n{step}') = \fix\;\n{step}$.
+  %%   \vspace{\baselineskip}
+  %% \end{frame}
+
+
+  \begin{frame}\large
     %\begin{center}\scshape the core idea\end{center}
 
-    On any expression $e$, we define two
-    mutually recursive static transformations:
+    %% On any expression $e$, we define two
+    %% mutually recursive static transformations:
+    Two static transformations on expressions $e$:
     \vspace{1ex}
     \begin{itemize}
-    \item \hi{$\phi e$} computes $e$ faster by replacing $\fix\;f$ by $\semifix\;(f,f')$.\\
-      To do this, it needs to find $f'$, for which it uses...
+    \item \hi{$\phi e$} annotates functions used by a fixed point with their
+      derivatives.\\[1ex]
 
-    \item \hi{$\delta e$}, which computes how the expression $\phi e$ changes as
-      its free variables change
+      {\normalsize\sffamily\textsc{complication:}\: We propagate
+        derivative information by hijacking the $\iso$ comonad.\par}
+
+    \item \hi{$\delta e$}, which computes how $\phi e$ changes as
+      its free variables change.
+      \\[1ex]
+      {\normalsize\sffamily\textsc{complication:}\:
+        Computing how set comprehensions change.
+        \par}
     \end{itemize}
-    \vspace{2ex}
+    \vspace{\baselineskip}
 
-    We:\vspace{1ex}
+    In the paper we:\vspace{1ex}
     \begin{itemize}
     \item Prove these correct using a logical relation.
     \item Implement them \& test their asymptotic performance.
     \end{itemize}
+    \vspace{\baselineskip}
   \end{frame}
 
 
+  \begin{frame}
+    \centering\Huge\color{red} a slide with graphs
+  \end{frame}
+
+  \begin{frame}
+    \strong{Some ideas to take away:}
+    \begin{itemize}
+    \item Bottom-up monotone fixed points are cool.
+    \item To compute them efficiently, incrementalize the step function.
+    \item Types can let us control what things we need to incrementalize!\\
+    \end{itemize}
+  \end{frame}
   \begin{frame}\centering\Huge\color{red}\scshape unfinished\end{frame}
 
 
