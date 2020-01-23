@@ -11,6 +11,7 @@
 \usepackage{accents}            % \underaccent
 \usepackage{pdfpages}           % \includepdf
 \usepackage{mathtools}          % \dblcolon
+\usepackage{pgfplots}\pgfplotsset{compat=1.5} % the perf graph
 
 %% TODO: more tracking for charter.
 \usepackage{iftex}
@@ -530,32 +531,66 @@
         \it Computing how set comprehensions change.
         \par}
     \end{itemize}
-    \vspace{1ex}
+  \end{frame}
 
-    In the paper we:\vspace{1ex}
+  \begin{frame}{}{}
+    \centering
     \begin{itemize}
-    \item Prove these correct using a logical relation.
-    \item Implement them \& test their asymptotic performance.
+    \item Regex combinators!\\
+      {\normalsize as a use-case for higher-order functions.\par}
+
+    \item Logical relations!\\
+      {\normalsize to prove $\phi/\delta$ correct.\par}
+
+    \item Further optimizations!\\
+      {\normalsize Must propagate $\emptyset$ to get asymptotic speedups.\par}
+
+    \item Benchmarks!\\[1ex]
+      {\scriptsize
+        \begin{tikzpicture}[baseline=(current bounding box.center)]
+          \begin{axis}[
+              xlabel={Number of nodes},
+              ylabel={Seconds},
+              height=90pt, width=145.62306pt,
+              legend entries={\naive,semi\naive},
+              legend cell align=left,
+              legend pos = north west,
+              legend style={
+                draw=none,
+                nodes={inner sep=2pt,}
+              },
+              xtick = {120, 320}, ytick = {0, 120},
+            ]
+            \addplot [color=red,thick] table [x=n,y=naive] {trans.dat};
+            %\addplot [color=black,mark=triangle*] table [x=n,y=seminaive_raw] {trans.dat};
+            \addplot [color=blue,thick] table  [x=n,y=seminaive] {trans.dat};
+          \end{axis}
+        \end{tikzpicture}
+        \par}
     \end{itemize}
-    \vspace{\baselineskip}
+
   \end{frame}
 
 
   \begin{frame}
-    \centering\Huge\color{red} a slide with graphs
-  \end{frame}
-
-  \begin{frame}
-    \strong{Some ideas to take away:}
+    \strong{Ideas to take away:}\vspace{1ex}
     \begin{itemize}
     \item Bottom-up monotone fixed points are cool.
     \item To compute them efficiently, incrementalize the step function.
-    \item Types can let us control what things we need to incrementalize!\\
+    \item Types let us control what things we need to incrementalize!
     \end{itemize}
+    \vspace{\baselineskip}
   \end{frame}
-  \begin{frame}\centering\Huge\color{gray!10}\itshape un{\upshape\scshape\color{black}fin}ished\end{frame}
 
-
+  \appendix
+  \begin{frame}
+    \centering\Huge
+    \color{gray!10}\itshape%
+    un{\upshape\scshape\color{black}fin}%
+    \color{gray!10}ished
+  \end{frame}
+
+
   %% \begin{frame}{}{}
   %%   \begin{fleqn}[1em]
   %%   {\bfseries\boldmath Incremental \fn-calculus} \textsuperscript{\sffamily\scshape[pldi 2014]}
