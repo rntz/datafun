@@ -168,7 +168,6 @@
     \fixptcolor{\kw{fix}}\; (\fnof R \compcolor{\{\n{start}\}
     \cup \setfor{y}{x \in R, (x,y) \in \n{edge}}})
     \end{array}\]
-    \pause
 
     %% Datalog is a \emph{first-order} logic language.
     %% \vspace{\baselineskip}
@@ -181,9 +180,10 @@
     %% \item a type system that tracks monotonicity
     %% \end{itemize}
 
+    \pause
     \uncover<5->{\strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]}
     is:}
-    \begin{itemize}
+    \begin{itemize}\setlength\itemsep{.5ex}
     \item a simply-typed \fn-calculus with \pause
     \item a \setcolor{finite set datatype}
       \& \compcolor{set comprehensions}, \pause
@@ -192,6 +192,7 @@
       \pause
     \item and non-monotonicity is handled via a comonad type $\iso A$.
     \end{itemize}
+    \vspace{\baselineskip}
 
     %% \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]} is a
     %% simply-typed \fn-calculus where \emph{types are posets} and \emph{all functions are
@@ -461,14 +462,13 @@
         \to \underexplain{}{2cm}{new frontier}{\tset A}
         %% & \uncover<3->{dR_i} &\uncover<3->{\dblcolon R_i \chgto \n{step}\;R_i}
       \end{align*}
-      \vspace{0pt}
 
       \textsc{strategy}
       \begin{align*}
         \underexplain{}{2cm}{known world}{{R_i}} &= \n{step}^i\;\emptyset
         &\uncover<2->{\chg{\underexplain{}{1.5cm}{frontier}{{dR_i}}}{R_i}{\n{step}\;R_i}}
       \end{align*}
-      \vspace{0pt}\pause\pause
+      \pause\pause
 
       %\setbeamercovered{transparent}
       \textsc{implementation}
