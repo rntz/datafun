@@ -94,7 +94,7 @@ The syntax of core Datafun can be interpreted in $\Poset$, the category of
 partially ordered sets and monotone maps. That is, an object of $\Poset$ is a
 pair $(A, \leq_A)$ consisting of a set $A$ and a reflexive, transitive,
 antisymmetric relation $\leq_A \subseteq A \times A$, while a morphism $f : A
-\to B$ is a function such that $x \leq_A y \implies f(a) \leq_B f(b)$.
+\to B$ is a function such that $x \leq_A y \implies f(x) \leq_B f(y)$.
 
 \subsubsection{Bicartesian Structure}
 
@@ -103,7 +103,7 @@ The bicartesian closed structure of $\Poset$ is largely the same as in $\Set$.
 The product and sum sets are constructed the same way, and ordered pointwise:
 
 \begin{align*}
-  (a,b) \le_{A \x B} (a',b') &\iff a \le_A a \wedge b \le_B b'\\
+  (a,b) \le_{A \x B} (a',b') &\iff a \le_A a' \wedge b \le_B b'\\
   \inj i x \le_{A_1 + A_2} \inj j y &\iff i = j \wedge x \le_{A_i} y
 \end{align*}
 
