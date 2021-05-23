@@ -1,0 +1,9 @@
+# Title
+
+From Datalog to Datafun: bottom-up logic ⨝ higher-order functions, incrementally
+
+# Abstract
+
+From shortest paths to static analysis to parsing to logical deduction, many problems are concisely expressed as iterating a monotone map until it reaches a fixed point. Surprisingly, with a little cleverness this can even be an efficient implementation strategy, and it even lends itself naturally to asynchronous, parallel computation. This is the insight behind the classic deductive query language Datalog. Unfortunately, Datalog really only supports one data structure – finite sets – and doesn't support procedural abstraction – factoring out repeated code into a function.
+
+Datafun is an attempt to combine the computational power of bottom-up fixed points with the flexibility of higher-order functions. In this talk, I'll explain how Datafun uses a carefully-designed type system to track monotonicity and permit fixed-point computation at various semilattice types. We'll see how, to compute these fixed points efficiently, you must incrementalize the inner loop – in other words, finding fixed points fast requires incremental view maintenance – and how we can apply this in Datafun by taking a non-traditional “derivative” of our program.
