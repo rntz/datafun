@@ -845,19 +845,42 @@
 
 
   \begin{frame}
-    \begin{align*}
-      \delta(\eforvar{x}{s}{e})
-      &=
-      \phantom{{}\join{}}
-      (\eforvar x {ds} e)
-      \\
-      &\phantom{{}={}} {}\join
-      (\eforvar x {s \cup ds}
-      %\elet{dx = \zero \;x}
-      \delta(e))
-    \end{align*}
+    \begin{fleqn}[1em]
+      \begin{align*}
+        \delta(\eforvar{x}{s}{e})
+        &=
+        \phantom{{}\join{}}
+        (\eforvar x {ds} e)
+        \\
+        &\phantom{{}={}} {}\join
+        (\eforvar x {s \cup ds}
+        \delta(e))
+      \end{align*}
 
-    \todo{have a concrete example?}
+      \pause
+      For example:
+
+      \[
+      \begin{array}{rl}
+        & \delta(\eforvar{x}{S} \n{member} \;x \;T)
+        \\[.5ex]\pause
+        =& %\phantom{\join{}}
+        (\eforvar x {dS} \n{member} \;x \;T)\\
+        & \join (\eforvar x {S \cup dS}
+        {\standout\delta(\n{member} \;x \;T)})
+        \\[.5ex]\pause
+        =& %\phantom{\join{}}
+        (\eforvar x {dS} \n{member} \;x \;T)\\
+        &
+        \join (\eforvar x {S \cup dS}
+        {\standout \n{member} \;x \;dT})
+        \\[.5ex]\pause
+        \approx& (dS \mathrel{\cap?} T) \vee ((S \cup dS) \mathrel{\cap?} dT)
+      \end{array}
+      \]
+    \end{fleqn}
+
+    %% \todo{have a concrete example?}
   \end{frame}
 
 
