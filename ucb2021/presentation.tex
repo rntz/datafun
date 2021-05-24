@@ -1,11 +1,12 @@
 %% TODO: aspect ratio
-\documentclass[aspectratio=169,dvipsnames,draft]{beamer}
+\documentclass[aspectratio=169,dvipsnames]{beamer}
 
 %% \usepackage{amssymb,amsmath,amsthm,latexsym}
 %% \usepackage{url,hyperref}
+\usepackage{multirow}           % \multirow, \multicolumn
 \usepackage{nccmath}           % fleqn environment
 \usepackage{mathpartir}        % \mathpar, \infer
-%% \usepackage{booktabs}           % \midrule
+\usepackage{booktabs}           % \midrule
 %% \usepackage{colonequals}
 \usepackage{tikz,tikz-cd}      % Hasse & commutative diagrams.
 \usepackage{accents}           % \underaccent
@@ -42,7 +43,7 @@
 
 \setbeamertemplate{footline}[frame number]
 \setbeamerfont{footline}{size=\small,}
-%\setbeamerfont{frametitle}{family=\displayfamily}
+\setbeamerfont{frametitle}{shape=\scshape}
 \setbeamercolor{frametitle}{fg=standout}
 %\setbeamertemplate{footline}{\hfil\insertpagenumber\vspace{2ex}}
 %% \setbeamerfont{headline}{size=\scriptsize}
@@ -93,14 +94,15 @@
 %\newcommand\kw[1]{\textsfit{#1}}\newcommand\n\textsfit\newcommand\tpname\textsf
 \renewcommand\c\textsf
 
-\newcommand\tset{\tpname{set}~}
-\newcommand\tmap[2]{\tpname{map}(#1,#2)}
+\newcommand\tset{\tpname{set}\,}
+\newcommand\tmap[2]{\tpname{map}\,(#1,#2)}
 \newcommand\tbool{\tpname{bool}}
 \newcommand\tunit{\ensuremath{1}}
 \newcommand\tnode{\tpname{node}}
 %\newcommand\mto{\overset{\textsf{\Large +}}{\to}}
 \newcommand\mto{\overset{\boldsymbol+}{\to}}
-\newcommand\mvar[1]{{\color{purple} #1}}
+\newcommand\mvar[1]{{\mvarcolor #1}}
+\newcommand\mvarcolor{\color{purple}}
 
 %\newcommand\efor[1]{\kw{for}\hspace{.3em} {#1} \mathrel{\kw{join}} }
 \newcommand\eforloop[1]{\kw{for}\hspace{.33em} {#1} \hspace{.33em}}
@@ -110,19 +112,25 @@
 \newcommand\eforvar[2]{\efor{{#1} \in {#2}}}
 \newcommand\ewhen[1]{\kw{when}~({#1})~}
 \newcommand\efixis[1]{\kw{fix}~{#1}~\kw{is}\;}
+%% \renewcommand\efixis[1]{\kw{solve}~{#1} ~\kw{is}~}
+%% \renewcommand\efixis[1]{\kw{solve}~{#1} =}
 \newcommand\eset[1]{\{{#1}\}}
 \newcommand\esetfor[2]{\eset{{#1} ~|~ {#2}}}
 \newcommand\elet[1]{\kw{let}~{#1}~\kw{in}~}
-\newcommand\eletfix[2]{\kw{let rec}~ \mvar{#1} = {#2}}
+\newcommand\eletfix[2]{\kw{let rec}~ {#1} = {#2}}
 \newcommand\eletfixin[2]{\eletfix{#1}{#2} ~\kw{in}~}
 \newcommand\zero{\ensuremath{\boldsymbol 0}}
 \newcommand\join{\sqcup}
+\newcommand\efalse{\text{false}}
+\newcommand\etrue{\text{true}}
 
 \newcommand\naive{na\"ive}
 \newcommand\Naive{Na\"ive}
 
 \let\oldcup\cup
+\let\oldsqcup\sqcup
 \renewcommand\cup{\mathrel{\oldcup}}
+\renewcommand\sqcup{\mathrel{\oldsqcup}}
 
 \newcommand\hilite{\color{Rhodamine}}
 \newcommand\hi[1]{{\hilite#1}}
@@ -134,14 +142,9 @@
 \newcommand\XXX{\todo{XXX}}
 
 
-\title{\emph{from} Datalog
-  %\\\hspace{1.205em}%
-  \color{black}\emph{to} Datafun}
-\subtitle{bottom-up logic \,$\color{Gray}\bowtie$\, \color{black}higher-order functions%\\ \color{Gray}incrementally%
-}
+\title{\emph{from} Datalog \color{black}\emph{to} Datafun}
+\subtitle{bottom-up logic \,$\color{Gray}\bowtie$\, \color{black}higher-order functions}
 \author{\itshape michael \color{black}\upshape\scshape arntzenius}
-%\author{\itshape michael \color{black} arntzenius}
-%\author{\scshape michael \color{black} arntzenius}
 \date{}
 \setbeamercolor{title}{fg=standout}
 \setbeamercolor{author}{fg=standout}
@@ -150,20 +153,28 @@
 \setbeamerfont{author}{size=\Large}
 \setbeamerfont{date}{size=\large}
 
+\newcommand\interlude{\Huge\standout\displayfamily}
+
 
 \begin{document}
   \Large
 
-  {\displayfamily
-    \standout
-    \maketitle
-  }
+  %\frame{\displayfamily\standout\titlepage}
+
+  \begin{frame}[plain,noframenumbering]
+    \displayfamily\standout\centering
+    \vfill
+    {\Huge\inserttitle}\par\vspace{1ex}
+    {\insertsubtitle\par}\vspace{4ex}
+    {\insertauthor}
+    \vfill
+  \end{frame}
 
   \begin{frame}
-    \Huge\displayfamily
+    \interlude
     \begin{center}
       \standout
-      {\scshape i}\\
+      {\upshape\scshape i}\\
       three examples
       %\itshape 3 examples
       %\bfseries\addfontfeatures{LetterSpace=4,RawFeature={+case},} 3 EXAMPLES
@@ -238,13 +249,13 @@
 
 
   \begin{frame}
-    \Huge\displayfamily\standout
+    \interlude
     \begin{center}
       %% compute \textbf{fixed points}\\
       %% of \textbf{monotone maps}\\
       %% on \textbf{semilattices}
       \standout
-      {\scshape ii}\\
+      {\upshape\scshape ii}\\
       fixed points,\\
       monotone maps,\\
       %\!\emph{\&}\,
@@ -298,7 +309,7 @@
         \text{unchecked} \rightarrow \text{checked}
 
         \infty \rightarrow ... \rightarrow \text{2} \rightarrow \text{1} \rightarrow \text{0}
-        
+
         \bot \rightarrow \text{constant} \rightarrow \top
       \end{mathpar}}\par
 
@@ -344,24 +355,24 @@
   \end{frame}
 
 
+  \newcommand\conj{,\,}
   \begin{frame}{}
     \centering \strong{Datalog!}
-    \todo{comma instead of wedge?}
     \begin{fleqn}[1em]
-    \begin{minipage}[t][.29\paperheight]{\paperwidth}
+    \begin{minipage}[t][.35\paperheight]{\paperwidth}
       \[\begin{array}{l}
       \n{reach}(\c{start}).\\
-      \n{reach}(Y) \gets \n{reach}(X) \wedge \n{edge}(X,Y).\\[1ex]\pause
+      \n{reach}(Y) \gets \n{reach}(X)\conj \n{edge}(X,Y).\\[1ex]\pause
       \n{reach2}(\c{start}).\\
-      \n{reach2}(Y) \gets \n{reach2}(X) \wedge \n{edge2}(X,Y).\\[1ex]
+      \n{reach2}(Y) \gets \n{reach2}(X)\conj \n{edge2}(X,Y).\\[1ex]
       \n{reach3}(\c{start}).\\
-      \n{reach3}(Y) \gets \n{reach3}(X) \wedge \n{isnt-this-tedious}(X,Y).
+      \n{reach3}(Y) \gets \n{reach3}(X)\conj \n{isnt-this-tedious}(X,Y).
       \\[1ex]
       \n{reach4}(\c{start}).\\
-      \n{reach4}(Y) \gets \n{reach4}(X) \wedge \n{yes-it-is-rather}(X,Y).
+      \n{reach4}(Y) \gets \n{reach4}(X)\conj \n{yes-it-is-rather}(X,Y).
       \\[1ex]
       \n{reach5}(\c{start}).\\
-      \n{reach5}(Y) \gets \n{reach5}(X) \wedge \n{yes-it-is-rather}(X,Y).\\
+      \n{reach5}(Y) \gets \n{reach5}(X)\conj \n{yes-it-is-rather}(X,Y).\\
       \end{array}\]
     \end{minipage}
     \end{fleqn}
@@ -390,21 +401,24 @@
 
 
   %% \begin{frame}
-  %%   \Huge
+  %%   \interlude
   %%   \begin{center}
-  %%     {\scshape iii}\\
+  %%     {\upshape\scshape iii}\\
   %%     designing datafun
   %%   \end{center}
   %% \end{frame}
 
 
+  \newcommand\nodecolor[1]{{\alt<3->{\color{ForestGreen}}{}#1}}
+  \newcommand\edgecolor[1]{{\alt<3->{\color{RoyalBlue}}{}#1}}
+
   \begin{frame}
     \centering
     \begin{fleqn}
       \textsc{datalog}
       \[\begin{array}{l}
       \n{reach}(\c{start}).\\
-      \n{reach}(Y) \gets \n{reach}(X) \wedge \n{edge}(X,Y).
+      \n{reach}(Y) \gets \n{reach}(X)\conj \n{edge}(X,Y).
       \end{array}
       \]
       \vspace{0pt}\pause
@@ -412,17 +426,24 @@
       \textsc{datafun}
       \[
       \begin{array}{l}
-      \n{reachable} \isa \tnode \to \tset (\tnode \x \tnode) \to \tset \tnode\\
-      \n{reachable} \;\n{start} \;\n{edge} = \pause
-      %% \n{reach} \;(\n{start}\!: \tnode) \;(\n{edge}\!: \tset(\tnode \x \tnode))
-      %% \!: \tset(\tnode)
-      %% = \pause
-%      \kw{fix}~ S ~\kw{is}~ \pause \{\n{start}\} \cup \setfor{y}{x \in S, (x,y) \in \n{edge}}
+      \n{reachable} \isa
+      \nodecolor{\tnode} \to
+      \edgecolor{\tset{(\tnode \x \tnode)}}
+      \to {\alt<4->{\mvarcolor}{}\tset \tnode}\\
+      %% \n{reachable} \;\n{start} \;\n{edge} = \pause
+      \n{reachable}
+      \alt<3>{\hphantom{{}\isa{}}}{\;} \nodecolor{\n{start}}
+      \alt<3>{\hphantom{i\to{}}}{\;} \edgecolor{\n{edge}}
+      = \pause\pause
       \\\quad
-      \eletfix{R}{\uncover<4->{\eset{\n{start}} \cup
-        \esetfor{y}{x \in \mvar R, (x,y) \in \n{edge}}}}
-      \\\quad
-      \kw{in}~\mvar R
+      %% \eletfix{\mvar R}{\uncover<4->{\eset{\n{start}} \cup
+      %%   \esetfor{y}{x \in \mvar R, (x,y) \in \n{edge}}}}
+      %% \\\quad
+      %% \kw{in}~\mvar R
+      \efixis{\mvar R}
+      \\\qquad
+      \uncover<5->{\eset{\n{start}} \cup
+        \esetfor{y}{x \in \mvar R, (x,y) \in \n{edge}}}
       \end{array}\]
     \end{fleqn}
   \end{frame}
@@ -430,29 +451,38 @@
 
   %% TODO: connect this up somehow, either arrows or hilighting in different
   %% colors.
-  \newcommand\setcolor[1]{{\alt<3->{\color{ForestGreen}}{}#1}}
-  \newcommand\compcolor[1]{{\alt<3->{\color{RoyalBlue}}{}#1}}
-  \newcommand\fixptcolor[1]{{\alt<4->{\color{Red}}{}#1}}
+  %\newcommand\setcolor[1]{{\alt<3->{\color{ForestGreen}}{}#1}}
+  \newcommand\setcolor[1]{{\alt<3->{\color{RoyalBlue}}{}#1}}
+  \newcommand\fixptcolor[1]{{\alt<4->{\mvarcolor}{}#1}}
+  \newcommand\functioncolor[1]{{\alt<2->{\color{ForestGreen}}{}#1}}
 
   \begin{frame}
-    \[\begin{array}{l}
-    \n{reach} \isa
-    \tnode
-    \to \setcolor{\tset (\tnode \x \tnode)}
-    \to \setcolor{\tset \tnode}\\
-    \n{reach} \;\n{start} \;\n{edge} = 
-    \fixptcolor{\kw{fix}~ {\color{black}R}~\kw{is}~}
-    \compcolor{\{\n{start}\}
-    \cup \setfor{y}{x \in R, (x,y) \in \n{edge}}}
+    \[
+      \begin{array}{l}
+      \functioncolor{\n{reachable} \;\n{start} \;\n{edge} = }
+      \\\quad
+      \fixptcolor{\efixis{R}}
+      \\\qquad
+      \setcolor{\eset{\n{start}} \cup
+        \esetfor{y}{x \in \fixptcolor{R}, (x,y) \in \n{edge}}}
     \end{array}\]
+      %% \[\begin{array}{l}
+    %% \n{reach} \isa
+    %% \tnode
+    %% \to \setcolor{\tset (\tnode \x \tnode)}
+    %% \to \setcolor{\tset \tnode}\\
+    %% \n{reach} \;\n{start} \;\n{edge} =
+    %% \fixptcolor{\kw{fix}~ {\color{black}R}~\kw{is}~}
+    %% \compcolor{\{\n{start}\}
+    %% \cup \setfor{y}{x \in R, (x,y) \in \n{edge}}}
+    %% \end{array}\]
 
     \pause
     \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016, popl 2020]}
     is:
     \begin{itemize}\setlength\itemsep{.5ex}
-    \item a pure functional language \pause
-    \item with \setcolor{sets}
-      \& \compcolor{set/lattice comprehensions} \pause
+    \item a \functioncolor{pure functional language} \pause
+    \item with \setcolor{sets \& set/lattice comprehensions} \pause
     \item and \fixptcolor{monotone fixed points} \pause
     \item where \emph{the type system tracks monotonicity}.
     \end{itemize}
@@ -472,63 +502,98 @@
   \end{frame}
 
 
-  \begin{frame}
-    \todo{slide on types as posets, join operators?}
-  \end{frame}
+  %% \begin{frame}
+  %%   \todo{slide on types as posets, join operators?}
+  %% \end{frame}
 
-
-  \begin{frame}{\scshape monotonicity}
+  %% \renewcommand\tset[1]{{\{#1\}}}
+  %% \renewcommand\tmap[2]{{\{#1 \mapsto #2\}}}
+  \newcommand\discolor{\color{RoyalBlue}}
+
+  \begin{frame}{monotonicity types}
+    %% \large
     \centering
 
-    {\small\todo{line up types with arguments}
-    \todo{emphasize plus over arrow}
-    \todo{colors for disc/mono?}}
+    \setlength\tabcolsep{1em}
+    \begin{tabular}{clc}
+      \textbf{Type} & \textbf{Meaning} & \textbf{Ordering} %& \textbf{Join}
+      \\\midrule
+%        $\N$ & naturals & $0 < 1 < 2 < \hdots$ \\
+      $\tbool$ & booleans & $\efalse < \etrue$ %& logical or
+      \\
+      $\tset A$      & finite subsets of $A$ & ${\subseteq}$ %& union
+      \\
+%        $\tmap A B$ & finite maps from $A$ to $B$ & \multicolumn{1}{c}{pointwise}\\
+      $A \to B$   & functions & \multicolumn{1}{c}{pointwise}\\
+      $A \mto B$  & \textbf{monotone} functions & \multicolumn{1}{c}{pointwise}
+    \end{tabular}
 
-    \[
-    \begin{array}{l}
-      \n{member} \isa \N \to \tset{\N} \mto \tbool\\
-      \n{member} \;x \;S =
-      \exists (y \in S)\; {x = y}
-    \end{array}
-    \]
-    \vspace{.4em}\pause
+    \pause
+    \[\begin{array}{l}
+      \n{member} \isa {\discolor \N \to{}} {\mvarcolor\tset{\N} \mto{}} \tbool\\
+      \n{member}\; {\discolor x}\; \mvar{S} = \exists({\discolor y} \in \mvar{S})\;
+      {\discolor x} = {\discolor y}
+    \end{array}\]
 
+    \pause
     \pbox{.8\textwidth}{
-    functions are
-    \emph{discrete} $A \to B$\\
-    \phantom{functions are }\hspace{-2.005em}or \emph{monotone} $A \mto B$
+    variables are \emph{discrete} {\discolor $x,y,z$}\\
+    \phantom{variables are }\hspace{-2.28em}or \emph{monotone}
+    {\mvarcolor $X,Y,Z$}
     }
-    \vspace{1.5em}\pause
-    
-    \pbox{.8\textwidth}{
-    variables are \emph{discrete} $x,y,z$\\
-    \phantom{variables are }\hspace{-2.005em}or \emph{monotone} $X,Y,Z$
-    }
-
-    %% \pbox{.8\textwidth}{
-    %% functions are
-    %% \emph{discrete} $A \to B$\\
-    %% \phantom{functions are }\hspace{-2.005em}or \emph{monotone} $A \mto B$
-    %% \\[1em]
-    %% variables are \emph{discrete} $x,y,z$\\
-    %% \phantom{variables are }\hspace{-2.005em}or \emph{monotone} $X,Y,Z$
-    %% }
-
-    %% \setlength\tabcolsep{0pt}
-    %% \begin{tabular}{r@{\qquad}rl}
-    %%   functions are \emph{discrete} $A \to B$
-    %%   & variables are \emph{discrete} &\ $x,y,z$\\
-    %%   or \emph{monotone} $A \mto B$
-    %%   & or \emph{monotone} &\ $X,Y,Z$
-    %% \end{tabular}
 
   \end{frame}
 
 
-  \begin{frame}{\scshape lattice comprehensions}
-    %% \todo{relational composition}\\
-    %% \todo{exists as example of lattice aggregation?}
+  %% \begin{frame}{monotonicity}
+  %%   \centering
 
+  %%   {\small\todo{line up types with arguments}
+  %%   \todo{emphasize plus over arrow}
+  %%   \todo{colors for disc/mono?}}
+
+  %%   \[
+  %%   \begin{array}{l}
+  %%     \n{member} \isa \N \to \tset{\N} \mto \tbool\\
+  %%     \n{member} \;x \;S =
+  %%     \exists (y \in S)\; {x = y}
+  %%   \end{array}
+  %%   \]
+  %%   \vspace{.4em}\pause
+
+  %%   \pbox{.8\textwidth}{
+  %%   functions are
+  %%   \emph{discrete} $A \to B$\\
+  %%   \phantom{functions are }\hspace{-2.005em}or \emph{monotone} $A \mto B$
+  %%   }
+  %%   \vspace{1.5em}\pause
+
+  %%   \pbox{.8\textwidth}{
+  %%   variables are \emph{discrete} $x,y,z$\\
+  %%   \phantom{variables are }\hspace{-2.005em}or \emph{monotone} $X,Y,Z$
+  %%   }
+
+  %%   %% \pbox{.8\textwidth}{
+  %%   %% functions are
+  %%   %% \emph{discrete} $A \to B$\\
+  %%   %% \phantom{functions are }\hspace{-2.005em}or \emph{monotone} $A \mto B$
+  %%   %% \\[1em]
+  %%   %% variables are \emph{discrete} $x,y,z$\\
+  %%   %% \phantom{variables are }\hspace{-2.005em}or \emph{monotone} $X,Y,Z$
+  %%   %% }
+
+  %%   %% \setlength\tabcolsep{0pt}
+  %%   %% \begin{tabular}{r@{\qquad}rl}
+  %%   %%   functions are \emph{discrete} $A \to B$
+  %%   %%   & variables are \emph{discrete} &\ $x,y,z$\\
+  %%   %%   or \emph{monotone} $A \mto B$
+  %%   %%   & or \emph{monotone} &\ $X,Y,Z$
+  %%   %% \end{tabular}
+
+  %% \end{frame}
+
+
+  \begin{frame}{lattice comprehensions}
     How does this expression \emph{run}?
 %
     \[
@@ -546,7 +611,7 @@
     \end{array}\]
   \end{frame}
 
-  \begin{frame}{\scshape lattice comprehensions}
+  \begin{frame}{lattice comprehensions}
     \[
     \exists (y \in S)\; x = y
     \pause\,\desugars\,
@@ -592,39 +657,45 @@
   \end{frame}
 
 
-  \begin{frame}{\scshape fixed points}
+  \begin{frame}{fixed points}
     %% \todo{return to transitive closure?}
     %% \todo{then move on to shortest path?}
 
     \[\begin{array}{l}
-    \n{reach} \isa \tnode \to \tset (\tnode \x \tnode) \to \tset \tnode\\
-    \n{reach} \;\n{start} \;\n{edge} = \efixis{{\standout R}}
+    %\n{reach} \isa \tnode \to \tset{(\tnode \x \tnode)} \to \tset \tnode\\
+    \n{reachable} \;\n{start} \;\n{edge} = \efixis{{\standout R}}
     \{\n{start}\} \cup \setfor{y}{x \in {\standout R}, (x,y) \in \n{edge}}
     \\[1em]\pause
-    \n{shortest} \isa \tnode \to \tset({\tnode \x \tnode \x \tpname{dist}})
+    \n{shortest} \isa \tnode \to \tset{(\tnode \x \tnode \x \tpname{dist})}
     \to \tmap{\tnode}{\tpname{dist}}
     \\
     \n{shortest} \;\n{start} \;\n{edge} =
-    \efixis{R}
-    \eset{\n{start}\!: \text{\liningnums{0}}}
+    \\\quad
+    \efixis{\mvar M}
+    \\\qquad
+    \phantom{\sqcup{}}
+    \eset{\n{start} \mapsto \text{\liningnums{0}}}
+    %\sqcup {}
     \\
-    \phantom{\n{shortest} \;\n{start} \;\n{edge} =}{}
+    %\phantom{\n{shortest} \;\n{start} \;\n{edge} =}{}
+    \qquad
     \sqcup
-    \esetfor{y\!: D_1 + d_2}{(x\!: D_1) \in R, (x,y,d_2) \in \n{edge}}
+    \esetfor{y \mapsto \mvar{D_1} + d_2}
+            {(x \mapsto \mvar{D_1}) \in \mvar M, (x,y,d_2) \in \n{edge}}
     \end{array}
     \]
   \end{frame}
 
 
-  %% \begin{frame}{\scshape cyk parsing}
+  %% \begin{frame}{cyk parsing}
   %%   \todo{CYK parsing example goes here}
   %% \end{frame}
 
 
   \begin{frame}
-    \Huge\standout\displayfamily
+    \interlude
     \begin{center}
-      {\scshape iv}
+      {\upshape\scshape iv}
       \\
 %      semi\naive\ evaluation\\
       deltas \emph{\&} derivatives
@@ -739,7 +810,7 @@
   %% \end{frame}
 
 
-  \begin{frame}%{\scshape change in datafun}
+  \begin{frame}%{change in datafun}
     \setlength\parskip{1ex}
 
     Every type $A$ gets a type $\standout\Delta A$ of \emph{increasing} changes,
@@ -756,7 +827,7 @@
     %
     \begin{mathpar}
       \delta(s \cup t) = ds \cup dt
-      
+
       \delta(s \setminus t) = ds \setminus t
       %\pause{\delta(\n{size} \;s) = \n{size} \;(s \cup ds)}
       \\%\pause
@@ -785,6 +856,8 @@
       %\elet{dx = \zero \;x}
       \delta(e))
     \end{align*}
+
+    \todo{have a concrete example?}
   \end{frame}
 
 
@@ -795,7 +868,7 @@
 
       {\normalsize \textbf{applications}: \itshape static analysis, parsing,
         shortest paths, regular expression matching}
-      
+
     \item To compute them efficiently, \emph{incrementalize the inner loop} by
       propagating changes through your program.
 
@@ -806,13 +879,48 @@
 
 
   \begin{frame}
-    \todo{{RETROSPECTIVE:} Datafun is neat, but it took a lot of work to
-      generalize seminaive evaluation to handle higher-order functions, and
-      would need significantly more work to make Datafun efficient by porting
-      over query optimisation, etc. Not clear the added complexity is worth it
-      as a way of making datalog more expressive; power-to-weight ratio, etc. If
-      I did it again, might try staged computation - separate flexible
-      higher-order bit from highly optimisable first-order bit.}
+    \centering
+    {\scshape future and related work}
+
+    \begin{itemize}
+      \setlength\itemsep{2ex}
+    \item \emph{Efficiency!} via... %\vspace{1ex}
+
+      \begin{center}
+        \large
+        \begin{tabular}{ccc}
+          \emph{\normalsize imitating Datalog:}
+          &
+          \emph{\normalsize compiling to Datalog:}
+          &
+          \emph{\normalsize emitting Datalog:}
+          \\
+          query optimization?
+          & query normalization?
+          & staged computation?
+        \end{tabular}
+      \end{center}
+
+    \item Custom semilattice types / deltas via SMT?
+      \\
+      {\large\itshape see {\upshape\scshape Flix}}
+
+    \item Concurrent and/or distributed computation?
+      \\
+      {\large\itshape see LVars, CALM}
+
+      \item Incrementalize fixed point maintenance?
+        \\
+        {\large\itshape see Differential Dataflow, Mario Picallo's thesis}
+    \end{itemize}
+
+    %% \todo{{RETROSPECTIVE:} Datafun is neat, but it took a lot of work to
+    %%   generalize seminaive evaluation to handle higher-order functions, and
+    %%   would need significantly more work to make Datafun efficient by porting
+    %%   over query optimisation, etc. Not clear the added complexity is worth it
+    %%   as a way of making datalog more expressive; power-to-weight ratio, etc. If
+    %%   I did it again, might try staged computation - separate flexible
+    %%   higher-order bit from highly optimisable first-order bit.}
   \end{frame}
 
 
@@ -829,7 +937,8 @@
     \todo{BACKUP SLIDES:}
     \begin{itemize}
     \item delta for functions
-    \item concurrency
+    \item the box type
+    \item concurrency graphs
     \end{itemize}
   \end{frame}
 
