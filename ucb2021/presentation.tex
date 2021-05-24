@@ -12,13 +12,14 @@
 \usepackage{accents}           % \underaccent
 \usepackage{pdfpages}           % \includepdf
 \usepackage{mathtools}          % \dblcolon, vertically centered colon
-%% \usepackage{pgfplots}\pgfplotsset{compat=1.5} % the perf graph
+\usepackage{pgfplots}\pgfplotsset{compat=1.5} % the perf graph
 \usepackage{censor}             % \censor
 \usepackage{array}              % alignment options in tabular
 \usepackage{pbox}               % \pbox
 \usepackage[normalem]{ulem}     % \sout
 
 \mathtoolsset{centercolon} % not sure this works w/ Euler
+\usetikzlibrary{calc}
 
 \usepackage{iftex}
 \ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=40,}{microtype}\else\fi
@@ -452,9 +453,9 @@
   %% TODO: connect this up somehow, either arrows or hilighting in different
   %% colors.
   %\newcommand\setcolor[1]{{\alt<3->{\color{ForestGreen}}{}#1}}
-  \newcommand\setcolor[1]{{\alt<3->{\color{RoyalBlue}}{}#1}}
-  \newcommand\fixptcolor[1]{{\alt<4->{\mvarcolor}{}#1}}
   \newcommand\functioncolor[1]{{\alt<2->{\color{ForestGreen}}{}#1}}
+  \newcommand\fixptcolor[1]{{\alt<3->{\mvarcolor}{}#1}}
+  \newcommand\setcolor[1]{{\alt<4->{\color{RoyalBlue}}{}#1}}
 
   \begin{frame}
     \[
@@ -464,26 +465,16 @@
       \fixptcolor{\efixis{R}}
       \\\qquad
       \setcolor{\eset{\n{start}} \cup
-        \esetfor{y}{x \in \fixptcolor{R}, (x,y) \in \n{edge}}}
+        \esetfor{y}{x \in {\color<5->{purple} R}, (x,y) \in \n{edge}}}
     \end{array}\]
-      %% \[\begin{array}{l}
-    %% \n{reach} \isa
-    %% \tnode
-    %% \to \setcolor{\tset (\tnode \x \tnode)}
-    %% \to \setcolor{\tset \tnode}\\
-    %% \n{reach} \;\n{start} \;\n{edge} =
-    %% \fixptcolor{\kw{fix}~ {\color{black}R}~\kw{is}~}
-    %% \compcolor{\{\n{start}\}
-    %% \cup \setfor{y}{x \in R, (x,y) \in \n{edge}}}
-    %% \end{array}\]
 
     \pause
     \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016, popl 2020]}
     is:
     \begin{itemize}\setlength\itemsep{.5ex}
     \item a \functioncolor{pure functional language} \pause
-    \item with \setcolor{sets \& set/lattice comprehensions} \pause
-    \item and \fixptcolor{monotone fixed points} \pause
+    \item with \fixptcolor{monotone fixed points} \pause
+    \item and \setcolor{sets \& set/lattice comprehensions} \pause
     \item where \emph{the type system tracks monotonicity}.
     \end{itemize}
     \vspace{\baselineskip}
@@ -695,10 +686,11 @@
   \begin{frame}
     \interlude
     \begin{center}
-      {\upshape\scshape iv}
+      {\upshape\scshape iii}
       \\
-%      semi\naive\ evaluation\\
-      deltas \emph{\&} derivatives
+      semi\naive\ evaluation\\
+      \huge(\emph{or,
+      deltas \emph{\&} derivatives})
     \end{center}
   \end{frame}
 
@@ -727,7 +719,7 @@
   \end{frame}
 
 
-  \begin{frame}{}{}\huge\centering
+  \begin{frame}{}{}\huge\centering\displayfamily
     \setlength\parskip{2ex}
 
     {\scshape semi\naive\ evaluation}
@@ -735,7 +727,7 @@
     means
 
     %% {\bf computing the changes between iterations}
-    {computing the {\strong{changes}} between iterations}
+    {computing the \strong{change} between iterations}
 
     %% {by}
     %% {\bfseries incrementalizing the step function}
@@ -884,26 +876,59 @@
   \end{frame}
 
 
-  \begin{frame}
-    \strong{Ideas to take away:}\vspace{1ex}
+  \begin{frame}{\upshape\emph{Semi\naive\ Evaluation for a Higher-Order Functional Language, \upshape\large\textsc{popl 2020}}}
+
+    %\centering
+    %% {\standout\emph{Semi\naive\ Evaluation for a Higher-Order Functional Language},\\ \textsc{popl 2020}}
+    %% \vspace{2ex}
+
     \begin{itemize}
-    \item Bottom-up monotone fixed points are neat.
+    \item How to handle \strong{higher-order functions}.
 
-      {\normalsize \textbf{applications}: \itshape static analysis, parsing,
-        shortest paths, regular expression matching}
+    \item \strong{Proof of correctness}.
 
-    \item To compute them efficiently, \emph{incrementalize the inner loop} by
-      propagating changes through your program.
+    \item \strong{Optimizations}:
+       must propagate $\varnothing$ to get asymptotic speedups.
 
-    \item Types let us control what things we need to incrementalize!
+       \vspace{1ex}
+    \item Simple \strong{benchmarks}:\quad%\\[2ex]
+      {\scriptsize
+        \begin{tikzpicture}[baseline={($ (current bounding box.north) - (0,20pt) $)}]
+          \begin{axis}[
+              xlabel={Number of nodes},
+              ylabel={Seconds},
+              height=90pt, width=145.62306pt,
+              legend entries={\naive,semi\naive},
+              legend cell align=left,
+              legend pos = north west,
+              legend style={
+                draw=none,
+                nodes={inner sep=2pt,}
+              },
+              xtick = {120, 320}, ytick = {0, 120},
+            ]
+            \addplot [color=red,thick] table [x=n,y=naive] {trans.dat};
+            %\addplot [color=black,mark=triangle*] table [x=n,y=seminaive_raw] {trans.dat};
+            \addplot [color=blue,thick] table  [x=n,y=seminaive] {trans.dat};
+          \end{axis}
+        \end{tikzpicture}
+        \par}
     \end{itemize}
-    \vspace{\baselineskip}
+
   \end{frame}
 
 
   \begin{frame}
+    \interlude\centering\vfill
+    {\scshape iv}\\%
+    where next?
+    \vfill
+  \end{frame}
+
+
+  \begin{frame}%{future and related work}
     \centering
-    {\scshape future and related work}
+    %% {\scshape\standout future and related work}
 
     \begin{itemize}
       \setlength\itemsep{2ex}
@@ -944,6 +969,22 @@
     %%   as a way of making datalog more expressive; power-to-weight ratio, etc. If
     %%   I did it again, might try staged computation - separate flexible
     %%   higher-order bit from highly optimisable first-order bit.}
+  \end{frame}
+
+
+  \begin{frame}
+    \strong{Ideas to take away:}\vspace{1ex}
+    \begin{itemize}
+    \item Bottom-up monotone fixed points are neat.
+
+      {\normalsize \textbf{applications}: \itshape static analysis, parsing,
+        shortest paths, regular expression matching}
+
+    \item To compute them efficiently, \emph{incrementalize the inner loop} by
+      propagating changes through your program.
+
+    \item Types let us control what things we need to incrementalize!
+    \end{itemize}
   \end{frame}
 
 
