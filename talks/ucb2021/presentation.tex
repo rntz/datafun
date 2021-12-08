@@ -649,18 +649,15 @@
 
 
   \begin{frame}{fixed points}
-    %% \todo{return to transitive closure?}
-    %% \todo{then move on to shortest path?}
-
     \[\begin{array}{l}
     %\n{reach} \isa \tnode \to \tset{(\tnode \x \tnode)} \to \tset \tnode\\
-    \n{reachable} \;\n{start} \;\n{edge} = \efixis{{\standout R}}
-    \{\n{start}\} \cup \setfor{y}{x \in {\standout R}, (x,y) \in \n{edge}}
-    \\[1em]\pause
+    %% \n{reachable} \;\n{start} \;\n{edge} = \efixis{{\standout R}}
+    %% \{\n{start}\} \cup \setfor{y}{x \in {\standout R}, (x,y) \in \n{edge}}
+    %% \\[1em]\pause
     \n{shortest} \isa \tnode \to \tset{(\tnode \x \tnode \x \tpname{dist})}
     \to \tmap{\tnode}{\tpname{dist}}
     \\
-    \n{shortest} \;\n{start} \;\n{edge} =
+    \n{shortest} \;\n{start} \;\n{edge} =\pause
     \\\quad
     \efixis{\mvar M}
     \\\qquad
@@ -918,15 +915,15 @@
   \end{frame}
 
 
-  \begin{frame}
-    \interlude\centering\vfill
-    {\scshape iv}\\%
-    where next?
-    \vfill
-  \end{frame}
+  %% \begin{frame}
+  %%   \interlude\centering\vfill
+  %%   {\scshape iv}\\%
+  %%   where next?
+  %%   \vfill
+  %% \end{frame}
 
 
-  \begin{frame}%{future and related work}
+  \begin{frame}{future and related work}
     \centering
     %% {\scshape\standout future and related work}
 
@@ -1003,6 +1000,7 @@
     \item delta for functions
     \item the box type
     \item concurrency graphs
+    \item delta(member), empty-prop
     \end{itemize}
   \end{frame}
 
