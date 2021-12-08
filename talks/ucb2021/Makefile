@@ -1,6 +1,6 @@
 # Copy this Makefile to where your .tex files are and change $(RNTZTEXDIR) to
 # point to rntztex's directory and this Makefile will still work.
-RNTZTEXDIR := ../rntztex/
+RNTZTEXDIR := ../../rntztex/
 
 # The TEXINPUTS environment variable tells TeX where to find .sty and .cls
 # files. This is necessary if you set RNTZTEXDIR to something other than ".".
