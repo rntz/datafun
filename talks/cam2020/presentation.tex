@@ -1,0 +1,639 @@
+%% TODO: aspect ratio
+\documentclass[aspectratio=169,dvipsnames]{beamer}
+
+\usepackage{amssymb,amsmath,amsthm,latexsym}
+\usepackage{url,hyperref}
+\usepackage{nccmath}            % fleqn environment
+\usepackage{mathpartir}         % \mathpar, \infer
+\usepackage{booktabs}           % \midrule
+\usepackage{colonequals}
+\usepackage{tikz,tikz-cd}       % Hasse & commutative diagrams.
+\usepackage{accents}            % \underaccent
+\usepackage{pdfpages}           % \includepdf
+\usepackage{mathtools}          % \dblcolon
+\usepackage{pgfplots}\pgfplotsset{compat=1.5} % the perf graph
+
+%% TODO: more tracking for charter.
+\usepackage{iftex}
+\ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=40,}{microtype}\else\fi
+\usepackage{microtype}
+\frenchspacing
+
+
+%% Format fiddling.
+\linespread{1.0608}
+\def\arraystretch{1.141}
+
+\let\olditemize\itemize
+\renewcommand\itemize{\olditemize\setlength\itemsep{1ex}}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamercolor{background canvas}{bg=} % necessary for \includepdf
+
+\setbeamertemplate{footline}[frame number]
+\setbeamerfont{footline}{size=\scriptsize,family=\sffamily,shape=\scshape,}
+%\setbeamertemplate{footline}{\hfil\insertpagenumber\vspace{2ex}}
+%% \setbeamerfont{headline}{size=\scriptsize}
+%% \setbeamertemplate{headline}{\vspace{2ex}\hfill\insertpagenumber\hspace*{2ex}}
+
+%\title{Semi\naive\ Evaluation for a Higher-Order Language}
+%\author{Michael Arntzenius \& Neel Krishnaswami}
+%\institute{University of Birmingham}
+%\date{POPL 2020}
+\date{}
+
+
+%% font fiddling
+\usepackage[LY1,OT1,T1]{fontenc}
+\ifPDFTeX\else\usepackage[no-math]{fontspec}\fi
+\usefonttheme{professionalfonts}
+\renewcommand{\familydefault}{\rmdefault}
+
+%\usepackage[scaled=0.9543]{XCharter}
+%\usepackage[llscale=1.0699300699300702,scale=1.0699300699300702,p,mono=false]{libertine}
+\usepackage[semibold,scaled=0.9663]{sourceserifpro}
+\usepackage[osf,semibold,scaled=0.9663]{sourcesanspro}
+%\usepackage[osf,scaled=1.0155]{Alegreya}
+%\usepackage[sfdefault,osf,scaled=1.0155]{AlegreyaSans}
+\usepackage[scaled=1.00438,varqu,var0]{inconsolata}
+
+\usepackage{fontchoice}
+
+\usepackage[euler-digits]{eulervm}
+\usepackage[bb=boondox]{mathalfa} % or bb=ams
+
+\usepackage[euler-digits]{eulervm}
+
+
+%% ===== COMMANDS =====
+\providecommand\strong[1]{{\bfseries#1}}
+\newcommand\textsfit[1]{\textsf{\itshape#1}}
+
+\newcommand\N{\mathbb{N}}
+\newcommand\x\times
+\providecommand\G{}\renewcommand\G\Gamma
+\newcommand\D\Delta
+\newcommand\fn{\ensuremath{\lambda}}
+\newcommand\isa{\mathrel{\,\text{:}\,}}
+\newcommand\fnof[1]{\fn{#1}.\;}
+\newcommand\fa[1]{(\forall {#1})\ }
+\newcommand\iso{{\texorpdfstring{\ensuremath{\square}}{box}}}
+\newcommand\ebox[1]{[{#1}]}
+\newcommand\pbox[1]{[{#1}]}
+
+\newcommand{\setfor}[2]{\{{#1} \mathrel{|} {#2}\}}
+
+\newcommand\kw\textbf\newcommand\n\textit\newcommand\tpname\text
+%\newcommand\kw[1]{\textsfit{#1}}\newcommand\n\textsfit\newcommand\tpname\textsf
+\renewcommand\c\textsf
+\newcommand\tset{\tpname{Set}~}
+\newcommand\tunit{\ensuremath{1}}
+\newcommand\tnode{\tpname{Node}}
+\newcommand\zero{\ensuremath{\mathbf{0}}}
+
+\newcommand\fix{\n{fix}}
+\newcommand\semifix{\n{semifix}}
+
+\newcommand\naive{na\"ive}
+\newcommand\Naive{Na\"ive}
+
+\let\oldcup\cup\renewcommand\cup{\mathrel{\oldcup}}
+
+\newcommand\hilite{\color{Rhodamine}}
+\newcommand\hi[1]{{\hilite#1}}
+%\newcommand\hilitetime{\color{Orange}}\newcommand\hiti[1]{{\hilitetime#1}}
+
+
+\begin{document}
+  \Large
+
+  \begin{frame}
+    \begin{enumerate}
+    \setlength\itemsep{\baselineskip}
+    \item \textbf{Monotone fixed points} and \textbf{Datafun}
+      
+      {\footnotesize \emph{Datafun: A Functional Datalog}, {Arntzenius and
+          Krishnaswami}, \upshape \scshape icfp 2016}
+      
+    \item \textbf{Incremental} fixed points
+
+      {\footnotesize \emph{Semi\naive\ Evaluation for a Higher-Order Functional
+          Language}, {Arntzenius and Krishnaswami}, \scshape popl 2020}
+      
+    \item \textbf{Concurrent} fixed points
+
+      {\footnotesize \itshape work-in-progress}
+    \end{enumerate}
+  \end{frame}
+  
+
+  %\includepdf[fitpaper]{title.pdf}
+  %\includepdf[fitpaper]{uncropped.pdf}
+
+  \begin{frame}
+    \textsc{pop quiz}\\ How can you compute each of the following?
+    \vspace{1ex}
+    \begin{itemize}
+    \item Graph reachability
+    \item Regular expression matching
+    \item Abstract interpretation
+    \end{itemize}
+
+    \vspace{1ex}\pause
+
+    \textsc{answer}\\ \itshape Iterate a monotone map to its fixed point.
+
+    \vspace{\baselineskip}
+
+%% They're all expressible as, and computable by, iterating a
+%%     monotone map until it reaches a fixed point.
+  \end{frame}
+
+
+  \begin{frame}
+    \begin{fleqn}[1em]
+    \begin{minipage}[t][.38\paperheight]{\paperwidth}
+      \[\begin{array}{l}
+      \n{reach}(\c{start}).\\
+      \n{reach}(Y) \gets \n{reach}(X) \wedge \n{edge}(X,Y).\\[1ex]\pause
+      \n{reach2}(\c{start}).\\
+      \n{reach2}(Y) \gets \n{reach2}(X) \wedge \n{edge2}(X,Y).\\[1ex]
+      \n{reach3}(\c{start}).\\
+      \n{reach3}(Y) \gets \n{reach3}(X) \wedge \n{isnt-this-tedious}(X,Y).
+      \\[1ex]
+      \n{reach4}(\c{start}).\\
+      \n{reach4}(Y) \gets \n{reach4}(X) \wedge \n{yes-it-is-rather}(X,Y).
+      \\[1ex]
+      \n{reach5}(\c{start}).\\
+      \n{reach5}(Y) \gets \n{reach5}(X) \wedge \n{yes-it-is-rather}(X,Y).\\
+      \end{array}\]
+    \end{minipage}
+    \end{fleqn}
+  \end{frame}
+
+
+  %% TODO: connect this up somehow, either arrows or hilighting in different
+  %% colors.
+  \newcommand\setcolor[1]{{\alt<3->{\color{ForestGreen}}{}#1}}
+  \newcommand\compcolor[1]{{\alt<3->{\color{RoyalBlue}}{}#1}}
+  \newcommand\fixptcolor[1]{{\alt<4->{\color{Red}}{}#1}}
+
+  \begin{frame}
+    \[\begin{array}{l}
+    \n{reach} \isa \setcolor{\tset (\tnode \x \tnode)}
+    \to \tnode
+    \to \setcolor{\tset \tnode}\\
+    \n{reach} \;\n{edge} \;\n{start} =
+    \fixptcolor{\kw{fix}}\; (\fnof R \compcolor{\{\n{start}\}
+    \cup \setfor{y}{x \in R, (x,y) \in \n{edge}}})
+    \end{array}\]
+
+    %% Datalog is a \emph{first-order} logic language.
+    %% \vspace{\baselineskip}
+
+    %% \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]}
+    %% is a simply-typed \fn-calculus with:\vspace{1ex}
+    %% \begin{itemize}
+    %% \item a finite set datatype \& set comprehensions
+    %% \item bottom-up monotone fixed points
+    %% \item a type system that tracks monotonicity
+    %% \end{itemize}
+
+    \pause
+    {\strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]}
+    is:}
+    \begin{itemize}\setlength\itemsep{.5ex}
+    \item a simply-typed \fn-calculus with \pause
+    \item a \setcolor{finite set datatype}
+      \& \compcolor{set comprehensions}, \pause
+    \item a \fixptcolor{monotone fixed point operator}, \pause
+    \item where \emph{types are posets} and \emph{all functions are monotone},
+      \pause
+    \item and non-monotonicity is handled via a comonad type $\iso A$.
+    \end{itemize}
+    \vspace{\baselineskip}
+
+    %% \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]} is a
+    %% simply-typed \fn-calculus where \emph{types are posets} and \emph{all functions are
+    %% monotone},
+    %% %
+    %% extended with\vspace{1ex}
+    %% \begin{itemize}
+    %% \item a finite set datatype \& set comprehensions;
+    %% \item a bottom-up monotone fixed point operator;
+    %% \item and a \emph{discreteness} comonad, $\iso$.
+    %% \end{itemize}
+
+  \end{frame}
+
+  \begin{frame}
+    The type $\iso A$ is defined:
+    \begin{align*}
+      x \in \iso A &\iff x \in A\\
+      x \le y \isa \iso A &\iff x = y
+    \end{align*}
+
+    Thus $f : \iso A \to B$ is monotone iff:
+
+    \[ x = y \implies f(x) \le f(y) \]
+
+    i.e., \strong{always!}
+  \end{frame}
+
+
+  %% \begin{frame}
+  %%   \begin{fleqn}[1em]
+  %%     \textsc{math}
+  %%
+  %%     \[\begin{array}{l}
+  %%     \n{reach} \isa \tset (\tnode \x \tnode) \to \tnode \to \tset \tnode\\
+  %%     \n{reach} \;\n{edge} \;\n{start} =
+  %%     \kw{fix}\; (\fnof R \{\n{start}\}
+  %%     \cup \setfor{y}{x \in R, (x,y) \in \n{edge}})
+  %%     \end{array}\]
+  %%
+  %%     \vspace{\baselineskip}
+  %%     \textsc{datafun}
+  %%
+  %%     \[
+  %%     \begin{array}{l}
+  %%       \n{reach} \isa \iso(\tset(\tnode \x \tnode)) \to \iso\tnode
+  %%       \to \tset \tnode\\
+  %%       \n{reach} \;\pbox{\n{edge}} \;\pbox{\n{start}} =\\
+  %%       \qquad
+  %%       \kw{fix}\; \ebox{\fnof R \{\n{start}\}
+  %%         \cup \setfor{y}{x \in R, (x',y) \in \n{edge}, x = x'}}
+  %%     \end{array}
+  %%     \]
+  %%   \end{fleqn}
+  %% \end{frame}
+
+  \begin{frame}
+    \begin{fleqn}[2em]
+      \centering
+      \textsc{\alt<2->{datafun}{math}}
+      \vspace{1ex}
+
+      \[\begin{array}{l}
+      \n{reach} \isa
+      \uncover<2>{\iso(}\tset (\tnode \x \tnode)\uncover<2>{)}
+      \to \uncover<2>{\iso}\tnode
+      \to \tset \tnode
+      \\
+      \n{reach} \;\uncover<2>{[}\n{edge}\uncover<2>{]}
+      \;\uncover<2>{[}\n{start}\uncover<2>{]} =\\
+      \qquad
+      \kw{fix}\; \alt<2>{\kern.8pt [\kern .8pt}{(}\fnof R \{\n{start}\}
+      \cup \setfor{y}{x \in R, (x\uncover<2>{'},y) \in \n{edge}%
+        \uncover<2>{, x = x'}}%
+      \alt<2>{\kern .8pt]}{)}
+      \end{array}\]
+    \end{fleqn}
+  \end{frame}
+
+
+  \begin{frame}
+    \[\n{step}\;R =
+    {\color<-2>{RoyalBlue}\{\n{start}\}}
+    \cup
+    {\color<-2>{Red}\setfor{y}{x \in R, (x,y) \in \n{edge}}}
+    \]
+
+    \pause\begin{align*}
+      R_0 &= \emptyset
+      & \uncover<3->{dR_0} &\uncover<3->{= }\uncover<4->{\color<-5>{RoyalBlue}\{\n{start}\}}
+      \\
+      R_{i+1} &= \makebox[4.3em][l]{$\alt<6->{\hi{R_i \cup dR_i}}{\n{step}\;R_i}$}
+      & \uncover<3->{dR_{i+1}} &\uncover<3->{= }\uncover<5->{\color<-5>{Red} \setfor{y}{x \in dR_i, (x,y) \in \n{edge}}}
+    \end{align*}
+
+    \centering\alt<3->{
+      \includegraphics[height=45mm]{imgs/focus-1240.jpg}
+    }{
+      \includegraphics[height=45mm]{imgs/focus-0946.jpg}
+    }
+    \vspace{1ex}
+  \end{frame}
+
+  %% \includepdf[fitpaper]{imgs/naive-0946.pdf}
+  %% \includepdf[fitpaper]{imgs/naive-1240.pdf}
+  %% \includepdf[fitpaper]{imgs/naive-1429.pdf}
+  %% \includepdf[fitpaper]{imgs/naive-1642.pdf}
+
+  %% \begin{frame}
+  %%     \[\begin{array}{l}
+  %%       \n{step} \;R = \{\n{start}\} \cup \setfor{y}{x \in R, (x,y) \in
+  %%         \n{edge}}\\
+  %%       R_0 = \emptyset\\
+  %%       R_{i+1} = \n{step}\;R_i
+  %%     \end{array}\]
+  %%     \vspace{\baselineskip}
+
+  %%     \color{red} TODO: pictures here explaining
+  %%     \begin{itemize}
+  %%     \item \naive\ evaluation
+  %%     \item semi\naive\ evaluation as ``keeping a frontier'' ie. ``computing the changes''
+  %%     \end{itemize}
+
+  %%     %% \begin{align*}
+  %%     %%   R_0 &= \emptyset & R_{i+1} &= \n{step}\;R_i
+  %%     %% \end{align*}
+  %% \end{frame}
+
+
+  %% \begin{frame}
+  %%   \begin{mathpar}
+  %%     \begin{array}{l}
+  %%       \n{step} \; s = \n{edge} \cup
+  %%       \setfor{(x,z)}{(x,y) \in \n{edge}, (y,z) \in s}
+  %%       \\
+  %%       \n{path}_i = \n{step}^i \;\emptyset =
+  %%       \text{paths of length $\le i$}
+  %%     \end{array}
+  %%     %% TODO: explain why no work is shared!
+  %%     %% (step path_i) appends an edge to _every_ element of path_i
+  %%   \end{mathpar}
+
+  %%   \vspace{1ex} $\n{path}_{i+1} = \n{step}\;\n{path}_i$ appends an edge to
+  %%   \emph{every} previously discovered path!
+  %%   \vspace{1ex}\pause
+
+  %%   \begin{center}
+  %%     \begin{tikzpicture}[thick,baseline=(current bounding box.center), scale=1.5]
+  %%       \node (a) at (0, 0) {$\n{path}_0$};
+  %%       \node (ab) at (1, 0) {$\subseteq$};
+  %%       \node (b) at (2, 0) {$\n{path}_1$};
+  %%       \node (bc) at (3, 0) {$\subseteq$};
+  %%       \node (c) at (4, 0) {$\n{path}_2$};
+  %%       \node (cd) at (5, 0) {$\subseteq$};
+  %%       \node (d) at (6, 0) {$\cdots$};
+  %%       \path[-Latex, bend right=50,below]
+  %%       (a) edge node {$\n{dpath}_0$} (b)
+  %%       (b) edge node {$\n{dpath}_1$} (c)
+  %%       (c) edge node {$\n{dpath}_2$} (d);
+  %%     \end{tikzpicture}
+  %%   \end{center}
+
+  %% \end{frame}
+
+
+  \begin{frame}{}{}\huge\centering%\setlength\baselineskip{2em}
+
+    {\scshape semi\naive\ evaluation}
+    \\[2ex]
+    {means}
+    \\[2ex]
+    {\bf computing the changes between iterations}
+
+    %% {by}
+
+    %% {\bfseries incrementalizing the step function}
+  \end{frame}
+
+
+  \newcommand\chgto\rightsquigarrow
+  \newcommand\chgat[4]{{\ensuremath{{#2} \dblcolon_{#1} {#3} \chgto {#4}}}}
+  \newcommand\chg[3]{{\ensuremath{{#1} \dblcolon {#2} \chgto {#3}}}}
+
+  \begin{frame}{Incremental \fn-calculus
+      \textsuperscript{\sffamily[%
+          Cai et al \textsc{pldi 2014},
+          Giarrusso's thesis \textsc{2017},
+          Giarrusso et al \textsc{esop 2019}]}}
+    Every type $A$ has a \emph{change type} $\D A$ and a relation
+    $\chgat{A}{dx}{x}{y}$, where $x,y : A$ and $dx : \D A$.
+
+    \vspace{1ex}
+    \setlength\arraycolsep{.2em}
+    \[
+    \begin{array}{rcl@{\qquad}c}
+      \D(\tset A) &=& \tset A & \chgat{\tset A}{dx}{x}{x \cup dx}
+      \\[1.5ex]\pause
+      \D(A \x B) &=& \D A \x \D B &
+      \infer{\chgat A{da} a {a'} \\ \chgat B{db} b {b'}
+      }{\chgat{A \x B}{(da,db)}{(a,b)}{(a',b')}}
+      \\[3.5ex]\pause
+      \D(\iso A) &=& \tunit & \chgat{\iso A}{()}{x}{x}
+    \end{array}
+    \]
+  \end{frame}
+
+  \newcommand\underexplain[4]{%
+    \underaccent{%
+      \parbox[t][#1]{#2}{\sffamily\centering\vspace{4pt}\small#3}
+    }{#4}}
+
+  \newcommand\chgatcov[4]{{\uncover<2->{{#2} \dblcolon_{#1}} {#3} \chgto {#4}}}
+  %\newcommand\chgatcovb[4]{{\uncover<5->{{#2} \dblcolon_{#1}} {#3} \to {#4}}}
+  \begin{frame}\LARGE
+    %\setbeamercovered{transparent}
+
+    \begin{mathpar}
+      \D(A \to B)
+      = \underexplain{}{1.5cm}{original input}{\iso A}
+      \to \underexplain{}{1.2cm}{change to input}{\D A}
+      \to \underexplain{}{1.4cm}{change in output}{\D B}
+      \\\pause
+      \chgat{A \to B}{df}{f}{\alt<5->{\hi f}{g}} \iff \pause
+      \infer{\chgat{A}{dx}{x}{y}
+      }{\chgat{B}{\uncover<4->{df\;x\;dx}}{f\;x}{\alt<5->{\hi f}{g}\;y}}
+      %% \infer{\chgatcov{A \to B}{df}{f}{\alt<3>{\hi{f}}{g}}\\
+      %%   \chgatcov{A}{dx}{x}{y}
+      %% }{
+      %%   \chgatcov{B}{df\;x\;dx}{f\;x}{\alt<3>{\hi f}{g}\;y}
+      %% }
+    \end{mathpar}
+
+    \setbeamercovered{invisible}
+    \vspace{2ex}\centering\pause\pause
+    In this case, we call $df$ the
+    \strong{derivative} of $f$.
+
+    \vspace{\baselineskip}
+
+    %% \[
+    %% \infer{
+    %%   \fa{\chgat A {dx} x y}\, \chgat B {df\;x\;dx} {f\;x} {g\;y}
+    %% }{\chgat{A \to B}{df} f g}
+    %% \]
+  \end{frame}
+
+
+  %% %% TODO?
+  %% \begin{frame}
+  %%   \begin{mathpar}
+  %%     \infer{
+  %%       \chgatcov{A \to B}{df}{f}{g} \\
+  %%       \chgat{A}{dx}{x}{y}
+  %%     }{\chgatcov{B}{df\;x\;dx}{f\;x}{g\;y}}
+  %%   \end{mathpar}
+  %% \end{frame}
+
+
+  \begin{frame}
+      \begin{align*}
+        \n{step} &\isa \tset A \to \tset A
+        %% & \uncover<2->{R_i} &\uncover<2->{= \n{step}^i \;\emptyset}
+        \\
+        \n{step}' &\isa
+        \underexplain{}{4cm}{\vspace{-3.43pt}known world}{\iso(\tset A)}
+        \to \underexplain{}{1.8cm}{frontier}{\tset A}
+        \to \underexplain{}{2cm}{new frontier}{\tset A}
+        %% & \uncover<3->{dR_i} &\uncover<3->{\dblcolon R_i \chgto \n{step}\;R_i}
+      \end{align*}
+
+      \textsc{strategy}
+      \begin{align*}
+        \underexplain{}{2cm}{known world}{{R_i}} &= \n{step}^i\;\emptyset
+        &\uncover<2->{\chg{\underexplain{}{1.5cm}{frontier}{{dR_i}}}{R_i}{\n{step}\;R_i}}
+      \end{align*}
+      \pause\pause
+
+      %\setbeamercovered{transparent}
+      \textsc{implementation}
+      \begin{align*}
+        R_0 &= \emptyset %\pause
+        & dR_0 &= \uncover<4->{\n{step}\;\emptyset} %\pause
+        %\dblcolon \emptyset \chgto \n{step}\;\emptyset
+        \\
+        R_{i+1} &= \uncover<5->{R_i \cup dR_i} %\pause
+        & dR_{i+1} &= \uncover<6->{\n{step}' \;R_i \;dR_i}
+        %\dblcolon \n{step}\;R_i \chgto \n{step}\;(R_i \cup dR_i)
+      \end{align*}
+      \vspace{\baselineskip}
+  \end{frame}
+
+
+  %% \begin{frame}
+  %%   %% TODO: this slide should give an intuition for what dR_i is. Perhaps
+  %%   %% graphically, or at least as "the set of nodes at distance exactly i".
+  %%   Suppose $\n{step}'$ is the derivative of $\n{step}$. Then:
+
+  %%   \[
+  %%   \n{step} \;(R_i \cup dR_i) = \n{step}\;R_i \cup \n{step}'\;R_i\;dR_i
+  %%   \]
+
+  %%   So consider the recurrences:
+  %%   \begin{align*}
+  %%     R_0 &= \emptyset & R_{i+1} &= R_i \cup dR_i\\
+  %%     dR_0 &= \n{step}\;\emptyset & dR_{i+1} &= \n{step}'\;R_i\;dR_i
+  %%   \end{align*}
+
+  %%   \strong{Theorem:} $R_i = \n{step}^i\;\emptyset$.
+  %%   \\[\baselineskip]
+  %%   So let $\semifix\;(\n{step}, \n{step}') \triangleq R_i$ such that $R_i =
+  %%   R_{i+1}$.
+  %%   \\
+  %%   Then $\semifix\;(\n{step},\n{step}') = \fix\;\n{step}$.
+  %%   \vspace{\baselineskip}
+  %% \end{frame}
+
+
+  \begin{frame}
+    %\begin{center}\scshape the core idea\end{center}
+
+    %% On any expression $e$, we define two
+    %% mutually recursive static transformations:
+    Two static transformations on expressions $e$:
+    \vspace{1.5ex}
+    \begin{itemize}\setlength\itemsep{1.5ex}
+    \item \hi{$\phi e$} annotates functions used by a fixed point with their
+      derivatives.\\[1ex]
+
+      {\normalsize\sffamily\textsc{key idea:} \it Propagate
+        derivatives by hijacking the $\iso$ comonad.\par}
+
+    \item \hi{$\delta e$} computes how $\phi e$ changes as
+      its free variables change.
+      \\[1ex]
+      {\normalsize\sffamily\textsc{key idea:}
+        \it Propagate changes for each variable.
+        \par}
+    \end{itemize}
+    \vspace{1.5ex}
+
+    Show correctness via a logical relation, similar to
+    $\chgat{A}{dx}{x}{x'}$.
+  \end{frame}
+
+  \begin{frame}
+    \begin{eqnarray*}
+      \Delta (A \x B) &=& \Delta A \x \Delta B\\
+      \delta (e_1, e_2) &=& (\delta e_1, \delta e_2) \\
+      \delta (\pi_i\; e) &=& \pi_i \;(\delta e)
+      \\[1em]\pause
+      \Delta(A \to B) &=& \iso A \to \Delta A \to \Delta B \\
+      \delta (e_1 \; e_2) &=& \delta e_1\; [e_2]\; \delta e_2\\
+      \pause
+      \delta (\fnof{x} e) &=& \fnof{[x]} \fnof{\hilite dx} \delta e \\\pause
+      \delta x &=& \hilite dx
+      \\[1em]\pause
+      \delta (e_1 \cup e_2) &=& \delta e_1 \cup \delta e_2
+    \end{eqnarray*}
+  \end{frame}
+
+  %% \begin{frame}{}{}
+  %%   \centering
+  %%   \begin{itemize}
+  %%   \item Regex combinators!\\
+  %%     {\normalsize as a use-case for higher-order functions.\par}
+
+  %%   \item Logical relations!\\
+  %%     {\normalsize to prove $\phi/\delta$ correct.\par}
+
+  %%   \item Further optimizations!\\
+  %%     {\normalsize Must propagate $\emptyset$ to get asymptotic speedups.\par}
+
+  %%   \item Benchmarks!\\[1ex]
+  %%     %% {\scriptsize
+  %%     %%   \begin{tikzpicture}[baseline=(current bounding box.center)]
+  %%     %%     \begin{axis}[
+  %%     %%         xlabel={Number of nodes},
+  %%     %%         ylabel={Seconds},
+  %%     %%         height=90pt, width=145.62306pt,
+  %%     %%         legend entries={\naive,semi\naive},
+  %%     %%         legend cell align=left,
+  %%     %%         legend pos = north west,
+  %%     %%         legend style={
+  %%     %%           draw=none,
+  %%     %%           nodes={inner sep=2pt,}
+  %%     %%         },
+  %%     %%         xtick = {120, 320}, ytick = {0, 120},
+  %%     %%       ]
+  %%     %%       %\addplot [color=red,thick] table [x=n,y=naive] {trans.dat};
+  %%     %%       %\addplot [color=black,mark=triangle*] table [x=n,y=seminaive_raw] {trans.dat};
+  %%     %%       %\addplot [color=blue,thick] table  [x=n,y=seminaive] {trans.dat};
+  %%     %%     \end{axis}
+  %%     %%   \end{tikzpicture}
+  %%     %%   \par}
+  %%   \end{itemize}
+
+  %% \end{frame}
+
+
+  \begin{frame}
+    \strong{Ideas to take away:}\vspace{1ex}
+    \begin{itemize}
+    \item Bottom-up monotone fixed points are neat.
+
+      {\normalsize \textbf{applications}: \itshape static analysis, parsing,
+        shortest paths, regular expression matching}
+      
+    \item To compute them efficiently, incrementalize the step function by
+      propagating changes through your program.
+
+    \item Types let us control what things we need to incrementalize!
+    \end{itemize}
+    \vspace{\baselineskip}
+  \end{frame}
+
+  \appendix
+  \begin{frame}
+    \centering\Huge
+    \color{gray!10}\itshape%
+    un{\upshape\scshape\color{black}fin}%
+    \color{gray!10}ished
+  \end{frame}
+
+
+\end{document}
