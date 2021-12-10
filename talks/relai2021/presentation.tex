@@ -1,0 +1,862 @@
+%% TODO: aspect ratio
+\documentclass[aspectratio=141,dvipsnames]{beamer}
+
+%% \usepackage{amssymb,amsmath,amsthm,latexsym}
+%% \usepackage{url,hyperref}
+\usepackage{multirow}           % \multirow, \multicolumn
+\usepackage{nccmath}           % fleqn environment
+\usepackage{mathpartir}        % \mathpar, \infer
+\usepackage{booktabs}           % \midrule
+%% \usepackage{colonequals}
+\usepackage{tikz,tikz-cd}      % Hasse & commutative diagrams.
+\usepackage{accents}           % \underaccent
+\usepackage{pdfpages}           % \includepdf
+\usepackage{mathtools}          % \dblcolon, vertically centered colon
+\usepackage{pgfplots}\pgfplotsset{compat=1.5} % the perf graph
+\usepackage{censor}             % \censor
+\usepackage{array}              % alignment options in tabular
+\usepackage{pbox}               % \pbox
+\usepackage[normalem]{ulem}     % \sout
+
+\mathtoolsset{centercolon} % not sure this works w/ Euler
+\usetikzlibrary{calc}
+
+\usepackage{iftex}
+\ifPDFTeX\PassOptionsToPackage{spacing=true,tracking=true,letterspace=40,}{microtype}\else\fi
+\usepackage{microtype}
+\frenchspacing
+
+
+%% Format fiddling.
+\linespread{1.0608}
+\setlength\arraycolsep{.2em}
+\def\arraystretch{1.05}
+
+\let\olditemize\itemize
+\renewcommand\itemize{\olditemize\setlength\itemsep{1ex}}
+
+\colorlet{standout}{Orange!10!Red!80!black}
+\newcommand\standout{\color{standout}}
+
+\setbeamertemplate{navigation symbols}{}
+%% TODO: figure out how to get this to work
+\colorlet{bgcolor}{yellow!6!white}
+\setbeamercolor{background canvas}{bg=bgcolor}
+
+\setbeamertemplate{footline}[frame number]
+\setbeamerfont{footline}{size=\small,}
+\setbeamerfont{frametitle}{shape=\scshape}
+\setbeamercolor{frametitle}{fg=standout}
+%\setbeamertemplate{footline}{\hfil\insertpagenumber\vspace{2ex}}
+%% \setbeamerfont{headline}{size=\scriptsize}
+%% \setbeamertemplate{headline}{\vspace{2ex}\hfill\insertpagenumber\hspace*{2ex}}
+
+
+%% font fiddling
+\usepackage[LY1,OT1,T1]{fontenc}
+\ifPDFTeX\else\usepackage[no-math]{fontspec}\fi
+\usefonttheme{professionalfonts}
+\renewcommand{\familydefault}{\rmdefault}
+
+%\usepackage[scaled=0.9543]{XCharter}
+%\usepackage[llscale=1.0699300699300702,scale=1.0699300699300702,p,mono=false]{libertine}
+%% \usepackage[semibold,scaled=0.9663]{sourceserifpro}
+%% \usepackage[osf,semibold,scaled=0.9663]{sourcesanspro}
+%% \usepackage[scaled=1.00438,varqu,var0]{inconsolata}
+
+\usepackage{fontchoice}
+\providecommand\displayfamily\rmfamily
+\setmonofont{inconsolata}[Scale=MatchLowercase,Scale=1.00438,]
+
+\usepackage[euler-digits]{eulervm}
+\usepackage[bb=boondox]{mathalfa} % or bb=ams
+%\usepackage[euler-digits]{eulervm}
+
+
+%% ===== COMMANDS =====
+\providecommand\strong[1]{{\bfseries#1}}
+\newcommand\textsfit[1]{\textsf{\itshape#1}}
+
+\newcommand\conj{,\,}
+\newcommand\N{\mathbb{N}}
+\newcommand\x\times
+\providecommand\G{}\renewcommand\G\Gamma
+\newcommand\D\Delta
+\newcommand\fn{\ensuremath{\lambda}}
+\newcommand\isa{\hspace{.1em}:\hspace{.1em}}
+\newcommand\fnof[1]{\fn{#1}.\;}
+\newcommand\fa[1]{(\forall {#1})\ }
+\newcommand\iso{{\texorpdfstring{\ensuremath{\square}}{box}}}
+\newcommand\desugars{\,\xrightarrow{\textsf{desugars}}\,}
+
+\newcommand{\setfor}[2]{\{{#1} \mathrel{|} {#2}\}}
+
+\newcommand\kw\textbf
+\newcommand\n\textit
+\newcommand\tpname\text
+%\newcommand\kw[1]{\textsfit{#1}}\newcommand\n\textsfit\newcommand\tpname\textsf
+\renewcommand\c\textsf
+
+\newcommand\tset{\tpname{set}\,}
+\newcommand\tmap[2]{\tpname{map}\,(#1,#2)}
+\newcommand\tbool{\tpname{bool}}
+\newcommand\tunit{\ensuremath{1}}
+\newcommand\tnode{\tpname{node}}
+%\newcommand\mto{\overset{\textsf{\Large +}}{\to}}
+\newcommand\mto{\overset{\boldsymbol+}{\to}}
+\newcommand\mvar[1]{{\mvarcolor #1}}
+\newcommand\mvarcolor{\color{purple}}
+
+%\newcommand\efor[1]{\kw{for}\hspace{.3em} {#1} \mathrel{\kw{join}} }
+\newcommand\eforloop[1]{\kw{for}\hspace{.33em} {#1} \hspace{.33em}}
+\newcommand\eforjoin{\kw{join}\hspace{.33em}}
+\newcommand\eforwhen[1]{\kw{when}\hspace{.33em} {#1} \hspace{.33em}}
+\newcommand\efor[1]{\eforloop{#1} \eforjoin}
+\newcommand\eforvar[2]{\efor{{#1} \in {#2}}}
+\newcommand\ewhen[1]{\kw{when}~({#1})~}
+\newcommand\efixis[1]{\kw{fix}~{#1}~\kw{is}\;}
+%% \renewcommand\efixis[1]{\kw{solve}~{#1} ~\kw{is}~}
+%% \renewcommand\efixis[1]{\kw{solve}~{#1} =}
+\newcommand\eset[1]{\{{#1}\}}
+\newcommand\esetfor[2]{\eset{{#1} ~|~ {#2}}}
+\newcommand\elet[1]{\kw{let}~{#1}~\kw{in}~}
+\newcommand\eletfix[2]{\kw{let rec}~ {#1} = {#2}}
+\newcommand\eletfixin[2]{\eletfix{#1}{#2} ~\kw{in}~}
+\newcommand\zero{\ensuremath{\boldsymbol 0}}
+\newcommand\join{\sqcup}
+\newcommand\efalse{\text{false}}
+\newcommand\etrue{\text{true}}
+
+\newcommand\naive{na\"ive}
+\newcommand\Naive{Na\"ive}
+
+\let\oldcup\cup
+\let\oldsqcup\sqcup
+\renewcommand\cup{\mathrel{\oldcup}}
+\renewcommand\sqcup{\mathrel{\oldsqcup}}
+
+\newcommand\hilite{\color{Rhodamine}}
+\newcommand\hi[1]{{\hilite#1}}
+%\newcommand\hilitetime{\color{Orange}}\newcommand\hiti[1]{{\hilitetime#1}}
+
+\newcommand\ensuretext[1]{\ifmmode\text{#1}\else{#1}\fi}
+\newcommand\todocolor{\color{OrangeRed}}
+\newcommand\todo[1]{\PackageWarning{fixme}{#1}{\todocolor\ensuretext{\bfseries\sffamily[{#1}]}}}
+\newcommand\XXX{\todo{XXX}}
+
+
+\title{Semi\naive\ evaluation in\\ Datafun and beyond}
+%\subtitle{bottom-up logic \,$\color{Gray}\bowtie$\, \color{black}higher-order functions}
+\author{michael arntzenius}
+\date{December 2021}
+
+\newcommand\interlude{\Huge\standout\displayfamily}
+
+
+\begin{document}
+  \Large
+
+  \begin{frame}[plain,noframenumbering]
+    \displayfamily
+    \centering
+    \vfill
+    {\standout\Huge\itshape\inserttitle\par}\vspace{3ex}
+    {\scshape michael arntzenius}\par\vspace{1ex}
+    {\addfontfeatures{Numbers=Tabular}2021–12–10}
+    \vfill
+  \end{frame}
+
+
+  \begin{frame}
+    \begin{enumerate}
+    \setlength\itemsep{3ex}
+    %% \setlength\itemsep{\baselineskip}
+    \item \textbf{Monotone fixed points}
+      \\[1ex]
+      
+      {\small \emph{Datafun: A Functional Datalog}\\
+        {Arntzenius and Krishnaswami}, \scshape icfp 2016 \par}
+      
+    \item \textbf{Incremental} monotone fixed points
+      \\[1ex]
+
+      {\small \emph{Semi\naive\ Evaluation for a Higher-Order Functional
+          Language}\\
+        {Arntzenius and Krishnaswami}, \scshape popl 2020 \par}
+      
+    \item \textbf{Concurrent} incremental monotone fixed points
+
+      {\small \itshape work-in-progress}
+    \end{enumerate}
+  \end{frame}
+
+
+  \begin{frame}
+    \textsc{pop quiz}\\ How can you compute each of the following?
+    \vspace{1ex}
+    \begin{itemize}
+    \item Graph reachability
+    \item Regular expression matching
+    \item Abstract interpretation
+    \end{itemize}
+
+    \vspace{1ex}
+
+    \textsc{answer}\\ \itshape Iterate a monotone map to its fixed point.
+
+    \vspace{\baselineskip}
+
+%% They're all expressible as, and computable by, iterating a
+%%     monotone map until it reaches a fixed point.
+  \end{frame}
+
+
+  \begin{frame}{}
+    \centering \strong{Datalog!} 
+    \begin{fleqn}[0em]
+    \begin{minipage}[t][.35\paperheight]{\paperwidth}
+      \[\begin{array}{l}
+      \n{reach}(\c{start}).\\
+      \n{reach}(Y) \gets \n{reach}(X)\conj \n{edge}(X,Y).\\[1ex]\pause
+      \n{reach2}(\c{start}).\\
+      \n{reach2}(Y) \gets \n{reach2}(X)\conj \n{edge2}(X,Y).\\[1ex]
+      \n{reach3}(\c{start}).\\
+      \n{reach3}(Y) \gets \n{reach3}(X)\conj \n{isnt-this-tedious}(X,Y).
+      \\[1ex]
+      \n{reach4}(\c{start}).\\
+      \n{reach4}(Y) \gets \n{reach4}(X)\conj \n{yes-it-is-rather}(X,Y).
+      \\[1ex]
+      \n{reach5}(\c{start}).\\
+      \n{reach5}(Y) \gets \n{reach5}(X)\conj \n{yes-it-is-rather}(X,Y).\\
+      \end{array}\]
+    \end{minipage}
+    \end{fleqn}
+  \end{frame}
+
+
+  \begin{frame}{}{}
+    {\centering\strong{\hspace{.1em}Datalog?}\par}
+    \begin{fleqn}[0em]
+      \[
+      \begin{array}{l}
+        \n{distance}(\c{start}, 0).\\
+        \n{distance}(Y, D+L) \gets \n{distance}(X, D) \conj \n{edge}(X,Y,L).
+      \end{array}
+      \]
+    \end{fleqn}
+    \pause
+
+    This finds \emph{all} distances to each node, not the shortest!
+    \vspace{1.75\baselineskip}
+  \end{frame}
+
+  \begin{frame}
+    \LARGE
+    \begin{center}
+      \begin{tabular}{@{}lcl@{}}
+        \scshape\color{Blue} datalog && \scshape\color{Blue} datafun
+        \\[.5ex]
+        \color{Red!80!black} repeat yourself &$\to$&
+        \color{Green!80!black} functions
+        \\
+        \color{Red!80!black} sets only &$\to$&
+        \color{Green!80!black} semilattice types
+      \end{tabular}
+    \end{center}
+  \end{frame}
+
+  %% \begin{frame}
+  %%   \LARGE
+  %%   \begin{center}
+  %%     \setlength\tabcolsep{1em}
+  %%     \begin{tabular}{@{}lcc@{}}
+  %%       \scshape\color{Blue} datalog
+  %%       & \color{Red!80!black} repeat yourself
+  %%       & \color{Red!80!black} sets only
+  %%       \pause
+  %%       \\
+  %%       & $\downarrow$ & $\downarrow$
+  %%       \\
+  %%       \scshape\color{Blue} datafun
+  %%       & \color{Green!80!black} functions
+  %%       & \color{Green!80!black} semilattice types
+  %%     \end{tabular}
+  %%   \end{center}
+  %% \end{frame}
+
+
+  \newcommand\nodecolor[1]{{\alt<2->{\color{ForestGreen}}{}#1}}
+  \newcommand\edgecolor[1]{{\alt<2->{\color{RoyalBlue}}{}#1}}
+
+  \begin{frame}
+    \centering
+    \begin{fleqn}
+      \textsc{datalog}
+      \[\begin{array}{l}
+      \n{reach}(\c{start}).\\
+      \n{reach}(Y) \gets \n{reach}(X)\conj \n{edge}(X,Y).
+      \end{array}
+      \]
+      \vspace{0pt}\pause
+
+      \textsc{datafun}
+      \[
+      \begin{array}{l}
+      \n{reachable} \isa
+      \nodecolor{\tnode} \to
+      \edgecolor{\tset{(\tnode \x \tnode)}}
+      \to {\alt<3->{\mvarcolor}{}\tset \tnode}\\
+      %% \n{reachable} \;\n{start} \;\n{edge} = \pause
+      \n{reachable}
+      \alt<2>{\hphantom{{}\isa{}}}{\;} \nodecolor{\n{start}}
+      \alt<2>{\hphantom{i\to{}}}{\;} \edgecolor{\n{edge}}
+      = \pause
+      \\\quad
+      %% \eletfix{\mvar R}{\uncover<4->{\eset{\n{start}} \cup
+      %%   \esetfor{y}{x \in \mvar R, (x,y) \in \n{edge}}}}
+      %% \\\quad
+      %% \kw{in}~\mvar R
+      \efixis{\mvar R}
+      \\\qquad\pause
+      \eset{\n{start}}
+      \cup
+      \esetfor{y}{x \in \mvar R, (x,y) \in \n{edge}}
+      \end{array}\]
+    \end{fleqn}
+  \end{frame}
+
+
+  %% TODO: connect this up somehow, either arrows or hilighting in different
+  %% colors.
+  %\newcommand\setcolor[1]{{\alt<3->{\color{ForestGreen}}{}#1}}
+  \newcommand\functioncolor[1]{{\alt<2->{\color{ForestGreen}}{}#1}}
+  \newcommand\fixptcolor[1]{{\alt<3->{\mvarcolor}{}#1}}
+  \newcommand\setcolor[1]{{\alt<4->{\color{RoyalBlue}}{}#1}}
+
+  \begin{frame}
+    \[
+      \begin{array}{l}
+      \functioncolor{\n{reachable} \;\n{start} \;\n{edge} = }
+      \\\quad
+      \fixptcolor{\efixis{R}}
+      \\\qquad
+      \setcolor{\eset{\n{start}} \cup
+        \esetfor{y}{x \in {\color<5->{purple} R}, (x,y) \in \n{edge}}}
+    \end{array}\]
+
+    \pause
+    \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016, popl 2020]}
+    is:
+    \begin{itemize}\setlength\itemsep{.5ex}
+    \item a \functioncolor{pure functional language} \pause
+    \item with \fixptcolor{monotone fixed points} \pause
+    \item and \setcolor{sets \& set/semilattice comprehensions} \pause
+    \item where \emph{the type system tracks monotonicity}.
+    \end{itemize}
+    \vspace{\baselineskip}
+
+    %% \strong{Datafun}\textsuperscript{\sffamily\scshape[icfp 2016]} is a
+    %% simply-typed \fn-calculus where \emph{types are posets} and \emph{all functions are
+    %% monotone},
+    %% %
+    %% extended with\vspace{1ex}
+    %% \begin{itemize}
+    %% \item a finite set datatype \& set comprehensions;
+    %% \item a bottom-up monotone fixed point operator;
+    %% \item and a \emph{discreteness} comonad, $\iso$.
+    %% \end{itemize}
+
+  \end{frame}
+
+
+  \newcommand\discolor{\color{RoyalBlue}}
+
+  \begin{frame}{monotonicity types}
+    \centering
+
+    \setlength\tabcolsep{1em}
+    \begin{tabular}{clc}
+      \textbf{Type} & \textbf{Meaning} & \textbf{Ordering} %& \textbf{Join}
+      \\\midrule
+%        $\N$ & naturals & $0 < 1 < 2 < \hdots$ \\
+      $\tbool$ & booleans & $\efalse < \etrue$ %& logical or
+      \\
+      $\tset A$      & finite subsets of $A$ & ${\subseteq}$ %& union
+      \\
+%        $\tmap A B$ & finite maps from $A$ to $B$ & \multicolumn{1}{c}{pointwise}\\
+      $A \to B$   & functions & \multicolumn{1}{c}{pointwise}\\
+      $A \mto B$  & \textbf{monotone} functions & \multicolumn{1}{c}{pointwise}
+    \end{tabular}
+
+    \pause
+    \[\begin{array}{l}
+      \n{member} \isa {\discolor \N \to{}} {\mvarcolor\tset{\N} \mto{}} \tbool\\
+      \n{member}\; {\discolor x}\; \mvar{S} = \exists({\discolor y} \in \mvar{S})\;
+      {\discolor x} = {\discolor y}
+    \end{array}\]
+
+    \pause
+    \pbox{.8\textwidth}{
+    variables are \emph{discrete} {\discolor $x,y,z$}\\
+    \phantom{variables are }\hspace{-2.28em}or \emph{monotone}
+    {\mvarcolor $X,Y,Z$}
+    }
+
+  \end{frame}
+
+
+  %% TODO: reduce number of examples I'm using here.
+  %% start with exists query
+  %% then do set comprehensions
+  \begin{frame}{semilattice comprehensions}
+    How does this expression \emph{run}?
+
+    \begin{fleqn}
+      \[\def\arraystretch{1.5}
+      \setlength\arraycolsep{.4em}
+      \begin{array}{rl}
+        & \exists (y \in \eset{1,2})\; x = y
+        \\\pause
+        \desugars& \eforvar{y}{\eset{1,2}} x = y
+        \\\pause
+        \text{\small which is a big lattice join:}
+        &\displaystyle \bigsqcup_{y \in \eset{1,2}} (x = y)
+        \\\pause
+        \text{\small i.e. boolean disjunction:}
+        %% &\displaystyle \bigvee_{y \in \eset{1,2}} (x = y)
+        %% \\\pause =
+        & (x = 1) \vee (x = 2)
+      \end{array}\]
+    \end{fleqn}
+
+  \end{frame}
+
+  \begin{frame}{semilattice comprehensions}
+
+    %% \large
+    \begin{fleqn}
+      \[
+      \begin{array}{rcl}
+        \exists (y \in S)\; x = y
+        &\desugars&
+        \eforvar{y}{S} x = y
+        \\[3ex]
+        \setfor{y}{x \in R, (x,y) \in \n{edge}}
+        &\desugars&
+        \eforloop{x_1 \in R}
+        \\
+        &&\quad \eforloop{(x_2,y) \in \n{edge}}
+        \\
+        &&\qquad
+        \eforwhen{x_1 = x_2} \eforjoin \eset{y}
+        \\[2ex]
+      \end{array}
+      \]
+    \end{fleqn}
+
+    %% \pause
+    %% All of relational algebra is derivable given $(\eforloop{x \in S} \eforjoin e)$!
+
+  \end{frame}
+
+
+  \newcommand\tdist{\tpname{dist}}
+  
+  \begin{frame}{fixed points}
+    \setlength\tabcolsep{1em}
+    \large
+    \begin{tabular}{@{}clc@{}}
+      \textbf{Type} & \textbf{Meaning} & \textbf{Ordering} %& \textbf{Join}
+      \\\midrule
+      $\tset A$      & finite subsets of $A$ & ${\subseteq}$ %& union
+      \\
+      $\tmap A B$ & dictionaries w/ $A$ keys and $B$ values
+      & pointwise
+      \\
+      $\tdist$ & distances under minimum
+      & $\infty < ... < 1 < 0$
+    \end{tabular}
+
+    \vspace{\baselineskip}
+    \begin{fleqn}
+      \[\begin{array}{l}
+      \n{shortest} \isa \tnode \to \tset{(\tnode \x \tnode \x \tpname{dist})}
+      \to \tmap{\tnode}{\tpname{dist}}
+      \\
+      \n{shortest} \;\n{start} \;\n{edge} =
+      \\\quad
+      \efixis{\mvar R} \pause
+      \\\qquad
+      \phantom{\sqcup{}}
+      \eset{\n{start} \mapsto \text{\liningnums{0}}}
+      %\sqcup {}
+      \\
+      \qquad \sqcup
+      (\eforloop{(x \mapsto \mvar{D}) \in \mvar R}\\
+      \qquad\phantom{\sqcup (} \quad \eforloop{(x,y,l) \in \n{edge}}\\
+      \qquad\phantom{\sqcup (} \qquad \eforjoin \eset{y \mapsto \mvar{D} + l})
+      \end{array}
+      \]
+    \end{fleqn}
+
+  \end{frame}
+
+
+  \begin{frame}
+
+    \begin{center}
+      \begin{tabular}{@{}lcl@{}}
+        \scshape\color{Blue} datalog && \scshape\color{Blue} datafun
+        \\[.5ex]
+        \color{gray} repeat yourself &&
+        \color{gray} functions
+        \\
+        \color{gray} sets only &&
+        \color{gray} semilattice types
+        \\
+        stratified recursion
+        & $\to$
+        & monotone fixed points
+        \\
+        conjunctive queries
+        & $\to$
+        & set/semilattice comprehensions
+      \end{tabular}
+    \end{center}
+
+    %% \begin{center}
+    %%   \setlength\tabcolsep{1em}
+    %%   \begin{tabular}{@{}lcc@{}}
+    %%     \scshape\color{Blue} datalog
+    %%     & \color{Red!80!black} repeat yourself
+    %%     & \color{Red!80!black} sets only
+    %%     \\
+    %%     & $\downarrow$ & $\downarrow$
+    %%     \\
+    %%     \scshape\color{Blue} datafun
+    %%     & \color{Green!80!black} functions
+    %%     & \color{Green!80!black} semilattice types
+    %%   \end{tabular}
+    %% \end{center}
+
+    %% \vspace{3ex}
+
+    %% To make Datalog into a higher-order functional language:
+
+    %% \begin{enumerate}
+    %% \item Handle \emph{fixed points} by tracking monotonicity with types.
+    %% \item Generalize \emph{relational algebra} using semilattice comprehensions.
+    %% \end{enumerate}
+
+  \end{frame}
+
+
+  \begin{frame}
+    \interlude
+    \begin{center}
+      {\upshape\scshape ii}
+      \\
+      \emph{incremental}
+      \\
+      monotone fixed points
+      %% \\
+      %% (or, \emph{semi\naive\ evaluation})
+    \end{center}
+  \end{frame}
+
+
+  \begin{frame}
+    \[\n{step}\;R =
+    {\color<-2>{RoyalBlue}\{\n{start}\}}
+    \cup
+    {\color<-2>{Red}\setfor{y}{x \in R, (x,y) \in \n{edge}}}
+    \]
+
+    \pause\begin{align*}
+      R_0 &= \emptyset
+      & \uncover<3->{dR_0} &\uncover<3->{= }\uncover<4->{\color<-5>{RoyalBlue}\{\n{start}\}}
+      \\
+      R_{i+1} &= \makebox[4.3em][l]{$\alt<6->{\hi{R_i \cup dR_i}}{\n{step}\;R_i}$}
+      & \uncover<3->{dR_{i+1}} &\uncover<3->{= }\uncover<5->{\color<-5>{Red} \setfor{y}{x \in dR_i, (x,y) \in \n{edge}}}
+    \end{align*}
+
+    \centering\alt<3->{
+      \includegraphics[height=45mm]{imgs/focus-1240.jpg}
+    }{
+      \includegraphics[height=45mm]{imgs/focus-0946.jpg}
+    }
+    \vspace{1ex}
+  \end{frame}
+
+
+  \begin{frame}{}{}\LARGE\centering
+    \setlength\parskip{2ex}
+
+    {\scshape semi\naive\ evaluation}
+
+    {means}
+
+    {computing the \strong{change} between iterations}
+  \end{frame}
+
+
+  \newcommand\chgto\rightsquigarrow
+  \newcommand\chgat[4]{{\ensuremath{{#2} \dblcolon_{#1} {#3} \chgto {#4}}}}
+  \newcommand\chg[3]{{\ensuremath{{#1} \dblcolon {#2} \chgto {#3}}}}
+
+  \begin{frame}{incremental $\lambda$-calculus \textsuperscript{\normalshape\sffamily[%
+          Cai et al \textsc{pldi 2014},
+          Giarrusso's thesis \textsc{2017}]}}
+    %% \large
+
+    Each type $A$ has a type $\standout\Delta A$ of \emph{increasing changes} and a relation $\standout\chgat{A}{dx} x y$ meaning ``$dx : \Delta A$ changes $x : A$ into $y : A$''.
+    %
+    \begin{mathpar}
+      \Delta(\tset{A}) = \tset{A}
+
+      \chgat{\tset A}{dx}{x}{x \cup dx}
+    \end{mathpar}
+
+    \pause To incrementalize, we transform programs to \emph{push changes
+    forward}, finding the change $\standout\delta(e)$ to an
+    expression with respect to its free monotone variables, e.g.
+    %
+    \begin{mathpar}
+      \delta(S \cup T) = dS \cup dT
+
+      \delta(S \setminus t) = dS \setminus t
+      \\%\pause
+      \standout
+      \delta(\eforvar{x}{s} e)?
+    \end{mathpar}
+  \end{frame}
+
+  %% \begin{frame}%{change in datafun}
+  %%   \large
+
+  %%   Every type $A$ gets a type $\standout\Delta A$ of \emph{increasing} changes,
+  %%   e.g.
+  %%   %
+  %%   \begin{mathpar}
+  %%     \Delta(\tset{A}) = \tset{A}
+  %%     %% \Delta(A \x B) = \Delta A \x \Delta B
+  %%   \end{mathpar}
+
+  %%   \pause
+  %%   We formalize this via a ternary relation $\standout\chgat{A}{dx}{x}{y}$, meaning ``$dx$ changes $x$ into $y$'', e.g.
+
+  %%   \[
+  %%   \chgat{\tset A}{dx}{x}{x \cup dx}
+  %%   \]
+
+  %%   \pause
+  %%   To incrementalize, we \emph{push changes through the program},
+  %%   finding the change $\standout\delta(e)$ to an expression, e.g.
+  %%   %
+  %%   \begin{mathpar}
+  %%     \delta(s \cup t) = ds \cup dt
+
+  %%     \delta(s \setminus t) = ds \setminus t
+  %%     \\%\pause
+  %%     \standout
+  %%     \delta(\eforvar{x}{s} e)?
+  %%   \end{mathpar}
+  %% \end{frame}
+
+
+  \begin{frame}
+    \begin{fleqn}[1em]
+      \begin{align*}
+        \delta(\eforvar{x}{S}{e})
+        &=
+        \phantom{{}\join{}}
+        (\eforvar x {dS} e)
+        \\
+        &\phantom{{}={}} {}\join
+        (\eforvar x {S \cup dS}
+        \delta(e))
+      \end{align*}
+
+      \pause
+      For example:
+
+      \[
+      \begin{array}{rl}
+        & \delta(\eforvar{x}{S} \n{member} \;x \;T)
+        \\[.5ex]\pause
+        =& %\phantom{\join{}}
+        (\eforvar x {dS} \n{member} \;x \;T)\\
+        & \join (\eforvar x {S \cup dS}
+        {\standout\delta(\n{member} \;x \;T)})
+        \\[.5ex]\pause
+        =& %\phantom{\join{}}
+        (\eforvar x {dS} \n{member} \;x \;T)\\
+        &
+        \join (\eforvar x {S \cup dS}
+        {\standout \n{member} \;x \;dT})
+        \\[.5ex]\pause
+        \approx& (dS \mathrel{\cap?} T) \vee ((S \cup dS) \mathrel{\cap?} dT)
+      \end{array}
+      \]
+    \end{fleqn}
+  \end{frame}
+
+
+  \begin{frame}
+    \LARGE
+    \def\arraystretch{1.25}
+    \[\begin{array}{rcl}
+      \D(\tset A) &=& \tset A
+      \\\pause
+      \D(A \x B) &=& \D A \x \D B
+      \\\pause
+      \D(A \mto B) &=& \standout\boldsymbol ?
+    \end{array}\]
+  \end{frame}
+
+
+  \newcommand\underexplain[4]{%
+    \underaccent{%
+      \parbox[t][#1]{#2}{\sffamily\centering\vspace{4pt}\small#3}
+    }{#4}}
+
+  \newcommand\chgatcov[4]{{\uncover<2->{{#2} \dblcolon_{#1}} {#3} \chgto {#4}}}
+  \begin{frame}{}
+    \LARGE
+    \begin{mathpar}
+      \D(A \mto B)
+      = \underexplain{}{1.5cm}{original input}{A}
+      \to \underexplain{}{1.2cm}{change to input}{\D A}
+      \mto \underexplain{}{1.4cm}{change in output}{\D B}
+      \vspace{1ex}
+      \\\pause
+      \chgat{A \to B}{df}{f}{\alt<6->{\hi f}{g}} \iff \pause
+      \infer{
+        \chgat{A}{dx}{x}{y}
+      }{
+        \uncover<4->{\chgat{B}{\uncover<5->{df\;x\;dx}}{f\;x}{\alt<6->{\hi f}{g}\;y}}
+      }
+    \end{mathpar}
+
+    \setbeamercovered{invisible} % I don't know why/whether we need this.
+    \vspace{3ex}
+    \centering\pause\pause\pause
+    In this case, we call $df$ a
+    \strong{derivative} of $f$.
+
+    \vspace{\baselineskip}
+  \end{frame}
+
+
+  \begin{frame}
+      \begin{align*}
+        \n{step} &\isa \,\tset A\, \mto \,\tset A\,
+        %% & \uncover<2->{R_i} &\uncover<2->{= \n{step}^i \;\emptyset}
+        \\
+        \n{step}' &\isa
+        \underexplain{}{2cm}{known world}{\,\tset A\,}
+        \to \underexplain{}{1.8cm}{frontier}{\,\tset A\,}
+        \mto \underexplain{}{1.8cm}{new frontier}{\,\tset A\,}
+        %% & \uncover<3->{dR_i} &\uncover<3->{\dblcolon R_i \chgto \n{step}\;R_i}
+      \end{align*}
+
+      \textsc{strategy}
+      \begin{align*}
+        \underexplain{}{2cm}{known world}{{R_i}} &= \n{step}^i\;\emptyset
+        &\uncover<2->{\chg{\underexplain{}{1.5cm}{frontier}{{dR_i}}}{R_i}{\n{step}\;R_i}}
+      \end{align*}
+      \pause\pause
+
+      %\setbeamercovered{transparent}
+      \textsc{implementation}
+      \begin{align*}
+        R_0 &= \emptyset %\pause
+        & dR_0 &= \uncover<4->{\n{step}\;\emptyset} %\pause
+        %\dblcolon \emptyset \chgto \n{step}\;\emptyset
+        \\
+        R_{i+1} &= \uncover<5->{R_i \cup dR_i} %\pause
+        & dR_{i+1} &= \uncover<6->{\n{step}' \;R_i \;dR_i}
+        %\dblcolon \n{step}\;R_i \chgto \n{step}\;(R_i \cup dR_i)
+      \end{align*}
+      \vspace{\baselineskip}
+  \end{frame}
+
+
+  \begin{frame}
+
+    \begin{center}
+      \begin{tabular}{@{}lcl@{}}
+        \scshape\color{Blue} datalog && \scshape\color{Blue} datafun
+        \\[.5ex]
+        \color{gray} repeat yourself &&
+        \color{gray} functions
+        \\
+        \color{gray} sets only &&
+        \color{gray} semilattice types
+        \\
+        \color{gray} stratified recursion
+        && \color{gray} monotone fixed points
+        \\
+        \color{gray} conjunctive queries
+        && \color{gray} set/semilattice comprehensions
+        \\
+        semi\naive\ evaluation
+        & $\to$
+        & incrementalize the inner loops
+      \end{tabular}
+    \end{center}
+    \vspace{2ex}
+
+    {\small 
+    \emph{Semi\naive\ Evaluation for a Higher-Order Functional
+      Language}\\
+         {Arntzenius and Krishnaswami}, \scshape popl 2020 \par}
+    
+  \end{frame}
+
+  %% \begin{frame}{key ideas}
+  %%   \large
+  %%   \begin{center}
+  %%     \setlength\tabcolsep{.67em}
+  %%     \begin{tabular}{@{}lccc@{}}
+  %%       \scshape\color{Blue} datalog
+  %%       & \color{Red!80!black} repeat yourself
+  %%       & \color{Red!80!black} sets only
+  %%       & semi\naive\ evaluation
+  %%       \\
+  %%       & $\downarrow$ & $\downarrow$
+  %%       \\
+  %%       \scshape\color{Blue} datafun
+  %%       & \color{Green!80!black} functions
+  %%       & \color{Green!80!black} semilattice types
+  %%       & incremental evaluation
+  %%     \end{tabular}
+  %%   \end{center}
+
+  %%   To make Datalog into a higher-order functional language:
+
+  %%   \begin{enumerate}
+  %%   \item Handle \emph{fixed points} by tracking monotonicity with types.
+  %%   \item Generalize \emph{relational algebra} using semilattice comprehensions.
+
+  %%   \item \standout
+  %%     To make fixed points efficient,  \emph{incrementalize} the inner loop by \emph{pushing changes through}.\\[1ex]
+
+  %%   {\small\itshape (\strong{Many} details omitted here, see the {\scshape popl} 2020 paper for more.)}
+  %%   \end{enumerate}
+
+  %% \end{frame}
+
+
+  \begin{frame}
+    \interlude
+    \begin{center}
+      {\upshape\scshape iii}
+      \\
+      \emph{concurrent} incremental
+      \\
+      monotone fixed points
+    \end{center}
+  \end{frame}
+
+\end{document}
