@@ -240,7 +240,9 @@ $s$ and $t$:
 \begin{code}
   \pwild \cap \pwild \isa \tseteq A \to \tseteq A \to \tseteq A\\
   %% NB. \kern -.5pt to get "member" closer to open paren.
-  s \cap t = \efor x {s} \ewhen{\kern -.5pt \mem \<\eboxvar x \<t} \eset{\dvar x}
+  s \cap t = \efor x {s}
+  \ewhen{\kern -.5pt \mem \<\eboxvar x \<t}
+  \eset{\dvar x}
 \end{code}
 
 \noindent
