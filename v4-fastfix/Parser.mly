@@ -1,6 +1,7 @@
 %parameter <B: Lang.SURFACE>
 
 %{
+    open Util
     open Type
 %}
 
@@ -41,7 +42,7 @@ tp_atom:
          | "bool" -> `Bool
          | "str" -> `String
          | "nat" -> `Nat
-         | _ -> $syntaxerror (* parseError "unrecognized type name" *) }
+         | _ -> parseError "unrecognized type name" }
 | LBRACK tp RBRACK { `Box $2 }
 | LBRACE eqtp RBRACE { `Set $2 }
 | LPAREN tp RPAREN { $2 }
@@ -49,7 +50,7 @@ tp_atom:
 // Need this because `Set takes an eqtp.
 eqtp: tp { match firstOrder $1 with
            | Some a -> a
-           | None -> $syntaxerror (* parseError "not an eqtp" *) }
+           | None -> parseError "not an eqtp" }
 
 // ===== Expressions =====
 // TODO: ifThenElse, proj
@@ -93,7 +94,7 @@ term_atom:
 | EMPTY { B.union [] }
 | STRING { B.string $1 }
 | BOOL { B.bool $1 }
-| INTEGER { if $1 < 0 then $syntaxerror else B.nat $1 }
+| INTEGER { if $1 < 0 then (parseError "the naturals don't include negative numbers") else B.nat $1 }
 | LPAREN RPAREN { B.tuple [] }
 | LPAREN term RPAREN { $2 }
 | LBRACK term RBRACK { B.box $2 }
