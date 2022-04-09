@@ -13,14 +13,17 @@ class Preord a => Semilat a where
   empty :: a
   union :: a -> a -> a
   unions :: [a] -> a
+  -- difference minimization. a <= b implies union a (diff b a) = b.
+  diff :: a -> a -> a
   empty = unions []
   union x y = unions [x,y]
+  diff x y = x -- always valid but not always efficient
 
 instance Preord Bool where x <: y = not x || y
 instance Ord a => Preord (Set a) where (<:) = Set.isSubsetOf
 instance Semilat Bool where empty = False; union = (||); unions = or
 instance Ord a => Semilat (Set a) where
-  empty = Set.empty; union = Set.union; unions = Set.unions
+  empty = Set.empty; union = Set.union; unions = Set.unions; diff = Set.difference
 instance Preord () where () <: () = True
 instance Semilat () where empty = (); unions _ = ()
 instance (Preord a, Preord b) => Preord (a,b) where
@@ -30,6 +33,7 @@ instance (Semilat a, Semilat b) => Semilat (a,b) where
   union (a,x) (b,y) = (union a b, union x y)
   unions ts = (unions lefts, unions rights)
     where (lefts, rights) = unzip ts
+  diff (a,x) (b,y) = (diff a b, diff x y)
 -- Problem: what do I do about n-ary tuples?
 
 set :: Ord a => [a] -> Set a
@@ -54,9 +58,16 @@ fix f = loop 0 empty
           where x' = f x
 
 -- Relies on the fact that the delta type of a semilattice type is itself.
+semifixNaive :: Semilat a => ((a -> a), (a -> a -> a)) -> a
+semifixNaive (f, df) = loop 0 empty (f empty)
+  where loop i x dx =
+          tracer "semifix" i $
+          if dx <: x then x
+          else loop (i+1) (union x dx) (df x dx)
+
 semifix :: Semilat a => ((a -> a), (a -> a -> a)) -> a
 semifix (f, df) = loop 0 empty (f empty)
   where loop i x dx =
           tracer "semifix" i $
           if dx <: x then x
-          else loop (i+1) (union x dx) (df x dx)
+          else loop (i+1) (union x dx) (df x dx `diff` x)
