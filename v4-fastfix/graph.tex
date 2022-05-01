@@ -10,6 +10,34 @@
 
 \begin{document}
 
+  \begin{tikzpicture}[baseline=(current bounding box.center)]
+    \begin{loglogaxis}[
+        title={\scshape transitive closure with self-loops},
+        xlabel={Number of nodes},
+        ylabel={Time (seconds)},
+        height=132.88pt, width=213pt, % golden
+        %height=140pt, width=210pt, % 2:3
+        %% legend entries={semi\naive,{semi\naive\ minimizing}},
+        %% legend entries={w/o minimizing diffs, minimizing diffs},
+        legend cell align=left,
+        legend pos = north west,
+        legend style={
+          font=\footnotesize,
+          draw=none,
+          nodes={inner sep=3pt,}
+        },
+        %% xtick = {120, 160, ..., 320},
+        %% ytick = {0, 60, ..., 260},
+      ]
+      \addplot [color=blue,mark=*] table [x=n,y=minimized] {trans-loop-extended.dat};
+      \addplot [color=red,mark=square*] table [x=n,y=normal_loopy] {trans-loop-extended.dat};
+      \addplot [color=black,mark=triangle*] table [x=n,y=minimized_loopy] {trans-loop-extended.dat};
+      \addplot [color=green,mark=x] table [x=n,y=normal] {trans-loop-extended.dat};
+    \end{loglogaxis}
+  \end{tikzpicture}
+
+  \clearpage
+
 \begin{figure}[t!]
   \centering
   \begin{tikzpicture}[baseline=(current bounding box.center)]

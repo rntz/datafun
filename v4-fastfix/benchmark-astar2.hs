@@ -14,7 +14,7 @@ type RegexpSemi = (DFString, DFStringDelta) -> (Int, Int) -> Set Int
 makeDFString :: String -> DFString
 makeDFString s = fromList (zip [0..] (map Data.Char.ord s))
 
-main = benchmark bench
+main = benchmark ["seminaive", "seminaive_simple", "seminaive_raw", "naive"] bench
 bench i = do
   let n = 600 + 100 * i
   string <- evaluate (makeDFString (replicate n 'a')) -- compute input string
@@ -22,7 +22,7 @@ bench i = do
   semiSimpleT <- time (astar2_semi_simple (string, Data.Set.empty) (0, 0))
   semiRawT <- time (astar2_semi_raw (string, Data.Set.empty) (0, 0))
   naiveT <- time (astar2 string 0)
-  return (n, semiT, semiSimpleT, semiRawT, naiveT)
+  return (n, [semiT, semiSimpleT, semiRawT, naiveT])
 
 
 -- Compiled Datafun code, naive and seminaive.

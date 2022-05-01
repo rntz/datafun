@@ -1,5 +1,5 @@
 -- The Datafun runtime.
-module Runtime (Set, Preord (..), Semilat (..), set, guard, forIn, fix, semifix)
+module Runtime (Set, Preord (..), Semilat (..), set, guard, forIn, fix, semifix, semifixMinimized)
 where
 
 import Debug.Trace
@@ -58,15 +58,15 @@ fix f = loop 0 empty
           where x' = f x
 
 -- Relies on the fact that the delta type of a semilattice type is itself.
-semifixNaive :: Semilat a => ((a -> a), (a -> a -> a)) -> a
-semifixNaive (f, df) = loop 0 empty (f empty)
+semifix :: Semilat a => ((a -> a), (a -> a -> a)) -> a
+semifix (f, df) = loop 0 empty (f empty)
   where loop i x dx =
           tracer "semifix" i $
           if dx <: x then x
           else loop (i+1) (union x dx) (df x dx)
 
-semifix :: Semilat a => ((a -> a), (a -> a -> a)) -> a
-semifix (f, df) = loop 0 empty (f empty)
+semifixMinimized :: Semilat a => ((a -> a), (a -> a -> a)) -> a
+semifixMinimized (f, df) = loop 0 empty (f empty)
   where loop i x dx =
           tracer "semifix" i $
           if dx <: x then x

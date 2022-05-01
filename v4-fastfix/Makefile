@@ -31,7 +31,7 @@ test/%-seminaive-simple.hs: test/%.df _build/default/seminaive_simple.exe
 
 # The benchmarks. NBENCH is the number of different input sizes to test on (the
 # number of different data points we'll get on the x-axis of the graph).
-BENCHES := trans astar astar2
+BENCHES := trans astar astar2 trans-loop
 BENCH_PROGS := $(addprefix benchmark-,$(BENCHES))
 BENCH_DATS := $(addsuffix .dat,$(BENCHES))
 NBENCH ?= 13

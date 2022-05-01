@@ -4,9 +4,9 @@ import Data.Set (Set)
 import qualified Data.Set
 
 main :: IO ()
-main = benchmark bench
+main = benchmark ["seminaive", "seminaive_simple", "seminaive_raw", "naive"] bench
 
-bench :: Benchmark
+bench :: Bench
 bench i = do
   let n = i * 20 + 80
   edges <- evaluate (lineG n)   -- pre-compute the input graph.
@@ -14,7 +14,7 @@ bench i = do
   simpleT <- time (trans_semi_simple (edges, Data.Set.empty))
   rawT    <- time (trans_semi_raw (edges, Data.Set.empty))
   naiveT  <- time (trans edges)
-  return (n, semiT, simpleT, rawT, naiveT)
+  return (n, [semiT, simpleT, rawT, naiveT])
 
 -- Example graphs, parameterized by number of nodes.
 lineG :: Int -> Set (Int,Int)
