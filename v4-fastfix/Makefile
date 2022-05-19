@@ -1,15 +1,18 @@
-.PHONY: all ocaml tests benchmarks run-benchmarks repl compile clean FORCE
+.PHONY: all ocaml tests benchmarks run-benchmarks repl compile clean sparkling
+.FORCE: ocaml
 
 all: ocaml tests benchmarks
 
 # The Datafun repl & compiler, in ocaml.
-_build/default/seminaive.exe: ocaml
-_build/default/seminaive_raw.exe: ocaml
-_build/default/seminaive_simple.exe: ocaml
-_build/default/naive.exe: ocaml
-_build/default/run.exe: ocaml
+COMPILERS := naive.exe seminaive.exe seminaive_simple.exe seminaive_raw.exe
+EXES := $(addprefix _build/default/, $(COMPILERS))
 ocaml:
-	dune build datafun.cma run.exe naive.exe seminaive.exe seminaive_raw.exe seminaive_simple.exe
+	dune build datafun.cma run.exe $(COMPILERS)
+
+# this is a hack to get make -j to work properly. make seems to get confused by
+# the dependency of test/*.hs on the outputs of dune.
+$(EXES): _build/default/%.exe: ocaml
+	@true
 
 repl: _build/default/run.exe
 	rlwrap _build/default/run.exe
@@ -58,6 +61,9 @@ graph.pdf: graph.tex FORCE
 clean:
 	dune clean
 	rm -f graph.pdf *.hi *.o $(BENCH_PROGS) test/*.hs
+
+sparkling: clean
+	rm -f $(BENCH_PROGS)
 
 # Automatic recompilation.
 .PHONY: watch watch\:%

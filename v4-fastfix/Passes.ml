@@ -229,7 +229,7 @@ module Seminaive(Imp: ZERO): MODAL
    * notice if this is at first-order lattice type and turn it into "empty", which
    * means the effort of makeZero is wasted.
    *)
-  let zero (tp: eqtp) (term: Imp.term): Imp.term =
+  let _zero (tp: eqtp) (term: Imp.term): Imp.term =
     Imp.zero (tp :> rawtp) (makeZero tp term)
 
   (* φx = x                 δx = dx *)
@@ -239,10 +239,11 @@ module Seminaive(Imp: ZERO): MODAL
    * it's first-order, we can inline zero applied to it. *)
   let discvar (a: tp) (x: sym): term =
     let phix = Imp.var (phi a) x in
-    phix, match firstOrder a with
-          | Some eqa -> zero eqa phix
-          | None -> let da = delta a in
-                    Imp.zero da (Imp.var da (Sym.d x))
+    (* phix, match firstOrder a with
+     *       | Some eqa -> zero eqa phix
+     *       | None -> let da = delta a in
+     *                 Imp.zero da (Imp.var da (Sym.d x)) *)
+    phix, let da = delta a in Imp.zero da (Imp.var da (Sym.d x))
 
   (* φ(box M) = φM, δM      δ(box M) = ⟨⟩ *)
   let box (a: tp) (fTerm, dTerm: term): term =
@@ -385,9 +386,13 @@ module Seminaive(Imp: ZERO): MODAL
 end
 
 
-(* Zero-change analysis.
+(* Zero-change rewriting.
  *
- * TODO: This could be smarter. Currently, it recognizes:
+ * Replaces zero changes at lattice type with bottom.
+ * TODO: should this also replace zero changes at first-order non-lattice type,
+ * to aid simplifier? a la makeZero from Seminaive()?
+ *
+ * Recognizes zero changes in various ways. Currently, it recognizes:
  *
  * - zero changes indicated by the previous layer, which should be all
  *   derivatives of "obviously discrete" things like discrete variables,
@@ -400,7 +405,7 @@ end
  *
  * - variables bound by letIn to zero-changes it recognizes.
  *
- * and that's it! it does not recognize:
+ * It does not recognize:
  *
  * - letTuple bindings where the body is a zero-change.
  * - Variables bound by letTuple to zero-changes it recognizes.
@@ -575,7 +580,9 @@ end = struct
   let union a terms cx =
     let f tm = match tm cx with _tmX, Some _ -> [] | tmX, None -> [tmX] in
     match List.(concat (map f terms)) with
-    | [] -> empty a | elems -> full (Imp.union a elems)
+    | [] -> empty a
+    | [b] -> full b
+    | elems -> full (Imp.union a elems)
 
   let forIn a b x set body cx =
     match set cx, body cx with
