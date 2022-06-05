@@ -39,21 +39,24 @@ let proj tps i term = match List.length tps, i with
   | 2, 1 -> call "snd" [term]
   | _, _ -> todo "projection from ternary or larger tuples unimplemented"
 
+let set _a = function
+  (* do we need this case? I guess it might be more efficient?
+   * but by omitting it we avoid dependency on any module except Runtime.hs *)
+  (* | [] -> string "Data.Set.empty" *)
+  | terms -> call "set" [listOf terms]
+
 (* NB. You'd think we could just generate "empty" here and let Haskell's
  * typeclasses do the work for us, but if Haskell can't infer the type of
  * such an expression it gets mad. So we make it explicit. *)
 let rec empty: tp semilat -> term = function
   | `Bool -> string "False"
   | `Nat -> string "0"
-  | `Set _ -> string "Data.Set.empty"
+  | `Set a -> set a []
   | `Tuple tps -> tuple (List.map (fun tp -> tp, empty tp) tps)
   (* NB. Even if we don't treat functions as semilattice types in source code,
    * Simplify can generate them by rewriting (λx.⊥) → ⊥. *)
   | `Fn(a,b) -> lam a b (Sym.fresh "_") (empty b)
 
-let set _a = function
-  | [] -> string "Data.Set.empty"
-  | terms -> call "set" [listOf terms]
 let union tp = function
   | [] -> empty tp
   | [tm] -> tm
