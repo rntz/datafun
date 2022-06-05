@@ -35,6 +35,7 @@ rule token = parse
   | "case" {CASE}
   | "if" {IF} | "then" {THEN} | "else" {ELSE}
   | "fix" {FIX} | "is" {IS}
+  | "pi1" {PI1} | "pi2" {PI2}
 
   (* literals *)
   | "true" {BOOL(true)}

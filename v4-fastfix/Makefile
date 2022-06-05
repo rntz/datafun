@@ -1,12 +1,11 @@
-.PHONY: all ocaml tests benchmarks run-benchmarks repl compile clean sparkling
-.FORCE: ocaml
+.PHONY: all ocaml tests benchmarks run-benchmarks repl compile clean sparkling FORCE
 
 all: ocaml tests benchmarks
 
 # The Datafun repl & compiler, in ocaml.
 COMPILERS := naive.exe seminaive.exe seminaive_simple.exe seminaive_raw.exe
 EXES := $(addprefix _build/default/, $(COMPILERS))
-ocaml:
+ocaml: FORCE
 	dune build datafun.cma run.exe $(COMPILERS)
 
 # this is a hack to get make -j to work properly. make seems to get confused by
@@ -34,7 +33,7 @@ test/%-seminaive-simple.hs: test/%.df _build/default/seminaive_simple.exe
 
 # The benchmarks. NBENCH is the number of different input sizes to test on (the
 # number of different data points we'll get on the x-axis of the graph).
-BENCHES := trans astar astar2 trans-loop
+BENCHES := trans astar trans-loop
 BENCH_PROGS := $(addprefix benchmark-,$(BENCHES))
 BENCH_DATS := $(addsuffix .dat,$(BENCHES))
 NBENCH ?= 13
@@ -54,7 +53,7 @@ LATEXRUN := $(RNTZTEXDIR)/latexrun/latexrun
 graph.pdf: graph.tex FORCE
 	test -f trans.dat
 	test -f astar.dat
-	test -f astar2.dat
+#	test -f astar2.dat
 	$(LATEXRUN) $<
 
 # Cleanup
