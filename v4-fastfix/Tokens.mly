@@ -9,7 +9,7 @@ LPAREN "(" RPAREN ")"
 LBRACK "[" RBRACK "]"
 LBRACE "{" RBRACE "}"
 /* keywords */ TYPE DEF LET IN END EMPTY OR FOR CASE IF THEN WHEN
-ELSE SHADOW FIX IS
+ELSE SHADOW FIX IS PI1 PI2
 /* end of file */ EOF
 
 %token <string> STRING

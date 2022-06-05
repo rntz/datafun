@@ -87,7 +87,11 @@ term2: term3 {$1}
 | term2 PLUS term2 { B.binop `Plus $1 $3 }
 
 // function applications
-term3: term_atom { $1 } | term3 term_atom { B.app $1 $2 }
+term3:
+| term_atom { $1 }
+| term3 term_atom { B.app $1 $2 }
+| PI1 e=term_atom { B.proj 0 e }
+| PI2 e=term_atom { B.proj 1 e }
 
 term_atom:
 | var { B.var $1 }
