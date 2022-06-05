@@ -54,8 +54,21 @@ I need an expression of type %s
        bodyTp, Imp.letBox a bodyTp x exprX bodyX
     | a, _ -> complain "cannot unbox non-box type" a
 
+  (* monotone let-tuple *)
+  (* let letTuple (xs: sym list) (expr: term) (body: term) (cx: cx) (expect: tp option): tp * Imp.term =
+   *   match expr cx None with
+   *   | (`Tuple tps as tupleTp), exprX ->
+   *      let tpxs = try List.map2 (fun tp x -> tp,x) tps xs
+   *                 with Invalid_argument _ -> complain "wrong tuple length" tupleTp in
+   *      (\* WHY WAS THIS BOXED?!?! *\)
+   *      let bindings = List.map (fun (tp,x) -> x, (Id,tp)) tpxs in
+   *      let bodyTp, bodyX = body (Cx.add_list bindings cx) expect in
+   *      bodyTp, Imp.letTuple tpxs bodyTp exprX bodyX
+   *   | a, _ -> complain "cannot detuple non-tuple" a *)
+
+  (* discrete let-tuple *)
   let letTuple (xs: sym list) (expr: term) (body: term) (cx: cx) (expect: tp option): tp * Imp.term =
-    match expr cx None with
+    match expr (scrub cx) None with (* NB. scrub context! *)
     | (`Tuple tps as tupleTp), exprX ->
        let tpxs = try List.map2 (fun tp x -> tp,x) tps xs
                   with Invalid_argument _ -> complain "wrong tuple length" tupleTp in
@@ -107,10 +120,10 @@ I need an expression of type %s
     | a, _ -> complain "cannot project from non-tuple" a
 
   let equals (e1: term) (e2: term) (cx: cx) (expect: tp option): tp * Imp.term =
-    let e1tp, e1x = e1 cx None in
+    let e1tp, e1x = e1 (scrub cx) None in
     match firstOrder e1tp with
     | None -> complain "cannot compare at non-equality type" e1tp
-    | Some tp -> synth `Bool expect, Imp.equals tp e1x (check e2 cx e1tp)
+    | Some tp -> synth `Bool expect, Imp.equals tp e1x (check e2 (scrub cx) e1tp)
 
   let binop (op: binop) (e1: term) (e2: term) (cx: cx) (expect: tp option): tp * Imp.term = match op with
     | `Plus -> synth `Nat expect, Imp.binop op (check e1 cx `Nat) (check e2 cx `Nat)
