@@ -229,7 +229,7 @@ module Seminaive(Imp: ZERO): MODAL
    * notice if this is at first-order lattice type and turn it into "empty", which
    * means the effort of makeZero is wasted.
    *)
-  let _zero (tp: eqtp) (term: Imp.term): Imp.term =
+  let zero (tp: eqtp) (term: Imp.term): Imp.term =
     Imp.zero (tp :> rawtp) (makeZero tp term)
 
   (* φx = x                 δx = dx *)
@@ -350,6 +350,11 @@ module Seminaive(Imp: ZERO): MODAL
 
   let forIn (a: eqtp) (b: tp semilat) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term) =
     let fb = phiEqLat b in
+    let da = delta (a :> tp) in
+    let dx = Sym.d x in
+    let phix = Imp.var (phi (a :> tp)) x in (* NB (phi a = a) b/c eqtype *)
+    let fBody' = Imp.letIn da (fb :> rawtp) dx (zero a phix) fBody in
+    let dBody' = Imp.letIn da (fb :> rawtp) dx (zero a phix) dBody in
     (* φ(for (x in M) N) = for (x in φM) φN {dx ↦ 0 x}
      * dx ↦ 0 x will be inlined by discvar. *)
     Imp.forIn a fb x fExpr fBody,
@@ -362,8 +367,8 @@ module Seminaive(Imp: ZERO): MODAL
      * dx ↦ 0 x will be inlined by discvar.
      *)
     Imp.union fb
-      [ Imp.forIn a fb x dExpr fBody
-      ; Imp.forIn a fb x (Imp.union (`Set a) [fExpr;dExpr]) dBody ]
+      [ Imp.forIn a fb x dExpr fBody'
+      ; Imp.forIn a fb x (Imp.union (`Set a) [fExpr;dExpr]) dBody' ]
 
   (* φ(fix M) = semifix φM
    * δ(fix M) = zero ⊥ = ⊥ *)
