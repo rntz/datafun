@@ -358,8 +358,11 @@ module Seminaive(Imp: ZERO): MODAL
 
   (* φ(M ∨ N) = φM ∨ φN     δ(M ∨ N) = δM ∨ δN *)
   let union (a: tp semilat) (terms: term list) =
-    Imp.union (phiLat a) (List.map fst terms),
-    Imp.union (deltaLat a) (List.map snd terms)
+    let fa = phiLat a and da = deltaLat a in
+    Imp.union fa (List.map fst terms),
+    match terms with
+      | [] -> Imp.zero (fa :> rawtp) (Imp.union da [])
+      | _  -> Imp.union da (List.map snd terms)
 
   let forIn (a: eqtp) (b: tp semilat) (x: sym) (fExpr, dExpr: term) (fBody, dBody: term) =
     let fb = phiEqLat b in
