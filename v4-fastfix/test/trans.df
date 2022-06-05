@@ -1,7 +1,8 @@
 @([{str,str}] -> {str,str})
-\edgebox. let [edge] = edgebox in
-fix path is
+\e. let [edge] = e in
+fix p is
   edge or
-  (for (a in edge) for (b in path)
-   let (x,y1) = a in let (y2,z) = b in
-   {(x,z) when y1 = y2});
+  {(pi1 a, pi2 b)
+   for a in edge
+   for b in p
+   when pi2 a = pi1 b};
