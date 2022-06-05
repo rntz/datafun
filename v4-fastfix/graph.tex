@@ -10,34 +10,35 @@
 
 \begin{document}
 
-  \begin{tikzpicture}[baseline=(current bounding box.center)]
-    \begin{loglogaxis}[
-        title={\scshape transitive closure with self-loops},
-        xlabel={Number of nodes},
-        ylabel={Time (seconds)},
-        height=132.88pt, width=213pt, % golden
-        %height=140pt, width=210pt, % 2:3
-        %% legend entries={semi\naive,{semi\naive\ minimizing}},
-        %% legend entries={w/o minimizing diffs, minimizing diffs},
-        legend cell align=left,
-        legend pos = north west,
-        legend style={
-          font=\footnotesize,
-          draw=none,
-          nodes={inner sep=3pt,}
-        },
-        %% xtick = {120, 160, ..., 320},
-        %% ytick = {0, 60, ..., 260},
-      ]
-      \addplot [color=blue,mark=*] table [x=n,y=minimized] {trans-loop-extended.dat};
-      \addplot [color=red,mark=square*] table [x=n,y=normal_loopy] {trans-loop-extended.dat};
-      \addplot [color=black,mark=triangle*] table [x=n,y=minimized_loopy] {trans-loop-extended.dat};
-      \addplot [color=green,mark=x] table [x=n,y=normal] {trans-loop-extended.dat};
-    \end{loglogaxis}
-  \end{tikzpicture}
+  %% \begin{tikzpicture}[baseline=(current bounding box.center)]
+  %%   \begin{loglogaxis}[
+  %%       title={\scshape transitive closure with self-loops},
+  %%       xlabel={Number of nodes},
+  %%       ylabel={Time (seconds)},
+  %%       height=132.88pt, width=213pt, % golden
+  %%       %height=140pt, width=210pt, % 2:3
+  %%       %% legend entries={semi\naive,{semi\naive\ minimizing}},
+  %%       %% legend entries={w/o minimizing diffs, minimizing diffs},
+  %%       legend cell align=left,
+  %%       legend pos = north west,
+  %%       legend style={
+  %%         font=\footnotesize,
+  %%         draw=none,
+  %%         nodes={inner sep=3pt,}
+  %%       },
+  %%       %% xtick = {120, 160, ..., 320},
+  %%       %% ytick = {0, 60, ..., 260},
+  %%     ]
+  %%     \addplot [color=blue,mark=*] table [x=n,y=minimized] {trans-loop-extended.dat};
+  %%     \addplot [color=red,mark=square*] table [x=n,y=normal_loopy] {trans-loop-extended.dat};
+  %%     \addplot [color=black,mark=triangle*] table [x=n,y=minimized_loopy] {trans-loop-extended.dat};
+  %%     \addplot [color=green,mark=x] table [x=n,y=normal] {trans-loop-extended.dat};
+  %%   \end{loglogaxis}
+  %% \end{tikzpicture}
 
-  \clearpage
+  %% \clearpage
 
+
 \begin{figure}[t!]
   \centering
   \begin{tikzpicture}[baseline=(current bounding box.center)]
@@ -98,18 +99,17 @@ set of index-pairs which match \texttt{/a/}; and on the string
 form a linear graph.
 
 
-\clearpage
 \begin{figure}
   \centering
   \begin{tikzpicture}[baseline=(current bounding box.center)]
     \begin{axis}[
-        xlabel={Length of string},
-        ylabel={Seconds},
+        xlabel={Number of nodes},
+        ylabel={Time (seconds)},
         height=140pt, width=220pt,
         % If we include the explicit table, we can make it this large without
         % enlarging the figure.
         height=172pt, width=280pt,
-        legend entries={\naive,semi\naive},
+        legend entries={seminaive simple, semi\naive\ optimized},
         legend cell align=left,
         legend pos = north west,
         legend style={
@@ -117,14 +117,42 @@ form a linear graph.
           nodes={inner sep=3pt,}
         },
       ]
-      \addplot table [x=n,y=naive] {astar2.dat};
-      \addplot table  [x=n,y=seminaive] {astar2.dat};
+      \addplot [color=green, mark=x] table [x=n,y=seminaive_simple] {astar.dat};
+      \addplot [color=blue, mark=*] table [x=n,y=seminaive] {astar.dat};
     \end{axis}
   \end{tikzpicture}
-  \caption{Finding all \emph{leading} occurrences of the regex \texttt{/a*/} in \texttt{a}\textsuperscript{\emph{n}}}
+  \caption{Matching regex \texttt{a*}}
 \end{figure}
 
-\noindent By \emph{leading occurrences}, I mean occurrences which start at the
-beginning of the string.
+
+%% \clearpage
+%% \begin{figure}
+%%   \centering
+%%   \begin{tikzpicture}[baseline=(current bounding box.center)]
+%%     \begin{axis}[
+%%         xlabel={Length of string},
+%%         ylabel={Seconds},
+%%         height=140pt, width=220pt,
+%%         % If we include the explicit table, we can make it this large without
+%%         % enlarging the figure.
+%%         height=172pt, width=280pt,
+%%         legend entries={\naive,semi\naive},
+%%         legend cell align=left,
+%%         legend pos = north west,
+%%         legend style={
+%%           draw=none,
+%%           nodes={inner sep=3pt,}
+%%         },
+%%       ]
+%%       \addplot table [x=n,y=naive] {astar2.dat};
+%%       \addplot table  [x=n,y=seminaive] {astar2.dat};
+%%     \end{axis}
+%%   \end{tikzpicture}
+%%   \caption{Finding all \emph{leading} occurrences of the regex \texttt{/a*/} in \texttt{a}\textsuperscript{\emph{n}}}
+%% \end{figure}
 
+%% \noindent By \emph{leading occurrences}, I mean occurrences which start at the
+%% beginning of the string.
+
+
 \end{document}
