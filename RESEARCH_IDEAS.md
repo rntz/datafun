@@ -1,3 +1,5 @@
+# Internal Categories as Change Structures 
+
 # Existentials and custom change types
 
 # Fitch-style modal logic & the indiscrete modality & modal subtyping
