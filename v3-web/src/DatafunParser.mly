@@ -109,11 +109,13 @@ comp:
  */
 %inline annot(X): X
     { match $1 with
-      | None, None -> $syntaxerror
+      | None, None -> parseError "neither a pattern nor an expression"
       | x, None    -> x, None
       | x, Some y  -> x, Some (($symbolstartpos,$endpos), y) }
-%inline getPat(X): X { match fst $1 with | Some x -> x | None -> $syntaxerror }
-%inline getExp(X): X { match snd $1 with | Some x -> x | None -> $syntaxerror }
+%inline getPat(X): X
+    { match fst $1 with | Some x -> x | None -> parseError "not a pattern" }
+%inline getExp(X): X
+    { match snd $1 with | Some x -> x | None -> parseError "not an expression" }
 
 test_patexp: patexp EOF {$1}; test_exp: exp EOF {$1}; test_pat: pat EOF {$1}
 patexp: annot(pe) {$1}

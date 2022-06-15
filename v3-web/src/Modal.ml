@@ -335,14 +335,14 @@ end = struct
          | Fn of (t -> t)
 
   let rec compare x y = match x,y with
-    | Base x, Base y -> Pervasives.compare x y
+    | Base x, Base y -> Stdlib.compare x y
     | Set x, Set y -> Values.compare x y
     | Tuple [], Tuple [] -> 0
     | Tuple (x::xs), Tuple (y::ys) ->
        let c = compare x y in
        if c <> 0 then c else compare (Tuple xs) (Tuple ys)
     | Tag(n,x), Tag(m,y) ->
-       let c = Pervasives.compare n m in
+       let c = Stdlib.compare n m in
        if c <> 0 then c else compare x y
     | (Base _|Set _|Tuple _|Tag _|Fn _), _ -> failwith "runtime type error"
 end

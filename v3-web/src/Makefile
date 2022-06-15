@@ -3,8 +3,12 @@
 all: FORCE
 	dune build datafun.cma
 
-repl: FORCE
+utop: FORCE
 	dune utop .
+
+repl: FORCE
+	dune build run.exe
+	rlwrap _build/default/run.exe
 
 clean:
 

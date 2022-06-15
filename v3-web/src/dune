@@ -1,5 +1,12 @@
 (library
- (name datafun))
+ (name datafun)
+ (modules Ast DatafunLexer DatafunParser Dict Elab IL Interp Modal Prim Repl Sigs Test Tone Util)
+ )
+
+(executable
+ (name run)
+ (libraries datafun)
+ (modules Run))
 
 (menhir
  (flags --explain)

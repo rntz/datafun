@@ -2,8 +2,11 @@ open Sigs
 
 exception Bug of string
 exception TODO
+exception ParseError of string
+
 let todo() = raise TODO
 let bug msg = raise (Bug msg)
+let parseError msg = raise (ParseError msg)
 
 let id x = x
 (* let const x _y = x *)

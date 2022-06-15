@@ -41,7 +41,7 @@ and Value: VALUE with type set = Values.t = struct
    * If I used Jane Street's Base and %ppx_compare, this would all
    * sort itself out. *)
   let rec compare x y = match x,y with
-    | (Bool _, Bool _)|(Int _, Int _)|(Str _, Str _) -> Pervasives.compare x y
+    | (Bool _, Bool _)|(Int _, Int _)|(Str _, Str _) -> Stdlib.compare x y
     | Set xs,    Set ys     -> Values.compare xs ys
     | Tuple xs,  Tuple ys   ->
        let n = Array.length xs in
