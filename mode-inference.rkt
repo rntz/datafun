@@ -50,9 +50,9 @@
   ;; FIXME!
   (match* (a b)
     ;; functoriality: [T]A <: B  ==> [UT]A <: UB
-    [(a `(,(? tone? u) b)) (tone* u (subtype a b))]
+    [(a `(,(? tone? u) ,b)) (tone* u (subtype a b))]
     ;; adjunction: U -| V and [T]A <: B  ==>  [TU]VA <: B
-    [(`(,(? tone? v) a) b) (tone* (subtype a b) (tone-left-adjoint v))]
+    [(`(,(? tone? v) ,a) b) (tone* (subtype a b) (tone-left-adjoint v))]
     ;; distribution over products
     [(`(* ,a1 ,a2) `(* ,b1 ,b2))
      (define t (subtype a1 b1))
@@ -122,16 +122,21 @@
        [(? boolean?) (synth 'bool)]
        [`(isa ,tp ,tm) (synth tp (check tp tm))]
        [`(set ,@elems) (todo)]
-       ;; TODO: multiargs
-       [`(lambda (,var) ,body)
+       [`(lambda ,vars ,body)
         (match expected
-          [`(-> ,a ,b)
-           (parameterize ([bound-vars (hash-set (bound-vars) var a)])
+          [`(-> ,@(app reverse (cons b (app reverse as))))
+           (unless (= (length as) (length vars))
+             (error 'elab "Argument list of wrong length"))
+           (parameterize ([bound-vars (apply hash-set* (bound-vars)
+                                             (append-map list vars as))])
              (define usage (check b body))
-             (unless (subtone? 'id (hash-ref usage var))
-               (error 'elab "Non-monotone use of ~s in lambda body ~s" var body))
-             (checked-ok (hash-remove usage var)))]
+             (for ([var vars])
+               (unless (subtone? 'id (hash-ref usage var 'dia))
+                 (error 'elab "Non-monotone use of ~s in lambda body ~s" var body))
+               (set! usage (hash-remove usage var)))
+             (checked-ok usage))]
           [_ (error 'elab "lambda cannot have type: ~s" expected)])]
+       ;; TODO: multiargs
        [`(,func ,arg)
         (define-values (ftp fusage) (elab #f func))
         (define-values (t a) (strip-tones ftp))
