@@ -11,7 +11,7 @@ class Semilat a where
   union :: a -> a -> a
   union x y = unions [x,y]
   diff :: a -> a -> a -- Law: union a (diff da a) = union a da
-  diff x y = x -- always lawful but not always efficient
+  diff dx x = dx -- always lawful but not always efficient
 
 instance Semilat () where
   () <: () = True
